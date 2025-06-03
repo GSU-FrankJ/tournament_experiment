@@ -5,8 +5,9 @@ import torch
 # -----------------------------------------------------
 torch.manual_seed(42)
 
-player1_effort = (torch.rand(1) * 100).requires_grad_(True)
-player2_effort = (torch.rand(1) * 100).requires_grad_(True)
+midpoint = 50.0  # midpoint of [0, 100]
+player1_effort = torch.tensor([midpoint], requires_grad=True)
+player2_effort = torch.tensor([midpoint], requires_grad=True)
 
 print(f"Initial effort of Player 1: {player1_effort.item():.2f}")
 print(f"Initial effort of Player 2: {player2_effort.item():.2f}")
@@ -14,9 +15,9 @@ print(f"Initial effort of Player 2: {player2_effort.item():.2f}")
 # -----------------------------------------------------
 # 2) Tournament parameters
 # -----------------------------------------------------
-w_H = 6.0   # Winning prize
-w_L = 2.0   # Losing (base) prize
-q   = 50.0  # Noise range parameter (ε ~ Uniform(-q, q))
+w_H = 6.5   # Winning prize
+w_L = 3.0   # Losing (base) prize
+q   = 25.0  # Noise range parameter (ε ~ Uniform(-q, q))
 k   = 1/3500  # Cost coefficient (cost = k * e^2)
 
 # -----------------------------------------------------
