@@ -30,7 +30,7 @@ import torch
 env = OneStageEnv(config)
 agent1 = REINFORCEAgent(effort_range=config["effort_range"], log_path="results/logs/reinforce_agent1.csv")
 agent2 = REINFORCEAgent(effort_range=config["effort_range"], log_path="results/logs/reinforce_agent2.csv")
-num_episodes = 5000
+num_episodes = 200000
 
 for episode in range(num_episodes):
     state1, state2 = env.reset()

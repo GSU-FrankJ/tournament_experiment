@@ -32,6 +32,17 @@ class REINFORCEAgent:
                 writer = csv.writer(f)
                 writer.writerow(["Episode", "Effort", "Reward", "Loss"])  # header
 
+    #     self._initialize_to_midpoint()
+
+    # def _initialize_to_midpoint(self):
+    #     with torch.no_grad():
+    #         midpoint = 0.5 
+    #         hidden_out = torch.zeros_like(self.policy.fc1.bias)
+    #         self.policy.fc1.weight.fill_(0.0)
+    #         self.policy.fc1.bias.copy_(hidden_out)
+    #         self.policy.fc2.weight.fill_(0.0)
+    #         self.policy.fc2.bias.fill_(torch.logit(torch.tensor(midpoint)))
+
     def select_action(self, state):
         effort_prob = self.policy(state)
         effort = effort_prob * (self.effort_high - self.effort_low) + self.effort_low
