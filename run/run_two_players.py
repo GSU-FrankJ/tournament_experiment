@@ -237,6 +237,81 @@ def run_ppo_experiment():
     print(f"PPO converged to effort: {final_effort1:.2f} (theoretical: {config['effort']:.2f})")
     return final_effort1
 
+def run_reinforce_grid_search():
+    """自动批量参数搜索，输出每组参数的 gap"""
+    print("\n==================== REINFORCE 参数网格搜索 ====================")
+    env = OneStageEnv(config)
+    # 参数网格
+    lr_list = [1e-3, 5e-4, 1e-4]
+    baseline_decay_list = [0.98, 0.99, 0.995]
+    gamma_list = [0.98, 0.99, 0.995]
+    results = []
+    exp_id = 0
+    for lr in lr_list:
+        for baseline_decay in baseline_decay_list:
+            for gamma in gamma_list:
+                exp_id += 1
+                print(f"\n[Exp {exp_id}] lr={lr}, baseline_decay={baseline_decay}, gamma={gamma}")
+                agent1 = REINFORCEAgent(
+                    lr=lr,
+                    effort_range=config["effort_range"],
+                    log_path=None,  # 不保存日志
+                    theoretical_effort=config["effort"],
+                    baseline_decay=baseline_decay
+                )
+                agent2 = REINFORCEAgent(
+                    lr=lr,
+                    effort_range=config["effort_range"],
+                    log_path=None,
+                    theoretical_effort=config["effort"],
+                    baseline_decay=baseline_decay
+                )
+                num_episodes = 20000
+                best_gap = None
+                best_effort = None
+                for episode in range(num_episodes):
+                    state1, state2 = env.reset()
+                    a1 = agent1.select_action(state1)
+                    a2 = agent2.select_action(state2)
+                    _, rewards, _, _, info = env.step(torch.stack([a1, a2]))
+                    agent1.store_reward(rewards[0])
+                    agent2.store_reward(rewards[1])
+                    agent1.update_policy(gamma=gamma, episode=episode, last_effort=a1)
+                    agent2.update_policy(gamma=gamma, episode=episode, last_effort=a2)
+                    if episode % 1000 == 0 and episode > 2000:
+                        stats1 = agent1.get_convergence_stats()
+                        if stats1:
+                            current_effort = stats1['recent_mean_effort']
+                            gap = abs(current_effort - config["effort"])
+                            if best_gap is None or gap < best_gap:
+                                best_gap = gap
+                                best_effort = current_effort
+                final_effort = info["efforts"][0]
+                final_gap = abs(final_effort - config["effort"])
+                results.append({
+                    "exp_id": exp_id,
+                    "lr": lr,
+                    "baseline_decay": baseline_decay,
+                    "gamma": gamma,
+                    "final_effort": round(final_effort, 2),
+                    "final_gap": round(final_gap, 3),
+                    "best_effort": round(best_effort, 2) if best_effort is not None else None,
+                    "best_gap": round(best_gap, 3) if best_gap is not None else None
+                })
+                if best_gap is not None:
+                    best_gap_str = f"{best_gap:.3f}"
+                else:
+                    best_gap_str = "None"
+                print(f"  → Final effort: {final_effort:.2f}, gap: {final_gap:.3f}, best_gap: {best_gap_str}")
+    # 输出汇总表
+    print("\n==================== REINFORCE 参数搜索结果汇总 ====================")
+    print(f"{'ID':<4} {'lr':<8} {'decay':<8} {'gamma':<8} {'final':<8} {'gap':<8} {'best':<8} {'best_gap':<8}")
+    for r in results:
+        print(f"{r['exp_id']:<4} {r['lr']:<8} {r['baseline_decay']:<8} {r['gamma']:<8} {r['final_effort']:<8} {r['final_gap']:<8} {r['best_effort']:<8} {r['best_gap']:<8}")
+    print("\n最优参数组合：")
+    best = min(results, key=lambda x: x['best_gap'] if x['best_gap'] is not None else 1e9)
+    print(best)
+
 def main():
     """Run all three experiments"""
     print("=== Optimized Two Identical Players Experiment ===")
@@ -278,4 +353,5 @@ def main():
     print(f"Training logs saved to: results/logs/")
 
 if __name__ == "__main__":
-    main() 
+    main()
+    run_reinforce_grid_search() 

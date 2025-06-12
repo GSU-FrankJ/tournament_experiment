@@ -59,40 +59,46 @@ class PolicyNetwork(nn.Module):
         # 动态调整标准差，随着训练进行逐渐减小
         return mean, std
 
+class ValueNetwork(nn.Module):
+    def __init__(self, input_dim=1, hidden_dim=128):
+        super().__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, 1)
+        self._init_weights()
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                nn.init.constant_(m.bias, 0.0)
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        return self.fc2(x)
+
 class REINFORCEAgent:
     def __init__(self, lr=3e-4, effort_range=(0, 100), log_path=None, baseline_decay=0.99, theoretical_effort=87.5):
         self.policy = PolicyNetwork()
-        # 使用AdamW优化器，更好的正则化
+        self.value_net = ValueNetwork()
         self.optimizer = optim.AdamW(self.policy.parameters(), lr=lr, weight_decay=1e-4)
-        # 使用cosine退火调度器
+        self.value_optimizer = optim.Adam(self.value_net.parameters(), lr=1e-3)
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10000, eta_min=1e-6)
-        
         self.effort_low, self.effort_high = effort_range
         self.saved_log_probs = []
         self.rewards = []
+        self.states = []
         self.log_path = log_path
         self.theoretical_effort = theoretical_effort
-        
-        # 改进的baseline实现
         self.baseline = 0.0
         self.baseline_decay = baseline_decay
         self.baseline_count = 0
-        
-        # 收敛监控
         self.recent_efforts = []
         self.recent_rewards = []
         self.episode_count = 0
-        
-        # 自适应探索参数
         self.initial_std = 0.5
         self.min_std = 0.05
         self.std_decay_rate = 0.9995
-        
-        # 奖励标准化
         self.reward_mean = 0.0
         self.reward_std = 1.0
         self.reward_history = []
-        
         if self.log_path:
             os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
             with open(self.log_path, mode='w', newline='') as f:
@@ -113,27 +119,15 @@ class REINFORCEAgent:
 
     def select_action(self, state):
         mean, std = self.policy(state)
-        
-        # 将0-1的输出映射到effort范围
         effort_mean = mean * (self.effort_high - self.effort_low) + self.effort_low
-        
-        # 自适应标准差衰减
         current_std = max(self.initial_std * (self.std_decay_rate ** self.episode_count), self.min_std)
-        
-        # 使用自适应标准差
         effort_std = current_std * (self.effort_high - self.effort_low)
-        
-        # 创建分布并采样
         dist = torch.distributions.Normal(effort_mean, effort_std)
         action = dist.sample()
-        
-        # 确保动作在合法范围内
         action = torch.clamp(action, self.effort_low, self.effort_high)
-        
-        # 计算对数概率
         log_prob = dist.log_prob(action)
-        
         self.saved_log_probs.append(log_prob)
+        self.states.append(state)
         return action
 
     def store_reward(self, reward):
@@ -144,63 +138,51 @@ class REINFORCEAgent:
     def update_policy(self, gamma=0.99, episode=None, last_effort=None):
         if not self.rewards:
             return
-        
         self.episode_count += 1
-        
-        # 计算discounted returns
         R = 0
         returns = []
         for r in reversed(self.rewards):
             R = r + gamma * R
             returns.insert(0, R)
         returns = torch.tensor(returns, dtype=torch.float32)
-        
-        # 更新baseline（指数移动平均）
-        current_return = returns[0].item()
-        if self.baseline_count == 0:
-            self.baseline = current_return
-        else:
-            self.baseline = self.baseline_decay * self.baseline + (1 - self.baseline_decay) * current_return
-        self.baseline_count += 1
-        
-        # 计算advantages
-        advantages = returns - self.baseline
-        
-        # 标准化advantages（如果有多个step）
+        states = torch.cat(self.states)
+        # 训练 value_net
+        values = self.value_net(states).squeeze()
+        value_loss = F.mse_loss(values, returns)
+        self.value_optimizer.zero_grad()
+        value_loss.backward()
+        self.value_optimizer.step()
+        # 计算 advantage
+        advantages = returns - values.detach()
         if len(advantages) > 1:
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-        
-        # 计算policy loss
         policy_loss = []
-        for log_prob, advantage in zip(self.saved_log_probs, advantages):
+        entropy_term = 0.0
+        for log_prob, state, advantage in zip(self.saved_log_probs, self.states, advantages):
+            # 重新计算分布以获得熵
+            mean, std = self.policy(state)
+            effort_mean = mean * (self.effort_high - self.effort_low) + self.effort_low
+            current_std = max(self.initial_std * (self.std_decay_rate ** self.episode_count), self.min_std)
+            effort_std = current_std * (self.effort_high - self.effort_low)
+            dist = torch.distributions.Normal(effort_mean, effort_std)
+            entropy = dist.entropy().mean()
+            entropy_term += entropy
             policy_loss.append(-log_prob * advantage)
-        
         if policy_loss:
-            # 反向传播
             self.optimizer.zero_grad()
-            total_loss = torch.stack(policy_loss).sum()
+            total_loss = torch.stack(policy_loss).sum() - 0.01 * entropy_term  # 熵正则化
             total_loss.backward()
-            
-            # 梯度裁剪，防止梯度爆炸
             torch.nn.utils.clip_grad_norm_(self.policy.parameters(), max_norm=0.5)
-            
             self.optimizer.step()
             self.scheduler.step()
-            
-            # 监控收敛
             if last_effort is not None:
                 effort_val = last_effort.item() if torch.is_tensor(last_effort) else last_effort
                 reward_val = self.rewards[-1]
-                
                 self.recent_efforts.append(effort_val)
                 self.recent_rewards.append(reward_val)
-                
-                # 保持最近100个结果
                 if len(self.recent_efforts) > 100:
                     self.recent_efforts.pop(0)
                     self.recent_rewards.pop(0)
-
-            # 记录训练过程
             if self.log_path and episode is not None and last_effort is not None:
                 with open(self.log_path, mode='a', newline='') as f:
                     writer = csv.writer(f)
@@ -209,7 +191,6 @@ class REINFORCEAgent:
                     normalized_reward = self.rewards[-1]
                     current_lr = self.optimizer.param_groups[0]['lr']
                     current_std = max(self.initial_std * (self.std_decay_rate ** self.episode_count), self.min_std)
-                    
                     writer.writerow([
                         episode, 
                         round(effort_val, 2), 
@@ -220,10 +201,9 @@ class REINFORCEAgent:
                         f"{current_lr:.6f}",
                         round(current_std, 4)
                     ])
-
-        # 清理
         self.rewards.clear()
         self.saved_log_probs.clear()
+        self.states.clear()
     
     def get_convergence_stats(self):
         """获取收敛统计信息"""
