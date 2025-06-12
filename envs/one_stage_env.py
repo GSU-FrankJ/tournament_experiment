@@ -148,4 +148,4 @@ class OneStageEnv:
         for i in range(self.num_players):
             info[f"p{i+1}_cost"] = costs[i]
         
-        return obs, rewards, costs_tensor, done, info
+        return obs, rewards, costs_tensor, done, info 

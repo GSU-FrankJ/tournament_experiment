@@ -77,4 +77,4 @@ def gradient_descent_solver(env, lr=0.1, steps=100000, eps=1e-3):
         other_efforts = [e] * (num_players - 1)
         final_u, final_cost = env.utility(e, *other_efforts)
     
-    return e, final_u, final_cost
+    return e, final_u, final_cost 
