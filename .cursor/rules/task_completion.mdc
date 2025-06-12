@@ -3,3 +3,113 @@ description:
 globs:
 alwaysApply: false
 ---
+# Task Completion Standard Workflow
+
+## Required Steps for Every Task Completion
+
+### 1. Task Status Update
+- Mark task as `done` using TaskMaster:
+```bash
+# Via MCP tool
+mcp_taskmaster-ai_set_task_status(id="X", status="done", projectRoot="/path")
+
+# Via CLI (fallback)
+task-master set-status --id=X --status=done
+```
+
+### 2. Code Quality Check
+- **Review all changes** made during task implementation
+- **Run tests** if applicable to ensure functionality
+- **Verify results** meet task requirements and acceptance criteria
+
+### 3. Git Commit (MANDATORY)
+Every task completion MUST include a professional Git commit following this format:
+
+#### Commit Message Structure:
+```
+feat(scope): brief description of main achievement
+
+🎯 Key Results:
+- Quantified outcome 1 with metrics
+- Quantified outcome 2 with metrics
+- Overall impact summary
+
+🔧 Technical Changes:
+- Major technical improvement 1
+- Major technical improvement 2
+- Architecture/algorithm changes
+
+📊 Performance/Results:
+- Before vs After comparisons
+- Percentage improvements
+- Validation metrics
+
+✅ Task #X - [Task Name] completed
+```
+
+#### Commit Command Template:
+```bash
+git add .
+git commit -m "feat(scope): brief achievement summary - Key result 1 - Key result 2 - Technical changes summary - Task #X [Task Name] completed"
+```
+
+### 4. Documentation Updates
+- Update relevant README files if new features added
+- Update configuration documentation if settings changed
+- Add inline code comments for complex implementations
+
+### 5. Results Validation
+- Compare actual results with theoretical/expected values
+- Document any deviations and explanations
+- Save output files/logs for future reference
+
+## Example Task Completion
+
+### Completed Task: RL Algorithm Optimization (#26)
+```bash
+git add .
+git commit -m "feat(rl-optimization): dramatically improve REINFORCE and PPO convergence to Nash equilibrium - REINFORCE: 84.01 vs 87.50 theoretical (3.5 gap, was 31.1) - PPO: 75.27 vs 87.50 theoretical (12.2 gap, was 22.7) - Overall 84% improvement in convergence accuracy - Smart weight initialization, curriculum learning, reward shaping - Enhanced network architecture with normalization & dropout - Task #26 RL Algorithm Optimization completed"
+```
+
+## Commit Message Best Practices
+
+### **Type Prefixes:**
+- `feat(scope):` - New features or major improvements
+- `fix(scope):` - Bug fixes
+- `refactor(scope):` - Code restructuring without functionality change
+- `perf(scope):` - Performance improvements
+- `test(scope):` - Adding or modifying tests
+- `docs(scope):` - Documentation updates
+- `chore(scope):` - Maintenance tasks
+
+### **Scope Examples:**
+- `rl-algorithms` - Reinforcement learning implementations
+- `experiments` - Experimental setups and configurations
+- `optimization` - Algorithm optimization work
+- `analysis` - Data analysis and results processing
+- `infrastructure` - Project structure and tooling
+
+### **Result Quantification:**
+- Always include **before vs after** metrics when possible
+- Use **percentage improvements** for impact clarity
+- Include **specific numerical results** from experiments
+- Reference **theoretical targets** and gaps achieved
+
+### **Professional Language:**
+- Use action-oriented descriptions
+- Quantify achievements with concrete metrics
+- Highlight technical innovations
+- Connect to broader research objectives
+
+## Quality Gates
+
+Before committing, ensure:
+- [ ] All code changes are tested and functional
+- [ ] Results are documented and verified
+- [ ] Commit message follows the standard format
+- [ ] Task status is updated in TaskMaster
+- [ ] No debugging code or temporary files included
+
+## Integration with TaskMaster
+
+This workflow integrates with the TaskMaster development process outlined in [`dev_workflow.mdc`](mdc:.cursor/rules/dev_workflow.mdc), ensuring every completed task contributes to a professional, trackable development history.
