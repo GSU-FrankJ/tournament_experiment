@@ -75,7 +75,7 @@ class ValueNetwork(nn.Module):
         return self.fc2(x)
 
 class REINFORCEAgent:
-    def __init__(self, lr=3e-4, effort_range=(0, 100), log_path=None, baseline_decay=0.99, theoretical_effort=87.5):
+    def __init__(self, lr=0.0001, effort_range=(0, 100), log_path=None, baseline_decay=0.98, theoretical_effort=87.5):
         self.policy = PolicyNetwork()
         self.value_net = ValueNetwork()
         self.optimizer = optim.AdamW(self.policy.parameters(), lr=lr, weight_decay=1e-4)
@@ -135,7 +135,7 @@ class REINFORCEAgent:
         normalized_reward = self._normalize_reward(reward.item() if torch.is_tensor(reward) else reward)
         self.rewards.append(normalized_reward)
 
-    def update_policy(self, gamma=0.99, episode=None, last_effort=None):
+    def update_policy(self, gamma=0.98, episode=None, last_effort=None):
         if not self.rewards:
             return
         self.episode_count += 1

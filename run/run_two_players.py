@@ -37,41 +37,36 @@ def run_gradient_experiment():
     return effort
 
 def run_reinforce_experiment():
-    """Run REINFORCE experiment with improved training strategy"""
+    """Run REINFORCE experiment with improved training strategy
+    默认参数已根据批量参数搜索最优结果设置：lr=0.0001, baseline_decay=0.98, gamma=0.98
+    """
     print("Running REINFORCE experiment...")
     env = OneStageEnv(config)
-    
-    # 根据理论值调整学习率 - 较高的理论值需要更低的学习率
-    base_lr = 2e-4
-    lr_factor = 1.0 / (1.0 + config["effort"] / 100.0)  # 理论值越高，学习率越低
-    adjusted_lr = base_lr * lr_factor
-    
-    print(f"Theoretical effort: {config['effort']:.2f}, Adjusted learning rate: {adjusted_lr:.6f}")
-    
+    # 批量搜索最优参数
+    best_lr = 0.0001
+    best_baseline_decay = 0.98
+    best_gamma = 0.98
+    print(f"Theoretical effort: {config['effort']:.2f}, Using best grid search params: lr={best_lr}, baseline_decay={best_baseline_decay}, gamma={best_gamma}")
     agent1 = REINFORCEAgent(
-        lr=adjusted_lr,
+        lr=best_lr,
         effort_range=config["effort_range"], 
         log_path="results/logs/reinforce_agent1.csv", 
         theoretical_effort=config["effort"],
-        baseline_decay=0.995  # 更高的baseline衰减
+        baseline_decay=best_baseline_decay
     )
     agent2 = REINFORCEAgent(
-        lr=adjusted_lr,
+        lr=best_lr,
         effort_range=config["effort_range"], 
         log_path="results/logs/reinforce_agent2.csv", 
         theoretical_effort=config["effort"],
-        baseline_decay=0.995
+        baseline_decay=best_baseline_decay
     )
-    
-    # 扩展训练时间和更耐心的早停
-    num_episodes = 60000  # 增加到60000轮
+    num_episodes = 60000
     convergence_check_interval = 1000
-    patience = 8000  # 增加耐心值
+    patience = 8000
     best_effort = None
     episodes_without_improvement = 0
-    
-    print(f"Training for up to {num_episodes} episodes with improved strategy...")
-    
+    print(f"Training for up to {num_episodes} episodes with best grid search params...")
     for episode in range(num_episodes):
         state1, state2 = env.reset()
         a1 = agent1.select_action(state1)
@@ -79,60 +74,44 @@ def run_reinforce_experiment():
         _, rewards, _, _, info = env.step(torch.stack([a1, a2]))
         agent1.store_reward(rewards[0])
         agent2.store_reward(rewards[1])
-        agent1.update_policy(episode=episode, last_effort=a1)
-        agent2.update_policy(episode=episode, last_effort=a2)
-        
-        # 收敛检测 - 延后开始监控
+        agent1.update_policy(gamma=best_gamma, episode=episode, last_effort=a1)
+        agent2.update_policy(gamma=best_gamma, episode=episode, last_effort=a2)
         if episode % convergence_check_interval == 0 and episode > 5000:
             stats1 = agent1.get_convergence_stats()
             if stats1:
                 current_effort = stats1['recent_mean_effort']
                 effort_std = stats1['recent_std_effort']
                 gap = abs(current_effort - config["effort"])
-                
                 print(f"Episode {episode}: Recent effort = {current_effort:.2f} ± {effort_std:.2f}, Gap = {gap:.2f}")
-                
-                # 更严格的改进判断标准
                 if best_effort is None or gap < abs(best_effort - config["effort"]):
                     best_effort = current_effort
                     episodes_without_improvement = 0
                     print(f"  → New best effort: {current_effort:.2f}")
                 else:
                     episodes_without_improvement += convergence_check_interval
-                
-                # 更宽松的早停条件
                 if effort_std < 2.0 and gap < 1.5:
                     print(f"REINFORCE converged early at episode {episode} with excellent performance!")
                     break
                 elif effort_std < 3.0 and gap < 3.0 and episode > 20000:
                     print(f"REINFORCE converged early at episode {episode} with good performance!")
                     break
-                
-                # 耐心用完
                 if episodes_without_improvement >= patience:
                     print(f"REINFORCE stopping due to no improvement for {patience} episodes")
                     break
-    
     final_effort1 = info["efforts"][0]
-    
-    # 评估最终收敛质量
     stats1 = agent1.get_convergence_stats()
     convergence_quality = "Poor"
     final_gap = abs(final_effort1 - config["effort"])
-    
     if stats1:
         final_std = stats1['recent_std_effort']
         avg_gap = abs(stats1['recent_mean_effort'] - config["effort"])
-        
         if avg_gap < 1.5 and final_std < 2.0:
             convergence_quality = "Excellent"
         elif avg_gap < 3.0 and final_std < 3.0:
             convergence_quality = "Good"
         elif avg_gap < 6.0 and final_std < 5.0:
             convergence_quality = "Fair"
-        
         print(f"Final convergence stats: avg_gap = {avg_gap:.2f}, std = {final_std:.2f}")
-    
     result = {
         "k": config["k"],
         "q": config["q"],
@@ -142,7 +121,7 @@ def run_reinforce_experiment():
         "Cost_of_effort": round(config["cost"], 2),
         "effort": round(config["effort"], 2),
         "Model_training": "REINFORCE",
-        "Parameter": f"episodes={episode+1}, improved_strategy, lr={adjusted_lr:.6f}",
+        "Parameter": f"episodes={episode+1}, best_grid_search, lr={best_lr}",
         "Effort_0_100": round(final_effort1, 2) if config["effort_range"][1] == 100 else "",
         "Effort_0_200": round(final_effort1, 2) if config["effort_range"][1] == 200 else "",
         "Convergence_Quality": convergence_quality,
@@ -354,4 +333,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    run_reinforce_grid_search() 
+    # run_reinforce_grid_search() 
