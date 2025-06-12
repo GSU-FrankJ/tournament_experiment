@@ -1,0 +1,140 @@
+# Tournament Experiment - Product Requirements Document
+
+## Project Overview
+The Tournament Experiment project is a comprehensive game-theoretic simulation framework that implements various tournament scenarios to study players' effort allocation and utility computation. The system supports both one-stage and two-stage game environments with multiple players, heterogeneous parameters, and different optimization strategies.
+
+## Project Goals
+1. Implement a complete set of game-theoretic simulation experiments
+2. Support various player configurations and parameter settings
+3. Provide multiple optimization algorithms (Gradient Descent, REINFORCE, PPO)
+4. Generate comprehensive results and analysis
+5. Enable easy experiment configuration and execution
+6. Provide clear visualization and reporting capabilities
+
+## Current Implementation Status
+The project has a solid foundation with:
+- Basic project structure established
+- One-stage environment partially implemented
+- Gradient solver and REINFORCE agent implemented
+- One two-player experiment script working
+- Configuration system started
+
+## Technical Requirements
+
+### Core Framework
+- Python 3.8+ compatibility
+- Modular architecture with clear separation of concerns
+- Configuration-driven experiment design
+- Comprehensive logging and result tracking
+- Error handling and validation
+
+### Game Environments
+1. **One-Stage Game Environment**
+   - Support for 2-N players
+   - Configurable cost and ability parameters
+   - Effort allocation mechanics
+   - Utility computation
+   - Nash equilibrium calculation capabilities
+
+2. **Two-Stage Game Environment**
+   - Sequential decision making
+   - Information revelation between stages
+   - Stage-specific optimization
+   - Inter-stage dependency modeling
+
+### Player Agent System
+1. **Gradient-based Solver**
+   - Analytical gradient computation
+   - Configurable learning rates
+   - Convergence detection
+   - Stability analysis
+
+2. **REINFORCE Agent**
+   - Policy gradient implementation
+   - Baseline variance reduction
+   - Experience replay capabilities
+   - Hyperparameter tuning support
+
+3. **PPO Agent**
+   - Proximal Policy Optimization
+   - Clipped surrogate objective
+   - Value function estimation
+   - Advantage estimation
+
+### Experiment Configurations
+1. **Two Identical Players** - Baseline symmetric game
+2. **Three Identical Players** - Multi-player extension
+3. **Different Cost Parameters** - Asymmetric cost structures (k₁ ≠ k₂)
+4. **Different Ability Parameters** - Asymmetric abilities (l₁ > l₂)
+5. **Two-Stage Game** - Sequential decision making
+
+### Output and Analysis
+1. **Results Management**
+   - CSV output format for numerical results
+   - Structured logging system
+   - Experiment metadata tracking
+   - Reproducibility support
+
+2. **Visualization**
+   - Convergence plots
+   - Strategy evolution tracking
+   - Comparative analysis charts
+   - Statistical summaries
+
+3. **Performance Metrics**
+   - Nash equilibrium convergence
+   - Training efficiency
+   - Strategy stability
+   - Utility maximization
+
+## Implementation Priorities
+
+### Phase 1 - Complete Core Infrastructure
+1. Finish implementing empty configuration files
+2. Complete two-stage environment implementation
+3. Implement PPO agent
+4. Complete all run scripts
+5. Implement comprehensive logging system
+
+### Phase 2 - Experiment Implementation
+1. Implement all five experiment types
+2. Add parameter validation and error handling
+3. Implement result analysis and comparison tools
+4. Add visualization capabilities
+5. Create comprehensive test suite
+
+### Phase 3 - Advanced Features
+1. Add experiment batch execution
+2. Implement hyperparameter optimization
+3. Add real-time monitoring dashboard
+4. Implement distributed execution capabilities
+5. Add advanced statistical analysis
+
+## Technical Constraints
+- Must maintain compatibility with existing code structure
+- All experiments should be reproducible with seed control
+- Memory usage should be optimized for large-scale experiments
+- Results should be easily exportable for external analysis
+- Code should follow academic research standards for transparency
+
+## Success Criteria
+1. All five experiment types running successfully
+2. All three optimization algorithms implemented and tested
+3. Consistent results across multiple runs with same parameters
+4. Clear documentation and usage examples
+5. Comprehensive test coverage
+6. Performance benchmarks established
+7. Ready for academic publication and peer review
+
+## Deliverables
+1. Complete implementation of all game environments
+2. All optimization agents fully functional
+3. All experiment configurations implemented
+4. Comprehensive documentation
+5. Test suite with good coverage
+6. Example results and analysis
+7. Performance benchmarks
+8. User guide and API documentation
+
+## Timeline Considerations
+The project should be developed incrementally, ensuring each component is thoroughly tested before moving to the next phase. Priority should be given to completing the missing implementations identified in the current codebase. 
