@@ -16,3 +16,15 @@
 0.0004,55.0,6.5,3.0,4.12,0.63,39.77,Gradient,"lr=0.1, steps=100000, eps=1e-3",39.71,,Excellent,0.067
 0.0004,55.0,6.5,3.0,4.12,0.63,39.77,REINFORCE,"episodes=38001, best_grid_search, lr=0.0001",40.85,,Poor,1.078
 0.0004,55.0,6.5,3.0,4.12,0.63,39.77,PPO,"episodes=11001, curriculum_learning, reward_shaping",50.0,,Fair,10.227
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",,87.36,Excellent,0.138
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,REINFORCE,"episodes=21001, best_grid_search, lr=0.0001",,74.84,Poor,12.665
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,PPO,"episodes=9001, optimized_config, tanh_activation, gamma=0.995",,99.6,Poor,12.095
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",,87.36,Excellent,0.138
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,REINFORCE,"episodes=14001, best_grid_search, lr=0.0001",,80.2,Poor,7.302
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,PPO,"episodes=15000, optimized_config, tanh_activation, gamma=0.995, no_reward_shaping",,76.74,Poor,10.761
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",,87.36,Excellent,0.138
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,REINFORCE,"episodes=24001, best_grid_search, lr=0.0001",,89.38,Poor,1.882
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,PPO,"episodes=15000, optimized_config, tanh_activation, gamma=0.995, no_reward_shaping",,71.7,Poor,15.803
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",,87.36,Excellent,0.138
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,REINFORCE,"episodes=20001, best_grid_search, lr=0.0001",,102.81,Poor,15.307
+0.0004,25.0,6.5,3.0,1.69,3.06,87.5,PPO,"episodes=15000, full_optimized_config, tanh_activation, gamma=0.995, cosine_annealing",,93.0,Poor,5.497

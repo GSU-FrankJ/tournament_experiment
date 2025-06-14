@@ -26,6 +26,7 @@ def gradient_descent_solver(env, lr=0.1, steps=100000, eps=1e-3):
     num_players = getattr(env, 'num_players', 2)
     
     log_path = f"/Users/fengjiang/Documents/GSU/tournament_experiment/results/logs/gradient_log_{num_players}p.txt"
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
     with open(log_path, "w") as f_log:
         f_log.write("Step,Effort,Gradient,Utility\n")
 
@@ -77,4 +78,21 @@ def gradient_descent_solver(env, lr=0.1, steps=100000, eps=1e-3):
         other_efforts = [e] * (num_players - 1)
         final_u, final_cost = env.utility(e, *other_efforts)
     
-    return e, final_u, final_cost 
+    return e, final_u, final_cost
+
+class GradientSolver:
+    """Wrapper class for gradient descent solver"""
+    
+    def __init__(self, env, config):
+        self.env = env
+        self.learning_rate = config.get('learning_rate', 0.01)
+        self.max_iterations = config.get('max_iterations', 10000)
+    
+    def solve(self):
+        """Solve using gradient descent"""
+        effort, utility, cost = gradient_descent_solver(
+            self.env, 
+            lr=self.learning_rate, 
+            steps=self.max_iterations
+        )
+        return effort

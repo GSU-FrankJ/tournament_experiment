@@ -7,25 +7,55 @@ import torch.nn.functional as F
 import numpy as np
 
 class PPONetwork(nn.Module):
-    def __init__(self, input_dim=1, hidden_dim=128):  # 增大网络容量
+    def __init__(self, input_dim=1, hidden_dim=128, num_layers=3, activation='relu', dropout_rate=0.05, separate_networks=True):
         super().__init__()
-        # Policy network - 更深的网络
-        self.policy_fc1 = nn.Linear(input_dim, hidden_dim)
-        self.policy_fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.policy_fc3 = nn.Linear(hidden_dim, hidden_dim//2)
+        self.separate_networks = separate_networks
+        
+        # 可配置的激活函数
+        if activation == 'tanh':
+            self.activation = torch.tanh
+        elif activation == 'relu':
+            self.activation = F.relu
+        else:
+            self.activation = F.relu
+        
+        # Dropout
+        self.dropout = nn.Dropout(dropout_rate)
+        
+        # Policy network - 可配置层数
+        policy_layers = []
+        current_dim = input_dim
+        for i in range(num_layers):
+            if i == num_layers - 1:  # 最后一层
+                policy_layers.append(nn.Linear(current_dim, hidden_dim//2))
+                policy_layers.append(nn.LayerNorm(hidden_dim//2))
+            else:
+                policy_layers.append(nn.Linear(current_dim, hidden_dim))
+                policy_layers.append(nn.LayerNorm(hidden_dim))
+                current_dim = hidden_dim
+        
+        self.policy_layers = nn.ModuleList(policy_layers)
         self.policy_mean = nn.Linear(hidden_dim//2, 1)  # mean for effort
         self.log_std = nn.Parameter(torch.log(torch.ones(1) * 8.0))  # 增加探索
         
-        # Value network - 独立的价值网络
-        self.value_fc1 = nn.Linear(input_dim, hidden_dim)
-        self.value_fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.value_fc3 = nn.Linear(hidden_dim, hidden_dim//2)
-        self.value_head = nn.Linear(hidden_dim//2, 1)  # state value
+        # Value network - 独立或共享网络
+        if separate_networks:
+            value_layers = []
+            current_dim = input_dim
+            for i in range(num_layers):
+                if i == num_layers - 1:  # 最后一层
+                    value_layers.append(nn.Linear(current_dim, hidden_dim//2))
+                    value_layers.append(nn.LayerNorm(hidden_dim//2))
+                else:
+                    value_layers.append(nn.Linear(current_dim, hidden_dim))
+                    value_layers.append(nn.LayerNorm(hidden_dim))
+                    current_dim = hidden_dim
+            
+            self.value_layers = nn.ModuleList(value_layers)
+        else:
+            self.value_layers = self.policy_layers  # 共享网络
         
-        # Dropout and normalization
-        self.dropout = nn.Dropout(0.1)
-        self.layer_norm1 = nn.LayerNorm(hidden_dim)
-        self.layer_norm2 = nn.LayerNorm(hidden_dim//2)
+        self.value_head = nn.Linear(hidden_dim//2, 1)  # state value
         
         # Initialize weights
         self._init_weights()
@@ -44,32 +74,58 @@ class PPONetwork(nn.Module):
 
     def forward(self, x):
         # Policy network forward pass
-        policy_x = F.relu(self.policy_fc1(x))
-        policy_x = self.layer_norm1(policy_x)
-        policy_x = self.dropout(policy_x)
-        policy_x = F.relu(self.policy_fc2(policy_x))
-        policy_x = F.relu(self.policy_fc3(policy_x))
-        policy_x = self.layer_norm2(policy_x)
+        policy_x = x
+        for i in range(0, len(self.policy_layers), 2):  # 每两层为一组（Linear + LayerNorm）
+            policy_x = self.policy_layers[i](policy_x)  # Linear layer
+            if i + 1 < len(self.policy_layers):
+                policy_x = self.policy_layers[i + 1](policy_x)  # LayerNorm layer
+            policy_x = self.activation(policy_x)
+            if i < len(self.policy_layers) - 2:  # 不在最后一层应用dropout
+                policy_x = self.dropout(policy_x)
+        
         mean = torch.sigmoid(self.policy_mean(policy_x))  # normalized effort [0,1]
         std = torch.exp(self.log_std).expand_as(mean)  # ensure positive std
         
         # Value network forward pass
-        value_x = F.relu(self.value_fc1(x))
-        value_x = self.layer_norm1(value_x)
-        value_x = self.dropout(value_x)
-        value_x = F.relu(self.value_fc2(value_x))
-        value_x = F.relu(self.value_fc3(value_x))
-        value_x = self.layer_norm2(value_x)
+        value_x = x
+        for i in range(0, len(self.value_layers), 2):  # 每两层为一组（Linear + LayerNorm）
+            value_x = self.value_layers[i](value_x)  # Linear layer
+            if i + 1 < len(self.value_layers):
+                value_x = self.value_layers[i + 1](value_x)  # LayerNorm layer
+            value_x = self.activation(value_x)
+            if i < len(self.value_layers) - 2:  # 不在最后一层应用dropout
+                value_x = self.dropout(value_x)
+        
         value = self.value_head(value_x)
         
         return mean, std, value
 
 class PPOAgent:
     def __init__(self, lr=1e-4, effort_range=(0, 100), log_path=None, 
-                 clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01, max_grad_norm=0.5, theoretical_effort=87.5):
-        self.network = PPONetwork()
-        self.optimizer = optim.Adam(self.network.parameters(), lr=lr, eps=1e-5, weight_decay=1e-5)
-        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.9, patience=1500, verbose=True)
+                 clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01, max_grad_norm=0.5, theoretical_effort=87.5,
+                 hidden_dim=128, num_layers=3, activation='relu', batch_size=64, update_epochs=8, 
+                 gae_lambda=0.95, weight_decay=1e-5, dropout_rate=0.05, lr_schedule='constant',
+                 separate_networks=True, reward_normalization=True):
+        
+        self.network = PPONetwork(
+            hidden_dim=hidden_dim, 
+            num_layers=num_layers,
+            activation=activation,
+            dropout_rate=dropout_rate,
+            separate_networks=separate_networks
+        )
+        
+        self.optimizer = optim.Adam(self.network.parameters(), lr=lr, eps=1e-5, weight_decay=weight_decay)
+        
+        # 学习率调度器
+        if lr_schedule == 'cosine_annealing':
+            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=1000, eta_min=lr*0.1)
+        elif lr_schedule == 'step':
+            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=500, gamma=0.9)
+        elif lr_schedule == 'plateau':
+            self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.9, patience=1500, verbose=True)
+        else:
+            self.scheduler = None
         
         self.effort_low, self.effort_high = effort_range
         self.clip_epsilon = clip_epsilon
@@ -77,6 +133,11 @@ class PPOAgent:
         self.entropy_coef = entropy_coef
         self.max_grad_norm = max_grad_norm
         self.theoretical_effort = theoretical_effort
+        self.batch_size = batch_size
+        self.update_epochs = update_epochs
+        self.gae_lambda = gae_lambda
+        self.lr_schedule = lr_schedule
+        self.reward_normalization = reward_normalization
         
         # Storage for trajectory
         self.states = []
@@ -152,12 +213,12 @@ class PPOAgent:
         mean, std, value = self.network(state)
         effort_mean = mean * (self.effort_high - self.effort_low) + self.effort_low
         
-        # 在早期添加一些引导的偏置
-        if len(self.recent_efforts) < 1000:
-            # 早期阶段，轻微偏向理论值
-            bias_strength = 0.05
-            bias = bias_strength * (self.theoretical_effort - effort_mean)
-            effort_mean = effort_mean + bias
+        # 移除早期偏置，让优化参数自然工作
+        # if len(self.recent_efforts) < 1000:
+        #     # 早期阶段，轻微偏向理论值
+        #     bias_strength = 0.05
+        #     bias = bias_strength * (self.theoretical_effort - effort_mean)
+        #     effort_mean = effort_mean + bias
         
         # Create normal distribution and sample
         dist = torch.distributions.Normal(effort_mean, std)
@@ -187,16 +248,16 @@ class PPOAgent:
             self.reward_mean = np.mean(self.reward_history)
             self.reward_std = max(np.std(self.reward_history), 1e-6)
 
-    def update_policy(self, gamma=0.99, update_epochs=8, episode=None, last_effort=None):
+    def update_policy(self, gamma=0.99, episode=None, last_effort=None):
         if len(self.rewards) == 0:
             return
         
-        # 应用奖励塑造
-        if last_effort is not None and episode is not None:
-            raw_reward = self.rewards[-1]
-            shaped_reward = self._shape_reward(raw_reward, last_effort, episode)
-            self.rewards[-1] = shaped_reward
-            self.recent_shaped_rewards.append(shaped_reward)
+        # 移除奖励塑造，使用原始奖励
+        # if last_effort is not None and episode is not None:
+        #     raw_reward = self.rewards[-1]
+        #     shaped_reward = self._shape_reward(raw_reward, last_effort, episode)
+        #     self.rewards[-1] = shaped_reward
+        #     self.recent_shaped_rewards.append(shaped_reward)
             
         # Convert lists to tensors
         states = torch.stack(self.states)
@@ -204,13 +265,32 @@ class PPOAgent:
         old_log_probs = torch.stack(self.log_probs)
         values = torch.stack(self.values).squeeze(-1)  # Remove extra dimensions
         
-        # 轻微的奖励归一化（不要太激进）
-        normalized_rewards = [(r - self.reward_mean) / max(self.reward_std, 10.0) for r in self.rewards]
-        rewards = torch.tensor(normalized_rewards, dtype=torch.float32)
+        # 奖励归一化（如果启用）
+        if self.reward_normalization:
+            normalized_rewards = [(r - self.reward_mean) / max(self.reward_std, 1.0) for r in self.rewards]
+            rewards = torch.tensor(normalized_rewards, dtype=torch.float32)
+        else:
+            rewards = torch.tensor(self.rewards, dtype=torch.float32)
         
-        # For single step environment, returns = rewards
-        returns = rewards
-        advantages = returns - values.detach()
+        # 计算GAE优势函数
+        if len(self.rewards) > 1:
+            # 多步GAE计算
+            advantages = []
+            gae = 0
+            for i in reversed(range(len(rewards))):
+                if i == len(rewards) - 1:
+                    next_value = 0
+                else:
+                    next_value = values[i + 1]
+                delta = rewards[i] + gamma * next_value - values[i]
+                gae = delta + gamma * self.gae_lambda * gae
+                advantages.insert(0, gae)
+            advantages = torch.tensor(advantages, dtype=torch.float32)
+            returns = advantages + values.detach()
+        else:
+            # 单步环境
+            returns = rewards
+            advantages = returns - values.detach()
         
         # Normalize advantages if we have more than one value
         if len(advantages) > 1:
@@ -222,7 +302,7 @@ class PPOAgent:
         total_entropy = 0
         
         # PPO update for multiple epochs
-        for epoch in range(update_epochs):
+        for epoch in range(self.update_epochs):
             # Forward pass through network
             mean, std, new_values = self.network(states)
             effort_mean = mean * (self.effort_high - self.effort_low) + self.effort_low
@@ -266,11 +346,14 @@ class PPOAgent:
             total_kl_div += kl_div.item()
             total_entropy += entropy.item()
         
-        # 更新学习率调度器（基于接近理论值的程度）
-        if last_effort is not None:
-            effort_val = last_effort.item() if torch.is_tensor(last_effort) else last_effort
-            proximity_score = max(0, 100 - abs(effort_val - self.theoretical_effort))
-            self.scheduler.step(proximity_score)
+        # 更新学习率调度器
+        if self.scheduler is not None:
+            if self.lr_schedule == 'plateau' and last_effort is not None:
+                effort_val = last_effort.item() if torch.is_tensor(last_effort) else last_effort
+                proximity_score = max(0, 100 - abs(effort_val - self.theoretical_effort))
+                self.scheduler.step(proximity_score)
+            elif self.lr_schedule in ['cosine_annealing', 'step']:
+                self.scheduler.step()
         
         # 监控收敛
         if last_effort is not None:
@@ -298,11 +381,11 @@ class PPOAgent:
                     round(effort_val, 2), 
                     round(raw_reward.item() if torch.is_tensor(raw_reward) else raw_reward, 2),
                     round(shaped_reward.item() if torch.is_tensor(shaped_reward) else shaped_reward, 2),
-                    round(total_policy_loss / update_epochs, 4),
-                    round(total_value_loss / update_epochs, 4),
-                    round((total_policy_loss + total_value_loss) / update_epochs, 4),
-                    round(total_kl_div / update_epochs, 6),
-                    round(total_entropy / update_epochs, 4),
+                    round(total_policy_loss / self.update_epochs, 4),
+                    round(total_value_loss / self.update_epochs, 4),
+                    round((total_policy_loss + total_value_loss) / self.update_epochs, 4),
+                    round(total_kl_div / self.update_epochs, 6),
+                    round(total_entropy / self.update_epochs, 4),
                     f"{current_lr:.6f}",
                     self.curriculum_phase
                 ])

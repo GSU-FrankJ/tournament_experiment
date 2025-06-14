@@ -1,0 +1,1392 @@
+{
+  "results": [
+    {
+      "trial_id": 1,
+      "config": {
+        "learning_rate": 5e-05,
+        "clip_epsilon": 0.15,
+        "entropy_coef": 0.005,
+        "update_epochs": 6,
+        "gamma": 0.97,
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "activation": "relu",
+        "value_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.1,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1500,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 163.21973617553712,
+      "final_std": 0.23664066814335905,
+      "final_gap": 75.71973617553712,
+      "best_gap": 76.33615066528321,
+      "episodes_trained": 15000,
+      "training_time": 97.03343224525452,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.62699389648438,
+          "std": 0.4420137470199584,
+          "gap": 85.12699389648438
+        },
+        {
+          "episode": 3000,
+          "effort": 171.7423452758789,
+          "std": 0.40930280682343745,
+          "gap": 84.2423452758789
+        },
+        {
+          "episode": 4000,
+          "effort": 170.9907027282715,
+          "std": 0.3688703337792557,
+          "gap": 83.49070272827149
+        },
+        {
+          "episode": 5000,
+          "effort": 170.18792333984376,
+          "std": 0.357523009329182,
+          "gap": 82.68792333984376
+        },
+        {
+          "episode": 6000,
+          "effort": 169.44321655273438,
+          "std": 0.32602076471985325,
+          "gap": 81.94321655273438
+        },
+        {
+          "episode": 7000,
+          "effort": 168.71757556152343,
+          "std": 0.3097882354166498,
+          "gap": 81.21757556152343
+        },
+        {
+          "episode": 8000,
+          "effort": 167.82290493774414,
+          "std": 0.2721935737076377,
+          "gap": 80.32290493774414
+        },
+        {
+          "episode": 9000,
+          "effort": 167.02044860839842,
+          "std": 0.26444577572512173,
+          "gap": 79.52044860839842
+        },
+        {
+          "episode": 10000,
+          "effort": 166.55509762573243,
+          "std": 0.2416674695688035,
+          "gap": 79.05509762573243
+        },
+        {
+          "episode": 11000,
+          "effort": 165.86159170532227,
+          "std": 0.2472689682569726,
+          "gap": 78.36159170532227
+        },
+        {
+          "episode": 12000,
+          "effort": 165.29686087036131,
+          "std": 0.1993783301054862,
+          "gap": 77.79686087036131
+        },
+        {
+          "episode": 13000,
+          "effort": 164.44820275878905,
+          "std": 0.20033453617828295,
+          "gap": 76.94820275878905
+        },
+        {
+          "episode": 14000,
+          "effort": 163.8361506652832,
+          "std": 0.17435144645337702,
+          "gap": 76.33615066528321
+        }
+      ],
+      "success": false,
+      "config_hash": 3288614889838872843,
+      "optimization_type": "grid_search"
+    },
+    {
+      "trial_id": 2,
+      "config": {
+        "learning_rate": 5e-05,
+        "clip_epsilon": 0.15,
+        "entropy_coef": 0.005,
+        "update_epochs": 6,
+        "gamma": 0.97,
+        "hidden_dim": 256,
+        "num_layers": 3,
+        "activation": "relu",
+        "value_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.1,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1500,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 163.90106747436522,
+      "final_std": 0.18047228290419864,
+      "final_gap": 76.40106747436522,
+      "best_gap": 76.89901568603517,
+      "episodes_trained": 15000,
+      "training_time": 125.15607810020447,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.49581567382813,
+          "std": 0.45681104390329424,
+          "gap": 84.99581567382813
+        },
+        {
+          "episode": 3000,
+          "effort": 171.71375149536132,
+          "std": 0.39078789030665945,
+          "gap": 84.21375149536132
+        },
+        {
+          "episode": 4000,
+          "effort": 170.95288522338868,
+          "std": 0.4011377702090645,
+          "gap": 83.45288522338868
+        },
+        {
+          "episode": 5000,
+          "effort": 170.08609942626953,
+          "std": 0.3721774035065486,
+          "gap": 82.58609942626953
+        },
+        {
+          "episode": 6000,
+          "effort": 169.30062033081055,
+          "std": 0.3404955766799396,
+          "gap": 81.80062033081055
+        },
+        {
+          "episode": 7000,
+          "effort": 168.44658657836914,
+          "std": 0.32767242747214015,
+          "gap": 80.94658657836914
+        },
+        {
+          "episode": 8000,
+          "effort": 167.7496042175293,
+          "std": 0.300114484844173,
+          "gap": 80.24960421752931
+        },
+        {
+          "episode": 9000,
+          "effort": 167.1374578552246,
+          "std": 0.29287708081981384,
+          "gap": 79.6374578552246
+        },
+        {
+          "episode": 10000,
+          "effort": 166.597225982666,
+          "std": 0.23641844962556607,
+          "gap": 79.097225982666
+        },
+        {
+          "episode": 11000,
+          "effort": 165.89926879882813,
+          "std": 0.24265300007777438,
+          "gap": 78.39926879882813
+        },
+        {
+          "episode": 12000,
+          "effort": 165.43739724731446,
+          "std": 0.20190505755697732,
+          "gap": 77.93739724731446
+        },
+        {
+          "episode": 13000,
+          "effort": 164.86838064575196,
+          "std": 0.198310556501186,
+          "gap": 77.36838064575196
+        },
+        {
+          "episode": 14000,
+          "effort": 164.39901568603517,
+          "std": 0.2123716778115841,
+          "gap": 76.89901568603517
+        }
+      ],
+      "success": false,
+      "config_hash": -4238194938799270764,
+      "optimization_type": "grid_search"
+    },
+    {
+      "trial_id": 3,
+      "config": {
+        "learning_rate": 5e-05,
+        "clip_epsilon": 0.15,
+        "entropy_coef": 0.005,
+        "update_epochs": 6,
+        "gamma": 0.99,
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "activation": "relu",
+        "value_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.1,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1500,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 163.58305682373046,
+      "final_std": 0.18901939485115912,
+      "final_gap": 76.08305682373046,
+      "best_gap": 76.53358267211914,
+      "episodes_trained": 15000,
+      "training_time": 104.03823208808899,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.73490670776368,
+          "std": 0.4452864061389799,
+          "gap": 85.23490670776368
+        },
+        {
+          "episode": 3000,
+          "effort": 171.88070971679687,
+          "std": 0.44035630256512204,
+          "gap": 84.38070971679687
+        },
+        {
+          "episode": 4000,
+          "effort": 170.83590823364258,
+          "std": 0.3743316428076614,
+          "gap": 83.33590823364258
+        },
+        {
+          "episode": 5000,
+          "effort": 169.97032015991212,
+          "std": 0.337386056620225,
+          "gap": 82.47032015991212
+        },
+        {
+          "episode": 6000,
+          "effort": 169.2495055847168,
+          "std": 0.3189319615336427,
+          "gap": 81.74950558471679
+        },
+        {
+          "episode": 7000,
+          "effort": 168.51944876098634,
+          "std": 0.3154576954590628,
+          "gap": 81.01944876098634
+        },
+        {
+          "episode": 8000,
+          "effort": 167.7684755554199,
+          "std": 0.2973472113719979,
+          "gap": 80.26847555541991
+        },
+        {
+          "episode": 9000,
+          "effort": 167.03465203857422,
+          "std": 0.24984605898924103,
+          "gap": 79.53465203857422
+        },
+        {
+          "episode": 10000,
+          "effort": 166.4241414794922,
+          "std": 0.2700568932681884,
+          "gap": 78.92414147949219
+        },
+        {
+          "episode": 11000,
+          "effort": 165.6228043823242,
+          "std": 0.22230529886138034,
+          "gap": 78.1228043823242
+        },
+        {
+          "episode": 12000,
+          "effort": 165.04990866088866,
+          "std": 0.23834895119785615,
+          "gap": 77.54990866088866
+        },
+        {
+          "episode": 13000,
+          "effort": 164.49180810546875,
+          "std": 0.21170738879336776,
+          "gap": 76.99180810546875
+        },
+        {
+          "episode": 14000,
+          "effort": 164.03358267211914,
+          "std": 0.18055641070194256,
+          "gap": 76.53358267211914
+        }
+      ],
+      "success": false,
+      "config_hash": -1170040502158443412,
+      "optimization_type": "grid_search"
+    },
+    {
+      "trial_id": 4,
+      "config": {
+        "learning_rate": 5e-05,
+        "clip_epsilon": 0.15,
+        "entropy_coef": 0.005,
+        "update_epochs": 6,
+        "gamma": 0.99,
+        "hidden_dim": 256,
+        "num_layers": 3,
+        "activation": "relu",
+        "value_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.1,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1500,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 163.57636264038086,
+      "final_std": 0.17613294563443616,
+      "final_gap": 76.07636264038086,
+      "best_gap": 76.69319006347655,
+      "episodes_trained": 15000,
+      "training_time": 135.6829798221588,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.32011224365235,
+          "std": 0.4820212473994194,
+          "gap": 84.82011224365235
+        },
+        {
+          "episode": 3000,
+          "effort": 171.45841506958007,
+          "std": 0.41667985217002185,
+          "gap": 83.95841506958007
+        },
+        {
+          "episode": 4000,
+          "effort": 170.63710885620117,
+          "std": 0.3768817826977188,
+          "gap": 83.13710885620117
+        },
+        {
+          "episode": 5000,
+          "effort": 169.93570928955077,
+          "std": 0.35244934276476547,
+          "gap": 82.43570928955077
+        },
+        {
+          "episode": 6000,
+          "effort": 169.20802047729492,
+          "std": 0.3026188045914274,
+          "gap": 81.70802047729492
+        },
+        {
+          "episode": 7000,
+          "effort": 168.53665069580077,
+          "std": 0.2978456192331984,
+          "gap": 81.03665069580077
+        },
+        {
+          "episode": 8000,
+          "effort": 167.79700216674806,
+          "std": 0.2748876245118855,
+          "gap": 80.29700216674806
+        },
+        {
+          "episode": 9000,
+          "effort": 167.06087069702147,
+          "std": 0.27358403020885785,
+          "gap": 79.56087069702147
+        },
+        {
+          "episode": 10000,
+          "effort": 166.47467083740236,
+          "std": 0.2592846566815949,
+          "gap": 78.97467083740236
+        },
+        {
+          "episode": 11000,
+          "effort": 165.89913595581055,
+          "std": 0.22584993301895537,
+          "gap": 78.39913595581055
+        },
+        {
+          "episode": 12000,
+          "effort": 165.32158294677734,
+          "std": 0.22535045274474302,
+          "gap": 77.82158294677734
+        },
+        {
+          "episode": 13000,
+          "effort": 164.66631805419922,
+          "std": 0.20761745507791848,
+          "gap": 77.16631805419922
+        },
+        {
+          "episode": 14000,
+          "effort": 164.19319006347655,
+          "std": 0.19911237299246132,
+          "gap": 76.69319006347655
+        }
+      ],
+      "success": false,
+      "config_hash": 2454221255948595333,
+      "optimization_type": "grid_search"
+    },
+    {
+      "trial_id": 5,
+      "config": {
+        "learning_rate": 5e-05,
+        "clip_epsilon": 0.15,
+        "entropy_coef": 0.005,
+        "update_epochs": 8,
+        "gamma": 0.97,
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "activation": "relu",
+        "value_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.1,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1500,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 163.77350186157227,
+      "final_std": 0.16319468504659337,
+      "final_gap": 76.27350186157227,
+      "best_gap": 76.69725756835936,
+      "episodes_trained": 15000,
+      "training_time": 142.1151261329651,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.33444763183593,
+          "std": 0.4575292415541105,
+          "gap": 84.83444763183593
+        },
+        {
+          "episode": 3000,
+          "effort": 171.42260052490235,
+          "std": 0.3637072118308844,
+          "gap": 83.92260052490235
+        },
+        {
+          "episode": 4000,
+          "effort": 170.61390414428712,
+          "std": 0.34053050205003793,
+          "gap": 83.11390414428712
+        },
+        {
+          "episode": 5000,
+          "effort": 169.6609052429199,
+          "std": 0.30432533220718594,
+          "gap": 82.16090524291991
+        },
+        {
+          "episode": 6000,
+          "effort": 168.93820715332032,
+          "std": 0.28256075194987423,
+          "gap": 81.43820715332032
+        },
+        {
+          "episode": 7000,
+          "effort": 168.34332046508788,
+          "std": 0.2844655248078,
+          "gap": 80.84332046508788
+        },
+        {
+          "episode": 8000,
+          "effort": 167.76126278686525,
+          "std": 0.25173504055187756,
+          "gap": 80.26126278686525
+        },
+        {
+          "episode": 9000,
+          "effort": 166.89231082153321,
+          "std": 0.2336906247387323,
+          "gap": 79.39231082153321
+        },
+        {
+          "episode": 10000,
+          "effort": 166.24203872680664,
+          "std": 0.22251580820899725,
+          "gap": 78.74203872680664
+        },
+        {
+          "episode": 11000,
+          "effort": 165.76674377441407,
+          "std": 0.17107726528115197,
+          "gap": 78.26674377441407
+        },
+        {
+          "episode": 12000,
+          "effort": 165.32097924804688,
+          "std": 0.16597237936973752,
+          "gap": 77.82097924804688
+        },
+        {
+          "episode": 13000,
+          "effort": 164.68274060058593,
+          "std": 0.1621013804844739,
+          "gap": 77.18274060058593
+        },
+        {
+          "episode": 14000,
+          "effort": 164.19725756835936,
+          "std": 0.1554397472817629,
+          "gap": 76.69725756835936
+        }
+      ],
+      "success": false,
+      "config_hash": -7655388968245730292,
+      "optimization_type": "grid_search"
+    },
+    {
+      "trial_id": 6,
+      "config": {
+        "learning_rate": 5e-05,
+        "hidden_dim": 512,
+        "num_layers": 4,
+        "activation": "relu",
+        "clip_epsilon": 0.3,
+        "value_coef": 0.5,
+        "entropy_coef": 0.005,
+        "max_grad_norm": 2.0,
+        "batch_size": 64,
+        "update_epochs": 10,
+        "gamma": 0.99,
+        "gae_lambda": 0.99,
+        "weight_decay": 1e-06,
+        "dropout_rate": 0.0,
+        "lr_schedule": "cosine_annealing",
+        "lr_decay_factor": 0.95,
+        "lr_patience": 3000,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": true
+      },
+      "final_effort": 164.83438793945314,
+      "final_std": 0.24088241188508228,
+      "final_gap": 77.33438793945314,
+      "best_gap": 77.92789694213866,
+      "episodes_trained": 15000,
+      "training_time": 515.2410311698914,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 172.3912398071289,
+          "std": 0.38095732817566635,
+          "gap": 84.8912398071289
+        },
+        {
+          "episode": 3000,
+          "effort": 171.2447536315918,
+          "std": 0.37065019914576747,
+          "gap": 83.7447536315918
+        },
+        {
+          "episode": 4000,
+          "effort": 170.32310787963868,
+          "std": 0.34306146737012055,
+          "gap": 82.82310787963868
+        },
+        {
+          "episode": 5000,
+          "effort": 169.63616217041016,
+          "std": 0.29411866847059276,
+          "gap": 82.13616217041016
+        },
+        {
+          "episode": 6000,
+          "effort": 168.94859411621093,
+          "std": 0.26550495085721004,
+          "gap": 81.44859411621093
+        },
+        {
+          "episode": 7000,
+          "effort": 168.3999129638672,
+          "std": 0.27477591388671685,
+          "gap": 80.8999129638672
+        },
+        {
+          "episode": 8000,
+          "effort": 167.94339602661134,
+          "std": 0.23803345260373815,
+          "gap": 80.44339602661134
+        },
+        {
+          "episode": 9000,
+          "effort": 167.49327941894532,
+          "std": 0.2453459616458167,
+          "gap": 79.99327941894532
+        },
+        {
+          "episode": 10000,
+          "effort": 167.12912155151366,
+          "std": 0.23816359941315476,
+          "gap": 79.62912155151366
+        },
+        {
+          "episode": 11000,
+          "effort": 166.75672134399414,
+          "std": 0.23184506501287794,
+          "gap": 79.25672134399414
+        },
+        {
+          "episode": 12000,
+          "effort": 166.34619860839842,
+          "std": 0.22174586575836913,
+          "gap": 78.84619860839842
+        },
+        {
+          "episode": 13000,
+          "effort": 165.86515878295899,
+          "std": 0.22871680939726757,
+          "gap": 78.36515878295899
+        },
+        {
+          "episode": 14000,
+          "effort": 165.42789694213866,
+          "std": 0.22525124861070314,
+          "gap": 77.92789694213866
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 7,
+      "config": {
+        "learning_rate": 0.005,
+        "hidden_dim": 256,
+        "num_layers": 4,
+        "activation": "elu",
+        "clip_epsilon": 0.25,
+        "value_coef": 0.5,
+        "entropy_coef": 0.01,
+        "max_grad_norm": 0.3,
+        "batch_size": 256,
+        "update_epochs": 6,
+        "gamma": 0.97,
+        "gae_lambda": 0.9,
+        "weight_decay": 1e-06,
+        "dropout_rate": 0.0,
+        "lr_schedule": "linear_decay",
+        "lr_decay_factor": 0.95,
+        "lr_patience": 3000,
+        "use_layer_norm": false,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": false,
+        "observation_normalization": false
+      },
+      "final_effort": 3.2976902767792344,
+      "final_std": 4.784975704650483,
+      "final_gap": 84.20230972322076,
+      "best_gap": 31.07545732593536,
+      "episodes_trained": 5001,
+      "training_time": 49.89694428443909,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 118.57545732593536,
+          "std": 91.42434298062562,
+          "gap": 31.07545732593536
+        },
+        {
+          "episode": 3000,
+          "effort": 12.184565814894974,
+          "std": 29.056964401589617,
+          "gap": 75.31543418510503
+        },
+        {
+          "episode": 4000,
+          "effort": 4.141032429121434,
+          "std": 6.625971959574874,
+          "gap": 83.35896757087856
+        },
+        {
+          "episode": 5000,
+          "effort": 3.2976902767792344,
+          "std": 4.784975704650483,
+          "gap": 84.20230972322076
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 8,
+      "config": {
+        "learning_rate": 0.005,
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "activation": "relu",
+        "clip_epsilon": 0.2,
+        "value_coef": 0.25,
+        "entropy_coef": 0.02,
+        "max_grad_norm": 1.0,
+        "batch_size": 64,
+        "update_epochs": 8,
+        "gamma": 0.99,
+        "gae_lambda": 0.9,
+        "weight_decay": 0.0001,
+        "dropout_rate": 0.0,
+        "lr_schedule": "cosine_annealing",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1000,
+        "use_layer_norm": true,
+        "use_residual": true,
+        "separate_networks": true,
+        "reward_normalization": false,
+        "observation_normalization": false
+      },
+      "final_effort": 11.013823692321777,
+      "final_std": 0.039837576919008445,
+      "final_gap": 76.48617630767822,
+      "best_gap": 7.622006122589113,
+      "episodes_trained": 6001,
+      "training_time": 58.75605487823486,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 98.51583155822753,
+          "std": 99.62116643745763,
+          "gap": 11.015831558227532
+        },
+        {
+          "episode": 3000,
+          "effort": 95.12200612258911,
+          "std": 98.48025225181578,
+          "gap": 7.622006122589113
+        },
+        {
+          "episode": 4000,
+          "effort": 101.23083276987076,
+          "std": 97.1348886833064,
+          "gap": 13.730832769870759
+        },
+        {
+          "episode": 5000,
+          "effort": 13.01889447593689,
+          "std": 3.7712592250994024,
+          "gap": 74.48110552406311
+        },
+        {
+          "episode": 6000,
+          "effort": 11.013823692321777,
+          "std": 0.039837576919008445,
+          "gap": 76.48617630767822
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 9,
+      "config": {
+        "learning_rate": 0.005,
+        "hidden_dim": 128,
+        "num_layers": 2,
+        "activation": "elu",
+        "clip_epsilon": 0.2,
+        "value_coef": 0.75,
+        "entropy_coef": 0.005,
+        "max_grad_norm": 2.0,
+        "batch_size": 32,
+        "update_epochs": 4,
+        "gamma": 0.97,
+        "gae_lambda": 0.99,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.15,
+        "lr_schedule": "cosine_annealing",
+        "lr_decay_factor": 0.8,
+        "lr_patience": 2000,
+        "use_layer_norm": false,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": false,
+        "observation_normalization": false
+      },
+      "final_effort": 4.625271247660741,
+      "final_std": 28.342352783534224,
+      "final_gap": 82.87472875233925,
+      "best_gap": 55.6435232685767,
+      "episodes_trained": 5001,
+      "training_time": 17.460166215896606,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 143.1435232685767,
+          "std": 89.6876021900229,
+          "gap": 55.6435232685767
+        },
+        {
+          "episode": 3000,
+          "effort": 0.15986874555703254,
+          "std": 0.24360246652134707,
+          "gap": 87.34013125444297
+        },
+        {
+          "episode": 4000,
+          "effort": 0.09297873227111995,
+          "std": 0.14194935095046027,
+          "gap": 87.40702126772888
+        },
+        {
+          "episode": 5000,
+          "effort": 4.625271247660741,
+          "std": 28.342352783534224,
+          "gap": 82.87472875233925
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 10,
+      "config": {
+        "learning_rate": 5e-05,
+        "hidden_dim": 128,
+        "num_layers": 2,
+        "activation": "tanh",
+        "clip_epsilon": 0.3,
+        "value_coef": 0.25,
+        "entropy_coef": 0.02,
+        "max_grad_norm": 0.5,
+        "batch_size": 256,
+        "update_epochs": 12,
+        "gamma": 0.97,
+        "gae_lambda": 0.97,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.0,
+        "lr_schedule": "constant",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 2000,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": false,
+        "reward_normalization": true,
+        "observation_normalization": true
+      },
+      "final_effort": 163.41772570800782,
+      "final_std": 12.524889000235225,
+      "final_gap": 75.91772570800782,
+      "best_gap": 50.16222645568848,
+      "episodes_trained": 5001,
+      "training_time": 42.90710496902466,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 137.66222645568848,
+          "std": 6.8035774493038685,
+          "gap": 50.16222645568848
+        },
+        {
+          "episode": 3000,
+          "effort": 144.56310076904296,
+          "std": 50.949263036900305,
+          "gap": 57.06310076904296
+        },
+        {
+          "episode": 4000,
+          "effort": 194.86987216186523,
+          "std": 1.4003764906714808,
+          "gap": 107.36987216186523
+        },
+        {
+          "episode": 5000,
+          "effort": 163.41772570800782,
+          "std": 12.524889000235225,
+          "gap": 75.91772570800782
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 11,
+      "config": {
+        "learning_rate": 1e-05,
+        "hidden_dim": 128,
+        "num_layers": 2,
+        "activation": "tanh",
+        "clip_epsilon": 0.1,
+        "value_coef": 0.75,
+        "entropy_coef": 0.01,
+        "max_grad_norm": 0.3,
+        "batch_size": 128,
+        "update_epochs": 4,
+        "gamma": 0.99,
+        "gae_lambda": 0.99,
+        "weight_decay": 0.0001,
+        "dropout_rate": 0.15,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.9,
+        "lr_patience": 1000,
+        "use_layer_norm": false,
+        "use_residual": true,
+        "separate_networks": false,
+        "reward_normalization": false,
+        "observation_normalization": true
+      },
+      "final_effort": 180.01931491088868,
+      "final_std": 1.0754528078445447,
+      "final_gap": 92.51931491088868,
+      "best_gap": 88.768408203125,
+      "episodes_trained": 5001,
+      "training_time": 14.826728105545044,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 176.268408203125,
+          "std": 0.681031736534039,
+          "gap": 88.768408203125
+        },
+        {
+          "episode": 3000,
+          "effort": 177.28778155517577,
+          "std": 0.8551108603657723,
+          "gap": 89.78778155517577
+        },
+        {
+          "episode": 4000,
+          "effort": 179.1470075378418,
+          "std": 0.9474278399683447,
+          "gap": 91.6470075378418
+        },
+        {
+          "episode": 5000,
+          "effort": 180.01931491088868,
+          "std": 1.0754528078445447,
+          "gap": 92.51931491088868
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 12,
+      "config": {
+        "learning_rate": 0.0001,
+        "hidden_dim": 512,
+        "num_layers": 4,
+        "activation": "tanh",
+        "clip_epsilon": 0.25,
+        "value_coef": 0.25,
+        "entropy_coef": 0.02,
+        "max_grad_norm": 1.0,
+        "batch_size": 256,
+        "update_epochs": 8,
+        "gamma": 0.97,
+        "gae_lambda": 0.97,
+        "weight_decay": 0.0,
+        "dropout_rate": 0.0,
+        "lr_schedule": "linear_decay",
+        "lr_decay_factor": 0.95,
+        "lr_patience": 2000,
+        "use_layer_norm": true,
+        "use_residual": false,
+        "separate_networks": false,
+        "reward_normalization": false,
+        "observation_normalization": false
+      },
+      "final_effort": 0.9433651751130819,
+      "final_std": 1.1440871424228154,
+      "final_gap": 86.55663482488691,
+      "best_gap": 22.096732315063477,
+      "episodes_trained": 6001,
+      "training_time": 94.6427710056305,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 167.4332680053711,
+          "std": 7.983022940364579,
+          "gap": 79.9332680053711
+        },
+        {
+          "episode": 3000,
+          "effort": 109.59673231506348,
+          "std": 11.391213269954507,
+          "gap": 22.096732315063477
+        },
+        {
+          "episode": 4000,
+          "effort": 21.35062670135498,
+          "std": 9.232547895409084,
+          "gap": 66.14937329864502
+        },
+        {
+          "episode": 5000,
+          "effort": 1.064955616429448,
+          "std": 1.5649684282337073,
+          "gap": 86.43504438357056
+        },
+        {
+          "episode": 6000,
+          "effort": 0.9433651751130819,
+          "std": 1.1440871424228154,
+          "gap": 86.55663482488691
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 13,
+      "config": {
+        "learning_rate": 0.0005,
+        "hidden_dim": 64,
+        "num_layers": 3,
+        "activation": "relu",
+        "clip_epsilon": 0.15,
+        "value_coef": 1.0,
+        "entropy_coef": 0.01,
+        "max_grad_norm": 0.5,
+        "batch_size": 32,
+        "update_epochs": 6,
+        "gamma": 0.97,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-06,
+        "dropout_rate": 0.0,
+        "lr_schedule": "linear_decay",
+        "lr_decay_factor": 0.8,
+        "lr_patience": 1000,
+        "use_layer_norm": false,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": true
+      },
+      "final_effort": 166.30154898071288,
+      "final_std": 0.03551379950740971,
+      "final_gap": 78.80154898071288,
+      "best_gap": 78.8665523071289,
+      "episodes_trained": 15000,
+      "training_time": 76.51563096046448,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 169.13851388549804,
+          "std": 0.5235759387599863,
+          "gap": 81.63851388549804
+        },
+        {
+          "episode": 3000,
+          "effort": 168.45690371704103,
+          "std": 0.08563045125237959,
+          "gap": 80.95690371704103
+        },
+        {
+          "episode": 4000,
+          "effort": 168.18451174926759,
+          "std": 0.0972701761363441,
+          "gap": 80.68451174926759
+        },
+        {
+          "episode": 5000,
+          "effort": 167.77489141845703,
+          "std": 0.10543095308268935,
+          "gap": 80.27489141845703
+        },
+        {
+          "episode": 6000,
+          "effort": 167.44016235351563,
+          "std": 0.07544318916057076,
+          "gap": 79.94016235351563
+        },
+        {
+          "episode": 7000,
+          "effort": 167.1067985534668,
+          "std": 0.0803524563576628,
+          "gap": 79.6067985534668
+        },
+        {
+          "episode": 8000,
+          "effort": 166.98279165649413,
+          "std": 0.03869651428314757,
+          "gap": 79.48279165649413
+        },
+        {
+          "episode": 9000,
+          "effort": 166.83837838745117,
+          "std": 0.023573563431743168,
+          "gap": 79.33837838745117
+        },
+        {
+          "episode": 10000,
+          "effort": 166.76258416748047,
+          "std": 0.020930288028983383,
+          "gap": 79.26258416748047
+        },
+        {
+          "episode": 11000,
+          "effort": 166.69115814208985,
+          "std": 0.01879457279693008,
+          "gap": 79.19115814208985
+        },
+        {
+          "episode": 12000,
+          "effort": 166.6131389465332,
+          "std": 0.020367079225188524,
+          "gap": 79.11313894653321
+        },
+        {
+          "episode": 13000,
+          "effort": 166.5157969055176,
+          "std": 0.05997108323010625,
+          "gap": 79.01579690551759
+        },
+        {
+          "episode": 14000,
+          "effort": 166.3665523071289,
+          "std": 0.011068432960144483,
+          "gap": 78.8665523071289
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 14,
+      "config": {
+        "learning_rate": 0.001,
+        "hidden_dim": 128,
+        "num_layers": 2,
+        "activation": "elu",
+        "clip_epsilon": 0.1,
+        "value_coef": 0.5,
+        "entropy_coef": 0.01,
+        "max_grad_norm": 0.5,
+        "batch_size": 256,
+        "update_epochs": 6,
+        "gamma": 0.97,
+        "gae_lambda": 0.95,
+        "weight_decay": 1e-06,
+        "dropout_rate": 0.0,
+        "lr_schedule": "reduce_on_plateau",
+        "lr_decay_factor": 0.8,
+        "lr_patience": 1000,
+        "use_layer_norm": false,
+        "use_residual": true,
+        "separate_networks": false,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 6.386711776345968,
+      "final_std": 8.688137901148679,
+      "final_gap": 81.11328822365404,
+      "best_gap": 9.908694793224328,
+      "episodes_trained": 6001,
+      "training_time": 22.86498498916626,
+      "convergence_quality": "Poor",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 171.17925953674316,
+          "std": 24.16842330266715,
+          "gap": 83.67925953674316
+        },
+        {
+          "episode": 3000,
+          "effort": 97.40869479322433,
+          "std": 60.35956916532539,
+          "gap": 9.908694793224328
+        },
+        {
+          "episode": 4000,
+          "effort": 58.370679504930976,
+          "std": 83.92335195682665,
+          "gap": 29.129320495069024
+        },
+        {
+          "episode": 5000,
+          "effort": 9.170019495069981,
+          "std": 12.133431620734322,
+          "gap": 78.32998050493002
+        },
+        {
+          "episode": 6000,
+          "effort": 6.386711776345968,
+          "std": 8.688137901148679,
+          "gap": 81.11328822365404
+        }
+      ],
+      "success": false,
+      "optimization_type": "random_search"
+    },
+    {
+      "trial_id": 15,
+      "config": {
+        "learning_rate": 0.0001,
+        "hidden_dim": 128,
+        "num_layers": 3,
+        "activation": "tanh",
+        "clip_epsilon": 0.2,
+        "value_coef": 0.75,
+        "entropy_coef": 0.005,
+        "max_grad_norm": 0.3,
+        "batch_size": 64,
+        "update_epochs": 10,
+        "gamma": 0.995,
+        "gae_lambda": 0.97,
+        "weight_decay": 1e-05,
+        "dropout_rate": 0.05,
+        "lr_schedule": "cosine_annealing",
+        "lr_decay_factor": 0.95,
+        "lr_patience": 3000,
+        "use_layer_norm": false,
+        "use_residual": false,
+        "separate_networks": true,
+        "reward_normalization": true,
+        "observation_normalization": false
+      },
+      "final_effort": 87.56568530273438,
+      "final_std": 5.481371785278858,
+      "final_gap": 0.06568530273438,
+      "best_gap": 0.06568530273438,
+      "episodes_trained": 10001,
+      "training_time": 102.7762930393219,
+      "convergence_quality": "Fair",
+      "training_metrics": [
+        {
+          "episode": 2000,
+          "effort": 160.1679169921875,
+          "std": 4.853162950604245,
+          "gap": 72.66791699218749
+        },
+        {
+          "episode": 3000,
+          "effort": 151.17116165161133,
+          "std": 4.264205206403499,
+          "gap": 63.67116165161133
+        },
+        {
+          "episode": 4000,
+          "effort": 126.31223677062988,
+          "std": 9.979862927986558,
+          "gap": 38.81223677062988
+        },
+        {
+          "episode": 5000,
+          "effort": 102.29245373535156,
+          "std": 14.839203255973668,
+          "gap": 14.792453735351557
+        },
+        {
+          "episode": 6000,
+          "effort": 136.31206491088867,
+          "std": 3.9702930785864763,
+          "gap": 48.812064910888665
+        },
+        {
+          "episode": 7000,
+          "effort": 89.95444441223144,
+          "std": 11.11565812032073,
+          "gap": 2.454444412231439
+        },
+        {
+          "episode": 8000,
+          "effort": 81.36905419921875,
+          "std": 5.492176207117437,
+          "gap": 6.130945800781248
+        },
+        {
+          "episode": 9000,
+          "effort": 98.39981532287598,
+          "std": 5.029268693493877,
+          "gap": 10.89981532287598
+        },
+        {
+          "episode": 10000,
+          "effort": 87.56568530273438,
+          "std": 5.481371785278858,
+          "gap": 0.06568530273438
+        }
+      ],
+      "success": true,
+      "optimization_type": "random_search"
+    }
+  ],
+  "best_config": {
+    "learning_rate": 0.0001,
+    "hidden_dim": 128,
+    "num_layers": 3,
+    "activation": "tanh",
+    "clip_epsilon": 0.2,
+    "value_coef": 0.75,
+    "entropy_coef": 0.005,
+    "max_grad_norm": 0.3,
+    "batch_size": 64,
+    "update_epochs": 10,
+    "gamma": 0.995,
+    "gae_lambda": 0.97,
+    "weight_decay": 1e-05,
+    "dropout_rate": 0.05,
+    "lr_schedule": "cosine_annealing",
+    "lr_decay_factor": 0.95,
+    "lr_patience": 3000,
+    "use_layer_norm": false,
+    "use_residual": false,
+    "separate_networks": true,
+    "reward_normalization": true,
+    "observation_normalization": false
+  },
+  "best_performance": 0.06568530273438,
+  "timestamp": "2025-06-14T19:31:01.784701",
+  "optimization_type": "random"
+}
