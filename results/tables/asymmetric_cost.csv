@@ -1,0 +1,4 @@
+k1,k2,q,w_h,w_l,Theoretical_e1,Theoretical_e2,Model_training,Parameter,Effort1,Effort2,Gap1,Gap2,Utility1,Utility2,Cost1,Cost2,Convergence_Quality
+0.0003,0.0005,25.0,6.5,3.0,72.92,26.25,Asymmetric_Gradient,"lr=0.1, steps=100000, eps=1e-3",60.33,36.27,12.59,10.024,4.937,2.813,1.092,0.658,Fair
+0.0003,0.0005,25.0,6.5,3.0,72.92,26.25,Asymmetric_REINFORCE,"episodes=40000, lr=0.0001, gamma=0.98",102.66,51.93,29.739,25.677,Poor
+0.0003,0.0005,25.0,6.5,3.0,72.92,26.25,Asymmetric_PPO,"episodes=15001, lr=0.0001, gamma=0.99",59.52,59.75,13.399,33.498,Poor
