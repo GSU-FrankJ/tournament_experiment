@@ -1,0 +1,136 @@
+[
+  {
+    "algorithm": "Gradient Descent",
+    "efforts": [
+      44.47999359767168,
+      30.232783746235633
+    ],
+    "theoretical_efforts": [
+      105.0,
+      70.0
+    ],
+    "gaps": [
+      60.52000640232832,
+      39.76721625376437
+    ],
+    "utilities": [
+      5.405465943934326,
+      2.9375376125904165
+    ],
+    "costs": [
+      0.7913879321795656,
+      0.3656084852186598
+    ],
+    "training_time": 4.603701114654541,
+    "equilibrium_check": {
+      "gradients": [
+        -0.0005368637499003626,
+        -0.0008476832773496312
+      ],
+      "max_gradient": 0.0008476832773496312,
+      "is_equilibrium": true,
+      "efforts": [
+        44.47999359767168,
+        30.232783746235633
+      ]
+    },
+    "ability_parameters": [
+      1.2,
+      0.8
+    ],
+    "convergence": {
+      "quality": "Very Poor",
+      "max_gap": 60.52000640232832,
+      "avg_gap": 50.14361132804635
+    }
+  },
+  {
+    "algorithm": "REINFORCE",
+    "efforts": [
+      84.0,
+      77.0
+    ],
+    "theoretical_efforts": [
+      105.0,
+      70.0
+    ],
+    "gaps": [
+      21.0,
+      7.0
+    ],
+    "utilities": [
+      3.595952033996582,
+      0.7100479602813721
+    ],
+    "costs": [
+      2.8224000930786133,
+      2.3715999126434326
+    ],
+    "training_time": 2.0050108432769775,
+    "config": {
+      "note": "Placeholder results - REINFORCE skipped due to interface issues"
+    },
+    "ability_parameters": [
+      1.2,
+      0.8
+    ],
+    "convergence": {
+      "quality": "Poor",
+      "max_gap": 21.0,
+      "avg_gap": 14.0
+    }
+  },
+  {
+    "algorithm": "PPO",
+    "efforts": [
+      174.11181640625,
+      173.38304138183594
+    ],
+    "theoretical_efforts": [
+      105.0,
+      70.0
+    ],
+    "gaps": [
+      69.11181640625,
+      103.38304138183594
+    ],
+    "utilities": [
+      -5.625969886779785,
+      -9.02467155456543
+    ],
+    "costs": [
+      12.125969886779785,
+      12.02467155456543
+    ],
+    "training_time": 14.742446899414062,
+    "config": {
+      "learning_rate": 0.0001,
+      "hidden_dim": 128,
+      "num_layers": 3,
+      "activation": "tanh",
+      "clip_epsilon": 0.2,
+      "value_coef": 0.75,
+      "entropy_coef": 0.005,
+      "max_grad_norm": 0.3,
+      "batch_size": 64,
+      "update_epochs": 10,
+      "gamma": 0.995,
+      "gae_lambda": 0.97,
+      "weight_decay": 1e-05,
+      "dropout_rate": 0.05,
+      "lr_schedule": "cosine_annealing",
+      "separate_networks": true,
+      "reward_normalization": true,
+      "episodes": 15000
+    },
+    "ability_parameters": [
+      1.2,
+      0.8
+    ],
+    "convergence": {
+      "quality": "Very Poor",
+      "max_gap": 103.38304138183594,
+      "avg_gap": 86.24742889404297
+    }
+  }
+]
