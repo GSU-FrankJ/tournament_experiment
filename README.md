@@ -1,5 +1,5 @@
 # Tournament Experiment
-This repository implements a set of game-theoretic simulation experiments, focusing on players' effort allocation and utility computation under various settings. It supports both one-stage and two-stage environments, multiple players, heterogeneous parameters, and different optimization strategies including Gradient Descent, REINFORCE, and PPO.
+This repository implements a set of game-theoretic simulation experiments, focusing on players' effort allocation and utility computation under various settings. It supports both one-stage and two-stage environments, multiple players, heterogeneous parameters, and different optimization strategies including Gradient Descent and PPO.
 ## Project Structure
 tournament_experiment/
 ├── config/              # Experiment configurations
@@ -48,7 +48,6 @@ python main.py
 
 Supported Solvers
 	•	Gradient-based Optimizer: agents/gradient_solver.py
-	•	REINFORCE: agents/reinforce_agent.py
 	•	PPO: agents/ppo_agent.py
 
 You can modify hyperparameters such as learning rate, exploration noise, and update intervals in the corresponding config files.
