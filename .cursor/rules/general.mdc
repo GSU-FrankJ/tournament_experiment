@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Generic project specifications
+
+## Technology stack
+- Python 3.8+ 
+- PyTorch 
+- NumPy 
+- Pandas 
+- Matplotlib 
+- PPO (Proximal Policy Optimization)
+- Gradient-based Optimizer 
+
+
+
+## Project structure rules
+- **Hierarchical organization**: divide directories by function or domain, following the principle of "separation of concerns".
+- **Naming consistency**: Use consistent and descriptive naming of directories and files to reflect their purpose and content.
+- **Modularization**: Place related functionality in the same module to reduce cross-module dependency
+- **Appropriate Nesting**: Avoid overly deep directory nesting, generally no more than 3-4 layers.
+- **Resource categorization**: differentiate between code, resources, configuration and test files.
+- **Dependency management**: centralize dependency management, avoid multiple declarations
+- **Convention prioritization**: follow the standard project structure conventions of a language or framework
+
+## Generic development principles
+- **Testability**: write testable code, components should maintain a single responsibility
+- **PRINCIPLE OF DRY**: avoid duplicating code, extract shared logic into separate functions or classes
+- **Code Simplicity**: Keep the code clear and concise, follow the KISS principle (Keep it Simple and Straightforward)
+- **Naming conventions**: Use descriptive variable, function, and class names that reflect their use and meaning
+- **Commented Documentation**: add comments to complex logic and write clear documentation describing functionality and usage
+- **Consistent style**: follow the official style guide and code conventions of the project or language
+- **Leveraging the ecosystem**: prioritize the use of mature libraries and tools and avoid unnecessary custom implementations
+- **Architectural design**: consider code maintainability, scalability, and performance requirements
+- **Version control**: write meaningful commits and keep logic-related changes in the same commit
+- **Exception handling**: handle edge cases and errors correctly, provide useful error messages
+
+
+## Description of the rules document for this project
+This project uses the following rules file:
+- general.mdc: general specification (this document)
+- document.mdc: document specification
+- git.mdc: Git commit specification
+- python.mdc: python language development specification

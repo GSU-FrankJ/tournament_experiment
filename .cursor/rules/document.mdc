@@ -1,0 +1,56 @@
+---
+description: 
+globs: *.md
+alwaysApply: false
+---
+---
+description: 
+globs: *.md
+alwaysApply: false
+---
+# Documentation specification
+
+## General Requirements
+- Use Markdown formatting for all documents
+- Use concise and clear language
+- Document content should be kept up-to-date
+- Avoid spelling and grammatical errors
+- Use English as the primary language
+
+## Directory structure
+- `README.md`: the project root directory, providing an overview of the project
+- `docs/`: stores detailed documentation.
+  - `guide/`: User's guide.
+  - `api/`: API documentation.
+  - `examples/`: sample code documentation.
+
+## README.md Content specification
+- Project name and short description
+- Description of the technology stack
+- Description of the project structure
+- Usage description
+- License information
+
+## Versioning specifications
+- Use `CHANGELOG.md` to record version changes.
+- Follow the Semantic Versioning specification.
+- Each release should contain: new features, fixed issues, breaking changes
+
+## Documentation organization
+- Organize the content of the document from the whole to the parts, from simple to complex.
+- Important information goes first.
+- Relevant content should be organized together
+- Use subheadings and lists to enhance readability.
+- Avoid long paragraphs and keep content concise.
+
+## Code Sample Specification
+- Provide complete working examples
+- Code should be simple and easy to understand
+- Add appropriate comments to explain key parts
+- Describe the expected output or behavior of the code
+- Update the example to match the latest API
+
+
+
+
+

@@ -1,0 +1,29 @@
+---
+description: 
+globs: *.py
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 该规则解释了 Python 编码、最佳实践、 整洁高效的代码模式.
+globs: **/*.py
+alwaysApply: false
+---
+# Python 规则
+
+- Follow PEP 8 style guides and naming conventions
+- Enhancing Code Readability and Type Safety with Type Annotations
+- Use virtual environments to manage dependencies:
+  - Prioritize `venv` or `poetry` for environment isolation
+  - Use `requirements.txt` or `pyproject.toml` to document dependencies.
+- Use context managers for resources (e.g., file operations)
+- Prioritize the use of list derivatives, generator expressions, and dictionary derivatives
+- Use `pytest` for testing to maintain high test coverage.
+- Document functions, classes and modules using docstrings.
+- Follow the principles of object-oriented design (SOLID).
+- Use exception handling to ensure program robustness
+- Use `dataclasses` or `pydantic` models to represent data
