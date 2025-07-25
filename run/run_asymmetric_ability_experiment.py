@@ -19,8 +19,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.asymmetric_ability_two_players import config
 from envs.asymmetric_ability_env import AsymmetricAbilityEnv
 from agents.asymmetric_ability_solver import asymmetric_ability_gradient_descent_solver, verify_equilibrium_conditions
-from agents.reinforce_agent import REINFORCEAgent
-from agents.ppo_agent import PPOAgent
+# from agents.reinforce_agent import REINFORCEAgent  # Removed REINFORCE - focus on Gradient and PPO
+from agents.two_players_ppo_agent import UltraOptimizedPPOAgent as PPOAgent
+from utils.logger import save_standardized_result, create_experiment_result
 
 def convert_numpy_types(obj):
     """Convert numpy types to native Python types for JSON serialization"""
@@ -159,25 +160,10 @@ def run_ppo(env):
     agents = []
     theoretical_efforts = env.get_theoretical_efforts()
     for i in range(env.num_players):
+        # UltraOptimizedPPOAgent has simplified interface
         agent = PPOAgent(
-            lr=ppo_config["learning_rate"],
             effort_range=env.effort_range,
-            theoretical_effort=theoretical_efforts[i],
-            hidden_dim=ppo_config["hidden_dim"],
-            num_layers=ppo_config["num_layers"],
-            activation=ppo_config["activation"],
-            clip_epsilon=ppo_config["clip_epsilon"],
-            value_coef=ppo_config["value_coef"],
-            entropy_coef=ppo_config["entropy_coef"],
-            max_grad_norm=ppo_config["max_grad_norm"],
-            batch_size=ppo_config["batch_size"],
-            update_epochs=ppo_config["update_epochs"],
-            gae_lambda=ppo_config["gae_lambda"],
-            weight_decay=ppo_config["weight_decay"],
-            dropout_rate=ppo_config["dropout_rate"],
-            lr_schedule=ppo_config["lr_schedule"],
-            separate_networks=ppo_config["separate_networks"],
-            reward_normalization=ppo_config["reward_normalization"]
+            theoretical_effort=theoretical_efforts[i]
         )
         agents.append(agent)
     
@@ -203,8 +189,8 @@ def run_ppo(env):
             agent.store_reward(rewards[i])
             
             # Update every batch_size episodes
-            if (episode + 1) % ppo_config["batch_size"] == 0:
-                agent.update_policy(gamma=ppo_config["gamma"], episode=episode, last_effort=actions[i])
+            if (episode + 1) % 64 == 0:  # Use fixed batch size for UltraOptimizedPPOAgent
+                agent.update_policy(episode=episode)
         
         # Logging
         if episode % 1000 == 0:
@@ -269,6 +255,34 @@ def analyze_convergence_quality(gaps):
         "max_gap": max_gap,
         "avg_gap": avg_gap
     }
+
+def save_algorithm_result(algorithm_name, result):
+    """Save algorithm result in standardized CSV format"""
+    # For asymmetric ability, use weighted average of efforts as final_effort
+    efforts = result["efforts"]
+    theoretical_efforts = result["theoretical_efforts"]
+    
+    weighted_effort = sum(efforts) / len(efforts)
+    theoretical_weighted = sum(theoretical_efforts) / len(theoretical_efforts)
+    
+    quality = result["convergence"]["quality"]
+    
+    # Convert training time or episodes info
+    if "config" in result and "episodes" in result["config"]:
+        episodes_info = f"{result['config']['episodes']}_episodes"
+    else:
+        episodes_info = "gradient_steps"
+    
+    standard_result = create_experiment_result(
+        algorithm=algorithm_name,
+        final_effort=weighted_effort,
+        theoretical_effort=theoretical_weighted,
+        convergence_quality=quality,
+        episodes=episodes_info,
+        k1=config.get("k", 0.0004),
+        information_revelation="none"
+    )
+    save_standardized_result(standard_result, "results/tables/asymmetric_ability.csv")
 
 def main():
     """Main experiment function"""
@@ -352,6 +366,10 @@ def main():
         print(f"  Player 1 (l1={config['l1']}): P(win) = {win_probs[0]:.3f}")
         print(f"  Player 2 (l2={config['l2']}): P(win) = {win_probs[1]:.3f}")
         print(f"  Higher ability player advantage: {win_probs[0] - win_probs[1]:.3f}")
+
+    # Save algorithm results
+    for result in results:
+        save_algorithm_result(result["algorithm"], result)
 
 if __name__ == "__main__":
     main() 

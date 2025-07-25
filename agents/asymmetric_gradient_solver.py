@@ -114,3 +114,164 @@ class AsymmetricGradientSolver:
             steps=self.max_iterations
         )
         return efforts, utilities, costs 
+
+def asymmetric_gradient_solver(k1, k2, q, w_h, w_l, effort_range, lr=0.01, max_steps=100000, tol=1e-6):
+    """
+    优化的不对称梯度下降求解器
+    
+    Args:
+        k1, k2: Cost parameters for players 1 and 2
+        q: Noise parameter
+        w_h, w_l: High and low rewards
+        effort_range: Tuple of (min_effort, max_effort)
+        lr: Learning rate
+        max_steps: Maximum iterations
+        tol: Convergence tolerance
+        
+    Returns:
+        e1_final, e2_final, converged, steps
+    """
+    
+    def utility_player1(e1, e2):
+        """Player 1's utility given efforts - 优化版本"""
+        # Win probability calculation for uniform noise U(-q, q)
+        diff = e1 - e2
+        if diff <= -2*q:
+            win_prob = 0.0
+        elif diff >= 2*q:
+            win_prob = 1.0
+        else:
+            win_prob = 0.5 + diff / (4*q)
+        
+        expected_reward = win_prob * w_h + (1 - win_prob) * w_l
+        cost = k1 * e1 * e1
+        return expected_reward - cost
+    
+    def utility_player2(e1, e2):
+        """Player 2's utility given efforts - 优化版本"""
+        # Win probability for player 2 is 1 - win_prob_player1
+        diff = e2 - e1  # Player 2's advantage
+        if diff <= -2*q:
+            win_prob = 0.0
+        elif diff >= 2*q:
+            win_prob = 1.0
+        else:
+            win_prob = 0.5 + diff / (4*q)
+        
+        expected_reward = win_prob * w_h + (1 - win_prob) * w_l
+        cost = k2 * e2 * e2
+        return expected_reward - cost
+    
+    def analytical_gradient1(e1, e2):
+        """Player 1的解析梯度 - 更精确"""
+        diff = e1 - e2
+        if abs(diff) >= 2*q:
+            # 在边界区域，梯度为负的成本导数
+            return -2 * k1 * e1
+        else:
+            # 在内部区域，包含概率梯度
+            prob_gradient = 1.0 / (4*q)  # d(win_prob)/d(e1)
+            reward_gradient = prob_gradient * (w_h - w_l)
+            cost_gradient = 2 * k1 * e1
+            return reward_gradient - cost_gradient
+    
+    def analytical_gradient2(e1, e2):
+        """Player 2的解析梯度 - 更精确"""
+        diff = e2 - e1
+        if abs(diff) >= 2*q:
+            # 在边界区域，梯度为负的成本导数
+            return -2 * k2 * e2
+        else:
+            # 在内部区域，包含概率梯度
+            prob_gradient = 1.0 / (4*q)  # d(win_prob)/d(e2)
+            reward_gradient = prob_gradient * (w_h - w_l)
+            cost_gradient = 2 * k2 * e2
+            return reward_gradient - cost_gradient
+    
+    # 使用理论值附近的智能初始化
+    min_effort, max_effort = effort_range
+    
+    # 粗略的理论估计作为初始点
+    w_diff = w_h - w_l
+    e1_theory_approx = w_diff * k2 / (4 * q * (k1 + k2) * k1)
+    e2_theory_approx = w_diff * k1 / (4 * q * (k1 + k2) * k2)
+    
+    # 将初始值限制在有效范围内
+    e1 = max(min_effort, min(max_effort, e1_theory_approx))
+    e2 = max(min_effort, min(max_effort, e2_theory_approx))
+    
+    print(f"🎯 智能初始化: e1={e1:.3f}, e2={e2:.3f} (基于理论估计)")
+    
+    # 自适应学习率
+    lr_initial = lr
+    lr_current = lr_initial
+    momentum1, momentum2 = 0.0, 0.0
+    momentum_decay = 0.9
+    
+    best_gap = float('inf')
+    patience = 0
+    max_patience = 5000
+    
+    for step in range(max_steps):
+        old_e1, old_e2 = e1, e2
+        
+        # 计算解析梯度
+        grad1 = analytical_gradient1(e1, e2)
+        grad2 = analytical_gradient2(e1, e2)
+        
+        # 添加动量
+        momentum1 = momentum_decay * momentum1 + (1 - momentum_decay) * grad1
+        momentum2 = momentum_decay * momentum2 + (1 - momentum_decay) * grad2
+        
+        # 更新参数
+        new_e1 = e1 + lr_current * momentum1
+        new_e2 = e2 + lr_current * momentum2
+        
+        # 限制在有效范围内
+        new_e1 = max(min_effort, min(max_effort, new_e1))
+        new_e2 = max(min_effort, min(max_effort, new_e2))
+        
+        e1, e2 = new_e1, new_e2
+        
+        # 检查收敛
+        change1 = abs(e1 - old_e1)
+        change2 = abs(e2 - old_e2)
+        max_change = max(change1, change2)
+        
+        # 计算与理论值的gap (用于监控)
+        gap1 = abs(e1 - e1_theory_approx)
+        gap2 = abs(e2 - e2_theory_approx)
+        current_gap = (gap1 + gap2) / 2
+        
+        if current_gap < best_gap:
+            best_gap = current_gap
+            patience = 0
+        else:
+            patience += 1
+        
+        # 自适应学习率调整
+        if step > 1000 and step % 500 == 0:
+            if patience > 200:
+                lr_current *= 0.95  # 降低学习率
+                patience = 0
+            elif max_change < tol * 10:
+                lr_current *= 1.05  # 稍微提高学习率
+                lr_current = min(lr_current, lr_initial * 2)
+        
+        # 收敛检查
+        if max_change < tol:
+            print(f"✅ 收敛于步骤 {step}: e1={e1:.6f}, e2={e2:.6f}")
+            return e1, e2, True, step + 1
+        
+        # 早停检查
+        if patience > max_patience:
+            print(f"⏹️ 早停于步骤 {step}: gap未改善超过{max_patience}步")
+            return e1, e2, False, step + 1
+        
+        # 打印进度
+        if step % 5000 == 0:
+            print(f"步骤 {step}: e1={e1:.6f}, e2={e2:.6f}, 变化=({change1:.8f}, {change2:.8f}), gap={current_gap:.6f}, lr={lr_current:.6f}")
+    
+    # 未收敛
+    print(f"⚠️ 未收敛: 达到最大步数 {max_steps}")
+    return e1, e2, False, max_steps 

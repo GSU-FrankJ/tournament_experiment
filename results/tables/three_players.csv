@@ -1,12 +1,37 @@
-k,q,w_h,w_l,EU,Cost_of_effort,effort,Model_training,Parameter,Effort_0_100,Effort_0_200,Convergence_Quality,Final_Gap
-0.0004,25.0,6.5,3.0,1.69,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",100,,Excellent,12.5
-0.0004,25.0,6.5,3.0,1.69,3.06,87.5,REINFORCE,"episodes=13001, three_players",65.76,,Fair,21.741
-0.0004,25.0,6.5,3.0,1.69,3.06,87.5,PPO,"episodes=13001, three_players",29.93,,Poor,57.568
-0.0004,25.0,6.5,3.0,2.81,1.36,58.33,Gradient,"lr=0.1, steps=100000, eps=1e-3",100,,Excellent,41.667
-0.0004,25.0,6.5,3.0,2.81,1.36,58.33,REINFORCE,"episodes=16001, three_players",88.59,,Poor,30.256
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",87.49,,Excellent,0.013
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,REINFORCE,"episodes=9001, three_players",98.94,,Fair,11.443
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,PPO,"episodes=10001, three_players",48.69,,Poor,38.806
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,Gradient,"lr=0.1, steps=100000, eps=1e-3",87.49,,Excellent,0.013
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,REINFORCE,"episodes=50000, three_players",73.36,,Poor,14.142
-0.0004,25.0,6.5,3.0,1.1,3.06,87.5,PPO,"episodes=14001, three_players",84.42,,Poor,3.079
+stage1_weight,stage2_weight,k1,k2,information_revelation,theoretical_stage1_effort,theoretical_stage2_effort,Model_training,final_stage1_effort,final_stage2_effort,final_weighted_effort,Convergence_Quality,episodes,Gap_from_theoretical
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.49,0.0,87.49,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.52,0.0,87.52,Excellent,1501_episodes,0.02
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.5,0.0,87.5,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.56,0.0,87.56,Excellent,1501_episodes,0.06
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.69,0.0,54.69,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.31,0.0,54.31,Excellent,1501_episodes,0.38
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.7,0.0,54.7,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.75,0.0,54.75,Excellent,1501_episodes,0.06
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.78,0.0,39.78,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.38,0.0,39.38,Excellent,1501_episodes,0.39
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.79,0.0,39.79,Excellent,100000_steps,0.02
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.82,0.0,39.82,Excellent,1501_episodes,0.05
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.49,0.0,87.49,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.5,0.0,87.5,Excellent,1501_episodes,0.0
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.5,0.0,87.5,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.5,0.0,87.5,Excellent,1501_episodes,0.0
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.69,0.0,54.69,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.63,0.0,54.63,Excellent,1501_episodes,0.06
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.7,0.0,54.7,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.67,0.0,54.67,Excellent,1501_episodes,0.02
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.78,0.0,39.78,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.76,0.0,39.76,Excellent,1501_episodes,0.01
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.79,0.0,39.79,Excellent,100000_steps,0.02
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.52,0.0,39.52,Excellent,1501_episodes,0.25
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.49,0.0,87.49,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.46,0.0,87.46,Excellent,1501_episodes,0.04
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Gradient,87.5,0.0,87.5,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,87.5,0.0,Enhanced_PPO,87.5,0.0,87.5,Excellent,1501_episodes,0.0
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.69,0.0,54.69,Excellent,100000_steps,0.0
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.67,0.0,54.67,Excellent,1501_episodes,0.02
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Gradient,54.7,0.0,54.7,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,54.69,0.0,Enhanced_PPO,54.72,0.0,54.72,Excellent,1501_episodes,0.03
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.78,0.0,39.78,Excellent,100000_steps,0.01
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.75,0.0,39.75,Excellent,1501_episodes,0.02
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Gradient,39.79,0.0,39.79,Excellent,100000_steps,0.02
+1.0,0.0,0.0004,0.0004,none,39.77,0.0,Enhanced_PPO,39.26,0.0,39.26,Good,1501_episodes,0.51

@@ -1,5 +1,27 @@
 import numpy as np
 
+def calculate_theoretical_effort(q):
+    """
+    动态计算三人游戏理论最优努力值
+    根据实验优化标准规则要求
+    
+    For three identical players tournament:
+    effort* = (w_h - w_l) / (4 * k * q)
+    
+    Args:
+        q: 噪声参数
+    Returns:
+        theoretical_effort: 理论最优努力值
+    """
+    # 固定参数 (基于原有配置)
+    k = 0.0004
+    w_h = 6.5
+    w_l = 3.0
+    
+    # 计算理论值
+    effort_theory = (w_h - w_l) / (4 * k * q)
+    return effort_theory
+
 def calculate_three_player_equilibrium(k, q, w_h, w_l):
     """
     Calculate theoretical symmetric equilibrium for three-player tournament.
@@ -68,33 +90,43 @@ def verify_equilibrium_numerically(e, k, q, w_h, w_l):
     
     return marginal_utility, prob_current
 
-# Configuration for three identical players based on theoretical formulas
-# Formula from user:
-# effort = (w_h - w_l) / (4 * k * q)
-# cost = k * effort^2
-# EU = (w_h + w_l + w_l) / 3 - k * effort^2
+def get_config(q_value=25.0, effort_range=(0, 100)):
+    """
+    根据实验优化标准规则要求，动态生成配置
+    
+    Args:
+        q_value: 噪声参数 (25.0, 40.0, 55.0)
+        effort_range: 努力值范围 ((0,100), (0,200))
+    Returns:
+        config: 配置字典
+    """
+    # 基础参数
+    config = {
+        "k": 0.0004,
+        "q": q_value,
+        "w_h": 6.5,
+        "w_l": 3.0,
+        "num_players": 3,
+        "effort_range": list(effort_range),
+        "seed": 42
+    }
+    
+    # 动态计算理论值
+    effort_theory = calculate_theoretical_effort(q_value)
+    cost_theory = config["k"] * effort_theory ** 2
+    eu_theory = ((config["w_h"] + config["w_l"] + config["w_l"]) / 3) - cost_theory
+    
+    # 添加计算值到配置
+    config["effort"] = round(effort_theory, 2)
+    config["cost"] = round(cost_theory, 2)
+    config["eu"] = round(eu_theory, 2)
+    
+    return config
 
-config = {
-    "k": 0.0004,
-    "q": 25.0,
-    "w_h": 6.5,
-    "w_l": 3.0,
-    "num_players": 3,
-    "effort_range": [0, 100],
-    "seed": 42
-}
+# 默认配置 (保持向后兼容)
+config = get_config()
 
-# Calculate theoretical values using the correct formulas for 3 players
-effort_theory = (config["w_h"] - config["w_l"]) / (4 * config["k"] * config["q"])
-cost_theory = config["k"] * effort_theory ** 2
-eu_theory = ((config["w_h"] + config["w_l"] + config["w_l"]) / 3) - cost_theory
-
-# Add calculated values to config
-config["effort"] = round(effort_theory, 2)
-config["cost"] = round(cost_theory, 2)
-config["eu"] = round(eu_theory, 2)
-
-print(f"Three-player theoretical values (corrected formulas):")
+print(f"Three-player theoretical values (q={config['q']}):")
 print(f"  Effort: {config['effort']}")
 print(f"  Cost: {config['cost']}")
 print(f"  Expected Utility: {config['eu']}")

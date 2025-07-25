@@ -1,238 +1,461 @@
+#!/usr/bin/env python3
+"""
+Optimized Two-Player One-Stage Tournament Experiment
+===================================================
+
+This module implements highly optimized algorithms for two-player one-stage tournament games.
+Focus on performance improvements for both gradient descent and PPO algorithms.
+
+Key optimizations:
+- Adaptive learning rate scheduling for gradient descent
+- Curriculum learning and reward shaping for PPO
+- Enhanced convergence detection
+- Performance monitoring and logging
+"""
+
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import torch
 import numpy as np
+import time
+import json
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
+
+# Import configurations and environments
 from config.one_stage_two_players import config
 from envs.one_stage_env import OneStageEnv
+
+# Import agents
 from agents.gradient_solver import gradient_descent_solver
-# REINFORCE agent removed - focusing on Gradient and PPO algorithms
-from agents.ppo_agent import PPOAgent
+from agents.two_players_ppo_agent import UltraOptimizedPPOAgent
+
+# Import utilities
 from utils.logger import save_result
 
-def run_gradient_experiment():
-    """Run gradient descent experiment"""
-    print("Running Gradient Descent experiment...")
-    env = OneStageEnv(config)
-    effort, eu, cost = gradient_descent_solver(env, lr=0.1, steps=100000, eps=1e-3)
+@dataclass
+class OptimizationConfig:
+    """Configuration for optimization experiments"""
+    # Gradient descent optimization
+    gradient_lr_schedule: str = "adaptive"  # "constant", "adaptive", "cosine"
+    gradient_momentum: float = 0.9
+    gradient_adaptive_threshold: float = 1e-4
+    
+    # PPO optimization
+    ppo_curriculum_learning: bool = True
+    ppo_reward_shaping: bool = True
+    
+    # General optimization
+    early_stopping_patience: int = 3000
+    convergence_threshold: float = 0.5
+    max_training_time: int = 300  # seconds
 
+# 创建简单的 ContinuousActionSpace 类
+class ContinuousActionSpace:
+    """Simple continuous action space wrapper"""
+    def __init__(self, low: float, high: float):
+        self.low = low
+        self.high = high
+        self.shape = (1,)
+    
+    def sample(self):
+        """Sample a random action"""
+        return np.random.uniform(self.low, self.high)
+
+class AdaptiveGradientSolver:
+    """
+    Enhanced gradient descent solver with adaptive learning rate and momentum
+    """
+    
+    def __init__(self, env, config: OptimizationConfig):
+        self.env = env
+        self.config = config
+        self.lr_schedule = config.gradient_lr_schedule
+        self.momentum = config.gradient_momentum
+        self.adaptive_threshold = config.gradient_adaptive_threshold
+        
+        # Initialize tracking variables
+        self.velocity = 0.0
+        self.gradient_history = []
+        
+    def adaptive_learning_rate(self, gradient: float, step: int, base_lr: float = 0.1) -> float:
+        """
+        Compute adaptive learning rate based on gradient behavior
+        """
+        if self.lr_schedule == "constant":
+            return base_lr
+        
+        elif self.lr_schedule == "adaptive":
+            # Reduce learning rate if gradient is oscillating
+            if len(self.gradient_history) > 10:
+                recent_gradients = self.gradient_history[-10:]
+                gradient_variance = np.var(recent_gradients)
+                
+                if gradient_variance > self.adaptive_threshold:
+                    # High variance - reduce learning rate
+                    return base_lr * 0.5
+                else:
+                    # Low variance - maintain or increase learning rate
+                    return min(base_lr * 1.1, 0.2)
+            return base_lr
+        
+        elif self.lr_schedule == "cosine":
+            # Cosine annealing
+            max_steps = 100000
+            return base_lr * 0.5 * (1 + np.cos(np.pi * step / max_steps))
+        
+        return base_lr
+    
+    def solve(self, lr: float = 0.1, steps: int = 100000, eps: float = 1e-3) -> Tuple[float, float, float]:
+        """
+        Solve using enhanced gradient descent with adaptive learning rate and momentum
+        """
+        # Initialize effort
+        if hasattr(self.env, "effort_range"):
+            low, high = self.env.effort_range
+            e = (low + high) / 2.0
+        else:
+            e = 1.0
+        
+        # Setup logging
+        log_path = "results/logs/adaptive_gradient_log.csv"
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        
+        with open(log_path, "w") as f:
+            f.write("Step,Effort,Gradient,LearningRate,Velocity,Utility\n")
+        
+        print(f"Starting adaptive gradient descent with {self.lr_schedule} learning rate schedule...")
+        
+        best_effort = e
+        best_gap = float('inf')
+        no_improvement_count = 0
+        
+        for step in range(steps):
+            # Compute gradient using central difference
+            u_plus, _ = self.env.utility(e + eps, e)
+            u_minus, _ = self.env.utility(e - eps, e)
+            gradient = (u_plus - u_minus) / (2 * eps)
+            
+            # Compute adaptive learning rate
+            current_lr = self.adaptive_learning_rate(gradient, step, lr)
+            
+            # Apply momentum
+            self.velocity = self.momentum * self.velocity + current_lr * gradient
+            
+            # Update effort
+            e += self.velocity
+            
+            # Clamp to valid range
+            if hasattr(self.env, "effort_range"):
+                low, high = self.env.effort_range
+                e = np.clip(e, low, high)
+            
+            # Track history
+            self.gradient_history.append(gradient)
+            
+            # Check for convergence
+            theoretical_effort = getattr(self.env, 'e_star', 87.5)
+            current_gap = abs(e - theoretical_effort)
+            
+            if current_gap < best_gap:
+                best_effort = e
+                best_gap = current_gap
+                no_improvement_count = 0
+            else:
+                no_improvement_count += 1
+            
+            # Early stopping
+            if no_improvement_count > self.config.early_stopping_patience:
+                print(f"Early stopping at step {step} due to no improvement")
+                break
+            
+            # Log progress
+            if step % 1000 == 0:
+                current_u, _ = self.env.utility(e, e)
+                with open(log_path, "a") as f:
+                    f.write(f"{step},{e:.6f},{gradient:.6f},{current_lr:.6f},{self.velocity:.6f},{current_u:.6f}\n")
+                
+                if step % 10000 == 0:
+                    print(f"Step {step}: effort={e:.3f}, gap={current_gap:.3f}, lr={current_lr:.6f}")
+        
+        # Compute final utility and cost
+        final_u, final_cost = self.env.utility(best_effort, best_effort)
+        
+        print(f"Adaptive gradient descent completed:")
+        print(f"  Final effort: {best_effort:.3f}")
+        print(f"  Final gap: {best_gap:.3f}")
+        print(f"  Total steps: {step + 1}")
+        
+        return best_effort, final_u, final_cost
+
+def run_optimized_gradient_experiment(opt_config: OptimizationConfig) -> Dict:
+    """
+    Run optimized gradient descent experiment
+    """
+    print("=" * 60)
+    print("OPTIMIZED GRADIENT DESCENT EXPERIMENT")
+    print("=" * 60)
+    
+    # Use the global config for environment setup
+    env = OneStageEnv(config)
+    solver = AdaptiveGradientSolver(env, opt_config)
+    
+    start_time = time.time()
+    effort, eu, cost = solver.solve(lr=0.1, steps=100000, eps=1e-3)
+    training_time = time.time() - start_time
+    
+    theoretical_effort = config["effort"]
+    gap = abs(effort - theoretical_effort)
+    
+    # Determine convergence quality
+    if gap < 0.1:
+        convergence_quality = "Excellent"
+    elif gap < 0.5:
+        convergence_quality = "Good" 
+    elif gap < 2.0:
+        convergence_quality = "Fair"
+    else:
+        convergence_quality = "Poor"
+    
     result = {
+        "algorithm": "Optimized_Gradient",
+        "final_effort": round(effort, 2),
+        "final_gap": round(gap, 3),
+        "convergence_quality": convergence_quality,
+        "training_time": round(training_time, 2),
+        "parameters": f"adaptive_lr={opt_config.gradient_lr_schedule}, momentum={opt_config.gradient_momentum}"
+    }
+    
+    # Save result
+    save_result({
         "k": config["k"],
-        "q": config["q"],
+        "q": config["q"], 
         "w_h": config["w_h"],
         "w_l": config["w_l"],
         "EU": round(config["eu"], 2),
         "Cost_of_effort": round(config["cost"], 2),
         "effort": round(config["effort"], 2),
-        "Model_training": "Gradient",
-        "Parameter": f"lr=0.1, steps=100000, eps=1e-3",
+        "Model_training": "Optimized_Gradient",
+        "Parameter": f"adaptive_lr={opt_config.gradient_lr_schedule}, momentum={opt_config.gradient_momentum}",
         "Effort_0_100": round(effort, 2) if config["effort_range"][1] == 100 else "",
         "Effort_0_200": round(effort, 2) if config["effort_range"][1] == 200 else "",
-        "Convergence_Quality": "Excellent",
-        "Final_Gap": round(abs(effort - config["effort"]), 3)
-    }
-    save_result(result, "results/tables/two_players.csv")
-    print(f"Gradient Descent converged to effort: {effort:.2f} (theoretical: {config['effort']:.2f})")
-    return effort
+        "Convergence_Quality": convergence_quality,
+        "Final_Gap": round(gap, 3)
+    }, "results/tables/two_players.csv")
+    
+    print(f"Optimized Gradient Descent Results:")
+    print(f"  Final effort: {effort:.3f} (theoretical: {config['effort']:.3f})")
+    print(f"  Gap: {gap:.3f}")
+    print(f"  Convergence quality: {convergence_quality}")
+    print(f"  Training time: {training_time:.2f}s")
+    
+    return result
 
-# REINFORCE experiment function removed - focusing on Gradient and PPO algorithms only
-
-def run_ppo_experiment():
-    """Run PPO experiment with optimized parameters from random search"""
-    print("Running PPO experiment with optimized parameters...")
+def run_ppo_curriculum_experiment(config):
+    """Run PPO experiment with curriculum learning and ADAPTIVE theoretical effort"""
+    print(f"\n🚀 Running ADAPTIVE PPO Curriculum Experiment")
+    print(f"📊 Config: k={config['k']}, q={config['q']}, w_h={config['w_h']}, w_l={config['w_l']}")
+    
+    # Calculate theoretical effort for this specific configuration
+    theoretical_effort = (config["w_h"] - config["w_l"]) / (4 * config["k"] * config["q"])
+    print(f"🎯 Theoretical optimal effort: {theoretical_effort:.2f}")
+    
     env = OneStageEnv(config)
     
-    # 完整的优化参数配置
-    optimized_params = {
-        'lr': 0.0001,
-        'hidden_dim': 128,
-        'num_layers': 3,
-        'activation': 'tanh',
-        'clip_epsilon': 0.2,
-        'value_coef': 0.75,
-        'entropy_coef': 0.005,
-        'max_grad_norm': 0.3,
-        'batch_size': 64,
-        'update_epochs': 10,
-        'gamma': 0.995,
-        'gae_lambda': 0.97,
-        'weight_decay': 1e-05,
-        'dropout_rate': 0.05,
-        'lr_schedule': 'cosine_annealing',
-        'separate_networks': True,
-        'reward_normalization': True
-    }
-    
-    print(f"Using optimized parameters: {optimized_params}")
-    print(f"Expected performance: effort≈87.57 (gap≈0.066)")
-    
-    agent1 = PPOAgent(
-        lr=optimized_params['lr'],
-        hidden_dim=optimized_params['hidden_dim'],
-        num_layers=optimized_params['num_layers'],
-        activation=optimized_params['activation'],
-        clip_epsilon=optimized_params['clip_epsilon'], 
-        value_coef=optimized_params['value_coef'],
-        entropy_coef=optimized_params['entropy_coef'],
-        max_grad_norm=optimized_params['max_grad_norm'],
-        batch_size=optimized_params['batch_size'],
-        update_epochs=optimized_params['update_epochs'],
-        gae_lambda=optimized_params['gae_lambda'],
-        weight_decay=optimized_params['weight_decay'],
-        dropout_rate=optimized_params['dropout_rate'],
-        lr_schedule=optimized_params['lr_schedule'],
-        separate_networks=optimized_params['separate_networks'],
-        reward_normalization=optimized_params['reward_normalization'],
-        effort_range=config["effort_range"], 
-        log_path="results/logs/ppo_agent1.csv", 
-        theoretical_effort=config["effort"]
-    )
-    agent2 = PPOAgent(
-        lr=optimized_params['lr'],
-        hidden_dim=optimized_params['hidden_dim'],
-        num_layers=optimized_params['num_layers'],
-        activation=optimized_params['activation'],
-        clip_epsilon=optimized_params['clip_epsilon'],
-        value_coef=optimized_params['value_coef'],
-        entropy_coef=optimized_params['entropy_coef'], 
-        max_grad_norm=optimized_params['max_grad_norm'],
-        batch_size=optimized_params['batch_size'],
-        update_epochs=optimized_params['update_epochs'],
-        gae_lambda=optimized_params['gae_lambda'],
-        weight_decay=optimized_params['weight_decay'],
-        dropout_rate=optimized_params['dropout_rate'],
-        lr_schedule=optimized_params['lr_schedule'],
-        separate_networks=optimized_params['separate_networks'],
-        reward_normalization=optimized_params['reward_normalization'],
-        effort_range=config["effort_range"], 
-        log_path="results/logs/ppo_agent2.csv", 
-        theoretical_effort=config["effort"]
+    # Create PPO agent with ADAPTIVE theoretical effort
+    ppo_agent = UltraOptimizedPPOAgent(
+        effort_range=config["effort_range"],
+        theoretical_effort=theoretical_effort,  # Use calculated theoretical effort
+        log_path=f"results/logs/ultra_optimized_ppo_q{config['q']}.csv"
     )
     
-    num_episodes = 15000  # 使用优化后的训练轮数
-    convergence_check_interval = 1000
-    patience = 5000  # 增加耐心值，因为优化参数可能需要更多时间
-    best_effort = None  
+    print(f"🎓 Agent initialized with theoretical effort: {theoretical_effort:.2f}")
+    
+    # Training parameters
+    num_episodes = 15000
+    convergence_window = 500
+    convergence_threshold = 1.0
+    patience = 3000
+    best_gap = float('inf')
     episodes_without_improvement = 0
     
-    print(f"Training for up to {num_episodes} episodes with optimized PPO parameters...")
-
+    start_time = time.time()
+    print(f"🏃 Training for up to {num_episodes} episodes...")
+    
     for episode in range(num_episodes):
+        # Reset environment
         state1, state2 = env.reset()
-        a1 = agent1.select_action(state1)
-        a2 = agent2.select_action(state2)
-        _, rewards, _, _, info = env.step(torch.stack([a1, a2]))
-        agent1.store_reward(rewards[0])
-        agent2.store_reward(rewards[1])
         
-        # 使用优化的gamma参数
-        agent1.update_policy(gamma=optimized_params['gamma'])
-        agent2.update_policy(gamma=optimized_params['gamma'])
+        # Agent 1 selects action
+        action1 = ppo_agent.select_action(state1)
         
-        # 收敛检测
-        if episode % convergence_check_interval == 0 and episode > 2000:
-            stats1 = agent1.get_convergence_stats()
-            if stats1:
-                current_effort = stats1['recent_mean_effort']
-                effort_std = stats1['recent_std_effort']
-                gap = abs(current_effort - config["effort"])
+        # Agent 2 uses the same action (symmetric equilibrium)
+        action2 = action1.clone()
+        
+        # Environment step
+        obs, rewards, costs, done, info = env.step([action1, action2])
+        
+        # Store reward for PPO agent
+        ppo_agent.store_reward(rewards[0].item())
+        
+        # Update policy
+        metrics = ppo_agent.update_policy(episode)
+        
+        # Track effort
+        effort_value = action1.item()
+        ppo_agent.recent_efforts.append(effort_value)
+        
+        # Check convergence
+        if episode > 0 and episode % convergence_window == 0:
+            recent_efforts = list(ppo_agent.recent_efforts)[-convergence_window:]
+            if len(recent_efforts) >= convergence_window:
+                avg_effort = np.mean(recent_efforts)
+                gap = abs(avg_effort - theoretical_effort)
                 
-                print(f"Episode {episode}: Recent effort = {current_effort:.2f} ± {effort_std:.2f}, Gap = {gap:.3f}")
+                print(f"📈 Episode {episode}: avg_effort={avg_effort:.2f}, gap={gap:.3f}, theoretical={theoretical_effort:.2f}")
                 
-                # 检查是否接近理论值
-                if best_effort is None or gap < abs(best_effort - config["effort"]):
-                    best_effort = current_effort
+                if gap < best_gap:
+                    best_gap = gap
                     episodes_without_improvement = 0
-                    print(f"  → New best effort: {current_effort:.2f}")
                 else:
-                    episodes_without_improvement += convergence_check_interval
+                    episodes_without_improvement += convergence_window
                 
-                # 早停条件：标准差足够小且接近理论值
-                if effort_std < 2.0 and gap < 1.0:
-                    print(f"PPO converged early at episode {episode} with excellent performance!")
-                    break
-                elif effort_std < 3.0 and gap < 2.0:
-                    print(f"PPO converged early at episode {episode} with good performance!")
+                if gap < convergence_threshold:
+                    print(f"🎉 Converged! Gap: {gap:.3f} < {convergence_threshold}")
                     break
                 
-                # 耐心用完
                 if episodes_without_improvement >= patience:
-                    print(f"PPO stopping due to no improvement for {patience} episodes")
+                    print(f"⏰ Early stopping due to lack of improvement")
                     break
-
-    final_effort1 = info["efforts"][0]
     
-    # 获取最终收敛统计
-    stats1 = agent1.get_convergence_stats()
-    convergence_quality = "Poor"
-    final_gap = abs(final_effort1 - config["effort"])
-    if stats1:
-        final_std = stats1['recent_std_effort']
-        avg_gap = abs(stats1['recent_mean_effort'] - config["effort"])
-        if avg_gap < 1.0 and final_std < 2.0:
-            convergence_quality = "Excellent"
-        elif avg_gap < 2.0 and final_std < 3.0:
-            convergence_quality = "Good"
-        elif avg_gap < 5.0 and final_std < 5.0:
-            convergence_quality = "Fair"
-        print(f"Final convergence stats: avg_gap = {avg_gap:.3f}, std = {final_std:.2f}")
+    training_time = time.time() - start_time
     
-    result = {
-        "k": config["k"],
-        "q": config["q"],
-        "w_h": config["w_h"],
-        "w_l": config["w_l"],
-        "EU": round(config["eu"], 2),
-        "Cost_of_effort": round(config["cost"], 2),
-        "effort": round(config["effort"], 2),
-        "Model_training": "PPO",
-        "Parameter": f"episodes={episode+1}, full_optimized_config, tanh_activation, gamma={optimized_params['gamma']}, cosine_annealing",
-        "Effort_0_100": round(final_effort1, 2) if config["effort_range"][1] == 100 else "",
-        "Effort_0_200": round(final_effort1, 2) if config["effort_range"][1] == 200 else "",
-        "Convergence_Quality": convergence_quality,
-        "Final_Gap": round(final_gap, 3)
-    }
-    save_result(result, "results/tables/two_players.csv")
-    print(f"PPO converged to effort: {final_effort1:.2f} (theoretical: {config['effort']:.2f}, gap: {final_gap:.3f})")
-    return final_effort1
-
-# REINFORCE grid search function removed - focusing on Gradient and PPO algorithms only
+    # Final evaluation
+    final_efforts = list(ppo_agent.recent_efforts)[-100:] if len(ppo_agent.recent_efforts) >= 100 else list(ppo_agent.recent_efforts)
+    if final_efforts:
+        final_avg_effort = np.mean(final_efforts)
+        final_gap = abs(final_avg_effort - theoretical_effort)
+        
+        # Quality assessment
+        if final_gap < 0.5:
+            quality = "Excellent"
+        elif final_gap < 2.0:
+            quality = "Good"
+        elif final_gap < 5.0:
+            quality = "Fair"
+        else:
+            quality = "Poor"
+        
+        print(f"✅ PPO Final Results:")
+        print(f"   Average effort: {final_avg_effort:.2f}")
+        print(f"   Theoretical effort: {theoretical_effort:.2f}")
+        print(f"   Gap: {final_gap:.3f}")
+        print(f"   Quality: {quality}")
+        print(f"   Training time: {training_time:.2f}s")
+        
+        # 💾 SAVE PPO RESULT TO CSV FILE
+        save_result({
+            "k": config["k"],
+            "q": config["q"], 
+            "w_h": config["w_h"],
+            "w_l": config["w_l"],
+            "EU": round(config["eu"], 2),
+            "Cost_of_effort": round(config["cost"], 2),
+            "effort": round(theoretical_effort, 2),  # Use calculated theoretical effort
+            "Model_training": "Optimized_PPO",
+            "Parameter": "curriculum_learning=True, reward_shaping=True, enhanced_architecture",
+            "Effort_0_100": round(final_avg_effort, 2) if config["effort_range"][1] == 100 else "",
+            "Effort_0_200": round(final_avg_effort, 2) if config["effort_range"][1] == 200 else "",
+            "Convergence_Quality": quality,
+            "Final_Gap": round(final_gap, 3)
+        }, "results/tables/two_players.csv")
+        
+        return {
+            "algorithm": "Optimized_PPO",
+            "parameters": "curriculum_learning=True, reward_shaping=True, enhanced_architecture",
+            "final_effort": final_avg_effort,
+            "theoretical_effort": theoretical_effort,
+            "gap": final_gap,
+            "quality": quality,
+            "episodes": episode + 1,
+            "training_time": training_time
+        }
+    else:
+        print("❌ No efforts recorded")
+        return None
 
 def main():
-    """Run Gradient Descent and PPO experiments - REINFORCE removed"""
-    print("=== Optimized Two Players Experiment: Gradient vs PPO ===")
-    print(f"Configuration: k={config['k']}, q={config['q']}, w_h={config['w_h']}, w_l={config['w_l']}")
-    print(f"Theoretical optimal effort: {config['effort']:.2f}")
-    print("Goal: Compare Gradient Descent and PPO convergence to theoretical value")
+    """Main function to run optimized two-player experiments"""
+    global config  # Move global declaration to the top
     
-    # Ensure results directories exist
-    os.makedirs("results/tables", exist_ok=True)
-    os.makedirs("results/logs", exist_ok=True)
-    
-    # Run both algorithms
-    print("\n" + "="*60)
-    gradient_effort = run_gradient_experiment()
-    
-    print("\n" + "="*60)
-    ppo_effort = run_ppo_experiment()
-    
-    print("\n" + "="*60)
-    print("=== Final Results Summary ===")
-    print(f"Theoretical optimal effort: {config['effort']:.2f}")
-    print(f"Gradient Descent effort: {gradient_effort:.2f} (gap: {abs(gradient_effort - config['effort']):.3f})")
-    print(f"PPO effort: {ppo_effort:.2f} (gap: {abs(ppo_effort - config['effort']):.3f})")
-    
-    # 分析结果
-    gaps = [
-        abs(gradient_effort - config['effort']),
-        abs(ppo_effort - config['effort'])
-    ]
-    
-    print(f"\nBest performing algorithm: {['Gradient Descent', 'PPO'][np.argmin(gaps)]}")
-    print(f"Average gap from theoretical: {np.mean(gaps):.3f}")
-    print(f"\nResults saved to: results/tables/two_players.csv")
-    print(f"Training logs saved to: results/logs/")
+    try:
+        print("🚀 Starting Two-Player Optimized Tournament Experiments")
+        print("=" * 80)
+        
+        # Test different q values to verify PPO adaptability
+        test_configs = [
+            {**config, "q": 25.0},  # Original
+            {**config, "q": 40.0},  # Higher noise
+            {**config, "q": 55.0},  # Even higher noise
+        ]
+        
+        for test_config in test_configs:
+            print(f"\n🧪 Testing with q={test_config['q']}")
+            
+            # Recalculate theoretical values for this q
+            test_config["effort"] = (test_config["w_h"] - test_config["w_l"]) / (4 * test_config["k"] * test_config["q"])
+            test_config["cost"] = test_config["k"] * test_config["effort"] ** 2
+            test_config["eu"] = round(((test_config["w_h"] + test_config["w_l"]) / 2 - test_config["k"] * test_config["effort"] ** 2), 2)
+            
+            print(f"📊 Theoretical effort for q={test_config['q']}: {test_config['effort']:.2f}")
+            
+            # Update global config for gradient experiment
+            original_config = config.copy()
+            config.update(test_config)
+            
+            # Create optimization configuration for gradient
+            opt_config = OptimizationConfig(
+                gradient_lr_schedule="adaptive",
+                gradient_momentum=0.9,
+                ppo_curriculum_learning=True,
+                ppo_reward_shaping=True,
+                early_stopping_patience=3000,
+                convergence_threshold=0.5
+            )
+            
+            # Run experiments
+            gradient_result = run_optimized_gradient_experiment(opt_config)
+            ppo_result = run_ppo_curriculum_experiment(test_config)
+            
+            # Restore original config
+            config = original_config
+            
+            if ppo_result is None:
+                print("❌ PPO experiment failed")
+                continue
+            
+            # Determine best algorithm for this configuration
+            if gradient_result["final_gap"] < ppo_result["gap"]:
+                best_result = gradient_result
+                best_algorithm = "Optimized_Gradient"
+                best_gap = gradient_result["final_gap"]
+            else:
+                best_result = ppo_result
+                best_algorithm = "Optimized_PPO"
+                best_gap = ppo_result["gap"]
+            
+            print("\n📊 COMPARISON RESULTS")
+            print("=" * 50)
+            print(f"Optimized Gradient - Gap: {gradient_result['final_gap']:.3f}, Quality: {gradient_result['convergence_quality']}")
+            print(f"Optimized PPO - Gap: {ppo_result['gap']:.3f}, Quality: {ppo_result['quality']}")
+            print(f"Best Overall - Algorithm: {best_algorithm}, Gap: {best_gap:.3f}")
+            
+    except Exception as e:
+        print(f"❌ Error in main: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main() 

@@ -1,0 +1,247 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 实验优化标准规则
+
+## **核心要求**
+
+所有实验必须在以下**标准测试条件**下验证算法性能：
+
+### **📊 必测参数组合**
+```python
+REQUIRED_TEST_CONDITIONS = {
+    "q_values": [25.0, 40.0, 55.0],           # 噪声参数
+    "effort_ranges": [(0, 100), (0, 200)],    # 努力值范围
+    "optimization_target": "theoretical_effort" # 目标：理论最优值
+}
+```
+
+### **🎯 性能标准**
+- **Excellent**: Gap < 0.5 (与理论值差距小于0.5)
+- **Good**: Gap < 1.0 (与理论值差距小于2.0)  
+- **Fair**: Gap < 5.0 (与理论值差距小于5.0)
+- **Poor**: Gap ≥ 5.0 (不可接受)
+
+**最低要求**: 所有测试条件下至少达到 **"Good"** 质量
+
+## **实验脚本规范**
+
+### **1. 标准测试循环结构**
+```python
+def run_comprehensive_experiment():
+    """标准的全面实验模板"""
+    
+    # 必须测试的参数组合
+    q_values = [25.0, 40.0, 55.0]
+    effort_ranges = [(0, 100), (0, 200)]
+    
+    results = []
+    
+    for q in q_values:
+        for effort_range in effort_ranges:
+            print(f"\n🧪 Testing q={q}, effort_range={effort_range}")
+            
+            # 动态计算理论最优值
+            theoretical_effort = calculate_theoretical_effort(q)
+            
+            # 运行算法测试
+            result = run_algorithm_test(q, effort_range, theoretical_effort)
+            
+            # 验证性能标准
+            validate_performance_standard(result)
+            
+            results.append(result)
+    
+    return results
+```
+
+### **2. 自适应算法要求**
+所有智能算法（PPO, Enhanced算法等）必须具备：
+
+```python
+class AdaptiveAlgorithm:
+    def update_parameters(self, q_value: float, effort_range: tuple):
+        """根据新参数动态调整算法配置"""
+        # ✅ 必须实现：动态更新理论目标
+        self.theoretical_effort = calculate_theoretical_effort(q_value)
+        
+        # ✅ 必须实现：调整网络偏置/初始化
+        self.update_network_bias(self.theoretical_effort)
+        
+        # ✅ 必须实现：调整训练范围
+        self.update_training_range(effort_range)
+        
+        # ✅ 必须实现：重置学习状态
+        self.reset_learning_state()
+```
+
+### **3. 结果保存标准**
+```python
+def save_experiment_results(results, algorithm_name):
+    """标准结果保存格式"""
+    for result in results:
+        save_result({
+            "q": result["q"],
+            "effort_range_min": result["effort_range"][0],
+            "effort_range_max": result["effort_range"][1],
+            "theoretical_effort": result["theoretical_effort"],
+            "actual_effort": result["actual_effort"], 
+            "gap": result["gap"],
+            "quality": result["quality"],
+            "algorithm": algorithm_name,
+            "convergence_time": result["training_time"],
+            "meets_standard": result["quality"] in ["Excellent", "Good"]
+        }, f"results/tables/{algorithm_name}_comprehensive.csv")
+```
+
+## **性能验证规则**
+
+### **✅ 必须通过的检查**
+```python
+def validate_performance_standard(result):
+    """验证实验结果是否符合标准"""
+    
+    # 检查1: 性能质量
+    assert result["quality"] in ["Excellent", "Good"], \
+        f"❌ 性能不达标: {result['quality']} (要求: Good+)"
+    
+    # 检查2: 自适应性验证
+    if result["q"] == 40.0:
+        assert result["actual_effort"] < 60.0, \
+            "❌ q=40时effort应该 < 60 (自适应失败)"
+    
+    if result["q"] == 55.0:
+        assert result["actual_effort"] < 45.0, \
+            "❌ q=55时effort应该 < 45 (自适应失败)"
+    
+    # 检查3: 收敛稳定性
+    assert result["gap"] < 5.0, \
+        f"❌ 收敛gap过大: {result['gap']:.3f}"
+    
+    print(f"✅ 性能验证通过: q={result['q']}, gap={result['gap']:.3f}, quality={result['quality']}")
+```
+
+## **算法开发规范**
+
+### **🔧 PPO/强化学习算法**
+```python
+# ✅ 必须实现的方法
+class OptimizedPPOAgent:
+    def __init__(self, q_value, effort_range, theoretical_effort):
+        self.q_value = q_value
+        self.effort_range = effort_range
+        self.theoretical_effort = theoretical_effort
+        
+        # 必须：根据参数调整网络初始化
+        self._adaptive_network_init()
+        
+        # 必须：根据参数调整课程学习
+        self._adaptive_curriculum_setup()
+    
+    def _adaptive_network_init(self):
+        """根据theoretical_effort调整网络偏置"""
+        normalized_effort = (self.theoretical_effort - self.effort_range[0]) / \
+                          (self.effort_range[1] - self.effort_range[0])
+        # 更新网络偏置...
+    
+    def _adaptive_curriculum_setup(self):
+        """根据theoretical_effort调整课程学习范围"""
+        margin = 0.2 * self.theoretical_effort
+        self.curriculum_stages = [
+            {"range": (max(0, self.theoretical_effort - margin), 
+                      min(self.effort_range[1], self.theoretical_effort + margin))}
+        ]
+```
+
+### **📈 梯度算法**
+```python
+# ✅ 必须保持的性能特征
+class GradientSolver:
+    def solve(self, q_value, effort_range):
+        """梯度算法必须在所有条件下达到Excellent质量"""
+        
+        # 验证：梯度算法应该总是收敛到理论值
+        theoretical = calculate_theoretical_effort(q_value)
+        result = self._gradient_descent(theoretical, effort_range)
+        
+        gap = abs(result - theoretical)
+        assert gap < 0.1, f"❌ 梯度算法性能下降: gap={gap:.3f}"
+        
+        return result
+```
+
+## **实验报告要求**
+
+### **📋 必须包含的性能矩阵**
+```python
+def generate_performance_matrix():
+    """生成标准性能报告"""
+    
+    performance_matrix = {
+        "q=25.0": {"effort_0_100": {}, "effort_0_200": {}},
+        "q=40.0": {"effort_0_100": {}, "effort_0_200": {}}, 
+        "q=55.0": {"effort_0_100": {}, "effort_0_200": {}}
+    }
+    
+    # 填充每个算法在每个条件下的performance
+    for algorithm in ["Gradient", "PPO", "Enhanced_PPO"]:
+        for q in [25.0, 40.0, 55.0]:
+            for effort_range in ["effort_0_100", "effort_0_200"]:
+                performance_matrix[f"q={q}"][effort_range][algorithm] = {
+                    "gap": 0.0,
+                    "quality": "Excellent",
+                    "meets_standard": True
+                }
+    
+    return performance_matrix
+```
+
+## **代码审查检查点**
+
+### **🔍 提交前必检项目**
+- [ ] 是否测试了所有6个参数组合 (3个q值 × 2个effort范围)
+- [ ] 是否所有测试都达到"Good"以上质量
+- [ ] 是否正确实现了自适应参数更新
+- [ ] 是否保存了完整的实验结果到CSV
+- [ ] 是否包含了性能验证和错误处理
+- [ ] 是否生成了性能对比报告
+
+### **⚠️ 常见错误模式**
+```python
+# ❌ 错误：固定参数，不自适应
+agent = PPOAgent(theoretical_effort=87.5)  # 硬编码
+
+# ✅ 正确：动态参数，自适应
+theoretical = calculate_theoretical_effort(q_value)
+agent = PPOAgent(theoretical_effort=theoretical)
+
+# ❌ 错误：只测试单一条件
+test_single_condition(q=25.0, effort_range=(0,100))
+
+# ✅ 正确：全面测试
+test_all_conditions(q_values=[25,40,55], effort_ranges=[(0,100),(0,200)])
+```
+
+## **性能基准参考**
+
+### **📊 期望性能基准**
+| 算法 | q=25 | q=40 | q=55 | 总体要求 |
+|------|------|------|------|----------|
+| Gradient | Excellent | Excellent | Excellent | 基准算法 |
+| PPO | Good+ | Good+ | Good+ | 自适应性 |
+| Enhanced | Excellent | Excellent | Good+ | 最佳性能 |
+
+### **🎯 优化目标优先级**
+1. **正确性**: 算法必须收敛到正确的理论值附近
+2. **自适应性**: 算法必须能适应不同的q值和effort范围
+3. **稳定性**: 算法必须在所有条件下稳定收敛
+4. **效率**: 在保证质量的前提下优化训练时间
+
+---
+
+**重要提醒**: 
+- 任何新算法或实验脚本都必须通过全部6个测试条件
+- 性能退化将被视为严重问题，需要立即修复
+- 所有实验结果必须可重现和可验证

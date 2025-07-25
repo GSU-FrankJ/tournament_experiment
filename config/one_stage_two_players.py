@@ -3,7 +3,7 @@ config = {
     "q": 40.0,
     "w_h": 6.5,
     "w_l": 3.0,
-    "effort_range": [0, 100],
+    "effort_range": [0, 200],
     "seed": 42
 }
 

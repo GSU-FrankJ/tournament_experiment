@@ -55,7 +55,29 @@ class AsymmetricCostEnv:
         )
         return p_final.item()
 
-    def probability_win_three_players_analytical(self, e1, e2, e3):
+    def probability_win_two_players_analytical(self, e1, e2):
+        """
+        计算两人游戏中玩家1获胜的概率
+        
+        Args:
+            e1: 玩家1的努力值
+            e2: 玩家2的努力值
+            
+        Returns:
+            玩家1获胜的概率
+        """
+        diff = e1 - e2
+        
+        # 对于均匀噪声 U(-q, q)
+        if diff <= -2 * self.q:
+            return 0.0
+        elif diff >= 2 * self.q:
+            return 1.0
+        else:
+            # 线性插值：P(e1 + ε1 > e2 + ε2) = 0.5 + diff/(4*q)
+            return 0.5 + diff / (4 * self.q)
+
+    def probability_win_two_players_triangular(self, e1, e2):
         """
         Analytical calculation for 3-player win probability.
         For asymmetric costs, this becomes more complex.
@@ -121,37 +143,51 @@ class AsymmetricCostEnv:
 
     def step(self, actions):
         """
-        Takes the effort of all players and returns reward and cost.
-        Input: actions is a tensor of length num_players
-        Returns: obs, rewards, costs, done, info
+        Actions: List of effort values for each player
         """
         if len(actions) != self.num_players:
             raise ValueError(f"Expected {self.num_players} actions, got {len(actions)}")
         
-        efforts = [action.item() for action in actions]
+        # 修复: 兼容float和tensor输入
+        efforts = []
+        for action in actions:
+            if isinstance(action, torch.Tensor):
+                efforts.append(action.item())
+            else:
+                efforts.append(float(action))
+        
+        # 确保努力值在有效范围内
+        low, high = self.effort_range
+        efforts = [max(low, min(high, e)) for e in efforts]
+        
+        # Calculate utilities and rewards
         utilities = []
-        costs = []
+        rewards = []
         
-        # Compute utility for each player using their specific cost parameter
-        for i in range(self.num_players):
-            other_efforts = [efforts[j] for j in range(self.num_players) if j != i]
-            u, cost = self.utility(i, efforts[i], *other_efforts)
-            utilities.append(u)
-            costs.append(cost)
+        if self.num_players == 2:
+            e1, e2 = efforts
+            
+            # Win probability calculation (same as probability_win_two_players_analytical)
+            win_prob_1 = self.probability_win_two_players_analytical(e1, e2)
+            
+            # Utilities = Expected reward - Cost
+            # 使用存储的成本参数
+            k1, k2 = self.k_players[0], self.k_players[1]
+            utility_1 = win_prob_1 * self.w_h + (1 - win_prob_1) * self.w_l - k1 * e1 * e1
+            utility_2 = (1 - win_prob_1) * self.w_h + win_prob_1 * self.w_l - k2 * e2 * e2
+            
+            utilities = [utility_1, utility_2]
+            rewards = utilities  # For this environment, rewards = utilities
+            
+        else:
+            raise NotImplementedError(f"Step not implemented for {self.num_players} players")
         
-        # Return observations (dummy states for all players)
-        obs = tuple(torch.tensor([0.0]) for _ in range(self.num_players))
-        rewards = torch.tensor(utilities, dtype=torch.float32)
-        costs_tensor = torch.tensor(costs, dtype=torch.float32)
-        done = True
+        # State is just the current efforts
+        state = torch.tensor(efforts, dtype=torch.float32)
+        done = False
+        info = {"efforts": efforts, "utilities": utilities}
         
-        # Build info dict
-        info = {"efforts": tuple(efforts)}
-        for i in range(self.num_players):
-            info[f"p{i+1}_cost"] = costs[i]
-            info[f"p{i+1}_k"] = self.k_players[i]
-        
-        return obs, rewards, costs_tensor, done, info
+        return state, rewards, done, info
 
     def get_theoretical_efforts(self):
         """Return theoretical equilibrium efforts for each player"""

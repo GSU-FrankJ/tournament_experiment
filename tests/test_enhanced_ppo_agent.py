@@ -7,7 +7,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.enhanced_ppo_agent import (
+from agents.three_players_ppo_agent import (
     EnhancedPPOAgent, ContinuousActionSpace, DiscreteActionSpace,
     ContinuousPolicyNetwork, DiscretePolicyNetwork, ValueNetwork,
     GAECalculator, PPOLoss
