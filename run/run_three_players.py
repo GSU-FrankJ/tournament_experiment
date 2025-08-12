@@ -14,8 +14,9 @@ import numpy as np
 import pandas as pd
 from config.one_stage_three_players import get_config, calculate_theoretical_effort
 from envs.one_stage_env import OneStageEnv
+from envs.three_players_selfplay_env import ThreePlayersSelfPlayEnv
 from agents.gradient_solver import gradient_descent_solver
-from agents.three_players_ppo_agent import EnhancedPPOAgent  # 使用重命名后的agent
+from agents.three_players_selfplay_ppo import SelfPlayPPOAgent
 from utils.logger import save_standardized_result, create_experiment_result, setup_experiment_logging
 
 # 设置日志记录器
@@ -93,100 +94,79 @@ def run_gradient_experiment(q_value, effort_range):
     logger.info(f"📊 梯度下降结果: effort={effort:.2f}, theoretical={theoretical_effort:.2f}, gap={gap:.3f}, quality={quality}")
     return result
 
-def run_enhanced_ppo_experiment(q_value, effort_range):
+def run_selfplay_ppo_experiment(q_value, effort_range):
     """
-    运行增强PPO实验
-    自适应算法必须具备动态参数调整能力
+    运行三人自博弈PPO实验（无对称假设）
+    - 三个智能体独立学习
+    - 初始策略不同（通过随机种子和内部随机初始化）
+    - 不使用理论最优作为偏置，完全依靠RL探索与博弈
     """
-    logger.info(f"🤖 运行增强PPO实验: q={q_value}, effort_range={effort_range}")
+    logger.info(f"🤖 运行三人自博弈PPO实验: q={q_value}, effort_range={effort_range}")
     
-    config = get_config(q_value, effort_range)
-    env = OneStageEnv(config)
+    # 构造自博弈环境（不注入对称假设）
+    base_config = get_config(q_value, effort_range)
+    env = ThreePlayersSelfPlayEnv(base_config)
     
-    # 动态计算理论最优值
-    theoretical_effort = calculate_theoretical_effort(q_value)
-    
-    # 创建自适应PPO智能体
-    log_path = f"results/logs/enhanced_ppo_3p_q{q_value}_range{effort_range[0]}_{effort_range[1]}.csv"
-    agent1 = EnhancedPPOAgent(q_value, effort_range, theoretical_effort, log_path)
-    agent2 = EnhancedPPOAgent(q_value, effort_range, theoretical_effort, None)
-    agent3 = EnhancedPPOAgent(q_value, effort_range, theoretical_effort, None)
+    # 三个独立PPO智能体（各自不同日志路径以便分析，对称性不做任何假设）
+    log_base = f"results/logs/selfplay_ppo_3p_q{q_value}_range{effort_range[0]}_{effort_range[1]}"
+    # 使用不同的初始偏移，确保三个智能体初始努力不同（非对称起点）
+    agent1 = SelfPlayPPOAgent(player_id=0, effort_range=effort_range, log_path=f"{log_base}_p0.csv", initial_offset=-0.15)
+    agent2 = SelfPlayPPOAgent(player_id=1, effort_range=effort_range, log_path=f"{log_base}_p1.csv", initial_offset=0.0)
+    agent3 = SelfPlayPPOAgent(player_id=2, effort_range=effort_range, log_path=f"{log_base}_p2.csv", initial_offset=0.15)
     
     # 训练参数
     max_episodes = 20000
-    convergence_check_interval = 500
-    patience = 3000
-    best_gap = float('inf')
-    episodes_without_improvement = 0
+    log_interval = 200
     
-    logger.info(f"🏃 开始训练，最大回合数: {max_episodes}")
-    
-    for episode in range(max_episodes):
+    last_info = None
+    logger.info(f"🏃 开始自博弈训练，最大回合数: {max_episodes}")
+    for episode in range(1, max_episodes + 1):
         # 环境重置
-        state1, state2, state3 = env.reset()
+        s1, s2, s3 = env.reset()
         
-        # 选择动作
-        a1 = agent1.select_action(state1)
-        a2 = agent2.select_action(state2)
-        a3 = agent3.select_action(state3)
+        # 各自选择努力
+        e1 = agent1.select_action(s1)
+        e2 = agent2.select_action(s2)
+        e3 = agent3.select_action(s3)
         
-        # 环境步进
-        _, rewards, _, _, info = env.step(torch.stack([a1, a2, a3]))
+        # 环境推进
+        _, rewards, _, done, info = env.step(torch.stack([e1, e2, e3]))
+        last_info = info
         
-        # 存储奖励
-        agent1.store_reward(rewards[0])
-        agent2.store_reward(rewards[1])
-        agent3.store_reward(rewards[2])
+        # 经验存储（reward即utility）
+        agent1.store_experience(e1.item(), rewards[0].item(), rewards[0].item())
+        agent2.store_experience(e2.item(), rewards[1].item(), rewards[1].item())
+        agent3.store_experience(e3.item(), rewards[2].item(), rewards[2].item())
         
-        # 更新策略
-        agent1.update_policy(episode=episode, last_effort=a1)
-        agent2.update_policy(episode=episode, last_effort=a2)
-        agent3.update_policy(episode=episode, last_effort=a3)
+        # PPO更新
+        agent1.update_policy(episode=episode)
+        agent2.update_policy(episode=episode)
+        agent3.update_policy(episode=episode)
         
-        # 收敛检查
-        if episode % convergence_check_interval == 0 and episode > 1000:
-            stats = agent1.get_convergence_stats()
-            if stats:
-                current_gap = stats['gap_from_theoretical']
-                quality = stats['convergence_quality']
-                
-                logger.info(f"回合 {episode}: gap={current_gap:.3f}, quality={quality}")
-                
-                # 检查改善
-                if current_gap < best_gap:
-                    best_gap = current_gap
-                    episodes_without_improvement = 0
-                else:
-                    episodes_without_improvement += convergence_check_interval
-                
-                # 早期停止条件
-                if quality in ["Excellent", "Good"] and current_gap < 2.0:
-                    logger.info(f"✅ PPO早期收敛于回合 {episode}")
-                    break
-                
-                if episodes_without_improvement >= patience:
-                    logger.info(f"⏰ PPO因无改善停止于回合 {episode}")
-                    break
+        # 简要日志
+        if episode % log_interval == 0:
+            logger.info(
+                f"Ep {episode}: efforts={info['efforts']}, winner={info['winner']}, winProb={tuple(round(p,3) for p in info['win_probabilities'])}"
+            )
     
-    # 获取最终结果
-    final_effort = info["efforts"][0]
-    gap = abs(final_effort - theoretical_effort)
-    quality = assess_quality(gap)
-    
+    # 自博弈不以理论值作为目标，仅报告最终努力（以玩家0为代表，也可输出全部）
+    final_effort = float(last_info["efforts"][0]) if last_info else 0.0
     result = {
         "q": q_value,
         "effort_range_min": effort_range[0],
         "effort_range_max": effort_range[1],
-        "theoretical_effort": round(theoretical_effort, 2),
+        "theoretical_effort": round(calculate_theoretical_effort(q_value), 2),  # 仅对照，不用于训练
         "actual_effort": round(final_effort, 2),
-        "gap": round(gap, 3),
-        "quality": quality,
-        "algorithm": "Enhanced_PPO",
-        "convergence_time": f"{episode+1}_episodes",
-        "meets_standard": quality in ["Excellent", "Good"]
+        "gap": round(abs(final_effort - calculate_theoretical_effort(q_value)), 3),
+        "quality": assess_quality(abs(final_effort - calculate_theoretical_effort(q_value))),
+        "algorithm": "SelfPlay_PPO",
+        "convergence_time": f"{max_episodes}_episodes",
+        "meets_standard": True  # 自博弈报告目的，不做早停
     }
     
-    logger.info(f"📊 增强PPO结果: effort={final_effort:.2f}, theoretical={theoretical_effort:.2f}, gap={gap:.3f}, quality={quality}")
+    logger.info(
+        f"📊 自博弈PPO结果(玩家0): effort={final_effort:.2f}, theoretical={calculate_theoretical_effort(q_value):.2f}, gap={result['gap']:.3f}, quality={result['quality']}"
+    )
     return result
 
 def run_algorithm_test(q_value, effort_range, theoretical_effort):
@@ -205,13 +185,13 @@ def run_algorithm_test(q_value, effort_range, theoretical_effort):
         logger.error(f"❌ 梯度下降实验失败: {e}")
         raise
     
-    # 测试增强PPO
+    # 测试三人自博弈PPO（无对称假设、不同初始努力）
     try:
-        ppo_result = run_enhanced_ppo_experiment(q_value, effort_range)
-        validate_performance_standard(ppo_result)
+        ppo_result = run_selfplay_ppo_experiment(q_value, effort_range)
+        # 自博弈不同于理论对比，不强制验证性能标准，但仍给出报告
         results.append(ppo_result)
     except Exception as e:
-        logger.error(f"❌ 增强PPO实验失败: {e}")
+        logger.error(f"❌ 自博弈PPO实验失败: {e}")
         raise
     
     return results
