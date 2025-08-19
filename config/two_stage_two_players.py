@@ -3,40 +3,45 @@
 # Stage 2: Second-round decisions based on Stage 1 outcomes
 
 config = {
+    # Prizes (weights in CSV): stage1_weight = w_L, stage2_weight = w_H
+    "stage1_weight": 3.0,
+    "stage2_weight": 6.5,
+
     # Basic game parameters
-    "k": 0.0004,        # Cost parameter
+    "k": 0.0004,        # Default cost (symmetric)
+    "k1": 0.0004,       # Stage 1 cost parameter
+    "k2": 0.0004,       # Stage 2 cost parameter
     "q": 25.0,          # Noise parameter
-    "w_h": 6.5,         # High reward
-    "w_l": 3.0,         # Low reward
+    "q_list": [25.0, 40.0, 55.0],
+    "w_h": 6.5,         # High prize
+    "w_l": 3.0,         # Low prize
     "effort_range": [0, 200],
+    "effort_bounds_stage1": [0, 100],
+    "effort_bounds_stage2": [0, 200],
     "seed": 42,
     "num_players": 2,
-    
-    # Two-stage specific parameters
-    "stage1_weight": 0.6,    # Weight of Stage 1 in final outcome
-    "stage2_weight": 0.4,    # Weight of Stage 2 in final outcome
+
+    # Information structure
     "information_revelation": "partial",  # "none", "partial", "full"
-    "stage1_noise_factor": 1.0,  # Noise multiplier for Stage 1
-    "stage2_noise_factor": 0.8,  # Noise multiplier for Stage 2 (often lower)
-    
-    # Information revelation settings
-    "reveal_opponent_effort": False,     # Whether to reveal opponent's Stage 1 effort
-    "reveal_stage1_outcome": True,       # Whether to reveal Stage 1 winner
-    "reveal_noise_realization": False,   # Whether to reveal actual noise values
-    
-    # Stage-specific cost parameters (can be different)
-    "k1": 0.0004,       # Stage 1 cost parameter
-    "k2": 0.0005,       # Stage 2 cost parameter (slightly higher)
+    "stage1_noise_factor": 1.0,
+    "stage2_noise_factor": 1.0,
+    "reveal_opponent_effort": False,
+    "reveal_stage1_outcome": True,
+    "reveal_noise_realization": False,
+
+    # Plotting and evaluation
+    "enable_overlay": True,
+    "convergence_rel_err_threshold": 0.10,
 }
 
 # Compute theoretical equilibrium efforts for both stages
 # This is a simplified calculation - actual equilibrium requires backward induction
-stage1_effort_base = (config["w_h"] - config["w_l"]) / (4 * config["k1"] * config["q"])
-stage2_effort_base = (config["w_h"] - config["w_l"]) / (4 * config["k2"] * config["q"])
+stage1_effort_base = (config["w_h"] - config["w_l"]) / (6 * config["k1"] * config["q"])  # spec
+stage2_effort_base = (config["w_h"] - config["w_l"]) / (6 * config["k2"] * config["q"])  # spec
 
-# Adjust for stage weights and inter-stage effects
-config["stage1_effort"] = stage1_effort_base * config["stage1_weight"]
-config["stage2_effort"] = stage2_effort_base * config["stage2_weight"]
+# Baseline theoretical efforts per stage (unweighted)
+config["stage1_effort"] = stage1_effort_base
+config["stage2_effort"] = stage2_effort_base
 
 # Total expected costs and utilities
 config["stage1_cost"] = config["k1"] * config["stage1_effort"] ** 2

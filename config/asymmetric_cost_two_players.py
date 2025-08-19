@@ -3,14 +3,26 @@
 # Based on user requirements: k1=0.0004, k2=0.00055
 
 config = {
+    # Prizes mapped to CSV fields: stage1_weight = w_L, stage2_weight = w_H
+    "stage1_weight": 5.5,
+    "stage2_weight": 8.0,
+
+    # Cost asymmetry
     "k1": 0.0004,  # Player 1 cost parameter (lower)
     "k2": 0.00055, # Player 2 cost parameter (higher)
+    "k": 0.0004,   # default (for overlays)
+
+    # Noise and bounds
     "q": 25.0,     # Noise parameter (will be varied in experiment)
-    "w_h": 8.0,    # High reward (updated from table)
-    "w_l": 5.5,    # Low reward (updated from table)
+    "q_list": [25.0, 40.0, 55.0],
+    "w_h": 8.0,    # High reward
+    "w_l": 5.5,    # Low reward
     "effort_range": [0, 200],
+    "effort_bounds_stage1": [0, 100],
+    "effort_bounds_stage2": [0, 200],
     "seed": 42,
-    "num_players": 2
+    "num_players": 2,
+    "information_revelation": "none",
 }
 
 def calculate_theoretical_efforts(q_value, k1, k2, w_h, w_l):

@@ -406,6 +406,32 @@ class SelfPlayPPOAgent:
         self.recent_utilities.clear()
         self.episode_count = 0
     
+    def update_parameters(self, q_value: float, effort_range: tuple, theoretical_effort: float):
+        """
+        Dynamically adjust agent configuration based on new parameters.
+        Mirrors adaptive hooks used in enhanced PPO agents.
+        
+        - Update theoretical target used only for initialization biasing
+        - Adjust action scaling to new effort range
+        - Reset learning buffers to avoid stale policy bias
+        """
+        self.effort_range = effort_range
+        # Light adaptive initialization: nudge policy mean towards normalized theoretical effort
+        low, high = effort_range
+        if high > low:
+            normalized_theoretical = float(np.clip((theoretical_effort - low) / (high - low), 0.0, 1.0))
+            # Apply a small bias to the last layer bias to point near theoretical effort
+            with torch.no_grad():
+                # Move mean head bias slightly towards desired normalized mean
+                current_bias = self.policy_net.mean_head.bias.data.clone()
+                target = torch.full_like(current_bias, normalized_theoretical)
+                self.policy_net.mean_head.bias.data = 0.9 * current_bias + 0.1 * target
+        # Optionally adjust exploration scale mildly via std_head bias
+        with torch.no_grad():
+            self.policy_net.std_head.bias.data = torch.clamp(self.policy_net.std_head.bias.data, min=0.1, max=1.0)
+        # Reset buffers to adapt quickly to new setting
+        self.reset_learning_state()
+    
     def save_model(self, path: str):
         """Save the model to disk."""
         torch.save({

@@ -58,6 +58,11 @@ class ThreePlayersSelfPlayEnv:
         self.cost_star = config.get("cost", None)
         self.eu_star = config.get("eu", None)
         
+        # Monte Carlo sampling configuration
+        # NOTE: Reduced default samples to mitigate Monte Carlo explosion
+        # Users can increase this gradually via config if needed
+        self.mc_samples = int(config.get("mc_samples", 3000))
+        
         # Environment state
         self.current_episode = 0
         self.episode_history = deque(maxlen=1000)
@@ -77,38 +82,50 @@ class ThreePlayersSelfPlayEnv:
         """
         Calculate win probability for player 1 given efforts of all three players.
         
-        This uses Monte Carlo simulation to accurately compute win probabilities
-        for any combination of effort levels, not just symmetric cases.
+        This remains for backward compatibility but now delegates to the
+        vectorized joint probability computation and returns p1 only.
+        """
+        p1, _, _ = self.probability_win_three_players_vectorized((e1, e2, e3))
+        return float(p1)
+
+    def probability_win_three_players_vectorized(self, efforts: tuple) -> tuple:
+        """
+        Vectorized Monte Carlo computation of all three players' win probabilities
+        using a single shared noise draw per episode.
         
         Args:
-            e1: Effort of player 1 (the player we're calculating for)
-            e2: Effort of player 2
-            e3: Effort of player 3
-            
+            efforts: Tuple of three efforts (e1, e2, e3)
+        
         Returns:
-            Probability that player 1 wins
+            (p1, p2, p3): Probabilities each player wins
         """
-        # Use Monte Carlo simulation for accurate win probability
-        num_samples = 50000
-        np.random.seed(self.seed + self.current_episode)  # Deterministic but varies by episode
+        e1, e2, e3 = map(float, efforts)
+        # Small analytical/linearized shortcut in near-symmetric neighborhood
+        # If efforts are sufficiently close (relative to noise scale), assume ~1/3 each
+        # This avoids unnecessary Monte Carlo in symmetric regions
+        if max(abs(e1 - e2), abs(e1 - e3), abs(e2 - e3)) <= 0.01 * float(self.q):
+            return 1.0/3.0, 1.0/3.0, 1.0/3.0
+        # Deterministic RNG that varies by episode for reproducibility
+        rng = np.random.default_rng(self.seed + self.current_episode)
+        num_samples = int(self.mc_samples)
         
-        # Generate noise for all players
-        eps1 = np.random.uniform(-self.q, self.q, num_samples)
-        eps2 = np.random.uniform(-self.q, self.q, num_samples)
-        eps3 = np.random.uniform(-self.q, self.q, num_samples)
+        # Single noise matrix for all three players: shape (num_samples, 3)
+        eps = rng.uniform(-self.q, self.q, size=(num_samples, 3))
+        scores = np.stack([
+            np.full(num_samples, e1),
+            np.full(num_samples, e2),
+            np.full(num_samples, e3)
+        ], axis=1) + eps
         
-        # Calculate total scores (effort + noise)
-        score1 = e1 + eps1
-        score2 = e2 + eps2
-        score3 = e3 + eps3
-        
-        # Player 1 wins if their score is higher than both others
-        wins = (score1 > score2) & (score1 > score3)
-        win_probability = np.mean(wins)
-        
-        return win_probability
+        # Winner per simulation via argmax over columns
+        winners = np.argmax(scores, axis=1)
+        # Estimate probabilities by frequency
+        p1 = float(np.mean(winners == 0))
+        p2 = float(np.mean(winners == 1))
+        p3 = float(np.mean(winners == 2))
+        return p1, p2, p3
     
-    def utility(self, player_id: int, effort: float, other_efforts: List[float]) -> Tuple[float, float]:
+    def utility(self, player_id: int, effort: float, other_efforts: List[float], p_win: float = None) -> Tuple[float, float]:
         """
         Compute expected utility for a specific player.
         
@@ -116,6 +133,7 @@ class ThreePlayersSelfPlayEnv:
             player_id: Player ID (0, 1, or 2)
             effort: This player's effort level
             other_efforts: List of efforts from other players
+            p_win: Optional precomputed win probability for this player (to avoid recomputation)
             
         Returns:
             (utility, cost): Expected utility and cost for this player
@@ -135,13 +153,14 @@ class ThreePlayersSelfPlayEnv:
         
         e1, e2, e3 = all_efforts
         
-        # Calculate win probability for this player
-        if player_id == 0:
-            p_win = self.probability_win_three_players(e1, e2, e3)
-        elif player_id == 1:
-            p_win = self.probability_win_three_players(e2, e1, e3)
-        else:  # player_id == 2
-            p_win = self.probability_win_three_players(e3, e1, e2)
+        # Use provided win probability if available to avoid duplicate Monte Carlo
+        if p_win is None:
+            if player_id == 0:
+                p_win = self.probability_win_three_players(e1, e2, e3)
+            elif player_id == 1:
+                p_win = self.probability_win_three_players(e2, e1, e3)
+            else:  # player_id == 2
+                p_win = self.probability_win_three_players(e3, e1, e2)
         
         # Calculate expected reward and cost
         expected_reward = self.w_l + p_win * (self.w_h - self.w_l)
@@ -191,26 +210,18 @@ class ThreePlayersSelfPlayEnv:
         low, high = self.effort_range
         efforts = [max(low, min(high, e)) for e in efforts]
         
-        # Calculate utilities and costs for each player
+        # Calculate win probabilities ONCE using shared noise; avoid duplication
+        p1, p2, p3 = self.probability_win_three_players_vectorized(tuple(efforts))
+        win_probabilities = [p1, p2, p3]
+        
+        # Calculate utilities and costs for each player using precomputed probabilities
         utilities = []
         costs = []
-        win_probabilities = []
-        
         for i in range(3):
             other_efforts = [efforts[j] for j in range(3) if j != i]
-            utility, cost = self.utility(i, efforts[i], other_efforts)
+            utility, cost = self.utility(i, efforts[i], other_efforts, p_win=win_probabilities[i])
             utilities.append(utility)
             costs.append(cost)
-            
-            # Calculate win probability for this player
-            if i == 0:
-                p_win = self.probability_win_three_players(efforts[0], efforts[1], efforts[2])
-            elif i == 1:
-                p_win = self.probability_win_three_players(efforts[1], efforts[0], efforts[2])
-            else:  # i == 2
-                p_win = self.probability_win_three_players(efforts[2], efforts[0], efforts[1])
-            
-            win_probabilities.append(p_win)
         
         # Store episode information
         episode_info = {

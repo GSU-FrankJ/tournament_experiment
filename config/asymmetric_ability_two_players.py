@@ -2,15 +2,25 @@
 # Player 1 has higher ability (l1 > l2), equal cost parameters (k1 = k2)
 
 config = {
+    # Prizes mapped to CSV fields: stage1_weight = w_L, stage2_weight = w_H
+    "stage1_weight": 3.0,
+    "stage2_weight": 6.5,
+
     "l1": 1.2,      # Player 1 ability parameter (higher)
     "l2": 0.8,      # Player 2 ability parameter (lower)
     "k": 0.0004,    # Equal cost parameter for both players
+    "k1": 0.0004,
+    "k2": 0.0004,
     "q": 25.0,      # Noise parameter
+    "q_list": [25.0, 40.0, 55.0],
     "w_h": 6.5,     # High reward
     "w_l": 3.0,     # Low reward
     "effort_range": [0, 200],
+    "effort_bounds_stage1": [0, 100],
+    "effort_bounds_stage2": [0, 200],
     "seed": 42,
-    "num_players": 2
+    "num_players": 2,
+    "information_revelation": "none",
 }
 
 # Compute theoretical asymmetric equilibrium efforts for different abilities
