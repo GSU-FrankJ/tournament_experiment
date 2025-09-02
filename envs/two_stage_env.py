@@ -28,6 +28,10 @@ class TwoStageEnv:
         self.stage2_weight = config["stage2_weight"]
         self.stage1_noise_factor = config["stage1_noise_factor"]
         self.stage2_noise_factor = config["stage2_noise_factor"]
+        # Probability model for win rate: 'logit' (recommended) or 'uniform' (legacy)
+        # When 'logit', p_win = sigmoid((e_i - e_j) / (q * noise_factor))
+        # This aligns with a softmax/logit victory model often used in tournaments
+        self.prob_model = config.get("prob_model", "logit")
         
         # Information revelation settings
         self.information_revelation = config["information_revelation"]
@@ -81,6 +85,24 @@ class TwoStageEnv:
             torch.where(d > 2 * effective_q, torch.tensor(0.0), p_middle)
         )
         return p_final.item()
+
+    def probability_logit(self, e1: float, e2: float, noise_factor: float = 1.0) -> float:
+        """
+        Logistic win probability model:
+        p(win for player with effort e1 vs e2) = sigmoid((e1 - e2) / (q * noise_factor))
+
+        Args:
+            e1: Effort of player 1
+            e2: Effort of player 2
+            noise_factor: Stage-specific multiplicative factor on q
+
+        Returns:
+            Probability in [0,1]
+        """
+        effective_q = max(1e-8, float(self.q) * float(noise_factor))
+        d = (float(e1) - float(e2)) / effective_q
+        # Use torch.sigmoid for numerical stability; convert to Python float for consistency
+        return float(torch.sigmoid(torch.tensor(d, dtype=torch.float32)).item())
     
     def compute_stage_utility(self, player_effort: float, other_efforts: List[float], 
                             stage: int) -> Tuple[float, float]:
@@ -105,7 +127,10 @@ class TwoStageEnv:
         if self.num_players == 2:
             if len(other_efforts) != 1:
                 raise ValueError("For 2 players, need exactly 1 other effort")
-            p_win = self.probability_uniform(player_effort, other_efforts[0], noise_factor)
+            if self.prob_model == "logit":
+                p_win = self.probability_logit(player_effort, other_efforts[0], noise_factor)
+            else:
+                p_win = self.probability_uniform(player_effort, other_efforts[0], noise_factor)
         else:
             raise ValueError(f"Unsupported number of players: {self.num_players}")
         
@@ -131,17 +156,22 @@ class TwoStageEnv:
         
         effective_q = self.q * noise_factor
         
-        # Generate noise for each player
-        noise_values = []
-        for i in range(self.num_players):
-            noise = np.random.uniform(-effective_q, effective_q)
-            noise_values.append(noise)
-        
-        # Compute total efforts (effort + noise)
-        total_efforts = [efforts[i] + noise_values[i] for i in range(self.num_players)]
-        
-        # Determine winner
-        winner = np.argmax(total_efforts)
+        if self.prob_model == "logit" and self.num_players == 2:
+            # Sample winner from Bernoulli with logistic probability
+            p_win_0 = self.probability_logit(efforts[0], efforts[1], noise_factor)
+            u = np.random.rand()
+            winner = 0 if u < p_win_0 else 1
+            # Synthesize noise values for record-keeping (not used in logic)
+            noise_values = [0.0, 0.0]
+            total_efforts = [efforts[0], efforts[1]]
+        else:
+            # Legacy uniform noise model
+            noise_values = []
+            for i in range(self.num_players):
+                noise = np.random.uniform(-effective_q, effective_q)
+                noise_values.append(noise)
+            total_efforts = [efforts[i] + noise_values[i] for i in range(self.num_players)]
+            winner = np.argmax(total_efforts)
         
         return {
             "efforts": efforts,
