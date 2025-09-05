@@ -89,10 +89,10 @@ def run_ppo(cfg: Dict, episodes: int = 5000) -> Dict:
     history: List[float] = []
     for ep in range(episodes):
         # Reset env and run Stage 1
-        states = env.reset()  # tuple of states per player (ignored content)
+        states = env.reset()  # tuple of informative states per player
         # Stage 1 actions (self-play)
-        e1_p1, logp1, v1, a1_p1, s1_p1 = agent.act(stage=1, opp_avg_effort=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
-        e1_p2, logp2, v2, a1_p2, s1_p2 = agent.act(stage=1, opp_avg_effort=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+        e1_p1, logp1, v1, a1_p1, s1_p1 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+        e1_p2, logp2, v2, a1_p2, s1_p2 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
         next_states, rewards_s1, costs_s1, done, info = env.step_stage1([
             torch.tensor(e1_p1, dtype=torch.float32),
             torch.tensor(e1_p2, dtype=torch.float32)
@@ -109,24 +109,19 @@ def run_ppo(cfg: Dict, episodes: int = 5000) -> Dict:
         agent.update_opponent_avg(stage=1, opponent_effort=e1_p2)
         agent.update_opponent_avg(stage=1, opponent_effort=e1_p1)
 
-        # Stage 2 actions
-        e2_p1, logp3, v3, a2_p1, s2_p1 = agent.act(stage=2, opp_avg_effort=agent.opp_avg(2), bounds=tuple(cfg["effort_bounds_stage2"]))
-        e2_p2, logp4, v4, a2_p2, s2_p2 = agent.act(stage=2, opp_avg_effort=agent.opp_avg(2), bounds=tuple(cfg["effort_bounds_stage2"]))
-        final_states, total_rewards, total_costs, done, info2 = env.step_stage2([
+        # Stage 2 actions using env-provided informative observations
+        s2_obs_p1 = next_states[0]
+        s2_obs_p2 = next_states[1]
+        e2_p1, logp3, v3, a2_p1, s2_p1 = agent.act_with_env_obs(s2_obs_p1, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+        e2_p2, logp4, v4, a2_p2, s2_p2 = agent.act_with_env_obs(s2_obs_p2, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+        final_states, rewards_s2, total_costs, done, info2 = env.step_stage2([
             torch.tensor(e2_p1, dtype=torch.float32),
             torch.tensor(e2_p2, dtype=torch.float32)
         ])
 
-        # Build per-player Stage 2 utilities (we recompute consistent with env API)
-        # Here we use the incremental reward as (total_utility - stage1_utility) to approximate per-stage credit.
-        # For PPO stability, per-step rewards suffice without precise credit assignment as long as returns are consistent.
-        # We take total_rewards as final episodic return; for step-wise learning, allocate a small portion at stage 2.
-        u_total_p1 = float(total_rewards[0].item())
-        u_total_p2 = float(total_rewards[1].item())
-        # Approximate Stage 2 reward as total - Stage1 utility contribution
-        # Since stage1 reward already stored, use residual for stage2 step
-        r2_p1 = u_total_p1 - r1_p1
-        r2_p2 = u_total_p2 - r1_p2
+        # Stage-2 reward now directly returned as weighted utility from env
+        r2_p1 = float(rewards_s2[0].item())
+        r2_p2 = float(rewards_s2[1].item())
 
         agent.store(s2_p1, a2_p1, e2_p1, logp3, v3, r2_p1, True)
         agent.store(s2_p2, a2_p2, e2_p2, logp4, v4, r2_p2, True)
@@ -137,8 +132,9 @@ def run_ppo(cfg: Dict, episodes: int = 5000) -> Dict:
         history.append((e1_p1 + e1_p2) / 2.0)
 
     final_e1 = float(np.mean(history[-100:])) if len(history) >= 100 else float(np.mean(history))
-    # Estimate final stage2 effort by sampling deterministically at the end
-    e2_p1_det, _, _, _, _ = agent.act(stage=2, opp_avg_effort=agent.opp_avg(2), bounds=tuple(cfg["effort_bounds_stage2"]), deterministic=True)
+    # Estimate final stage2 effort by sampling deterministically using a neutral Stage-2 obs
+    neutral_obs = torch.tensor([2.0, 0.0, float(final_e1), 0.0, 0.0], dtype=torch.float32)
+    e2_p1_det, _, _, _, _ = agent.act_with_env_obs(neutral_obs, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]), deterministic=True)
     final_e2 = float(e2_p1_det)
 
     row = build_csv_row(
