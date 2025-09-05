@@ -42,3 +42,7 @@ class TwoPlayersEnv:
         return obs, rewards, costs, True, {"efforts": (e1, e2)}
 
 
+
+
+
+

@@ -229,8 +229,9 @@ class TwoStageEnv:
         self.stage1_noise = None
         self.information_state = {}
         
-        # Return initial states (dummy states for Stage 1)
-        return tuple(torch.tensor([1.0]) for _ in range(self.num_players))  # Stage indicator
+        # Return initial states as a fixed-length informative vector placeholder for Stage 1
+        # state = [stage_indicator(=1.0), won_stage1(=0.0), my_e1(=0.0), opp_e1(=0.0), p_win_estimate(=0.0)]
+        return tuple(torch.tensor([1.0, 0.0, 0.0, 0.0, 0.0]) for _ in range(self.num_players))
     
     def step_stage1(self, actions: List[torch.Tensor]) -> Tuple:
         """
@@ -260,19 +261,53 @@ class TwoStageEnv:
         for i in range(self.num_players):
             other_efforts = [efforts[j] for j in range(self.num_players) if j != i]
             u, cost = self.compute_stage_utility(efforts[i], other_efforts, stage=1)
-            utilities.append(u)
+            # Weight Stage-1 utility at the source to avoid double counting later
+            utilities.append(self.stage1_weight * u)
             costs.append(cost)
         
         # Prepare states for Stage 2 (include information)
         next_states = []
         for i in range(self.num_players):
-            info_state = self.get_information_state(i)
-            # Encode information as a tensor (simplified)
-            if "won_stage1" in info_state:
-                state_value = 2.0 if info_state["won_stage1"] else 2.0  # Stage 2 indicator
+            # Encode an informative Stage-2 state vector depending on revelation settings
+            # state = [stage_indicator(=2.0), won_stage1(0/1 or 0), my_e1, opp_e1(0 if hidden), p_win_estimate(optional or 0)]
+            won_flag = 0.0
+            my_e1 = float(efforts[i])
+            opp_e1 = 0.0
+            p_win_est = 0.0
+
+            if self.information_revelation == "full":
+                if self.stage1_outcomes is not None:
+                    won_flag = 1.0 if self.stage1_outcomes["winner"] == i else 0.0
+                # In full mode, expose both efforts
+                other_idx = 1 - i if self.num_players == 2 else None
+                if other_idx is not None and self.stage1_efforts is not None:
+                    opp_e1 = float(self.stage1_efforts[other_idx])
+                # Optional: estimate win probability for Stage 2 based on Stage 1 signal
+                if other_idx is not None and self.stage1_efforts is not None:
+                    if self.prob_model == "logit":
+                        p_win_est = self.probability_logit(my_e1, opp_e1, self.stage1_noise_factor)
+                    else:
+                        p_win_est = self.probability_uniform(my_e1, opp_e1, self.stage1_noise_factor)
+            elif self.information_revelation == "partial":
+                # Reveal outcome if configured
+                if self.reveal_stage1_outcome and self.stage1_outcomes is not None:
+                    won_flag = 1.0 if self.stage1_outcomes["winner"] == i else 0.0
+                # Reveal opponent effort if configured
+                if self.reveal_opponent_effort and self.stage1_efforts is not None:
+                    other_idx = 1 - i if self.num_players == 2 else None
+                    if other_idx is not None:
+                        opp_e1 = float(self.stage1_efforts[other_idx])
+                # Optional probability if both efforts visible
+                if opp_e1 != 0.0:
+                    if self.prob_model == "logit":
+                        p_win_est = self.probability_logit(my_e1, opp_e1, self.stage1_noise_factor)
+                    else:
+                        p_win_est = self.probability_uniform(my_e1, opp_e1, self.stage1_noise_factor)
             else:
-                state_value = 2.0  # Stage 2 indicator
-            next_states.append(torch.tensor([state_value]))
+                # none: expose only the stage indicator and own effort
+                pass
+
+            next_states.append(torch.tensor([2.0, won_flag, my_e1, opp_e1, float(p_win_est)]))
         
         # Update stage
         self.current_stage = 2
@@ -305,7 +340,7 @@ class TwoStageEnv:
             actions: List of effort tensors for each player
         
         Returns:
-            (final_states, total_rewards, total_costs, done, info)
+            (final_states, rewards_stage2_weighted, total_costs, done, info)
         """
         if len(actions) != self.num_players:
             raise ValueError(f"Expected {self.num_players} actions, got {len(actions)}")
@@ -329,29 +364,23 @@ class TwoStageEnv:
             stage2_utilities.append(u)
             stage2_costs.append(cost)
         
-        # Compute Stage 1 utilities and costs (already computed, but recalculate for consistency)
+        # Compute Stage-1 raw utilities (for logging) and costs; return only Stage-2 weighted utility as reward
         stage1_utilities = []
         stage1_costs = []
-        
-        for i in range(self.num_players):
-            other_efforts = [self.stage1_efforts[j] for j in range(self.num_players) if j != i]
-            u, cost = self.compute_stage_utility(self.stage1_efforts[i], other_efforts, stage=1)
-            stage1_utilities.append(u)
-            stage1_costs.append(cost)
-        
-        # Compute weighted total utilities and costs
-        total_utilities = []
         total_costs = []
-        
         for i in range(self.num_players):
-            total_utility = (self.stage1_weight * stage1_utilities[i] + 
-                           self.stage2_weight * stage2_utilities[i])
-            total_cost = stage1_costs[i] + stage2_costs[i]
-            total_utilities.append(total_utility)
-            total_costs.append(total_cost)
+            # Recompute Stage-1 cost for completeness
+            other_efforts = [self.stage1_efforts[j] for j in range(self.num_players) if j != i]
+            u1, cost1 = self.compute_stage_utility(self.stage1_efforts[i], other_efforts, stage=1)
+            stage1_utilities.append(u1)
+            stage1_costs.append(cost1)
+            total_costs.append(cost1 + stage2_costs[i])
         
-        # Final states (dummy)
-        final_states = tuple(torch.tensor([0.0]) for _ in range(self.num_players))
+        # Weight Stage-2 utilities only
+        rewards_stage2_weighted = [self.stage2_weight * u2 for u2 in stage2_utilities]
+        
+        # Final states as zeroed informative vectors matching state shape
+        final_states = tuple(torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0]) for _ in range(self.num_players))
         
         # Build comprehensive info dict
         info = {
@@ -374,7 +403,7 @@ class TwoStageEnv:
         
         return (
             final_states,
-            torch.tensor(total_utilities, dtype=torch.float32),
+            torch.tensor(rewards_stage2_weighted, dtype=torch.float32),
             torch.tensor(total_costs, dtype=torch.float32),
             True,  # Game is done
             info

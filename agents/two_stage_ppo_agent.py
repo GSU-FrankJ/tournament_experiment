@@ -32,16 +32,19 @@ from torch.distributions import Beta
 class BetaPolicyNet(nn.Module):
     """Policy-Value network producing Beta(α, β) parameters and a state-value.
 
-    Input features are minimal but extensible: [stage_indicator_norm, q_norm, opp_avg_norm]
+    Input features (5-dim) to leverage informative env states:
+    [stage_indicator_norm, q_norm, opp_signal_norm, won_stage1_norm, opp_e1_norm]
     - stage_indicator_norm: 0 for stage 1, 1 for stage 2
     - q_norm = q / 100
-    - opp_avg_norm = normalized opponent average effort in [0,1]
+    - opp_signal_norm: generic opponent signal in [0,1] (EMA or revealed effort)
+    - won_stage1_norm: 0/1 flag (0 in stage 1)
+    - opp_e1_norm: opponent's stage1 effort normalized to [0,1] (0 if hidden/unknown)
     """
 
     def __init__(self, hidden_dim: int = 64):
         super().__init__()
         self.feature = nn.Sequential(
-            nn.Linear(3, hidden_dim), nn.ReLU(),
+            nn.Linear(5, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
         )
         # Output positive concentration parameters via softplus + 1.0 for stability
@@ -129,27 +132,54 @@ class TwoStagePPOAgent:
         lo, hi = bounds
         return float(np.log(max(hi - lo, 1e-12)))
 
-    def _build_state(self, stage_indicator: float, opp_avg_effort: float, bounds: Tuple[float, float]) -> torch.Tensor:
-        """Construct minimal input features for the network."""
-        # Normalize stage ∈ {1,2} to 0/1
+    def _build_state(self, stage_indicator: float, opp_signal: float, bounds: Tuple[float, float]) -> torch.Tensor:
+        """Construct 5-d input features for the network for generic usage.
+
+        In Stage 1, we provide won=0 and opp_e1=0 (unknown yet). In Stage 2, caller can
+        pass opponent signal (e.g., EMA or revealed effort) via opp_signal if desired.
+        """
         stage_norm = 0.0 if stage_indicator <= 1.5 else 1.0
-        # Normalize q to ~[0.25, 0.55]
         q_norm = float(self.q_value) / 100.0
-        # Normalize opponent average into [0,1]
         lo, hi = bounds
-        opp_norm = 0.0 if hi <= lo else float(np.clip((opp_avg_effort - lo) / (hi - lo), 0.0, 1.0))
-        x = torch.tensor([stage_norm, q_norm, opp_norm], dtype=torch.float32, device=self.device)
+        opp_signal_norm = 0.0 if hi <= lo else float(np.clip((opp_signal - lo) / (hi - lo), 0.0, 1.0))
+        won_stage1_norm = 0.0
+        opp_e1_norm = 0.0
+        x = torch.tensor([stage_norm, q_norm, opp_signal_norm, won_stage1_norm, opp_e1_norm], dtype=torch.float32, device=self.device)
+        return x
+
+    def _build_state_from_env_obs(self, obs: torch.Tensor, bounds_stage1: Tuple[float, float], bounds_stage2: Tuple[float, float]) -> torch.Tensor:
+        """Map env's 5-d observation to the 5-d features expected by the network.
+
+        obs = [stage_indicator(1/2/0), won_stage1(0/1), my_e1, opp_e1, p_win_estimate]
+        We reuse:
+        - stage -> stage_norm
+        - q_norm from agent config
+        - opp_signal_norm from opp_e1 (if visible) or 0
+        - won_stage1_norm from obs
+        - opp_e1_norm from obs normalized by Stage-1 bounds
+        """
+        stage_indicator = float(obs[0].item())
+        won_stage1 = float(obs[1].item())
+        opp_e1 = float(obs[3].item())
+        stage_norm = 0.0 if stage_indicator <= 1.5 else 1.0
+        q_norm = float(self.q_value) / 100.0
+        # Opponent signal: use revealed opponent e1 if available; else 0
+        lo1, hi1 = bounds_stage1
+        opp_signal_norm = 0.0 if hi1 <= lo1 else float(np.clip((opp_e1 - lo1) / (hi1 - lo1), 0.0, 1.0))
+        won_stage1_norm = 1.0 if won_stage1 >= 0.5 else 0.0
+        opp_e1_norm = opp_signal_norm
+        x = torch.tensor([stage_norm, q_norm, opp_signal_norm, won_stage1_norm, opp_e1_norm], dtype=torch.float32, device=self.device)
         return x
 
     # --------- Acting ---------
-    def act(self, stage: int, opp_avg_effort: float, bounds: Tuple[float, float], deterministic: bool = False):
+    def act(self, stage: int, opp_signal: float, bounds: Tuple[float, float], deterministic: bool = False):
         """Sample an action (effort) and return useful terms for PPO update.
 
         Returns:
             effort_e (float), log_prob_e (float), value (float), action_a (float in (0,1)), state_tensor (torch.Tensor)
         """
         self.net.eval()
-        x = self._build_state(float(stage), opp_avg_effort, bounds)
+        x = self._build_state(float(stage), opp_signal, bounds)
         alpha, beta, value = self.net(x.unsqueeze(0))  # batch 1
         dist = Beta(alpha, beta)
         if deterministic:
@@ -159,6 +189,32 @@ class TwoStagePPOAgent:
             a = dist.rsample().clamp(1e-6, 1 - 1e-6)
         e = self._scale_to_effort(a, bounds)
         # log_prob in e-space = log_prob_Beta(a) - log(e_max - e_min)
+        log_prob_e = dist.log_prob(a).squeeze(-1) - self._jacobian_log_term(bounds)
+        return (
+            float(e.item()),
+            float(log_prob_e.item()),
+            float(value.item()),
+            float(a.item()),
+            x.detach(),
+        )
+
+    def act_with_env_obs(self, obs: torch.Tensor, bounds_stage1: Tuple[float, float], bounds_stage2: Tuple[float, float], deterministic: bool = False):
+        """Act given the environment-provided observation vector.
+
+        This leverages revealed Stage-1 information for Stage-2 decisions.
+        """
+        self.net.eval()
+        x = self._build_state_from_env_obs(obs, bounds_stage1, bounds_stage2)
+        alpha, beta, value = self.net(x.unsqueeze(0))
+        dist = Beta(alpha, beta)
+        if deterministic:
+            a = (alpha / (alpha + beta)).clamp(1e-6, 1 - 1e-6)
+        else:
+            a = dist.rsample().clamp(1e-6, 1 - 1e-6)
+        # Choose bounds by stage from obs[0]
+        stage_indicator = float(obs[0].item())
+        bounds = bounds_stage1 if stage_indicator <= 1.5 else bounds_stage2
+        e = self._scale_to_effort(a, bounds)
         log_prob_e = dist.log_prob(a).squeeze(-1) - self._jacobian_log_term(bounds)
         return (
             float(e.item()),
