@@ -51,35 +51,59 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     """
     w_h, w_l, k = cfg["w_h"], cfg["w_l"], cfg["k"]
     effort_bounds = tuple(cfg["effort_bounds_stage2"])  # (0, 200)
-    train_qs = list(train_qs if train_qs is not None else cfg["q_list"])
+    # Curriculum: start training only at q=55 unless explicitly overridden upstream
+    train_qs = [55.0]
     eval_qs = list(eval_qs if eval_qs is not None else train_qs)
 
     # PPO agent with 3-dim state: [q, k, w_gap]
-    ppo_cfg = PPOConfig(steps_per_update=2048, epochs=15, minibatch_size=128, state_dim=3, hidden=64)
+    ppo_cfg = PPOConfig(
+        steps_per_update=8192,
+        epochs=10,
+        minibatch_size=512,
+        state_dim=3,
+        hidden=64,
+        opponent_sync_interval=5,
+        opponent_ema_tau=0.1,
+        entropy_coef=0.02,
+        lr=3e-4,
+    )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
 
     history: List[float] = []
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
+    # Entropy decay schedule: 0.02 -> 0.005 over first 50 updates
+    start_entropy, end_entropy, decay_updates = 0.02, 0.005, 50
+    update_idx = 0
 
     while steps_done < total_steps_target:
+        # Apply entropy decay before this update
+        progress = min(1.0, float(update_idx) / float(decay_updates))
+        agent.cfg.entropy_coef = start_entropy + (end_entropy - start_entropy) * progress
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
             env = TwoPlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=effort_bounds, seed=cfg.get("seed", 42))
 
+            # Symmetric on-policy sampling for both players
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             a1_norm, e1, logp1, v1 = agent.act(s1)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
-            a2_norm, e2, logp2, v2 = agent.act(s2)
+            # Use lagged opponent for the other player to stabilize learning
+            a2_norm, e2, logp2, _ = agent.act_opponent(s2)
+            # For GAE targets, use current net's value estimate on s2
+            with torch.no_grad():
+                _, v2 = agent.net.dist(s2)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
+            # Store both players' on-policy samples
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
             agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         agent.update()
+        update_idx += 1
         steps_done += steps_this
 
     # Build rows for each evaluation q
