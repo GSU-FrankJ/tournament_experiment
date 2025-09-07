@@ -58,14 +58,14 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
         steps_per_update=16384,
-        epochs=15,
+        epochs=20,
         minibatch_size=1024,
         state_dim=3,
         hidden=64,
-        opponent_sync_interval=5,
+        opponent_sync_interval=2,
         opponent_ema_tau=0.0,
         entropy_coef=0.02,
-        lr=2e-4,
+        lr=3e-4,
         clip_eps=0.25,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
