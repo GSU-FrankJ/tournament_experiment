@@ -62,10 +62,10 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
         minibatch_size=1024,
         state_dim=3,
         hidden=64,
-        opponent_sync_interval=10,
+        opponent_sync_interval=5,
         opponent_ema_tau=0.0,
         entropy_coef=0.02,
-        lr=1e-4,
+        lr=2e-4,
         clip_eps=0.25,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
