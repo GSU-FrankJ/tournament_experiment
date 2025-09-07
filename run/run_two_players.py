@@ -57,15 +57,16 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
-        steps_per_update=8192,
-        epochs=20,
+        steps_per_update=16384,
+        epochs=15,
         minibatch_size=1024,
         state_dim=3,
         hidden=64,
-        opponent_sync_interval=15,
+        opponent_sync_interval=10,
         opponent_ema_tau=0.0,
         entropy_coef=0.02,
         lr=1e-4,
+        clip_eps=0.25,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
 
@@ -73,8 +74,8 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
-    # Entropy decay schedule: 0.02 -> 0.0 over first 50 updates
-    start_entropy, end_entropy, decay_updates = 0.02, 0.0, 50
+    # Entropy decay schedule: 0.02 -> 0.002 over first 50 updates (floor)
+    start_entropy, end_entropy, decay_updates = 0.02, 0.002, 50
     update_idx = 0
 
     while steps_done < total_steps_target:
