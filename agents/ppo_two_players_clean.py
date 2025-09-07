@@ -62,6 +62,9 @@ class PPOConfig:
     minibatch_size: int = 256
     state_dim: int = 3  # [q_norm, k_norm, wgap_norm]
     hidden: int = 64
+    # Opponent policy lag (self-play stabilization)
+    opponent_sync_interval: int = 5  # sync every N PPO updates
+    opponent_ema_tau: float = 0.0     # 0.0 -> hard copy; (0,1] -> EMA
 
 
 class PPOTwoPlayersBandit:
@@ -72,6 +75,13 @@ class PPOTwoPlayersBandit:
 
         self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
+        # Lagged opponent network (frozen)
+        self.opp_net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
+        self.opp_net.load_state_dict(self.net.state_dict())
+        for p in self.opp_net.parameters():
+            p.requires_grad_(False)
+
+        self.update_counter = 0
 
         # rollout storage
         self.reset_storage()
@@ -86,13 +96,20 @@ class PPOTwoPlayersBandit:
             t = t.unsqueeze(0)
         return t.to(self.device)
 
-    def act(self, state: torch.Tensor):
-        dist, value = self.net.dist(state)
+    def _act_with_net(self, net: ActorCritic, state: torch.Tensor):
+        dist, value = net.dist(state)
         a_norm = dist.sample()
         logp = dist.log_prob(a_norm).squeeze(-1)
         # map to effort
         effort = self.low + a_norm.squeeze(-1) * (self.high - self.low)
         return a_norm.detach(), effort.detach(), logp.detach(), value.detach()
+
+    def act(self, state: torch.Tensor):
+        return self._act_with_net(self.net, state)
+
+    def act_opponent(self, state: torch.Tensor):
+        with torch.no_grad():
+            return self._act_with_net(self.opp_net, state)
 
     def evaluate_actions(self, states: torch.Tensor, actions_norm: torch.Tensor):
         dist, values = self.net.dist(states)
@@ -188,6 +205,18 @@ class PPOTwoPlayersBandit:
                 self.opt.step()
 
         self.reset_storage()
+        # Update opponent with lag
+        self.update_counter += 1
+        if self.cfg.opponent_sync_interval > 0 and (self.update_counter % self.cfg.opponent_sync_interval == 0):
+            tau = float(self.cfg.opponent_ema_tau)
+            if tau <= 0.0:
+                # hard copy
+                self.opp_net.load_state_dict(self.net.state_dict())
+            else:
+                # EMA: opp = (1-tau)*opp + tau*net
+                with torch.no_grad():
+                    for p_opp, p_net in zip(self.opp_net.parameters(), self.net.parameters()):
+                        p_opp.mul_(1.0 - tau).add_(p_net, alpha=tau)
 
     # ---- utility ----
     def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
