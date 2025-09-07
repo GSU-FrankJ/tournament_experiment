@@ -24,6 +24,7 @@ config = {
 
 # Dynamically compute theoretical symmetric equilibrium effort (legacy fields)
 # NOTE: For overlays, use utils.theory.e_star with denominator 6 per spec.
-config["effort"] = (config["w_h"] - config["w_l"]) / (6 * config["k"] * config["q"])  # spec
+# Two-player single-stage uses denominator 4
+config["effort"] = (config["w_h"] - config["w_l"]) / (4 * config["k"] * config["q"])  # 2p-1stage
 config["cost"] = config["k"] * config["effort"] ** 2
 config["eu"] = round(((config["w_h"] + config["w_l"]) / 2 - config["k"] * config["effort"] ** 2), 2)

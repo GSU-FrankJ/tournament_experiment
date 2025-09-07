@@ -1,68 +1,85 @@
 # Tournament Experiment
-This repository implements a set of game-theoretic simulation experiments, focusing on players' effort allocation and utility computation under various settings. It supports both one-stage and two-stage environments, multiple players, heterogeneous parameters, and different optimization strategies including Gradient Descent and PPO.
+
+This repository contains game‑theoretic tournament experiments. The current active track focuses on the one‑stage, two‑player symmetric tournament and verifies whether a PPO agent can learn the theoretical symmetric effort.
+
 ## Project Structure
+
+```
 tournament_experiment/
 ├── config/              # Experiment configurations
-├── envs/                # Game environments (one-stage, two-stage)
-├── agents/              # Solvers and policy optimization agents
-├── run/                 # Experiment entry points
-├── results/             # Output tables and logs
-├── utils/               # Logging, evaluation, and plotting tools
-└── main.py              # Master controller for experiment selection
+├── envs/                # Environments (two-player one-stage active)
+├── agents/              # Agents (clean PPO for two-player is active)
+├── run/                 # Entry points (two-player runner active)
+├── results/             # Output CSVs and figures
+├── utils/               # Probability, theory, plotting, logging
+└── backup/              # Archived legacy scripts/environments
+```
+
+Legacy multi-player / two‑stage files have been moved to `backup/` to keep the two‑player track minimal.
+
 ## Installation
-We recommend using Python 3.8+ with a virtual environment:
-```bash
-git clone https://github.com/your_username/tournament_experiment.git
-cd tournament_experiment
 
-# Install dependencies
+We recommend Python 3.8+ and a virtual environment.
+
+```
 pip install -r requirements.txt
+```
 
-How to Run
+## Two‑Player One‑Stage PPO (Denominator 4)
 
-Each experiment can be executed directly via the scripts in the run/ directory:
+- Theory (two identical players): `e*(q) = (w_H − w_L) / (4 q k)`.
+- Implementation:
+  - Environment: `envs/two_players_env.py` (win probability via `utils/prob.p_from_diff`).
+  - PPO agent: `agents/ppo_two_players_clean.py` (Beta policy, log_prob, ratio, clip, GAE).
+  - Runner: `run/run_two_players.py`.
 
-1. One-Stage Game with Two Identical Players
+### Hyperparameters (PPO)
 
-python run/run_two_players.py
+- gamma: 0.99
+- gae_lambda: 0.95
+- clip_eps: 0.2
+- lr: 3e-4 (Adam)
+- value_coef: 0.5
+- entropy_coef: 0.01
+- max_grad_norm: 0.5
+- steps_per_update: 2048
+- epochs: 15
+- minibatch_size: 256 (agent default; runner uses 128)
+- state_dim: 3 with features `[q_norm, k_norm, w_gap_norm]`
+- hidden: 64
 
-2. One-Stage Game with Three Identical Players
+### Config (defaults)
 
-python run/run_three_players.py
+- Prizes: `w_H=6.5`, `w_L=3.0`
+- Cost: `k=0.0004` (fixed)
+- Noise list: `q_list=[25.0, 40.0, 55.0]`
+- Effort bounds: `[0, 200]`
 
-3. Different Cost Parameters ($k_1 \ne k_2$)
+### Train and Evaluate
 
-python run/run_diff_cost.py
+- Train once across all q’s and evaluate each q:
 
-4. Different Ability Parameters ($l_1 > l_2$)
+```
+python3 run/run_two_players.py --method ppo --episodes 100000
+```
 
-python run/run_diff_ability.py
+- Train only on a specific q (and evaluate that q):
 
-5. Two-Stage Game
+```
+python3 run/run_two_players.py --method ppo --q 40 --episodes 100000
+```
 
-python run/run_two_stage.py
+- Closed‑form baseline rows (uses denominator 4):
 
-Alternatively, you can use the master script to choose an experiment interactively:
+```
+python3 run/run_two_players.py --method gradient --q 40
+```
 
-python main.py
+### Outputs
 
-Supported Solvers
-	•	Gradient-based Optimizer: agents/gradient_solver.py
-	•	PPO: agents/ppo_agent.py
+- CSV: `results/one_stage_two_players.csv` (standardized header via `utils.logger.save_standardized_result`).
+- Plot: `results/one_stage_two_players.png` with learning curve and e*(q) overlays.
 
-You can modify hyperparameters such as learning rate, exploration noise, and update intervals in the corresponding config files.
+## Contact
 
-Output Format
-	•	Numerical results are written to results/tables/*.csv
-	•	Training logs are saved under results/logs/
-	•	Visualization utilities are available in utils/plot.py
-
-Customization
-
-To create a new experiment:
-	1.	Create a new configuration file under config/
-	2.	Add a corresponding run script in run/
-
-Contact
-
-For questions or contributions, please reach out to: fjiang4@student.gsu.edu
+For questions or contributions: `fjiang4@student.gsu.edu`.
