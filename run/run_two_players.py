@@ -51,21 +51,21 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     """
     w_h, w_l, k = cfg["w_h"], cfg["w_l"], cfg["k"]
     effort_bounds = tuple(cfg["effort_bounds_stage2"])  # (0, 200)
-    # Curriculum: start training only at q=55 unless explicitly overridden upstream
-    train_qs = [55.0]
+    # Respect CLI-provided training set; default to config q_list
+    train_qs = list(train_qs if train_qs is not None else cfg["q_list"])
     eval_qs = list(eval_qs if eval_qs is not None else train_qs)
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
         steps_per_update=8192,
-        epochs=10,
-        minibatch_size=512,
+        epochs=20,
+        minibatch_size=1024,
         state_dim=3,
         hidden=64,
-        opponent_sync_interval=5,
-        opponent_ema_tau=0.1,
+        opponent_sync_interval=15,
+        opponent_ema_tau=0.0,
         entropy_coef=0.02,
-        lr=3e-4,
+        lr=1e-4,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
 
@@ -73,8 +73,8 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
-    # Entropy decay schedule: 0.02 -> 0.005 over first 50 updates
-    start_entropy, end_entropy, decay_updates = 0.02, 0.005, 50
+    # Entropy decay schedule: 0.02 -> 0.0 over first 50 updates
+    start_entropy, end_entropy, decay_updates = 0.02, 0.0, 50
     update_idx = 0
 
     while steps_done < total_steps_target:
@@ -102,6 +102,28 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         agent.update()
+        # After each PPO update, evaluate and log gaps for quick monitoring
+        upd_i = update_idx + 1
+        try:
+            for q_eval in eval_qs:
+                e2_star_val = clip_stage2(e_star_two_players(q_eval, w_h, w_l, k), effort_bounds)
+                s_eval = agent.state_from_params(q=float(q_eval), k=k, w_h=w_h, w_l=w_l)
+                with torch.no_grad():
+                    dist, _ = agent.net.dist(s_eval)
+                    alpha = dist.concentration1.squeeze()
+                    beta = dist.concentration0.squeeze()
+                    if (alpha > 1.0 and beta > 1.0):
+                        a_eval = (alpha - 1.0) / (alpha + beta - 2.0)
+                    else:
+                        # Fallback: sample-average action
+                        samples = dist.sample((256,)).squeeze(-1)
+                        a_eval = samples.mean()
+                    final_e2_eval = float(effort_bounds[0] + a_eval.item() * (effort_bounds[1] - effort_bounds[0]))
+                gap = abs(final_e2_eval - e2_star_val)
+                print(f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, entropy={agent.cfg.entropy_coef:.3f}")
+        except Exception as _e:
+            # Keep training robust to any eval hiccup
+            pass
         update_idx += 1
         steps_done += steps_this
 
@@ -110,12 +132,19 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     for q in eval_qs:
         e2_star_val = clip_stage2(e_star_two_players(q, w_h, w_l, k), effort_bounds)
 
-        # Evaluate by using mean action of current policy
+        # Evaluate with Beta mode when defined (alpha,beta>1), else sample-average
         s_eval = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
         with torch.no_grad():
             dist, _ = agent.net.dist(s_eval)
-            a_mean = (dist.concentration1 / (dist.concentration1 + dist.concentration0)).squeeze().cpu().item()
-        final_e2 = float(effort_bounds[0] + a_mean * (effort_bounds[1] - effort_bounds[0]))
+            alpha = dist.concentration1.squeeze()
+            beta = dist.concentration0.squeeze()
+            if (alpha > 1.0 and beta > 1.0):
+                a_eval = (alpha - 1.0) / (alpha + beta - 2.0)
+            else:
+                samples = dist.sample((512,)).squeeze(-1)
+                a_eval = samples.mean()
+            a_eval = float(a_eval.detach().cpu().item())
+        final_e2 = float(effort_bounds[0] + a_eval * (effort_bounds[1] - effort_bounds[0]))
 
         row = build_csv_row(
             stage1_weight=cfg["stage1_weight"],
