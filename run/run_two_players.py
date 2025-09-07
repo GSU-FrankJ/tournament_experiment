@@ -98,9 +98,8 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
-            # Store both players' on-policy samples
+            # Store only the learner's on-policy sample (keep opponent lagged but off-storage)
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         agent.update()
         update_idx += 1
