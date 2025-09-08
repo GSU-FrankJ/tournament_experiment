@@ -9,6 +9,7 @@ stage to the CSV's stage-2 fields (stage-1 fields set to 0).
 import sys
 import os
 import argparse
+import math
 from typing import Dict, List, Optional
 import numpy as np
 import torch
@@ -62,7 +63,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
         minibatch_size=1024,
         state_dim=3,
         hidden=64,
-        opponent_sync_interval=2,
+        opponent_sync_interval=1,
         opponent_ema_tau=0.0,
         entropy_coef=0.02,
         lr=3e-4,
@@ -77,30 +78,53 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     # Entropy decay schedule: 0.02 -> 0.002 over first 50 updates (floor)
     start_entropy, end_entropy, decay_updates = 0.02, 0.002, 50
     update_idx = 0
+    # Late-phase settings
+    total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
+    late_updates = min(100, total_updates)  # last 50-100 updates; cap by total
+    start_late = max(0, total_updates - late_updates)
 
     while steps_done < total_steps_target:
         # Apply entropy decay before this update
         progress = min(1.0, float(update_idx) / float(decay_updates))
         agent.cfg.entropy_coef = start_entropy + (end_entropy - start_entropy) * progress
+        # Late-phase clip schedule: 0.30 -> 0.25 over last N updates
+        if update_idx >= start_late:
+            if late_updates > 1:
+                prog_late = float(update_idx - start_late) / float(late_updates - 1)
+            else:
+                prog_late = 1.0
+            agent.cfg.clip_eps = 0.30 - 0.05 * max(0.0, min(1.0, prog_late))
+        else:
+            agent.cfg.clip_eps = 0.25
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
             env = TwoPlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=effort_bounds, seed=cfg.get("seed", 42))
 
-            # Symmetric on-policy sampling for both players
+            # Sampling strategy: early-phase uses lagged opponent and stores learner only;
+            # late-phase switches to fully on-policy symmetric sampling and stores both.
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
-            a1_norm, e1, logp1, v1 = agent.act(s1)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
-            # Use lagged opponent for the other player to stabilize learning
-            a2_norm, e2, logp2, _ = agent.act_opponent(s2)
-            # For GAE targets, use current net's value estimate on s2
-            with torch.no_grad():
-                _, v2 = agent.net.dist(s2)
+            if update_idx >= start_late:
+                # Fully on-policy self-play
+                a1_norm, e1, logp1, v1 = agent.act(s1)
+                a2_norm, e2, logp2, v2 = agent.act(s2)
+            else:
+                a1_norm, e1, logp1, v1 = agent.act(s1)
+                a2_norm, e2, logp2, _ = agent.act_opponent(s2)
+                # For GAE targets, use current net's value estimate on s2
+                with torch.no_grad():
+                    _, v2 = agent.net.dist(s2)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
-            # Store only the learner's on-policy sample (keep opponent lagged but off-storage)
-            agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+            if update_idx >= start_late:
+                # Store both players' on-policy samples in late phase
+                agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+            else:
+                # Store only the learner's on-policy sample (keep opponent lagged but off-storage)
+                agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         agent.update()
         # After each PPO update, evaluate and log gaps for quick monitoring
