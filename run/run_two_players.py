@@ -82,20 +82,35 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
     late_updates = min(100, total_updates)  # last 50-100 updates; cap by total
     start_late = max(0, total_updates - late_updates)
+    # Entropy final squeeze to 0.0 in the last 30 updates
+    entropy_zero_updates = min(30, total_updates)
+    start_entropy_zero = max(0, total_updates - entropy_zero_updates)
+    # LR boost in last 50 updates: 3e-4 -> 4e-4
+    lr_base = ppo_cfg.lr
+    lr_boost_value = 4e-4
+    lr_boost_updates = min(50, total_updates)
+    start_lr_late = max(0, total_updates - lr_boost_updates)
 
     while steps_done < total_steps_target:
         # Apply entropy decay before this update
         progress = min(1.0, float(update_idx) / float(decay_updates))
         agent.cfg.entropy_coef = start_entropy + (end_entropy - start_entropy) * progress
-        # Late-phase clip schedule: 0.30 -> 0.25 over last N updates
+        # Force entropy to 0.0 in the last ~30 updates for tighter convergence
+        if update_idx >= start_entropy_zero:
+            agent.cfg.entropy_coef = 0.0
+        # Late-phase clip schedule: 0.35 -> 0.25 over last N updates (slightly larger at start of late phase)
         if update_idx >= start_late:
             if late_updates > 1:
                 prog_late = float(update_idx - start_late) / float(late_updates - 1)
             else:
                 prog_late = 1.0
-            agent.cfg.clip_eps = 0.30 - 0.05 * max(0.0, min(1.0, prog_late))
+            agent.cfg.clip_eps = 0.35 - 0.10 * max(0.0, min(1.0, prog_late))
         else:
             agent.cfg.clip_eps = 0.25
+        # LR boost in the last ~50 updates
+        new_lr = lr_boost_value if update_idx >= start_lr_late else lr_base
+        for g in agent.opt.param_groups:
+            g["lr"] = new_lr
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
