@@ -17,10 +17,14 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from typing import Dict, List, Optional
 
 import numpy as np
 import torch
+
+# Ensure project root is on sys.path when executing as a script
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.different_ability_two_players import (
     DIFFERENT_ABILITY_CONFIG,
@@ -70,7 +74,7 @@ def run_gradient(cfg: Dict) -> Dict:
     }
 
 
-def run_ppo(cfg: Dict, episodes: int) -> Dict:
+def run_ppo(cfg: Dict, episodes: int, updates: Optional[int] = None) -> Dict:
     # Build environment and theory
     env = DifferentAbilityEnv(cfg)
     e1_th, e2_th, _, _, _, _ = calculate_theoretical_efforts_different_ability(
@@ -107,6 +111,10 @@ def run_ppo(cfg: Dict, episodes: int) -> Dict:
     steps_done = 0
     update_idx = 0
     low, high = tuple(cfg["effort_range"])
+
+    # If explicit updates provided, override total steps using PPO steps_per_update
+    if updates is not None:
+        total_steps_target = int(updates) * ppo_cfg.steps_per_update
 
     # Late-phase setup
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
@@ -231,7 +239,8 @@ def main():
     parser = argparse.ArgumentParser(description="Different-Ability Two-Player Experiment")
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (else run default from config)")
-    parser.add_argument("--episodes", type=int, default=100000, help="Episodes for PPO")
+    parser.add_argument("--episodes", type=int, default=100000, help="Total steps for PPO (ignored if --updates is set)")
+    parser.add_argument("--updates", type=int, help="Number of PPO updates (episodes = updates * steps_per_update)")
     args = parser.parse_args()
 
     base = dict(DIFFERENT_ABILITY_CONFIG)
@@ -245,10 +254,9 @@ def main():
     if args.method == "gradient":
         rows.append(run_gradient(base))
     else:
-        rows.append(run_ppo(base, episodes=args.episodes))
+        rows.append(run_ppo(base, episodes=args.episodes, updates=args.updates))
     save_results(rows)
 
 
 if __name__ == "__main__":
     main()
-
