@@ -104,7 +104,8 @@ def run_ppo(cfg: Dict, episodes: int, updates: Optional[int] = None) -> Dict:
         l_self_n = norm01(l_self, denom)
         l_other_n = norm01(l_other, denom)
         s = torch.tensor([q_norm, k_norm, wgap_norm, l_self_n, l_other_n], dtype=torch.float32)
-        return s.unsqueeze(0)
+        # Ensure state is on the same device as the agent/network
+        return s.unsqueeze(0).to(agent.device)
 
     # Schedules similar to run_two_players.py
     total_steps_target = int(episodes)
