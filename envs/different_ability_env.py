@@ -76,10 +76,10 @@ class DifferentAbilityEnv:
 
     # ---- probability / utility ----
     def probability_win_player1(self, e1: float, e2: float) -> float:
-        """P(l1*e1 + ε1 > l2*e2 + ε2) with ε1, ε2 ~ U(-q, q)."""
-        eff_e1 = self.l1 * e1
-        eff_e2 = self.l2 * e2
-        d = eff_e2 - eff_e1  # threshold for ε1 - ε2
+        """P(e1 + l1 + ε1 > e2 + l2 + ε2) with ε1, ε2 ~ U(-q, q)."""
+        score1 = e1 + self.l1
+        score2 = e2 + self.l2
+        d = score2 - score1  # threshold for ε1 - ε2
 
         if d <= -2 * self.q:
             return 1.0
@@ -122,7 +122,7 @@ class DifferentAbilityEnv:
         done = True
         info = {
             "efforts": [e1, e2],
-            "effective_efforts": [self.l1 * e1, self.l2 * e2],
+            "effective_efforts": [e1 + self.l1, e2 + self.l2],
             "win_probabilities": [p1, 1.0 - p1],
             "costs": [c1, c2],
             "utilities": [u1, u2],
@@ -159,7 +159,7 @@ class DifferentAbilityEnv:
 
         return {
             "efforts": efforts,
-            "effective_efforts": [self.l1 * e1, self.l2 * e2],
+            "effective_efforts": [e1 + self.l1, e2 + self.l2],
             "theoretical_efforts": self.theoretical_efforts or [self.theoretical_effort1, self.theoretical_effort2],
             "gaps": gaps,
             "max_gap": max(gaps) if gaps else 0.0,
@@ -189,4 +189,3 @@ class DifferentAbilityEnv:
 
     def get_cost_parameters(self) -> List[float]:
         return [self.k1, self.k2]
-

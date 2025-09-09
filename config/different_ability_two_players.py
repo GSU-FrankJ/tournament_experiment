@@ -23,76 +23,58 @@ DIFFERENT_ABILITY_CONFIG = {
     "seed": 42
 }
 
-def calculate_theoretical_efforts_different_ability(q: float, k1: float, k2: float, 
-                                                   l1: float, l2: float, 
-                                                   w_h: float, w_l: float) -> Tuple[float, float, float, float, float, float]:
+def calculate_theoretical_efforts_different_ability(
+    q: float,
+    k1: float,
+    k2: float,
+    l1: float,
+    l2: float,
+    w_h: float,
+    w_l: float,
+) -> Tuple[float, float, float, float, float, float]:
     """
-    计算具有不同能力玩家的理论最优努力值和期望收益
-    
-    对于不同能力的Nash equilibrium，我们采用更适合的公式：
-    在对称成本但不对称能力的情况下，努力值的比例应该反映能力比例，
-    但总体水平需要适当调整以适应给定的参数范围。
-    
-    采用修正的平衡公式，使努力值在合理范围内：
-    e_i = (w_h - w_l) * sqrt(l_i) / (2 * sqrt(k) * q)
-    
-    Args:
-        q: 奖金参数/噪声参数
-        k1, k2: 成本参数 (在这个场景中 k1 = k2 = k)
-        l1, l2: 能力参数 (l1 > l2)
-        w_h, w_l: 权重参数
-        
-    Returns:
-        (e1_optimal, e2_optimal, cost1_optimal, cost2_optimal, EU1_optimal, EU2_optimal)
+    使用解析解计算不同能力下的对称均衡努力与理论效用。
+
+    表中给出的对称均衡努力（e1*=e2*=e*）为：
+        e* = ((2q - (l1 - l2)) (w_h - w_l)) / (8 k q^2)
+
+    注意：该模型为加法型能力 y_i = e_i + l_i + ε_i，ε_i ~ U(-q,q)。
+
+    返回：
+        (e1*, e2*, c1*, c2*, EU1*, EU2*)
     """
-    
-    # 修正的理论最优努力值计算
-    # 使用平方根关系以保持在合理范围内
-    w_diff = w_h - w_l
-    
-    # 基础努力水平
-    base_effort = w_diff / (2 * np.sqrt(k1) * q)
-    
-    # 按能力比例调整，但使用平方根以避免过高数值
-    e1_optimal = base_effort * np.sqrt(l1) / 2  # 除以2使数值合理
-    e2_optimal = base_effort * np.sqrt(l2) / 2
-    
-    # 进一步调整以确保在范围内
-    scaling_factor = min(1.0, 100.0 / max(e1_optimal, e2_optimal))
-    e1_optimal *= scaling_factor
-    e2_optimal *= scaling_factor
-    
-    # 计算成本
+    w_diff = float(w_h - w_l)
+    k = float(k1)  # k1 = k2 = k
+    delta_l = float(l1 - l2)
+
+    # 解析式（下界到0，避免负努力）
+    e_star = ((2.0 * q - delta_l) * w_diff) / (8.0 * k * (q ** 2))
+    e_star = max(0.0, e_star)
+
+    e1_optimal = e_star
+    e2_optimal = e_star
+
+    # 成本 c(e) = k e^2
     cost1_optimal = k1 * (e1_optimal ** 2)
     cost2_optimal = k2 * (e2_optimal ** 2)
-    
-    # 计算在最优努力下的期望收益
-    # 使用 uniform noise 模型计算精确的获胜概率
-    # P(player 1 wins) = P(l1*e1 + ε1 > l2*e2 + ε2)
-    # 其中 ε1, ε2 ~ Uniform(-q, q)
-    
-    effective_diff = l1 * e1_optimal - l2 * e2_optimal
-    
-    # 对于 uniform noise，差值 ε1 - ε2 具有三角分布在 [-2q, 2q]
-    # P(player 1 wins) = P(ε1 - ε2 > l2*e2 - l1*e1)
-    d = l2 * e2_optimal - l1 * e1_optimal
-    
-    # 计算精确的获胜概率
+
+    # 胜率：P(e1 + l1 + ε1 > e2 + l2 + ε2)
+    # 令 d = (e2 + l2) - (e1 + l1)，则 ε1 - ε2 ~ Tri(-2q, 2q)
+    d = (e2_optimal + l2) - (e1_optimal + l1)
     if d <= -2 * q:
         p1_win = 1.0
     elif d >= 2 * q:
         p1_win = 0.0
     elif d < 0:
-        p1_win = 1.0 - ((d + 2*q)**2) / (8 * q**2)
+        p1_win = 1.0 - ((d + 2 * q) ** 2) / (8 * q ** 2)
     else:
-        p1_win = ((2*q - d)**2) / (8 * q**2)
-    
+        p1_win = ((2 * q - d) ** 2) / (8 * q ** 2)
     p2_win = 1.0 - p1_win
-    
-    # 期望收益
+
+    # 期望效用
     EU1_optimal = w_l + p1_win * w_diff - cost1_optimal
     EU2_optimal = w_l + p2_win * w_diff - cost2_optimal
-    
+
     return e1_optimal, e2_optimal, cost1_optimal, cost2_optimal, EU1_optimal, EU2_optimal
 
 # 预计算所有Q值的理论结果 - 根据表格的三个 q 值
