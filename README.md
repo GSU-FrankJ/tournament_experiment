@@ -30,23 +30,20 @@ pip install -r requirements.txt
 - Theory (two identical players): `e*(q) = (w_H − w_L) / (4 q k)`.
 - Implementation:
   - Environment: `envs/two_players_env.py` (win probability via `utils/prob.p_from_diff`).
-  - PPO agent: `agents/ppo_two_players_clean.py` (Beta policy, log_prob, ratio, clip, GAE).
-  - Runner: `run/run_two_players.py`.
+  - PPO agent: `agents/ppo_two_players_clean.py` (Beta policy over normalized effort; GAE; clipping; opponent lag support).
+  - Runner: `run/run_two_players.py` (adds late‑phase schedules and self‑play sampling control).
 
-### Hyperparameters (PPO)
+### Runner Defaults and Schedules
 
-- gamma: 0.99
-- gae_lambda: 0.95
-- clip_eps: 0.2
-- lr: 3e-4 (Adam)
-- value_coef: 0.5
-- entropy_coef: 0.01
-- max_grad_norm: 0.5
-- steps_per_update: 2048
-- epochs: 15
-- minibatch_size: 256 (agent default; runner uses 128)
-- state_dim: 3 with features `[q_norm, k_norm, w_gap_norm]`
-- hidden: 64
+- gamma: 0.99; gae_lambda: 0.95; value_coef: 0.5; max_grad_norm: 0.5
+- steps_per_update: 16384; epochs: 20; minibatch_size: 1024; hidden: 64
+- clip schedule: 0.25 early; late‑phase anneal 0.35 → 0.25
+- entropy schedule: 0.02 → 0.002 over first 50 updates; forced to 0.0 in last ~30 updates
+- learning rate: 3e‑4 base; boosted to 4e‑4 in last ~50 updates
+- self‑play sampling:
+  - Early phase: learner vs lagged opponent; only learner transitions stored
+  - Late phase: fully on‑policy symmetric sampling; store both players’ transitions
+- state encoding (3‑D): `[q/60, k/1e‑3, (w_h−w_l)/10]`
 
 ### Config (defaults)
 
@@ -57,19 +54,23 @@ pip install -r requirements.txt
 
 ### Train and Evaluate
 
-- Train once across all q’s and evaluate each q:
+- Train once across all q’s (`config/one_stage_two_players.py:q_list=[25,40,55]`) and evaluate each q:
 
 ```
-python3 run/run_two_players.py --method ppo --episodes 100000
+python3 run/run_two_players.py --method ppo --episodes 131072
 ```
 
 - Train only on a specific q (and evaluate that q):
 
 ```
-python3 run/run_two_players.py --method ppo --q 40 --episodes 100000
+python3 run/run_two_players.py --method ppo --q 40 --episodes 131072
 ```
 
-- Closed‑form baseline rows (uses denominator 4):
+Tips:
+- `--episodes` is the total number of environment steps (bandit: one step per episode). Set it to a multiple of `steps_per_update=16384` for clean updates (e.g., 65536, 131072, 262144).
+- Override the training/eval set via `--q`; omit it to sweep all values in `q_list`.
+
+- Closed‑form baseline rows (denominator 4):
 
 ```
 python3 run/run_two_players.py --method gradient --q 40
@@ -79,6 +80,8 @@ python3 run/run_two_players.py --method gradient --q 40
 
 - CSV: `results/one_stage_two_players.csv` (standardized header via `utils.logger.save_standardized_result`).
 - Plot: `results/one_stage_two_players.png` with learning curve and e*(q) overlays.
+
+During training, the runner also prints per‑update diagnostics for each evaluation `q`: theoretical `e*`, policy implied effort (via Beta mode if defined, else sample mean), absolute gap, and current entropy.
 
 ## Contact
 
