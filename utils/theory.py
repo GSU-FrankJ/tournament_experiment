@@ -32,6 +32,19 @@ def e_star_two_players(q: float, w_h: float, w_l: float, k: float) -> float:
     return (w_h - w_l) / (4.0 * q * k)
 
 
+def e_star_three_players(q: float, w_h: float, w_l: float, k: float) -> float:
+    """Three-player single-stage benchmark effort per user specification.
+
+    The user’s requirement states the same closed-form as the two-player
+    single-stage formula:
+
+        e*(q) = (w_H - w_L) / (4 q k)
+
+    We expose it as a dedicated helper for clarity in run scripts.
+    """
+    return (w_h - w_l) / (4.0 * q * k)
+
+
 def clip_stage1(e: float, bounds: Tuple[float, float] = (0.0, 100.0)) -> float:
     """Clip effort to Stage-1 bounds [0, 100]."""
     lo, hi = bounds
@@ -96,7 +109,6 @@ def eu_two_players_asymmetric_cost(q: float, w_h: float, w_l: float, k1: float, 
     ))
     eu2_num = (((4.0 * k1) ** 2) * k2 * (q**2) * (8.0 * k2 * (q**2) - w_gap) * w_gap)
     return eu1_num / denom, eu2_num / denom
-
 
 
 

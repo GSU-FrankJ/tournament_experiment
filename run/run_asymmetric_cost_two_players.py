@@ -63,7 +63,14 @@ def run_gradient(cfg: Dict) -> Dict:
     return row
 
 
-def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = None, eval_qs: Optional[List[float]] = None) -> List[Dict]:
+def run_ppo(
+    cfg: Dict,
+    episodes: int = 5000,
+    train_qs: Optional[List[float]] = None,
+    eval_qs: Optional[List[float]] = None,
+    steps_per_update_override: Optional[int] = None,
+    log_every: int = 10,
+) -> List[Dict]:
     w_h, w_l = cfg["w_h"], cfg["w_l"]
     k1, k2 = cfg["k1"], cfg["k2"]
     effort_bounds = tuple(cfg.get("effort_bounds_stage2", cfg.get("effort_range", (0.0, 200.0))))
@@ -71,7 +78,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     eval_qs = list(eval_qs if eval_qs is not None else train_qs)
 
     ppo_cfg = PPOConfig(
-        steps_per_update=8192,
+        steps_per_update=steps_per_update_override or 8192,
         epochs=10,
         minibatch_size=1024,
         state_dim=4,  # [q_norm, k_self_norm, k_opp_norm, wgap_norm]
@@ -89,6 +96,10 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     steps_done = 0
     update_idx = 0
 
+    # Pre-compute planned updates for progress display
+    total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
+    print(f"Starting PPO training: total_steps={total_steps_target}, steps_per_update={ppo_cfg.steps_per_update}, planned_updates={total_updates}", flush=True)
+
     while steps_done < total_steps_target:
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
@@ -104,6 +115,37 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
         agent.update()
         update_idx += 1
         steps_done += steps_this
+
+        # Periodic evaluation / progress print
+        if log_every and (update_idx % log_every == 0 or update_idx == 1):
+            try:
+                q_eval_list = eval_qs if eval_qs else [cfg["q"]]
+                for q_eval in q_eval_list:
+                    e1_star, e2_star = e_star_two_players_asymmetric_cost(q_eval, w_h, w_l, k1, k2)
+                    s1_eval = _state_tensor(agent, float(q_eval), k1, k2, w_h, w_l)
+                    s2_eval = _state_tensor(agent, float(q_eval), k2, k1, w_h, w_l)
+                    with torch.no_grad():
+                        # Player 1 role
+                        d1, _ = agent.net.dist(s1_eval)
+                        if (d1.concentration1.item() > 1.0 and d1.concentration0.item() > 1.0):
+                            a1 = (d1.concentration1 - 1.0) / (d1.concentration1 + d1.concentration0 - 2.0)
+                            a1 = float(a1.squeeze().clamp(0,1).item())
+                        else:
+                            a1 = float(d1.sample((512,)).mean().item())
+                        e1_eval = float(effort_bounds[0] + a1 * (effort_bounds[1] - effort_bounds[0]))
+                        # Player 2 role
+                        d2, _ = agent.net.dist(s2_eval)
+                        if (d2.concentration1.item() > 1.0 and d2.concentration0.item() > 1.0):
+                            a2 = (d2.concentration1 - 1.0) / (d2.concentration1 + d2.concentration0 - 2.0)
+                            a2 = float(a2.squeeze().clamp(0,1).item())
+                        else:
+                            a2 = float(d2.sample((512,)).mean().item())
+                        e2_eval = float(effort_bounds[0] + a2 * (effort_bounds[1] - effort_bounds[0]))
+                    gap1 = abs(e1_eval - e1_star)
+                    gap2 = abs(e2_eval - e2_star)
+                    print(f"[Update {update_idx}/{total_updates}] q={q_eval}: e1*={e1_star:.2f} e1={e1_eval:.2f} gap1={gap1:.2f} | e2*={e2_star:.2f} e2={e2_eval:.2f} gap2={gap2:.2f} | steps={steps_done}/{total_steps_target}", flush=True)
+            except Exception:
+                pass
 
     # Build rows for each q in eval
     rows: List[Dict] = []
@@ -150,6 +192,8 @@ def main():
     parser.add_argument("--method", choices=["gradient", "ppo"], default="ppo")
     parser.add_argument("--q", type=float, help="Optional single q value to run")
     parser.add_argument("--episodes", type=int, default=20000, help="Total environment steps for PPO")
+    parser.add_argument("--steps-per-update", type=int, default=None, help="Override PPO steps_per_update for faster progress updates")
+    parser.add_argument("--log-every", type=int, default=10, help="Print progress every N updates (1 for every update)")
     args = parser.parse_args()
 
     cfg = dict(base_config)
@@ -165,7 +209,14 @@ def main():
     else:
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])  # type: ignore
         eval_qs = train_qs
-        rows = run_ppo(cfg, episodes=args.episodes, train_qs=train_qs, eval_qs=eval_qs)
+        rows = run_ppo(
+            cfg,
+            episodes=args.episodes,
+            train_qs=train_qs,
+            eval_qs=eval_qs,
+            steps_per_update_override=args.steps_per_update,
+            log_every=args.log_every,
+        )
         for row in rows:
             save_result(row, out_csv)
 
