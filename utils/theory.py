@@ -44,6 +44,59 @@ def clip_stage2(e: float, bounds: Tuple[float, float] = (0.0, 200.0)) -> float:
     return max(lo, min(hi, float(e)))
 
 
+# ---- Asymmetric-cost two-player formulas ----
+def e_star_two_players_asymmetric_cost(q: float, w_h: float, w_l: float, k1: float, k2: float) -> tuple[float, float]:
+    """Closed-form equilibrium efforts for k1 != k2, l1 = l2.
+
+    Based on the user's provided expressions (reduces to symmetric case when k1=k2=k):
+
+        e1* = 2 k2 q (w_H - w_L) / (8 k1 k2 q^2 - (k1 - k2) (w_H - w_L))
+        e2* = 2 k1 q (w_H - w_L) / (8 k1 k2 q^2 - (k1 - k2) (w_H - w_L))
+
+    Returns (e1*, e2*).
+    """
+    w_gap = float(w_h) - float(w_l)
+    k1 = float(k1)
+    k2 = float(k2)
+    q = float(q)
+    denom = (8.0 * k1 * k2 * q * q) - ((k1 - k2) * w_gap)
+    if abs(denom) < 1e-12:
+        # Fallback to symmetric-like approximation to avoid division by zero
+        e_sym = e_star_two_players(q, w_h, w_l, (k1 + k2) / 2.0)
+        return e_sym, e_sym
+    e1 = (2.0 * k2 * q * w_gap) / denom
+    e2 = (2.0 * k1 * q * w_gap) / denom
+    return e1, e2
+
+
+def eu_two_players_asymmetric_cost(q: float, w_h: float, w_l: float, k1: float, k2: float) -> tuple[float, float]:
+    """Expected utilities at the asymmetric-cost equilibrium.
+
+    Uses the exact expressions provided by the user:
+
+        Eu1 = ((wH-wL)(32 k1^2 k2^2 q^4 - k1 k2 (16 k1 q^2 - 12 k2 q^2)(wH-wL) + (k1-k2)^2 (wH-wL)^2))
+               / (8 k1 k2 q^2 - k1 (wH-wL) + k2 (wH-wL))^2
+
+        Eu2 = ((4 k1)^2 k2 q^2 (8 k2 q^2 - (wH-wL))(wH-wL))
+               / (8 k1 k2 q^2 - k1 (wH-wL) + k2 (wH-wL))^2
+
+    Returns (Eu1, Eu2).
+    """
+    w_gap = float(w_h) - float(w_l)
+    k1 = float(k1)
+    k2 = float(k2)
+    q = float(q)
+    denom = (8.0 * k1 * k2 * q * q - k1 * w_gap + k2 * w_gap) ** 2
+    if denom <= 0:
+        return 0.0, 0.0
+    eu1_num = (w_gap * (
+        32.0 * (k1**2) * (k2**2) * (q**4)
+        - k1 * k2 * ((16.0 * k1 * (q**2) - 12.0 * k2 * (q**2)) * w_gap)
+        + ((k1 - k2) ** 2) * (w_gap ** 2)
+    ))
+    eu2_num = (((4.0 * k1) ** 2) * k2 * (q**2) * (8.0 * k2 * (q**2) - w_gap) * w_gap)
+    return eu1_num / denom, eu2_num / denom
+
 
 
 

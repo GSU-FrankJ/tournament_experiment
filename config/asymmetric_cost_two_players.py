@@ -27,22 +27,16 @@ config = {
 
 def calculate_theoretical_efforts(q_value, k1, k2, w_h, w_l):
     """
-    Calculate theoretical asymmetric equilibrium efforts for given parameters
-    
-    For asymmetric costs, the Nash equilibrium efforts are:
-    e1* = (w_h - w_l) * k2 / (4 * q * (k1 + k2) * k1)
-    e2* = (w_h - w_l) * k1 / (4 * q * (k1 + k2) * k2)
+    Calculate theoretical equilibrium using the exact asymmetric-cost formulas.
+
+    e1* = 2 k2 q (w_H - w_L) / (8 k1 k2 q^2 - (k1 - k2)(w_H - w_L))
+    e2* = 2 k1 q (w_H - w_L) / (8 k1 k2 q^2 - (k1 - k2)(w_H - w_L))
     """
-    w_diff = w_h - w_l
-    denominator = 4 * q_value * (k1 + k2)
-    
-    effort1 = w_diff * k2 / (denominator * k1)
-    effort2 = w_diff * k1 / (denominator * k2)
-    
-    cost1 = k1 * effort1 ** 2
-    cost2 = k2 * effort2 ** 2
-    
-    return effort1, effort2, cost1, cost2
+    from utils.theory import e_star_two_players_asymmetric_cost
+    e1, e2 = e_star_two_players_asymmetric_cost(q_value, w_h, w_l, k1, k2)
+    cost1 = k1 * e1 * e1
+    cost2 = k2 * e2 * e2
+    return e1, e2, cost1, cost2
 
 # Compute theoretical values for default q
 k1, k2 = config["k1"], config["k2"]
