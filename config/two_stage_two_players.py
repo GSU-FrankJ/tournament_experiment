@@ -3,9 +3,10 @@
 # Stage 2: Second-round decisions based on Stage 1 outcomes
 
 config = {
-    # Prizes (weights in CSV): stage1_weight = w_L, stage2_weight = w_H
-    "stage1_weight": 3.0,
-    "stage2_weight": 6.5,
+    # Stage weights: equal contribution of both stages to final payoff
+    # If you prefer absolute prize scaling, change both to the same positive value.
+    "stage1_weight": 0.5,
+    "stage2_weight": 0.5,
 
     # Basic game parameters
     "k": 0.0004,        # Default cost (symmetric)
