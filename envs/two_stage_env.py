@@ -32,6 +32,8 @@ class TwoStageEnv:
         # When 'logit', p_win = sigmoid((e_i - e_j) / (q * noise_factor))
         # This aligns with a softmax/logit victory model often used in tournaments
         self.prob_model = config.get("prob_model", "logit")
+        # Monte Carlo samples for total probability in Stage 2 (uniform noise model)
+        self.mc_total_samples: int = int(config.get("mc_total_samples", 4096))
         
         # Information revelation settings
         self.information_revelation = config["information_revelation"]
@@ -103,6 +105,30 @@ class TwoStageEnv:
         d = (float(e1) - float(e2)) / effective_q
         # Use torch.sigmoid for numerical stability; convert to Python float for consistency
         return float(torch.sigmoid(torch.tensor(d, dtype=torch.float32)).item())
+
+    def probability_total_uniform_mc(
+        self,
+        e1_s1: float,
+        e2_s1: float,
+        e1_s2: float,
+        e2_s2: float,
+        samples: int | None = None,
+    ) -> float:
+        """Monte Carlo estimate of P(total_1 > total_2) under uniform stage noises.
+
+        total_i = e_i1 + e_i2 + eps_i1 + eps_i2, where eps_it ~ U(-q*factor_t, q*factor_t).
+        """
+        n = int(samples or self.mc_total_samples)
+        q1 = float(self.q) * float(self.stage1_noise_factor)
+        q2 = float(self.q) * float(self.stage2_noise_factor)
+        # Sample independent noises for both players and both stages
+        eps11 = np.random.uniform(-q1, q1, size=n)
+        eps21 = np.random.uniform(-q1, q1, size=n)
+        eps12 = np.random.uniform(-q2, q2, size=n)
+        eps22 = np.random.uniform(-q2, q2, size=n)
+        tot1 = float(e1_s1) + float(e1_s2) + eps11 + eps12
+        tot2 = float(e2_s1) + float(e2_s2) + eps21 + eps22
+        return float(np.mean(tot1 > tot2))
     
     def compute_stage_utility(self, player_effort: float, other_efforts: List[float], 
                             stage: int) -> Tuple[float, float]:
@@ -254,15 +280,15 @@ class TwoStageEnv:
         self.stage1_outcomes = self.simulate_stage_outcome(efforts, stage=1)
         self.stage1_winner = self.stage1_outcomes["winner"]
         
-        # Compute Stage 1 utilities and costs
+        # Compute Stage 1 costs and immediate rewards (only costs here; prize decided after Stage 2)
         utilities = []
         costs = []
         
         for i in range(self.num_players):
             other_efforts = [efforts[j] for j in range(self.num_players) if j != i]
-            u, cost = self.compute_stage_utility(efforts[i], other_efforts, stage=1)
-            # Weight Stage-1 utility at the source to avoid double counting later
-            utilities.append(self.stage1_weight * u)
+            # Only cost now; no prize component at Stage 1
+            _, cost = self.compute_stage_utility(efforts[i], other_efforts, stage=1)
+            utilities.append(-cost)
             costs.append(cost)
         
         # Prepare states for Stage 2 (include information)
@@ -354,15 +380,27 @@ class TwoStageEnv:
         # Simulate Stage 2 outcome
         stage2_outcomes = self.simulate_stage_outcome(stage2_efforts, stage=2)
         
-        # Compute Stage 2 utilities and costs
+        # Compute Stage 2 utilities and costs (use total-output probability with uniform MC)
         stage2_utilities = []
         stage2_costs = []
         
+        if self.num_players != 2:
+            raise ValueError("Total-output Monte Carlo currently supports exactly 2 players")
+
+        # MC probability that player 0 wins based on total outputs across stages
+        p_total_p0 = self.probability_total_uniform_mc(
+            self.stage1_efforts[0], self.stage1_efforts[1], stage2_efforts[0], stage2_efforts[1]
+        )
+        p_total_p1 = 1.0 - p_total_p0
+
+        # Per-player utilities at Stage 2 using total probability
         for i in range(self.num_players):
-            other_efforts = [stage2_efforts[j] for j in range(self.num_players) if j != i]
-            u, cost = self.compute_stage_utility(stage2_efforts[i], other_efforts, stage=2)
-            stage2_utilities.append(u)
+            cost = self.k2 * (stage2_efforts[i] ** 2)
             stage2_costs.append(cost)
+        # rewards from prize component
+        u2_p0 = self.w_l + p_total_p0 * (self.w_h - self.w_l) - stage2_costs[0]
+        u2_p1 = self.w_l + p_total_p1 * (self.w_h - self.w_l) - stage2_costs[1]
+        stage2_utilities = [u2_p0, u2_p1]
         
         # Compute Stage-1 raw utilities (for logging) and costs; return only Stage-2 weighted utility as reward
         stage1_utilities = []
@@ -376,8 +414,8 @@ class TwoStageEnv:
             stage1_costs.append(cost1)
             total_costs.append(cost1 + stage2_costs[i])
         
-        # Weight Stage-2 utilities only
-        rewards_stage2_weighted = [self.stage2_weight * u2 for u2 in stage2_utilities]
+        # Final reward uses only Stage 2 prize component (Stage 1 costs already applied)
+        rewards_stage2_weighted = [u2 for u2 in stage2_utilities]
         
         # Final states as zeroed informative vectors matching state shape
         final_states = tuple(torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0]) for _ in range(self.num_players))
@@ -437,4 +475,3 @@ class TwoStageEnv:
     def get_stage1_information(self, player_id: int) -> Dict:
         """Get Stage 1 information available to a specific player"""
         return self.get_information_state(player_id)
-

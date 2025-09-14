@@ -26,7 +26,7 @@ config = {
     "information_revelation": "partial",  # "none", "partial", "full"
     "stage1_noise_factor": 1.0,
     "stage2_noise_factor": 1.0,
-    "reveal_opponent_effort": False,
+    "reveal_opponent_effort": True,
     "reveal_stage1_outcome": True,
     "reveal_noise_realization": False,
 
