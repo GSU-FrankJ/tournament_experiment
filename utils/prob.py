@@ -80,3 +80,6 @@ def p_from_efforts(e_i: Number, e_j: Number, q: float) -> Number:
 
 
 
+
+
+
