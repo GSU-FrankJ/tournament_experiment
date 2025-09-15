@@ -63,6 +63,9 @@ class PPOCfg:
     minibatch_size: int = 256
     hidden: int = 64
     state_dim: int = 8
+    # Opponent lag settings to avoid self-play gradient cancellation
+    opponent_sync_interval: int = 1  # sync every N updates
+    opponent_ema_tau: float = 0.0     # 0 -> hard copy; (0,1] -> EMA
 
 
 class TwoStagePPOAgent:
@@ -106,11 +109,18 @@ class TwoStagePPOAgent:
         self.net = ActorCritic(state_dim=self.cfg.state_dim, hidden=self.cfg.hidden).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=self.cfg.lr)
 
+        # Lagged opponent net (frozen)
+        self.opp_net = ActorCritic(state_dim=self.cfg.state_dim, hidden=self.cfg.hidden).to(self.device)
+        self.opp_net.load_state_dict(self.net.state_dict())
+        for p in self.opp_net.parameters():
+            p.requires_grad_(False)
+
         # Opponent effort running averages per stage (only stage 1 used)
         self._opp_sum = {1: 0.0, 2: 0.0}
         self._opp_cnt = {1: 0, 2: 0}
 
         self.reset_storage()
+        self.update_counter = 0
 
     # ----- feature helpers -----
     def _norm01(self, x: float, lo: float, hi: float) -> float:
@@ -167,9 +177,39 @@ class TwoStagePPOAgent:
         state = self._stage1_state(opp_signal)
         return self._act_with_state(state, bounds, deterministic)
 
+    def act_opponent(self, *, stage: int, opp_signal: float, bounds: Tuple[float, float], deterministic: bool = False):
+        state = self._stage1_state(opp_signal)
+        dist, value = self.opp_net.dist(state)
+        if deterministic:
+            alpha = dist.concentration1
+            beta = dist.concentration0
+            use_mean = (alpha > 1.0) & (beta > 1.0)
+            a = torch.where(use_mean, (alpha - 1.0) / (alpha + beta - 2.0), dist.sample())
+        else:
+            a = dist.sample()
+        logp = dist.log_prob(a).squeeze(-1)
+        lo, hi = float(bounds[0]), float(bounds[1])
+        effort = lo + a.squeeze(-1) * (hi - lo)
+        return effort.detach().cpu().item(), logp.detach(), value.detach(), a.detach(), state.detach()
+
     def act_with_env_obs(self, obs: torch.Tensor, bounds_stage1: Tuple[float, float], bounds_stage2: Tuple[float, float], deterministic: bool = False):
         state = self._stage2_state_from_obs(obs)
         return self._act_with_state(state, bounds_stage2, deterministic)
+
+    def act_with_env_obs_opponent(self, obs: torch.Tensor, bounds_stage1: Tuple[float, float], bounds_stage2: Tuple[float, float], deterministic: bool = False):
+        state = self._stage2_state_from_obs(obs)
+        dist, value = self.opp_net.dist(state)
+        if deterministic:
+            alpha = dist.concentration1
+            beta = dist.concentration0
+            use_mean = (alpha > 1.0) & (beta > 1.0)
+            a = torch.where(use_mean, (alpha - 1.0) / (alpha + beta - 2.0), dist.sample())
+        else:
+            a = dist.sample()
+        logp = dist.log_prob(a).squeeze(-1)
+        lo, hi = float(bounds_stage2[0]), float(bounds_stage2[1])
+        effort = lo + a.squeeze(-1) * (hi - lo)
+        return effort.detach().cpu().item(), logp.detach(), value.detach(), a.detach(), state.detach()
 
     # ----- storage -----
     def reset_storage(self):
@@ -241,6 +281,16 @@ class TwoStagePPOAgent:
                 self.opt.step()
 
         self.reset_storage()
+        # Sync lagged opponent
+        self.update_counter += 1
+        if self.cfg.opponent_sync_interval > 0 and (self.update_counter % self.cfg.opponent_sync_interval == 0):
+            tau = float(self.cfg.opponent_ema_tau)
+            if tau <= 0.0:
+                self.opp_net.load_state_dict(self.net.state_dict())
+            else:
+                with torch.no_grad():
+                    for p_opp, p_net in zip(self.opp_net.parameters(), self.net.parameters()):
+                        p_opp.mul_(1.0 - tau).add_(p_net, alpha=tau)
 
     # ----- opponent averages -----
     def opp_avg(self, stage: int) -> float:
@@ -255,4 +305,3 @@ class TwoStagePPOAgent:
     def update_opponent_avg(self, *, stage: int, opponent_effort: float):
         self._opp_sum[stage] = self._opp_sum.get(stage, 0.0) + float(opponent_effort)
         self._opp_cnt[stage] = self._opp_cnt.get(stage, 0) + 1
-

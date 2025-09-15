@@ -98,11 +98,18 @@ def run_ppo(cfg: Dict, episodes: int = 5000, *, prob: str = "uniform", episodes_
     for upd in range(episodes):
         # collect multiple episodes per PPO update
         avg_e1_batch = []
-        for _ in range(episodes_per_update):
+        for j in range(episodes_per_update):
             _ = env.reset()
+            learner_is_p1 = ((upd * episodes_per_update + j) % 2 == 0)
+
             # Stage 1
-            e1_p1, logp1, v1, a1_p1, s1_p1 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
-            e1_p2, logp2, v2, a1_p2, s1_p2 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+            if learner_is_p1:
+                e1_p1, logp1, v1, a1_p1, s1_p1 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+                e1_p2, _, _, _, _ = agent.act_opponent(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+            else:
+                e1_p1, _, _, _, _ = agent.act_opponent(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+                e1_p2, logp1, v1, a1_p1, s1_p1 = agent.act(stage=1, opp_signal=agent.opp_avg(1), bounds=tuple(cfg["effort_bounds_stage1"]))
+
             next_states, rewards_s1, costs_s1, done, info = env.step_stage1([
                 torch.tensor(e1_p1, dtype=torch.float32),
                 torch.tensor(e1_p2, dtype=torch.float32)
@@ -110,24 +117,34 @@ def run_ppo(cfg: Dict, episodes: int = 5000, *, prob: str = "uniform", episodes_
 
             r1_p1 = float(rewards_s1[0].item())
             r1_p2 = float(rewards_s1[1].item())
-            agent.store(s1_p1, a1_p1, e1_p1, logp1, v1, r1_p1, False)
-            agent.store(s1_p2, a1_p2, e1_p2, logp2, v2, r1_p2, False)
+            if learner_is_p1:
+                agent.store(s1_p1, a1_p1, e1_p1, logp1, v1, r1_p1, False)
+            else:
+                agent.store(s1_p1, a1_p1, e1_p2, logp1, v1, r1_p2, False)
+
             agent.update_opponent_avg(stage=1, opponent_effort=e1_p2)
             agent.update_opponent_avg(stage=1, opponent_effort=e1_p1)
 
             # Stage 2
             s2_obs_p1 = next_states[0]
             s2_obs_p2 = next_states[1]
-            e2_p1, logp3, v3, a2_p1, s2_p1 = agent.act_with_env_obs(s2_obs_p1, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
-            e2_p2, logp4, v4, a2_p2, s2_p2 = agent.act_with_env_obs(s2_obs_p2, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+            if learner_is_p1:
+                e2_p1, logp3, v3, a2_p1, s2_p1 = agent.act_with_env_obs(s2_obs_p1, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+                e2_p2, _, _, _, _ = agent.act_with_env_obs_opponent(s2_obs_p2, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+            else:
+                e2_p1, _, _, _, _ = agent.act_with_env_obs_opponent(s2_obs_p1, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+                e2_p2, logp3, v3, a2_p1, s2_p1 = agent.act_with_env_obs(s2_obs_p2, tuple(cfg["effort_bounds_stage1"]), tuple(cfg["effort_bounds_stage2"]))
+
             final_states, rewards_s2, total_costs, done, info2 = env.step_stage2([
                 torch.tensor(e2_p1, dtype=torch.float32),
                 torch.tensor(e2_p2, dtype=torch.float32)
             ])
             r2_p1 = float(rewards_s2[0].item())
             r2_p2 = float(rewards_s2[1].item())
-            agent.store(s2_p1, a2_p1, e2_p1, logp3, v3, r2_p1, True)
-            agent.store(s2_p2, a2_p2, e2_p2, logp4, v4, r2_p2, True)
+            if learner_is_p1:
+                agent.store(s2_p1, a2_p1, e2_p1, logp3, v3, r2_p1, True)
+            else:
+                agent.store(s2_p1, a2_p1, e2_p2, logp3, v3, r2_p2, True)
 
             avg_e1_batch.append((e1_p1 + e1_p2) / 2.0)
 
