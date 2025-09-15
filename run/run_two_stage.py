@@ -53,7 +53,19 @@ def run_gradient(cfg: Dict) -> Dict:
     return row
 
 
-def run_ppo(cfg: Dict, episodes: int = 5000, *, prob: str = "uniform", episodes_per_update: int = 1) -> Dict:
+def run_ppo(
+    cfg: Dict,
+    episodes: int = 5000,
+    *,
+    prob: str = "uniform",
+    episodes_per_update: int = 1,
+    lr: float = 1e-4,
+    entropy: float = 0.002,
+    mc_samples: int | None = None,
+    anneal_steps: int = 0,
+    lr_final: float | None = None,
+    entropy_final: float | None = None,
+) -> Dict:
     """True PPO with Beta policy, GAE(λ), and logistic win probability self-play.
 
     Training loop:
@@ -68,13 +80,15 @@ def run_ppo(cfg: Dict, episodes: int = 5000, *, prob: str = "uniform", episodes_
     # Set env probability model based on arg (align with theory when 'uniform')
     env_cfg = dict(cfg)
     env_cfg["prob_model"] = str(prob)
+    if mc_samples is not None:
+        env_cfg["mc_total_samples"] = int(mc_samples)
     env = TwoStageEnv(env_cfg)
 
     # Compute theoretical efforts for reporting
     e2_star_val = clip_stage2(e_star(q, w_h, w_l, k2), tuple(cfg["effort_bounds_stage2"]))
     e1_star_val = clip_stage1(e_star(q, w_h, w_l, k1), tuple(cfg["effort_bounds_stage1"]))
 
-    # Use more conservative defaults for stability
+    # Use provided hyperparameters (allow override from CLI)
     agent = TwoStagePPOAgent(
         effort_bounds_stage1=tuple(cfg["effort_bounds_stage1"]),
         effort_bounds_stage2=tuple(cfg["effort_bounds_stage2"]),
@@ -86,16 +100,30 @@ def run_ppo(cfg: Dict, episodes: int = 5000, *, prob: str = "uniform", episodes_
         gamma=0.99,
         gae_lambda=0.95,
         clip_ratio=0.2,
-        entropy_coef=0.002,
+        entropy_coef=float(entropy),
         value_coef=0.5,
-        lr=1e-4,
+        lr=float(lr),
         hidden=64,
     )
 
     history: List[float] = []
     if episodes_per_update <= 0:
         episodes_per_update = 1
+    # anneal schedule setup
+    if lr_final is None:
+        lr_final = float(lr)
+    if entropy_final is None:
+        entropy_final = float(entropy)
     for upd in range(episodes):
+        # optional linear annealing for lr and entropy over first anneal_steps updates
+        if anneal_steps and anneal_steps > 0:
+            frac = min(1.0, upd / float(max(1, anneal_steps)))
+            cur_lr = float(lr) * (1.0 - frac) + float(lr_final) * frac
+            cur_ent = float(entropy) * (1.0 - frac) + float(entropy_final) * frac
+            # apply to agent
+            for g in agent.opt.param_groups:
+                g['lr'] = cur_lr
+            agent.cfg.entropy_coef = cur_ent
         # collect multiple episodes per PPO update
         avg_e1_batch = []
         for j in range(episodes_per_update):
@@ -195,6 +223,12 @@ def main():
     parser.add_argument("--episodes", type=int, default=5000, help="Number of PPO updates")
     parser.add_argument("--prob", choices=["uniform", "logit"], default="uniform", help="Win-probability model in env")
     parser.add_argument("--episodes-per-update", type=int, default=1, help="Episodes collected per PPO update")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Initial learning rate")
+    parser.add_argument("--entropy", type=float, default=0.002, help="Initial entropy coefficient")
+    parser.add_argument("--mc-samples", type=int, default=None, help="MC samples for total probability (override config)")
+    parser.add_argument("--anneal-steps", type=int, default=0, help="Linear anneal steps for lr/entropy (0 disables)")
+    parser.add_argument("--lr-final", type=float, default=None, help="Final learning rate after anneal")
+    parser.add_argument("--entropy-final", type=float, default=None, help="Final entropy coef after anneal")
     args = parser.parse_args()
 
     cfg = dict(base_config)
@@ -209,7 +243,18 @@ def main():
         if args.method == "gradient":
             row = run_gradient(cfg)
         else:
-            row = run_ppo(cfg, episodes=args.episodes, prob=args.prob, episodes_per_update=args.episodes_per_update)
+            row = run_ppo(
+                cfg,
+                episodes=args.episodes,
+                prob=args.prob,
+                episodes_per_update=args.episodes_per_update,
+                lr=args.lr,
+                entropy=args.entropy,
+                mc_samples=args.mc_samples,
+                anneal_steps=args.anneal_steps,
+                lr_final=args.lr_final,
+                entropy_final=args.entropy_final,
+            )
 
         save_standardized_result(row, csv_path)
 

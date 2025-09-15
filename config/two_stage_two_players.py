@@ -29,6 +29,8 @@ config = {
     "reveal_opponent_effort": True,
     "reveal_stage1_outcome": True,
     "reveal_noise_realization": False,
+    # Monte Carlo samples for total-output probability in Stage 2
+    "mc_total_samples": 16384,
 
     # Plotting and evaluation
     "enable_overlay": True,
