@@ -59,7 +59,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
-        steps_per_update=16384,
+        steps_per_update=8192,
         epochs=20,
         minibatch_size=1024,
         state_dim=3,
@@ -76,16 +76,15 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
-    # Entropy decay schedule: 0.02 -> 0.002 over first 50 updates (floor)
-    start_entropy, end_entropy, decay_updates = 0.02, 0.002, 50
+    # Entropy schedule: 0.02 -> 0.005 across early/mid updates, then final 50 updates -> 0.0
+    start_entropy, entropy_floor = 0.02, 0.005
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
     late_updates = min(100, total_updates)  # last 50-100 updates; cap by total
     start_late = max(0, total_updates - late_updates)
-    # Entropy final squeeze to 0.0 in the last 30 updates
-    entropy_zero_updates = min(30, total_updates)
-    start_entropy_zero = max(0, total_updates - entropy_zero_updates)
+    final_entropy_span = min(50, total_updates)
+    main_entropy_span = max(0, total_updates - final_entropy_span)
     # LR boost in last 50 updates: 3e-4 -> 4e-4
     lr_base = ppo_cfg.lr
     lr_boost_value = 4e-4
@@ -93,12 +92,31 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     start_lr_late = max(0, total_updates - lr_boost_updates)
 
     while steps_done < total_steps_target:
-        # Apply entropy decay before this update
-        progress = min(1.0, float(update_idx) / float(decay_updates))
-        agent.cfg.entropy_coef = start_entropy + (end_entropy - start_entropy) * progress
-        # Force entropy to 0.0 in the last ~30 updates for tighter convergence
-        if update_idx >= start_entropy_zero:
-            agent.cfg.entropy_coef = 0.0
+        # Apply entropy schedule: early decay to floor, final span ramps to zero
+        if total_updates <= final_entropy_span:
+            # Degenerate case: go straight from start to zero within the span
+            if final_entropy_span > 1:
+                tail_progress = float(update_idx) / float(final_entropy_span - 1)
+            else:
+                tail_progress = 1.0
+            tail_progress = max(0.0, min(1.0, tail_progress))
+            agent.cfg.entropy_coef = start_entropy * (1.0 - tail_progress)
+        else:
+            if update_idx < main_entropy_span:
+                if main_entropy_span > 1:
+                    main_progress = float(update_idx) / float(main_entropy_span - 1)
+                else:
+                    main_progress = 1.0
+                main_progress = max(0.0, min(1.0, main_progress))
+                agent.cfg.entropy_coef = start_entropy + (entropy_floor - start_entropy) * main_progress
+            else:
+                tail_step = update_idx - main_entropy_span
+                if final_entropy_span > 1:
+                    tail_progress = float(tail_step) / float(final_entropy_span - 1)
+                else:
+                    tail_progress = 1.0
+                tail_progress = max(0.0, min(1.0, tail_progress))
+                agent.cfg.entropy_coef = entropy_floor * (1.0 - tail_progress)
         # Late-phase clip schedule: 0.35 -> 0.25 over last N updates (slightly larger at start of late phase)
         if update_idx >= start_late:
             if late_updates > 1:
