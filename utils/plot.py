@@ -74,3 +74,8 @@ def plot_effort_curve(
 
 
 
+
+
+
+
+
