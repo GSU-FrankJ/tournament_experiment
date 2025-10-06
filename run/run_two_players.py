@@ -41,6 +41,7 @@ def run_gradient(cfg: Dict) -> Dict:
         final_stage2_effort=e2,
         episodes=0,
     )
+    row["stage2_gap_unweighted"] = abs(float(row["final_stage2_effort"]) - float(row["theoretical_stage2_effort"]))
     return row
 
 
@@ -150,15 +151,9 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
                 s_eval = agent.state_from_params(q=float(q_eval), k=k, w_h=w_h, w_l=w_l)
                 with torch.no_grad():
                     dist, _ = agent.net.dist(s_eval)
-                    alpha = dist.concentration1.squeeze()
-                    beta = dist.concentration0.squeeze()
-                    if (alpha > 1.0 and beta > 1.0):
-                        a_eval = (alpha - 1.0) / (alpha + beta - 2.0)
-                    else:
-                        # Fallback: sample-average action
-                        samples = dist.sample((256,)).squeeze(-1)
-                        a_eval = samples.mean()
-                    final_e2_eval = float(effort_bounds[0] + a_eval.item() * (effort_bounds[1] - effort_bounds[0]))
+                    a_eval = dist.mean.squeeze()
+                    a_eval = a_eval.clamp(0.0, 1.0)
+                    final_e2_eval = float(effort_bounds[0] + a_eval.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
                 gap = abs(final_e2_eval - e2_star_val)
                 print(f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, entropy={agent.cfg.entropy_coef:.3f}")
         except Exception as _e:
@@ -176,15 +171,11 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
         s_eval = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
         with torch.no_grad():
             dist, _ = agent.net.dist(s_eval)
-            alpha = dist.concentration1.squeeze()
-            beta = dist.concentration0.squeeze()
-            if (alpha > 1.0 and beta > 1.0):
-                a_eval = (alpha - 1.0) / (alpha + beta - 2.0)
-            else:
-                samples = dist.sample((512,)).squeeze(-1)
-                a_eval = samples.mean()
+            a_eval = dist.mean.squeeze()
+            a_eval = a_eval.clamp(0.0, 1.0)
             a_eval = float(a_eval.detach().cpu().item())
         final_e2 = float(effort_bounds[0] + a_eval * (effort_bounds[1] - effort_bounds[0]))
+        stage2_gap = abs(final_e2 - e2_star_val)
 
         row = build_csv_row(
             stage1_weight=cfg["stage1_weight"],
@@ -199,6 +190,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
             final_stage2_effort=final_e2,
             episodes=episodes,
         )
+        row["stage2_gap_unweighted"] = stage2_gap
         rows.append(row)
 
     # Plot overlays for each q (training history)
