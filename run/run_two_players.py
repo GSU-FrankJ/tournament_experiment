@@ -81,7 +81,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
-    late_updates = min(100, total_updates)  # last 50-100 updates; cap by total
+    late_updates = min(50, total_updates)
     start_late = max(0, total_updates - late_updates)
     final_entropy_span = min(50, total_updates)
     main_entropy_span = max(0, total_updates - final_entropy_span)
@@ -139,26 +139,13 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
             # late-phase switches to fully on-policy symmetric sampling and stores both.
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
-            if update_idx >= start_late:
-                # Fully on-policy self-play
-                a1_norm, e1, logp1, v1 = agent.act(s1)
-                a2_norm, e2, logp2, v2 = agent.act(s2)
-            else:
-                a1_norm, e1, logp1, v1 = agent.act(s1)
-                a2_norm, e2, logp2, _ = agent.act_opponent(s2)
-                # For GAE targets, use current net's value estimate on s2
-                with torch.no_grad():
-                    _, v2 = agent.net.dist(s2)
+            a1_norm, e1, logp1, v1 = agent.act(s1)
+            a2_norm, e2, logp2, v2 = agent.act(s2)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
-            if update_idx >= start_late:
-                # Store both players' on-policy samples in late phase
-                agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
-            else:
-                # Store only the learner's on-policy sample (keep opponent lagged but off-storage)
-                agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+            agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         agent.update()
         # After each PPO update, evaluate and log gaps for quick monitoring
