@@ -43,7 +43,69 @@ def _state_tensor(agent: PPOTwoPlayersBandit, q: float, k_self: float, k_opp: fl
 
 def run_gradient(cfg: Dict) -> Dict:
     k1, k2, q, w_h, w_l = cfg["k1"], cfg["k2"], cfg["q"], cfg["w_h"], cfg["w_l"]
-    e1, e2 = e_star_two_players_asymmetric_cost(q, w_h, w_l, k1, k2)
+    effort_bounds = tuple(cfg.get("effort_bounds_stage2", cfg.get("effort_range", (0.0, 200.0))))
+    env = DifferentCostEnv(w_h=w_h, w_l=w_l, k1=k1, k2=k2, q=q, effort_bounds=effort_bounds, seed=cfg.get("seed", 42))
+
+    e1_star, e2_star = e_star_two_players_asymmetric_cost(q, w_h, w_l, k1, k2)
+    clamp = lambda x: float(np.clip(x, env.low, env.high))
+    e1 = clamp(e1_star)
+    e2 = clamp(e2_star)
+
+    lr = cfg.get("gradient_lr", 0.05)
+    grad_eps = cfg.get("gradient_eps", 1e-2)
+    max_steps = cfg.get("gradient_steps", 5000)
+    tol = cfg.get("gradient_tol", 1e-5)
+
+    def _finite_diff(base_value: float, evaluator) -> float:
+        forward = clamp(base_value + grad_eps)
+        backward = clamp(base_value - grad_eps)
+
+        if abs(forward - backward) < 1e-12:
+            if abs(forward - base_value) > 1e-12:
+                return (evaluator(forward) - evaluator(base_value)) / (forward - base_value)
+            if abs(base_value - backward) > 1e-12:
+                return (evaluator(base_value) - evaluator(backward)) / (base_value - backward)
+            return 0.0
+        return (evaluator(forward) - evaluator(backward)) / (forward - backward)
+
+    converged = False
+    steps_taken = 0
+
+    for step in range(1, max_steps + 1):
+        steps_taken = step
+        g1 = _finite_diff(e1, lambda effort: env.expected_utility(e_self=effort, e_opp=e2, k_self=k1))
+        g2 = _finite_diff(e2, lambda effort: env.expected_utility(e_self=effort, e_opp=e1, k_self=k2))
+
+        grad_norm = max(abs(g1), abs(g2))
+
+        next_e1 = clamp(e1 + lr * g1)
+        next_e2 = clamp(e2 + lr * g2)
+        delta = max(abs(next_e1 - e1), abs(next_e2 - e2))
+
+        e1, e2 = next_e1, next_e2
+
+        if step == 1 or step % 250 == 0:
+            gap1 = abs(e1 - e1_star)
+            gap2 = abs(e2 - e2_star)
+            print(f"[gradient-asym] step={step:05d} e1={e1:.6f} e2={e2:.6f} grad=({g1:.3e},{g2:.3e}) gap=({gap1:.3e},{gap2:.3e})")
+
+        if grad_norm < tol and delta < tol:
+            converged = True
+            break
+
+        if delta < 1e-8:
+            lr *= 0.5
+
+    final_g1 = _finite_diff(e1, lambda effort: env.expected_utility(e_self=effort, e_opp=e2, k_self=k1))
+    final_g2 = _finite_diff(e2, lambda effort: env.expected_utility(e_self=effort, e_opp=e1, k_self=k2))
+    grad_norm = max(abs(final_g1), abs(final_g2))
+
+    gap1 = abs(e1 - e1_star)
+    gap2 = abs(e2 - e2_star)
+    avg_gap = 0.5 * (gap1 + gap2)
+
+    print(f"[gradient-asym] done converged={converged} steps={steps_taken} e1={e1:.6f} e2={e2:.6f} gap_avg={avg_gap:.3e} grad_norm={grad_norm:.3e}")
+
     row = {
         "model": "gradient",
         "q": q,
@@ -51,14 +113,17 @@ def run_gradient(cfg: Dict) -> Dict:
         "k2": k2,
         "w_h": w_h,
         "w_l": w_l,
-        "theoretical_e1": e1,
-        "theoretical_e2": e2,
+        "theoretical_e1": e1_star,
+        "theoretical_e2": e2_star,
         "final_e1": e1,
         "final_e2": e2,
-        "gap1": 0.0,
-        "gap2": 0.0,
-        "avg_gap": 0.0,
+        "gap1": gap1,
+        "gap2": gap2,
+        "avg_gap": avg_gap,
         "episodes": 0,
+        "gradient_iterations": steps_taken,
+        "gradient_grad_norm": grad_norm,
+        "gradient_converged": converged,
     }
     return row
 

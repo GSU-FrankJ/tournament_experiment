@@ -1,6 +1,7 @@
-import math
 import os
-import numpy as np
+
+from utils.prob import p_from_efforts
+from utils.theory import e_star_two_players_asymmetric_cost
 
 def asymmetric_gradient_descent_solver(env, lr=0.1, steps=100000, eps=1e-3):
     """
@@ -132,75 +133,38 @@ def asymmetric_gradient_solver(k1, k2, q, w_h, w_l, effort_range, lr=0.01, max_s
         e1_final, e2_final, converged, steps
     """
     
-    def utility_player1(e1, e2):
-        """Player 1's utility given efforts - 优化版本"""
-        # Win probability calculation for uniform noise U(-q, q)
+    w_gap = w_h - w_l
+
+    def win_prob_and_grad(e1: float, e2: float) -> tuple[float, float]:
+        """Return P1's win probability and ∂P1/∂e1 under Uniform(-q, q) noise."""
         diff = e1 - e2
-        if diff <= -2*q:
-            win_prob = 0.0
-        elif diff >= 2*q:
-            win_prob = 1.0
-        else:
-            win_prob = 0.5 + diff / (4*q)
-        
-        expected_reward = win_prob * w_h + (1 - win_prob) * w_l
-        cost = k1 * e1 * e1
-        return expected_reward - cost
-    
-    def utility_player2(e1, e2):
-        """Player 2's utility given efforts - 优化版本"""
-        # Win probability for player 2 is 1 - win_prob_player1
-        diff = e2 - e1  # Player 2's advantage
-        if diff <= -2*q:
-            win_prob = 0.0
-        elif diff >= 2*q:
-            win_prob = 1.0
-        else:
-            win_prob = 0.5 + diff / (4*q)
-        
-        expected_reward = win_prob * w_h + (1 - win_prob) * w_l
-        cost = k2 * e2 * e2
-        return expected_reward - cost
-    
-    def analytical_gradient1(e1, e2):
-        """Player 1的解析梯度 - 更精确"""
-        diff = e1 - e2
-        if abs(diff) >= 2*q:
-            # 在边界区域，梯度为负的成本导数
-            return -2 * k1 * e1
-        else:
-            # 在内部区域，包含概率梯度
-            prob_gradient = 1.0 / (4*q)  # d(win_prob)/d(e1)
-            reward_gradient = prob_gradient * (w_h - w_l)
-            cost_gradient = 2 * k1 * e1
-            return reward_gradient - cost_gradient
-    
-    def analytical_gradient2(e1, e2):
-        """Player 2的解析梯度 - 更精确"""
-        diff = e2 - e1
-        if abs(diff) >= 2*q:
-            # 在边界区域，梯度为负的成本导数
-            return -2 * k2 * e2
-        else:
-            # 在内部区域，包含概率梯度
-            prob_gradient = 1.0 / (4*q)  # d(win_prob)/d(e2)
-            reward_gradient = prob_gradient * (w_h - w_l)
-            cost_gradient = 2 * k2 * e2
-            return reward_gradient - cost_gradient
-    
-    # 使用理论值附近的智能初始化
+        if diff <= -2.0 * q:
+            return 0.0, 0.0
+        if diff >= 2.0 * q:
+            return 1.0, 0.0
+        prob = float(p_from_efforts(e1, e2, q))
+        grad = (1.0 / (2.0 * q)) - (abs(diff) / (4.0 * q * q))
+        return prob, grad
+
+    def analytical_gradient1(e1: float, e2: float) -> float:
+        _, dp_de1 = win_prob_and_grad(e1, e2)
+        return w_gap * dp_de1 - 2.0 * k1 * e1
+
+    def analytical_gradient2(e1: float, e2: float) -> float:
+        _, dp_de1 = win_prob_and_grad(e1, e2)
+        return w_gap * dp_de1 - 2.0 * k2 * e2
+
+    # 使用闭式解作为智能初始化
     min_effort, max_effort = effort_range
-    
-    # 粗略的理论估计作为初始点
-    w_diff = w_h - w_l
-    e1_theory_approx = w_diff * k2 / (4 * q * (k1 + k2) * k1)
-    e2_theory_approx = w_diff * k1 / (4 * q * (k1 + k2) * k2)
-    
-    # 将初始值限制在有效范围内
-    e1 = max(min_effort, min(max_effort, e1_theory_approx))
-    e2 = max(min_effort, min(max_effort, e2_theory_approx))
-    
-    print(f"🎯 智能初始化: e1={e1:.3f}, e2={e2:.3f} (基于理论估计)")
+    e1_star, e2_star = e_star_two_players_asymmetric_cost(q, w_h, w_l, k1, k2)
+
+    def clip(value: float) -> float:
+        return max(min_effort, min(max_effort, value))
+
+    e1 = clip(e1_star)
+    e2 = clip(e2_star)
+
+    print(f"🎯 智能初始化: e1={e1:.3f}, e2={e2:.3f} (闭式解)")
     
     # 自适应学习率
     lr_initial = lr
@@ -239,8 +203,8 @@ def asymmetric_gradient_solver(k1, k2, q, w_h, w_l, effort_range, lr=0.01, max_s
         max_change = max(change1, change2)
         
         # 计算与理论值的gap (用于监控)
-        gap1 = abs(e1 - e1_theory_approx)
-        gap2 = abs(e2 - e2_theory_approx)
+        gap1 = abs(e1 - e1_star)
+        gap2 = abs(e2 - e2_star)
         current_gap = (gap1 + gap2) / 2
         
         if current_gap < best_gap:
