@@ -1,27 +1,29 @@
 """
 两个具有不同能力的玩家配置
 Single stage: two players with different ability l_1 > l_2, k = k_1 = k_2
-Based on table parameters: l1=10, l2=5, k=0.0004
+Based on table parameters: l1=10, l2=5.
 
-From the table, we can see the expected efforts should be in a reasonable range.
-Let me use a more appropriate formula that accounts for the contest structure.
+This module keeps the legacy ``DIFFERENT_ABILITY_CONFIG`` entry point while also
+exposing helpers for the parameter grid used in the paper experiments.
 """
 
-import numpy as np
+from __future__ import annotations
+
 from typing import Dict, List, Tuple
 
-# 基础配置参数 - 根据表格要求
-DIFFERENT_ABILITY_CONFIG = {
-    "k": 0.0004,    # 相同的成本参数 k1 = k2 = k
-    "k1": 0.0004,   # 玩家1成本参数
-    "k2": 0.0004,   # 玩家2成本参数
-    "l1": 10,       # 玩家1能力 (较高) - from table
-    "l2": 5,        # 玩家2能力 (较低) - from table
-    "w_h": 6.5,     # 高权重 - from table
-    "w_l": 3.0,     # 低权重 - from table
-    "num_players": 2,
-    "seed": 42
-}
+# Ability parameters shared across experiments
+DEFAULT_L1 = 10.0
+DEFAULT_L2 = 5.0
+DEFAULT_SEED = 42
+
+# Parameters requested in the experiment plan
+PARAM_SETS: Tuple[Dict[str, float], ...] = (
+    {"k": 0.0004, "w_h": 6.5, "w_l": 3.0},
+    {"k": 0.0005, "w_h": 8.0, "w_l": 3.0},
+)
+Q_VALUES: Tuple[float, ...] = (25.0, 40.0, 55.0)
+EFFORT_RANGES: Tuple[Tuple[int, int], ...] = ((0, 100), (0, 200))
+
 
 def calculate_theoretical_efforts_different_ability(
     q: float,
@@ -72,77 +74,91 @@ def calculate_theoretical_efforts_different_ability(
     p2_win = 1.0 - p1_win
 
     # 期望效用
-    EU1_optimal = w_l + p1_win * w_diff - cost1_optimal
-    EU2_optimal = w_l + p2_win * w_diff - cost2_optimal
+    eu1_optimal = w_l + p1_win * w_diff - cost1_optimal
+    eu2_optimal = w_l + p2_win * w_diff - cost2_optimal
 
-    return e1_optimal, e2_optimal, cost1_optimal, cost2_optimal, EU1_optimal, EU2_optimal
+    return e1_optimal, e2_optimal, cost1_optimal, cost2_optimal, eu1_optimal, eu2_optimal
 
-# 预计算所有Q值的理论结果 - 根据表格的三个 q 值
-Q_VALUES = [25.0, 40.0, 55.0]
-theoretical_results = {}
 
-print("=== Different Ability Two Players Theoretical Calculations ===")
-print(f"Parameters: l1={DIFFERENT_ABILITY_CONFIG['l1']}, l2={DIFFERENT_ABILITY_CONFIG['l2']}")
-print(f"Cost: k1=k2={DIFFERENT_ABILITY_CONFIG['k']}")
-print(f"Rewards: w_h={DIFFERENT_ABILITY_CONFIG['w_h']}, w_l={DIFFERENT_ABILITY_CONFIG['w_l']}")
-print()
+def build_different_ability_config(
+    *,
+    k: float,
+    w_h: float,
+    w_l: float,
+    q: float,
+    effort_range: Tuple[int, int],
+    l1: float = DEFAULT_L1,
+    l2: float = DEFAULT_L2,
+    seed: int = DEFAULT_SEED,
+) -> Dict[str, float]:
+    """Construct a config dict with embedded theoretical quantities."""
+    k = float(k)
+    k1 = float(k)
+    k2 = float(k)
+    l1 = float(l1)
+    l2 = float(l2)
+    w_h = float(w_h)
+    w_l = float(w_l)
 
-for q in Q_VALUES:
     e1, e2, c1, c2, eu1, eu2 = calculate_theoretical_efforts_different_ability(
-        q, DIFFERENT_ABILITY_CONFIG["k1"], DIFFERENT_ABILITY_CONFIG["k2"],
-        DIFFERENT_ABILITY_CONFIG["l1"], DIFFERENT_ABILITY_CONFIG["l2"],
-        DIFFERENT_ABILITY_CONFIG["w_h"], DIFFERENT_ABILITY_CONFIG["w_l"]
+        q, k1, k2, l1, l2, w_h, w_l
     )
-    theoretical_results[q] = {
-        "e1": e1, "e2": e2, 
-        "c1": c1, "c2": c2,
-        "eu1": eu1, "eu2": eu2
+    cfg: Dict[str, float] = {
+        "k": k,
+        "k1": k1,
+        "k2": k2,
+        "l1": l1,
+        "l2": l2,
+        "w_h": w_h,
+        "w_l": w_l,
+        "q": float(q),
+        "effort_range": list(effort_range),
+        "num_players": 2,
+        "seed": int(seed),
+        "theoretical_effort1": e1,
+        "theoretical_effort2": e2,
+        "theoretical_cost1": c1,
+        "theoretical_cost2": c2,
+        "theoretical_eu1": eu1,
+        "theoretical_eu2": eu2,
+        "theoretical_efforts": [e1, e2],
+        "theoretical_costs": [c1, c2],
     }
-    
-    print(f"q = {q}:")
-    print(f"  e1* = {e1:.2f}, e2* = {e2:.2f}")
-    print(f"  c1* = {c1:.2f}, c2* = {c2:.2f}")
-    print(f"  EU1* = {eu1:.2f}, EU2* = {eu2:.2f}")
-    print()
+    return cfg
 
-# 创建测试配置列表 - 包含多个 effort_range
-test_configs = []
-effort_ranges = [(0, 100), (0, 200)]  # 两种测试范围
 
-for q in Q_VALUES:
-    for effort_range in effort_ranges:
-        config = {
-            "q": q,
-            "k": DIFFERENT_ABILITY_CONFIG["k"],
-            "k1": DIFFERENT_ABILITY_CONFIG["k1"],
-            "k2": DIFFERENT_ABILITY_CONFIG["k2"],
-            "l1": DIFFERENT_ABILITY_CONFIG["l1"],
-            "l2": DIFFERENT_ABILITY_CONFIG["l2"],
-            "w_h": DIFFERENT_ABILITY_CONFIG["w_h"],
-            "w_l": DIFFERENT_ABILITY_CONFIG["w_l"],
-            "effort_range": effort_range,
-            "num_players": DIFFERENT_ABILITY_CONFIG["num_players"],
-            "seed": DIFFERENT_ABILITY_CONFIG["seed"],
-            "theoretical_effort1": theoretical_results[q]["e1"],
-            "theoretical_effort2": theoretical_results[q]["e2"],
-            "theoretical_cost1": theoretical_results[q]["c1"],
-            "theoretical_cost2": theoretical_results[q]["c2"],
-            "theoretical_eu1": theoretical_results[q]["eu1"],
-            "theoretical_eu2": theoretical_results[q]["eu2"],
-            "theoretical_efforts": [theoretical_results[q]["e1"], theoretical_results[q]["e2"]],
-            "theoretical_costs": [theoretical_results[q]["c1"], theoretical_results[q]["c2"]]
-        }
-        test_configs.append(config)
+# Legacy default config (used when no CLI overrides are provided)
+DIFFERENT_ABILITY_CONFIG: Dict[str, float] = build_different_ability_config(
+    k=PARAM_SETS[0]["k"],
+    w_h=PARAM_SETS[0]["w_h"],
+    w_l=PARAM_SETS[0]["w_l"],
+    q=Q_VALUES[0],
+    effort_range=EFFORT_RANGES[0],
+)
 
-print(f"Created {len(test_configs)} test configurations")
-print(f"Q values: {Q_VALUES}")
-print(f"Effort ranges: {effort_ranges}")
 
-# 导出主要配置用于向后兼容
-config = test_configs[0]  # 默认使用 q=25, effort_range=(0,100)
+def build_param_grid_configs() -> List[Dict[str, float]]:
+    """Enumerate the full grid (k, w_h, w_l, q, effort_range)."""
+    configs: List[Dict[str, float]] = []
+    for param_set in PARAM_SETS:
+        for q in Q_VALUES:
+            for effort_range in EFFORT_RANGES:
+                cfg = build_different_ability_config(
+                    k=param_set["k"],
+                    w_h=param_set["w_h"],
+                    w_l=param_set["w_l"],
+                    q=q,
+                    effort_range=effort_range,
+                )
+                configs.append(cfg)
+    return configs
+
 
 if __name__ == "__main__":
     print("=== Different Ability Configuration Summary ===")
-    for i, cfg in enumerate(test_configs):
-        print(f"Config {i+1}: q={cfg['q']}, range={cfg['effort_range']}")
-        print(f"  Theoretical: e1*={cfg['theoretical_effort1']:.2f}, e2*={cfg['theoretical_effort2']:.2f}") 
+    for cfg in build_param_grid_configs():
+        print(
+            f"k={cfg['k']:.4f}, w_h={cfg['w_h']:.1f}, w_l={cfg['w_l']:.1f}, "
+            f"q={cfg['q']:.0f}, range={tuple(cfg['effort_range'])}, "
+            f"e1*={cfg['theoretical_effort1']:.3f}, e2*={cfg['theoretical_effort2']:.3f}"
+        )

@@ -40,21 +40,41 @@ def _symmetric_mc_gradient(env: ThreePlayersEnv, e: float, eps: float = 1e-3) ->
     return (u_plus - u_minus) / (2.0 * eps)
 
 
-def gradient_descent_three_players(cfg: Dict, lr: float = 0.05, steps: int = 20000, eps: float = 1e-3) -> float:
+def gradient_descent_three_players(
+    cfg: Dict,
+    lr: float = 0.05,
+    steps: int = 20000,
+    eps: float = 1e-3,
+    *,
+    mc_samples: int = 20000,
+    allow_near_symmetric_shortcut: bool = True,
+    track_shortcut_stats: bool = False,
+) -> tuple[float, ThreePlayersEnv]:
     """Gradient descent on symmetric effort using MC-based win probabilities."""
     env = ThreePlayersEnv(w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=cfg["q"],
                           effort_bounds=tuple(cfg["effort_bounds_stage2"]),
-                          seed=cfg.get("seed", 42), mc_samples=20000)
+                          seed=cfg.get("seed", 42), mc_samples=int(mc_samples),
+                          allow_near_symmetric_shortcut=allow_near_symmetric_shortcut,
+                          track_shortcut_stats=track_shortcut_stats)
     lo, hi = env.effort_range
     # Start from theoretical value (faster) and clamp
     e = float(np.clip(e_star_three_players(cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"]), lo, hi))
     for _ in range(steps):
         g = _symmetric_mc_gradient(env, e, eps)
         e = float(np.clip(e + lr * g, lo, hi))
-    return e
+    return e, env
 
 
-def run_gradient(cfg: Dict) -> Dict:
+def run_gradient(
+    cfg: Dict,
+    *,
+    lr: float = 0.05,
+    steps: int = 5000,
+    grad_eps: float = 0.1,
+    mc_samples: int = 20000,
+    disable_shortcut: bool = True,
+    print_stats: bool = True,
+) -> Dict:
     """Finite-difference gradient descent at symmetric profile.
 
     Uses the analytical utility wrapper in OneStageEnv (num_players=3) to get a
@@ -64,7 +84,33 @@ def run_gradient(cfg: Dict) -> Dict:
     e_theory = clip_stage2(e_star_three_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
 
     # Use MC-based gradient descent tailored for 3 players
-    e_final = gradient_descent_three_players(cfg, lr=0.05, steps=5000, eps=1e-3)
+    e_final, env = gradient_descent_three_players(
+        cfg,
+        lr=lr,
+        steps=steps,
+        eps=grad_eps,
+        mc_samples=mc_samples,
+        allow_near_symmetric_shortcut=not disable_shortcut,
+        track_shortcut_stats=True,
+    )
+
+    if print_stats:
+        stats = env.get_shortcut_stats()
+        total_calls = stats["shortcut_hits"] + stats["full_path_calls"]
+        pct_shortcut = (stats["shortcut_hits"] / total_calls * 100.0) if total_calls else 0.0
+        print(
+            f"[gradient] q={q:.3f} shortcut_hits={stats['shortcut_hits']} "
+            f"full_path_calls={stats['full_path_calls']} ({pct_shortcut:.2f}% shortcut)"
+        )
+        probe_eps = max(grad_eps, 0.01 * q)
+        probe_points = {
+            "theory": float(e_theory),
+            "final": float(e_final),
+            "midpoint": float((float(e_theory) + float(e_final)) / 2.0),
+        }
+        for label, probe_e in probe_points.items():
+            g_val = _symmetric_mc_gradient(env, probe_e, eps=probe_eps)
+            print(f"[gradient] q={q:.3f} probe={label} effort={probe_e:.6f} dU/de={g_val:.6f}")
 
     row = build_csv_row(
         stage1_weight=cfg["stage1_weight"],
@@ -189,6 +235,24 @@ def main():
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
     parser.add_argument("--episodes", type=int, default=8000, help="Episodes for PPO")
+    parser.add_argument(
+        "--disable-near-symmetric-shortcut-for-grad",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Disable the near-symmetric shortcut when computing gradients (default: disabled).",
+    )
+    parser.add_argument(
+        "--grad-epsilon",
+        type=float,
+        default=0.1,
+        help="Finite-difference epsilon for ∂U/∂e estimates in gradient descent.",
+    )
+    parser.add_argument(
+        "--mc-samples",
+        type=int,
+        default=20000,
+        help="Monte Carlo samples for gradient-mode ThreePlayersEnv.",
+    )
     args = parser.parse_args()
 
     cfg = dict(base_config)
@@ -199,7 +263,22 @@ def main():
         q_values = [args.q] if args.q is not None else list(cfg["q_list"])
         for q in q_values:
             cfg["q"] = float(q)
-            row = run_gradient(cfg)
+            if (not args.disable_near_symmetric_shortcut_for_grad) and (args.grad_epsilon < 0.01 * cfg["q"]):
+                print(
+                    f"[gradient] warning: grad_epsilon={args.grad_epsilon:.3g} < 1% of q={cfg['q']:.3g}; "
+                    "near-symmetric shortcut may flatten gradients. "
+                    "Use --disable-near-symmetric-shortcut-for-grad to avoid this.",
+                    flush=True,
+                )
+            row = run_gradient(
+                cfg,
+                lr=0.05,
+                steps=5000,
+                grad_eps=args.grad_epsilon,
+                mc_samples=args.mc_samples,
+                disable_shortcut=args.disable_near_symmetric_shortcut_for_grad,
+                print_stats=True,
+            )
             save_standardized_result(row, csv_path)
     else:
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])

@@ -25,7 +25,9 @@ class ThreePlayersEnv:
 
     def __init__(self, *, w_h: float, w_l: float, k: float, q: float,
                  effort_bounds: Tuple[float, float] = (0.0, 200.0),
-                 seed: int = 42, mc_samples: int = 3000):
+                 seed: int = 42, mc_samples: int = 3000,
+                 allow_near_symmetric_shortcut: bool = True,
+                 track_shortcut_stats: bool = False):
         self.w_h = float(w_h)
         self.w_l = float(w_l)
         self.k = float(k)
@@ -34,9 +36,13 @@ class ThreePlayersEnv:
         self.seed = int(seed)
         self.num_players = 3
         self.mc_samples = int(mc_samples)
+        self.allow_near_symmetric_shortcut = bool(allow_near_symmetric_shortcut)
+        self.track_shortcut_stats = bool(track_shortcut_stats)
 
         # Episode counter for deterministic RNG per-episode
         self._episode = 0
+        self.shortcut_hits = 0
+        self.full_path_calls = 0
 
     # --- probability helpers ---
     def _win_probs(self, e1: float, e2: float, e3: float) -> Tuple[float, float, float]:
@@ -47,8 +53,14 @@ class ThreePlayersEnv:
         """
         # Near-symmetric shortcut to avoid excessive Monte Carlo when efforts
         # are very close compared to the noise scale.
-        if max(abs(e1 - e2), abs(e1 - e3), abs(e2 - e3)) <= 0.01 * self.q:
+        if (self.allow_near_symmetric_shortcut and
+                max(abs(e1 - e2), abs(e1 - e3), abs(e2 - e3)) <= 0.01 * self.q):
+            if self.track_shortcut_stats:
+                self.shortcut_hits += 1
             return 1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0
+
+        if self.track_shortcut_stats:
+            self.full_path_calls += 1
 
         rng = np.random.default_rng(self.seed + self._episode)
         eps = rng.uniform(-self.q, self.q, size=(self.mc_samples, 3))
@@ -99,3 +111,9 @@ class ThreePlayersEnv:
         }
         return obs, rewards, costs_t, done, info
 
+    def get_shortcut_stats(self) -> Dict[str, int]:
+        """Return usage statistics for the near-symmetric shortcut."""
+        return {
+            "shortcut_hits": int(self.shortcut_hits),
+            "full_path_calls": int(self.full_path_calls),
+        }

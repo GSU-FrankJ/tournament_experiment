@@ -83,6 +83,43 @@ python3 run/run_two_players.py --method gradient --q 40
 
 During training, the runner also prints per‑update diagnostics for each evaluation `q`: theoretical `e*`, policy implied effort (via Beta mode if defined, else sample mean), absolute gap, and current entropy.
 
+## Different Ability (l1 > l2, k1 = k2)
+
+The `run/run_different_ability.py` entry point aligns the “Different ability” plan:
+
+- Closed-form baseline from `config/different_ability_two_players.py` (two ability tiers, equal cost).
+- Gradient solver: `agents/different_ability_solver.py` (adaptive LR, ability-aware gradients).
+- PPO agent: `agents/ppo_two_players_clean.PPOTwoPlayersBandit` (Beta policy, dynamic clip, entropy/learning-rate schedules, both players stored every rollout).
+- Environment: `envs/different_ability_env.DifferentAbilityEnv` (now seeded with true theoretical efforts on construction).
+
+### Reproducing the experiments
+
+- **Single configuration** (default k=0.0004, w_H=6.5, w_L=3.0, q=25, effort range [0,200]):
+
+```
+python3 run/run_different_ability.py --method both --q 25 --episodes 131072 --steps-per-update 8192 --epochs 20 --log-interval 5
+```
+
+Adjust `--steps-per-update`, `--epochs`, `--updates`, `--episodes`, and `--minibatch-size` for sensitivity tests.  
+Use `--skip-history` when you only need final CSV rows (skips gap trace files).
+
+- **Full parameter grid** (k,w pairs {(0.0004,6.5,3.0), (0.0005,8.0,3.0)}, q∈{25,40,55}, effort ranges {[0,100],[0,200]}):
+
+```
+python3 run/run_different_ability.py --method both --grid --updates 160 --steps-per-update 8192 --log-interval 4
+```
+
+This command produces gradient + PPO rows for all 12 combinations with consistent schedules. Override `--seed` for repeats.
+
+### Outputs
+
+- CSV aggregates: `results/tables/different_ability_two_players.csv` (columns: method, parameters, theoretical efforts, final efforts, episodes, updates, max_gap, quality, effort bounds, PPO hyperparameters).
+- Per-run traces: `results/traces/different_ability/*.csv` (update-by-update gap diagnostics for gradient and PPO).
+- Gap plots: `results/plots/different_ability/*_gap.png`.
+- Parameter sensitivity summary: `results/plots/different_ability/parameter_sensitivity.png` (mean final max-gap vs q for each parameter tuple).
+
+Per-update logging now prints theoretical efforts, current policy efforts, max gap, entropy coefficient, clip threshold, and instantaneous learning rate to ease convergence checks. PPO stores both players’ trajectories from the first update to improve stability (matching the asymmetric-cost runner behaviour).
+
 ## Contact
 
 For questions or contributions: `fjiang4@student.gsu.edu`.
