@@ -8,9 +8,9 @@ Implements the model:
 - Expected utility: Eu_i = w_L + p_i (w_H - w_L) - k e_i^2
 
 This env performs true self-play for three identical competitors: one winner,
-two losers in each episode. Win probabilities are computed via a shared
-Monte-Carlo draw across the three players for numerical stability. The env is
-single-step (bandit) and returns dummy observations.
+two losers in each episode. Win probabilities are, by default, evaluated via the
+closed-form integrals in ``utils.prob`` with an optional Monte-Carlo fallback
+for diagnostics. The env is single-step (bandit) and returns dummy observations.
 """
 
 from __future__ import annotations
@@ -18,6 +18,8 @@ from __future__ import annotations
 from typing import Tuple, Dict, Any, List
 import numpy as np
 import torch
+
+from utils.prob import win_prob_three_players, win_prob_three_players_grad
 
 
 class ThreePlayersEnv:
@@ -27,7 +29,8 @@ class ThreePlayersEnv:
                  effort_bounds: Tuple[float, float] = (0.0, 200.0),
                  seed: int = 42, mc_samples: int = 3000,
                  allow_near_symmetric_shortcut: bool = True,
-                 track_shortcut_stats: bool = False):
+                 track_shortcut_stats: bool = False,
+                 use_analytic_probabilities: bool = True):
         self.w_h = float(w_h)
         self.w_l = float(w_l)
         self.k = float(k)
@@ -38,11 +41,13 @@ class ThreePlayersEnv:
         self.mc_samples = int(mc_samples)
         self.allow_near_symmetric_shortcut = bool(allow_near_symmetric_shortcut)
         self.track_shortcut_stats = bool(track_shortcut_stats)
+        self.use_analytic = bool(use_analytic_probabilities)
 
         # Episode counter for deterministic RNG per-episode
         self._episode = 0
         self.shortcut_hits = 0
         self.full_path_calls = 0
+        self.analytic_calls = 0
 
     # --- probability helpers ---
     def _win_probs(self, e1: float, e2: float, e3: float) -> Tuple[float, float, float]:
@@ -51,6 +56,25 @@ class ThreePlayersEnv:
         Uses one shared noise matrix (shape [mc_samples, 3]) to ensure the
         probability mass is coherent across players in the same episode.
         """
+        if self.use_analytic:
+            p1 = win_prob_three_players(e1, e2, e3, self.q)
+            p2 = win_prob_three_players(e2, e1, e3, self.q)
+            p3 = win_prob_three_players(e3, e1, e2, self.q)
+            total = p1 + p2 + p3
+            if total > 0.0:
+                p1 /= total
+                p2 /= total
+                p3 /= total
+            else:
+                p1 = p2 = p3 = 1.0 / 3.0
+            p1 = float(np.clip(p1, 0.0, 1.0))
+            p2 = float(np.clip(p2, 0.0, 1.0))
+            p3 = float(np.clip(p3, 0.0, 1.0))
+            if self.track_shortcut_stats:
+                self.full_path_calls += 1
+            self.analytic_calls += 1
+            return p1, p2, p3
+
         # Near-symmetric shortcut to avoid excessive Monte Carlo when efforts
         # are very close compared to the noise scale.
         if (self.allow_near_symmetric_shortcut and
@@ -116,4 +140,17 @@ class ThreePlayersEnv:
         return {
             "shortcut_hits": int(self.shortcut_hits),
             "full_path_calls": int(self.full_path_calls),
+            "analytic_calls": int(self.analytic_calls),
+            "mode": "analytic" if self.use_analytic else "mc",
         }
+
+    def expected_utility_gradient(self, e1: float, e2: float, e3: float) -> Tuple[float, float, float]:
+        """Analytical gradient of expected utilities with respect to efforts."""
+        if not self.use_analytic:
+            raise RuntimeError("Analytic gradients require use_analytic_probabilities=True")
+        dp1, dp2, dp3 = win_prob_three_players_grad(e1, e2, e3, self.q)
+        reward_gap = self.w_h - self.w_l
+        grad1 = reward_gap * dp1 - 2.0 * self.k * e1
+        grad2 = reward_gap * dp2 - 2.0 * self.k * e2
+        grad3 = reward_gap * dp3 - 2.0 * self.k * e3
+        return grad1, grad2, grad3

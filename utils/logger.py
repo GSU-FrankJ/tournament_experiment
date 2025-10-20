@@ -59,7 +59,10 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
                                        experiment_data.get("convergence_time", "N/A")),
         "Gap_from_theoretical": experiment_data.get("Gap_from_theoretical",
                                                    experiment_data.get("gap", 0.0)),
-        "stage2_gap_unweighted": experiment_data.get("stage2_gap_unweighted", "")
+        "stage2_gap_unweighted": experiment_data.get("stage2_gap_unweighted", ""),
+        "gradient_iterations": experiment_data.get("gradient_iterations", ""),
+        "gradient_final_grad": experiment_data.get("gradient_final_grad", ""),
+        "gradient_mode": experiment_data.get("gradient_mode", ""),
     }
     
     # Ensure results directory exists
@@ -72,7 +75,8 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
             "stage1_weight", "stage2_weight", "k1", "k2", "information_revelation",
             "theoretical_stage1_effort", "theoretical_stage2_effort", "Model_training",
             "final_stage1_effort", "final_stage2_effort", "final_weighted_effort",
-            "Convergence_Quality", "episodes", "Gap_from_theoretical", "stage2_gap_unweighted"
+            "Convergence_Quality", "episodes", "Gap_from_theoretical", "stage2_gap_unweighted",
+            "gradient_iterations", "gradient_final_grad", "gradient_mode"
         ]
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         if not file_exists:
