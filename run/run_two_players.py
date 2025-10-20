@@ -25,9 +25,90 @@ from envs.two_players_env import TwoPlayersEnv
 from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
 
 
-def run_gradient(cfg: Dict) -> Dict:
+def _symmetric_fd_gradient(env: TwoPlayersEnv, e: float, eps: float = 0.1) -> float:
+    """Central-difference ∂Eu/∂e_i at symmetric profile (e, e)."""
+    lo, hi = env.effort_low, env.effort_high
+    e_plus = max(lo, min(hi, e + eps))
+    e_minus = max(lo, min(hi, e - eps))
+    u_plus = env.expected_utility(e_plus, e)
+    u_minus = env.expected_utility(e_minus, e)
+    return (u_plus - u_minus) / (2.0 * eps)
+
+
+def gradient_descent_two_players(
+    cfg: Dict,
+    *,
+    lr: float = 0.1,
+    steps: int = 2000,
+    eps: float = 0.1,
+    tol: float = 1e-4,
+    log: bool = True,
+) -> tuple[float, Dict[str, float]]:
+    """Symmetric gradient descent to match experiment plan requirements."""
+    effort_bounds = tuple(cfg["effort_bounds_stage2"])
+    env = TwoPlayersEnv(
+        w_h=cfg["w_h"],
+        w_l=cfg["w_l"],
+        k=cfg["k"],
+        q=cfg["q"],
+        effort_bounds=effort_bounds,
+        seed=cfg.get("seed", 42),
+    )
+    lo, hi = effort_bounds
+    e_theory = float(e_star_two_players(cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"]))
+    e = float(np.clip(e_theory, lo, hi))
+    history = {
+        "init_e": e,
+        "final_grad": 0.0,
+        "iterations": 0.0,
+    }
+
+    for step in range(1, steps + 1):
+        g = _symmetric_fd_gradient(env, e, eps=eps)
+        e = float(np.clip(e + lr * g, lo, hi))
+        history["iterations"] = float(step)
+        history["final_grad"] = float(g)
+        if log and (step == 1 or step % 250 == 0 or step == steps):
+            print(f"[gradient-2p] step={step:05d} effort={e:.6f} grad={g:.6f}")
+        if abs(g) < tol:
+            if log:
+                print(f"[gradient-2p] converged at step={step} with |grad|={abs(g):.6g}")
+            break
+
+    return e, history
+
+
+def run_gradient(
+    cfg: Dict,
+    *,
+    lr: float = 0.1,
+    steps: int = 2000,
+    grad_eps: float = 0.1,
+    tol: float = 1e-4,
+    log: bool = True,
+) -> Dict:
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
-    e2 = clip_stage2(e_star_two_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
+    theoretical_e = clip_stage2(e_star_two_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
+    final_e, meta = gradient_descent_two_players(
+        cfg,
+        lr=lr,
+        steps=steps,
+        eps=grad_eps,
+        tol=tol,
+        log=log,
+    )
+    if log:
+        probes = {
+            "theory": theoretical_e,
+            "final": final_e,
+            "midpoint": 0.5 * (theoretical_e + final_e),
+        }
+        env = TwoPlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=tuple(cfg["effort_bounds_stage2"]), seed=cfg.get("seed", 42))
+        for label, effort in probes.items():
+            g_val = _symmetric_fd_gradient(env, effort, eps=max(grad_eps, 1e-3))
+            print(f"[gradient-2p] probe={label} effort={effort:.6f} dU/de={g_val:.6f}")
+        print(f"[gradient-2p] meta: iterations={meta['iterations']:.0f} final_grad={meta['final_grad']:.6f}")
+
     row = build_csv_row(
         stage1_weight=cfg["stage1_weight"],
         stage2_weight=cfg["stage2_weight"],
@@ -35,13 +116,15 @@ def run_gradient(cfg: Dict) -> Dict:
         k2=cfg["k2"],
         information_revelation=cfg.get("information_revelation", "none"),
         theoretical_stage1_effort=0.0,
-        theoretical_stage2_effort=e2,
+        theoretical_stage2_effort=theoretical_e,
         model_training="gradient",
         final_stage1_effort=0.0,
-        final_stage2_effort=e2,
+        final_stage2_effort=final_e,
         episodes=0,
     )
     row["stage2_gap_unweighted"] = abs(float(row["final_stage2_effort"]) - float(row["theoretical_stage2_effort"]))
+    row["gradient_iterations"] = meta["iterations"]
+    row["gradient_final_grad"] = meta["final_grad"]
     return row
 
 
@@ -219,9 +302,34 @@ def main():
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
     parser.add_argument("--episodes", type=int, default=5000, help="Episodes for PPO")
+    parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
+    parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
+    parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
+    parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
+    parser.add_argument("--k", type=float, help="Override symmetric cost k.")
+    parser.add_argument("--w_h", type=float, help="Override high prize w_h.")
+    parser.add_argument("--w_l", type=float, help="Override low prize w_l.")
+    parser.add_argument("--effort-range", type=float, nargs=2, metavar=("LO", "HI"), help="Override symmetric effort bounds.")
+    parser.add_argument("--seed", type=int, help="Override RNG seed.")
     args = parser.parse_args()
 
     cfg = dict(base_config)
+    if args.k is not None:
+        cfg["k"] = float(args.k)
+        cfg["k1"] = float(args.k)
+        cfg["k2"] = float(args.k)
+    if args.w_h is not None:
+        cfg["w_h"] = float(args.w_h)
+    if args.w_l is not None:
+        cfg["w_l"] = float(args.w_l)
+    if args.effort_range is not None:
+        lo, hi = args.effort_range
+        bounds = [float(lo), float(hi)]
+        cfg["effort_bounds_stage2"] = bounds
+        cfg["effort_range"] = bounds
+    if args.seed is not None:
+        cfg["seed"] = int(args.seed)
+
     csv_path = os.path.join("results", "one_stage_two_players.csv")
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
@@ -229,7 +337,16 @@ def main():
         q_values = [args.q] if args.q is not None else list(cfg["q_list"])
         for q in q_values:
             cfg["q"] = float(q)
-            row = run_gradient(cfg)
+            if args.grad_epsilon < 1e-4:
+                print(f"[gradient-2p] warning: grad-epsilon={args.grad_epsilon:.2e} may be too small for stable finite differences.", flush=True)
+            row = run_gradient(
+                cfg,
+                lr=args.grad_lr,
+                steps=args.grad_steps,
+                grad_eps=args.grad_epsilon,
+                tol=args.grad_tol,
+                log=True,
+            )
             save_standardized_result(row, csv_path)
     else:
         # Train once; evaluate for all q (or the specified q)
