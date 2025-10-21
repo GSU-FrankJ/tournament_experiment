@@ -160,6 +160,8 @@ class PPOTwoPlayersBandit:
         actions_norm = torch.stack(self.storage["actions_norm"]).unsqueeze(-1).to(self.device)
         old_logp = torch.stack(self.storage["logp"]).to(self.device)
         advantages, returns = self._compute_gae()
+        adv_mean = float(advantages.mean().item())
+        adv_std = float(advantages.std(unbiased=False).item())
         # Sanity shape checks
         # All should be [T] except states [T, state_dim] and actions_norm [T,1]
         if states.dim() != 2:
@@ -175,6 +177,8 @@ class PPOTwoPlayersBandit:
 
         dataset_size = states.size(0)
         idx = np.arange(dataset_size)
+        kl_values: List[float] = []
+        entropy_values: List[float] = []
         for _ in range(self.cfg.epochs):
             np.random.shuffle(idx)
             for start in range(0, dataset_size, self.cfg.minibatch_size):
@@ -190,6 +194,9 @@ class PPOTwoPlayersBandit:
                 surr1 = ratio * mb_adv
                 surr2 = torch.clamp(ratio, 1 - self.cfg.clip_eps, 1 + self.cfg.clip_eps) * mb_adv
                 policy_loss = -torch.min(surr1, surr2).mean()
+                approx_kl = (mb_old_logp - logp).mean()
+                kl_values.append(float(approx_kl.detach().cpu().item()))
+                entropy_values.append(float(entropy.detach().cpu().item()))
 
                 # ensure 1D shapes
                 if values.dim() != 1:
@@ -217,6 +224,14 @@ class PPOTwoPlayersBandit:
                 with torch.no_grad():
                     for p_opp, p_net in zip(self.opp_net.parameters(), self.net.parameters()):
                         p_opp.mul_(1.0 - tau).add_(p_net, alpha=tau)
+
+        metrics = {
+            "adv_mean": adv_mean,
+            "adv_std": adv_std,
+            "approx_kl": float(np.mean(kl_values)) if kl_values else 0.0,
+            "batch_entropy": float(np.mean(entropy_values)) if entropy_values else 0.0,
+        }
+        return metrics
 
     # ---- utility ----
     def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:

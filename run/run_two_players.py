@@ -128,7 +128,7 @@ def run_gradient(
     return row
 
 
-def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = None, eval_qs: Optional[List[float]] = None) -> List[Dict]:
+def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] = None, eval_qs: Optional[List[float]] = None) -> List[Dict]:
     """Train PPO via self-play with conditioning on (q, k, w_gap).
 
     - Trains over ``train_qs`` (defaults to cfg["q_list" ]).
@@ -142,16 +142,16 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
-        steps_per_update=8192,
-        epochs=20,
-        minibatch_size=1024,
+        steps_per_update=3072,
+        epochs=12,
+        minibatch_size=448,
         state_dim=3,
-        hidden=64,
+        hidden=128,
         opponent_sync_interval=1,
         opponent_ema_tau=0.0,
-        entropy_coef=0.02,
-        lr=3e-4,
-        clip_eps=0.25,
+        entropy_coef=0.015,
+        lr=2.2e-4,
+        clip_eps=0.28,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
 
@@ -159,78 +159,89 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
-    # Entropy schedule: 0.02 -> 0.005 across early/mid updates, then final 50 updates -> 0.0
-    start_entropy, entropy_floor = 0.02, 0.005
+    # Entropy / LR schedules: hold high values until ~2/3 progress, then anneal
+    entropy_start, entropy_hold, entropy_final = 0.015, 0.01, 0.002
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
-    late_updates = min(50, total_updates)
-    start_late = max(0, total_updates - late_updates)
-    final_entropy_span = min(50, total_updates)
-    main_entropy_span = max(0, total_updates - final_entropy_span)
-    # LR boost in last 50 updates: 3e-4 -> 4e-4
-    lr_base = ppo_cfg.lr
-    lr_boost_value = 4e-4
-    lr_boost_updates = min(50, total_updates)
-    start_lr_late = max(0, total_updates - lr_boost_updates)
+    hold_fraction = 2.0 / 3.0
+    hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
+    tail_updates = max(1, total_updates - hold_updates)
+    # Learning rate schedule: hold at 2.2e-4, then anneal to 1.5e-4
+    lr_hold = ppo_cfg.lr
+    lr_final = 2.0e-4
+    # Clip cosine schedule: 0.28 -> 0.18
+    clip_max = 0.28
+    clip_min = 0.18
+    # Self-play lag schedule: warmup 80 updates then fade across 40
+    lag_warmup_updates = 80 if total_updates >= 80 else max(1, total_updates // 2)
+    lag_fade_updates = 40 if total_updates >= 120 else max(1, total_updates // 3)
+
+    last_update_metrics: Optional[Dict[str, float]] = None
 
     while steps_done < total_steps_target:
-        # Apply entropy schedule: early decay to floor, final span ramps to zero
-        if total_updates <= final_entropy_span:
-            # Degenerate case: go straight from start to zero within the span
-            if final_entropy_span > 1:
-                tail_progress = float(update_idx) / float(final_entropy_span - 1)
+        # Entropy: hold near 0.01 for first ~2/3 updates, then ramp to zero
+        if update_idx < hold_updates:
+            if hold_updates > 1:
+                hold_progress = float(update_idx) / float(hold_updates - 1)
             else:
-                tail_progress = 1.0
+                hold_progress = 1.0
+            hold_progress = max(0.0, min(1.0, hold_progress))
+            agent.cfg.entropy_coef = entropy_start + (entropy_hold - entropy_start) * hold_progress
+        else:
+            tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
             tail_progress = max(0.0, min(1.0, tail_progress))
-            agent.cfg.entropy_coef = start_entropy * (1.0 - tail_progress)
+            agent.cfg.entropy_coef = entropy_hold + (entropy_final - entropy_hold) * tail_progress
+        # Clip cosine schedule across total updates
+        if total_updates > 1:
+            clip_progress = float(update_idx) / float(total_updates - 1)
         else:
-            if update_idx < main_entropy_span:
-                if main_entropy_span > 1:
-                    main_progress = float(update_idx) / float(main_entropy_span - 1)
-                else:
-                    main_progress = 1.0
-                main_progress = max(0.0, min(1.0, main_progress))
-                agent.cfg.entropy_coef = start_entropy + (entropy_floor - start_entropy) * main_progress
-            else:
-                tail_step = update_idx - main_entropy_span
-                if final_entropy_span > 1:
-                    tail_progress = float(tail_step) / float(final_entropy_span - 1)
-                else:
-                    tail_progress = 1.0
-                tail_progress = max(0.0, min(1.0, tail_progress))
-                agent.cfg.entropy_coef = entropy_floor * (1.0 - tail_progress)
-        # Late-phase clip schedule: 0.35 -> 0.25 over last N updates (slightly larger at start of late phase)
-        if update_idx >= start_late:
-            if late_updates > 1:
-                prog_late = float(update_idx - start_late) / float(late_updates - 1)
-            else:
-                prog_late = 1.0
-            agent.cfg.clip_eps = 0.35 - 0.10 * max(0.0, min(1.0, prog_late))
+            clip_progress = 1.0
+        clip_cosine = 0.5 * (1.0 + math.cos(math.pi * clip_progress))
+        agent.cfg.clip_eps = clip_min + (clip_max - clip_min) * clip_cosine
+        # LR cosine decay across total updates
+        if update_idx < hold_updates:
+            new_lr = lr_hold
         else:
-            agent.cfg.clip_eps = 0.25
-        # LR boost in the last ~50 updates
-        new_lr = lr_boost_value if update_idx >= start_lr_late else lr_base
+            lr_tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
+            lr_tail_progress = max(0.0, min(1.0, lr_tail_progress))
+            new_lr = lr_hold + (lr_final - lr_hold) * lr_tail_progress
         for g in agent.opt.param_groups:
             g["lr"] = new_lr
+        # Determine lagged-opponent mixing probability for this PPO update
+        if update_idx < lag_warmup_updates:
+            lag_prob = 1.0
+        elif update_idx < lag_warmup_updates + lag_fade_updates:
+            denom = max(1, lag_fade_updates - 1)
+            lag_phase = update_idx - lag_warmup_updates
+            lag_prob = max(0.0, 1.0 - (lag_phase / denom))
+        else:
+            lag_prob = 0.0
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
             env = TwoPlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=effort_bounds, seed=cfg.get("seed", 42))
 
-            # Sampling strategy: early-phase uses lagged opponent and stores learner only;
-            # late-phase switches to fully on-policy symmetric sampling and stores both.
+            # Sampling strategy: early-phase mixes in lagged opponent samples (no stochastic env noise);
+            # late-phase switches to fully on-policy symmetric sampling and stores both trajectories.
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             a1_norm, e1, logp1, v1 = agent.act(s1)
-            a2_norm, e2, logp2, v2 = agent.act(s2)
+            use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
+            if use_opponent:
+                a2_norm, e2, _, _ = agent.act_opponent(s2)
+                logp2 = None
+                v2 = None
+            else:
+                a2_norm, e2, logp2, v2 = agent.act(s2)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+            if not use_opponent:
+                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
-        agent.update()
+        last_update_metrics = agent.update()
         # After each PPO update, evaluate and log gaps for quick monitoring
         upd_i = update_idx + 1
         try:
@@ -242,8 +253,16 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
                     a_eval = dist.mean.squeeze()
                     a_eval = a_eval.clamp(0.0, 1.0)
                     final_e2_eval = float(effort_bounds[0] + a_eval.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
+                    alpha_mean = float(dist.concentration1.mean().item())
+                    beta_mean = float(dist.concentration0.mean().item())
                 gap = abs(final_e2_eval - e2_star_val)
-                print(f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, entropy={agent.cfg.entropy_coef:.3f}")
+                kl_val = last_update_metrics.get("approx_kl", float("nan")) if last_update_metrics else float("nan")
+                adv_mean = last_update_metrics.get("adv_mean", float("nan")) if last_update_metrics else float("nan")
+                print(
+                    f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, "
+                    f"entropy={agent.cfg.entropy_coef:.3f}, lag_prob={lag_prob:.2f}, adv_mean={adv_mean:.4f}, "
+                    f"approx_kl={kl_val:.4f}, alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}"
+                )
         except Exception as _e:
             # Keep training robust to any eval hiccup
             pass
@@ -255,7 +274,7 @@ def run_ppo(cfg: Dict, episodes: int = 5000, train_qs: Optional[List[float]] = N
     for q in eval_qs:
         e2_star_val = clip_stage2(e_star_two_players(q, w_h, w_l, k), effort_bounds)
 
-        # Evaluate with Beta mode when defined (alpha,beta>1), else sample-average
+        # Evaluate via Beta mean (mode intentionally not used per experiment doc)
         s_eval = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
         with torch.no_grad():
             dist, _ = agent.net.dist(s_eval)
@@ -301,7 +320,7 @@ def main():
     parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
-    parser.add_argument("--episodes", type=int, default=5000, help="Episodes for PPO")
+    parser.add_argument("--episodes", type=int, default=921600, help="Episodes for PPO (default 921600 ≈ 300 updates at 3072 steps/update)")
     parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
     parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
     parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")

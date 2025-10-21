@@ -191,6 +191,8 @@ def run_ppo(cfg: Dict, episodes: int = 8000, train_qs: Optional[List[float]] = N
         entropy_coef=0.01,
         lr=3e-4,
         clip_eps=0.25,
+        opponent_sync_interval=1,
+        opponent_ema_tau=0.0,
     )
     agent = PPOThreePlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
 
@@ -199,17 +201,72 @@ def run_ppo(cfg: Dict, episodes: int = 8000, train_qs: Optional[List[float]] = N
     steps_target = int(episodes)
     steps_done = 0
     update_idx = 0
+    total_updates = (steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
+
+    # Stabilization schedule shared with the two-player implementation
+    start_entropy = 0.02
+    entropy_floor = 0.005
+    final_entropy_span = min(50, total_updates)
+    main_entropy_span = max(0, total_updates - final_entropy_span)
+    late_updates = final_entropy_span
+    start_late = max(0, total_updates - late_updates)
+    lr_base = ppo_cfg.lr
+    lr_boost_value = 4e-4
+    lr_boost_updates = min(50, total_updates)
+    start_lr_late = max(0, total_updates - lr_boost_updates)
+    high_q_entropy_threshold = 40.0
+    high_q_entropy_bonus = 0.005
 
     while steps_done < steps_target:
+        if total_updates <= final_entropy_span:
+            if final_entropy_span > 1:
+                tail_progress = float(update_idx) / float(final_entropy_span - 1)
+            else:
+                tail_progress = 1.0
+            tail_progress = max(0.0, min(1.0, tail_progress))
+            entropy_base = start_entropy * (1.0 - tail_progress)
+        else:
+            if update_idx < main_entropy_span:
+                if main_entropy_span > 1:
+                    main_progress = float(update_idx) / float(main_entropy_span - 1)
+                else:
+                    main_progress = 1.0
+                main_progress = max(0.0, min(1.0, main_progress))
+                entropy_base = start_entropy + (entropy_floor - start_entropy) * main_progress
+            else:
+                tail_step = update_idx - main_entropy_span
+                if final_entropy_span > 1:
+                    tail_progress = float(tail_step) / float(final_entropy_span - 1)
+                else:
+                    tail_progress = 1.0
+                tail_progress = max(0.0, min(1.0, tail_progress))
+                entropy_base = entropy_floor * (1.0 - tail_progress)
+        agent.cfg.entropy_coef = entropy_base
+
+        if update_idx >= start_late:
+            if late_updates > 1:
+                prog_late = float(update_idx - start_late) / float(late_updates - 1)
+            else:
+                prog_late = 1.0
+            agent.cfg.clip_eps = 0.35 - 0.10 * max(0.0, min(1.0, prog_late))
+        else:
+            agent.cfg.clip_eps = 0.25
+
+        new_lr = lr_boost_value if update_idx >= start_lr_late else lr_base
+        for group in agent.opt.param_groups:
+            group["lr"] = new_lr
+
         steps_this = min(ppo_cfg.steps_per_update, steps_target - steps_done)
+        q_samples_this_update: List[float] = []
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
+            q_samples_this_update.append(q)
             env = ThreePlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=effort_bounds, seed=cfg.get("seed", 42))
             s = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             # Sample three players from the same policy (on-policy self-play)
             a1, e1, logp1, v1 = agent.act(s)
-            a2, e2, logp2, v2 = agent.act(s)
-            a3, e3, logp3, v3 = agent.act(s)
+            a2, e2, logp2, v2 = agent.act_opponent(s)
+            a3, e3, logp3, v3 = agent.act_opponent(s)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]),
                                                torch.tensor([float(e2.item())]),
@@ -220,6 +277,9 @@ def run_ppo(cfg: Dict, episodes: int = 8000, train_qs: Optional[List[float]] = N
             agent.store(s, a3, logp3, float(rewards[2].item()), v3, bool(done))
 
             history.append(float((e1.item() + e2.item() + e3.item()) / 3.0))
+
+        if q_samples_this_update and max(q_samples_this_update) >= high_q_entropy_threshold:
+            agent.cfg.entropy_coef = entropy_base + high_q_entropy_bonus
 
         agent.update()
         update_idx += 1
@@ -232,13 +292,7 @@ def run_ppo(cfg: Dict, episodes: int = 8000, train_qs: Optional[List[float]] = N
         s_eval = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
         with torch.no_grad():
             dist, _ = agent.net.dist(s_eval)
-            alpha = dist.concentration1.squeeze()
-            beta = dist.concentration0.squeeze()
-            if (alpha > 1.0 and beta > 1.0):
-                a_eval = (alpha - 1.0) / (alpha + beta - 2.0)
-            else:
-                samples = dist.sample((512,)).squeeze(-1)
-                a_eval = samples.mean()
+            a_eval = dist.mean.squeeze().clamp(0.0, 1.0)
             a_eval = float(a_eval.detach().cpu().item())
         final_e = float(effort_bounds[0] + a_eval * (effort_bounds[1] - effort_bounds[0]))
 

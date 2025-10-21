@@ -63,6 +63,8 @@ class PPOConfig:
     minibatch_size: int = 256
     state_dim: int = 3
     hidden: int = 64
+    opponent_sync_interval: int = 1
+    opponent_ema_tau: float = 0.0
 
 
 class PPOThreePlayersBandit:
@@ -73,6 +75,11 @@ class PPOThreePlayersBandit:
 
         self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
+        self.opp_net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
+        self.opp_net.load_state_dict(self.net.state_dict())
+        for p in self.opp_net.parameters():
+            p.requires_grad_(False)
+        self.update_counter = 0
         self.reset_storage()
 
     # ---- helpers ----
@@ -98,6 +105,14 @@ class PPOThreePlayersBandit:
         logp = dist.log_prob(actions_norm).squeeze(-1)
         entropy = dist.entropy().mean()
         return logp, entropy, values.squeeze(-1)
+
+    def act_opponent(self, state: torch.Tensor):
+        with torch.no_grad():
+            dist, value = self.opp_net.dist(state)
+            a_norm = dist.sample()
+            logp = dist.log_prob(a_norm).squeeze(-1)
+            effort = self.low + a_norm.squeeze(-1) * (self.high - self.low)
+        return a_norm.detach(), effort.detach(), logp.detach(), value.detach()
 
     # ---- storage / GAE ----
     def reset_storage(self):
@@ -171,6 +186,18 @@ class PPOThreePlayersBandit:
                 self.opt.step()
 
         self.reset_storage()
+        self.update_counter += 1
+        if (
+            self.cfg.opponent_sync_interval > 0
+            and (self.update_counter % self.cfg.opponent_sync_interval == 0)
+        ):
+            tau = float(self.cfg.opponent_ema_tau)
+            if tau <= 0.0:
+                self.opp_net.load_state_dict(self.net.state_dict())
+            else:
+                with torch.no_grad():
+                    for p_opp, p_net in zip(self.opp_net.parameters(), self.net.parameters()):
+                        p_opp.mul_(1.0 - tau).add_(p_net, alpha=tau)
 
     # ---- convenience ----
     def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
@@ -179,4 +206,3 @@ class PPOThreePlayersBandit:
         wgap_norm = float(w_h - w_l) / 10.0
         t = torch.tensor([q_norm, k_norm, wgap_norm], dtype=torch.float32, device=self.device)
         return t.unsqueeze(0)
-

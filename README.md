@@ -44,6 +44,9 @@ pip install -r requirements.txt
   - Early phase: learner vs lagged opponent; only learner transitions stored
   - Late phase: fully on‑policy symmetric sampling; store both players’ transitions
 - state encoding (3‑D): `[q/60, k/1e‑3, (w_h−w_l)/10]`
+- Assumptions documented for this track:
+  - Two-player environment uses closed-form expected utilities (no stochastic noise is sampled during rollouts).
+  - Evaluation converts the learned Beta policy to actions via the distribution mean; we do **not** switch to the mode even when α,β>1.
 
 ### Config (defaults)
 
