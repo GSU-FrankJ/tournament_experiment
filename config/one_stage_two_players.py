@@ -16,6 +16,30 @@ config = {
     "effort_bounds_stage2": [0, 200],
     "seed": 42,
 
+    # Opponent (lag) settings
+    "opponent_mode": "ema",
+    "opponent_sync_interval": 10,
+    "opponent_ema_tau": 0.05,
+    "opponent_snapshot_keep": 10,
+    "opponent_history_sample_p": 0.5,
+
+    # PPO rollout & update (bandit-friendly defaults)
+    "steps_per_update": 8192,
+    "minibatch_size": 1024,
+    "update_epochs": 6,
+    "eval_every_updates": 20,
+    "early_stop_abs_err": 1.0,
+    "early_stop_patience": 5,
+    "entropy_coef_start": 0.02,
+    "entropy_coef_hold": 0.01,
+    "entropy_coef_end": 0.002,
+    "lr_start": 3e-4,
+    "lr_end": 1e-4,
+    "clip_range_start": 0.2,
+    "clip_range_end": 0.1,
+    "lag_warmup_updates": None,
+    "lag_fade_updates": None,
+
     # Plotting and evaluation
     "enable_overlay": True,
     "convergence_rel_err_threshold": 0.10,

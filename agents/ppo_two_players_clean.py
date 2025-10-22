@@ -14,9 +14,10 @@ Key points:
 
 from __future__ import annotations
 
+from collections import deque
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Tuple, List, Dict
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -63,8 +64,11 @@ class PPOConfig:
     state_dim: int = 3  # [q_norm, k_norm, wgap_norm]
     hidden: int = 64
     # Opponent policy lag (self-play stabilization)
-    opponent_sync_interval: int = 5  # sync every N PPO updates
-    opponent_ema_tau: float = 0.0     # 0.0 -> hard copy; (0,1] -> EMA
+    opponent_mode: str = "ema"  # ["ema", "periodic", "snapshot"]
+    opponent_sync_interval: int = 10  # sync every N PPO updates
+    opponent_ema_tau: float = 0.05    # EMA coefficient
+    opponent_snapshot_keep: int = 10
+    opponent_history_sample_p: float = 0.5
 
 
 class PPOTwoPlayersBandit:
@@ -75,13 +79,31 @@ class PPOTwoPlayersBandit:
 
         self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
-        # Lagged opponent network (frozen)
-        self.opp_net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
-        self.opp_net.load_state_dict(self.net.state_dict())
-        for p in self.opp_net.parameters():
-            p.requires_grad_(False)
+        # Lag opponent / history configuration
+        self.opponent_mode = getattr(cfg, "opponent_mode", "ema")
+        self.opponent_sync_interval = max(0, int(getattr(cfg, "opponent_sync_interval", 0) or 0))
+        self.opponent_ema_tau = float(getattr(cfg, "opponent_ema_tau", 0.0))
+        self.opponent_history_sample_p = max(0.0, min(1.0, float(getattr(cfg, "opponent_history_sample_p", 0.0))))
+        self.opponent_snapshot_keep = max(0, int(getattr(cfg, "opponent_snapshot_keep", 0) or 0))
+        if self.opponent_mode not in ("ema", "periodic", "snapshot"):
+            self.opponent_mode = "periodic"
 
-        self.update_counter = 0
+        # Lagged opponent network (frozen copy)
+        self.opponent_policy = deepcopy(self.net).to(self.device)
+        for p in self.opponent_policy.parameters():
+            p.requires_grad_(False)
+        self.opponent_policy.eval()
+
+        # Historical snapshot pool (only populated for snapshot mode or explicit requests)
+        history_maxlen = self.opponent_snapshot_keep if self.opponent_snapshot_keep > 0 else None
+        self._opponent_history: deque[ActorCritic] = deque(maxlen=history_maxlen)
+
+        # Tracking counters
+        self._updates = 0
+        self._last_sync_step = -1
+
+        if self.opponent_mode == "snapshot" and self.opponent_snapshot_keep != 0:
+            self._snapshot_current()
 
         # rollout storage
         self.reset_storage()
@@ -99,23 +121,75 @@ class PPOTwoPlayersBandit:
     def _act_with_net(self, net: ActorCritic, state: torch.Tensor):
         dist, value = net.dist(state)
         a_norm = dist.sample()
-        logp = dist.log_prob(a_norm).squeeze(-1)
+        eps = 1e-6
+        a_safe = a_norm.clamp(eps, 1.0 - eps)
+        logp = dist.log_prob(a_safe).squeeze(-1)
         # map to effort
-        effort = self.low + a_norm.squeeze(-1) * (self.high - self.low)
-        return a_norm.detach(), effort.detach(), logp.detach(), value.detach()
+        effort = self.low + a_safe.squeeze(-1) * (self.high - self.low)
+        return a_safe.detach(), effort.detach(), logp.detach(), value.detach()
 
     def act(self, state: torch.Tensor):
         return self._act_with_net(self.net, state)
 
     def act_opponent(self, state: torch.Tensor):
+        opp_net = self._sample_opponent_policy_for_play()
         with torch.no_grad():
-            return self._act_with_net(self.opp_net, state)
+            return self._act_with_net(opp_net, state)
+
+    def _sample_opponent_policy_for_play(self) -> ActorCritic:
+        history_available = len(self._opponent_history) > 0
+        use_history = (
+            history_available
+            and self.opponent_history_sample_p > 0.0
+            and float(np.random.rand()) < float(self.opponent_history_sample_p)
+        )
+        if use_history:
+            idx = int(np.random.randint(len(self._opponent_history)))
+            return self._opponent_history[idx]
+        return self.opponent_policy
+
+    @torch.no_grad()
+    def _ema_update(self, tau: float):
+        tau = float(max(0.0, min(1.0, tau)))
+        if tau <= 0.0:
+            self._hard_copy_to_opponent()
+            return
+        for p_opp, p_cur in zip(self.opponent_policy.parameters(), self.net.parameters()):
+            p_opp.data.lerp_(p_cur.data, tau)
+
+    @torch.no_grad()
+    def _hard_copy_to_opponent(self):
+        for p_opp, p_cur in zip(self.opponent_policy.parameters(), self.net.parameters()):
+            p_opp.data.copy_(p_cur.data)
+
+    @torch.no_grad()
+    def _snapshot_current(self):
+        # Sync the managed opponent copy before saving and append frozen snapshot
+        self._hard_copy_to_opponent()
+        snap = deepcopy(self.opponent_policy)
+        for p in snap.parameters():
+            p.requires_grad_(False)
+        snap.eval()
+        self._opponent_history.append(snap)
 
     def evaluate_actions(self, states: torch.Tensor, actions_norm: torch.Tensor):
         dist, values = self.net.dist(states)
-        logp = dist.log_prob(actions_norm).squeeze(-1)
+        eps = 1e-6
+        a_safe = actions_norm.clamp(eps, 1.0 - eps)
+        logp = dist.log_prob(a_safe).squeeze(-1)
         entropy = dist.entropy().mean()
         return logp, entropy, values.squeeze(-1)
+
+    @torch.no_grad()
+    def mean_action_norm(self, state: torch.Tensor) -> torch.Tensor:
+        dist, _ = self.net.dist(state.to(self.device))
+        eps = 1e-6
+        return dist.mean.clamp(eps, 1.0 - eps)
+
+    @torch.no_grad()
+    def mean_effort(self, state: torch.Tensor) -> float:
+        a_mean = self.mean_action_norm(state).squeeze().item()
+        return float(self.low + a_mean * (self.high - self.low))
 
     # ---- storage and advantage ----
     def reset_storage(self):
@@ -173,7 +247,7 @@ class PPOTwoPlayersBandit:
         if advantages.dim() != 1 or returns.dim() != 1:
             raise RuntimeError(f"returns/advantages shapes unexpected: {advantages.shape}, {returns.shape}")
         # normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+        advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
 
         dataset_size = states.size(0)
         idx = np.arange(dataset_size)
@@ -212,24 +286,27 @@ class PPOTwoPlayersBandit:
                 self.opt.step()
 
         self.reset_storage()
-        # Update opponent with lag
-        self.update_counter += 1
-        if self.cfg.opponent_sync_interval > 0 and (self.update_counter % self.cfg.opponent_sync_interval == 0):
-            tau = float(self.cfg.opponent_ema_tau)
-            if tau <= 0.0:
-                # hard copy
-                self.opp_net.load_state_dict(self.net.state_dict())
+        # Update opponent with lag according to configured mode
+        self._updates += 1
+        if self.opponent_sync_interval > 0 and (self._updates % self.opponent_sync_interval == 0):
+            if self.opponent_mode == "ema":
+                self._ema_update(self.opponent_ema_tau)
+            elif self.opponent_mode == "periodic":
+                self._hard_copy_to_opponent()
+            elif self.opponent_mode == "snapshot":
+                self._snapshot_current()
             else:
-                # EMA: opp = (1-tau)*opp + tau*net
-                with torch.no_grad():
-                    for p_opp, p_net in zip(self.opp_net.parameters(), self.net.parameters()):
-                        p_opp.mul_(1.0 - tau).add_(p_net, alpha=tau)
+                # Fallback to hard copy for unknown modes
+                self._hard_copy_to_opponent()
+            self._last_sync_step = self._updates
 
         metrics = {
             "adv_mean": adv_mean,
             "adv_std": adv_std,
             "approx_kl": float(np.mean(kl_values)) if kl_values else 0.0,
             "batch_entropy": float(np.mean(entropy_values)) if entropy_values else 0.0,
+            "opponent_history_size": float(len(self._opponent_history)),
+            "opponent_last_sync": float(self._last_sync_step),
         }
         return metrics
 

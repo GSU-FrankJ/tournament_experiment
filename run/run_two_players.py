@@ -128,7 +128,16 @@ def run_gradient(
     return row
 
 
-def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] = None, eval_qs: Optional[List[float]] = None) -> List[Dict]:
+def run_ppo(
+    cfg: Dict,
+    episodes: int = 921600,
+    train_qs: Optional[List[float]] = None,
+    eval_qs: Optional[List[float]] = None,
+    *,
+    eval_symmetric: bool = True,
+    eval_vs_opponent: bool = False,
+    eval_vs_history: bool = False,
+) -> List[Dict]:
     """Train PPO via self-play with conditioning on (q, k, w_gap).
 
     - Trains over ``train_qs`` (defaults to cfg["q_list" ]).
@@ -142,25 +151,34 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
-        steps_per_update=3072,
-        epochs=12,
-        minibatch_size=448,
+        steps_per_update=int(cfg.get("steps_per_update", 8192)),
+        epochs=int(cfg.get("update_epochs", 6)),
+        minibatch_size=int(cfg.get("minibatch_size", 1024)),
         state_dim=3,
         hidden=128,
-        opponent_sync_interval=1,
-        opponent_ema_tau=0.0,
-        entropy_coef=0.015,
-        lr=2.2e-4,
-        clip_eps=0.28,
+        opponent_mode=cfg.get("opponent_mode", "ema"),
+        opponent_sync_interval=int(cfg.get("opponent_sync_interval", 10)),
+        opponent_ema_tau=float(cfg.get("opponent_ema_tau", 0.05)),
+        opponent_snapshot_keep=int(cfg.get("opponent_snapshot_keep", 10)),
+        opponent_history_sample_p=float(cfg.get("opponent_history_sample_p", 0.5)),
+        entropy_coef=float(cfg.get("entropy_coef_start", 0.02)),
+        lr=float(cfg.get("lr_start", 3e-4)),
+        clip_eps=float(cfg.get("clip_range_start", 0.2)),
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
+    agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
+    agent.cfg.clip_eps = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
+    for g in agent.opt.param_groups:
+        g["lr"] = float(cfg.get("lr_start", ppo_cfg.lr))
 
     history: List[float] = []
     total_steps_target = int(episodes)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
     # Entropy / LR schedules: hold high values until ~2/3 progress, then anneal
-    entropy_start, entropy_hold, entropy_final = 0.015, 0.01, 0.002
+    entropy_start = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
+    entropy_hold = float(cfg.get("entropy_coef_hold", 0.01))
+    entropy_final = float(cfg.get("entropy_coef_end", 0.002))
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
@@ -168,16 +186,23 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
     # Learning rate schedule: hold at 2.2e-4, then anneal to 1.5e-4
-    lr_hold = ppo_cfg.lr
-    lr_final = 2.0e-4
-    # Clip cosine schedule: 0.28 -> 0.18
-    clip_max = 0.28
-    clip_min = 0.18
-    # Self-play lag schedule: warmup 80 updates then fade across 40
-    lag_warmup_updates = 80 if total_updates >= 80 else max(1, total_updates // 2)
-    lag_fade_updates = 40 if total_updates >= 120 else max(1, total_updates // 3)
+    lr_hold = float(cfg.get("lr_start", agent.cfg.lr))
+    lr_final = float(cfg.get("lr_end", 1e-4))
+    # Clip cosine schedule
+    clip_max = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
+    clip_min = float(cfg.get("clip_range_end", 0.1))
+    # Self-play lag schedule: warmup then fade
+    lag_warmup_cfg = cfg.get("lag_warmup_updates")
+    lag_fade_cfg = cfg.get("lag_fade_updates")
+    lag_warmup_updates = max(0, int(lag_warmup_cfg)) if lag_warmup_cfg is not None else max(1, total_updates // 2)
+    lag_fade_updates = max(0, int(lag_fade_cfg)) if lag_fade_cfg is not None else max(1, total_updates // 3)
 
     last_update_metrics: Optional[Dict[str, float]] = None
+    eval_every = int(cfg.get("eval_every_updates", 20) or 0)
+    es_abs = float(cfg.get("early_stop_abs_err", 1.0))
+    es_pat = int(cfg.get("early_stop_patience", 5) or 0)
+    es_counter = 0
+    early_stop_triggered = False
 
     while steps_done < total_steps_target:
         # Entropy: hold near 0.01 for first ~2/3 updates, then ramp to zero
@@ -208,7 +233,7 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
             new_lr = lr_hold + (lr_final - lr_hold) * lr_tail_progress
         for g in agent.opt.param_groups:
             g["lr"] = new_lr
-        # Determine lagged-opponent mixing probability for this PPO update
+        # Determine probability of sampling lagged-opponent paths for this update
         if update_idx < lag_warmup_updates:
             lag_prob = 1.0
         elif update_idx < lag_warmup_updates + lag_fade_updates:
@@ -227,6 +252,8 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             a1_norm, e1, logp1, v1 = agent.act(s1)
+            # Early phase: with prob=lag_prob, draw opponent action from lagged/historical policy.
+            # Late phase: fully on-policy symmetric sampling.
             use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
             if use_opponent:
                 a2_norm, e2, _, _ = agent.act_opponent(s2)
@@ -258,10 +285,13 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
                 gap = abs(final_e2_eval - e2_star_val)
                 kl_val = last_update_metrics.get("approx_kl", float("nan")) if last_update_metrics else float("nan")
                 adv_mean = last_update_metrics.get("adv_mean", float("nan")) if last_update_metrics else float("nan")
+                hist_size = last_update_metrics.get("opponent_history_size", float(len(agent._opponent_history))) if last_update_metrics else float(len(agent._opponent_history))
+                last_sync = last_update_metrics.get("opponent_last_sync", float(agent._last_sync_step)) if last_update_metrics else float(agent._last_sync_step)
                 print(
                     f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, "
                     f"entropy={agent.cfg.entropy_coef:.3f}, lag_prob={lag_prob:.2f}, adv_mean={adv_mean:.4f}, "
-                    f"approx_kl={kl_val:.4f}, alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}"
+                    f"approx_kl={kl_val:.4f}, alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}, "
+                    f"opp_mode={agent.opponent_mode}, last_sync={last_sync:.0f}, opp_hist_size={hist_size:.0f}"
                 )
         except Exception as _e:
             # Keep training robust to any eval hiccup
@@ -269,19 +299,65 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
         update_idx += 1
         steps_done += steps_this
 
+        if eval_every > 0 and es_pat > 0 and (update_idx % eval_every == 0):
+            abs_errs = []
+            for q_eval in eval_qs:
+                e2_star_val = clip_stage2(e_star_two_players(q_eval, w_h, w_l, k), effort_bounds)
+                state_eval = agent.state_from_params(q=float(q_eval), k=k, w_h=w_h, w_l=w_l)
+                e_eval = agent.mean_effort(state_eval)
+                abs_errs.append(abs(e_eval - e2_star_val))
+            mean_abs_err = float(np.mean(abs_errs)) if abs_errs else float("inf")
+            if mean_abs_err < es_abs:
+                es_counter += 1
+            else:
+                es_counter = 0
+            print(f"[EarlyStopProbe] updates={update_idx} mean_abs_err={mean_abs_err:.3f} ({es_counter}/{es_pat})")
+            if es_counter >= es_pat:
+                print("[EarlyStop] satisfied mean_abs_err threshold and patience. Stopping training.")
+                early_stop_triggered = True
+                break
+
     # Build rows for each evaluation q
     rows: List[Dict] = []
     for q in eval_qs:
         e2_star_val = clip_stage2(e_star_two_players(q, w_h, w_l, k), effort_bounds)
 
-        # Evaluate via Beta mean (mode intentionally not used per experiment doc)
-        s_eval = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
-        with torch.no_grad():
-            dist, _ = agent.net.dist(s_eval)
-            a_eval = dist.mean.squeeze()
-            a_eval = a_eval.clamp(0.0, 1.0)
-            a_eval = float(a_eval.detach().cpu().item())
-        final_e2 = float(effort_bounds[0] + a_eval * (effort_bounds[1] - effort_bounds[0]))
+        # Helper utilities for evaluation
+        env_eval = TwoPlayersEnv(
+            w_h=w_h,
+            w_l=w_l,
+            k=k,
+            q=q,
+            effort_bounds=effort_bounds,
+            seed=cfg.get("seed", 42),
+        )
+
+        def _compute_effort(policy_net: torch.nn.Module) -> float:
+            state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
+            with torch.no_grad():
+                dist, _ = policy_net.dist(state)
+                a_mean = dist.mean.squeeze().clamp(0.0, 1.0)
+                return float(effort_bounds[0] + a_mean.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
+
+        def _evaluate_pair(policy_net: torch.nn.Module, opponent_net: torch.nn.Module) -> Dict[str, float]:
+            effort_self = _compute_effort(policy_net)
+            effort_opp = _compute_effort(opponent_net)
+            _, rewards, _, _, _ = env_eval.step(
+                (
+                    torch.tensor([effort_self], dtype=torch.float32),
+                    torch.tensor([effort_opp], dtype=torch.float32),
+                )
+            )
+            reward_self = float(rewards[0].item())
+            reward_opp = float(rewards[1].item())
+            return {
+                "effort_self": effort_self,
+                "effort_opp": effort_opp,
+                "reward_self": reward_self,
+                "reward_opp": reward_opp,
+            }
+
+        final_e2 = _compute_effort(agent.net)
         stage2_gap = abs(final_e2 - e2_star_val)
 
         row = build_csv_row(
@@ -298,6 +374,44 @@ def run_ppo(cfg: Dict, episodes: int = 921600, train_qs: Optional[List[float]] =
             episodes=episodes,
         )
         row["stage2_gap_unweighted"] = stage2_gap
+        row["abs_err"] = stage2_gap
+        row["opp_mode"] = agent.opponent_mode
+        row["opp_sync_interval"] = agent.opponent_sync_interval
+        row["opp_ema_tau"] = agent.opponent_ema_tau
+        row["opp_hist_size"] = len(agent._opponent_history)
+        row["last_sync_step"] = agent._last_sync_step
+
+        if eval_symmetric:
+            sym_eval = _evaluate_pair(agent.net, agent.net)
+            row["eval_symmetric_effort"] = sym_eval["effort_self"]
+            row["eval_symmetric_reward"] = sym_eval["reward_self"]
+            row["eval_symmetric_abs_err"] = abs(sym_eval["effort_self"] - e2_star_val)
+
+        if eval_vs_opponent:
+            opp_eval = _evaluate_pair(agent.net, agent.opponent_policy)
+            row["eval_vs_opponent_effort"] = opp_eval["effort_self"]
+            row["eval_vs_opponent_reward"] = opp_eval["reward_self"]
+            row["eval_vs_opponent_opp_effort"] = opp_eval["effort_opp"]
+            row["eval_vs_opponent_abs_err"] = abs(opp_eval["effort_self"] - e2_star_val)
+
+        if eval_vs_history:
+            history_nets = list(agent._opponent_history)
+            if history_nets:
+                hist_results = [_evaluate_pair(agent.net, hist_net) for hist_net in history_nets]
+                efforts = np.array([res["effort_self"] for res in hist_results], dtype=np.float32)
+                rewards = np.array([res["reward_self"] for res in hist_results], dtype=np.float32)
+                row["eval_vs_history_effort_mean"] = float(efforts.mean())
+                row["eval_vs_history_effort_std"] = float(efforts.std(ddof=0)) if efforts.size > 1 else 0.0
+                row["eval_vs_history_reward_mean"] = float(rewards.mean())
+                row["eval_vs_history_reward_std"] = float(rewards.std(ddof=0)) if rewards.size > 1 else 0.0
+                row["eval_vs_history_abs_err_mean"] = float(np.mean(np.abs(efforts - e2_star_val)))
+            else:
+                row["eval_vs_history_effort_mean"] = float("nan")
+                row["eval_vs_history_effort_std"] = float("nan")
+                row["eval_vs_history_reward_mean"] = float("nan")
+                row["eval_vs_history_reward_std"] = float("nan")
+                row["eval_vs_history_abs_err_mean"] = float("nan")
+
         rows.append(row)
 
     # Plot overlays for each q (training history)
@@ -325,6 +439,11 @@ def main():
     parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
     parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
     parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
+    parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
+    parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
+    parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
+    parser.add_argument("--no-eval-symmetric", dest="eval_symmetric", action="store_false", help="Disable symmetric self-play evaluation.")
+    parser.set_defaults(eval_symmetric=True)
     parser.add_argument("--k", type=float, help="Override symmetric cost k.")
     parser.add_argument("--w_h", type=float, help="Override high prize w_h.")
     parser.add_argument("--w_l", type=float, help="Override low prize w_l.")
@@ -371,7 +490,15 @@ def main():
         # Train once; evaluate for all q (or the specified q)
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])
         eval_qs = train_qs
-        rows = run_ppo(cfg, episodes=args.episodes, train_qs=train_qs, eval_qs=eval_qs)
+        rows = run_ppo(
+            cfg,
+            episodes=args.episodes,
+            train_qs=train_qs,
+            eval_qs=eval_qs,
+            eval_symmetric=args.eval_symmetric,
+            eval_vs_opponent=args.eval_vs_opponent,
+            eval_vs_history=args.eval_vs_history,
+        )
         for row in rows:
             save_standardized_result(row, csv_path)
 
