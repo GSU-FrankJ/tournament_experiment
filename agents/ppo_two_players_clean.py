@@ -134,7 +134,13 @@ class PPOTwoPlayersBandit:
     def act_opponent(self, state: torch.Tensor):
         opp_net = self._sample_opponent_policy_for_play()
         with torch.no_grad():
-            return self._act_with_net(opp_net, state)
+            dist, _ = opp_net.dist(state.to(self.device))
+            eps = 1e-6
+            a_norm = dist.sample()
+            a_safe = a_norm.clamp(eps, 1.0 - eps)
+            logp = dist.log_prob(a_safe).squeeze(-1)
+            effort = self.low + a_safe.squeeze(-1) * (self.high - self.low)
+        return a_safe.detach(), effort.detach(), logp.detach(), None
 
     def _sample_opponent_policy_for_play(self) -> ActorCritic:
         history_available = len(self._opponent_history) > 0
@@ -190,6 +196,11 @@ class PPOTwoPlayersBandit:
     def mean_effort(self, state: torch.Tensor) -> float:
         a_mean = self.mean_action_norm(state).squeeze().item()
         return float(self.low + a_mean * (self.high - self.low))
+
+    @torch.no_grad()
+    def value_only(self, state: torch.Tensor):
+        _, value = self.net.dist(state.to(self.device))
+        return value.detach()
 
     # ---- storage and advantage ----
     def reset_storage(self):

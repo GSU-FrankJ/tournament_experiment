@@ -130,7 +130,7 @@ def run_gradient(
 
 def run_ppo(
     cfg: Dict,
-    episodes: int = 921600,
+    episodes: Optional[int] = None,
     train_qs: Optional[List[float]] = None,
     eval_qs: Optional[List[float]] = None,
     *,
@@ -143,6 +143,11 @@ def run_ppo(
     - Trains over ``train_qs`` (defaults to cfg["q_list" ]).
     - Returns a list of CSV rows, one per q in ``eval_qs`` (defaults to train_qs).
     """
+    if episodes is None:
+        episodes = int(cfg.get("episodes", 1_800_000))
+    else:
+        episodes = int(episodes)
+
     w_h, w_l, k = cfg["w_h"], cfg["w_l"], cfg["k"]
     effort_bounds = tuple(cfg["effort_bounds_stage2"])  # (0, 200)
     # Respect CLI-provided training set; default to config q_list
@@ -151,19 +156,19 @@ def run_ppo(
 
     # PPO agent with 3-dim state: [q, k, w_gap]
     ppo_cfg = PPOConfig(
-        steps_per_update=int(cfg.get("steps_per_update", 8192)),
+        steps_per_update=int(cfg.get("steps_per_update", 4096)),
         epochs=int(cfg.get("update_epochs", 6)),
         minibatch_size=int(cfg.get("minibatch_size", 1024)),
         state_dim=3,
         hidden=128,
-        opponent_mode=cfg.get("opponent_mode", "ema"),
-        opponent_sync_interval=int(cfg.get("opponent_sync_interval", 10)),
-        opponent_ema_tau=float(cfg.get("opponent_ema_tau", 0.05)),
+        opponent_mode=cfg.get("opponent_mode", "periodic"),
+        opponent_sync_interval=int(cfg.get("opponent_sync_interval", 2)),
+        opponent_ema_tau=float(cfg.get("opponent_ema_tau", 0.20)),
         opponent_snapshot_keep=int(cfg.get("opponent_snapshot_keep", 10)),
-        opponent_history_sample_p=float(cfg.get("opponent_history_sample_p", 0.5)),
+        opponent_history_sample_p=float(cfg.get("opponent_history_sample_p", 0.3)),
         entropy_coef=float(cfg.get("entropy_coef_start", 0.02)),
         lr=float(cfg.get("lr_start", 3e-4)),
-        clip_eps=float(cfg.get("clip_range_start", 0.2)),
+        clip_eps=float(cfg.get("clip_range_start", 0.30)),
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
     agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
@@ -177,25 +182,38 @@ def run_ppo(
     rng = np.random.default_rng(cfg.get("seed", 42))
     # Entropy / LR schedules: hold high values until ~2/3 progress, then anneal
     entropy_start = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
-    entropy_hold = float(cfg.get("entropy_coef_hold", 0.01))
-    entropy_final = float(cfg.get("entropy_coef_end", 0.002))
+    entropy_hold = float(cfg.get("entropy_coef_hold", entropy_start))
+    entropy_final = float(cfg.get("entropy_coef_end", 0.005))
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
     hold_fraction = 2.0 / 3.0
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
-    # Learning rate schedule: hold at 2.2e-4, then anneal to 1.5e-4
+    # Learning rate schedule: hold at starting value, then anneal to final value
     lr_hold = float(cfg.get("lr_start", agent.cfg.lr))
-    lr_final = float(cfg.get("lr_end", 1e-4))
-    # Clip cosine schedule
+    lr_final = float(cfg.get("lr_end", 2e-4))
+    # Clip schedule parameters
     clip_max = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
-    clip_min = float(cfg.get("clip_range_end", 0.1))
-    # Self-play lag schedule: warmup then fade
-    lag_warmup_cfg = cfg.get("lag_warmup_updates")
+    clip_min = float(cfg.get("clip_range_end", 0.15))
+    # Self-play lag schedule: short warmup then fade
+    lag_warmup_updates = max(0, int(cfg.get("lag_warmup_updates", 10)))
     lag_fade_cfg = cfg.get("lag_fade_updates")
-    lag_warmup_updates = max(0, int(lag_warmup_cfg)) if lag_warmup_cfg is not None else max(1, total_updates // 2)
     lag_fade_updates = max(0, int(lag_fade_cfg)) if lag_fade_cfg is not None else max(1, total_updates // 3)
+
+    history_prob_start = float(cfg.get("opponent_history_sample_p", agent.opponent_history_sample_p))
+    history_prob_end = float(cfg.get("opponent_history_sample_p_end", history_prob_start))
+    agent.opponent_history_sample_p = history_prob_start
+
+    clip_factor = 1.0
+    lr_factor = 1.0
+    clip_floor = 0.10
+    clip_ceiling = 0.45
+    min_lr = 5e-5
+    max_lr = 5e-4
+    target_kl = float(cfg.get("target_kl", 0.01))
+    kl_low = 0.5 * target_kl
+    kl_high = 3.0 * target_kl
 
     last_update_metrics: Optional[Dict[str, float]] = None
     eval_every = int(cfg.get("eval_every_updates", 20) or 0)
@@ -205,7 +223,14 @@ def run_ppo(
     early_stop_triggered = False
 
     while steps_done < total_steps_target:
-        # Entropy: hold near 0.01 for first ~2/3 updates, then ramp to zero
+        if total_updates > 1:
+            hist_progress = float(update_idx) / float(total_updates - 1)
+            hist_progress = max(0.0, min(1.0, hist_progress))
+        else:
+            hist_progress = 1.0
+        agent.opponent_history_sample_p = history_prob_start + (history_prob_end - history_prob_start) * hist_progress
+
+        # Entropy: hold high for first ~2/3 updates, then ramp down
         if update_idx < hold_updates:
             if hold_updates > 1:
                 hold_progress = float(update_idx) / float(hold_updates - 1)
@@ -217,22 +242,29 @@ def run_ppo(
             tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
             tail_progress = max(0.0, min(1.0, tail_progress))
             agent.cfg.entropy_coef = entropy_hold + (entropy_final - entropy_hold) * tail_progress
-        # Clip cosine schedule across total updates
-        if total_updates > 1:
-            clip_progress = float(update_idx) / float(total_updates - 1)
-        else:
-            clip_progress = 1.0
-        clip_cosine = 0.5 * (1.0 + math.cos(math.pi * clip_progress))
-        agent.cfg.clip_eps = clip_min + (clip_max - clip_min) * clip_cosine
-        # LR cosine decay across total updates
+        # Clip schedule with adaptive scaling
         if update_idx < hold_updates:
-            new_lr = lr_hold
+            clip_base = clip_max
+        else:
+            tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
+            tail_progress = max(0.0, min(1.0, tail_progress))
+            clip_base = clip_max + (clip_min - clip_max) * tail_progress
+        clip_val = clip_base * clip_factor
+        clip_val = max(clip_floor, min(clip_ceiling, clip_val))
+        agent.cfg.clip_eps = clip_val
+        clip_base_current = clip_base
+        # Learning rate schedule with adaptive scaling
+        if update_idx < hold_updates:
+            lr_base = lr_hold
         else:
             lr_tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
             lr_tail_progress = max(0.0, min(1.0, lr_tail_progress))
-            new_lr = lr_hold + (lr_final - lr_hold) * lr_tail_progress
+            lr_base = lr_hold + (lr_final - lr_hold) * lr_tail_progress
+        lr_val = lr_base * lr_factor
+        lr_val = max(min_lr, min(max_lr, lr_val))
         for g in agent.opt.param_groups:
-            g["lr"] = new_lr
+            g["lr"] = lr_val
+        lr_base_current = lr_base
         # Determine probability of sampling lagged-opponent paths for this update
         if update_idx < lag_warmup_updates:
             lag_prob = 1.0
@@ -256,19 +288,31 @@ def run_ppo(
             # Late phase: fully on-policy symmetric sampling.
             use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
             if use_opponent:
-                a2_norm, e2, _, _ = agent.act_opponent(s2)
-                logp2 = None
-                v2 = None
+                a2_norm, e2, logp2, _ = agent.act_opponent(s2)
+                v2 = agent.value_only(s2)
             else:
                 a2_norm, e2, logp2, v2 = agent.act(s2)
 
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            if not use_opponent:
-                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             history.append(float((e1.item() + e2.item()) / 2.0))
         last_update_metrics = agent.update()
+        kl_val = float(last_update_metrics.get("approx_kl", 0.0) if last_update_metrics else 0.0)
+        if not math.isfinite(kl_val):
+            kl_val = 0.0
+        if kl_val < kl_low:
+            clip_factor = min(clip_factor * 1.2, 1.5)
+            lr_factor = min(lr_factor * 1.25, 1.5)
+        elif kl_val > kl_high:
+            clip_factor = max(clip_factor * 0.8, 0.5)
+            lr_factor = max(lr_factor * 0.8, 0.2)
+        clip_val = max(clip_floor, min(clip_ceiling, clip_base_current * clip_factor))
+        agent.cfg.clip_eps = clip_val
+        lr_val = max(min_lr, min(max_lr, lr_base_current * lr_factor))
+        for g in agent.opt.param_groups:
+            g["lr"] = lr_val
         # After each PPO update, evaluate and log gaps for quick monitoring
         upd_i = update_idx + 1
         try:
@@ -357,7 +401,13 @@ def run_ppo(
                 "reward_opp": reward_opp,
             }
 
-        final_e2 = _compute_effort(agent.net)
+        s_agent = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
+        with torch.no_grad():
+            dist_agent, _ = agent.net.dist(s_agent)
+            a_agent = dist_agent.mean.squeeze().clamp(0.0, 1.0)
+            final_e2 = float(effort_bounds[0] + a_agent.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
+            alpha_eval = float(dist_agent.concentration1.mean().item())
+            beta_eval = float(dist_agent.concentration0.mean().item())
         stage2_gap = abs(final_e2 - e2_star_val)
 
         row = build_csv_row(
@@ -380,6 +430,10 @@ def run_ppo(
         row["opp_ema_tau"] = agent.opponent_ema_tau
         row["opp_hist_size"] = len(agent._opponent_history)
         row["last_sync_step"] = agent._last_sync_step
+        row["approx_kl"] = last_update_metrics.get("approx_kl", float("nan")) if last_update_metrics else float("nan")
+        row["batch_entropy"] = last_update_metrics.get("batch_entropy", float("nan")) if last_update_metrics else float("nan")
+        row["alpha_mean"] = alpha_eval
+        row["beta_mean"] = beta_eval
 
         if eval_symmetric:
             sym_eval = _evaluate_pair(agent.net, agent.net)
@@ -434,7 +488,12 @@ def main():
     parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
-    parser.add_argument("--episodes", type=int, default=921600, help="Episodes for PPO (default 921600 ≈ 300 updates at 3072 steps/update)")
+    parser.add_argument(
+        "--episodes",
+        type=int,
+        default=base_config.get("episodes", 1_800_000),
+        help="Episodes for PPO (default config value, e.g. 2.4e6 ≈ 585 updates at 4096 steps/update)",
+    )
     parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
     parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
     parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
@@ -467,6 +526,7 @@ def main():
         cfg["effort_range"] = bounds
     if args.seed is not None:
         cfg["seed"] = int(args.seed)
+    cfg["episodes"] = int(args.episodes)
 
     csv_path = os.path.join("results", "one_stage_two_players.csv")
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)

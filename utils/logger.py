@@ -59,10 +59,29 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
                                        experiment_data.get("convergence_time", "N/A")),
         "Gap_from_theoretical": experiment_data.get("Gap_from_theoretical",
                                                    experiment_data.get("gap", 0.0)),
+        "abs_err": experiment_data.get("abs_err", ""),
         "stage2_gap_unweighted": experiment_data.get("stage2_gap_unweighted", ""),
         "gradient_iterations": experiment_data.get("gradient_iterations", ""),
         "gradient_final_grad": experiment_data.get("gradient_final_grad", ""),
         "gradient_mode": experiment_data.get("gradient_mode", ""),
+        "opp_mode": experiment_data.get("opp_mode", ""),
+        "opp_sync_interval": experiment_data.get("opp_sync_interval", ""),
+        "opp_ema_tau": experiment_data.get("opp_ema_tau", ""),
+        "opp_hist_size": experiment_data.get("opp_hist_size", ""),
+        "last_sync_step": experiment_data.get("last_sync_step", ""),
+        "approx_kl": experiment_data.get("approx_kl", ""),
+        "batch_entropy": experiment_data.get("batch_entropy", ""),
+        "alpha_mean": experiment_data.get("alpha_mean", ""),
+        "beta_mean": experiment_data.get("beta_mean", ""),
+        "eval_vs_opponent_effort": experiment_data.get("eval_vs_opponent_effort", ""),
+        "eval_vs_opponent_reward": experiment_data.get("eval_vs_opponent_reward", ""),
+        "eval_vs_opponent_opp_effort": experiment_data.get("eval_vs_opponent_opp_effort", ""),
+        "eval_vs_opponent_abs_err": experiment_data.get("eval_vs_opponent_abs_err", ""),
+        "eval_vs_history_effort_mean": experiment_data.get("eval_vs_history_effort_mean", ""),
+        "eval_vs_history_effort_std": experiment_data.get("eval_vs_history_effort_std", ""),
+        "eval_vs_history_reward_mean": experiment_data.get("eval_vs_history_reward_mean", ""),
+        "eval_vs_history_reward_std": experiment_data.get("eval_vs_history_reward_std", ""),
+        "eval_vs_history_abs_err_mean": experiment_data.get("eval_vs_history_abs_err_mean", ""),
     }
     
     # Ensure results directory exists
@@ -75,8 +94,13 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
             "stage1_weight", "stage2_weight", "k1", "k2", "information_revelation",
             "theoretical_stage1_effort", "theoretical_stage2_effort", "Model_training",
             "final_stage1_effort", "final_stage2_effort", "final_weighted_effort",
-            "Convergence_Quality", "episodes", "Gap_from_theoretical", "stage2_gap_unweighted",
-            "gradient_iterations", "gradient_final_grad", "gradient_mode"
+            "Convergence_Quality", "episodes", "Gap_from_theoretical", "abs_err", "stage2_gap_unweighted",
+            "gradient_iterations", "gradient_final_grad", "gradient_mode",
+            "opp_mode", "opp_sync_interval", "opp_ema_tau", "opp_hist_size", "last_sync_step",
+            "approx_kl", "batch_entropy", "alpha_mean", "beta_mean",
+            "eval_vs_opponent_effort", "eval_vs_opponent_reward", "eval_vs_opponent_opp_effort",
+            "eval_vs_opponent_abs_err", "eval_vs_history_effort_mean", "eval_vs_history_effort_std",
+            "eval_vs_history_reward_mean", "eval_vs_history_reward_std", "eval_vs_history_abs_err_mean"
         ]
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         if not file_exists:
