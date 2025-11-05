@@ -16,10 +16,14 @@ Results are saved to results/tables/different_ability_two_players.csv
 from __future__ import annotations
 
 import argparse
+import json
+import logging
 import os
 import sys
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import math
 import numpy as np
 import pandas as pd
 import torch
@@ -46,6 +50,51 @@ from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
 
 TRACES_DIR = os.path.join("results", "traces", "different_ability")
 PLOTS_DIR = os.path.join("results", "plots", "different_ability")
+
+
+def _ensure_outdir_and_logging(args: argparse.Namespace) -> str:
+    """Ensure outdir exists, configure logging, and tee stdout to a log file."""
+    if not getattr(args, "outdir", None):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        args.outdir = os.path.join("results", "runs", f"different_ability_{timestamp}")
+    os.makedirs(args.outdir, exist_ok=True)
+
+    log_path = os.path.join(args.outdir, "run.log")
+
+    logger = logging.getLogger()
+    logger.handlers.clear()
+    logger.setLevel(logging.INFO)
+
+    formatter = logging.Formatter(
+        fmt="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    file_handler = logging.FileHandler(log_path, mode="a", encoding="utf-8")
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    import builtins as _builtins
+
+    def tee_print(*args: Any, **kwargs: Any) -> None:
+        sep = kwargs.pop("sep", " ")
+        end = kwargs.pop("end", "\n")
+        kwargs.pop("file", None)
+        kwargs.pop("flush", None)
+        message = sep.join(str(x) for x in args)
+        suffix = "" if end == "\n" else end
+        logging.info("%s%s", message, suffix)
+
+    _builtins.print = tee_print
+
+    logging.info("Logging initialized. Writing to %s", log_path)
+    return log_path
 
 
 def ensure_dir(path: str) -> None:
@@ -265,6 +314,7 @@ def run_ppo(
     minibatch_size: Optional[int] = None,
     log_interval: int = 1,
     store_history: bool = True,
+    metrics_outdir: Optional[str] = None,
 ) -> Dict[str, Any]:
     cfg = ensure_theory_fields(cfg)
     env = DifferentAbilityEnv(cfg)
@@ -288,6 +338,10 @@ def run_ppo(
         clip_eps=0.25,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=bounds, cfg=ppo_cfg)
+    agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
+    agent.cfg.clip_eps = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
+    for group in agent.opt.param_groups:
+        group["lr"] = float(cfg.get("lr_start", ppo_cfg.lr))
 
     def state_for(l_self: float, l_other: float) -> torch.Tensor:
         q_norm = norm01(cfg["q"], 60.0)
@@ -307,33 +361,59 @@ def run_ppo(
     update_idx = 0
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
 
-    # Scheduling parameters
-    late_updates = min(100, total_updates)
-    start_late = max(0, total_updates - late_updates)
-    start_entropy, end_entropy, decay_updates = 0.02, 0.002, 50
-    entropy_zero_updates = min(30, total_updates)
-    start_entropy_zero = max(0, total_updates - entropy_zero_updates)
-    lr_base = ppo_cfg.lr
-    lr_boost_value = 4e-4
-    lr_boost_updates = min(50, total_updates)
-    start_lr_late = max(0, total_updates - lr_boost_updates)
-
+    capture_history = store_history or metrics_outdir is not None
+    entropy_start = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
+    entropy_hold = float(cfg.get("entropy_coef_hold", entropy_start))
+    entropy_final = float(cfg.get("entropy_coef_end", 0.002))
+    hold_fraction = float(cfg.get("entropy_hold_fraction", 2.0 / 3.0))
+    hold_fraction = max(0.0, min(1.0, hold_fraction))
+    hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
+    tail_updates = max(1, total_updates - hold_updates)
+    lr_start_val = float(cfg.get("lr_start", ppo_cfg.lr))
+    lr_final_val = float(cfg.get("lr_final", lr_start_val))
+    lr_min = float(cfg.get("lr_min", 5e-5))
+    lr_max = float(cfg.get("lr_max", 5e-4))
+    clip_start = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
+    clip_end = float(cfg.get("clip_range_end", 0.15))
+    clip_floor = float(cfg.get("clip_range_floor", 0.05))
+    clip_ceiling = float(cfg.get("clip_range_ceiling", 0.5))
+    target_kl = float(cfg.get("target_kl", 0.01))
+    kl_low = 0.5 * target_kl
+    kl_high = 3.0 * target_kl
+    clip_factor = 1.0
+    lr_factor = 1.0
     rng = np.random.default_rng(cfg.get("seed", 42))
     records: List[Dict[str, Any]] = []
 
+    last_update_metrics: Optional[Dict[str, Any]] = None
+
     while steps_done < total_steps_target:
-        progress = min(1.0, float(update_idx) / float(decay_updates))
-        agent.cfg.entropy_coef = start_entropy + (end_entropy - start_entropy) * progress
-        if update_idx >= start_entropy_zero:
-            agent.cfg.entropy_coef = 0.0
-
-        if update_idx >= start_late:
-            prog_late = 1.0 if late_updates <= 1 else float(update_idx - start_late) / float(max(late_updates - 1, 1))
-            agent.cfg.clip_eps = 0.35 - 0.10 * max(0.0, min(1.0, prog_late))
+        if update_idx < hold_updates:
+            if hold_updates > 1:
+                hold_progress = float(update_idx) / float(hold_updates - 1)
+            else:
+                hold_progress = 1.0
+            hold_progress = max(0.0, min(1.0, hold_progress))
+            entropy_val = entropy_start + (entropy_hold - entropy_start) * hold_progress
+            clip_base = clip_start
+            lr_base = lr_start_val
         else:
-            agent.cfg.clip_eps = 0.25
+            if tail_updates > 1:
+                tail_progress = float(update_idx - hold_updates) / float(tail_updates - 1)
+            else:
+                tail_progress = 1.0
+            tail_progress = max(0.0, min(1.0, tail_progress))
+            entropy_val = entropy_hold + (entropy_final - entropy_hold) * tail_progress
+            clip_base = clip_start + (clip_end - clip_start) * tail_progress
+            lr_base = lr_start_val + (lr_final_val - lr_start_val) * tail_progress
 
-        current_lr = lr_boost_value if update_idx >= start_lr_late else lr_base
+        agent.cfg.entropy_coef = entropy_val
+        clip_val = clip_base * clip_factor
+        clip_val = max(clip_floor, min(clip_ceiling, clip_val))
+        agent.cfg.clip_eps = clip_val
+
+        current_lr = lr_base * lr_factor
+        current_lr = max(lr_min, min(lr_max, current_lr))
         for group in agent.opt.param_groups:
             group["lr"] = current_lr
 
@@ -344,6 +424,8 @@ def run_ppo(
 
             a1_norm, e1, logp1, v1 = agent.act(s1)
             a2_norm, e2, logp2, v2 = agent.act_opponent(s2)
+            if v2 is None:
+                v2 = agent.value_only(s2)
 
             _, rewards, _, done, _ = env.step(
                 [
@@ -356,7 +438,15 @@ def run_ppo(
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
             agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
 
-        agent.update()
+        last_update_metrics = agent.update()
+        approx_kl = float(last_update_metrics.get("approx_kl", 0.0)) if isinstance(last_update_metrics, dict) else 0.0
+        if approx_kl < kl_low:
+            clip_factor = min(clip_factor * 1.2, 1.5)
+            lr_factor = min(lr_factor * 1.25, 1.5)
+        elif approx_kl > kl_high:
+            clip_factor = max(clip_factor * 0.8, 0.5)
+            lr_factor = max(lr_factor * 0.8, 0.2)
+
         update_idx += 1
         steps_done += steps_this
 
@@ -378,10 +468,11 @@ def run_ppo(
                 f"[Update {update_idx}/{total_updates}] q={cfg['q']}: "
                 f"e*={(e1_th, e2_th)} policy=({e1_eval:.2f}, {e2_eval:.2f}) "
                 f"gap={gap:.3f} entropy={agent.cfg.entropy_coef:.3f} "
-                f"clip={agent.cfg.clip_eps:.3f} lr={current_lr:.2e}"
+                f"clip={agent.cfg.clip_eps:.3f} lr={current_lr:.2e} "
+                f"kl={approx_kl:.4f}"
             )
 
-        if store_history:
+        if capture_history:
             records.append(
                 {
                     "update": update_idx,
@@ -394,6 +485,7 @@ def run_ppo(
                     "entropy": agent.cfg.entropy_coef,
                     "clip_eps": agent.cfg.clip_eps,
                     "lr": current_lr,
+                    "approx_kl": approx_kl,
                 }
             )
 
@@ -421,6 +513,13 @@ def run_ppo(
         tag = experiment_tag(cfg)
         trace_path = save_gap_records(records, "ppo", tag)
         plot_path = plot_gap_curve(records, "ppo", tag)
+    if metrics_outdir and records:
+        os.makedirs(metrics_outdir, exist_ok=True)
+        df_metrics = pd.DataFrame(records)
+        if "update" not in df_metrics.columns:
+            df_metrics.insert(0, "update", np.arange(1, len(df_metrics) + 1))
+        metrics_path = os.path.join(metrics_outdir, "metrics.csv")
+        df_metrics.to_csv(metrics_path, index=False)
 
     return {
         "method": "ppo",
@@ -494,7 +593,25 @@ def main():
     parser.add_argument("--seed", type=int, help="Random seed override")
     parser.add_argument("--skip-history", action="store_true", help="Skip saving per-update gap traces")
     parser.add_argument("--make-plots", action="store_true", help="Force regeneration of summary plots from current run")
+    parser.add_argument("--lr-start", type=float, default=0.0003, help="Initial PPO learning rate")
+    parser.add_argument("--lr-final", type=float, default=0.0001, help="Final PPO learning rate after annealing")
+    parser.add_argument("--target-kl", type=float, default=0.015, help="Target KL divergence for adaptive scaling")
+    parser.add_argument("--entropy-hold-fraction", type=float, default=0.85, help="Fraction of updates to hold entropy before annealing")
+    parser.add_argument("--clip-range-end", type=float, default=0.2, help="Final PPO clipping range")
+    parser.add_argument("--outdir", type=str, help="Directory to store per-update metrics (metrics.csv)")
     args = parser.parse_args()
+
+    _ensure_outdir_and_logging(args)
+
+    params_path = os.path.join(args.outdir, "params.json")
+    with open(params_path, "w", encoding="utf-8") as params_file:
+        json.dump(vars(args), params_file, indent=2, sort_keys=True)
+    print("Saved params.json to", params_path)
+
+    command_path = os.path.join(args.outdir, "command.txt")
+    with open(command_path, "w", encoding="utf-8") as command_file:
+        command_file.write(" ".join(sys.argv) + "\n")
+    print("Saved command.txt to", command_path)
 
     if args.grid:
         configs = build_param_grid_configs()
@@ -515,7 +632,33 @@ def main():
             base["effort_range"] = parse_effort_range(list(args.effort_range))
         if "effort_range" not in base:
             base["effort_range"] = list(DIFFERENT_ABILITY_CONFIG.get("effort_range", [0, 100]))
+        if args.lr_start is not None:
+            base["lr_start"] = float(args.lr_start)
+        if args.lr_final is not None:
+            base["lr_final"] = float(args.lr_final)
+        if args.target_kl is not None:
+            base["target_kl"] = float(args.target_kl)
+        if args.entropy_hold_fraction is not None:
+            base["entropy_hold_fraction"] = float(args.entropy_hold_fraction)
+        if args.clip_range_end is not None:
+            base["clip_range_end"] = float(args.clip_range_end)
         configs = [base]
+
+    if args.lr_start is not None:
+        for cfg in configs:
+            cfg["lr_start"] = float(args.lr_start)
+    if args.lr_final is not None:
+        for cfg in configs:
+            cfg["lr_final"] = float(args.lr_final)
+    if args.target_kl is not None:
+        for cfg in configs:
+            cfg["target_kl"] = float(args.target_kl)
+    if args.entropy_hold_fraction is not None:
+        for cfg in configs:
+            cfg["entropy_hold_fraction"] = float(args.entropy_hold_fraction)
+    if args.clip_range_end is not None:
+        for cfg in configs:
+            cfg["clip_range_end"] = float(args.clip_range_end)
 
     # Apply optional seed override
     if args.seed is not None:
@@ -540,6 +683,9 @@ def main():
             print(f"Gradient solver max_gap={grad_row['max_gap']:.4f}, quality={grad_row['quality']}")
 
         if args.method in ("ppo", "both"):
+            metrics_dir = None
+            if args.outdir:
+                metrics_dir = os.path.join(args.outdir, tag) if len(configs) > 1 else args.outdir
             ppo_row = run_ppo(
                 dict(cfg_for_logging),
                 episodes=args.episodes,
@@ -549,6 +695,7 @@ def main():
                 minibatch_size=args.minibatch_size,
                 log_interval=max(1, args.log_interval),
                 store_history=not args.skip_history,
+                metrics_outdir=metrics_dir,
             )
             rows.append(ppo_row)
             print(f"PPO max_gap={ppo_row['max_gap']:.4f}, quality={ppo_row['quality']}")

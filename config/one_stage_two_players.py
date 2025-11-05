@@ -27,18 +27,19 @@ config = {
     "steps_per_update": 4096,
     "minibatch_size": 1024,
     "update_epochs": 6,
-    "episodes": 3000000,
+    "episodes": 2048000,      # ≈500 updates × 4096 steps/update
+    "max_updates": 500,
     "eval_every_updates": 20,
     "early_stop_abs_err": 0.8,
     "early_stop_patience": 6,
     "entropy_coef_start": 0.02,
     "entropy_coef_hold": 0.02,
-    "entropy_coef_end": 0.004,
+    "entropy_coef_end": 0.008, # 略高于默认水平，尾段仍保留少许探索
     "lr_start": 3e-4,
     "lr_end": 2e-4,
     "clip_range_start": 0.25,
-    "clip_range_end": 0.12,
-    "target_kl": 0.008,
+    "clip_range_end": 0.18,   # 由 0.16 再放宽到 0.18，后期允许更大步幅
+    "target_kl": 0.015,       # 略放松 KL 约束，容许更大胆更新
     "lag_warmup_updates": 10,
     "lag_fade_updates": 10,
     "opponent_history_sample_p_end": 0.0,

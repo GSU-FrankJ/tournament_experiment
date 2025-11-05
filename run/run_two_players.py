@@ -10,6 +10,8 @@ import sys
 import os
 import argparse
 import math
+import datetime
+from contextlib import contextmanager
 from typing import Dict, List, Optional
 import numpy as np
 import torch
@@ -23,6 +25,55 @@ from utils.plot import plot_effort_curve
 from utils.logger import save_standardized_result
 from envs.two_players_env import TwoPlayersEnv
 from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
+
+
+class _TeeStream:
+    def __init__(self, *streams):
+        self._streams = streams
+
+    def write(self, data: str) -> None:
+        for stream in self._streams:
+            stream.write(data)
+
+    def flush(self) -> None:
+        for stream in self._streams:
+            stream.flush()
+
+
+@contextmanager
+def _tee_console_to_file(log_path: str):
+    """Mirror stdout/stderr to a log file while preserving console output."""
+    log_dir = os.path.dirname(log_path)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+    old_stdout, old_stderr = sys.stdout, sys.stderr
+    with open(log_path, "a", encoding="utf-8", buffering=1) as log_file:
+        sys.stdout = _TeeStream(old_stdout, log_file)
+        sys.stderr = _TeeStream(old_stderr, log_file)
+        try:
+            yield log_path
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
+
+def _build_log_path(args: argparse.Namespace) -> str:
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    method_tag = getattr(args, "method", "run")
+    q_val = getattr(args, "q", None)
+    if q_val is None:
+        q_tag = "q_all"
+    else:
+        q_clean = f"{q_val:g}".replace("-", "neg").replace(".", "p")
+        q_tag = f"q{q_clean}"
+    episodes_val = getattr(args, "episodes", None)
+    episodes_tag = ""
+    if episodes_val is not None:
+        episodes_tag = f"_ep{int(episodes_val)}"
+    seed_val = getattr(args, "seed", None)
+    seed_tag = f"_seed{int(seed_val)}" if seed_val is not None else ""
+    filename = f"one_stage_two_players_{method_tag}_{q_tag}{episodes_tag}{seed_tag}_{timestamp}.log"
+    return os.path.join("results", "logs", filename)
 
 
 def _symmetric_fd_gradient(env: TwoPlayersEnv, e: float, eps: float = 0.1) -> float:
@@ -178,6 +229,12 @@ def run_ppo(
 
     history: List[float] = []
     total_steps_target = int(episodes)
+    max_updates_cfg = int(cfg.get("max_updates", 0) or 0)
+    if max_updates_cfg > 0:
+        capped_steps = max_updates_cfg * ppo_cfg.steps_per_update
+        if total_steps_target > capped_steps:
+            total_steps_target = capped_steps
+            print(f"[config] max_updates={max_updates_cfg} -> total_steps capped at {total_steps_target}", flush=True)
     steps_done = 0
     rng = np.random.default_rng(cfg.get("seed", 42))
     # Entropy / LR schedules: hold high values until ~2/3 progress, then anneal
@@ -187,7 +244,8 @@ def run_ppo(
     update_idx = 0
     # Late-phase settings
     total_updates = (total_steps_target + ppo_cfg.steps_per_update - 1) // ppo_cfg.steps_per_update
-    hold_fraction = 2.0 / 3.0
+    hold_fraction = float(cfg.get("entropy_hold_fraction", 2.0 / 3.0))
+    hold_fraction = max(0.0, min(1.0, hold_fraction))
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
     # Learning rate schedule: hold at starting value, then anneal to final value
@@ -484,32 +542,7 @@ def run_ppo(
     return rows
 
 
-def main():
-    parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
-    parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
-    parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
-    parser.add_argument(
-        "--episodes",
-        type=int,
-        default=base_config.get("episodes", 1_800_000),
-        help="Episodes for PPO (default config value, e.g. 2.4e6 ≈ 585 updates at 4096 steps/update)",
-    )
-    parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
-    parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
-    parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
-    parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
-    parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
-    parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
-    parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
-    parser.add_argument("--no-eval-symmetric", dest="eval_symmetric", action="store_false", help="Disable symmetric self-play evaluation.")
-    parser.set_defaults(eval_symmetric=True)
-    parser.add_argument("--k", type=float, help="Override symmetric cost k.")
-    parser.add_argument("--w_h", type=float, help="Override high prize w_h.")
-    parser.add_argument("--w_l", type=float, help="Override low prize w_l.")
-    parser.add_argument("--effort-range", type=float, nargs=2, metavar=("LO", "HI"), help="Override symmetric effort bounds.")
-    parser.add_argument("--seed", type=int, help="Override RNG seed.")
-    args = parser.parse_args()
-
+def _run_cli(args: argparse.Namespace) -> str:
     cfg = dict(base_config)
     if args.k is not None:
         cfg["k"] = float(args.k)
@@ -563,6 +596,40 @@ def main():
             save_standardized_result(row, csv_path)
 
     print(f"Saved results to {csv_path}")
+    return csv_path
+
+
+def main():
+    parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
+    parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
+    parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
+    parser.add_argument(
+        "--episodes",
+        type=int,
+        default=base_config.get("episodes", 1_800_000),
+        help="Episodes for PPO (default config value, e.g. 2.4e6 ≈ 585 updates at 4096 steps/update)",
+    )
+    parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
+    parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
+    parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
+    parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
+    parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
+    parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
+    parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
+    parser.add_argument("--no-eval-symmetric", dest="eval_symmetric", action="store_false", help="Disable symmetric self-play evaluation.")
+    parser.set_defaults(eval_symmetric=True)
+    parser.add_argument("--k", type=float, help="Override symmetric cost k.")
+    parser.add_argument("--w_h", type=float, help="Override high prize w_h.")
+    parser.add_argument("--w_l", type=float, help="Override low prize w_l.")
+    parser.add_argument("--effort-range", type=float, nargs=2, metavar=("LO", "HI"), help="Override symmetric effort bounds.")
+    parser.add_argument("--seed", type=int, help="Override RNG seed.")
+    args = parser.parse_args()
+
+    log_path = _build_log_path(args)
+    with _tee_console_to_file(log_path):
+        print(f"[log] Mirroring console output to {log_path}")
+        _run_cli(args)
+        print(f"[log] Run complete. Full console trace saved to {log_path}")
 
 
 if __name__ == "__main__":
