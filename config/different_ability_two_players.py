@@ -24,6 +24,52 @@ PARAM_SETS: Tuple[Dict[str, float], ...] = (
 Q_VALUES: Tuple[float, ...] = (25.0, 40.0, 55.0)
 EFFORT_RANGES: Tuple[Tuple[int, int], ...] = ((0, 100), (0, 200))
 
+PPO_DEFAULTS: Dict[str, object] = {
+    # CSV / logging metadata
+    "stage1_weight": 3.0,
+    "stage2_weight": 6.5,
+    "information_revelation": "none",
+    "num_players": 2,
+    # Training set (mirrors one-stage two-player defaults)
+    "q_list": [25.0, 40.0, 55.0],
+    "effort_bounds_stage1": [0, 100],
+    "effort_bounds_stage2": [0, 200],
+    # PPO rollout & optimization
+    "steps_per_update": 4096,
+    "minibatch_size": 1024,
+    "update_epochs": 6,
+    "episodes": 3_000_000,
+    "max_updates": 0,
+    # Opponent (lag) controls
+    "opponent_mode": "periodic",
+    "opponent_sync_interval": 2,
+    "opponent_ema_tau": 0.20,
+    "opponent_snapshot_keep": 10,
+    "opponent_history_sample_p": 0.0,
+    "opponent_history_sample_p_end": 0.0,
+    # Lag warm-up / fade schedule
+    "lag_warmup_updates": 10,
+    "lag_fade_updates": 10,
+    # Entropy, LR, clip schedules
+    "entropy_coef_start": 0.02,
+    "entropy_coef_hold": 0.02,
+    "entropy_coef_end": 0.005,
+    "entropy_hold_fraction": 2.0 / 3.0,
+    "lr_start": 3e-4,
+    "lr_end": 2e-4,
+    "lr_min": 5e-5,
+    "lr_max": 5e-4,
+    "clip_range_start": 0.25,
+    "clip_range_end": 0.16,
+    "clip_range_floor": 0.10,
+    "clip_range_ceiling": 0.45,
+    "target_kl": 0.010,
+    # Evaluation / stopping
+    "eval_every_updates": 20,
+    "early_stop_abs_err": 0.8,
+    "early_stop_patience": 6,
+}
+
 
 def calculate_theoretical_efforts_different_ability(
     q: float,
@@ -124,6 +170,17 @@ def build_different_ability_config(
         "theoretical_efforts": [e1, e2],
         "theoretical_costs": [c1, c2],
     }
+    defaults = dict(PPO_DEFAULTS)
+    # Always include the current q in q_list for training/eval flexibility
+    q_list = list(defaults.get("q_list", []))
+    if q not in q_list:
+        q_list.append(q)
+    defaults["q_list"] = q_list
+    # Align effort bounds with the provided range
+    low, high = cfg["effort_range"]
+    defaults["effort_bounds_stage2"] = [float(low), float(high)]
+    defaults["effort_bounds_stage1"] = [float(low), float(min(high, 100.0))]
+    cfg.update(defaults)
     return cfg
 
 

@@ -307,7 +307,7 @@ def run_gradient(cfg: Dict[str, Any], store_history: bool = True) -> Dict[str, A
 def run_ppo(
     cfg: Dict[str, Any],
     *,
-    episodes: int,
+    episodes: Optional[int] = None,
     updates: Optional[int] = None,
     steps_per_update: Optional[int] = None,
     epochs: Optional[int] = None,
@@ -321,21 +321,27 @@ def run_ppo(
     e1_th = cfg["theoretical_effort1"]
     e2_th = cfg["theoretical_effort2"]
 
-    bounds = tuple(cfg["effort_range"])
+    bounds = tuple(cfg.get("effort_bounds_stage2", cfg["effort_range"]))
     low, high = bounds
 
-    # Configure PPO with ability-aware state features
+    steps_per_update_val = int(steps_per_update or cfg.get("steps_per_update", 4096))
+    epochs_val = int(epochs or cfg.get("update_epochs", 6))
+    minibatch_val = int(minibatch_size or cfg.get("minibatch_size", 1024))
+
     ppo_cfg = PPOConfig(
-        steps_per_update=steps_per_update or 16384,
-        epochs=epochs or 20,
-        minibatch_size=minibatch_size or 1024,
-        state_dim=5,  # [q_norm, k_norm, wgap_norm, l_self_norm, l_other_norm]
-        hidden=64,
-        opponent_sync_interval=1,
-        opponent_ema_tau=0.0,
-        entropy_coef=0.02,
-        lr=3e-4,
-        clip_eps=0.25,
+        steps_per_update=steps_per_update_val,
+        epochs=epochs_val,
+        minibatch_size=minibatch_val,
+        state_dim=5,
+        hidden=128,
+        opponent_mode=cfg.get("opponent_mode", "periodic"),
+        opponent_sync_interval=int(cfg.get("opponent_sync_interval", 2)),
+        opponent_ema_tau=float(cfg.get("opponent_ema_tau", 0.20)),
+        opponent_snapshot_keep=int(cfg.get("opponent_snapshot_keep", 10)),
+        opponent_history_sample_p=float(cfg.get("opponent_history_sample_p", 0.0)),
+        entropy_coef=float(cfg.get("entropy_coef_start", 0.02)),
+        lr=float(cfg.get("lr_start", 3e-4)),
+        clip_eps=float(cfg.get("clip_range_start", 0.25)),
     )
     agent = PPOTwoPlayersBandit(effort_bounds=bounds, cfg=ppo_cfg)
     agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
@@ -353,9 +359,16 @@ def run_ppo(
         s = torch.tensor([q_norm, k_norm, wgap_norm, l_self_n, l_other_n], dtype=torch.float32)
         return s.unsqueeze(0).to(agent.device)
 
-    total_steps_target = int(episodes)
+    total_steps_target = int(episodes if episodes is not None else cfg.get("episodes", 3_000_000))
     if updates is not None:
         total_steps_target = int(updates) * ppo_cfg.steps_per_update
+
+    max_updates_cfg = int(cfg.get("max_updates", 0) or 0)
+    if max_updates_cfg > 0:
+        capped_steps = max_updates_cfg * ppo_cfg.steps_per_update
+        if total_steps_target > capped_steps:
+            total_steps_target = capped_steps
+            print(f"[config] max_updates={max_updates_cfg} -> total_steps capped at {total_steps_target}", flush=True)
 
     steps_done = 0
     update_idx = 0
@@ -364,58 +377,79 @@ def run_ppo(
     capture_history = store_history or metrics_outdir is not None
     entropy_start = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
     entropy_hold = float(cfg.get("entropy_coef_hold", entropy_start))
-    entropy_final = float(cfg.get("entropy_coef_end", 0.002))
+    entropy_final = float(cfg.get("entropy_coef_end", 0.005))
     hold_fraction = float(cfg.get("entropy_hold_fraction", 2.0 / 3.0))
     hold_fraction = max(0.0, min(1.0, hold_fraction))
-    hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
+    hold_updates = max(1, int(math.ceil(total_updates * hold_fraction))) if total_updates > 0 else 1
     tail_updates = max(1, total_updates - hold_updates)
-    lr_start_val = float(cfg.get("lr_start", ppo_cfg.lr))
-    lr_final_val = float(cfg.get("lr_final", lr_start_val))
-    lr_min = float(cfg.get("lr_min", 5e-5))
-    lr_max = float(cfg.get("lr_max", 5e-4))
-    clip_start = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
-    clip_end = float(cfg.get("clip_range_end", 0.15))
-    clip_floor = float(cfg.get("clip_range_floor", 0.05))
-    clip_ceiling = float(cfg.get("clip_range_ceiling", 0.5))
+    lr_hold = float(cfg.get("lr_start", agent.cfg.lr))
+    lr_final = float(cfg.get("lr_end", cfg.get("lr_final", lr_hold)))
+    min_lr = float(cfg.get("lr_min", 5e-5))
+    max_lr = float(cfg.get("lr_max", 5e-4))
+    clip_max = float(cfg.get("clip_range_start", agent.cfg.clip_eps))
+    clip_min = float(cfg.get("clip_range_end", 0.16))
+    clip_floor = float(cfg.get("clip_range_floor", 0.10))
+    clip_ceiling = float(cfg.get("clip_range_ceiling", 0.45))
+    lag_warmup_updates = max(0, int(cfg.get("lag_warmup_updates", 10)))
+    lag_fade_updates = max(0, int(cfg.get("lag_fade_updates", 10)))
+    history_prob_start = float(cfg.get("opponent_history_sample_p", agent.opponent_history_sample_p))
+    history_prob_end = float(cfg.get("opponent_history_sample_p_end", history_prob_start))
+    agent.opponent_history_sample_p = history_prob_start
+    clip_factor = 1.0
+    lr_factor = 1.0
     target_kl = float(cfg.get("target_kl", 0.01))
     kl_low = 0.5 * target_kl
     kl_high = 3.0 * target_kl
-    clip_factor = 1.0
-    lr_factor = 1.0
     rng = np.random.default_rng(cfg.get("seed", 42))
     records: List[Dict[str, Any]] = []
-
     last_update_metrics: Optional[Dict[str, Any]] = None
+    eval_every = int(cfg.get("eval_every_updates", 0) or 0)
+    es_abs = float(cfg.get("early_stop_abs_err", 1.0))
+    es_pat = int(cfg.get("early_stop_patience", 0) or 0)
+    es_counter = 0
+    early_stop_triggered = False
 
     while steps_done < total_steps_target:
+        if total_updates > 1:
+            hist_progress = float(update_idx) / float(total_updates - 1)
+            hist_progress = max(0.0, min(1.0, hist_progress))
+        else:
+            hist_progress = 1.0
+        agent.opponent_history_sample_p = history_prob_start + (history_prob_end - history_prob_start) * hist_progress
+
         if update_idx < hold_updates:
-            if hold_updates > 1:
-                hold_progress = float(update_idx) / float(hold_updates - 1)
-            else:
-                hold_progress = 1.0
+            hold_progress = float(update_idx) / float(max(1, hold_updates - 1))
             hold_progress = max(0.0, min(1.0, hold_progress))
             entropy_val = entropy_start + (entropy_hold - entropy_start) * hold_progress
-            clip_base = clip_start
-            lr_base = lr_start_val
+            clip_base = clip_max
+            lr_base = lr_hold
         else:
-            if tail_updates > 1:
-                tail_progress = float(update_idx - hold_updates) / float(tail_updates - 1)
-            else:
-                tail_progress = 1.0
+            tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
             tail_progress = max(0.0, min(1.0, tail_progress))
             entropy_val = entropy_hold + (entropy_final - entropy_hold) * tail_progress
-            clip_base = clip_start + (clip_end - clip_start) * tail_progress
-            lr_base = lr_start_val + (lr_final_val - lr_start_val) * tail_progress
+            clip_base = clip_max + (clip_min - clip_max) * tail_progress
+            lr_base = lr_hold + (lr_final - lr_hold) * tail_progress
 
         agent.cfg.entropy_coef = entropy_val
         clip_val = clip_base * clip_factor
         clip_val = max(clip_floor, min(clip_ceiling, clip_val))
         agent.cfg.clip_eps = clip_val
+        clip_base_current = clip_base
 
-        current_lr = lr_base * lr_factor
-        current_lr = max(lr_min, min(lr_max, current_lr))
+        lr_val = lr_base * lr_factor
+        lr_val = max(lr_min, min(lr_max, lr_val))
         for group in agent.opt.param_groups:
-            group["lr"] = current_lr
+            group["lr"] = lr_val
+        lr_base_current = lr_base
+
+        if update_idx < lag_warmup_updates:
+            lag_prob = 1.0
+        elif update_idx < lag_warmup_updates + lag_fade_updates:
+            denom = max(1, lag_fade_updates - 1)
+            lag_phase = update_idx - lag_warmup_updates
+            lag_prob = max(0.0, 1.0 - (lag_phase / denom))
+        else:
+            lag_prob = 0.0
 
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         for _ in range(steps_this):
@@ -423,29 +457,39 @@ def run_ppo(
             s2 = state_for(cfg["l2"], cfg["l1"])
 
             a1_norm, e1, logp1, v1 = agent.act(s1)
-            a2_norm, e2, logp2, v2 = agent.act_opponent(s2)
-            if v2 is None:
+            use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
+            if use_opponent:
+                a2_norm, e2, logp2, _ = agent.act_opponent(s2)
                 v2 = agent.value_only(s2)
+            else:
+                a2_norm, e2, logp2, v2 = agent.act(s2)
 
             _, rewards, _, done, _ = env.step(
-                [
+                (
                     torch.tensor([float(e1.item())]),
                     torch.tensor([float(e2.item())]),
-                ]
+                )
             )
 
-            # Store both players from the start for stable self-play
             agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
             agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
 
         last_update_metrics = agent.update()
-        approx_kl = float(last_update_metrics.get("approx_kl", 0.0)) if isinstance(last_update_metrics, dict) else 0.0
+        approx_kl = float(last_update_metrics.get("approx_kl", 0.0) if isinstance(last_update_metrics, dict) else 0.0)
+        if not math.isfinite(approx_kl):
+            approx_kl = 0.0
         if approx_kl < kl_low:
             clip_factor = min(clip_factor * 1.2, 1.5)
             lr_factor = min(lr_factor * 1.25, 1.5)
         elif approx_kl > kl_high:
             clip_factor = max(clip_factor * 0.8, 0.5)
             lr_factor = max(lr_factor * 0.8, 0.2)
+
+        clip_val = max(clip_floor, min(clip_ceiling, clip_base_current * clip_factor))
+        agent.cfg.clip_eps = clip_val
+        current_lr = max(min_lr, min(max_lr, lr_base_current * lr_factor))
+        for group in agent.opt.param_groups:
+            group["lr"] = current_lr
 
         update_idx += 1
         steps_done += steps_this
@@ -469,7 +513,7 @@ def run_ppo(
                 f"e*={(e1_th, e2_th)} policy=({e1_eval:.2f}, {e2_eval:.2f}) "
                 f"gap={gap:.3f} entropy={agent.cfg.entropy_coef:.3f} "
                 f"clip={agent.cfg.clip_eps:.3f} lr={current_lr:.2e} "
-                f"kl={approx_kl:.4f}"
+                f"lag_prob={lag_prob:.2f} kl={approx_kl:.4f}"
             )
 
         if capture_history:
@@ -486,8 +530,26 @@ def run_ppo(
                     "clip_eps": agent.cfg.clip_eps,
                     "lr": current_lr,
                     "approx_kl": approx_kl,
+                    "lag_prob": lag_prob,
                 }
             )
+
+        if eval_every > 0 and es_pat > 0 and (update_idx % eval_every == 0):
+            abs_errs = []
+            state_eval_1 = state_for(cfg["l1"], cfg["l2"])
+            state_eval_2 = state_for(cfg["l2"], cfg["l1"])
+            abs_errs.append(abs(agent.mean_effort(state_eval_1) - e1_th))
+            abs_errs.append(abs(agent.mean_effort(state_eval_2) - e2_th))
+            mean_abs_err = float(np.mean(abs_errs)) if abs_errs else float("inf")
+            es_counter = es_counter + 1 if mean_abs_err < es_abs else 0
+            print(f"[EarlyStopProbe] updates={update_idx} mean_abs_err={mean_abs_err:.3f} ({es_counter}/{es_pat})")
+            if es_counter >= es_pat:
+                print("[EarlyStop] stopping different-ability PPO (abs_err threshold reached).")
+                early_stop_triggered = True
+                break
+
+        if early_stop_triggered:
+            break
 
     with torch.no_grad():
         se1 = state_for(cfg["l1"], cfg["l2"])
@@ -584,7 +646,12 @@ def main():
     parser.add_argument("--w-h", dest="w_h", type=float, help="Override w_h for single run")
     parser.add_argument("--w-l", dest="w_l", type=float, help="Override w_l for single run")
     parser.add_argument("--effort-range", nargs=2, type=float, metavar=("LOW", "HIGH"), help="Effort bounds for single run")
-    parser.add_argument("--episodes", type=int, default=100000, help="Total PPO environment steps (overridden by --updates)")
+    parser.add_argument(
+        "--episodes",
+        type=int,
+        default=DIFFERENT_ABILITY_CONFIG.get("episodes", 3_000_000),
+        help="Total PPO environment steps (default aligns with config; overridden by --updates)",
+    )
     parser.add_argument("--updates", type=int, help="Number of PPO updates (episodes = updates * steps_per_update)")
     parser.add_argument("--steps-per-update", type=int, help="Override PPO steps_per_update")
     parser.add_argument("--epochs", dest="ppo_epochs", type=int, help="Override PPO epochs per update")
