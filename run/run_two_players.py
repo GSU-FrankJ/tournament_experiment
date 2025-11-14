@@ -265,13 +265,25 @@ def run_ppo(
 
     clip_factor = 1.0
     lr_factor = 1.0
-    clip_floor = 0.10
-    clip_ceiling = 0.45
-    min_lr = 5e-5
-    max_lr = 5e-4
+
+    clip_floor = float(cfg.get("clip_floor", 0.10))
+    clip_ceiling = float(cfg.get("clip_ceiling", 0.60))
+
+    min_lr = float(cfg.get("min_lr", 5e-5))
+    max_lr = float(cfg.get("max_lr", 8e-4))
+
     target_kl = float(cfg.get("target_kl", 0.01))
-    kl_low = 0.5 * target_kl
-    kl_high = 3.0 * target_kl
+    kl_low = float(cfg.get("kl_low", 0.5 * target_kl))
+    kl_high = float(cfg.get("kl_high", 3.0 * target_kl))
+
+    kl_clip_factor_up = float(cfg.get("kl_clip_factor_up", 1.5))
+    kl_clip_factor_down = float(cfg.get("kl_clip_factor_down", 0.7))
+    kl_lr_factor_up = float(cfg.get("kl_lr_factor_up", 1.5))
+    kl_lr_factor_down = float(cfg.get("kl_lr_factor_down", 0.7))
+
+    warm_decay_ratio = float(cfg.get("warm_decay_ratio", 0.7))
+    force_kl_gate = bool(cfg.get("force_kl_gate", True))
+    kl_reached_low = False
 
     last_update_metrics: Optional[Dict[str, float]] = None
     eval_every = int(cfg.get("eval_every_updates", 20) or 0)
@@ -300,26 +312,37 @@ def run_ppo(
             tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
             tail_progress = max(0.0, min(1.0, tail_progress))
             agent.cfg.entropy_coef = entropy_hold + (entropy_final - entropy_hold) * tail_progress
+        progress = float(update_idx) / float(max(1, total_updates - 1))
+        progress = max(0.0, min(1.0, progress))
+        use_decay = progress >= warm_decay_ratio
+        if force_kl_gate and not kl_reached_low:
+            use_decay = False
+
         # Clip schedule with adaptive scaling
-        if update_idx < hold_updates:
+        if not use_decay:
             clip_base = clip_max
         else:
-            tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
-            tail_progress = max(0.0, min(1.0, tail_progress))
-            clip_base = clip_max + (clip_min - clip_max) * tail_progress
-        clip_val = clip_base * clip_factor
-        clip_val = max(clip_floor, min(clip_ceiling, clip_val))
+            if update_idx < hold_updates:
+                clip_base = clip_max
+            else:
+                tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
+                tail_progress = max(0.0, min(1.0, tail_progress))
+                clip_base = clip_max + (clip_min - clip_max) * tail_progress
+        clip_val = max(clip_floor, min(clip_ceiling, clip_base * clip_factor))
         agent.cfg.clip_eps = clip_val
         clip_base_current = clip_base
+
         # Learning rate schedule with adaptive scaling
-        if update_idx < hold_updates:
+        if not use_decay:
             lr_base = lr_hold
         else:
-            lr_tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
-            lr_tail_progress = max(0.0, min(1.0, lr_tail_progress))
-            lr_base = lr_hold + (lr_final - lr_hold) * lr_tail_progress
-        lr_val = lr_base * lr_factor
-        lr_val = max(min_lr, min(max_lr, lr_val))
+            if update_idx < hold_updates:
+                lr_base = lr_hold
+            else:
+                lr_tail_progress = float(update_idx - hold_updates) / float(max(1, tail_updates - 1))
+                lr_tail_progress = max(0.0, min(1.0, lr_tail_progress))
+                lr_base = lr_hold + (lr_final - lr_hold) * lr_tail_progress
+        lr_val = max(min_lr, min(max_lr, lr_base * lr_factor))
         for g in agent.opt.param_groups:
             g["lr"] = lr_val
         lr_base_current = lr_base
@@ -360,12 +383,17 @@ def run_ppo(
         kl_val = float(last_update_metrics.get("approx_kl", 0.0) if last_update_metrics else 0.0)
         if not math.isfinite(kl_val):
             kl_val = 0.0
+
+        if kl_val >= kl_low and not kl_reached_low:
+            kl_reached_low = True
+
         if kl_val < kl_low:
-            clip_factor = min(clip_factor * 1.2, 1.5)
-            lr_factor = min(lr_factor * 1.25, 1.5)
+            clip_factor = min(clip_factor * kl_clip_factor_up, 2.0)
+            lr_factor = min(lr_factor * kl_lr_factor_up, 2.0)
         elif kl_val > kl_high:
-            clip_factor = max(clip_factor * 0.8, 0.5)
-            lr_factor = max(lr_factor * 0.8, 0.2)
+            clip_factor = max(clip_factor * kl_clip_factor_down, 0.3)
+            lr_factor = max(lr_factor * kl_lr_factor_down, 0.3)
+
         clip_val = max(clip_floor, min(clip_ceiling, clip_base_current * clip_factor))
         agent.cfg.clip_eps = clip_val
         lr_val = max(min_lr, min(max_lr, lr_base_current * lr_factor))
