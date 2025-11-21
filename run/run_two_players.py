@@ -11,6 +11,7 @@ import os
 import argparse
 import math
 import datetime
+import csv
 from contextlib import contextmanager
 from typing import Dict, List, Optional
 import numpy as np
@@ -25,6 +26,21 @@ from utils.plot import plot_effort_curve
 from utils.logger import save_standardized_result
 from envs.two_players_env import TwoPlayersEnv
 from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
+from agents.mc_fd_crn_solver import MCFDConfig, gradient_ascent_dynamics
+
+
+MCFD_FIELDNAMES = [
+    "sigma",
+    "delta",
+    "eta",
+    "num_samples",
+    "final_effort",
+    "mcfd_iterations",
+    "mcfd_tol",
+    "mcfd_effort_min",
+    "mcfd_effort_max",
+    "seed",
+]
 
 
 class _TeeStream:
@@ -60,12 +76,21 @@ def _tee_console_to_file(log_path: str):
 def _build_log_path(args: argparse.Namespace) -> str:
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     method_tag = getattr(args, "method", "run")
+    
+    # For MC-FD, use sigma parameters instead of q
+    if method_tag == "mcfd":
+        sigma1 = getattr(args, "mcfd_sigma1", 20.0)
+        sigma2 = getattr(args, "mcfd_sigma2", 20.0)
+        q_tag = f"σ{sigma1:.0f}_{sigma2:.0f}"
+    else:
+        # For gradient/PPO methods, use q parameter
     q_val = getattr(args, "q", None)
     if q_val is None:
         q_tag = "q_all"
     else:
         q_clean = f"{q_val:g}".replace("-", "neg").replace(".", "p")
         q_tag = f"q{q_clean}"
+    
     episodes_val = getattr(args, "episodes", None)
     episodes_tag = ""
     if episodes_val is not None:
@@ -74,6 +99,17 @@ def _build_log_path(args: argparse.Namespace) -> str:
     seed_tag = f"_seed{int(seed_val)}" if seed_val is not None else ""
     filename = f"one_stage_two_players_{method_tag}_{q_tag}{episodes_tag}{seed_tag}_{timestamp}.log"
     return os.path.join("results", "logs", filename)
+
+
+def _save_mcfd_result(row: Dict[str, float], csv_path: str) -> None:
+    """Persist MC-FD rows using the requested minimal layout."""
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    file_exists = os.path.isfile(csv_path)
+    with open(csv_path, mode="a", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=MCFD_FIELDNAMES)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
 
 
 def _symmetric_fd_gradient(env: TwoPlayersEnv, e: float, eps: float = 0.1) -> float:
@@ -177,6 +213,59 @@ def run_gradient(
     row["gradient_iterations"] = meta["iterations"]
     row["gradient_final_grad"] = meta["final_grad"]
     return row
+
+
+def run_mcfd(cfg: Dict, args: argparse.Namespace) -> Dict:
+    """Execute Monte Carlo finite-difference solver with Gaussian noise (σ₁, σ₂).
+    
+    Uses simulation-based gradient estimation with Common Random Numbers.
+    No q parameter is used - noise is controlled by sigma1 and sigma2.
+    """
+
+    bounds = tuple(cfg.get("effort_bounds_stage2", (0.0, 200.0)))
+    e_min = float(args.mcfd_effort_min) if args.mcfd_effort_min is not None else bounds[0]
+    e_max = float(args.mcfd_effort_max) if args.mcfd_effort_max is not None else bounds[1]
+    if e_min >= e_max:
+        raise ValueError(f"mcfd effort bounds invalid: [{e_min}, {e_max}]")
+
+    mcfd_cfg = MCFDConfig(
+        w_h=float(cfg["w_h"]),
+        w_l=float(cfg["w_l"]),
+        k=float(cfg["k"]),
+        sigma1=float(args.mcfd_sigma1),
+        sigma2=float(args.mcfd_sigma2),
+        delta=float(args.mcfd_delta),
+        eta=float(args.mcfd_eta),
+        num_samples=int(args.mcfd_num_samples),
+        e_min=e_min,
+        e_max=e_max,
+        max_iters=int(args.mcfd_max_iters),
+        tol=float(args.mcfd_tol),
+        seed=int(args.mcfd_seed) if args.mcfd_seed is not None else cfg.get("seed"),
+    )
+
+    sim_results = gradient_ascent_dynamics(mcfd_cfg)
+    e1_history = sim_results["effort_player1"]
+    e2_history = sim_results["effort_player2"]
+    e1_final = float(e1_history[-1])
+    e2_final = float(e2_history[-1])
+    avg_final_effort = 0.5 * (e1_final + e2_final)
+    iterations = max(0, len(e1_history) - 1)
+
+    mcfd_row = {
+        "sigma": mcfd_cfg.sigma1,
+        "delta": mcfd_cfg.delta,
+        "eta": mcfd_cfg.eta,
+        "num_samples": mcfd_cfg.num_samples,
+        "final_effort": avg_final_effort,
+        "mcfd_iterations": iterations,
+        "mcfd_tol": mcfd_cfg.tol,
+        "mcfd_effort_min": e_min,
+        "mcfd_effort_max": e_max,
+        "seed": mcfd_cfg.seed if mcfd_cfg.seed is not None else "",
+    }
+
+    return mcfd_row
 
 
 def run_ppo(
@@ -607,6 +696,10 @@ def _run_cli(args: argparse.Namespace) -> str:
                 log=True,
             )
             save_standardized_result(row, csv_path)
+    elif args.method == "mcfd":
+        # MC-FD uses Gaussian noise (σ parameters) and custom CSV layout.
+        row = run_mcfd(cfg, args)
+        _save_mcfd_result(row, csv_path)
     else:
         # Train once; evaluate for all q (or the specified q)
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])
@@ -629,7 +722,7 @@ def _run_cli(args: argparse.Namespace) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
-    parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
+    parser.add_argument("--method", choices=["gradient", "ppo", "mcfd"], default="gradient")
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
     parser.add_argument(
         "--episodes",
@@ -641,6 +734,16 @@ def main():
     parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
     parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
     parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
+    parser.add_argument("--mcfd-sigma1", type=float, default=20.0, help="Player 1 noise std (suggested values: 15, 20, 25).")
+    parser.add_argument("--mcfd-sigma2", type=float, default=20.0, help="Player 2 noise std (suggested values: 15, 20, 25).")
+    parser.add_argument("--mcfd-delta", type=float, default=1.0, help="Finite-difference perturbation size.")
+    parser.add_argument("--mcfd-eta", type=float, default=0.1, help="Gradient-ascent learning rate for MC-FD solver.")
+    parser.add_argument("--mcfd-num-samples", type=int, default=64, help="Monte Carlo samples per gradient estimate.")
+    parser.add_argument("--mcfd-max-iters", type=int, default=500, help="Maximum MC-FD iterations.")
+    parser.add_argument("--mcfd-tol", type=float, default=1e-3, help="Convergence tolerance for MC-FD updates.")
+    parser.add_argument("--mcfd-seed", type=int, help="RNG seed for MC-FD solver (defaults to config seed).")
+    parser.add_argument("--mcfd-effort-min", type=float, help="Override MC-FD effort lower bound (defaults to config stage2 min).")
+    parser.add_argument("--mcfd-effort-max", type=float, help="Override MC-FD effort upper bound (defaults to config stage2 max).")
     parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
     parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
     parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
