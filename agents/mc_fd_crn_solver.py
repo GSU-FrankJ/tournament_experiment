@@ -23,14 +23,14 @@ class MCFDConfig:
     Attributes focus on commonly tuned hyper-parameters and payoff constants.
     """
 
-    w_h: float = 22.0
+    w_h: float = 30.0
     w_l: float = 15.0
     k: float = 0.002
     sigma1: float = 20.0
     sigma2: float = 20.0
-    delta: float = 1.0  # Finite-difference perturbation magnitude
-    eta: float = 0.1  # Gradient-ascent learning rate
-    num_samples: int = 64  # Monte Carlo sample size per gradient estimate
+    delta: float = 0.1  # Finite-difference perturbation magnitude
+    eta: float = 0.05  # Gradient-ascent learning rate
+    num_samples: int = 5000  # Monte Carlo sample size per gradient estimate
     e_min: float = 0.0
     e_max: float = 100.0
     max_iters: int = 500
@@ -239,7 +239,7 @@ def gradient_ascent_dynamics(
 
 if __name__ == "__main__":
     default_cfg = MCFDConfig(
-        w_h=22.0,
+        w_h=30.0,
         w_l=15.0,
         k=0.002,
         sigma1=20.0,
@@ -258,4 +258,3 @@ if __name__ == "__main__":
     print(f"e1 -> {results['effort_player1'][-1]:.3f}")
     print(f"e2 -> {results['effort_player2'][-1]:.3f}")
     print(f"Iterations: {len(results['effort_player1']) - 1}")
-

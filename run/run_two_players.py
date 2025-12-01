@@ -84,12 +84,12 @@ def _build_log_path(args: argparse.Namespace) -> str:
         q_tag = f"σ{sigma1:.0f}_{sigma2:.0f}"
     else:
         # For gradient/PPO methods, use q parameter
-    q_val = getattr(args, "q", None)
-    if q_val is None:
-        q_tag = "q_all"
-    else:
-        q_clean = f"{q_val:g}".replace("-", "neg").replace(".", "p")
-        q_tag = f"q{q_clean}"
+        q_val = getattr(args, "q", None)
+        if q_val is None:
+            q_tag = "q_all"
+        else:
+            q_clean = f"{q_val:g}".replace("-", "neg").replace(".", "p")
+            q_tag = f"q{q_clean}"
     
     episodes_val = getattr(args, "episodes", None)
     episodes_tag = ""
@@ -112,14 +112,46 @@ def _save_mcfd_result(row: Dict[str, float], csv_path: str) -> None:
         writer.writerow(row)
 
 
-def _symmetric_fd_gradient(env: TwoPlayersEnv, e: float, eps: float = 0.1) -> float:
-    """Central-difference ∂Eu/∂e_i at symmetric profile (e, e)."""
-    lo, hi = env.effort_low, env.effort_high
-    e_plus = max(lo, min(hi, e + eps))
-    e_minus = max(lo, min(hi, e - eps))
-    u_plus = env.expected_utility(e_plus, e)
-    u_minus = env.expected_utility(e_minus, e)
-    return (u_plus - u_minus) / (2.0 * eps)
+def _clip_effort(value: float, bounds: tuple[float, float]) -> float:
+    lo, hi = bounds
+    return float(np.clip(value, lo, hi))
+
+
+def _batch_payoffs_uniform(env: TwoPlayersEnv, e1: float, e2: float, eps1: np.ndarray, eps2: np.ndarray, tie_breaks: np.ndarray) -> tuple[float, float]:
+    """Vectorized payoff batch using provided Uniform(-q, q) noises and tie-breaks."""
+    y1 = e1 + eps1
+    y2 = e2 + eps2
+    winners = np.where(y1 > y2, 0, np.where(y2 > y1, 1, tie_breaks))
+    payoff1 = np.where(winners == 0, env.w_h, env.w_l)
+    payoff2 = np.where(winners == 0, env.w_l, env.w_h)
+    u1 = payoff1 - env.k * (e1 ** 2)
+    u2 = payoff2 - env.k * (e2 ** 2)
+    return float(u1.mean()), float(u2.mean())
+
+
+def _stochastic_fd_gradients(
+    env: TwoPlayersEnv,
+    e1: float,
+    e2: float,
+    delta: float,
+    num_samples: int,
+) -> tuple[float, float]:
+    """Central-difference gradients for each player using uniform noise samples."""
+    eps1, eps2, tie_breaks = env.draw_noise_batch(num_samples)
+
+    e1_plus = _clip_effort(e1 + delta, (env.effort_low, env.effort_high))
+    e1_minus = _clip_effort(e1 - delta, (env.effort_low, env.effort_high))
+    e2_plus = _clip_effort(e2 + delta, (env.effort_low, env.effort_high))
+    e2_minus = _clip_effort(e2 - delta, (env.effort_low, env.effort_high))
+
+    u1_plus, _ = _batch_payoffs_uniform(env, e1_plus, e2, eps1, eps2, tie_breaks)
+    u1_minus, _ = _batch_payoffs_uniform(env, e1_minus, e2, eps1, eps2, tie_breaks)
+    _, u2_plus = _batch_payoffs_uniform(env, e1, e2_plus, eps1, eps2, tie_breaks)
+    _, u2_minus = _batch_payoffs_uniform(env, e1, e2_minus, eps1, eps2, tie_breaks)
+
+    g1 = (u1_plus - u1_minus) / (2.0 * delta)
+    g2 = (u2_plus - u2_minus) / (2.0 * delta)
+    return float(g1), float(g2)
 
 
 def gradient_descent_two_players(
@@ -129,9 +161,11 @@ def gradient_descent_two_players(
     steps: int = 2000,
     eps: float = 0.1,
     tol: float = 1e-4,
+    num_samples: int = 64,
+    init_perturb: float = 1.0,
     log: bool = True,
-) -> tuple[float, Dict[str, float]]:
-    """Symmetric gradient descent to match experiment plan requirements."""
+) -> tuple[tuple[float, float], Dict[str, float]]:
+    """Two-player gradient ascent with uniform noise and distinct starts."""
     effort_bounds = tuple(cfg["effort_bounds_stage2"])
     env = TwoPlayersEnv(
         w_h=cfg["w_h"],
@@ -141,28 +175,54 @@ def gradient_descent_two_players(
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
     )
+    if eps <= 0:
+        raise ValueError("grad_eps must be positive for finite differences")
+    num_samples = max(1, int(num_samples))
     lo, hi = effort_bounds
     e_theory = float(e_star_two_players(cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"]))
-    e = float(np.clip(e_theory, lo, hi))
+    # Start near theory but enforce e1 != e2 to avoid trivial symmetry.
+    half_perturb = max(init_perturb * 0.5, 1e-6)
+    e1 = _clip_effort(e_theory - half_perturb, effort_bounds)
+    e2 = _clip_effort(e_theory + half_perturb, effort_bounds)
+    if abs(e1 - e2) < 1e-8:
+        jitter = max(half_perturb, 0.01 * (hi - lo))
+        e2 = _clip_effort(e1 + jitter, effort_bounds)
+        if abs(e1 - e2) < 1e-8:
+            e1 = _clip_effort(e1 - jitter, effort_bounds)
+
     history = {
-        "init_e": e,
+        "init_e1": e1,
+        "init_e2": e2,
         "final_grad": 0.0,
         "iterations": 0.0,
     }
 
     for step in range(1, steps + 1):
-        g = _symmetric_fd_gradient(env, e, eps=eps)
-        e = float(np.clip(e + lr * g, lo, hi))
+        g1, g2 = _stochastic_fd_gradients(env, e1, e2, delta=eps, num_samples=num_samples)
+        e1_new = _clip_effort(e1 + lr * g1, effort_bounds)
+        e2_new = _clip_effort(e2 + lr * g2, effort_bounds)
+
+        delta_e1 = abs(e1_new - e1)
+        delta_e2 = abs(e2_new - e2)
+        grad_norm = max(abs(g1), abs(g2))
+
+        e1, e2 = e1_new, e2_new
         history["iterations"] = float(step)
-        history["final_grad"] = float(g)
+        history["final_grad"] = float(grad_norm)
+        history["final_grad_pair"] = (float(g1), float(g2))
         if log and (step == 1 or step % 250 == 0 or step == steps):
-            print(f"[gradient-2p] step={step:05d} effort={e:.6f} grad={g:.6f}")
-        if abs(g) < tol:
+            print(
+                f"[gradient-2p] step={step:05d} e1={e1:.6f} e2={e2:.6f} "
+                f"grad=({g1:.6f},{g2:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e})"
+            )
+        if grad_norm < tol or max(delta_e1, delta_e2) < tol:
             if log:
-                print(f"[gradient-2p] converged at step={step} with |grad|={abs(g):.6g}")
+                print(f"[gradient-2p] converged at step={step} with grad_norm={grad_norm:.3e}")
             break
 
-    return e, history
+    history["final_e1"] = e1
+    history["final_e2"] = e2
+    return (e1, e2), history
 
 
 def run_gradient(
@@ -172,28 +232,30 @@ def run_gradient(
     steps: int = 2000,
     grad_eps: float = 0.1,
     tol: float = 1e-4,
+    num_samples: int = 64,
+    init_perturb: float = 1.0,
     log: bool = True,
 ) -> Dict:
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
     theoretical_e = clip_stage2(e_star_two_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
-    final_e, meta = gradient_descent_two_players(
+    (e1, e2), meta = gradient_descent_two_players(
         cfg,
         lr=lr,
         steps=steps,
         eps=grad_eps,
         tol=tol,
+        num_samples=num_samples,
+        init_perturb=init_perturb,
         log=log,
     )
+    final_e = 0.5 * (e1 + e2)
     if log:
-        probes = {
-            "theory": theoretical_e,
-            "final": final_e,
-            "midpoint": 0.5 * (theoretical_e + final_e),
-        }
-        env = TwoPlayersEnv(w_h=w_h, w_l=w_l, k=k, q=q, effort_bounds=tuple(cfg["effort_bounds_stage2"]), seed=cfg.get("seed", 42))
-        for label, effort in probes.items():
-            g_val = _symmetric_fd_gradient(env, effort, eps=max(grad_eps, 1e-3))
-            print(f"[gradient-2p] probe={label} effort={effort:.6f} dU/de={g_val:.6f}")
+        gap_sym = abs(e1 - e2)
+        grad_pair = meta.get("final_grad_pair", (0.0, 0.0))
+        print(
+            f"[gradient-2p] final e1={e1:.6f} e2={e2:.6f} avg={final_e:.6f} "
+            f"grad=({grad_pair[0]:.6f},{grad_pair[1]:.6f}) gap_sym={gap_sym:.3e}"
+        )
         print(f"[gradient-2p] meta: iterations={meta['iterations']:.0f} final_grad={meta['final_grad']:.6f}")
 
     row = build_csv_row(
@@ -212,6 +274,10 @@ def run_gradient(
     row["stage2_gap_unweighted"] = abs(float(row["final_stage2_effort"]) - float(row["theoretical_stage2_effort"]))
     row["gradient_iterations"] = meta["iterations"]
     row["gradient_final_grad"] = meta["final_grad"]
+    row["gradient_mode"] = "stochastic_uniform"
+    row["final_e1"] = e1
+    row["final_e2"] = e2
+    row["symmetry_gap"] = abs(e1 - e2)
     return row
 
 
@@ -693,6 +759,8 @@ def _run_cli(args: argparse.Namespace) -> str:
                 steps=args.grad_steps,
                 grad_eps=args.grad_epsilon,
                 tol=args.grad_tol,
+                num_samples=args.grad_samples,
+                init_perturb=args.grad_init_perturb,
                 log=True,
             )
             save_standardized_result(row, csv_path)
@@ -730,10 +798,12 @@ def main():
         default=base_config.get("episodes", 1_800_000),
         help="Episodes for PPO (default config value, e.g. 2.4e6 ≈ 585 updates at 4096 steps/update)",
     )
-    parser.add_argument("--grad-lr", type=float, default=0.1, help="Learning rate for gradient descent solver.")
-    parser.add_argument("--grad-steps", type=int, default=2000, help="Maximum gradient descent iterations.")
-    parser.add_argument("--grad-epsilon", type=float, default=0.1, help="Finite-difference epsilon for gradients.")
-    parser.add_argument("--grad-tol", type=float, default=1e-4, help="Terminate when |grad| < tol.")
+    parser.add_argument("--grad-lr", type=float, default=base_config.get("gradient_lr", 0.1), help="Learning rate for gradient descent solver.")
+    parser.add_argument("--grad-steps", type=int, default=base_config.get("gradient_steps", 2000), help="Maximum gradient descent iterations.")
+    parser.add_argument("--grad-epsilon", type=float, default=base_config.get("gradient_delta", 0.1), help="Finite-difference epsilon for gradients.")
+    parser.add_argument("--grad-tol", type=float, default=base_config.get("gradient_tol", 1e-4), help="Terminate when |grad| < tol.")
+    parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 64), help="Monte Carlo samples for uniform-noise gradients.")
+    parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0), help="Initial asymmetry to avoid symmetric starts.")
     parser.add_argument("--mcfd-sigma1", type=float, default=20.0, help="Player 1 noise std (suggested values: 15, 20, 25).")
     parser.add_argument("--mcfd-sigma2", type=float, default=20.0, help="Player 2 noise std (suggested values: 15, 20, 25).")
     parser.add_argument("--mcfd-delta", type=float, default=1.0, help="Finite-difference perturbation size.")
