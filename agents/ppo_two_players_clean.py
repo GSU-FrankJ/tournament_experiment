@@ -25,25 +25,24 @@ import torch.nn.functional as F
 
 
 class ActorCritic(nn.Module):
-    def __init__(self, state_dim: int = 1, hidden: int = 64):
+    def __init__(self, state_dim: int = 1, hidden: int = 64):       
         super().__init__()
         self.shared = nn.Sequential(
             nn.Linear(state_dim, hidden), nn.Tanh(),
             nn.Linear(hidden, hidden), nn.Tanh(),
         )
-        self.alpha_head = nn.Linear(hidden, 1)
-        self.beta_head = nn.Linear(hidden, 1)
-        self.value_head = nn.Linear(hidden, 1)
+        self.alpha_head = nn.Linear(hidden, 1)                     #Alpha 头
+        self.beta_head = nn.Linear(hidden, 1)                     #Beta 头
+        self.value_head = nn.Linear(hidden, 1)                     #值函数头    
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor):                     #得到 Alpha, Beta, 值函数   
         h = self.shared(x)
-        # Softplus -> (0, +inf); add 1 for numerical stability
-        alpha = F.softplus(self.alpha_head(h)) + 1.0
-        beta = F.softplus(self.beta_head(h)) + 1.0
-        value = self.value_head(h).squeeze(-1)
+        alpha = F.softplus(self.alpha_head(h)) + 1.0        # Softplus -> (0, +inf); add 1 for numerical stability
+        beta = F.softplus(self.beta_head(h)) + 1.0        
+        value = self.value_head(h).squeeze(-1)        
         return alpha, beta, value
 
-    def dist(self, x: torch.Tensor):
+    def dist(self, x: torch.Tensor):                     #得到 Beta 分布 和 值函数
         alpha, beta, value = self.forward(x)
         dist = torch.distributions.Beta(alpha, beta)
         return dist, value
@@ -244,9 +243,27 @@ class PPOTwoPlayersBandit:
         states = torch.stack(self.storage["states"]).to(self.device)
         actions_norm = torch.stack(self.storage["actions_norm"]).unsqueeze(-1).to(self.device)
         old_logp = torch.stack(self.storage["logp"]).to(self.device)
+        rewards_tensor = torch.stack(self.storage["rewards"]).to(self.device).view(-1)
         advantages, returns = self._compute_gae()
+        
+        # Compute raw advantage stats BEFORE normalization (for diagnostics)
         adv_mean = float(advantages.mean().item())
         adv_std = float(advantages.std(unbiased=False).item())
+        
+        # Compute state stats (global mean/std across all elements)
+        # Using unbiased=False for population std to match Welford accumulator
+        state_mean = float(states.mean().item())
+        state_std = float(states.std(unbiased=False).item())
+        
+        # Compute reward stats from stored transitions
+        reward_mean = float(rewards_tensor.mean().item())
+        reward_std = float(rewards_tensor.std(unbiased=False).item())
+        
+        # Compute value stats from GAE computation
+        values_tensor = torch.stack(self.storage["values"]).to(self.device).view(-1)
+        value_mean = float(values_tensor.mean().item())
+        value_std = float(values_tensor.std(unbiased=False).item())
+        
         # Sanity shape checks
         # All should be [T] except states [T, state_dim] and actions_norm [T,1]
         if states.dim() != 2:
@@ -257,8 +274,12 @@ class PPOTwoPlayersBandit:
             raise RuntimeError(f"old_logp shape unexpected: {old_logp.shape}")
         if advantages.dim() != 1 or returns.dim() != 1:
             raise RuntimeError(f"returns/advantages shapes unexpected: {advantages.shape}, {returns.shape}")
-        # normalize advantages
+        
+        # Normalize advantages (standard PPO practice)
         advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
+        
+        # Compute normalized advantage std (should be ~1.0 after normalization)
+        adv_norm_std = float(advantages.std(unbiased=False).item())
 
         dataset_size = states.size(0)
         idx = np.arange(dataset_size)
@@ -312,10 +333,21 @@ class PPOTwoPlayersBandit:
             self._last_sync_step = self._updates
 
         metrics = {
+            # Advantage stats (raw = before normalization, norm = after normalization)
             "adv_mean": adv_mean,
-            "adv_std": adv_std,
+            "adv_std": adv_std,              # Raw advantage std (before normalization)
+            "adv_norm_std": adv_norm_std,    # Normalized advantage std (should be ~1.0)
+            # State/reward/value scale stats (computed on stored learner transitions)
+            "state_mean": state_mean,
+            "state_std": state_std,
+            "reward_mean": reward_mean,
+            "reward_std": reward_std,
+            "value_mean": value_mean,
+            "value_std": value_std,
+            # Training diagnostics
             "approx_kl": float(np.mean(kl_values)) if kl_values else 0.0,
             "batch_entropy": float(np.mean(entropy_values)) if entropy_values else 0.0,
+            # Opponent tracking
             "opponent_history_size": float(len(self._opponent_history)),
             "opponent_last_sync": float(self._last_sync_step),
         }

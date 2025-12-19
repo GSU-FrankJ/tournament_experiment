@@ -1,8 +1,0 @@
-stage1_weight,stage2_weight,k1,k2,information_revelation,theoretical_stage1_effort,theoretical_stage2_effort,Model_training,final_stage1_effort,final_stage2_effort,final_weighted_effort,Convergence_Quality,episodes,Gap_from_theoretical
-3.0,6.5,0.0004,0.0004,none,0.0,39.772727272727266,ppo,0.0,38.60213756561279,250.91389417648315,Poor,6553600,7.608833096244098
-3.0,6.5,0.0004,0.0004,none,0.0,87.5,ppo,0.0,66.70928001403809,433.61032009124756,Poor,4096000,135.13967990875244
-3.0,6.5,0.0004,0.0004,none,0.0,54.6875,ppo,0.0,51.61480903625488,335.49625873565674,Poor,4096000,19.97249126434326
-stage1_weight,stage2_weight,k1,k2,information_revelation,theoretical_stage1_effort,theoretical_stage2_effort,Model_training,final_stage1_effort,final_stage2_effort,final_weighted_effort,Convergence_Quality,episodes,Gap_from_theoretical,stage2_gap_unweighted,gradient_iterations,gradient_final_grad,gradient_mode
-3.0,6.5,0.0004,0.0004,none,0.0,87.5,gradient,0.0,87.43391105971476,568.3204218881459,Excellent,0,0.42957811185408445,,5000.0,-0.0002388050666398319,finite
-3.0,6.5,0.0004,0.0004,none,0.0,54.6875,gradient,0.0,54.91055017346331,356.91857612751147,Fair,0,1.4498261275114714,,5000.0,0.0008059670999127633,finite
-3.0,6.5,0.0004,0.0004,none,0.0,39.772727272727266,gradient,0.0,39.65436798876139,257.75339192694906,Good,0,0.7693353457781882,,5000.0,-0.0004276781648019738,finite

@@ -1,0 +1,11 @@
+{
+  "variant_idx": 1,
+  "param_name": "lr_end",
+  "baseline_value": 0.0002,
+  "new_value": 0.0003,
+  "description": "Higher final learning rate for faster late adaptation",
+  "command": "/home/fjiang4/miniconda3/bin/python run/run_two_players.py --method ppo --rollout-mode vs_opponent --episodes 2048000 --q 40.0 --seed 42 --eval-vs-opponent --override-lr-end 0.0003 --run-id 20251218_184458 --variant-name lr_end_0.0003",
+  "cli_flag": "--override-lr-end",
+  "run_id": "20251218_184458",
+  "variant_name": "lr_end_0.0003"
+}

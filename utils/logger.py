@@ -36,6 +36,9 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
     """
     # Map experiment data to standard format
     standardized_row = {
+        # Run identification columns (for sweep correlation)
+        "run_id": experiment_data.get("run_id", ""),
+        "variant_name": experiment_data.get("variant_name", "baseline"),
         "stage1_weight": experiment_data.get("stage1_weight", 1.0),
         "stage2_weight": experiment_data.get("stage2_weight", 0.0),
         "k1": experiment_data.get("k1", experiment_data.get("k", 0.0004)),
@@ -91,6 +94,7 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
     file_exists = os.path.isfile(filename)
     with open(filename, mode="a", newline="") as file:
         fieldnames = [
+            "run_id", "variant_name",
             "stage1_weight", "stage2_weight", "k1", "k2", "information_revelation",
             "theoretical_stage1_effort", "theoretical_stage2_effort", "Model_training",
             "final_stage1_effort", "final_stage2_effort", "final_weighted_effort",

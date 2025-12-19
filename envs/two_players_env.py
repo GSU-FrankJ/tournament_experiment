@@ -59,9 +59,9 @@ class TwoPlayersEnv:
         eps2 = float(self.rng.uniform(-self.q, self.q))
         y1, y2, winner = self.sample_noisy_outputs(e1, e2, eps1, eps2)
 
-        payoffs = [self.w_l, self.w_l]
-        payoffs[winner] = self.w_h
-        costs = torch.tensor([self.k * e1 * e1, self.k * e2 * e2], dtype=torch.float32)
+        payoffs = [self.w_l, self.w_l] #初始化收益为 w_l ，未获胜者收益为 w_l
+        payoffs[winner] = self.w_h #获胜者收益为 w_h
+        costs = torch.tensor([self.k * e1 * e1, self.k * e2 * e2], dtype=torch.float32) #成本为 k * e^2
         rewards = torch.tensor(
             [payoffs[0] - costs[0].item(), payoffs[1] - costs[1].item()],
             dtype=torch.float32,

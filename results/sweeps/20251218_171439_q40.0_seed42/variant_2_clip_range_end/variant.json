@@ -1,0 +1,11 @@
+{
+  "variant_idx": 2,
+  "param_name": "clip_range_end",
+  "baseline_value": 0.35,
+  "new_value": 0.45,
+  "description": "Wider final clip range for larger policy updates",
+  "command": "/home/fjiang4/miniconda3/bin/python run/run_two_players.py --method ppo --rollout-mode vs_opponent --episodes 2048000 --q 40.0 --seed 42 --eval-vs-opponent --override-clip-end 0.45 --run-id 20251218_201358 --variant-name clip_end_0.45",
+  "cli_flag": "--override-clip-end",
+  "run_id": "20251218_201358",
+  "variant_name": "clip_end_0.45"
+}
