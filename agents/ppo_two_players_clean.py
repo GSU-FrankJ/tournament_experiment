@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 import numpy as np
 import torch
 import torch.nn as nn
@@ -68,6 +68,12 @@ class PPOConfig:
     opponent_ema_tau: float = 0.05    # EMA coefficient
     opponent_snapshot_keep: int = 10
     opponent_history_sample_p: float = 0.5
+    # Early-stop (default OFF to preserve legacy behaviour)
+    kl_early_stop: bool = False
+    kl_stop_patience: int = 1
+    kl_stop_threshold: Optional[float] = None
+    ratio_stop_threshold: Optional[float] = None
+    target_kl: float = 0.08
 
 
 class PPOTwoPlayersBandit:
@@ -282,12 +288,51 @@ class PPOTwoPlayersBandit:
         adv_norm_std = float(advantages.std(unbiased=False).item())
 
         dataset_size = states.size(0)
+        clip_eps = float(self.cfg.clip_eps)
         idx = np.arange(dataset_size)
         kl_values: List[float] = []
         entropy_values: List[float] = []
-        for _ in range(self.cfg.epochs):
+
+        # --- Early-stop bookkeeping ---
+        early_stop_triggered = False
+        early_stop_reason = ""
+        epoch_idx_triggered = -1
+        mb_idx_triggered = -1
+        breach_count = 0
+        minibatches_completed = 0
+        minibatches_total_planned = int(np.ceil(dataset_size / float(self.cfg.minibatch_size))) * self.cfg.epochs
+
+        # Per-update thresholds (auto-derived if None)
+        kl_stop_threshold = (
+            self.cfg.kl_stop_threshold
+            if self.cfg.kl_stop_threshold is not None
+            else 2.0 * float(self.cfg.target_kl)
+        )
+        ratio_stop_threshold = (
+            self.cfg.ratio_stop_threshold
+            if self.cfg.ratio_stop_threshold is not None
+            else 1.0 + 2.0 * clip_eps
+        )
+
+        # Per-minibatch accumulators for diagnostics
+        policy_loss_list: List[float] = []
+        value_loss_list: List[float] = []
+        entropy_list: List[float] = []
+        approx_kl_list: List[float] = []
+        kl_proxy_list: List[float] = []
+        kl_ms_list: List[float] = []
+        clip_frac_list: List[float] = []
+        ratio_mean_list: List[float] = []
+        ratio_std_list: List[float] = []
+        ratio_max_list: List[float] = []
+        log_ratio_abs_mean_list: List[float] = []
+        log_ratio_mean_list: List[float] = []
+        log_ratio_std_list: List[float] = []
+        grad_norm_list: List[float] = []
+
+        for epoch_idx in range(self.cfg.epochs):
             np.random.shuffle(idx)
-            for start in range(0, dataset_size, self.cfg.minibatch_size):
+            for mb_local_idx, start in enumerate(range(0, dataset_size, self.cfg.minibatch_size)):
                 mb_idx = idx[start:start + self.cfg.minibatch_size]
                 mb_states = states[mb_idx]
                 mb_actions = actions_norm[mb_idx]
@@ -296,13 +341,43 @@ class PPOTwoPlayersBandit:
                 mb_old_logp = old_logp[mb_idx]
 
                 logp, entropy, values = self.evaluate_actions(mb_states, mb_actions)
-                ratio = torch.exp(logp - mb_old_logp)
+
+                # Numerical safety guard
+                if (
+                    not torch.isfinite(logp).all()
+                    or not torch.isfinite(entropy).all()
+                    or not torch.isfinite(values).all()
+                ):
+                    breach_count += 1
+                    if breach_count >= max(1, int(self.cfg.kl_stop_patience)):
+                        early_stop_triggered = True
+                        early_stop_reason = "nan_guard"
+                        epoch_idx_triggered = epoch_idx
+                        mb_idx_triggered = mb_local_idx
+                        break
+                    else:
+                        continue
+
+                log_ratio = logp - mb_old_logp
+                ratio = torch.exp(log_ratio)
+
                 surr1 = ratio * mb_adv
-                surr2 = torch.clamp(ratio, 1 - self.cfg.clip_eps, 1 + self.cfg.clip_eps) * mb_adv
+                surr2 = torch.clamp(ratio, 1 - clip_eps, 1 + clip_eps) * mb_adv
                 policy_loss = -torch.min(surr1, surr2).mean()
                 approx_kl = (mb_old_logp - logp).mean()
-                kl_values.append(float(approx_kl.detach().cpu().item()))
-                entropy_values.append(float(entropy.detach().cpu().item()))
+
+                # PPO clipping diagnostics
+                clip_frac = torch.mean((ratio.gt(1 + clip_eps) | ratio.lt(1 - clip_eps)).float())
+
+                # KL proxy (non-negative) for early stop: mean(ratio - 1 - log_ratio)
+                kl_proxy = torch.mean(ratio - 1.0 - log_ratio).item()
+                ratio_max = ratio.max().item()
+
+                # Secondary drift / stability signals
+                log_ratio_abs_mean = log_ratio.abs().mean().item()
+                log_ratio_mean = log_ratio.mean().item()
+                log_ratio_std = log_ratio.std(unbiased=False).item()
+                kl_ms = torch.mean(log_ratio * log_ratio).item()
 
                 # ensure 1D shapes
                 if values.dim() != 1:
@@ -314,10 +389,52 @@ class PPOTwoPlayersBandit:
 
                 self.opt.zero_grad()
                 loss.backward()
-                nn.utils.clip_grad_norm_(self.net.parameters(), self.cfg.max_grad_norm)
+                grad_norm = float(nn.utils.clip_grad_norm_(self.net.parameters(), self.cfg.max_grad_norm).item())
                 self.opt.step()
 
-        self.reset_storage()
+                # Record per-minibatch stats
+                policy_loss_list.append(float(policy_loss.detach().cpu().item()))
+                value_loss_list.append(float(value_loss.detach().cpu().item()))
+                entropy_list.append(float(entropy.detach().cpu().item()))
+                approx_kl_list.append(float(approx_kl.detach().cpu().item()))
+                kl_proxy_list.append(kl_proxy)
+                kl_ms_list.append(kl_ms)
+                clip_frac_list.append(float(clip_frac.detach().cpu().item()))
+                ratio_mean_list.append(float(ratio.mean().detach().cpu().item()))
+                ratio_std_list.append(float(ratio.std(unbiased=False).detach().cpu().item()))
+                ratio_max_list.append(ratio_max)
+                log_ratio_abs_mean_list.append(log_ratio_abs_mean)
+                log_ratio_mean_list.append(log_ratio_mean)
+                log_ratio_std_list.append(log_ratio_std)
+                grad_norm_list.append(grad_norm)
+                minibatches_completed += 1
+
+                kl_values.append(float(approx_kl.detach().cpu().item()))
+                entropy_values.append(float(entropy.detach().cpu().item()))
+
+                # Early-stop breach logic (minibatch-level, no averaging)
+                breached = False
+                if kl_proxy > kl_stop_threshold:
+                    breached = True
+                    early_stop_reason = "kl_proxy_exceeded"
+                elif ratio_max > ratio_stop_threshold:
+                    breached = True
+                    early_stop_reason = "ratio_exceeded"
+
+                if breached:
+                    breach_count += 1
+                else:
+                    breach_count = 0
+
+                if self.cfg.kl_early_stop and breach_count >= max(1, int(self.cfg.kl_stop_patience)):
+                    early_stop_triggered = True
+                    epoch_idx_triggered = epoch_idx
+                    mb_idx_triggered = mb_local_idx
+                    break
+
+            if early_stop_triggered:
+                break
+
         # Update opponent with lag according to configured mode
         self._updates += 1
         if self.opponent_sync_interval > 0 and (self._updates % self.opponent_sync_interval == 0):
@@ -350,7 +467,54 @@ class PPOTwoPlayersBandit:
             # Opponent tracking
             "opponent_history_size": float(len(self._opponent_history)),
             "opponent_last_sync": float(self._last_sync_step),
+            # Per-minibatch aggregates
+            "policy_loss_mean": float(np.mean(policy_loss_list)) if policy_loss_list else 0.0,
+            "policy_loss_max": float(np.max(policy_loss_list)) if policy_loss_list else 0.0,
+            "value_loss_mean": float(np.mean(value_loss_list)) if value_loss_list else 0.0,
+            "value_loss_max": float(np.max(value_loss_list)) if value_loss_list else 0.0,
+            "entropy_mean": float(np.mean(entropy_list)) if entropy_list else 0.0,
+            "entropy_max": float(np.max(entropy_list)) if entropy_list else 0.0,
+            "approx_kl_max_abs": float(np.max(np.abs(approx_kl_list))) if approx_kl_list else 0.0,
+            "kl_proxy_mean": float(np.mean(kl_proxy_list)) if kl_proxy_list else 0.0,
+            "kl_proxy_max": float(np.max(kl_proxy_list)) if kl_proxy_list else 0.0,
+            "kl_ms_mean": float(np.mean(kl_ms_list)) if kl_ms_list else 0.0,
+            "kl_ms_max": float(np.max(kl_ms_list)) if kl_ms_list else 0.0,
+            "clip_frac_mean": float(np.mean(clip_frac_list)) if clip_frac_list else 0.0,
+            "clip_frac_max": float(np.max(clip_frac_list)) if clip_frac_list else 0.0,
+            "ratio_mean": float(np.mean(ratio_mean_list)) if ratio_mean_list else 0.0,
+            "ratio_std_mean": float(np.mean(ratio_std_list)) if ratio_std_list else 0.0,
+            "ratio_max": float(np.max(ratio_max_list)) if ratio_max_list else 0.0,
+            "log_ratio_abs_mean": float(np.mean(log_ratio_abs_mean_list)) if log_ratio_abs_mean_list else 0.0,
+            "log_ratio_mean": float(np.mean(log_ratio_mean_list)) if log_ratio_mean_list else 0.0,
+            "log_ratio_std_mean": float(np.mean(log_ratio_std_list)) if log_ratio_std_list else 0.0,
+            "grad_norm_mean": float(np.mean(grad_norm_list)) if grad_norm_list else 0.0,
+            "grad_norm_max": float(np.max(grad_norm_list)) if grad_norm_list else 0.0,
+            # Early-stop summary
+            "early_stop_triggered": early_stop_triggered,
+            "early_stop_reason": early_stop_reason,
+            "epoch_idx_triggered": int(epoch_idx_triggered),
+            "mb_idx_triggered": int(mb_idx_triggered),
+            "epochs_completed": int(epoch_idx + 1 if not early_stop_triggered else epoch_idx_triggered + 1),
+            "minibatches_completed": int(minibatches_completed),
+            "minibatches_total_planned": int(minibatches_total_planned),
         }
+        # Explained variance using rollout-time value predictions (old V) vs returns
+        returns_cpu = returns.detach()
+        old_values_cpu = torch.stack(self.storage["values"]).to(self.device).view(-1)
+        var_returns = returns_cpu.var(unbiased=False)
+        if torch.isfinite(var_returns) and var_returns.item() > 1e-8:
+            ev_old = 1.0 - torch.var(returns_cpu - old_values_cpu, unbiased=False) / (var_returns + 1e-8)
+            metrics["explained_variance_oldV"] = float(ev_old.item())
+        else:
+            metrics["explained_variance_oldV"] = float("nan")
+
+        # NOTE: Outer-loop LR/clip scaling in run/run_two_players.py still uses approx_kl.
+        # If early_stop_triggered=True, the outer controller may see a low approx_kl and
+        # scale LR/clip upward; future follow-up can gate that using early_stop flags.
+
+        # Clear storage for next rollout
+        self.reset_storage()
+
         return metrics
 
     # ---- utility ----

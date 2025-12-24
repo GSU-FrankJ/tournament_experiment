@@ -56,6 +56,11 @@ config = {
     "lag_warmup_updates": 10,
     "lag_fade_updates": 10,
     "opponent_history_sample_p_end": 0.0,
+    # KL early-stop (defaults keep behaviour OFF)
+    "kl_early_stop": True,
+    "kl_stop_patience": 1,
+    "kl_stop_threshold": None,
+    "ratio_stop_threshold": None,
 
     # Plotting and evaluation
     "enable_overlay": True,

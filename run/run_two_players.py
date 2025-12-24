@@ -317,6 +317,11 @@ def run_ppo(
         entropy_coef=float(cfg.get("entropy_coef_start", 0.02)),
         lr=float(cfg.get("lr_start", 3e-4)),
         clip_eps=float(cfg.get("clip_range_start", 0.30)),
+        kl_early_stop=bool(cfg.get("kl_early_stop", False)),
+        kl_stop_patience=int(cfg.get("kl_stop_patience", 1)),
+        kl_stop_threshold=cfg.get("kl_stop_threshold"),
+        ratio_stop_threshold=cfg.get("ratio_stop_threshold"),
+        target_kl=float(cfg.get("target_kl", 0.01)),
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
     agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
@@ -633,6 +638,10 @@ def run_ppo(
                 
                 gap = abs(final_e2_eval - e2_star_val)
                 kl_val = last_update_metrics.get("approx_kl", float("nan")) if last_update_metrics else float("nan")
+                kl_proxy_max = last_update_metrics.get("kl_proxy_max", float("nan")) if last_update_metrics else float("nan")
+                ratio_max = last_update_metrics.get("ratio_max", float("nan")) if last_update_metrics else float("nan")
+                clip_frac_max = last_update_metrics.get("clip_frac_max", float("nan")) if last_update_metrics else float("nan")
+                approx_kl_max_abs = last_update_metrics.get("approx_kl_max_abs", float("nan")) if last_update_metrics else float("nan")
                 adv_mean = last_update_metrics.get("adv_mean", float("nan")) if last_update_metrics else float("nan")
                 adv_std = last_update_metrics.get("adv_std", float("nan")) if last_update_metrics else float("nan")
                 adv_norm_std = last_update_metrics.get("adv_norm_std", float("nan")) if last_update_metrics else float("nan")
@@ -647,7 +656,9 @@ def run_ppo(
                 print(
                     f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, "
                     f"entropy={agent.cfg.entropy_coef:.3f}, lag_prob={lag_prob:.2f}, "
-                    f"approx_kl={kl_val:.4f}, alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}"
+                    f"approx_kl={kl_val:.4f}, kl_proxy_max={kl_proxy_max:.4f}, ratio_max={ratio_max:.4f}, "
+                    f"clip_frac_max={clip_frac_max:.4f}, approx_kl_max_abs={approx_kl_max_abs:.4f}, "
+                    f"alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}"
                 )
                 # Rollout sample metrics line
                 print(
@@ -771,6 +782,13 @@ def run_ppo(
         row["stored_p2_total"] = stored_p2_total
         row["skipped_p2_total"] = skipped_p2_due_to_opponent_total
         row["effective_batch_size_total"] = stored_p1_total + stored_p2_total
+        row["kl_proxy_max"] = last_update_metrics.get("kl_proxy_max", float("nan")) if last_update_metrics else float("nan")
+        row["kl_proxy_mean"] = last_update_metrics.get("kl_proxy_mean", float("nan")) if last_update_metrics else float("nan")
+        row["ratio_max"] = last_update_metrics.get("ratio_max", float("nan")) if last_update_metrics else float("nan")
+        row["ratio_mean"] = last_update_metrics.get("ratio_mean", float("nan")) if last_update_metrics else float("nan")
+        row["clip_frac_max"] = last_update_metrics.get("clip_frac_max", float("nan")) if last_update_metrics else float("nan")
+        row["clip_frac_mean"] = last_update_metrics.get("clip_frac_mean", float("nan")) if last_update_metrics else float("nan")
+        row["approx_kl_max_abs"] = last_update_metrics.get("approx_kl_max_abs", float("nan")) if last_update_metrics else float("nan")
         
         # === NEW INSTRUMENTATION COLUMNS ===
         # Policy mean effort (confirmed: Beta mean α/(α+β) scaled to effort range)
@@ -902,6 +920,16 @@ def _run_cli(args: argparse.Namespace) -> str:
     if overrides_applied:
         print(f"[config] Hyperparameter overrides: {', '.join(overrides_applied)}", flush=True)
     
+    # === PPO training dynamics override (separate from schedule endpoints) ===
+    # This is NOT subject to mutual exclusion - can be combined with other overrides.
+    if args.override_update_epochs is not None:
+        if args.override_update_epochs < 1:
+            raise ValueError(
+                f"[config] ERROR: --override-update-epochs must be >= 1, got {args.override_update_epochs}"
+            )
+        cfg["update_epochs"] = int(args.override_update_epochs)
+        print(f"[config] Override: update_epochs -> {args.override_update_epochs}", flush=True)
+    
     # Allow explicit override of variant_name via CLI (sweep script may pass this)
     if args.variant_name is not None:
         variant_name = args.variant_name
@@ -1013,6 +1041,12 @@ def main():
         type=float,
         default=None,
         help="Override target_kl config value (e.g., 0.12 instead of baseline 0.08).",
+    )
+    parser.add_argument(
+        "--override-update-epochs",
+        type=int,
+        default=None,
+        help="Override PPO update_epochs (number of optimization epochs per update). Must be >= 1.",
     )
     # Run identification flags for sweep correlation
     parser.add_argument(

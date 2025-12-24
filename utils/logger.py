@@ -102,6 +102,10 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
             "gradient_iterations", "gradient_final_grad", "gradient_mode",
             "opp_mode", "opp_sync_interval", "opp_ema_tau", "opp_hist_size", "last_sync_step",
             "approx_kl", "batch_entropy", "alpha_mean", "beta_mean",
+            "kl_proxy_max", "kl_proxy_mean",
+            "ratio_max", "ratio_mean",
+            "clip_frac_max", "clip_frac_mean",
+            "approx_kl_max_abs",
             "eval_vs_opponent_effort", "eval_vs_opponent_reward", "eval_vs_opponent_opp_effort",
             "eval_vs_opponent_abs_err", "eval_vs_history_effort_mean", "eval_vs_history_effort_std",
             "eval_vs_history_reward_mean", "eval_vs_history_reward_std", "eval_vs_history_abs_err_mean"
