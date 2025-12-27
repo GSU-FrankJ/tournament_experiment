@@ -497,6 +497,9 @@ class PPOTwoPlayersBandit:
             "epochs_completed": int(epoch_idx + 1 if not early_stop_triggered else epoch_idx_triggered + 1),
             "minibatches_completed": int(minibatches_completed),
             "minibatches_total_planned": int(minibatches_total_planned),
+            "clip_eps_used": clip_eps,
+            "ratio_stop_threshold_used": ratio_stop_threshold,
+            "kl_stop_threshold_used": kl_stop_threshold,
         }
         # Explained variance using rollout-time value predictions (old V) vs returns
         returns_cpu = returns.detach()

@@ -56,6 +56,35 @@ config = {
     "lag_warmup_updates": 10,
     "lag_fade_updates": 10,
     "opponent_history_sample_p_end": 0.0,
+
+    # Convergence / early-stop (OFF by default to preserve baseline behavior)
+    "convergence": {
+        "enabled": False,
+        "eval_every_updates": 20,
+        "cheap_gate": {
+            "window_size": 20,
+            "mean_kl_thresh": 0.003,
+            "std_kl_thresh": 0.001,
+            "drift_effort_thresh": 0.5,
+            "patience_drift": 3,
+        },
+        "exploit": {
+            "exploit_eps": 0.05,
+            "patience_exploit": 5,
+            "M": 8192,
+            "grid": {
+                "stage_a_step": 5.0,
+                "stage_b_radius": 15.0,
+                "stage_b_step": 1.0,
+                "stage_c_radius": 3.0,
+                "stage_c_step": 0.25,
+            },
+        },
+        "symmetry": {
+            "symmetry_gap_thresh": 0.5,
+            "symmetry_fail_patience": 3,
+        },
+    },
     # KL early-stop (defaults keep behaviour OFF)
     "kl_early_stop": True,
     "kl_stop_patience": 1,

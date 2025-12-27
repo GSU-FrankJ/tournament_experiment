@@ -85,6 +85,22 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
         "eval_vs_history_reward_mean": experiment_data.get("eval_vs_history_reward_mean", ""),
         "eval_vs_history_reward_std": experiment_data.get("eval_vs_history_reward_std", ""),
         "eval_vs_history_abs_err_mean": experiment_data.get("eval_vs_history_abs_err_mean", ""),
+        "kl_proxy_max": experiment_data.get("kl_proxy_max", ""),
+        "kl_proxy_mean": experiment_data.get("kl_proxy_mean", ""),
+        "ratio_max": experiment_data.get("ratio_max", ""),
+        "ratio_mean": experiment_data.get("ratio_mean", ""),
+        "clip_frac_max": experiment_data.get("clip_frac_max", ""),
+        "clip_frac_mean": experiment_data.get("clip_frac_mean", ""),
+        "approx_kl_max_abs": experiment_data.get("approx_kl_max_abs", ""),
+        "mean_kl_window": experiment_data.get("mean_kl_window", ""),
+        "std_kl_window": experiment_data.get("std_kl_window", ""),
+        "drift_effort": experiment_data.get("drift_effort", ""),
+        "exploitability": experiment_data.get("exploitability", ""),
+        "best_dev_effort": experiment_data.get("best_dev_effort", ""),
+        "symmetry_gap": experiment_data.get("symmetry_gap", ""),
+        "drift_ok_streak": experiment_data.get("drift_ok_streak", ""),
+        "exploit_ok_streak": experiment_data.get("exploit_ok_streak", ""),
+        "converged_flag": experiment_data.get("converged_flag", ""),
     }
     
     # Ensure results directory exists
@@ -106,6 +122,9 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
             "ratio_max", "ratio_mean",
             "clip_frac_max", "clip_frac_mean",
             "approx_kl_max_abs",
+            "mean_kl_window", "std_kl_window", "drift_effort",
+            "exploitability", "best_dev_effort", "symmetry_gap",
+            "drift_ok_streak", "exploit_ok_streak", "converged_flag",
             "eval_vs_opponent_effort", "eval_vs_opponent_reward", "eval_vs_opponent_opp_effort",
             "eval_vs_opponent_abs_err", "eval_vs_history_effort_mean", "eval_vs_history_effort_std",
             "eval_vs_history_reward_mean", "eval_vs_history_reward_std", "eval_vs_history_abs_err_mean"

@@ -393,3 +393,4 @@ The investigation **confirms with code evidence and diagnostic experiments** tha
 **Recommended immediate fix**: Implement **Option A** (store only learner) or **Option D** (remove lag) depending on experimental goals, then re-run experiments to establish valid baselines.
 
 
+

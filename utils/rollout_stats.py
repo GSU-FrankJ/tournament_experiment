@@ -91,14 +91,24 @@ class RolloutStatsAccumulator:
     state_stats: WelfordAccumulator = field(default_factory=WelfordAccumulator)
     reward_stats: WelfordAccumulator = field(default_factory=WelfordAccumulator)
 
-    def update_effort(self, effort: float) -> None:
+    def update_effort(self, effort: float, *, player: str | None = None) -> None:
         """
         Record a sampled effort value from learner policy.
         
         Args:
             effort: The effort value (in original effort_range units, not normalized)
+            player: Optional player identifier ("p1" or "p2") for symmetry diagnostics.
         """
         self.effort_stats.update(float(effort))
+        # Per-player effort stats (for symmetry diagnostics)
+        if player == "p1":
+            if not hasattr(self, "_effort_p1_stats"):
+                self._effort_p1_stats = WelfordAccumulator()
+            self._effort_p1_stats.update(float(effort))
+        elif player == "p2":
+            if not hasattr(self, "_effort_p2_stats"):
+                self._effort_p2_stats = WelfordAccumulator()
+            self._effort_p2_stats.update(float(effort))
 
     def update_state(self, state: torch.Tensor | np.ndarray) -> None:
         """
@@ -158,7 +168,19 @@ class RolloutStatsAccumulator:
                 - state_std: global std of state elements
                 - reward_mean: mean reward
                 - reward_std: reward std
+                - sample_avg_effort_p1: mean effort for player1 (if tracked)
+                - sample_avg_effort_p2: mean effort for player2 (if tracked)
         """
+        effort_p1_mean = None
+        effort_p2_mean = None
+        effort_p1_count = None
+        effort_p2_count = None
+        if hasattr(self, "_effort_p1_stats"):
+            effort_p1_mean = self._effort_p1_stats.get_mean()
+            effort_p1_count = self._effort_p1_stats.count
+        if hasattr(self, "_effort_p2_stats"):
+            effort_p2_mean = self._effort_p2_stats.get_mean()
+            effort_p2_count = self._effort_p2_stats.count
         return {
             "sample_avg_effort": self.get_sample_avg_effort(),
             "effort_sample_count": self.get_effort_count(),
@@ -166,6 +188,10 @@ class RolloutStatsAccumulator:
             "state_std": self.get_state_std(),
             "reward_mean": self.get_reward_mean(),
             "reward_std": self.get_reward_std(),
+            "sample_avg_effort_p1": effort_p1_mean,
+            "sample_avg_effort_p2": effort_p2_mean,
+            "effort_sample_count_p1": effort_p1_count,
+            "effort_sample_count_p2": effort_p2_count,
         }
 
     def reset(self) -> None:
@@ -173,6 +199,10 @@ class RolloutStatsAccumulator:
         self.effort_stats.reset()
         self.state_stats.reset()
         self.reward_stats.reset()
+        if hasattr(self, "_effort_p1_stats"):
+            self._effort_p1_stats.reset()
+        if hasattr(self, "_effort_p2_stats"):
+            self._effort_p2_stats.reset()
 
 
 @dataclass
