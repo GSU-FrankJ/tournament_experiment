@@ -167,12 +167,45 @@ def _sample_policy_efforts(agent, q: float, effort_bounds: tuple[float, float], 
     Sample efforts from current policy (Beta distribution) using torch vectorized sampling.
     """
     device = next(agent.net.parameters()).device
-    generator = torch.Generator(device=device)
-    generator.manual_seed(seed)
+    gen_key = (int(seed), device.type, device.index)
+    gen_map = getattr(agent, "_policy_effort_generators", None)
+    if gen_map is None:
+        gen_map = {}
+        setattr(agent, "_policy_effort_generators", gen_map)
+    generator = gen_map.get(gen_key)
+    if generator is None:
+        generator = torch.Generator(device=device)
+        generator.manual_seed(int(seed))
+        gen_map[gen_key] = generator
     state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
     with torch.no_grad():
         dist, _ = agent.net.dist(state)
-        samples = dist.sample((M,), generator=generator).squeeze(-1).clamp(0.0, 1.0)
+        try:
+            samples = dist.sample((M,), generator=generator)
+        except TypeError:
+            # Fallback for torch versions where Distribution.sample lacks a generator arg.
+            # Derive a per-call seed from the provided generator so randomness still advances deterministically.
+            seed_gen_map = getattr(agent, "_policy_effort_seed_generators", None)
+            if seed_gen_map is None:
+                seed_gen_map = {}
+                setattr(agent, "_policy_effort_seed_generators", seed_gen_map)
+            seed_gen = seed_gen_map.get(gen_key)
+            if seed_gen is None:
+                seed_gen = torch.Generator(device="cpu")
+                seed_gen.manual_seed(int(seed))
+                seed_gen_map[gen_key] = seed_gen
+            seed_value = int(torch.randint(0, 2**31 - 1, (1,), generator=seed_gen).item())
+            if device.type == "cuda":
+                device_index = device.index if device.index is not None else torch.cuda.current_device()
+                with torch.random.fork_rng(devices=[device_index]):
+                    torch.manual_seed(seed_value)
+                    torch.cuda.manual_seed_all(seed_value)
+                    samples = dist.sample((M,))
+            else:
+                with torch.random.fork_rng(devices=[]):
+                    torch.manual_seed(seed_value)
+                    samples = dist.sample((M,))
+        samples = samples.squeeze(-1).clamp(0.0, 1.0)
     low, high = effort_bounds
     return (low + samples * (high - low)).to(device)
 
@@ -225,15 +258,30 @@ def eval_exploitability(
     device = next(agent.net.parameters()).device
     low, high = effort_bounds
     with torch.no_grad():
-        torch.manual_seed(seed)
-        # Common random numbers (CRN) for all candidates
-        eps1 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
-        eps2 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
-        tie_breaks = torch.randint(0, 2, (M,), device=device)
+        if device.type == "cuda":
+            device_index = device.index if device.index is not None else torch.cuda.current_device()
+            with torch.random.fork_rng(devices=[device_index]):
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
+                # Common random numbers (CRN) for all candidates
+                eps1 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+                eps2 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+                tie_breaks = torch.randint(0, 2, (M,), device=device)
 
-        # Sample policy efforts for self-play and opponent
-        efforts_policy_1 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed, k=k, w_h=w_h, w_l=w_l)
-        efforts_policy_2 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed + 17, k=k, w_h=w_h, w_l=w_l)
+                # Sample policy efforts for self-play and opponent
+                efforts_policy_1 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed, k=k, w_h=w_h, w_l=w_l)
+                efforts_policy_2 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed + 17, k=k, w_h=w_h, w_l=w_l)
+        else:
+            with torch.random.fork_rng(devices=[]):
+                torch.manual_seed(seed)
+                # Common random numbers (CRN) for all candidates
+                eps1 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+                eps2 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+                tie_breaks = torch.randint(0, 2, (M,), device=device)
+
+                # Sample policy efforts for self-play and opponent
+                efforts_policy_1 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed, k=k, w_h=w_h, w_l=w_l)
+                efforts_policy_2 = _sample_policy_efforts(agent, q, effort_bounds, M, seed=seed + 17, k=k, w_h=w_h, w_l=w_l)
 
         # U_self = E[u(π, π)]
         u_self = _payoff_player1(
@@ -408,6 +456,38 @@ def run_gradient(
     return row
 
 
+def get_effort_for_side(
+    side: str,
+    agent: PPOTwoPlayersBandit,
+    obs: torch.Tensor,
+    q: float,
+    effort_bounds: tuple[float, float],
+    fixed_effort: Optional[float],
+    is_train_side: bool,
+    seed: int,
+    fallback_rollout_stats: Optional[Dict[str, float]],
+) -> Dict[str, object]:
+    """Return effort/action payload for a side; freeze non-train side when fixed effort is set."""
+    del side, q, seed, fallback_rollout_stats
+    if fixed_effort is not None and not is_train_side:
+        fixed_value = _clip_effort(float(fixed_effort), effort_bounds)
+        return {
+            "effort": torch.tensor([fixed_value], dtype=torch.float32),
+            "action_norm": None,
+            "logp": None,
+            "value": None,
+            "source": "fixed",
+        }
+    action_norm, effort, logp, value = agent.act(obs)
+    return {
+        "effort": effort,
+        "action_norm": action_norm,
+        "logp": logp,
+        "value": value,
+        "source": "policy_sample",
+    }
+
+
 def run_ppo(
     cfg: Dict,
     episodes: Optional[int] = None,
@@ -420,6 +500,8 @@ def run_ppo(
     eval_vs_history: bool = False,
     run_id: Optional[str] = None,
     variant_name: str = "baseline",
+    fixed_opponent_effort: Optional[float] = None,
+    train_side: str = "p1",
 ) -> List[Dict]:
     """Train PPO via self-play with conditioning on (q, k, w_gap).
 
@@ -442,6 +524,13 @@ def run_ppo(
 
     w_h, w_l, k = cfg["w_h"], cfg["w_l"], cfg["k"]
     effort_bounds = tuple(cfg["effort_bounds_stage2"])  # (0, 200)
+    train_side = str(train_side).lower()
+    if train_side not in ("p1", "p2"):
+        raise ValueError(f"train_side must be 'p1' or 'p2', got '{train_side}'")
+    fixed_opponent_enabled = fixed_opponent_effort is not None
+    fixed_effort_clamped = None
+    if fixed_opponent_enabled:
+        fixed_effort_clamped = _clip_effort(float(fixed_opponent_effort), effort_bounds)
     # Respect CLI-provided training set; default to config q_list
     train_qs = list(train_qs if train_qs is not None else cfg["q_list"])
     eval_qs = list(eval_qs if eval_qs is not None else train_qs)
@@ -496,6 +585,11 @@ def run_ppo(
         print("[PPO]   - Player1 uses learner; Player2 may use opponent (lag schedule)")
         print("[PPO]   - Store only learner-generated transitions")
     print(flush=True)
+    if fixed_opponent_enabled:
+        print(
+            f"[Experiment] fixed_opponent_effort={fixed_effort_clamped:.2f} train_side={train_side}",
+            flush=True,
+        )
 
     history: List[float] = []
     total_steps_target = int(episodes)
@@ -565,6 +659,21 @@ def run_ppo(
     convergence_enabled = bool(convergence_cfg.get("enabled", False))
     conv_eval_every = int(convergence_cfg.get("eval_every_updates", eval_every or 20))
     cheap_cfg = convergence_cfg.get("cheap_gate", {}) if convergence_enabled else {}
+    cheap_profiles = convergence_cfg.get("cheap_gate_profiles", {}) if convergence_enabled else {}
+    cheap_profile_name = convergence_cfg.get("cheap_gate_profile", "default") if convergence_enabled else "default"
+    if convergence_enabled and cheap_profiles:
+        selected_profile = cheap_profiles.get(cheap_profile_name)
+        if selected_profile is None:
+            fallback_name = "default" if "default" in cheap_profiles else next(iter(cheap_profiles))
+            print(
+                f"[Convergence] cheap_gate_profile='{cheap_profile_name}' not found; using '{fallback_name}' instead.",
+                flush=True,
+            )
+            cheap_profile_name = fallback_name
+            selected_profile = cheap_profiles.get(cheap_profile_name, {})
+        cheap_cfg = dict(selected_profile)
+    if convergence_enabled:
+        print(f"[Convergence] cheap_gate_profile={cheap_profile_name}", flush=True)
     exploit_cfg = convergence_cfg.get("exploit", {}) if convergence_enabled else {}
     symmetry_cfg = convergence_cfg.get("symmetry", {}) if convergence_enabled else {}
     cheap_tracker = CheapGateTracker(int(cheap_cfg.get("window_size", 20))) if convergence_enabled else None
@@ -685,59 +794,107 @@ def run_ppo(
             s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
             s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
 
-            # Player 1: ALWAYS uses learner policy (both modes)
-            a1_norm, e1, logp1, v1 = agent.act(s1)
+            if fixed_opponent_enabled:
+                res_p1 = get_effort_for_side(
+                    "p1",
+                    agent,
+                    s1,
+                    q,
+                    effort_bounds,
+                    fixed_effort_clamped,
+                    train_side == "p1",
+                    cfg.get("seed", 42),
+                    last_rollout_stats,
+                )
+                res_p2 = get_effort_for_side(
+                    "p2",
+                    agent,
+                    s2,
+                    q,
+                    effort_bounds,
+                    fixed_effort_clamped,
+                    train_side == "p2",
+                    cfg.get("seed", 42),
+                    last_rollout_stats,
+                )
+                a1_norm, e1, logp1, v1 = (
+                    res_p1["action_norm"],
+                    res_p1["effort"],
+                    res_p1["logp"],
+                    res_p1["value"],
+                )
+                a2_norm, e2, logp2, v2 = (
+                    res_p2["action_norm"],
+                    res_p2["effort"],
+                    res_p2["logp"],
+                    res_p2["value"],
+                )
+                use_opponent = False
+            else:
+                # Player 1: ALWAYS uses learner policy (both modes)
+                a1_norm, e1, logp1, v1 = agent.act(s1)
 
-            # Player 2: Mode-dependent action generation
-            if rollout_mode == "selfplay":
-                # SELFPLAY MODE: Player2 always uses learner policy
-                # Opponent lag mechanism is disabled for action generation
-                a2_norm, e2, logp2, v2 = agent.act(s2)
-                use_opponent = False  # Not used for action selection in selfplay
-
-            else:  # rollout_mode == "vs_opponent"
-                # VS_OPPONENT MODE: Player2 may use opponent based on lag schedule
-                # Early phase: with prob=lag_prob, draw opponent action from lagged/historical policy.
-                # Late phase: fully on-policy learner sampling.
-                use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
-                if use_opponent:
-                    # Player2 uses opponent policy (lagged/historical)
-                    a2_norm, e2, logp2, _ = agent.act_opponent(s2)
-                    v2 = agent.value_only(s2)
-                else:
-                    # Player2 uses learner policy
+                # Player 2: Mode-dependent action generation
+                if rollout_mode == "selfplay":
+                    # SELFPLAY MODE: Player2 always uses learner policy
+                    # Opponent lag mechanism is disabled for action generation
                     a2_norm, e2, logp2, v2 = agent.act(s2)
+                    use_opponent = False  # Not used for action selection in selfplay
+
+                else:  # rollout_mode == "vs_opponent"
+                    # VS_OPPONENT MODE: Player2 may use opponent based on lag schedule
+                    # Early phase: with prob=lag_prob, draw opponent action from lagged/historical policy.
+                    # Late phase: fully on-policy learner sampling.
+                    use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
+                    if use_opponent:
+                        # Player2 uses opponent policy (lagged/historical)
+                        a2_norm, e2, logp2, _ = agent.act_opponent(s2)
+                        v2 = agent.value_only(s2)
+                    else:
+                        # Player2 uses learner policy
+                        a2_norm, e2, logp2, v2 = agent.act(s2)
 
             # Execute environment step with both actions
             _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
 
             # Storage: Mode-dependent logic
-            # Player 1: ALWAYS store (learner-generated in both modes)
-            agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            stored_p1_this_update += 1
-            # Track P1's sampled effort (always learner-generated)
-            rollout_stats.update_effort(float(e1.item()), player="p1")
-
-            # Player 2: Mode-dependent storage
-            if rollout_mode == "selfplay":
-                # SELFPLAY: Always store player2 (learner-generated)
-                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
-                stored_p2_this_update += 1
-                # Track P2's sampled effort (learner-generated in selfplay)
-                rollout_stats.update_effort(float(e2.item()), player="p2")
-
-            else:  # rollout_mode == "vs_opponent"
-                # VS_OPPONENT: Only store player2 when it used learner policy
-                if not use_opponent:
-                    # Player2 used learner -> store for PPO update
+            if fixed_opponent_enabled:
+                # Fixed-opponent mode: only store train-side transitions to keep PPO on-policy.
+                if train_side == "p1":
+                    agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+                    stored_p1_this_update += 1
+                    rollout_stats.update_effort(float(e1.item()), player="p1")
+                else:
                     agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
                     stored_p2_this_update += 1
-                    # Track P2's sampled effort (learner-generated)
                     rollout_stats.update_effort(float(e2.item()), player="p2")
-                else:
-                    # Player2 used opponent -> treat as environment dynamics, don't store
-                    skipped_p2_this_update += 1
-                    # NOTE: Do NOT track P2 effort when using opponent policy
+            else:
+                # Player 1: ALWAYS store (learner-generated in both modes)
+                agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+                stored_p1_this_update += 1
+                # Track P1's sampled effort (always learner-generated)
+                rollout_stats.update_effort(float(e1.item()), player="p1")
+
+                # Player 2: Mode-dependent storage
+                if rollout_mode == "selfplay":
+                    # SELFPLAY: Always store player2 (learner-generated)
+                    agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+                    stored_p2_this_update += 1
+                    # Track P2's sampled effort (learner-generated in selfplay)
+                    rollout_stats.update_effort(float(e2.item()), player="p2")
+
+                else:  # rollout_mode == "vs_opponent"
+                    # VS_OPPONENT: Only store player2 when it used learner policy
+                    if not use_opponent:
+                        # Player2 used learner -> store for PPO update
+                        agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+                        stored_p2_this_update += 1
+                        # Track P2's sampled effort (learner-generated)
+                        rollout_stats.update_effort(float(e2.item()), player="p2")
+                    else:
+                        # Player2 used opponent -> treat as environment dynamics, don't store
+                        skipped_p2_this_update += 1
+                        # NOTE: Do NOT track P2 effort when using opponent policy
 
             history.append(float((e1.item() + e2.item()) / 2.0))
         last_update_metrics = agent.update()
@@ -839,13 +996,16 @@ def run_ppo(
                 # Main update line: policy and gap
                 if policy_mean_effort_current is None:
                     policy_mean_effort_current = final_e2_eval
-                print(
+                update_line = (
                     f"[Update {upd_i}] q={q_eval}: e*={e2_star_val:.2f}, policy={final_e2_eval:.2f}, gap={gap:.2f}, "
                     f"entropy={agent.cfg.entropy_coef:.3f}, lag_prob={lag_prob:.2f}, "
                     f"approx_kl={kl_val:.4f}, kl_proxy_max={kl_proxy_max:.4f}, ratio_max={ratio_max:.4f}, "
                     f"clip_frac_max={clip_frac_max:.4f}, approx_kl_max_abs={approx_kl_max_abs:.4f}, "
                     f"alpha_mean={alpha_mean:.2f}, beta_mean={beta_mean:.2f}"
                 )
+                if fixed_opponent_enabled:
+                    update_line += f", opponent_effort_used={fixed_effort_clamped:.2f}"
+                print(update_line)
                 # Rollout sample metrics line
                 print(
                     f"  [Rollout] sample_avg_effort={sample_avg_effort:.2f}, mean_vs_sample_gap={mean_vs_sample_gap:.2f}, "
@@ -900,12 +1060,17 @@ def run_ppo(
 
         # === Convergence evaluation (optional, default OFF) ===
         if convergence_enabled and cheap_tracker is not None and rollout_mode == "selfplay":
-            # If policy_mean_effort_current not set, fallback to sample_avg_effort
+            policy_effort_source = "policy_eval"
             if policy_mean_effort_current is None and last_rollout_stats:
                 policy_mean_effort_current = last_rollout_stats.get("sample_avg_effort", None)
+                policy_effort_source = "rollout_sample"
+            if policy_mean_effort_current is None:
+                policy_effort_source = "none"
             cheap_tracker.update(kl_val, policy_mean_effort_current)
             do_eval = (update_idx + 1) % conv_eval_every == 0
             if do_eval:
+                len_kl = len(cheap_tracker.kl_hist)
+                len_policy = len(cheap_tracker.policy_hist)
                 gate_stats = cheap_tracker.compute()
                 mean_kl_window = gate_stats["mean_kl_window"]
                 std_kl_window = gate_stats["std_kl_window"]
@@ -914,14 +1079,15 @@ def run_ppo(
                 last_std_kl_window = std_kl_window
                 last_drift_effort = drift_effort
 
-                drift_pass = (
-                    mean_kl_window is not None
-                    and std_kl_window is not None
-                    and drift_effort is not None
-                    and mean_kl_window <= float(cheap_cfg.get("mean_kl_thresh", 0.003))
-                    and std_kl_window <= float(cheap_cfg.get("std_kl_thresh", 0.001))
-                    and drift_effort <= float(cheap_cfg.get("drift_effort_thresh", 0.5))
-                )
+                mean_thresh = float(cheap_cfg.get("mean_kl_thresh", 0.0045))
+                std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
+                drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
+                patience_drift = int(cheap_cfg.get("patience_drift", 2))
+                exploit_eps = float(exploit_cfg.get("exploit_eps", 0.05))
+                mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
+                std_ok = std_kl_window is not None and std_kl_window <= std_thresh
+                drift_ok = drift_effort is not None and drift_effort <= drift_thresh
+                drift_pass = mean_ok and std_ok and drift_ok
                 if drift_pass:
                     drift_ok_streak += 1
                 else:
@@ -944,7 +1110,8 @@ def run_ppo(
                 else:
                     symmetry_fail_streak = 0
 
-                if drift_pass and drift_ok_streak >= int(cheap_cfg.get("patience_drift", 3)):
+                run_exploit = drift_pass and drift_ok_streak >= patience_drift
+                if run_exploit:
                     # Run exploitability (coarse-to-fine grid) using CRN
                     eval_seed = int(cfg.get("seed", 42)) + int(update_idx + 1)
                     grid_cfg = exploit_cfg.get("grid", {}) if exploit_cfg else {}
@@ -970,7 +1137,12 @@ def run_ppo(
                     best_dev_effort = exploit_res["best_dev_effort"]
                     last_exploitability = exploitability_val
                     last_best_dev_effort = best_dev_effort
-                    if exploitability_val < float(exploit_cfg.get("exploit_eps", 0.05)):
+                    print(
+                        f"[ConvergenceDebug] trigger=cheap_gate eval_seed={eval_seed} "
+                        f"candidates={exploit_res.get('num_candidates', 'NA')}",
+                        flush=True,
+                    )
+                    if exploitability_val < exploit_eps:
                         exploit_ok_streak += 1
                     else:
                         exploit_ok_streak = 0
@@ -988,13 +1160,48 @@ def run_ppo(
                     last_exploitability = None
                     last_best_dev_effort = None
 
+                def _fmt(val: float | None, digits: int = 4) -> str:
+                    return "NA" if val is None else f"{val:.{digits}f}"
+
+                fail_reasons = []
+                if mean_kl_window is None:
+                    fail_reasons.append("mean_kl:window")
+                elif not mean_ok:
+                    fail_reasons.append("mean_kl")
+                if std_kl_window is None:
+                    fail_reasons.append("std_kl:window")
+                elif not std_ok:
+                    fail_reasons.append("std_kl")
+                if drift_effort is None:
+                    fail_reasons.append("drift:window")
+                elif not drift_ok:
+                    fail_reasons.append("drift")
+                if drift_pass and drift_ok_streak < patience_drift:
+                    fail_reasons.append("patience")
+                if not run_exploit:
+                    if not fail_reasons:
+                        fail_reasons.append("unknown")
+                    decision = f"GATE_FAIL({','.join(fail_reasons)})"
+                else:
+                    decision = "EXPLOIT_OK_STREAK++" if exploitability_val is not None and exploitability_val < exploit_eps else "RUN_EXPLOIT"
+
+                mean_status = f"{_fmt(mean_kl_window)}({'OK' if mean_ok else 'FAIL'}<={mean_thresh:.4f})"
+                std_status = f"{_fmt(std_kl_window)}({'OK' if std_ok else 'FAIL'}<={std_thresh:.4f})"
+                drift_status = f"{_fmt(drift_effort, 2)}({'OK' if drift_ok else 'FAIL'}<={drift_thresh:.2f})"
+                print(
+                    f"[ConvergenceDebug] upd={update_idx + 1} len_kl={len_kl} len_pol={len_policy} "
+                    f"mean_kl={mean_status} std_kl={std_status} drift={drift_status} "
+                    f"drift_streak={drift_ok_streak}/{patience_drift} source={policy_effort_source} => {decision}",
+                    flush=True,
+                )
+
                 # Logging line
                 print(
                     f"[Convergence] upd={update_idx + 1} mean_kl={mean_kl_window} std_kl={std_kl_window} "
                     f"drift_effort={drift_effort} exploitability={exploitability_val if exploitability_val is not None else 'NA'} "
                     f"best_dev={best_dev_effort if best_dev_effort is not None else 'NA'} "
                     f"sym_gap={symmetry_gap_val if symmetry_gap_val is not None else 'NA'} "
-                    f"streaks: drift={drift_ok_streak}/{cheap_cfg.get('patience_drift', 3)} "
+                    f"streaks: drift={drift_ok_streak}/{patience_drift} "
                     f"exploit={exploit_ok_streak}/{exploit_cfg.get('patience_exploit', 5)}",
                     flush=True,
                 )
@@ -1240,6 +1447,9 @@ def _run_cli(args: argparse.Namespace) -> str:
     # Allow explicit override of variant_name via CLI (sweep script may pass this)
     if args.variant_name is not None:
         variant_name = args.variant_name
+    if args.fixed_opponent_effort is not None:
+        fixed_suffix = f"fixedopp{args.fixed_opponent_effort:g}_{args.train_side}"
+        variant_name = f"{variant_name}_{fixed_suffix}" if variant_name else fixed_suffix
     
     # Generate run_id: use CLI-provided value or generate from current timestamp
     if args.run_id is not None:
@@ -1257,6 +1467,8 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["convergence"] = {}
     if args.enable_convergence_eval:
         cfg["convergence"]["enabled"] = True
+    if args.cheap_gate_profile is not None:
+        cfg["convergence"]["cheap_gate_profile"] = args.cheap_gate_profile
 
     if args.method == "gradient":
         q_values = [args.q] if args.q is not None else list(cfg["q_list"])
@@ -1290,6 +1502,8 @@ def _run_cli(args: argparse.Namespace) -> str:
             eval_vs_history=args.eval_vs_history,
             run_id=run_id,
             variant_name=variant_name,
+            fixed_opponent_effort=args.fixed_opponent_effort,
+            train_side=args.train_side,
         )
         for row in rows:
             save_standardized_result(row, csv_path)
@@ -1306,6 +1520,21 @@ def main():
         choices=["selfplay", "vs_opponent"],
         default="vs_opponent",
         help="Rollout mode for PPO: 'selfplay' (both use learner, store both) or 'vs_opponent' (p2 may use opponent, store only learner samples)",
+    )
+    # Experiment 1 (fixed opponent best-response):
+    # python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42 \
+    #   --fixed-opponent-effort 54.69 --train-side p1
+    parser.add_argument(
+        "--fixed-opponent-effort",
+        type=float,
+        default=None,
+        help="Enable fixed-opponent mode with constant effort (clamped to effort bounds).",
+    )
+    parser.add_argument(
+        "--train-side",
+        choices=["p1", "p2"],
+        default="p1",
+        help="Which side to train when fixed-opponent mode is enabled.",
     )
     parser.add_argument("--q", type=float, help="Override q (otherwise run all in config q_list)")
     parser.add_argument(
@@ -1366,6 +1595,19 @@ def main():
         action="store_true",
         help="Enable convergence evaluation/early-stop (exploitability + stability gating). Default OFF.",
     )
+    cheap_gate_profiles = base_config.get("convergence", {}).get("cheap_gate_profiles", {}) or {}
+    cheap_gate_profile_choices = sorted(cheap_gate_profiles.keys()) if cheap_gate_profiles else ["default", "conservative", "aggressive"]
+    parser.add_argument(
+        "--cheap-gate-profile",
+        choices=cheap_gate_profile_choices,
+        default=None,
+        help="Select cheap gate profile (default/conservative/aggressive). Used only with --enable-convergence-eval.",
+    )
+    # Smoke test: `python run/run_two_players.py --method ppo --rollout-mode selfplay --episodes 40960 --enable-convergence-eval`
+    # Expect: after a few eval points, ConvergenceDebug shows RUN_EXPLOIT and CSV exploitability is not NA if gate passes.
+    # Verification: FAIL reasons are explicit when mean/std/drift exceed thresholds; no RUN_EXPLOIT in that case.
+    # Trigger: when mean_kl approx 0.002-0.004, std_kl approx 0.002-0.004, drift approx 1-2 for consecutive windows,
+    # expect RUN_EXPLOIT within <=3 eval points. Tuning: relax only failing threshold by 10-20%.
     # Run identification flags for sweep correlation
     parser.add_argument(
         "--run-id",

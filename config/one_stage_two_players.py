@@ -61,12 +61,36 @@ config = {
     "convergence": {
         "enabled": False,
         "eval_every_updates": 20,
+        "cheap_gate_profile": "default",
+        "cheap_gate_profiles": {
+            "default": {
+                "window_size": 20,
+                "mean_kl_thresh": 0.0045,
+                "std_kl_thresh": 0.0035,
+                "drift_effort_thresh": 2.0,
+                "patience_drift": 2,
+            },
+            "conservative": {
+                "window_size": 20,
+                "mean_kl_thresh": 0.0038,
+                "std_kl_thresh": 0.0030,
+                "drift_effort_thresh": 1.5,
+                "patience_drift": 3,
+            },
+            "aggressive": {
+                "window_size": 20,
+                "mean_kl_thresh": 0.0060,
+                "std_kl_thresh": 0.0075,
+                "drift_effort_thresh": 5.5,
+                "patience_drift": 1,
+            },
+        },
         "cheap_gate": {
             "window_size": 20,
-            "mean_kl_thresh": 0.003,
-            "std_kl_thresh": 0.001,
-            "drift_effort_thresh": 0.5,
-            "patience_drift": 3,
+            "mean_kl_thresh": 0.0045,
+            "std_kl_thresh": 0.0035,
+            "drift_effort_thresh": 2.0,
+            "patience_drift": 2,
         },
         "exploit": {
             "exploit_eps": 0.05,
