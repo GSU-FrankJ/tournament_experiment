@@ -6,6 +6,13 @@ Writes standardized CSV and figure overlays. For one-stage, we map the single
 stage to the CSV's stage-2 fields (stage-1 fields set to 0).
 """
 
+# Smoke tests (theory-align experiment):
+# 1) Baseline: python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42
+# 2) Theory-align:
+#    python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42 \
+#      --enable-convergence-eval --cheap-gate-profile aggressive --theory-align
+# Expect: [TheoryAlign] lines, ent=0, conc_mean >= 80, mean_vs_sample_gap ~0, policy -> e*=54.69.
+
 import sys
 import os
 import argparse
@@ -179,7 +186,7 @@ def _sample_policy_efforts(agent, q: float, effort_bounds: tuple[float, float], 
         gen_map[gen_key] = generator
     state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
     with torch.no_grad():
-        dist, _ = agent.net.dist(state)
+        dist, _ = agent.dist(state)
         try:
             samples = dist.sample((M,), generator=generator)
         except TypeError:
@@ -524,6 +531,23 @@ def run_ppo(
 
     w_h, w_l, k = cfg["w_h"], cfg["w_l"], cfg["k"]
     effort_bounds = tuple(cfg["effort_bounds_stage2"])  # (0, 200)
+    theory_align_enabled = bool(cfg.get("theory_align", False))
+    theory_align_conc_min = float(cfg.get("theory_align_conc_min", 0.0))
+    theory_align_conc_weight = float(cfg.get("theory_align_conc_weight", 0.0))
+    theory_align_v2_enabled = bool(cfg.get("theory_align_v2", False))
+    theory_align_v2_conc_min = float(cfg.get("theory_align_v2_conc_min", 1.0))
+    theory_align_v2_conc_scale = float(cfg.get("theory_align_v2_conc_scale", 1.0))
+    theory_align_v2_conc_min_start = float(cfg.get("theory_align_v2_conc_min_start", theory_align_v2_conc_min))
+    theory_align_v2_conc_scale_start = float(cfg.get("theory_align_v2_conc_scale_start", theory_align_v2_conc_scale))
+    theory_align_v2_conc_max = cfg.get("theory_align_v2_conc_max", None)
+    if theory_align_v2_conc_max is not None:
+        theory_align_v2_conc_max = float(theory_align_v2_conc_max)
+    theory_align_v2_var_coef = float(cfg.get("theory_align_v2_var_coef", 0.0))
+    theory_align_v2_br_coef = float(cfg.get("theory_align_v2_br_coef", 0.0))
+    theory_align_v2_var_coef_start = float(cfg.get("theory_align_v2_var_coef_start", theory_align_v2_var_coef))
+    theory_align_v2_ramp_warmup = int(cfg.get("theory_align_v2_ramp_warmup", 0))
+    theory_align_v2_ramp_steps = int(cfg.get("theory_align_v2_ramp_steps", 0))
+    theory_align_v2_es_window = int(cfg.get("theory_align_v2_early_stop_window", 20))
     train_side = str(train_side).lower()
     if train_side not in ("p1", "p2"):
         raise ValueError(f"train_side must be 'p1' or 'p2', got '{train_side}'")
@@ -569,6 +593,15 @@ def run_ppo(
         kl_stop_threshold=cfg.get("kl_stop_threshold"),
         ratio_stop_threshold=cfg.get("ratio_stop_threshold"),
         target_kl=float(cfg.get("target_kl", 0.01)),
+        theory_align=theory_align_enabled,
+        theory_align_conc_min=theory_align_conc_min,
+        theory_align_conc_weight=theory_align_conc_weight,
+        theory_align_v2=theory_align_v2_enabled,
+        theory_align_v2_conc_min=theory_align_v2_conc_min,
+        theory_align_v2_conc_scale=theory_align_v2_conc_scale,
+        theory_align_v2_conc_max=theory_align_v2_conc_max,
+        theory_align_v2_var_coef=theory_align_v2_var_coef,
+        theory_align_v2_br_coef=theory_align_v2_br_coef,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
     agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
@@ -710,6 +743,8 @@ def run_ppo(
     
     # Last rollout stats snapshot for logging (persists across updates)
     last_rollout_stats: Optional[Dict[str, float]] = None
+    # Early-stop rate tracker for TheoryAlignV2 diagnostics
+    early_stop_hist = deque(maxlen=theory_align_v2_es_window) if theory_align_v2_enabled else None
 
     while steps_done < total_steps_target:
         if total_updates > 1:
@@ -718,6 +753,29 @@ def run_ppo(
         else:
             hist_progress = 1.0
         agent.opponent_history_sample_p = history_prob_start + (history_prob_end - history_prob_start) * hist_progress
+
+        if theory_align_v2_enabled:
+            warmup = max(0, int(theory_align_v2_ramp_warmup))
+            ramp_steps = max(0, int(theory_align_v2_ramp_steps))
+            if update_idx < warmup:
+                ramp_t = 0.0
+            elif ramp_steps <= 0:
+                ramp_t = 1.0
+            else:
+                ramp_t = float(update_idx - warmup + 1) / float(ramp_steps)
+                ramp_t = max(0.0, min(1.0, ramp_t))
+            conc_min = theory_align_v2_conc_min_start + (theory_align_v2_conc_min - theory_align_v2_conc_min_start) * ramp_t
+            conc_scale = theory_align_v2_conc_scale_start + (theory_align_v2_conc_scale - theory_align_v2_conc_scale_start) * ramp_t
+            var_coef = theory_align_v2_var_coef_start + (theory_align_v2_var_coef - theory_align_v2_var_coef_start) * ramp_t
+            if hasattr(agent.net, "conc_min"):
+                agent.net.conc_min = float(conc_min)
+            if hasattr(agent.net, "conc_scale"):
+                agent.net.conc_scale = float(conc_scale)
+            if hasattr(agent.opponent_policy, "conc_min"):
+                agent.opponent_policy.conc_min = float(conc_min)
+            if hasattr(agent.opponent_policy, "conc_scale"):
+                agent.opponent_policy.conc_scale = float(conc_scale)
+            agent.cfg.theory_align_v2_var_coef = float(var_coef)
 
         # Entropy: hold high for first ~2/3 updates, then ramp down
         if update_idx < hold_updates:
@@ -898,6 +956,8 @@ def run_ppo(
 
             history.append(float((e1.item() + e2.item()) / 2.0))
         last_update_metrics = agent.update()
+        if theory_align_v2_enabled and early_stop_hist is not None and last_update_metrics:
+            early_stop_hist.append(1.0 if last_update_metrics.get("early_stop_triggered") else 0.0)
         
         # Capture rollout stats snapshot for this update before reset
         last_rollout_stats = rollout_stats.get_summary()
@@ -949,12 +1009,21 @@ def run_ppo(
 
         # After each PPO update, evaluate and log gaps for quick monitoring
         upd_i = update_idx + 1
+        conc_values: List[float] = []
+        conc_values_v2: List[float] = []
+        var_effort_values_v2: List[float] = []
+        ta_policy_mean_effort: Optional[float] = None
+        ta_sample_avg_effort: Optional[float] = None
+        ta_mean_vs_sample_gap: Optional[float] = None
+        ta_v2_policy_mean_effort: Optional[float] = None
+        ta_v2_sample_avg_effort: Optional[float] = None
+        ta_v2_mean_vs_sample_gap: Optional[float] = None
         try:
             for q_eval in eval_qs:
                 e2_star_val = clip_stage2(e_star_two_players(q_eval, w_h, w_l, k), effort_bounds)  # theoretical optimal
                 s_eval = agent.state_from_params(q=float(q_eval), k=k, w_h=w_h, w_l=w_l)  # build normalized state
                 with torch.no_grad():
-                    dist, _ = agent.net.dist(s_eval)  # get Beta distribution
+                    dist, _ = agent.dist(s_eval)  # get Beta distribution
                     a_eval = dist.mean.squeeze()  # get mean (Beta mean = alpha/(alpha+beta))
                     a_eval = a_eval.clamp(0.0, 1.0)
                     # policy_mean_effort: Beta mean mapped to effort range
@@ -1011,6 +1080,27 @@ def run_ppo(
                     f"  [Rollout] sample_avg_effort={sample_avg_effort:.2f}, mean_vs_sample_gap={mean_vs_sample_gap:.2f}, "
                     f"effort_samples={effort_sample_count}"
                 )
+                if theory_align_enabled:
+                    conc_vals = (dist.concentration1 + dist.concentration0).detach().cpu().view(-1).tolist()
+                    conc_values.extend([float(v) for v in conc_vals])
+                    if ta_policy_mean_effort is None:
+                        ta_policy_mean_effort = final_e2_eval
+                        ta_sample_avg_effort = sample_avg_effort
+                        ta_mean_vs_sample_gap = mean_vs_sample_gap
+                if theory_align_v2_enabled:
+                    conc_vals_v2 = (dist.concentration1 + dist.concentration0).detach().cpu().view(-1).tolist()
+                    conc_values_v2.extend([float(v) for v in conc_vals_v2])
+                    alpha = dist.concentration1
+                    beta = dist.concentration0
+                    conc_val = alpha + beta
+                    denom = (conc_val * conc_val) * (conc_val + 1.0) + 1e-8
+                    var_action = (alpha * beta) / denom
+                    var_effort = var_action * ((effort_bounds[1] - effort_bounds[0]) ** 2)
+                    var_effort_values_v2.extend(var_effort.detach().cpu().view(-1).tolist())
+                    if ta_v2_policy_mean_effort is None:
+                        ta_v2_policy_mean_effort = final_e2_eval
+                        ta_v2_sample_avg_effort = sample_avg_effort
+                        ta_v2_mean_vs_sample_gap = mean_vs_sample_gap
                 if last_update_metrics and last_update_metrics.get("early_stop_triggered"):
                     print(
                         f"  [EarlyStop] triggered={last_update_metrics.get('early_stop_triggered')} "
@@ -1034,6 +1124,58 @@ def run_ppo(
                         f"  [PolicyCheck] policy_mean_check_err={policy_mean_check_err:.6f} "
                         f"(expected <0.01; confirms policy=alpha/(alpha+beta) scaled to effort_range)"
                     )
+            if theory_align_enabled and conc_values:
+                conc_arr = np.asarray(conc_values, dtype=float)
+                conc_mean = float(np.mean(conc_arr))
+                conc_p10 = float(np.percentile(conc_arr, 10))
+                conc_p50 = float(np.percentile(conc_arr, 50))
+                conc_p90 = float(np.percentile(conc_arr, 90))
+                if ta_policy_mean_effort is None:
+                    ta_policy_mean_effort = policy_mean_effort_current if policy_mean_effort_current is not None else float("nan")
+                if ta_sample_avg_effort is None:
+                    ta_sample_avg_effort = last_rollout_stats.get("sample_avg_effort", float("nan")) if last_rollout_stats else float("nan")
+                if ta_mean_vs_sample_gap is None:
+                    if math.isfinite(ta_policy_mean_effort) and math.isfinite(ta_sample_avg_effort):
+                        ta_mean_vs_sample_gap = ta_policy_mean_effort - ta_sample_avg_effort
+                    else:
+                        ta_mean_vs_sample_gap = float("nan")
+                print(
+                    f"[TheoryAlign] ent={agent.cfg.entropy_coef:.3f} conc_mean={conc_mean:.2f} "
+                    f"conc_p10={conc_p10:.2f} conc_p50={conc_p50:.2f} conc_p90={conc_p90:.2f} "
+                    f"policy_mean_effort={ta_policy_mean_effort:.2f} "
+                    f"sample_avg_effort={ta_sample_avg_effort:.2f} "
+                    f"mean_vs_sample_gap={ta_mean_vs_sample_gap:.2f}",
+                    flush=True,
+                )
+            if theory_align_v2_enabled and conc_values_v2:
+                conc_arr_v2 = np.asarray(conc_values_v2, dtype=float)
+                conc_mean_v2 = float(np.mean(conc_arr_v2))
+                conc_p10_v2 = float(np.percentile(conc_arr_v2, 10))
+                conc_p50_v2 = float(np.percentile(conc_arr_v2, 50))
+                conc_p90_v2 = float(np.percentile(conc_arr_v2, 90))
+                var_mean_v2 = float(np.mean(var_effort_values_v2)) if var_effort_values_v2 else float("nan")
+                var_p90_v2 = float(np.percentile(var_effort_values_v2, 90)) if var_effort_values_v2 else float("nan")
+                if ta_v2_policy_mean_effort is None:
+                    ta_v2_policy_mean_effort = policy_mean_effort_current if policy_mean_effort_current is not None else float("nan")
+                if ta_v2_sample_avg_effort is None:
+                    ta_v2_sample_avg_effort = last_rollout_stats.get("sample_avg_effort", float("nan")) if last_rollout_stats else float("nan")
+                if ta_v2_mean_vs_sample_gap is None:
+                    if math.isfinite(ta_v2_policy_mean_effort) and math.isfinite(ta_v2_sample_avg_effort):
+                        ta_v2_mean_vs_sample_gap = ta_v2_policy_mean_effort - ta_v2_sample_avg_effort
+                    else:
+                        ta_v2_mean_vs_sample_gap = float("nan")
+                early_stop_rate = float(np.mean(early_stop_hist)) if early_stop_hist else float("nan")
+                early_stop_window = len(early_stop_hist) if early_stop_hist is not None else 0
+                print(
+                    f"[TheoryAlignV2] ent={agent.cfg.entropy_coef:.3f} conc_mean={conc_mean_v2:.2f} "
+                    f"conc_p10={conc_p10_v2:.2f} conc_p50={conc_p50_v2:.2f} conc_p90={conc_p90_v2:.2f} "
+                    f"var_effort_mean={var_mean_v2:.3f} var_effort_p90={var_p90_v2:.3f} "
+                    f"policy_mean_effort={ta_v2_policy_mean_effort:.2f} "
+                    f"sample_avg_effort={ta_v2_sample_avg_effort:.2f} "
+                    f"mean_vs_sample_gap={ta_v2_mean_vs_sample_gap:.2f} "
+                    f"early_stop_rate={early_stop_rate:.2f}({early_stop_window})",
+                    flush=True,
+                )
         except Exception as _e:
             # Keep training robust to any eval hiccup
             pass
@@ -1224,7 +1366,14 @@ def run_ppo(
         def _compute_effort(policy_net: torch.nn.Module) -> float:
             state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
             with torch.no_grad():
-                dist, _ = policy_net.dist(state)
+                if theory_align_enabled:
+                    dist, _ = policy_net.dist(
+                        state,
+                        theory_align=True,
+                        theory_align_conc_min=theory_align_conc_min,
+                    )
+                else:
+                    dist, _ = policy_net.dist(state)
                 a_mean = dist.mean.squeeze().clamp(0.0, 1.0)
                 return float(effort_bounds[0] + a_mean.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
 
@@ -1248,7 +1397,7 @@ def run_ppo(
 
         s_agent = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
         with torch.no_grad():
-            dist_agent, _ = agent.net.dist(s_agent)
+            dist_agent, _ = agent.dist(s_agent)
             a_agent = dist_agent.mean.squeeze().clamp(0.0, 1.0)
             final_e2 = float(effort_bounds[0] + a_agent.detach().cpu().item() * (effort_bounds[1] - effort_bounds[0]))
             alpha_eval = float(dist_agent.concentration1.mean().item())
@@ -1433,6 +1582,65 @@ def _run_cli(args: argparse.Namespace) -> str:
         variant_name = f"target_kl_{args.override_target_kl}"
     if overrides_applied:
         print(f"[config] Hyperparameter overrides: {', '.join(overrides_applied)}", flush=True)
+
+    if args.theory_align and args.theory_align_v2:
+        raise ValueError("[config] ERROR: --theory-align and --theory-align-v2 are mutually exclusive.")
+    if args.theory_align:
+        cfg["entropy_coef_start"] = 0.0
+        cfg["entropy_coef_hold"] = 0.0
+        cfg["entropy_coef_end"] = 0.0
+        cfg["theory_align"] = True
+        cfg["theory_align_conc_min"] = 100.0
+        cfg["theory_align_conc_weight"] = 5e-4
+        print(
+            "[TheoryAlign] enabled: entropy_coef_start/hold/end=0, "
+            "conc_min=100.0, conc_weight=5e-4",
+            flush=True,
+        )
+    if args.theory_align_v2:
+        cfg["entropy_coef_start"] = 0.0
+        cfg["entropy_coef_hold"] = 0.0
+        cfg["entropy_coef_end"] = 0.0
+        cfg["theory_align_v2"] = True
+        cfg["theory_align_v2_conc_min"] = 1000.0
+        cfg["theory_align_v2_conc_scale"] = 10000.0
+        cfg["theory_align_v2_conc_max"] = 100000.0
+        cfg["theory_align_v2_var_coef"] = 5e-2
+        cfg["theory_align_v2_br_coef"] = 3e-3
+        cfg["theory_align_v2_conc_min_start"] = 100.0
+        cfg["theory_align_v2_conc_scale_start"] = 100.0
+        cfg["theory_align_v2_var_coef_start"] = 0.0
+        cfg["theory_align_v2_ramp_warmup"] = 20
+        cfg["theory_align_v2_ramp_steps"] = 50
+        cfg["theory_align_v2_early_stop_window"] = 20
+        # Stability tweaks (v2 only): reduce update aggressiveness.
+        cfg["lr_start"] = min(float(cfg.get("lr_start", 3e-4)), 1e-4)
+        cfg["lr_end"] = min(float(cfg.get("lr_end", 2e-4)), 5e-5)
+        cfg["update_epochs"] = min(int(cfg.get("update_epochs", 6)), 2)
+        cfg["clip_range_start"] = min(float(cfg.get("clip_range_start", 0.5)), 0.3)
+        cfg["clip_range_end"] = min(float(cfg.get("clip_range_end", 0.35)), 0.2)
+        cfg["target_kl"] = min(float(cfg.get("target_kl", 0.08)), 0.06)
+        cfg["force_kl_gate"] = False
+        cfg["kl_clip_factor_up"] = 1.0
+        cfg["kl_lr_factor_up"] = 1.0
+        cfg["clip_ceiling"] = 0.35
+        cfg["ratio_stop_threshold"] = 3.0
+        cfg["update_epochs"] = 1
+        cfg["lr_start"] = min(float(cfg.get("lr_start", 1e-4)), 5e-5)
+        cfg["lr_end"] = min(float(cfg.get("lr_end", 5e-5)), 2e-5)
+        cfg["clip_range_start"] = min(float(cfg.get("clip_range_start", 0.3)), 0.2)
+        cfg["clip_range_end"] = min(float(cfg.get("clip_range_end", 0.2)), 0.15)
+        cfg["ratio_stop_threshold"] = 2.2
+        cfg["max_grad_norm"] = 0.25
+        cfg["value_coef"] = 1.0
+        cfg["gae_lambda"] = 1.0
+        cfg["gamma"] = 1.0
+        print(
+            "[TheoryAlignV2] enabled: entropy=0, mean+conc head, var_coef=5e-2, "
+            "conc_min=1000, conc_scale=10000, conc_max=100000, ramp_warmup=20, ramp_steps=50, "
+            "lr/clip/epochs softened",
+            flush=True,
+        )
     
     # === PPO training dynamics override (separate from schedule endpoints) ===
     # This is NOT subject to mutual exclusion - can be combined with other overrides.
@@ -1589,6 +1797,16 @@ def main():
         type=int,
         default=None,
         help="Override PPO update_epochs (number of optimization epochs per update). Must be >= 1.",
+    )
+    parser.add_argument(
+        "--theory-align",
+        action="store_true",
+        help="EXPERIMENT: keep PPO stochastic but collapse policy variance to align with pure-strategy theory.",
+    )
+    parser.add_argument(
+        "--theory-align-v2",
+        action="store_true",
+        help="EXPERIMENT: mean+concentration policy head with variance penalty for theory alignment.",
     )
     parser.add_argument(
         "--enable-convergence-eval",

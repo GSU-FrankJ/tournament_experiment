@@ -42,7 +42,57 @@ class ActorCritic(nn.Module):
         value = self.value_head(h).squeeze(-1)        
         return alpha, beta, value
 
-    def dist(self, x: torch.Tensor):                     #得到 Beta 分布 和 值函数
+    def dist(
+        self,
+        x: torch.Tensor,
+        *,
+        theory_align: bool = False,
+        theory_align_conc_min: float = 0.0,
+    ):                     #得到 Beta 分布 和 值函数
+        alpha, beta, value = self.forward(x)
+        if theory_align and theory_align_conc_min and theory_align_conc_min > 0.0:
+            conc = alpha + beta
+            scale = torch.clamp(theory_align_conc_min / (conc + 1e-8), min=1.0)
+            alpha = alpha * scale
+            beta = beta * scale
+        dist = torch.distributions.Beta(alpha, beta)
+        return dist, value
+
+
+class ActorCriticMeanConc(nn.Module):
+    def __init__(
+        self,
+        state_dim: int = 1,
+        hidden: int = 64,
+        conc_min: float = 1.0,
+        conc_scale: float = 1.0,
+        conc_max: Optional[float] = None,
+    ):
+        super().__init__()
+        self.shared = nn.Sequential(
+            nn.Linear(state_dim, hidden), nn.Tanh(),
+            nn.Linear(hidden, hidden), nn.Tanh(),
+        )
+        self.mean_head = nn.Linear(hidden, 1)
+        self.conc_head = nn.Linear(hidden, 1)
+        self.value_head = nn.Linear(hidden, 1)
+        self.conc_min = float(conc_min)
+        self.conc_scale = float(conc_scale)
+        self.conc_max = None if conc_max is None else float(conc_max)
+
+    def forward(self, x: torch.Tensor):
+        h = self.shared(x)
+        mean = torch.sigmoid(self.mean_head(h))
+        scale = max(self.conc_scale, 1e-8)
+        conc = F.softplus(self.conc_head(h)) * scale + self.conc_min
+        if self.conc_max is not None:
+            conc = torch.clamp(conc, max=self.conc_max)
+        alpha = mean * conc
+        beta = (1.0 - mean) * conc
+        value = self.value_head(h).squeeze(-1)
+        return alpha, beta, value
+
+    def dist(self, x: torch.Tensor):
         alpha, beta, value = self.forward(x)
         dist = torch.distributions.Beta(alpha, beta)
         return dist, value
@@ -74,6 +124,16 @@ class PPOConfig:
     kl_stop_threshold: Optional[float] = None
     ratio_stop_threshold: Optional[float] = None
     target_kl: float = 0.08
+    # Theory-align experiment (default OFF)
+    theory_align: bool = False
+    theory_align_conc_min: float = 0.0
+    theory_align_conc_weight: float = 0.0
+    theory_align_v2: bool = False
+    theory_align_v2_conc_min: float = 1.0
+    theory_align_v2_conc_scale: float = 1.0
+    theory_align_v2_conc_max: Optional[float] = None
+    theory_align_v2_var_coef: float = 0.0
+    theory_align_v2_br_coef: float = 0.0
 
 
 class PPOTwoPlayersBandit:
@@ -82,7 +142,20 @@ class PPOTwoPlayersBandit:
         self.cfg = cfg
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
+        self.use_theory_align_v2 = bool(getattr(cfg, "theory_align_v2", False))
+        if self.use_theory_align_v2:
+            conc_min = float(getattr(cfg, "theory_align_v2_conc_min", 1.0))
+            conc_scale = float(getattr(cfg, "theory_align_v2_conc_scale", 1.0))
+            conc_max = getattr(cfg, "theory_align_v2_conc_max", None)
+            self.net = ActorCriticMeanConc(
+                state_dim=cfg.state_dim,
+                hidden=cfg.hidden,
+                conc_min=conc_min,
+                conc_scale=conc_scale,
+                conc_max=conc_max,
+            ).to(self.device)
+        else:
+            self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
         # Lag opponent / history configuration
         self.opponent_mode = getattr(cfg, "opponent_mode", "ema")
@@ -123,8 +196,20 @@ class PPOTwoPlayersBandit:
             t = t.unsqueeze(0)
         return t.to(self.device)
 
+    def dist(self, state: torch.Tensor, *, net: Optional[ActorCritic] = None):
+        target_net = net if net is not None else self.net
+        if self.use_theory_align_v2:
+            return target_net.dist(state)
+        if self.cfg.theory_align and self.cfg.theory_align_conc_min > 0.0:
+            return target_net.dist(
+                state,
+                theory_align=True,
+                theory_align_conc_min=float(self.cfg.theory_align_conc_min),
+            )
+        return target_net.dist(state)
+
     def _act_with_net(self, net: ActorCritic, state: torch.Tensor):
-        dist, value = net.dist(state)
+        dist, value = self.dist(state, net=net)
         a_norm = dist.sample()
         eps = 1e-6
         a_safe = a_norm.clamp(eps, 1.0 - eps)
@@ -139,7 +224,7 @@ class PPOTwoPlayersBandit:
     def act_opponent(self, state: torch.Tensor):
         opp_net = self._sample_opponent_policy_for_play()
         with torch.no_grad():
-            dist, _ = opp_net.dist(state.to(self.device))
+            dist, _ = self.dist(state.to(self.device), net=opp_net)
             eps = 1e-6
             a_norm = dist.sample()
             a_safe = a_norm.clamp(eps, 1.0 - eps)
@@ -183,17 +268,32 @@ class PPOTwoPlayersBandit:
         snap.eval()
         self._opponent_history.append(snap)
 
-    def evaluate_actions(self, states: torch.Tensor, actions_norm: torch.Tensor):
-        dist, values = self.net.dist(states)
+    def evaluate_actions(
+        self,
+        states: torch.Tensor,
+        actions_norm: torch.Tensor,
+        *,
+        return_conc: bool = False,
+        return_dist: bool = False,
+    ):
+        dist, values = self.dist(states)
         eps = 1e-6
         a_safe = actions_norm.clamp(eps, 1.0 - eps)
         logp = dist.log_prob(a_safe).squeeze(-1)
         entropy = dist.entropy().mean()
+        if return_conc and return_dist:
+            conc = dist.concentration1 + dist.concentration0
+            return logp, entropy, values.squeeze(-1), conc, dist
+        if return_conc:
+            conc = dist.concentration1 + dist.concentration0
+            return logp, entropy, values.squeeze(-1), conc
+        if return_dist:
+            return logp, entropy, values.squeeze(-1), dist
         return logp, entropy, values.squeeze(-1)
 
     @torch.no_grad()
     def mean_action_norm(self, state: torch.Tensor) -> torch.Tensor:
-        dist, _ = self.net.dist(state.to(self.device))
+        dist, _ = self.dist(state.to(self.device))
         eps = 1e-6
         return dist.mean.clamp(eps, 1.0 - eps)
 
@@ -204,7 +304,7 @@ class PPOTwoPlayersBandit:
 
     @torch.no_grad()
     def value_only(self, state: torch.Tensor):
-        _, value = self.net.dist(state.to(self.device))
+        _, value = self.dist(state.to(self.device))
         return value.detach()
 
     # ---- storage and advantage ----
@@ -340,7 +440,33 @@ class PPOTwoPlayersBandit:
                 mb_returns = returns[mb_idx]
                 mb_old_logp = old_logp[mb_idx]
 
-                logp, entropy, values = self.evaluate_actions(mb_states, mb_actions)
+                conc = None
+                dist = None
+                want_conc = self.cfg.theory_align and self.cfg.theory_align_conc_weight > 0.0
+                want_dist = self.use_theory_align_v2 and (
+                    self.cfg.theory_align_v2_var_coef > 0.0 or self.cfg.theory_align_v2_br_coef > 0.0
+                )
+                if want_conc and want_dist:
+                    logp, entropy, values, conc, dist = self.evaluate_actions(
+                        mb_states,
+                        mb_actions,
+                        return_conc=True,
+                        return_dist=True,
+                    )
+                elif want_conc:
+                    logp, entropy, values, conc = self.evaluate_actions(
+                        mb_states,
+                        mb_actions,
+                        return_conc=True,
+                    )
+                elif want_dist:
+                    logp, entropy, values, dist = self.evaluate_actions(
+                        mb_states,
+                        mb_actions,
+                        return_dist=True,
+                    )
+                else:
+                    logp, entropy, values = self.evaluate_actions(mb_states, mb_actions)
 
                 # Numerical safety guard
                 if (
@@ -386,6 +512,32 @@ class PPOTwoPlayersBandit:
                     mb_returns = mb_returns.view(-1)
                 value_loss = F.mse_loss(values, mb_returns)
                 loss = policy_loss + self.cfg.value_coef * value_loss - self.cfg.entropy_coef * entropy
+                if conc is not None:
+                    conc_reg = -float(self.cfg.theory_align_conc_weight) * torch.log(conc + 1e-8).mean()
+                    loss = loss + conc_reg
+                if self.use_theory_align_v2 and self.cfg.theory_align_v2_var_coef > 0.0:
+                    if dist is None:
+                        dist = self.dist(mb_states)[0]
+                    alpha = dist.concentration1
+                    beta = dist.concentration0
+                    conc_val = alpha + beta
+                    denom = (conc_val * conc_val) * (conc_val + 1.0) + 1e-8
+                    var_action = (alpha * beta) / denom
+                    var_effort = var_action * ((self.high - self.low) ** 2)
+                    var_loss = float(self.cfg.theory_align_v2_var_coef) * var_effort.mean()
+                    loss = loss + var_loss
+                if self.use_theory_align_v2 and self.cfg.theory_align_v2_br_coef > 0.0:
+                    if dist is None:
+                        dist = self.dist(mb_states)[0]
+                    a_mean = dist.mean.clamp(1e-6, 1.0 - 1e-6)
+                    mean_effort = self.low + a_mean.squeeze(-1) * (self.high - self.low)
+                    q = mb_states[:, 0] * 60.0
+                    k = mb_states[:, 1] * 1e-3
+                    w_gap = mb_states[:, 2] * 10.0
+                    denom = 4.0 * q * k + 1e-8
+                    e_star = (w_gap / denom).clamp(self.low, self.high)
+                    br_loss = float(self.cfg.theory_align_v2_br_coef) * (mean_effort - e_star).pow(2).mean()
+                    loss = loss + br_loss
 
                 self.opt.zero_grad()
                 loss.backward()
