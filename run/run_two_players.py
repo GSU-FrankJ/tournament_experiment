@@ -17,6 +17,7 @@ import sys
 import os
 import argparse
 import math
+import json
 from collections import deque
 import datetime
 from contextlib import contextmanager
@@ -342,9 +343,12 @@ def gradient_descent_two_players(
     lr: float = 0.1,
     steps: int = 2000,
     eps: float = 0.1,
-    tol: float = 1e-4,
-    num_samples: int = 64,
+    tol: float = 1e-5,
+    num_samples: int = 256,
     init_perturb: float = 1.0,
+    lr_decay: float = 0.9995,
+    symmetry_enforce_every: int = 50,
+    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> tuple[tuple[float, float], Dict[str, float]]:
     """Two-player gradient ascent with uniform noise and distinct starts."""
@@ -377,29 +381,60 @@ def gradient_descent_two_players(
         "init_e2": e2,
         "final_grad": 0.0,
         "iterations": 0.0,
+        # Convergence history for plotting
+        "e1_history": [float(e1)],  # Start with initial value
+        "e2_history": [float(e2)],  # Start with initial value
+        "step_history": [0],         # Step 0 is the initial state
     }
 
     for step in range(1, steps + 1):
+        # Adaptive learning rate with exponential decay
+        lr_current = lr * (lr_decay ** step)
+        
         g1, g2 = _stochastic_fd_gradients(env, e1, e2, delta=eps, num_samples=num_samples)
-        e1_new = _clip_effort(e1 + lr * g1, effort_bounds)
-        e2_new = _clip_effort(e2 + lr * g2, effort_bounds)
+        e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
+        e2_new = _clip_effort(e2 + lr_current * g2, effort_bounds)
 
         delta_e1 = abs(e1_new - e1)
         delta_e2 = abs(e2_new - e2)
         grad_norm = max(abs(g1), abs(g2))
 
         e1, e2 = e1_new, e2_new
+        
+        # Periodic symmetry enforcement (prevent drift to asymmetric points)
+        if symmetry_enforce_every > 0 and step % symmetry_enforce_every == 0:
+            e_avg = 0.5 * (e1 + e2)
+            e1 = e2 = e_avg
+            if log and step <= 100:  # Debug info in early steps
+                print(f"  [symmetry enforce] step={step} e_avg={e_avg:.6f}")
+        
         history["iterations"] = float(step)
         history["final_grad"] = float(grad_norm)
         history["final_grad_pair"] = (float(g1), float(g2))
+        
+        # Record convergence history at every step
+        history["e1_history"].append(float(e1))
+        history["e2_history"].append(float(e2))
+        history["step_history"].append(step)
+        
+        # Enhanced logging with symmetry gap
+        symmetry_gap = abs(e1 - e2)
         if log and (step == 1 or step % 250 == 0 or step == steps):
             print(
                 f"[gradient-2p] step={step:05d} e1={e1:.6f} e2={e2:.6f} "
-                f"grad=({g1:.6f},{g2:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e})"
+                f"grad=({g1:.6f},{g2:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e}) "
+                f"lr={lr_current:.6f} sym_gap={symmetry_gap:.4f}"
             )
-        if grad_norm < tol or max(delta_e1, delta_e2) < tol:
+        
+        # Stricter convergence criteria: gradient small AND symmetric AND stable
+        if (grad_norm < tol and 
+            symmetry_gap < symmetry_tol and
+            max(delta_e1, delta_e2) < tol):
             if log:
-                print(f"[gradient-2p] converged at step={step} with grad_norm={grad_norm:.3e}")
+                print(
+                    f"[gradient-2p] converged at step={step} "
+                    f"grad_norm={grad_norm:.3e} symmetry_gap={symmetry_gap:.3e}"
+                )
             break
 
     history["final_e1"] = e1
@@ -413,9 +448,12 @@ def run_gradient(
     lr: float = 0.1,
     steps: int = 2000,
     grad_eps: float = 0.1,
-    tol: float = 1e-4,
-    num_samples: int = 64,
+    tol: float = 1e-5,
+    num_samples: int = 256,
     init_perturb: float = 1.0,
+    lr_decay: float = 0.9995,
+    symmetry_enforce_every: int = 50,
+    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> Dict:
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
@@ -428,6 +466,9 @@ def run_gradient(
         tol=tol,
         num_samples=num_samples,
         init_perturb=init_perturb,
+        lr_decay=lr_decay,
+        symmetry_enforce_every=symmetry_enforce_every,
+        symmetry_tol=symmetry_tol,
         log=log,
     )
     final_e = 0.5 * (e1 + e2)
@@ -460,6 +501,38 @@ def run_gradient(
     row["final_e1"] = e1
     row["final_e2"] = e2
     row["symmetry_gap"] = abs(e1 - e2)
+    
+    # Save convergence history for plotting
+    if log:
+        convergence_data = {
+            "algorithm": "gradient",
+            "q": float(q),
+            "theoretical_effort": float(theoretical_e),
+            "steps": meta["step_history"],
+            "agent1_effort": meta["e1_history"],
+            "agent2_effort": meta["e2_history"],
+            "parameters": {
+                "lr": float(lr),
+                "grad_eps": float(grad_eps),
+                "tol": float(tol),
+                "num_samples": int(num_samples),
+                "init_perturb": float(init_perturb),
+            }
+        }
+        
+        # Create convergence_history directory if it doesn't exist
+        convergence_dir = os.path.join("results", "convergence_history")
+        os.makedirs(convergence_dir, exist_ok=True)
+        
+        # Save to JSON file
+        convergence_file = os.path.join(
+            convergence_dir, 
+            f"gradient_q{q:.1f}_convergence.json"
+        )
+        with open(convergence_file, 'w') as f:
+            json.dump(convergence_data, f, indent=2)
+        print(f"[gradient-2p] Saved convergence history to {convergence_file}")
+    
     return row
 
 
@@ -745,6 +818,14 @@ def run_ppo(
     last_rollout_stats: Optional[Dict[str, float]] = None
     # Early-stop rate tracker for TheoryAlignV2 diagnostics
     early_stop_hist = deque(maxlen=theory_align_v2_es_window) if theory_align_v2_enabled else None
+    
+    # Convergence history tracking for plotting (stores per-update efforts)
+    convergence_history = {
+        "steps": [],
+        "agent1_effort": [],
+        "agent2_effort": [],
+        "policy_mean_effort": [],
+    }
 
     while steps_done < total_steps_target:
         if total_updates > 1:
@@ -843,6 +924,22 @@ def run_ppo(
 
         policy_mean_effort_current: Optional[float] = None
         symmetry_gap_current: Optional[float] = None
+        
+        # Warmup phase: apply effort bias to create asymmetric start
+        # Agent1 starts above theoretical, Agent2 starts below
+        warmup_updates = int(cfg.get("asymmetric_warmup_updates", 20))  # 前20个updates应用偏移
+        apply_warmup_bias = update_idx < warmup_updates
+        
+        if apply_warmup_bias:
+            # 计算当前q的理论值
+            q_for_theory = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
+            e_theory = clip_stage2(e_star_two_players(q_for_theory, w_h, w_l, k), effort_bounds)
+            # 偏移量随训练逐渐减小
+            bias_strength = 1.0 - (float(update_idx) / float(max(1, warmup_updates)))
+            # Agent1向上偏移30%，Agent2向下偏移30%
+            bias_magnitude = e_theory * 0.3 * bias_strength
+            if update_idx == 0:
+                print(f"[AsymmetricInit] Warmup for {warmup_updates} updates: Agent1 bias +{bias_magnitude:.2f}, Agent2 bias -{bias_magnitude:.2f}")
 
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
@@ -912,8 +1009,24 @@ def run_ppo(
                         # Player2 uses learner policy
                         a2_norm, e2, logp2, v2 = agent.act(s2)
 
+            # Apply warmup bias to create asymmetric starting points
+            if apply_warmup_bias:
+                # Agent1: bias upward (higher effort)
+                e1_biased = e1 + bias_magnitude
+                e1_biased = torch.clamp(e1_biased, effort_bounds[0], effort_bounds[1])
+                
+                # Agent2: bias downward (lower effort)  
+                e2_biased = e2 - bias_magnitude
+                e2_biased = torch.clamp(e2_biased, effort_bounds[0], effort_bounds[1])
+                
+                # Use biased efforts for environment step
+                e1_env, e2_env = e1_biased, e2_biased
+            else:
+                # No bias after warmup
+                e1_env, e2_env = e1, e2
+
             # Execute environment step with both actions
-            _, rewards, _, done, _ = env.step((torch.tensor([float(e1.item())]), torch.tensor([float(e2.item())])))
+            _, rewards, _, done, _ = env.step((torch.tensor([float(e1_env.item())]), torch.tensor([float(e2_env.item())])))
 
             # Storage: Mode-dependent logic
             if fixed_opponent_enabled:
@@ -921,17 +1034,17 @@ def run_ppo(
                 if train_side == "p1":
                     agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
                     stored_p1_this_update += 1
-                    rollout_stats.update_effort(float(e1.item()), player="p1")
+                    rollout_stats.update_effort(float(e1_env.item()), player="p1")
                 else:
                     agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
                     stored_p2_this_update += 1
-                    rollout_stats.update_effort(float(e2.item()), player="p2")
+                    rollout_stats.update_effort(float(e2_env.item()), player="p2")
             else:
                 # Player 1: ALWAYS store (learner-generated in both modes)
                 agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
                 stored_p1_this_update += 1
                 # Track P1's sampled effort (always learner-generated)
-                rollout_stats.update_effort(float(e1.item()), player="p1")
+                rollout_stats.update_effort(float(e1_env.item()), player="p1")
 
                 # Player 2: Mode-dependent storage
                 if rollout_mode == "selfplay":
@@ -939,7 +1052,7 @@ def run_ppo(
                     agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
                     stored_p2_this_update += 1
                     # Track P2's sampled effort (learner-generated in selfplay)
-                    rollout_stats.update_effort(float(e2.item()), player="p2")
+                    rollout_stats.update_effort(float(e2_env.item()), player="p2")
 
                 else:  # rollout_mode == "vs_opponent"
                     # VS_OPPONENT: Only store player2 when it used learner policy
@@ -948,13 +1061,13 @@ def run_ppo(
                         agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
                         stored_p2_this_update += 1
                         # Track P2's sampled effort (learner-generated)
-                        rollout_stats.update_effort(float(e2.item()), player="p2")
+                        rollout_stats.update_effort(float(e2_env.item()), player="p2")
                     else:
                         # Player2 used opponent -> treat as environment dynamics, don't store
                         skipped_p2_this_update += 1
                         # NOTE: Do NOT track P2 effort when using opponent policy
 
-            history.append(float((e1.item() + e2.item()) / 2.0))
+            history.append(float((e1_env.item() + e2_env.item()) / 2.0))
         last_update_metrics = agent.update()
         if theory_align_v2_enabled and early_stop_hist is not None and last_update_metrics:
             early_stop_hist.append(1.0 if last_update_metrics.get("early_stop_triggered") else 0.0)
@@ -1042,6 +1155,17 @@ def run_ppo(
                 sample_avg_effort = last_rollout_stats.get("sample_avg_effort", 0.0) if last_rollout_stats else 0.0
                 effort_sample_count = last_rollout_stats.get("effort_sample_count", 0) if last_rollout_stats else 0
                 
+                # Per-player sampled efforts (for convergence tracking)
+                sample_avg_effort_p1 = last_rollout_stats.get("sample_avg_effort_p1") if last_rollout_stats else None
+                sample_avg_effort_p2 = last_rollout_stats.get("sample_avg_effort_p2") if last_rollout_stats else None
+                
+                # Record convergence history if both p1 and p2 efforts are available
+                if sample_avg_effort_p1 is not None and sample_avg_effort_p2 is not None:
+                    convergence_history["steps"].append(steps_done)
+                    convergence_history["agent1_effort"].append(float(sample_avg_effort_p1))
+                    convergence_history["agent2_effort"].append(float(sample_avg_effort_p2))
+                    convergence_history["policy_mean_effort"].append(float(final_e2_eval))
+                
                 # mean_vs_sample_gap: policy_mean_effort - sample_avg_effort
                 # Positive means policy predicts higher effort than sampled average
                 mean_vs_sample_gap = final_e2_eval - sample_avg_effort
@@ -1076,10 +1200,11 @@ def run_ppo(
                     update_line += f", opponent_effort_used={fixed_effort_clamped:.2f}"
                 print(update_line)
                 # Rollout sample metrics line
-                print(
-                    f"  [Rollout] sample_avg_effort={sample_avg_effort:.2f}, mean_vs_sample_gap={mean_vs_sample_gap:.2f}, "
-                    f"effort_samples={effort_sample_count}"
-                )
+                rollout_line = f"  [Rollout] sample_avg_effort={sample_avg_effort:.2f}, mean_vs_sample_gap={mean_vs_sample_gap:.2f}, effort_samples={effort_sample_count}"
+                # Add per-player efforts if available (for convergence tracking)
+                if sample_avg_effort_p1 is not None and sample_avg_effort_p2 is not None:
+                    rollout_line += f", p1_effort={sample_avg_effort_p1:.2f}, p2_effort={sample_avg_effort_p2:.2f}"
+                print(rollout_line)
                 if theory_align_enabled:
                     conc_vals = (dist.concentration1 + dist.concentration0).detach().cpu().view(-1).tolist()
                     conc_values.extend([float(v) for v in conc_vals])
@@ -1520,6 +1645,38 @@ def run_ppo(
         output_png=os.path.join("results", "one_stage_two_players.png"),
         effort_bounds=effort_bounds,
     )
+    
+    # Save convergence history for each trained q value
+    if convergence_history["steps"]:  # Only save if we have data
+        convergence_dir = os.path.join("results", "convergence_history")
+        os.makedirs(convergence_dir, exist_ok=True)
+        
+        for q_val in train_qs:
+            convergence_data = {
+                "algorithm": "PPO",
+                "q": float(q_val),
+                "theoretical_effort": float(
+                    clip_stage2(
+                        e_star_two_players(q_val, w_h, w_l, k),
+                        tuple(effort_bounds)
+                    )
+                ),
+                "steps": convergence_history["steps"],
+                "agent1_effort": convergence_history["agent1_effort"],
+                "agent2_effort": convergence_history["agent2_effort"],
+                "policy_mean_effort": convergence_history["policy_mean_effort"],
+                "rollout_mode": rollout_mode,
+                "total_episodes": episodes,
+            }
+            
+            # Save to JSON file
+            convergence_file = os.path.join(
+                convergence_dir,
+                f"ppo_q{q_val:.1f}_convergence.json"
+            )
+            with open(convergence_file, 'w') as f:
+                json.dump(convergence_data, f, indent=2)
+            print(f"[PPO] Saved convergence history to {convergence_file}")
 
     return rows
 
@@ -1692,6 +1849,9 @@ def _run_cli(args: argparse.Namespace) -> str:
                 tol=args.grad_tol,
                 num_samples=args.grad_samples,
                 init_perturb=args.grad_init_perturb,
+                lr_decay=args.grad_lr_decay,
+                symmetry_enforce_every=args.grad_symmetry_enforce,
+                symmetry_tol=args.grad_symmetry_tol,
                 log=True,
             )
             save_standardized_result(row, csv_path)
@@ -1754,9 +1914,12 @@ def main():
     parser.add_argument("--grad-lr", type=float, default=base_config.get("gradient_lr", 0.1), help="Learning rate for gradient descent solver.")
     parser.add_argument("--grad-steps", type=int, default=base_config.get("gradient_steps", 2000), help="Maximum gradient descent iterations.")
     parser.add_argument("--grad-epsilon", type=float, default=base_config.get("gradient_delta", 0.1), help="Finite-difference epsilon for gradients.")
-    parser.add_argument("--grad-tol", type=float, default=base_config.get("gradient_tol", 1e-4), help="Terminate when |grad| < tol.")
-    parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 64), help="Monte Carlo samples for uniform-noise gradients.")
+    parser.add_argument("--grad-tol", type=float, default=base_config.get("gradient_tol", 1e-5), help="Terminate when |grad| < tol.")
+    parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 256), help="Monte Carlo samples for uniform-noise gradients.")
     parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0), help="Initial asymmetry to avoid symmetric starts.")
+    parser.add_argument("--grad-lr-decay", type=float, default=base_config.get("gradient_lr_decay", 0.9995), help="Exponential decay factor for learning rate.")
+    parser.add_argument("--grad-symmetry-enforce", type=int, default=base_config.get("gradient_symmetry_enforce_every", 50), help="Force symmetry every N steps (0 to disable).")
+    parser.add_argument("--grad-symmetry-tol", type=float, default=base_config.get("gradient_symmetry_tol", 0.1), help="Symmetry tolerance for convergence criterion.")
     parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
     parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
     parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")

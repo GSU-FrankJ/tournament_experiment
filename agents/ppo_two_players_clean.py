@@ -67,6 +67,7 @@ class ActorCriticMeanConc(nn.Module):
         conc_min: float = 1.0,
         conc_scale: float = 1.0,
         conc_max: Optional[float] = None,
+        init_bias_mean: Optional[float] = None,  # 新增：设置初始mean偏置
     ):
         super().__init__()
         self.shared = nn.Sequential(
@@ -79,6 +80,18 @@ class ActorCriticMeanConc(nn.Module):
         self.conc_min = float(conc_min)
         self.conc_scale = float(conc_scale)
         self.conc_max = None if conc_max is None else float(conc_max)
+        
+        # 如果指定了init_bias_mean，设置mean_head的bias使其初始输出接近目标mean
+        if init_bias_mean is not None:
+            # mean = sigmoid(mean_head(h))
+            # 要使初始mean接近init_bias_mean，设置bias = logit(init_bias_mean)
+            # logit(p) = log(p / (1 - p))
+            init_bias_mean = max(0.01, min(0.99, float(init_bias_mean)))  # 限制范围避免数值问题
+            target_logit = np.log(init_bias_mean / (1.0 - init_bias_mean))
+            nn.init.constant_(self.mean_head.bias, target_logit)
+            # 将weight初始化为较小值，使得初始时主要依赖bias
+            nn.init.normal_(self.mean_head.weight, mean=0.0, std=0.01)
+            print(f"[ActorCriticMeanConc] Initialized mean_head bias for target mean={init_bias_mean:.3f} (logit={target_logit:.3f})")
 
     def forward(self, x: torch.Tensor):
         h = self.shared(x)
@@ -137,7 +150,7 @@ class PPOConfig:
 
 
 class PPOTwoPlayersBandit:
-    def __init__(self, effort_bounds: Tuple[float, float], cfg: PPOConfig = PPOConfig(), device: str = None):
+    def __init__(self, effort_bounds: Tuple[float, float], cfg: PPOConfig = PPOConfig(), device: str = None, init_bias_mean: Optional[float] = None):
         self.low, self.high = float(effort_bounds[0]), float(effort_bounds[1])
         self.cfg = cfg
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -153,6 +166,7 @@ class PPOTwoPlayersBandit:
                 conc_min=conc_min,
                 conc_scale=conc_scale,
                 conc_max=conc_max,
+                init_bias_mean=init_bias_mean,  # 传递初始化偏置
             ).to(self.device)
         else:
             self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)

@@ -70,3 +70,11 @@ ENV/
 env.bak/
 venv.bak/ __pycache__/
 *.pyc
+
+# Experiment results (generated files)
+# Uncomment to ignore large result files:
+# results/convergence_plots/
+# results/convergence_history/
+# results/*.png
+# results/*.csv
+# results/logs/

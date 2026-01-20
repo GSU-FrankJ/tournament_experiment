@@ -9,9 +9,14 @@ launched directly without touching `config/` files.
 
 from __future__ import annotations
 
+import sys
+import os
 import argparse
 import math
 from typing import Dict
+
+# Add project root to Python path for absolute imports
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from agents.mc_fd_crn_solver import MCFDConfig, gradient_ascent_dynamics
 

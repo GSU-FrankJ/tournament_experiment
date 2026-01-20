@@ -84,6 +84,13 @@ config = {
                 "drift_effort_thresh": 5.5,
                 "patience_drift": 1,
             },
+            "relaxed": {
+                "window_size": 20,
+                "mean_kl_thresh": 0.015,      # 放宽到1.5% - 适合theory-align-v2的KL波动
+                "std_kl_thresh": 0.012,       # 放宽相应
+                "drift_effort_thresh": 8.0,   # 更宽松的drift容忍
+                "patience_drift": 1,
+            },
         },
         "cheap_gate": {
             "window_size": 20,
