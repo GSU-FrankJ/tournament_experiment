@@ -1,0 +1,7 @@
+method,q,seed,ablation,Conv. Step,Gate-on Ratio,First Gate,Final Exploit.,|e - e*|,quality
+GRADIENT,25.0,42,baseline,99.0,0.0,,,0.015210883218131244,Excellent
+GRADIENT,40.0,42,baseline,99.0,0.0,,,0.09578956286641471,Excellent
+GRADIENT,55.0,42,baseline,99.0,0.0,,,0.07287202182681796,Excellent
+TEL-PPO,25.0,42,baseline,,0.0,,,0.34835733287035,Excellent
+TEL-PPO,40.0,42,baseline,242.0,0.0,,,0.3232399704865401,Excellent
+TEL-PPO,55.0,42,baseline,244.0,0.0,,,0.03294083916331658,Excellent

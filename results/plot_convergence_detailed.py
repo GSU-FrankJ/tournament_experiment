@@ -81,6 +81,9 @@ def plot_combined(data: Dict, output_dir: str = "results/convergence_plots"):
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.legend(loc='best', fontsize=12, framealpha=0.95)
     
+    # Force scientific notation on x-axis for consistency across all plots
+    ax.ticklabel_format(style='scientific', axis='x', scilimits=(0, 0))
+    
     # Add info box
     final_e1 = agent1_effort[-1]
     final_e2 = agent2_effort[-1]
@@ -168,6 +171,9 @@ def plot_separated(data: Dict, output_dir: str = "results/convergence_plots"):
     ax2.set_title(f'Agent 2 Convergence', fontsize=14, fontweight='bold')
     ax2.grid(True, alpha=0.3, linestyle='--')
     ax2.legend(loc='best', fontsize=11, framealpha=0.95)
+    
+    # Force scientific notation on x-axis for consistency across all plots
+    ax2.ticklabel_format(style='scientific', axis='x', scilimits=(0, 0))
     
     # Add final value annotation
     final_e2 = agent2_effort[-1]

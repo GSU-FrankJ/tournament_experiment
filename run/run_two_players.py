@@ -18,12 +18,30 @@ import os
 import argparse
 import math
 import json
+import subprocess
 from collections import deque
 import datetime
 from contextlib import contextmanager
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import numpy as np
 import torch
+
+
+def _get_git_sha() -> str:
+    """Get current git commit SHA, or 'unknown' if not in a git repo."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()[:12]  # Short SHA
+    except Exception:
+        pass
+    return "unknown"
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -582,6 +600,11 @@ def run_ppo(
     variant_name: str = "baseline",
     fixed_opponent_effort: Optional[float] = None,
     train_side: str = "p1",
+    # Paper artifact ablation flags
+    exploit_every_updates: int = 10,
+    disable_cheap_gate: bool = False,
+    disable_exploitability: bool = False,
+    ablation_name: str = "baseline",
 ) -> List[Dict]:
     """Train PPO via self-play with conditioning on (q, k, w_gap).
 
@@ -593,6 +616,12 @@ def run_ppo(
                          store only learner-generated transitions
     - run_id: Unique identifier for this run (timestamp string for log/CSV correlation)
     - variant_name: Name of the sweep variant (e.g., "baseline", "entropy_end_0.025")
+    
+    Paper artifact ablation flags:
+    - exploit_every_updates: Max interval between exploitability evals (default 10)
+    - disable_cheap_gate: Gate always ON (eval eligible every update)
+    - disable_exploitability: Never evaluate exploitability (converge on effort only)
+    - ablation_name: Tag for this variant (appears in all output files)
     """
     # Validate rollout_mode
     if rollout_mode not in ("selfplay", "vs_opponent"):
@@ -820,12 +849,26 @@ def run_ppo(
     early_stop_hist = deque(maxlen=theory_align_v2_es_window) if theory_align_v2_enabled else None
     
     # Convergence history tracking for plotting (stores per-update efforts)
-    convergence_history = {
+    # Extended for paper artifacts with time-series metrics
+    convergence_history: Dict[str, Any] = {
         "steps": [],
         "agent1_effort": [],
         "agent2_effort": [],
         "policy_mean_effort": [],
+        # Time-series metrics (logged every update)
+        "approx_kl": [],
+        "batch_entropy": [],
+        "alpha_mean": [],
+        "beta_mean": [],
+        "mean_kl_window": [],
+        "drift_effort": [],
+        # Exploitability: sparse (NaN when not evaluated)
+        "exploitability": [],           # NaN if not evaluated this step
+        "exploitability_is_valid": [],  # bool: True if evaluated this step
     }
+    # Track steps where exploitability was actually evaluated (for paper)
+    exploit_eval_steps: List[int] = []
+    last_exploit_eval_step: int = -999999  # Track for periodic evaluation
 
     while steps_done < total_steps_target:
         if total_updates > 1:
@@ -1165,6 +1208,20 @@ def run_ppo(
                     convergence_history["agent1_effort"].append(float(sample_avg_effort_p1))
                     convergence_history["agent2_effort"].append(float(sample_avg_effort_p2))
                     convergence_history["policy_mean_effort"].append(float(final_e2_eval))
+                    # Extended time-series metrics for paper artifacts
+                    _kl_for_hist = last_update_metrics.get("approx_kl", float("nan")) if last_update_metrics else float("nan")
+                    _entropy_for_hist = last_update_metrics.get("entropy_mean", float("nan")) if last_update_metrics else float("nan")
+                    convergence_history["approx_kl"].append(float(_kl_for_hist) if math.isfinite(_kl_for_hist) else float("nan"))
+                    convergence_history["batch_entropy"].append(float(_entropy_for_hist) if math.isfinite(_entropy_for_hist) else float("nan"))
+                    convergence_history["alpha_mean"].append(float(alpha_mean))
+                    convergence_history["beta_mean"].append(float(beta_mean))
+                    # mean_kl_window and drift_effort will be filled after cheap_tracker.compute() or as NaN
+                    # These are placeholders; they will be updated in the convergence eval section
+                    convergence_history["mean_kl_window"].append(float("nan"))
+                    convergence_history["drift_effort"].append(float("nan"))
+                    # Exploitability: NaN placeholder (updated in convergence eval section if evaluated)
+                    convergence_history["exploitability"].append(float("nan"))
+                    convergence_history["exploitability_is_valid"].append(False)
                 
                 # mean_vs_sample_gap: policy_mean_effort - sample_avg_effort
                 # Positive means policy predicts higher effort than sampled average
@@ -1326,6 +1383,7 @@ def run_ppo(
                 break
 
         # === Convergence evaluation (optional, default OFF) ===
+        # Ablation flags: disable_cheap_gate, disable_exploitability, exploit_every_updates
         if convergence_enabled and cheap_tracker is not None and rollout_mode == "selfplay":
             policy_effort_source = "policy_eval"
             if policy_mean_effort_current is None and last_rollout_stats:
@@ -1345,6 +1403,14 @@ def run_ppo(
                 last_mean_kl_window = mean_kl_window
                 last_std_kl_window = std_kl_window
                 last_drift_effort = drift_effort
+                
+                # Update convergence_history with latest mean_kl_window and drift_effort
+                if convergence_history["steps"] and len(convergence_history["mean_kl_window"]) > 0:
+                    # Update the last entry with computed values
+                    if mean_kl_window is not None:
+                        convergence_history["mean_kl_window"][-1] = float(mean_kl_window)
+                    if drift_effort is not None:
+                        convergence_history["drift_effort"][-1] = float(drift_effort)
 
                 mean_thresh = float(cheap_cfg.get("mean_kl_thresh", 0.0045))
                 std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
@@ -1354,7 +1420,12 @@ def run_ppo(
                 mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
                 std_ok = std_kl_window is not None and std_kl_window <= std_thresh
                 drift_ok = drift_effort is not None and drift_effort <= drift_thresh
-                drift_pass = mean_ok and std_ok and drift_ok
+                
+                # Gate logic: if --disable-cheap-gate, gate always passes
+                if disable_cheap_gate:
+                    drift_pass = True  # Gate always ON
+                else:
+                    drift_pass = mean_ok and std_ok and drift_ok
                 if drift_pass:
                     drift_ok_streak += 1
                 else:
@@ -1377,8 +1448,24 @@ def run_ppo(
                 else:
                     symmetry_fail_streak = 0
 
-                run_exploit = drift_pass and drift_ok_streak >= patience_drift
+                # Exploitability evaluation logic with ablation flags
+                # --disable-exploitability: never evaluate
+                # --exploit-every-updates N: caps max interval between evals
+                # --disable-cheap-gate: gate always ON, combined with above evals every N updates
+                steps_since_last_exploit = update_idx - last_exploit_eval_step
+                periodic_due = steps_since_last_exploit >= exploit_every_updates
+                gate_triggered = drift_pass and drift_ok_streak >= patience_drift
+                
+                # Determine whether to run exploitability
+                if disable_exploitability:
+                    run_exploit = False
+                else:
+                    # Eval if periodic OR (gate passed AND not too frequent)
+                    run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
+                
                 if run_exploit:
+                    last_exploit_eval_step = update_idx
+                    exploit_eval_steps.append(steps_done)
                     # Run exploitability (coarse-to-fine grid) using CRN
                     eval_seed = int(cfg.get("seed", 42)) + int(update_idx + 1)
                     grid_cfg = exploit_cfg.get("grid", {}) if exploit_cfg else {}
@@ -1404,8 +1491,15 @@ def run_ppo(
                     best_dev_effort = exploit_res["best_dev_effort"]
                     last_exploitability = exploitability_val
                     last_best_dev_effort = best_dev_effort
+                    
+                    # Update convergence_history with exploitability
+                    if convergence_history["steps"] and len(convergence_history["exploitability"]) > 0:
+                        convergence_history["exploitability"][-1] = float(exploitability_val)
+                        convergence_history["exploitability_is_valid"][-1] = True
+                    
+                    trigger_reason = "periodic" if periodic_due else "cheap_gate"
                     print(
-                        f"[ConvergenceDebug] trigger=cheap_gate eval_seed={eval_seed} "
+                        f"[ConvergenceDebug] trigger={trigger_reason} eval_seed={eval_seed} "
                         f"candidates={exploit_res.get('num_candidates', 'NA')}",
                         flush=True,
                     )
@@ -1413,7 +1507,8 @@ def run_ppo(
                         exploit_ok_streak += 1
                     else:
                         exploit_ok_streak = 0
-                        drift_ok_streak = 0  # reset cheap gate streak on failure
+                        if not disable_cheap_gate:
+                            drift_ok_streak = 0  # reset cheap gate streak on failure
                     if exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
                         converged_flag = 1
                         print(
@@ -1423,7 +1518,8 @@ def run_ppo(
                         early_stop_triggered = True
                         break
                 else:
-                    exploit_ok_streak = 0
+                    if not disable_exploitability:
+                        exploit_ok_streak = 0
                     last_exploitability = None
                     last_best_dev_effort = None
 
@@ -1431,34 +1527,40 @@ def run_ppo(
                     return "NA" if val is None else f"{val:.{digits}f}"
 
                 fail_reasons = []
-                if mean_kl_window is None:
-                    fail_reasons.append("mean_kl:window")
-                elif not mean_ok:
-                    fail_reasons.append("mean_kl")
-                if std_kl_window is None:
-                    fail_reasons.append("std_kl:window")
-                elif not std_ok:
-                    fail_reasons.append("std_kl")
-                if drift_effort is None:
-                    fail_reasons.append("drift:window")
-                elif not drift_ok:
-                    fail_reasons.append("drift")
-                if drift_pass and drift_ok_streak < patience_drift:
-                    fail_reasons.append("patience")
+                if not disable_cheap_gate:
+                    if mean_kl_window is None:
+                        fail_reasons.append("mean_kl:window")
+                    elif not mean_ok:
+                        fail_reasons.append("mean_kl")
+                    if std_kl_window is None:
+                        fail_reasons.append("std_kl:window")
+                    elif not std_ok:
+                        fail_reasons.append("std_kl")
+                    if drift_effort is None:
+                        fail_reasons.append("drift:window")
+                    elif not drift_ok:
+                        fail_reasons.append("drift")
+                    if drift_pass and drift_ok_streak < patience_drift:
+                        fail_reasons.append("patience")
                 if not run_exploit:
-                    if not fail_reasons:
-                        fail_reasons.append("unknown")
-                    decision = f"GATE_FAIL({','.join(fail_reasons)})"
+                    if disable_exploitability:
+                        decision = "EXPLOIT_DISABLED"
+                    elif not fail_reasons:
+                        fail_reasons.append("waiting_periodic" if not periodic_due else "unknown")
+                        decision = f"GATE_FAIL({','.join(fail_reasons)})"
+                    else:
+                        decision = f"GATE_FAIL({','.join(fail_reasons)})"
                 else:
                     decision = "EXPLOIT_OK_STREAK++" if exploitability_val is not None and exploitability_val < exploit_eps else "RUN_EXPLOIT"
 
                 mean_status = f"{_fmt(mean_kl_window)}({'OK' if mean_ok else 'FAIL'}<={mean_thresh:.4f})"
                 std_status = f"{_fmt(std_kl_window)}({'OK' if std_ok else 'FAIL'}<={std_thresh:.4f})"
                 drift_status = f"{_fmt(drift_effort, 2)}({'OK' if drift_ok else 'FAIL'}<={drift_thresh:.2f})"
+                gate_mode = "DISABLED" if disable_cheap_gate else "enabled"
                 print(
                     f"[ConvergenceDebug] upd={update_idx + 1} len_kl={len_kl} len_pol={len_policy} "
                     f"mean_kl={mean_status} std_kl={std_status} drift={drift_status} "
-                    f"drift_streak={drift_ok_streak}/{patience_drift} source={policy_effort_source} => {decision}",
+                    f"drift_streak={drift_ok_streak}/{patience_drift} source={policy_effort_source} gate={gate_mode} => {decision}",
                     flush=True,
                 )
 
@@ -1646,42 +1748,116 @@ def run_ppo(
         effort_bounds=effort_bounds,
     )
     
-    # Save convergence history for each trained q value
+    # Save convergence history for each trained q value (extended format for paper artifacts)
     if convergence_history["steps"]:  # Only save if we have data
         convergence_dir = os.path.join("results", "convergence_history")
         os.makedirs(convergence_dir, exist_ok=True)
+        
+        # Get seed from config (for filename)
+        seed_val = int(cfg.get("seed", 42))
         
         for q_val in train_qs:
             convergence_data = {
                 "algorithm": "PPO",
                 "q": float(q_val),
+                "seed": seed_val,
+                "ablation_name": ablation_name,
                 "theoretical_effort": float(
                     clip_stage2(
                         e_star_two_players(q_val, w_h, w_l, k),
                         tuple(effort_bounds)
                     )
                 ),
+                # Core effort series
                 "steps": convergence_history["steps"],
                 "agent1_effort": convergence_history["agent1_effort"],
                 "agent2_effort": convergence_history["agent2_effort"],
                 "policy_mean_effort": convergence_history["policy_mean_effort"],
+                # Extended time-series metrics (paper artifacts)
+                "approx_kl": convergence_history["approx_kl"],
+                "batch_entropy": convergence_history["batch_entropy"],
+                "alpha_mean": convergence_history["alpha_mean"],
+                "beta_mean": convergence_history["beta_mean"],
+                "mean_kl_window": convergence_history["mean_kl_window"],
+                "drift_effort": convergence_history["drift_effort"],
+                # Exploitability (sparse: NaN when not evaluated)
+                "exploitability": convergence_history["exploitability"],
+                "exploitability_is_valid": convergence_history["exploitability_is_valid"],
+                "exploit_eval_steps": exploit_eval_steps,
+                # Metadata
                 "rollout_mode": rollout_mode,
                 "total_episodes": episodes,
+                "disable_cheap_gate": disable_cheap_gate,
+                "disable_exploitability": disable_exploitability,
+                "exploit_every_updates": exploit_every_updates,
             }
             
-            # Save to JSON file
-            convergence_file = os.path.join(
-                convergence_dir,
-                f"ppo_q{q_val:.1f}_convergence.json"
-            )
+            # Build filename with seed and ablation (new format)
+            # Format: ppo_q{q}_seed{seed}_{ablation}_convergence.json
+            if ablation_name == "baseline":
+                convergence_file = os.path.join(
+                    convergence_dir,
+                    f"ppo_q{q_val:.1f}_seed{seed_val}_convergence.json"
+                )
+            else:
+                convergence_file = os.path.join(
+                    convergence_dir,
+                    f"ppo_q{q_val:.1f}_seed{seed_val}_{ablation_name}_convergence.json"
+                )
+            
             with open(convergence_file, 'w') as f:
                 json.dump(convergence_data, f, indent=2)
             print(f"[PPO] Saved convergence history to {convergence_file}")
+            
+            # Write metadata.json for this run (for reproducibility)
+            metadata_file = convergence_file.replace("_convergence.json", "_metadata.json")
+            metadata = {
+                "run_id": run_id if run_id else datetime.datetime.now().strftime("%Y%m%d_%H%M%S"),
+                "method": "ppo",
+                "q": float(q_val),
+                "seed": seed_val,
+                "ablation_name": ablation_name,
+                "git_sha": _get_git_sha(),
+                "cmdline": " ".join(sys.argv),
+                "timestamp": datetime.datetime.now().isoformat(),
+                "convergence_file": os.path.basename(convergence_file),
+                "variant_name": variant_name,
+            }
+            with open(metadata_file, 'w') as f:
+                json.dump(metadata, f, indent=2)
+            print(f"[PPO] Saved metadata to {metadata_file}")
 
     return rows
 
 
 def _run_cli(args: argparse.Namespace) -> str:
+    # === Apply method-specific defaults ===
+    # For PPO: enable modern defaults (selfplay, theory-align-v2, convergence-eval, relaxed profile)
+    # For gradient: keep traditional defaults
+    if args.method == "ppo":
+        if args.rollout_mode is None:
+            args.rollout_mode = "selfplay"
+            print("[config] PPO default: rollout_mode='selfplay'")
+        
+        if args.theory_align_v2 is None:
+            args.theory_align_v2 = True
+            print("[config] PPO default: theory_align_v2=True")
+        
+        if args.enable_convergence_eval is None:
+            args.enable_convergence_eval = True
+            print("[config] PPO default: enable_convergence_eval=True")
+        
+        if args.cheap_gate_profile is None:
+            args.cheap_gate_profile = "relaxed"
+            print("[config] PPO default: cheap_gate_profile='relaxed'")
+    else:  # gradient
+        if args.rollout_mode is None:
+            args.rollout_mode = "vs_opponent"
+        if args.theory_align_v2 is None:
+            args.theory_align_v2 = False
+        if args.enable_convergence_eval is None:
+            args.enable_convergence_eval = False
+    
     cfg = dict(base_config)
     if args.k is not None:
         cfg["k"] = float(args.k)
@@ -1872,6 +2048,11 @@ def _run_cli(args: argparse.Namespace) -> str:
             variant_name=variant_name,
             fixed_opponent_effort=args.fixed_opponent_effort,
             train_side=args.train_side,
+            # Paper artifact ablation flags
+            exploit_every_updates=args.exploit_every_updates,
+            disable_cheap_gate=args.disable_cheap_gate,
+            disable_exploitability=args.disable_exploitability,
+            ablation_name=args.ablation_name,
         )
         for row in rows:
             save_standardized_result(row, csv_path)
@@ -1886,8 +2067,8 @@ def main():
     parser.add_argument(
         "--rollout-mode",
         choices=["selfplay", "vs_opponent"],
-        default="vs_opponent",
-        help="Rollout mode for PPO: 'selfplay' (both use learner, store both) or 'vs_opponent' (p2 may use opponent, store only learner samples)",
+        default=None,  # Will be set based on method
+        help="Rollout mode for PPO: 'selfplay' (both use learner, store both) or 'vs_opponent' (p2 may use opponent, store only learner samples). Default: 'selfplay' for PPO, 'vs_opponent' for gradient.",
     )
     # Experiment 1 (fixed opponent best-response):
     # python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42 \
@@ -1969,20 +2150,37 @@ def main():
     parser.add_argument(
         "--theory-align-v2",
         action="store_true",
-        help="EXPERIMENT: mean+concentration policy head with variance penalty for theory alignment.",
+        dest="theory_align_v2",
+        help="Enable theory-align-v2. Default: enabled for PPO, disabled for gradient.",
     )
+    parser.add_argument(
+        "--no-theory-align-v2",
+        action="store_false",
+        dest="theory_align_v2",
+        help="Disable theory-align-v2 (override PPO default).",
+    )
+    parser.set_defaults(theory_align_v2=None)  # Will be set based on method
+    
     parser.add_argument(
         "--enable-convergence-eval",
         action="store_true",
-        help="Enable convergence evaluation/early-stop (exploitability + stability gating). Default OFF.",
+        dest="enable_convergence_eval",
+        help="Enable convergence evaluation/early-stop. Default: enabled for PPO, disabled for gradient.",
     )
+    parser.add_argument(
+        "--no-convergence-eval",
+        action="store_false",
+        dest="enable_convergence_eval",
+        help="Disable convergence evaluation (override PPO default).",
+    )
+    parser.set_defaults(enable_convergence_eval=None)  # Will be set based on method
     cheap_gate_profiles = base_config.get("convergence", {}).get("cheap_gate_profiles", {}) or {}
     cheap_gate_profile_choices = sorted(cheap_gate_profiles.keys()) if cheap_gate_profiles else ["default", "conservative", "aggressive"]
     parser.add_argument(
         "--cheap-gate-profile",
         choices=cheap_gate_profile_choices,
-        default=None,
-        help="Select cheap gate profile (default/conservative/aggressive). Used only with --enable-convergence-eval.",
+        default=None,  # Will be set based on method
+        help="Select cheap gate profile (default/conservative/aggressive/relaxed). Default: 'relaxed' for PPO with theory-align-v2, 'default' otherwise.",
     )
     # Smoke test: `python run/run_two_players.py --method ppo --rollout-mode selfplay --episodes 40960 --enable-convergence-eval`
     # Expect: after a few eval points, ConvergenceDebug shows RUN_EXPLOIT and CSV exploitability is not NA if gate passes.
@@ -2001,6 +2199,29 @@ def main():
         type=str,
         default=None,
         help="Sweep variant name (e.g., 'baseline', 'entropy_end_0.025'). Auto-derived from overrides if not provided.",
+    )
+    # === Paper artifact flags (ablation + time-series logging) ===
+    parser.add_argument(
+        "--exploit-every-updates",
+        type=int,
+        default=10,
+        help="Maximum interval between exploitability evaluations (caps worst-case cost). Default: 10.",
+    )
+    parser.add_argument(
+        "--disable-cheap-gate",
+        action="store_true",
+        help="Gate always ON: exploitability evaluation is eligible every update (combined with --exploit-every-updates N, evals every N updates).",
+    )
+    parser.add_argument(
+        "--disable-exploitability",
+        action="store_true",
+        help="Never evaluate exploitability; convergence is based on effort gap only. All exploitability values = NaN.",
+    )
+    parser.add_argument(
+        "--ablation-name",
+        type=str,
+        default="baseline",
+        help="Ablation variant name for paper artifacts. Included in JSON, CSV, and metadata. Default: 'baseline'.",
     )
     args = parser.parse_args()
 
