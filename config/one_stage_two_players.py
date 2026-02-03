@@ -57,11 +57,11 @@ config = {
     "lag_fade_updates": 10,
     "opponent_history_sample_p_end": 0.0,
 
-    # Convergence / early-stop (OFF by default to preserve baseline behavior)
+    # Convergence / early-stop (ON by default for PPO with relaxed profile)
     "convergence": {
-        "enabled": False,
+        "enabled": True,
+        "cheap_gate_profile": "relaxed",
         "eval_every_updates": 20,
-        "cheap_gate_profile": "default",
         "cheap_gate_profiles": {
             "default": {
                 "window_size": 20,

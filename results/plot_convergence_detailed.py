@@ -27,7 +27,7 @@ def load_convergence_file(filepath: str) -> Optional[Dict]:
         return None
 
 
-def plot_combined(data: Dict, output_dir: str = "results/convergence_plots"):
+def plot_combined(data: Dict, output_dir: str = "results/convergence_plots", suffix: str = ""):
     """
     Create a combined plot showing both agents on the same axes.
     
@@ -36,6 +36,11 @@ def plot_combined(data: Dict, output_dir: str = "results/convergence_plots"):
     - Agent2 effort (orange solid line)
     - Theoretical effort (black dashed line)
     - Average effort (green dotted line, optional)
+    
+    Args:
+        data: Convergence data dictionary
+        output_dir: Base output directory for plots
+        suffix: Optional suffix to add to output filename (e.g., "k0.0005_wh8_wl3")
     """
     algorithm = data.get("algorithm", "unknown")
     q = data.get("q", 0.0)
@@ -103,14 +108,17 @@ def plot_combined(data: Dict, output_dir: str = "results/convergence_plots"):
     
     plt.tight_layout()
     
-    # Save figure
-    output_file = os.path.join(algo_dir, f'q{q:.1f}_combined.png')
+    # Save figure with optional suffix
+    if suffix:
+        output_file = os.path.join(algo_dir, f'q{q:.1f}_{suffix}_combined.png')
+    else:
+        output_file = os.path.join(algo_dir, f'q{q:.1f}_combined.png')
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"✅ Saved combined plot: {output_file}")
     plt.close()
 
 
-def plot_separated(data: Dict, output_dir: str = "results/convergence_plots"):
+def plot_separated(data: Dict, output_dir: str = "results/convergence_plots", suffix: str = ""):
     """
     Create separated plots showing each agent in its own subplot.
     
@@ -118,6 +126,11 @@ def plot_separated(data: Dict, output_dir: str = "results/convergence_plots"):
     - Top: Agent 1 convergence
     - Bottom: Agent 2 convergence
     Both show theoretical value as reference.
+    
+    Args:
+        data: Convergence data dictionary
+        output_dir: Base output directory for plots
+        suffix: Optional suffix to add to output filename (e.g., "k0.0005_wh8_wl3")
     """
     algorithm = data.get("algorithm", "unknown")
     q = data.get("q", 0.0)
@@ -191,28 +204,39 @@ def plot_separated(data: Dict, output_dir: str = "results/convergence_plots"):
     
     plt.tight_layout()
     
-    # Save figure
-    output_file = os.path.join(algo_dir, f'q{q:.1f}_separated.png')
+    # Save figure with optional suffix
+    if suffix:
+        output_file = os.path.join(algo_dir, f'q{q:.1f}_{suffix}_separated.png')
+    else:
+        output_file = os.path.join(algo_dir, f'q{q:.1f}_separated.png')
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"✅ Saved separated plot: {output_file}")
     plt.close()
 
 
-def plot_convergence_for_file(filepath: str, output_dir: str = "results/convergence_plots"):
-    """Load a convergence file and generate both combined and separated plots."""
+def plot_convergence_for_file(filepath: str, output_dir: str = "results/convergence_plots", suffix: str = ""):
+    """Load a convergence file and generate both combined and separated plots.
+    
+    Args:
+        filepath: Path to convergence JSON file
+        output_dir: Base output directory for plots
+        suffix: Optional suffix to add to output filenames
+    """
     data = load_convergence_file(filepath)
     if data is None:
         return
     
     print(f"\n📊 Generating plots for {data.get('algorithm', 'unknown')} q={data.get('q', 0.0)}")
-    plot_combined(data, output_dir)
-    plot_separated(data, output_dir)
+    plot_combined(data, output_dir, suffix=suffix)
+    plot_separated(data, output_dir, suffix=suffix)
 
 
 def process_all_files(convergence_dir: str = "results/convergence_history",
                       output_dir: str = "results/convergence_plots",
                       algorithm: Optional[str] = None,
-                      q_value: Optional[float] = None):
+                      q_value: Optional[float] = None,
+                      suffix: str = "",
+                      file_pattern: Optional[str] = None):
     """
     Process all convergence history files and generate plots.
     
@@ -221,6 +245,8 @@ def process_all_files(convergence_dir: str = "results/convergence_history",
         output_dir: Directory to save generated plots
         algorithm: Optional filter for specific algorithm (e.g., "PPO", "gradient")
         q_value: Optional filter for specific q value
+        suffix: Optional suffix to add to output filenames (e.g., "k0.0005_wh8_wl3")
+        file_pattern: Optional substring to filter convergence files (e.g., "k5e4_wh8_wl3")
     """
     if not os.path.exists(convergence_dir):
         print(f"❌ Convergence history directory not found: {convergence_dir}")
@@ -238,6 +264,10 @@ def process_all_files(convergence_dir: str = "results/convergence_history",
     
     processed = 0
     for filepath in sorted(json_files):
+        # Apply file pattern filter if specified
+        if file_pattern and file_pattern not in os.path.basename(filepath):
+            continue
+        
         # Load data to check filters
         with open(filepath, 'r') as f:
             data = json.load(f)
@@ -248,7 +278,7 @@ def process_all_files(convergence_dir: str = "results/convergence_history",
         if q_value is not None and abs(data.get("q", 0.0) - q_value) > 0.01:
             continue
         
-        plot_convergence_for_file(filepath, output_dir)
+        plot_convergence_for_file(filepath, output_dir, suffix=suffix)
         processed += 1
     
     print("="*60)
@@ -288,6 +318,17 @@ def main():
         type=str,
         help="Process a single specific convergence file"
     )
+    parser.add_argument(
+        "--suffix",
+        type=str,
+        default="",
+        help="Suffix to add to output filenames (e.g., 'k0.0005_wh8_wl3')"
+    )
+    parser.add_argument(
+        "--file-pattern",
+        type=str,
+        help="Filter convergence files by substring in filename (e.g., 'k5e4_wh8_wl3')"
+    )
     
     args = parser.parse_args()
     
@@ -300,14 +341,16 @@ def main():
         if not os.path.exists(args.file):
             print(f"❌ File not found: {args.file}")
             return
-        plot_convergence_for_file(args.file, args.output_dir)
+        plot_convergence_for_file(args.file, args.output_dir, suffix=args.suffix)
     else:
         # Process all files with optional filters
         process_all_files(
             convergence_dir=args.convergence_dir,
             output_dir=args.output_dir,
             algorithm=args.algorithm,
-            q_value=args.q
+            q_value=args.q,
+            suffix=args.suffix,
+            file_pattern=args.file_pattern
         )
     
     print("\n✅ Done!")
