@@ -25,7 +25,7 @@
 
 ```bash
 cd /home/fjiang4/tournament_experiment-4
-python3 results/plot_convergence_detailed.py
+python3 tools/plot_convergence_detailed.py
 ```
 
 这将处理 `results/convergence_history/` 中的所有JSON文件，并在 `results/convergence_plots/` 下按算法分类保存图表。
@@ -36,40 +36,40 @@ python3 results/plot_convergence_detailed.py
 
 ```bash
 # 仅处理PPO算法
-python3 results/plot_convergence_detailed.py --algorithm PPO
+python3 tools/plot_convergence_detailed.py --algorithm PPO
 
 # 仅处理gradient算法
-python3 results/plot_convergence_detailed.py --algorithm gradient
+python3 tools/plot_convergence_detailed.py --algorithm gradient
 ```
 
 #### 2. 仅处理特定q值
 
 ```bash
 # 仅处理q=55.0的数据
-python3 results/plot_convergence_detailed.py --q 55.0
+python3 tools/plot_convergence_detailed.py --q 55.0
 
 # 仅处理q=25.0的数据
-python3 results/plot_convergence_detailed.py --q 25.0
+python3 tools/plot_convergence_detailed.py --q 25.0
 ```
 
 #### 3. 组合过滤
 
 ```bash
 # 仅处理PPO算法的q=40.0数据
-python3 results/plot_convergence_detailed.py --algorithm PPO --q 40.0
+python3 tools/plot_convergence_detailed.py --algorithm PPO --q 40.0
 ```
 
 #### 4. 处理单个文件
 
 ```bash
-python3 results/plot_convergence_detailed.py \
+python3 tools/plot_convergence_detailed.py \
   --file results/convergence_history/ppo_q55.0_convergence.json
 ```
 
 #### 5. 自定义输出目录
 
 ```bash
-python3 results/plot_convergence_detailed.py \
+python3 tools/plot_convergence_detailed.py \
   --output-dir my_custom_plots
 ```
 
@@ -118,7 +118,7 @@ results/convergence_plots/
 
 ```bash
 # 生成所有图表
-python3 results/plot_convergence_detailed.py
+python3 tools/plot_convergence_detailed.py
 
 # 查看生成的文件
 ls -lh results/convergence_plots/*/*.png
@@ -128,7 +128,7 @@ ls -lh results/convergence_plots/*/*.png
 
 ```bash
 # 仅生成PPO的图表
-python3 results/plot_convergence_detailed.py --algorithm PPO
+python3 tools/plot_convergence_detailed.py --algorithm PPO
 
 # 打开图表进行比较
 # results/convergence_plots/ppo/q25.0_combined.png
@@ -145,14 +145,14 @@ python run/run_two_players.py --method ppo --rollout-mode selfplay --q 55 \
   --cheap-gate-profile relaxed
 
 # 为新生成的数据创建图表
-python3 results/plot_convergence_detailed.py --algorithm PPO --q 55.0
+python3 tools/plot_convergence_detailed.py --algorithm PPO --q 55.0
 ```
 
 ### 场景4: 论文插图准备
 
 ```bash
 # 生成所有高分辨率图表（默认300 DPI）
-python3 results/plot_convergence_detailed.py
+python3 tools/plot_convergence_detailed.py
 
 # 图表会自动保存为高质量PNG，适合论文使用
 ```
@@ -243,4 +243,4 @@ fontsize=16  # 更大的字体
 
 **创建日期**: 2026-01-20
 **作者**: AI Assistant
-**相关文件**: `results/plot_convergence_detailed.py`
+**相关文件**: `tools/plot_convergence_detailed.py`

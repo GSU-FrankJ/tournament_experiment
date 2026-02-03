@@ -7,26 +7,47 @@ alwaysApply: true
 
 # Project Structure
 
+Each directory contains a README.md with detailed documentation.
+
+```
 .
-├── agents/ - Intensive learning agents
-            Naming convention: the agent used for each experimental scenario is named experiment_ppo/gradient_agnet.py (for example:2players_ppo_agent.py)
-├── envs/ - game environment
-├── config/ - Experiment configuration
-            one_stage_two_players [one_stage_two_players.py](mdc:config/one_stage_two_players.py)
-            one_stage_three_players [one_stage_three_players.py](mdc:config/one_stage_three_players.py)
-            two_stage_two_players [two_stage_two_players.py](mdc:config/two_stage_two_players.py)
-            asymmetric_cost_two_players [asymmetric_cost_two_players.py](mdc:config/asymmetric_cost_two_players.py)
-            asymmetric_ability_two_players [asymmetric_ability_two_players.py](mdc:config/asymmetric_ability_two_players.py)
-├── run/ - Experiment execution scripts
-            No matter how many files are generated in the middle of the experiment (e.g., test, comparison, etc.), the final code is uniformly summarized in the
-            [run_asymmetric_ability_experiment.py](mdc:run/run_asymmetric_ability_experiment.py)
-            [run_asymmetric_cost_experiment.py](mdc:run/run_asymmetric_cost_experiment.py)
-            [run_three_players.py](mdc:run/run_three_players.py)
-            [run_two_players.py](mdc:run/run_two_players.py)
-            [run_two_stage.py](mdc:run/run_two_stage.py)
-├── results/ - experiment results
-            All chart headers are
-            stage1_weight,stage2_weight,k1,k2,information_revelation,theoretical_stage1_effort,theoretical_stage2_effort,Model_training,final_stage1_effort,final_stage2_effort,final_weighted_effort,Convergence_Quality,episodes,Gap_from_theoretical
-            The chart name is the same as its config
-            all run.py scripts produce results that match the results table header
-└── utils/ - utility functions
+├── agents/           # Learning algorithms (PPO, MC-FD gradient solver)
+│                     See [agents/README.md](mdc:agents/README.md)
+├── config/           # Experiment configurations
+│                     [one_stage_two_players.py](mdc:config/one_stage_two_players.py) - Primary config
+│                     [one_stage_three_players.py](mdc:config/one_stage_three_players.py)
+│                     [two_stage_two_players.py](mdc:config/two_stage_two_players.py)
+│                     [asymmetric_cost_two_players.py](mdc:config/asymmetric_cost_two_players.py)
+│                     [asymmetric_ability_two_players.py](mdc:config/asymmetric_ability_two_players.py)
+├── docs/             # Documentation hub
+│   ├── guides/       # User guides (PPO defaults, plotting, asymmetric init)
+│   ├── technical/    # Implementation docs, audit reports
+│   └── archive/      # Legacy materials (Word docs, old code)
+├── envs/             # Game environments
+│                     See [envs/README.md](mdc:envs/README.md)
+├── paper_artifacts/  # Paper figure/table generation pipeline
+│                     See [paper_artifacts/README.md](mdc:paper_artifacts/README.md)
+├── paper_out/        # Generated paper outputs (figures, tables, data)
+├── results/          # Experiment outputs
+│   ├── convergence_history/  # JSON training data
+│   └── convergence_plots/    # Generated plots
+├── run/              # Experiment entry points
+│                     [run_two_players.py](mdc:run/run_two_players.py) - Primary entry point
+│                     [run_mcfd.py](mdc:run/run_mcfd.py) - MC-FD solver
+│                     [run_ppo_custom_params.py](mdc:run/run_ppo_custom_params.py) - Custom sweeps
+├── tools/            # Analysis and diagnostic scripts
+│                     plot_convergence.py, verify_rollout_modes.py, etc.
+└── utils/            # Core utility modules (prob, theory, eval, logger)
+                      See [utils/README.md](mdc:utils/README.md)
+```
+
+## Key Entry Points
+
+- **Run experiments**: `python run/run_two_players.py --method ppo --q 25 --episodes 2048000`
+- **Generate plots**: `python tools/plot_convergence_detailed.py`
+- **Generate paper artifacts**: `python -m paper_artifacts make_all`
+
+## Results Output
+
+- Convergence JSON: `results/convergence_history/{method}_q{q}_seed{seed}_{ablation}_convergence.json`
+- Results CSV: `results/one_stage_two_players_v2.csv`

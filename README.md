@@ -1,21 +1,58 @@
 # Tournament Experiment
 
-This repository contains game‑theoretic tournament experiments. The current active track focuses on the one‑stage, two‑player symmetric tournament and verifies whether a PPO agent can learn the theoretical symmetric effort.
+Game-theoretic tournament experiments with PPO reinforcement learning. The active track verifies whether a PPO agent can learn the theoretical Nash equilibrium effort in two-player symmetric tournaments.
+
+## New Agent Quickstart
+
+**For AI agents exploring this codebase:** Each directory contains a `README.md` with purpose, key files, and usage patterns. Start here:
+
+| Directory | Purpose | Key Entry Point |
+|-----------|---------|-----------------|
+| [`run/`](run/README.md) | Experiment runners | `python run/run_two_players.py --method ppo --q 25` |
+| [`agents/`](agents/README.md) | Learning algorithms | `PPOTwoPlayersBandit`, `MCFDConfig` |
+| [`envs/`](envs/README.md) | Game environments | `TwoPlayersEnv` |
+| [`config/`](config/README.md) | Experiment configs | `one_stage_two_players.py` |
+| [`utils/`](utils/README.md) | Core utilities | `prob.py`, `theory.py`, `eval.py` |
+| [`tools/`](tools/README.md) | Analysis & diagnostics | `plot_convergence.py` |
+| [`results/`](results/README.md) | Experiment outputs | JSON convergence data, CSV results |
+| [`docs/`](docs/README.md) | Documentation | Guides, technical docs, archive |
+| [`paper_artifacts/`](paper_artifacts/README.md) | Paper generation | `python -m paper_artifacts make_all` |
+
+**Quick commands:**
+```bash
+# Run PPO experiment
+python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50
+
+# Run gradient baseline
+python run/run_two_players.py --method gradient --q 40
+
+# Generate convergence plots
+python tools/plot_convergence_detailed.py
+
+# Generate paper artifacts
+python -m paper_artifacts make_all
+```
 
 ## Project Structure
 
 ```
 tournament_experiment/
+├── agents/              # Learning algorithms (PPO, MC-FD gradient solver)
 ├── config/              # Experiment configurations
-├── envs/                # Environments (two-player one-stage active)
-├── agents/              # Agents (clean PPO for two-player is active)
-├── run/                 # Entry points (two-player runner active)
-├── results/             # Output CSVs and figures
-├── utils/               # Probability, theory, plotting, logging
-└── backup/              # Archived legacy scripts/environments
+├── docs/                # Documentation (guides, technical, archive)
+│   ├── guides/          # User guides (PPO defaults, plotting, etc.)
+│   ├── technical/       # Implementation docs, audit reports
+│   └── archive/         # Legacy materials
+├── envs/                # Game environments
+├── paper_artifacts/     # Paper figure/table generation pipeline
+├── paper_out/           # Generated paper outputs (figures, tables, data)
+├── results/             # Experiment outputs
+│   ├── convergence_history/  # JSON training data
+│   └── convergence_plots/    # Generated plots
+├── run/                 # Experiment entry points
+├── tools/               # Analysis and diagnostic scripts
+└── utils/               # Core utility modules
 ```
-
-Legacy multi-player / two‑stage files have been moved to `backup/` to keep the two‑player track minimal.
 
 ## Installation
 
