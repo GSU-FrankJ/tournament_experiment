@@ -145,12 +145,32 @@ class ThreePlayersEnv:
         }
 
     def expected_utility_gradient(self, e1: float, e2: float, e3: float) -> Tuple[float, float, float]:
-        """Analytical gradient of expected utilities with respect to efforts."""
+        """Analytical gradient of each player's expected utility with respect to their OWN effort.
+        
+        Returns:
+            (∂U_1/∂e_1, ∂U_2/∂e_2, ∂U_3/∂e_3) - the gradient each player uses to update their effort
+            
+        Note: win_prob_three_players_grad(e_i, e_j, e_k, q) returns gradients of player i's
+        win probability. We need to call it three times, once for each player as the focal player.
+        """
         if not self.use_analytic:
             raise RuntimeError("Analytic gradients require use_analytic_probabilities=True")
-        dp1, dp2, dp3 = win_prob_three_players_grad(e1, e2, e3, self.q)
+        
         reward_gap = self.w_h - self.w_l
-        grad1 = reward_gap * dp1 - 2.0 * self.k * e1
-        grad2 = reward_gap * dp2 - 2.0 * self.k * e2
-        grad3 = reward_gap * dp3 - 2.0 * self.k * e3
+        
+        # Player 1's gradient: ∂U_1/∂e_1 = (w_h - w_l) * ∂p_1/∂e_1 - 2k*e_1
+        # Call with e1 as focal player (first arg)
+        dp1_de1, _, _ = win_prob_three_players_grad(e1, e2, e3, self.q)
+        grad1 = reward_gap * dp1_de1 - 2.0 * self.k * e1
+        
+        # Player 2's gradient: ∂U_2/∂e_2 = (w_h - w_l) * ∂p_2/∂e_2 - 2k*e_2
+        # Call with e2 as focal player (first arg)
+        dp2_de2, _, _ = win_prob_three_players_grad(e2, e1, e3, self.q)
+        grad2 = reward_gap * dp2_de2 - 2.0 * self.k * e2
+        
+        # Player 3's gradient: ∂U_3/∂e_3 = (w_h - w_l) * ∂p_3/∂e_3 - 2k*e_3
+        # Call with e3 as focal player (first arg)
+        dp3_de3, _, _ = win_prob_three_players_grad(e3, e1, e2, self.q)
+        grad3 = reward_gap * dp3_de3 - 2.0 * self.k * e3
+        
         return grad1, grad2, grad3
