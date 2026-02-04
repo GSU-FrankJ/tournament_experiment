@@ -71,6 +71,9 @@ env.bak/
 venv.bak/ __pycache__/
 *.pyc
 
+# Worktrees (isolated development workspaces)
+.worktrees/
+
 # Experiment results (generated files)
 # Uncomment to ignore large result files:
 # results/convergence_plots/
