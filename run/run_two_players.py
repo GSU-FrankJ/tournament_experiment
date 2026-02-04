@@ -13,6 +13,8 @@ stage to the CSV's stage-2 fields (stage-1 fields set to 0).
 #      --enable-convergence-eval --cheap-gate-profile aggressive --theory-align
 # Expect: [TheoryAlign] lines, ent=0, conc_mean >= 80, mean_vs_sample_gap ~0, policy -> e*=54.69.
 
+from __future__ import annotations  # Python 3.8 compatibility for type hints
+
 import sys
 import os
 import argparse
