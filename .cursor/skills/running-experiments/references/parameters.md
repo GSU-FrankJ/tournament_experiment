@@ -62,9 +62,29 @@ All profiles use `window_size: 20`.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `exploit_eps` | 0.05 | Exploitability threshold |
-| `patience_exploit` | 5 | Patience for exploit check |
-| `M` | 8192 | Monte Carlo samples |
+| `exploit_eps` | 0.05 | Exploitability threshold (ε for ε-Nash) |
+| `patience_exploit` | 5 | Consecutive passes needed to declare convergence |
+| `M` | 8192 | Monte Carlo samples for deviation payoff |
+
+### Convergence CLI Arguments
+
+| CLI Arg | Default | Description |
+|---------|---------|-------------|
+| `--exploit-every-updates` | 10 | Max interval between exploitability evaluations |
+| `--disable-cheap-gate` | False | Gate always ON: eval eligible every update |
+| `--disable-exploitability` | False | Never evaluate exploitability |
+| `--cheap-gate-profile` | `relaxed` | Which threshold profile to use |
+
+### Convergence Flow
+
+1. **Cheap Gate Check**: Every update, check if KL + drift metrics are stable
+2. **Gate Pass**: If stable for `patience_drift` updates, trigger exploitability eval
+3. **Exploitability Eval**: Monte Carlo estimation of max deviation payoff
+4. **Convergence**: If exploitability < `exploit_eps` for `patience_exploit` evals, stop
+
+Ablation flags modify this flow:
+- `--disable-cheap-gate`: Skip step 1-2, eval every `--exploit-every-updates`
+- `--disable-exploitability`: Skip step 3-4, never evaluate exploitability
 
 ## Gradient Method Parameters
 

@@ -1,0 +1,51 @@
+---
+description: Convert Chinese input into an actionable, structured English prompt
+alwaysApply: true
+---
+
+# Chinese → Structured English Prompt Converter
+
+## When to Apply
+- If the user message is primarily in Chinese **and** contains a task/request that can be executed (e.g., asking to write, build, analyze, plan, generate, refactor, summarize, debug).
+- If the message is purely social/small talk (e.g., greetings, emotions without a request), still respond in English **but** keep the structure minimal (Role/Goal/Response) and avoid over-engineering.
+
+## Output Structure (always use Markdown)
+```markdown
+## Role
+[Single line. The most relevant expert persona for the task.]
+
+## Goal
+[One sentence. The primary outcome.]
+
+## Context
+[2–6 bullet points. Only info that impacts execution/decisions.]
+
+## Inputs
+- [Explicit user-provided artifacts: text, files, links, paths, configs, screenshots, constraints]
+- [If none provided, say "None provided."]
+
+## Constraints
+- [Hard requirements from the user]
+- [Tooling/format constraints (e.g., “Cursor agent”, “Jupyter”, “no external libs”, “no web browsing”)]
+- [Non-goals / exclusions if implied]
+
+## Steps
+1. [Actionable step]
+2. ...
+N. [Include a final verification/self-check step]
+(Prefer 5–9 steps unless the task is trivially small.)
+
+## Deliverables
+- [Concrete outputs: files, code blocks, diagrams, tables, checklists, commands]
+- [If multiple deliverables, list each explicitly.]
+
+## Acceptance Criteria
+- [Testable, objective checklist items; “Done when …”]
+- [Include edge cases if relevant.]
+
+## Assumptions
+- Assumption: ...
+  Rationale: ...
+- Assumption: ...
+  Rationale: ...
+(Only include assumptions that materially affect execution.)

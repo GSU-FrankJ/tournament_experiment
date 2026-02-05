@@ -1,9 +1,20 @@
 """
 Theoretical benchmarks and helper utilities.
 
-Implements the closed-form symmetric benchmark for the two-player tournament:
+Implements closed-form equilibrium formulas for tournament experiments:
 
-    e*(q) = (w_H - w_L) / (6 q k)
+1. Two-player symmetric:
+    e*(q) = (w_H - w_L) / (4 q k)
+
+2. Two-player asymmetric cost (k1 != k2):
+    e1* = 2 k2 q (w_H - w_L) / (8 k1 k2 q² - (k1 - k2)(w_H - w_L))
+    e2* = 2 k1 q (w_H - w_L) / (8 k1 k2 q² - (k1 - k2)(w_H - w_L))
+
+3. Two-player different ability (additive model, l1 > l2):
+    e* = ((2q - (l1 - l2)) * (w_H - w_L)) / (8kq²)  [symmetric effort]
+
+4. Three-player symmetric:
+    e*(q) = (w_H - w_L) / (4 q k)
 
 Stage-specific clipping is handled by convenience helpers to ensure efforts
 respect the stage effort bounds.
@@ -109,6 +120,104 @@ def eu_two_players_asymmetric_cost(q: float, w_h: float, w_l: float, k1: float, 
     ))
     eu2_num = (((4.0 * k1) ** 2) * k2 * (q**2) * (8.0 * k2 * (q**2) - w_gap) * w_gap)
     return eu1_num / denom, eu2_num / denom
+
+
+# ---- Different-ability two-player formulas (additive ability model) ----
+def e_star_two_players_different_ability(
+    q: float, w_h: float, w_l: float, k: float, l1: float, l2: float
+) -> float:
+    """Closed-form symmetric equilibrium effort for additive ability model.
+
+    Model: y_i = e_i + l_i + ε_i, where ε_i ~ U(-q, q), l1 > l2.
+    Both players exert the same effort in equilibrium.
+
+    The symmetric equilibrium effort is:
+        e* = ((2q - (l1 - l2)) * (w_H - w_L)) / (8kq²)
+
+    Args:
+        q: Noise parameter (half-width of uniform distribution)
+        w_h: High prize (winner)
+        w_l: Low prize (loser)
+        k: Cost coefficient (same for both players)
+        l1: Player 1 ability (higher)
+        l2: Player 2 ability (lower)
+
+    Returns:
+        e*: Symmetric equilibrium effort (both players exert same effort)
+    """
+    w_gap = float(w_h) - float(w_l)
+    delta_l = float(l1) - float(l2)
+    k = float(k)
+    q = float(q)
+
+    # Closed-form (bound at 0 to avoid negative effort)
+    e_star = ((2.0 * q - delta_l) * w_gap) / (8.0 * k * (q ** 2))
+    return max(0.0, e_star)
+
+
+def p_win_different_ability(
+    e1: float, e2: float, l1: float, l2: float, q: float
+) -> float:
+    """Win probability for player 1 in additive ability model.
+
+    Player 1 wins if: e1 + l1 + ε1 > e2 + l2 + ε2
+    Let d = (e2 + l2) - (e1 + l1), then ε1 - ε2 ~ Tri(-2q, 2q).
+
+    Uses exact triangular CDF: P(ε1 - ε2 > d).
+
+    Args:
+        e1: Player 1 effort
+        e2: Player 2 effort
+        l1: Player 1 ability
+        l2: Player 2 ability
+        q: Noise parameter
+
+    Returns:
+        P(player 1 wins)
+    """
+    d = float(e2 + l2) - float(e1 + l1)
+    q = float(q)
+
+    if d <= -2.0 * q:
+        return 1.0
+    elif d >= 2.0 * q:
+        return 0.0
+    elif d < 0:
+        return 1.0 - ((d + 2.0 * q) ** 2) / (8.0 * q ** 2)
+    else:
+        return ((2.0 * q - d) ** 2) / (8.0 * q ** 2)
+
+
+def eu_two_players_different_ability(
+    q: float, w_h: float, w_l: float, k: float, l1: float, l2: float
+) -> tuple[float, float]:
+    """Expected utilities at the different-ability equilibrium.
+
+    Computes EU for both players at the symmetric equilibrium effort.
+
+    Args:
+        q: Noise parameter
+        w_h: High prize (winner)
+        w_l: Low prize (loser)
+        k: Cost coefficient
+        l1: Player 1 ability (higher)
+        l2: Player 2 ability (lower)
+
+    Returns:
+        (EU1, EU2): Expected utilities at equilibrium
+    """
+    e_star = e_star_two_players_different_ability(q, w_h, w_l, k, l1, l2)
+    cost = float(k) * (e_star ** 2)
+
+    # Win probability at equilibrium
+    p1_win = p_win_different_ability(e_star, e_star, l1, l2, q)
+    p2_win = 1.0 - p1_win
+
+    w_gap = float(w_h) - float(w_l)
+    eu1 = float(w_l) + p1_win * w_gap - cost
+    eu2 = float(w_l) + p2_win * w_gap - cost
+
+    return eu1, eu2
 
 
 

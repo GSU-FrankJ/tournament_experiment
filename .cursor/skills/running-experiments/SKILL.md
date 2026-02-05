@@ -5,22 +5,48 @@ description: Run tournament game theory experiments with PPO or gradient methods
 
 # Running Experiments
 
+## Available Experiment Types
+
+| Experiment | Script | Config | Description |
+|------------|--------|--------|-------------|
+| **Two-Player Symmetric** | `run/run_two_players.py` | `config/one_stage_two_players.py` | Identical players (k1=k2, l1=l2) |
+| **Different Cost** | `run/run_different_cost.py` | `config/one_stage_different_cost.py` | Asymmetric costs (k1 < k2, l1=l2) |
+| **Different Ability** | `run/run_different_ability.py` | `config/one_stage_different_ability.py` | Asymmetric abilities (k1=k2, l1 > l2) |
+| **Three Players** | `run/run_three_players.py` | `config/one_stage_three_players.py` | Three identical players |
+
 ## Quick Start
 
-### PPO Training (Recommended)
+### Two-Player Symmetric (Default)
 
 ```bash
-# Default modern config - selfplay with theory alignment
+# PPO Training (Recommended)
 python run/run_two_players.py --method ppo --q 40 --episodes 2048000 --seed 42
 
-# Multiple q values (omit --q to sweep all)
-python run/run_two_players.py --method ppo --episodes 2048000 --seed 42
+# Gradient Baseline
+python run/run_two_players.py --method gradient --q 40
 ```
 
-### Gradient Baseline
+### Different Ability Experiment
 
 ```bash
-python run/run_two_players.py --method gradient --q 40
+# Gradient baseline (l1=10, l2=5 by default)
+python run/run_different_ability.py --method gradient --q 40
+
+# PPO training
+python run/run_different_ability.py --method ppo --q 40 --episodes 2048000 --seed 42
+
+# Custom ability parameters
+python run/run_different_ability.py --method ppo --q 40 --l1 15 --l2 5
+```
+
+### Different Cost Experiment
+
+```bash
+# Gradient baseline (k1=0.0004, k2=0.00055 by default)
+python run/run_different_cost.py --method gradient --q 40
+
+# PPO training
+python run/run_different_cost.py --method ppo --q 40 --episodes 2048000 --seed 42
 ```
 
 <!-- MC-FD Solver (备用，目前不常用)
@@ -48,6 +74,27 @@ python run/run_mcfd.py --w-h 6.5 --w-l 3.0 --k 0.0004 --sigma1 25.0
 | `--theory-align-v2` | True | Mean+concentration policy head |
 | `--enable-convergence-eval` | True | Early stopping on convergence |
 | `--cheap-gate-profile` | `relaxed` | KL threshold profile |
+
+### Convergence & Exploitability Arguments
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--exploit-every-updates` | 10 | Max interval between exploitability evaluations |
+| `--disable-cheap-gate` | False | Gate always ON: exploitability eval eligible every update |
+| `--disable-exploitability` | False | Never evaluate exploitability; converge on effort gap only |
+
+**Cheap Gate**: 决定何时触发 exploitability 检查的"门控"机制，基于 KL divergence 和 policy drift 是否稳定。
+
+**Exploitability**: 衡量当前策略的 ε-Nash 近似程度。如果对手可以通过单方面偏离获得超过 ε 的收益，则策略尚未收敛。
+
+```bash
+# 每5个update评估一次exploitability，禁用cheap gate门控
+python run/run_two_players.py --method ppo --q 40 \
+    --exploit-every-updates 5 --disable-cheap-gate
+
+# 完全禁用exploitability评估（仅基于effort gap收敛）
+python run/run_two_players.py --method ppo --q 40 --disable-exploitability
+```
 
 ### Disabling Defaults
 
@@ -95,7 +142,7 @@ config = {
 
 ## Theoretical Equilibrium
 
-For two-player single-stage tournament, equilibrium effort:
+### Two-Player Symmetric
 
 ```
 e* = (w_h - w_l) / (4 * k * q)
@@ -106,6 +153,30 @@ Examples with default `w_h=6.5, w_l=3.0, k=0.0004`:
 - q=40: e* ≈ 54.69
 - q=55: e* ≈ 39.77
 
+### Different Ability (Additive Model)
+
+Model: `y_i = e_i + l_i + ε_i` where `l1 > l2`
+
+```
+e* = ((2q - (l1 - l2)) * (w_h - w_l)) / (8 * k * q²)
+```
+
+Both players exert **same effort** at equilibrium; player 1 wins more often due to ability advantage.
+
+Examples with `l1=10, l2=5, k=0.0004, w_h=6.5, w_l=3.0`:
+- q=25: e* ≈ 78.75, P(p1 wins) ≈ 0.68
+- q=40: e* ≈ 51.27, P(p1 wins) ≈ 0.56
+- q=55: e* ≈ 38.07, P(p1 wins) ≈ 0.54
+
+### Different Cost (Asymmetric Cost)
+
+```
+e1* = 2 k2 q (w_H - w_L) / (8 k1 k2 q² - (k1 - k2)(w_H - w_L))
+e2* = 2 k1 q (w_H - w_L) / (8 k1 k2 q² - (k1 - k2)(w_H - w_L))
+```
+
+Player with lower cost (k1) exerts more effort at equilibrium.
+
 ## Custom Parameter Experiments
 
 ### Method 1: CLI Override
@@ -115,38 +186,30 @@ python run/run_two_players.py --method ppo --q 40 --seed 50 \
     --episodes 4096000 --rollout-mode vs_opponent
 ```
 
-### Method 2: Custom Script
-
-Create a script like `run/run_ppo_custom_params.py`:
-
-```python
-from config.one_stage_two_players import config as base_config
-from run.run_two_players import run_ppo
-
-cfg = base_config.copy()
-cfg["k"] = 0.0005        # Custom cost
-cfg["w_h"] = 8.0         # Custom high prize
-cfg["w_l"] = 3.0         # Custom low prize
-cfg["seed"] = 42
-
-results = run_ppo(
-    cfg=cfg,
-    episodes=2_048_000,
-    train_qs=[25.0, 40.0],
-    eval_qs=[25.0, 40.0],
-    rollout_mode="selfplay",
-    ablation_name="my_experiment",
-)
 ```
 
 ## Output Files
 
+### Two-Player Symmetric
 | Output | Location |
 |--------|----------|
 | Convergence JSON | `results/convergence_history/{method}_q{q}_seed{seed}_{ablation}_convergence.json` |
-| Metadata JSON | `results/convergence_history/*_metadata.json` |
 | Results CSV | `results/one_stage_two_players_v2.csv` |
-| Training logs | `results/logs/` |
+| Training logs | `results/logs/one_stage_two_players_*.log` |
+
+### Different Ability
+| Output | Location |
+|--------|----------|
+| Convergence JSON | `results/convergence_history/different_ability_{method}_q{q}_convergence.json` |
+| Results CSV | `results/different_ability_two_players.csv` |
+| Training logs | `results/logs/different_ability_*.log` |
+
+### Different Cost
+| Output | Location |
+|--------|----------|
+| Convergence JSON | `results/convergence_history/different_cost_{method}_q{q}_convergence.json` |
+| Results CSV | `results/different_cost_two_players.csv` |
+| Training logs | `results/logs/different_cost_*.log` |
 
 ### Convergence JSON Structure
 
@@ -177,16 +240,6 @@ python tools/plot_convergence.py
 
 # Detailed per-agent plots
 python tools/plot_convergence_detailed.py --algorithm PPO --q 25.0
-```
-
-### Hyperparameter Sweeps
-
-```bash
-# Run sweep
-python tools/sweep_one_stage_vs_opponent.py
-
-# Analyze results
-python tools/collect_and_pick_best.py
 ```
 
 ## Experiment Workflow
