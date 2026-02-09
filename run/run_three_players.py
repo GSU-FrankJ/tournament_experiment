@@ -92,13 +92,186 @@ def _build_log_path(args: argparse.Namespace) -> str:
     seed_val = getattr(args, "seed", None)
     seed_tag = f"_seed{int(seed_val)}" if seed_val is not None else ""
     filename = f"three_players_{method_tag}_{q_tag}{episodes_tag}{seed_tag}_{timestamp}.log"
-    return os.path.join("results", "logs", filename)
+    return os.path.join("results", "three_players", "logs", filename)
 
 
 def _clip_effort(value: float, bounds: tuple[float, float]) -> float:
     """Clip effort to bounds."""
     lo, hi = bounds
     return float(np.clip(value, lo, hi))
+
+
+# === Three-player exploitability evaluation ===
+
+def _sample_policy_efforts_3p(
+    agent,
+    q: float,
+    effort_bounds: tuple[float, float],
+    M: int,
+    seed: int,
+    *,
+    k: float,
+    w_h: float,
+    w_l: float,
+) -> torch.Tensor:
+    """Sample M efforts from the agent's current policy for given game params.
+    
+    Uses deterministic seeding per call for reproducibility (CRN).
+    """
+    device = next(agent.net.parameters()).device
+    gen_key = (int(seed), device.type, getattr(device, "index", None))
+    gen_map = getattr(agent, "_policy_effort_generators", None)
+    if gen_map is None:
+        gen_map = {}
+        setattr(agent, "_policy_effort_generators", gen_map)
+    generator = gen_map.get(gen_key)
+    if generator is None:
+        generator = torch.Generator(device=device)
+        generator.manual_seed(int(seed))
+        gen_map[gen_key] = generator
+    state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
+    with torch.no_grad():
+        dist, _ = agent.dist(state)
+        try:
+            samples = dist.sample((M,), generator=generator)
+        except TypeError:
+            # Fallback: derive per-call seed from generator for older torch
+            seed_gen_map = getattr(agent, "_policy_effort_seed_generators", None)
+            if seed_gen_map is None:
+                seed_gen_map = {}
+                setattr(agent, "_policy_effort_seed_generators", seed_gen_map)
+            seed_gen = seed_gen_map.get(gen_key)
+            if seed_gen is None:
+                seed_gen = torch.Generator(device="cpu")
+                seed_gen.manual_seed(int(seed))
+                seed_gen_map[gen_key] = seed_gen
+            seed_value = int(torch.randint(0, 2**31 - 1, (1,), generator=seed_gen).item())
+            with torch.random.fork_rng(devices=[]):
+                torch.manual_seed(seed_value)
+                samples = dist.sample((M,))
+        samples = samples.squeeze(-1).clamp(0.0, 1.0)
+    low, high = effort_bounds
+    return (low + samples * (high - low)).to(device)
+
+
+def _payoff_player1_3p(
+    e1: torch.Tensor,
+    e2: torch.Tensor,
+    e3: torch.Tensor,
+    eps1: torch.Tensor,
+    eps2: torch.Tensor,
+    eps3: torch.Tensor,
+    *,
+    w_h: float,
+    w_l: float,
+    k: float,
+) -> torch.Tensor:
+    """Vectorized payoff for player 1 in a three-player tournament.
+    
+    Winner (highest score y_i = e_i + eps_i) gets w_h, two losers get w_l.
+    Cost for player 1 is k * e1^2.
+    Ties broken randomly via stacking order + argmax (favors lower index).
+    """
+    y1 = e1 + eps1
+    y2 = e2 + eps2
+    y3 = e3 + eps3
+    # Stack scores: shape (3, M). argmax returns index of winner.
+    scores = torch.stack([y1, y2, y3], dim=0)  # (3, M)
+    winners = torch.argmax(scores, dim=0)  # (M,)
+    payoff1 = torch.where(winners == 0, w_h, w_l) - k * (e1 ** 2)
+    return payoff1
+
+
+def eval_exploitability_3p(
+    agent,
+    q: float,
+    effort_bounds: tuple[float, float],
+    *,
+    M: int,
+    grid_cfg: dict,
+    seed: int,
+    w_h: float,
+    w_l: float,
+    k: float,
+) -> dict:
+    """Monte Carlo exploitability evaluation for three-player tournament.
+    
+    Measures how much utility player 1 can gain by unilaterally deviating
+    from the shared policy while players 2 and 3 follow it.
+    
+    Uses Common Random Numbers (CRN) and coarse-to-fine grid search.
+    
+    Returns:
+        {
+            "exploitability": float,  # max(u_dev - u_self, 0)
+            "best_dev_effort": float,
+            "u_dev": float,
+            "u_selfplay": float,
+            "num_candidates": int,
+        }
+    """
+    device = next(agent.net.parameters()).device
+    low, high = effort_bounds
+    with torch.no_grad():
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(seed)
+            # Common random numbers (CRN) for all candidates
+            eps1 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+            eps2 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+            eps3 = (torch.rand(M, device=device) * 2.0 - 1.0) * q
+
+            # Sample policy efforts for self-play (3 independent draws)
+            efforts_p1 = _sample_policy_efforts_3p(agent, q, effort_bounds, M, seed=seed, k=k, w_h=w_h, w_l=w_l)
+            efforts_p2 = _sample_policy_efforts_3p(agent, q, effort_bounds, M, seed=seed + 17, k=k, w_h=w_h, w_l=w_l)
+            efforts_p3 = _sample_policy_efforts_3p(agent, q, effort_bounds, M, seed=seed + 31, k=k, w_h=w_h, w_l=w_l)
+
+        # U_self = E[u_1(pi, pi, pi)] — player 1's payoff under self-play
+        u_self = _payoff_player1_3p(
+            efforts_p1, efforts_p2, efforts_p3, eps1, eps2, eps3,
+            w_h=w_h, w_l=w_l, k=k,
+        ).mean().item()
+
+        # Coarse-to-fine grid search for best deviation effort
+        stage_a = torch.arange(low, high + 1e-6, grid_cfg.get("stage_a_step", 5.0), device=device)
+
+        def _around(center: float, radius: float, step: float):
+            lo_bound = max(low, center - radius)
+            hi_bound = min(high, center + radius)
+            return torch.arange(lo_bound, hi_bound + 1e-6, step, device=device)
+
+        best_delta = -float("inf")
+        best_e = float(low)
+        num_candidates = 0
+
+        def eval_candidates(candidates: torch.Tensor):
+            nonlocal best_delta, best_e, num_candidates
+            for e_dev in candidates:
+                e_dev_val = e_dev.item()
+                efforts_dev = torch.full((M,), e_dev_val, device=device)
+                # Deviator plays e_dev against two policy opponents
+                payoff_dev = _payoff_player1_3p(
+                    efforts_dev, efforts_p2, efforts_p3, eps1, eps2, eps3,
+                    w_h=w_h, w_l=w_l, k=k,
+                )
+                delta = payoff_dev.mean().item() - u_self
+                num_candidates += 1
+                if delta > best_delta:
+                    best_delta = delta
+                    best_e = e_dev_val
+
+        eval_candidates(stage_a)
+        stage_b = _around(best_e, grid_cfg.get("stage_b_radius", 15.0), grid_cfg.get("stage_b_step", 1.0))
+        eval_candidates(stage_b)
+        stage_c = _around(best_e, grid_cfg.get("stage_c_radius", 3.0), grid_cfg.get("stage_c_step", 0.25))
+        eval_candidates(stage_c)
+
+    return {
+        "exploitability": float(max(best_delta, 0.0)),
+        "best_dev_effort": float(best_e),
+        "u_dev": float(u_self + best_delta),
+        "u_selfplay": float(u_self),
+        "num_candidates": int(num_candidates),
+    }
 
 
 # === Gradient-based solver ===
@@ -336,7 +509,7 @@ def run_gradient(
             }
         }
         
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "three_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         convergence_file = os.path.join(
             convergence_dir, 
@@ -427,6 +600,9 @@ def run_ppo(
     
     # Theory-align settings
     theory_align_v2_enabled = bool(cfg.get("theory_align_v2", False))
+    theory_align_v2_conc_min = float(cfg.get("theory_align_v2_conc_min", 1.0))
+    theory_align_v2_conc_scale = float(cfg.get("theory_align_v2_conc_scale", 1.0))
+    theory_align_v2_conc_max = cfg.get("theory_align_v2_conc_max", None)
     
     # PPO agent configuration (simplified for self-play)
     ppo_cfg = PPOConfig(
@@ -444,6 +620,14 @@ def run_ppo(
         ratio_stop_threshold=cfg.get("ratio_stop_threshold"),
         target_kl=float(cfg.get("target_kl", 0.08)),
         theory_align_v2=theory_align_v2_enabled,
+        theory_align_v2_conc_min=theory_align_v2_conc_min,
+        theory_align_v2_conc_scale=theory_align_v2_conc_scale,
+        theory_align_v2_conc_max=theory_align_v2_conc_max,
+        # Pass through stability parameters from config
+        gamma=float(cfg.get("gamma", 0.99)),
+        gae_lambda=float(cfg.get("gae_lambda", 0.95)),
+        value_coef=float(cfg.get("value_coef", 0.5)),
+        max_grad_norm=float(cfg.get("max_grad_norm", 0.5)),
     )
     
     agent = PPOThreePlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
@@ -485,11 +669,33 @@ def run_ppo(
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
     
-    # Convergence tracking
+    # Convergence tracking (exploitability-based, theory-free)
     convergence_cfg = cfg.get("convergence", {}) or {}
     convergence_enabled = bool(convergence_cfg.get("enabled", False))
-    cheap_cfg = convergence_cfg.get("cheap_gate", {}) if convergence_enabled else {}
+    # Resolve cheap_gate config: use named profile if specified, else inline "cheap_gate" block
+    cheap_profiles = convergence_cfg.get("cheap_gate_profiles", {}) if convergence_enabled else {}
+    cheap_profile_name = convergence_cfg.get("cheap_gate_profile", "default") if convergence_enabled else "default"
+    if cheap_profiles and cheap_profile_name in cheap_profiles:
+        cheap_cfg = cheap_profiles[cheap_profile_name]
+    else:
+        cheap_cfg = convergence_cfg.get("cheap_gate", {}) if convergence_enabled else {}
+    exploit_cfg = convergence_cfg.get("exploit", {}) if convergence_enabled else {}
     cheap_tracker = CheapGateTracker(int(cheap_cfg.get("window_size", 20))) if convergence_enabled else None
+    
+    # Convergence state tracking
+    drift_ok_streak = 0
+    exploit_ok_streak = 0
+    last_exploitability = None
+    last_best_dev_effort = None
+    converged_flag = 0
+    stop_reason = "max_updates"  # default if we exhaust episodes
+    early_stop_triggered = False
+    last_exploit_eval_step = -999999
+    exploit_every_updates = int(cfg.get("exploit_every_updates", 10))
+    exploit_eval_steps: List[int] = []
+    
+    if convergence_enabled:
+        print(f"[Convergence] enabled=True cheap_gate_profile={cheap_profile_name}", flush=True)
     
     # Create environment (reuse across steps for RNG continuity)
     q_init = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
@@ -511,9 +717,24 @@ def run_ppo(
         "policy_mean_effort": [],
         "approx_kl": [],
         "batch_entropy": [],
+        "mean_kl_window": [],
+        "drift_effort": [],
+        # Exploitability: sparse (NaN when not evaluated this update)
+        "exploitability": [],
+        "exploitability_is_valid": [],
     }
     
     last_update_metrics: Optional[Dict[str, float]] = None
+    
+    # Asymmetric warmup: bias players to different efforts to break symmetry
+    asymmetric_warmup_updates = int(cfg.get("asymmetric_warmup_updates", 50))
+    asymmetric_bias_magnitude = float(cfg.get("asymmetric_bias_magnitude", 0.3))  # 30% of e*
+    if asymmetric_warmup_updates > 0:
+        print(f"[PPO-3p] Asymmetric warmup for {asymmetric_warmup_updates} updates:")
+        print(f"[PPO-3p]   Player 1: +{asymmetric_bias_magnitude*100:.0f}% bias (explore higher)")
+        print(f"[PPO-3p]   Player 2: no bias (follow policy)")
+        print(f"[PPO-3p]   Player 3: -{asymmetric_bias_magnitude*100:.0f}% bias (explore lower)")
+        print(flush=True)
     
     while steps_done < total_steps_target:
         # Update entropy schedule
@@ -551,6 +772,18 @@ def run_ppo(
         # Collect rollout
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         
+        # Compute asymmetric bias for this update (decays over warmup period)
+        apply_asymmetric_bias = update_idx < asymmetric_warmup_updates
+        if apply_asymmetric_bias:
+            # Bias strength decays linearly from 1.0 to 0.0 over warmup
+            bias_strength = 1.0 - (float(update_idx) / float(max(1, asymmetric_warmup_updates)))
+            # Compute bias magnitude based on theoretical equilibrium
+            q_for_theory = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
+            e_theory = e_star_three_players(q_for_theory, w_h, w_l, k)
+            bias_amount = e_theory * asymmetric_bias_magnitude * bias_strength
+        else:
+            bias_amount = 0.0
+        
         for _ in range(steps_this):
             q = float(rng.choice(train_qs))
             env.q = q
@@ -563,11 +796,23 @@ def run_ppo(
             a2_norm, e2, logp2, v2 = agent.act(state)
             a3_norm, e3, logp3, v3 = agent.act(state)
             
-            # Execute environment step
+            # Apply asymmetric bias during warmup to break symmetry
+            if apply_asymmetric_bias and bias_amount > 0:
+                lo, hi = effort_bounds
+                # Player 1: bias upward (explore higher efforts)
+                e1_biased = torch.clamp(e1 + bias_amount, lo, hi)
+                # Player 2: no bias (follow policy mean)
+                e2_biased = e2
+                # Player 3: bias downward (explore lower efforts)
+                e3_biased = torch.clamp(e3 - bias_amount, lo, hi)
+            else:
+                e1_biased, e2_biased, e3_biased = e1, e2, e3
+            
+            # Execute environment step with (potentially biased) efforts
             efforts = (
-                torch.tensor([float(e1.item())]),
-                torch.tensor([float(e2.item())]),
-                torch.tensor([float(e3.item())]),
+                torch.tensor([float(e1_biased.item())]),
+                torch.tensor([float(e2_biased.item())]),
+                torch.tensor([float(e3_biased.item())]),
             )
             _, rewards, _, done, _ = env.step(efforts)
             
@@ -599,17 +844,138 @@ def run_ppo(
         convergence_history["policy_mean_effort"].append(policy_mean_effort)
         convergence_history["approx_kl"].append(metrics.get("approx_kl", 0.0))
         convergence_history["batch_entropy"].append(metrics.get("batch_entropy", 0.0))
+        convergence_history["mean_kl_window"].append(float("nan"))
+        convergence_history["drift_effort"].append(float("nan"))
+        convergence_history["exploitability"].append(float("nan"))
+        convergence_history["exploitability_is_valid"].append(False)
         
-        # Logging
+        # Logging (theory shown for reference only, NOT used for stopping)
         if update_idx % 20 == 0 or update_idx == total_updates - 1:
             abs_err = abs(policy_mean_effort - theoretical_e)
+            exploit_str = f" exploit={last_exploitability:.4f}" if last_exploitability is not None else ""
             print(
                 f"[PPO-3p] update={update_idx:04d} steps={steps_done:08d} "
                 f"policy_mean={policy_mean_effort:.4f} theory={theoretical_e:.4f} "
                 f"abs_err={abs_err:.4f} entropy={agent.cfg.entropy_coef:.4f} "
-                f"kl={metrics.get('approx_kl', 0.0):.6f}",
+                f"kl={metrics.get('approx_kl', 0.0):.6f}{exploit_str}",
                 flush=True,
             )
+        
+        # === Convergence evaluation (exploitability-based, theory-free) ===
+        if convergence_enabled and cheap_tracker is not None:
+            cheap_stats = cheap_tracker.compute()
+            mean_kl_window = cheap_stats.get("mean_kl_window")
+            std_kl_window = cheap_stats.get("std_kl_window")
+            drift_effort = cheap_stats.get("drift_effort")
+            
+            # Update convergence history with cheap gate metrics
+            if mean_kl_window is not None:
+                convergence_history["mean_kl_window"][-1] = float(mean_kl_window)
+            if drift_effort is not None:
+                convergence_history["drift_effort"][-1] = float(drift_effort)
+            
+            # Cheap gate thresholds
+            mean_thresh = float(cheap_cfg.get("mean_kl_thresh", 0.0045))
+            std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
+            drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
+            patience_drift = int(cheap_cfg.get("patience_drift", 2))
+            exploit_eps = float(exploit_cfg.get("exploit_eps", 0.05))
+            
+            mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
+            std_ok = std_kl_window is not None and std_kl_window <= std_thresh
+            drift_ok = drift_effort is not None and drift_effort <= drift_thresh
+            drift_pass = mean_ok and std_ok and drift_ok
+            
+            if drift_pass:
+                drift_ok_streak += 1
+            else:
+                drift_ok_streak = 0
+            
+            exploitability_val = None
+            best_dev_effort = None
+            
+            # Determine whether to run exploitability evaluation
+            steps_since_last_exploit = update_idx - last_exploit_eval_step
+            periodic_due = steps_since_last_exploit >= exploit_every_updates
+            gate_triggered = drift_pass and drift_ok_streak >= patience_drift
+            run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
+            
+            if run_exploit:
+                last_exploit_eval_step = update_idx
+                exploit_eval_steps.append(steps_done)
+                # Run exploitability (coarse-to-fine grid) using CRN
+                eval_seed = int(cfg.get("seed", 42)) + int(update_idx + 1)
+                grid_cfg = exploit_cfg.get("grid", {}) if exploit_cfg else {}
+                q_for_exploit = float(train_qs[0]) if train_qs else float(cfg.get("q", q_init))
+                exploit_res = eval_exploitability_3p(
+                    agent,
+                    q=q_for_exploit,
+                    effort_bounds=effort_bounds,
+                    M=int(exploit_cfg.get("M", 8192)),
+                    grid_cfg={
+                        "stage_a_step": grid_cfg.get("stage_a_step", 5.0),
+                        "stage_b_radius": grid_cfg.get("stage_b_radius", 15.0),
+                        "stage_b_step": grid_cfg.get("stage_b_step", 1.0),
+                        "stage_c_radius": grid_cfg.get("stage_c_radius", 3.0),
+                        "stage_c_step": grid_cfg.get("stage_c_step", 0.25),
+                    },
+                    seed=eval_seed,
+                    w_h=w_h,
+                    w_l=w_l,
+                    k=k,
+                )
+                exploitability_val = exploit_res["exploitability"]
+                best_dev_effort = exploit_res["best_dev_effort"]
+                last_exploitability = exploitability_val
+                last_best_dev_effort = best_dev_effort
+                
+                # Update convergence_history with exploitability
+                convergence_history["exploitability"][-1] = float(exploitability_val)
+                convergence_history["exploitability_is_valid"][-1] = True
+                
+                trigger_reason = "periodic" if periodic_due else "cheap_gate"
+                print(
+                    f"[ConvergenceDebug] trigger={trigger_reason} eval_seed={eval_seed} "
+                    f"candidates={exploit_res.get('num_candidates', 'NA')}",
+                    flush=True,
+                )
+                if exploitability_val < exploit_eps:
+                    exploit_ok_streak += 1
+                else:
+                    exploit_ok_streak = 0
+                    drift_ok_streak = 0  # reset cheap gate streak on failure
+                if exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
+                    converged_flag = 1
+                    stop_reason = "exploitability"
+                    print(
+                        f"[Convergence] Exploitability satisfied for {exploit_ok_streak} evals; stopping training.",
+                        flush=True,
+                    )
+                    early_stop_triggered = True
+            else:
+                exploit_ok_streak = 0
+                last_exploitability = None
+                last_best_dev_effort = None
+            
+            # Convergence status logging (every 20 updates or when exploit evaluated)
+            if update_idx % 20 == 0 or run_exploit:
+                def _fmt(val, digits=4):
+                    return "NA" if val is None else f"{val:.{digits}f}"
+                decision = "NOT_EVAL"
+                if run_exploit:
+                    decision = "EXPLOIT_OK++" if exploitability_val is not None and exploitability_val < exploit_eps else "RUN_EXPLOIT"
+                print(
+                    f"[Convergence] upd={update_idx + 1} mean_kl={_fmt(mean_kl_window)} "
+                    f"std_kl={_fmt(std_kl_window)} drift={_fmt(drift_effort, 2)} "
+                    f"exploit={_fmt(exploitability_val)} best_dev={_fmt(best_dev_effort)} "
+                    f"streaks: drift={drift_ok_streak}/{patience_drift} "
+                    f"exploit={exploit_ok_streak}/{exploit_cfg.get('patience_exploit', 5)} "
+                    f"decision={decision}",
+                    flush=True,
+                )
+            
+            if early_stop_triggered:
+                break
         
         update_idx += 1
     
@@ -636,6 +1002,10 @@ def run_ppo(
             "episodes": int(episodes),
             "updates": int(update_idx),
             "ablation_name": ablation_name,
+            "converged_flag": converged_flag,
+            "last_exploitability": float(last_exploitability) if last_exploitability is not None else None,
+            "last_best_dev_effort": float(last_best_dev_effort) if last_best_dev_effort is not None else None,
+            "exploit_ok_streak": exploit_ok_streak,
         }
         results.append(result)
         
@@ -646,15 +1016,39 @@ def run_ppo(
             "q": float(q),
             "theoretical_effort": float(theoretical_e),
             "ablation_name": ablation_name,
-            **convergence_history,
+            # Structured dicts expected by sweep parser
+            "theoretical": {
+                "effort": float(theoretical_e),
+            },
+            "final": {
+                "effort": float(policy_mean_effort),
+                "gap": float(abs_err),
+            },
             "final_results": {
                 "final_effort": float(policy_mean_effort),
                 "theoretical_e": float(theoretical_e),
                 "abs_error": float(abs_err),
-            }
+            },
+            # Stopping info (required by sweep_exploit_ablation.py)
+            "stop_reason": stop_reason,
+            "stopped_at_update": update_idx,
+            "joint_exploit_ok_streak": exploit_ok_streak,
+            "final_exploit_1": last_exploitability,
+            "final_exploit_2": last_exploitability,  # symmetric 3-player game
+            "final_exploit_max": last_exploitability,
+            "final_br_effort_1": last_best_dev_effort,
+            "final_br_effort_2": last_best_dev_effort,  # symmetric 3-player game
+            # Exploit config
+            "exploit_config": {
+                "exploit_eps": float(exploit_cfg.get("exploit_eps", 0.05)),
+                "patience_exploit": int(exploit_cfg.get("patience_exploit", 5)),
+                "exploit_every_updates": exploit_every_updates,
+                "exploit_M": int(exploit_cfg.get("M", 8192)),
+            },
+            **convergence_history,
         }
         
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "three_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         seed_val = cfg.get("seed", 42)
         convergence_file = os.path.join(
@@ -688,14 +1082,46 @@ def _run_cli(args: argparse.Namespace) -> str:
     if args.effort_range is not None:
         cfg["effort_range"] = list(args.effort_range)
     
-    # Theory-align-v2 settings
+    # Theory-align-v2 settings (copied from two-player for consistency)
     if args.theory_align_v2:
         cfg["entropy_coef_start"] = 0.0
         cfg["entropy_coef_hold"] = 0.0
         cfg["entropy_coef_end"] = 0.0
         cfg["theory_align_v2"] = True
-        print("[TheoryAlignV2] enabled: entropy=0", flush=True)
+        # Concentration parameters for sharp (deterministic) policy
+        cfg["theory_align_v2_conc_min"] = 1000.0
+        cfg["theory_align_v2_conc_scale"] = 10000.0
+        cfg["theory_align_v2_conc_max"] = 100000.0
+        # Regularization coefficients
+        cfg["theory_align_v2_var_coef"] = 5e-2
+        cfg["theory_align_v2_br_coef"] = 3e-3
+        # Ramping schedule for concentration
+        cfg["theory_align_v2_conc_min_start"] = 100.0
+        cfg["theory_align_v2_conc_scale_start"] = 100.0
+        cfg["theory_align_v2_var_coef_start"] = 0.0
+        cfg["theory_align_v2_ramp_warmup"] = 20
+        cfg["theory_align_v2_ramp_steps"] = 50
+        cfg["theory_align_v2_early_stop_window"] = 20
+        # Stability tweaks (v2 only): reduce update aggressiveness
+        cfg["lr_start"] = 5e-5
+        cfg["lr_end"] = 2e-5
+        cfg["update_epochs"] = 1
+        cfg["clip_range_start"] = 0.2
+        cfg["clip_range_end"] = 0.15
+        cfg["target_kl"] = 0.06
+        cfg["ratio_stop_threshold"] = 2.2
+        cfg["max_grad_norm"] = 0.25
+        cfg["value_coef"] = 1.0
+        cfg["gae_lambda"] = 1.0
+        cfg["gamma"] = 1.0
     
+    # --disable-entropy: zero entropy regularization (mechanism ablation)
+    if args.disable_entropy:
+        cfg["entropy_coef_start"] = 0.0
+        cfg["entropy_coef_hold"] = 0.0
+        cfg["entropy_coef_end"] = 0.0
+        print("[ablation] --disable-entropy: entropy_coef=0 throughout training", flush=True)
+
     # Convergence eval settings
     if "convergence" not in cfg:
         cfg["convergence"] = {}
@@ -703,6 +1129,36 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["convergence"]["enabled"] = True
     if args.cheap_gate_profile is not None:
         cfg["convergence"]["cheap_gate_profile"] = args.cheap_gate_profile
+
+    # Exploitability overrides
+    if hasattr(args, 'exploit_every_updates') and args.exploit_every_updates is not None:
+        cfg["exploit_every_updates"] = int(args.exploit_every_updates)
+    if args.exploit_eps is not None:
+        if "convergence" not in cfg:
+            cfg["convergence"] = {}
+        if "exploit" not in cfg["convergence"]:
+            cfg["convergence"]["exploit"] = {}
+        cfg["convergence"]["exploit"]["exploit_eps"] = float(args.exploit_eps)
+    if args.exploit_patience is not None:
+        if "convergence" not in cfg:
+            cfg["convergence"] = {}
+        if "exploit" not in cfg["convergence"]:
+            cfg["convergence"]["exploit"] = {}
+        cfg["convergence"]["exploit"]["patience_exploit"] = int(args.exploit_patience)
+    if args.exploit_M is not None:
+        if "convergence" not in cfg:
+            cfg["convergence"] = {}
+        if "exploit" not in cfg["convergence"]:
+            cfg["convergence"]["exploit"] = {}
+        cfg["convergence"]["exploit"]["M"] = int(args.exploit_M)
+    
+    # Asymmetric warmup settings
+    if hasattr(args, 'no_asymmetric_warmup') and args.no_asymmetric_warmup:
+        cfg["asymmetric_warmup_updates"] = 0
+    elif hasattr(args, 'asymmetric_warmup_updates'):
+        cfg["asymmetric_warmup_updates"] = int(args.asymmetric_warmup_updates)
+    if hasattr(args, 'asymmetric_bias_magnitude'):
+        cfg["asymmetric_bias_magnitude"] = float(args.asymmetric_bias_magnitude)
     
     if args.method == "gradient":
         q_values = [args.q] if args.q is not None else list(cfg["q_list"])
@@ -792,12 +1248,72 @@ def main():
         default=None,
     )
     
-    # Ablation name
+    # Exploitability evaluation controls
+    parser.add_argument(
+        "--exploit-every-updates",
+        type=int,
+        default=10,
+        help="Max interval between exploitability evaluations (default: 10)",
+    )
+    parser.add_argument(
+        "--exploit-eps",
+        type=float,
+        default=None,
+        help="Override exploit_eps threshold (default: from config, 0.05)",
+    )
+    parser.add_argument(
+        "--exploit-patience",
+        type=int,
+        default=None,
+        help="Override patience_exploit (default: from config, 5)",
+    )
+    parser.add_argument(
+        "--exploit-M",
+        type=int,
+        default=None,
+        help="Monte Carlo samples for exploitability (default: from config, 8192)",
+    )
+    
+    # Ablation flags
+    parser.add_argument(
+        "--disable-cheap-gate",
+        action="store_true",
+        help="Always evaluate exploitability (no gate)",
+    )
+    parser.add_argument(
+        "--disable-exploitability",
+        action="store_true",
+        help="Skip exploitability evaluation entirely",
+    )
+    parser.add_argument(
+        "--disable-entropy",
+        action="store_true",
+        help="Set entropy_coef to 0 throughout training (mechanism ablation).",
+    )
     parser.add_argument(
         "--ablation-name",
         type=str,
         default="baseline",
         help="Ablation variant name for output files",
+    )
+
+    # Asymmetric warmup to break symmetry
+    parser.add_argument(
+        "--asymmetric-warmup-updates",
+        type=int,
+        default=50,
+        help="Number of updates with asymmetric bias (0 to disable). Default: 50",
+    )
+    parser.add_argument(
+        "--asymmetric-bias-magnitude",
+        type=float,
+        default=0.3,
+        help="Bias magnitude as fraction of theoretical e* (0.3 = 30%%). Default: 0.3",
+    )
+    parser.add_argument(
+        "--no-asymmetric-warmup",
+        action="store_true",
+        help="Disable asymmetric warmup (equivalent to --asymmetric-warmup-updates 0)",
     )
     
     args = parser.parse_args()

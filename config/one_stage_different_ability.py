@@ -53,8 +53,6 @@ config = {
     "episodes": 2_048_000,
     "max_updates": 500,
     "eval_every_updates": 20,
-    "early_stop_abs_err": 0.8,
-    "early_stop_patience": 6,
     
     # Entropy schedule: wider exploration that decays
     "entropy_coef_start": 0.03,

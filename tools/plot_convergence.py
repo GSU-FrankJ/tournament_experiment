@@ -20,7 +20,7 @@ from typing import Dict, List, Optional
 
 
 def load_convergence_data(
-    convergence_dir: str = "results/convergence_history",
+    convergence_dir: str = "results/two_players/convergence",
     scenario_filter: Optional[str] = None,
 ) -> Dict:
     """
@@ -374,7 +374,7 @@ def plot_convergence_separate_agents(
 
 
 def plot_different_cost_convergence(
-    convergence_dir: str = "results/convergence_history",
+    convergence_dir: str = "results/two_players/convergence",
     output_dir: str = "results",
 ):
     """

@@ -50,6 +50,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.one_stage_different_ability import config as base_config
 from utils.theory import e_star_two_players_different_ability, p_win_different_ability, clip_stage2
+from utils.exploit_asymmetric import eval_exploitability_asymmetric
 from envs.different_ability_env import DifferentAbilityEnv
 from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
 
@@ -103,7 +104,7 @@ def _build_log_path(args: argparse.Namespace) -> str:
     seed_val = getattr(args, "seed", None)
     seed_tag = f"_seed{int(seed_val)}" if seed_val is not None else ""
     filename = f"different_ability_{method_tag}_{q_tag}{episodes_tag}{seed_tag}_{timestamp}.log"
-    return os.path.join("results", "logs", filename)
+    return os.path.join("results", "different_ability", "logs", filename)
 
 
 def _clip_effort(value: float, bounds: Tuple[float, float]) -> float:
@@ -377,7 +378,7 @@ def run_gradient(
             },
         }
         
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "different_ability", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         convergence_file = os.path.join(
             convergence_dir,
@@ -451,6 +452,12 @@ def run_ppo_different_ability(
     train_qs: Optional[List[float]] = None,
     *,
     ablation_name: str = "baseline",
+    exploit_eps: float = 0.05,
+    patience_exploit: int = 5,
+    exploit_every_updates: int = 10,
+    exploit_M: int = 8192,
+    disable_cheap_gate: bool = False,
+    disable_exploitability: bool = False,
 ) -> List[Dict]:
     """
     Train PPO for different ability scenario using a single shared agent.
@@ -464,6 +471,12 @@ def run_ppo_different_ability(
         episodes: Total training steps (default from config)
         train_qs: List of q values to train on (default from config)
         ablation_name: Tag for this variant
+        exploit_eps: Exploitability threshold for convergence (default 0.05)
+        patience_exploit: Consecutive passes required for stopping (default 5)
+        exploit_every_updates: Max interval between exploitability evaluations (default 10)
+        exploit_M: Monte Carlo samples for exploitability (default 8192)
+        disable_cheap_gate: If True, always evaluate exploitability (no gate)
+        disable_exploitability: If True, skip exploitability evaluation entirely
         
     Returns:
         List of result dictionaries, one per q value
@@ -548,6 +561,25 @@ def run_ppo_different_ability(
     cheap_cfg = convergence_cfg.get("cheap_gate", {}) if convergence_enabled else {}
     cheap_tracker = CheapGateTracker(int(cheap_cfg.get("window_size", 20))) if convergence_enabled else None
     
+    # Exploitability tracking
+    joint_exploit_ok_streak = 0
+    stop_reason = "max_updates"  # default if we exhaust episodes
+    converged_flag = 0
+    last_exploit_1 = None
+    last_exploit_2 = None
+    last_br_effort_1 = None
+    last_br_effort_2 = None
+    updates_since_exploit_eval = 0
+    
+    # Grid config for exploitability evaluation
+    exploit_grid_cfg = {
+        "stage_a_step": 5.0,
+        "stage_b_radius": 15.0,
+        "stage_b_step": 1.0,
+        "stage_c_radius": 3.0,
+        "stage_c_step": 0.25,
+    }
+    
     # Create environment (reuse across steps)
     q_init = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
     env_config = {
@@ -572,6 +604,17 @@ def run_ppo_different_ability(
         "approx_kl": [],
         "batch_entropy": [],
     }
+    
+    # Exploitability history (sparse, only when evaluated)
+    exploit_history: List[Dict[str, Any]] = []
+    
+    # Print exploitability settings
+    if not disable_exploitability:
+        print(
+            f"[PPO-diff-ability] Exploitability: eps={exploit_eps}, patience={patience_exploit}, "
+            f"every={exploit_every_updates}, M={exploit_M}, disable_gate={disable_cheap_gate}",
+            flush=True,
+        )
     
     while steps_done < total_steps_target:
         # Update entropy schedule
@@ -665,6 +708,110 @@ def run_ppo_different_ability(
                 flush=True,
             )
         
+        # === Exploitability evaluation and early stopping ===
+        updates_since_exploit_eval += 1
+        
+        if not disable_exploitability:
+            # Decide whether to evaluate exploitability:
+            # - If disable_cheap_gate: evaluate every exploit_every_updates
+            # - Otherwise: evaluate when cheap gate passes OR max interval reached
+            should_eval_exploit = False
+            
+            if disable_cheap_gate:
+                # No gate - evaluate on schedule
+                should_eval_exploit = (updates_since_exploit_eval >= exploit_every_updates)
+            else:
+                # Check cheap gate condition
+                if cheap_tracker is not None:
+                    cheap_stats = cheap_tracker.compute()
+                    mean_kl = cheap_stats.get("mean_kl_window")
+                    std_kl = cheap_stats.get("std_kl_window")
+                    drift = cheap_stats.get("drift_effort")
+                    
+                    # Cheap gate thresholds (from config or defaults)
+                    mean_thresh = float(cheap_cfg.get("mean_kl_thresh", 0.012))
+                    std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
+                    drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
+                    
+                    mean_ok = mean_kl is not None and mean_kl <= mean_thresh
+                    std_ok = std_kl is not None and std_kl <= std_thresh
+                    drift_ok = drift is not None and drift <= drift_thresh
+                    
+                    gate_pass = mean_ok and std_ok and drift_ok
+                    should_eval_exploit = gate_pass or (updates_since_exploit_eval >= exploit_every_updates)
+                else:
+                    # No tracker - evaluate on schedule
+                    should_eval_exploit = (updates_since_exploit_eval >= exploit_every_updates)
+            
+            if should_eval_exploit:
+                updates_since_exploit_eval = 0
+                
+                # Evaluate exploitability for both players
+                # Note: Different-ability uses same agent for both, but different ability params
+                exploit_result = eval_exploitability_asymmetric(
+                    agent1=agent,  # Same agent for both (symmetric policy)
+                    agent2=agent,
+                    q=test_q,
+                    effort_bounds=effort_bounds,
+                    M=exploit_M,
+                    grid_cfg=exploit_grid_cfg,
+                    seed=cfg.get("seed", 42) + update_idx,  # Vary seed per eval
+                    w_h=w_h,
+                    w_l=w_l,
+                    k1=k,  # Same cost for both
+                    k2=k,
+                    l1=l1,  # Different abilities
+                    l2=l2,
+                    game_type="different_ability",
+                )
+                
+                exploit_1 = exploit_result["exploit_1"]
+                exploit_2 = exploit_result["exploit_2"]
+                exploit_max = exploit_result["exploit_max"]
+                br_effort_1 = exploit_result["br_effort_1"]
+                br_effort_2 = exploit_result["br_effort_2"]
+                
+                # Store for final output
+                last_exploit_1 = exploit_1
+                last_exploit_2 = exploit_2
+                last_br_effort_1 = br_effort_1
+                last_br_effort_2 = br_effort_2
+                
+                # Log exploitability
+                print(
+                    f"[Exploit] upd={update_idx} exploit_1={exploit_1:.4f} exploit_2={exploit_2:.4f} "
+                    f"exploit_max={exploit_max:.4f} br_effort_1={br_effort_1:.2f} "
+                    f"br_effort_2={br_effort_2:.2f} streak={joint_exploit_ok_streak}/{patience_exploit}",
+                    flush=True,
+                )
+                
+                # Record in history
+                exploit_history.append({
+                    "update": update_idx,
+                    "exploit_1": exploit_1,
+                    "exploit_2": exploit_2,
+                    "exploit_max": exploit_max,
+                    "br_effort_1": br_effort_1,
+                    "br_effort_2": br_effort_2,
+                    "streak": joint_exploit_ok_streak,
+                })
+                
+                # Joint pass: both players must have exploitability < eps
+                if exploit_1 < exploit_eps and exploit_2 < exploit_eps:
+                    joint_exploit_ok_streak += 1
+                else:
+                    joint_exploit_ok_streak = 0
+                
+                # Check stopping condition
+                if joint_exploit_ok_streak >= patience_exploit:
+                    stop_reason = "exploitability"
+                    converged_flag = 1
+                    print(
+                        f"[Convergence] Exploitability satisfied for {joint_exploit_ok_streak} evals; stopping training.",
+                        flush=True,
+                    )
+                    break
+        
         update_idx += 1
     
     # Final evaluation
@@ -701,6 +848,15 @@ def run_ppo_different_ability(
             "episodes": int(episodes),
             "updates": int(update_idx),
             "ablation_name": ablation_name,
+            # Exploitability fields
+            "stop_reason": stop_reason,
+            "converged_flag": converged_flag,
+            "joint_exploit_ok_streak": joint_exploit_ok_streak,
+            "final_exploit_1": last_exploit_1,
+            "final_exploit_2": last_exploit_2,
+            "final_exploit_max": max(last_exploit_1 or 0.0, last_exploit_2 or 0.0) if last_exploit_1 is not None else None,
+            "final_br_effort_1": last_br_effort_1,
+            "final_br_effort_2": last_br_effort_2,
         }
         results.append(result)
         
@@ -723,14 +879,33 @@ def run_ppo_different_ability(
             },
             "ablation_name": ablation_name,
             "history": convergence_history,
+            "exploit_history": exploit_history,
             "final": {
                 "effort": float(policy_mean),
                 "gap": float(gap),
                 "p1_win": float(p1_win),
             },
+            # Stopping info
+            "stop_reason": stop_reason,
+            "stopped_at_update": update_idx,
+            "joint_exploit_ok_streak": joint_exploit_ok_streak,
+            "final_exploit_1": last_exploit_1,
+            "final_exploit_2": last_exploit_2,
+            "final_exploit_max": max(last_exploit_1 or 0.0, last_exploit_2 or 0.0) if last_exploit_1 is not None else None,
+            "final_br_effort_1": last_br_effort_1,
+            "final_br_effort_2": last_br_effort_2,
+            # Exploit config
+            "exploit_config": {
+                "exploit_eps": exploit_eps,
+                "patience_exploit": patience_exploit,
+                "exploit_every_updates": exploit_every_updates,
+                "exploit_M": exploit_M,
+                "disable_cheap_gate": disable_cheap_gate,
+                "disable_exploitability": disable_exploitability,
+            },
         }
         
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "different_ability", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         convergence_file = os.path.join(
             convergence_dir,
@@ -748,7 +923,7 @@ def run_ppo_different_ability(
 
 def _save_results_csv(results: List[Dict], cfg: Dict) -> None:
     """Save results to CSV file."""
-    csv_path = os.path.join("results", "different_ability_two_players.csv")
+    csv_path = os.path.join("results", "different_ability", "summary.csv")
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     
     fieldnames = [
@@ -823,7 +998,14 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["entropy_coef_end"] = 0.0
         cfg["theory_align_v2"] = True
         print("[TheoryAlignV2] enabled: entropy=0", flush=True)
-    
+
+    # --disable-entropy: zero entropy regularization (mechanism ablation)
+    if args.disable_entropy:
+        cfg["entropy_coef_start"] = 0.0
+        cfg["entropy_coef_hold"] = 0.0
+        cfg["entropy_coef_end"] = 0.0
+        print("[ablation] --disable-entropy: entropy_coef=0 throughout training", flush=True)
+
     # Convergence eval settings
     if "convergence" not in cfg:
         cfg["convergence"] = {}
@@ -880,6 +1062,12 @@ def _run_cli(args: argparse.Namespace) -> str:
             episodes=args.episodes,
             train_qs=train_qs,
             ablation_name=args.ablation_name,
+            exploit_eps=args.exploit_eps,
+            patience_exploit=args.exploit_patience,
+            exploit_every_updates=args.exploit_every_updates,
+            exploit_M=args.exploit_M,
+            disable_cheap_gate=args.disable_cheap_gate,
+            disable_exploitability=args.disable_exploitability,
         )
     
     return "OK"
@@ -945,6 +1133,47 @@ def main():
         default=None,
     )
     
+    # Exploitability evaluation settings
+    parser.add_argument(
+        "--exploit-eps",
+        type=float,
+        default=0.05,
+        help="Exploitability threshold for convergence (default: 0.05)",
+    )
+    parser.add_argument(
+        "--exploit-patience",
+        type=int,
+        default=5,
+        help="Consecutive passes required for stopping (default: 5)",
+    )
+    parser.add_argument(
+        "--exploit-every-updates",
+        type=int,
+        default=10,
+        help="Max interval between exploitability evaluations (default: 10)",
+    )
+    parser.add_argument(
+        "--exploit-M",
+        type=int,
+        default=8192,
+        help="Monte Carlo samples for exploitability (default: 8192)",
+    )
+    parser.add_argument(
+        "--disable-cheap-gate",
+        action="store_true",
+        help="Always evaluate exploitability (no gate)",
+    )
+    parser.add_argument(
+        "--disable-exploitability",
+        action="store_true",
+        help="Skip exploitability evaluation entirely",
+    )
+    parser.add_argument(
+        "--disable-entropy",
+        action="store_true",
+        help="Set entropy_coef to 0 throughout training (mechanism ablation).",
+    )
+
     # Ablation name
     parser.add_argument(
         "--ablation-name",

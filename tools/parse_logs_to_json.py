@@ -387,7 +387,7 @@ def parse_log_to_json(
     return str(output_path)
 
 
-def parse_all_mapped_logs(logs_dir: str = "results/logs", output_dir: str = "results/convergence_history"):
+def parse_all_mapped_logs(logs_dir: str = "results/two_players/logs", output_dir: str = "results/two_players/convergence"):
     """
     Parse all log files in the mapping and generate JSON files.
     
@@ -456,13 +456,13 @@ def main():
     )
     parser.add_argument(
         "--logs-dir",
-        default="results/logs",
-        help="Directory containing log files (default: results/logs)"
+        default="results/two_players/logs",
+        help="Directory containing log files (default: results/two_players/logs)"
     )
     parser.add_argument(
         "--output-dir",
-        default="results/convergence_history",
-        help="Directory to save JSON files (default: results/convergence_history)"
+        default="results/two_players/convergence",
+        help="Directory to save JSON files (default: results/two_players/convergence)"
     )
     parser.add_argument(
         "--q",

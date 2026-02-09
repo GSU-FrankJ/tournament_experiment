@@ -42,8 +42,6 @@ config = {
     "episodes": 2_048_000,    # Default sweep budget: exactly 500 updates at 4096 steps/update (可用 CLI 覆盖)
     "max_updates": 500,
     "eval_every_updates": 20,
-    "early_stop_abs_err": 0.8,
-    "early_stop_patience": 6,
     # Sweep1_E-inspired entropy schedule: wider exploration that decays to 0.015 (更激进但稳定)
     "entropy_coef_start": 0.03,
     "entropy_coef_hold": 0.03,

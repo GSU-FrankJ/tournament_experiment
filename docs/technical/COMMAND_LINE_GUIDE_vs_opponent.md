@@ -237,12 +237,9 @@ These are set in `config/one_stage_two_players.py` and used internally (cannot o
 - `lag_warmup_updates`: 10 (use opponent for first 10 updates)
 - `lag_fade_updates`: 10 (fade opponent usage over next 10 updates)
 
-**Early Stopping** (Source: `config/one_stage_two_players.py:44-46`):
-- `eval_every_updates`: 20 (evaluate every 20 updates)
-- `early_stop_abs_err`: 0.8 (stop if error < 0.8)
-- `early_stop_patience`: 6 (require 6 consecutive low-error evals)
-
-**Note**: To modify these, edit `config/one_stage_two_players.py` directly.
+**Note**: Training runs to completion (all budgeted steps). The convergence evaluation
+system (if enabled) provides stopping criteria that do not rely on knowing the
+theoretical equilibrium.
 
 ---
 

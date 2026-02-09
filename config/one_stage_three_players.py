@@ -28,8 +28,6 @@ config = {
     "episodes": 2_048_000,    # Default budget: 500 updates at 4096 steps/update
     "max_updates": 500,
     "eval_every_updates": 20,
-    "early_stop_abs_err": 0.8,
-    "early_stop_patience": 6,
 
     # Learning rate schedule
     "lr_start": 3e-4,

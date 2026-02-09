@@ -231,8 +231,8 @@ def plot_convergence_for_file(filepath: str, output_dir: str = "results/converge
     plot_separated(data, output_dir, suffix=suffix)
 
 
-def process_all_files(convergence_dir: str = "results/convergence_history",
-                      output_dir: str = "results/convergence_plots",
+def process_all_files(convergence_dir: str = "results/two_players/convergence",
+                      output_dir: str = "results/plots",
                       algorithm: Optional[str] = None,
                       q_value: Optional[float] = None,
                       suffix: str = "",
@@ -293,14 +293,14 @@ def main():
     parser.add_argument(
         "--convergence-dir",
         type=str,
-        default="results/convergence_history",
-        help="Directory containing convergence JSON files (default: results/convergence_history)"
+        default="results/two_players/convergence",
+        help="Directory containing convergence JSON files (default: results/two_players/convergence)"
     )
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="results/convergence_plots",
-        help="Directory to save generated plots (default: results/convergence_plots)"
+        default="results/plots",
+        help="Directory to save generated plots (default: results/plots)"
     )
     parser.add_argument(
         "--algorithm",

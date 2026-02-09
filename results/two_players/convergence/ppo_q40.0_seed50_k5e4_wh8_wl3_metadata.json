@@ -1,0 +1,12 @@
+{
+  "run_id": "20260202_213110",
+  "method": "ppo",
+  "q": 40.0,
+  "seed": 50,
+  "ablation_name": "k5e4_wh8_wl3",
+  "git_sha": "5e3e61fe37e6",
+  "cmdline": "run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 50 --theory-align-v2 --enable-convergence-eval --cheap-gate-profile relaxed --k 0.0005 --w_h 8 --w_l 3 --ablation-name k5e4_wh8_wl3",
+  "timestamp": "2026-02-02T21:48:40.230075",
+  "convergence_file": "ppo_q40.0_seed50_k5e4_wh8_wl3_convergence.json",
+  "variant_name": "baseline"
+}

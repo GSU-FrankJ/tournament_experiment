@@ -16,7 +16,7 @@ Game-theoretic tournament experiments with PPO reinforcement learning. The activ
 | [`tools/`](tools/README.md) | Analysis & diagnostics | `plot_convergence.py` |
 | [`results/`](results/README.md) | Experiment outputs | JSON convergence data, CSV results |
 | [`docs/`](docs/README.md) | Documentation | Guides, technical docs, archive |
-| [`paper_artifacts/`](paper_artifacts/README.md) | Paper generation | `python -m paper_artifacts make_all` |
+| [`paper/generator/`](paper/generator/README.md) | Paper generation | `python -m paper.generator make_all` |
 
 **Quick commands:**
 ```bash
@@ -30,7 +30,7 @@ python run/run_two_players.py --method gradient --q 40
 python tools/plot_convergence_detailed.py
 
 # Generate paper artifacts
-python -m paper_artifacts make_all
+python -m paper.generator make_all
 ```
 
 ## Project Structure
@@ -44,11 +44,18 @@ tournament_experiment/
 │   ├── technical/       # Implementation docs, audit reports
 │   └── archive/         # Legacy materials
 ├── envs/                # Game environments
-├── paper_artifacts/     # Paper figure/table generation pipeline
-├── paper_out/           # Generated paper outputs (figures, tables, data)
+├── paper/               # Paper generation & outputs
+│   ├── generator/       # Python package (figure/table pipeline)
+│   ├── figures/         # Generated figures
+│   ├── tables/          # Generated tables
+│   └── data/            # Generated data
 ├── results/             # Experiment outputs
-│   ├── convergence_history/  # JSON training data
-│   └── convergence_plots/    # Generated plots
+│   ├── two_players/     # Symmetric 2-player (convergence/, logs/, summary.csv)
+│   ├── three_players/   # 3-player (convergence/, logs/)
+│   ├── different_cost/  # Asymmetric cost (convergence/, logs/, summary.csv)
+│   ├── different_ability/ # Different ability (convergence/, logs/, summary.csv)
+│   ├── ablation/        # Ablation studies (exploit_params/, mechanism/)
+│   └── plots/           # Diagnostic plots
 ├── run/                 # Experiment entry points
 ├── tools/               # Analysis and diagnostic scripts
 └── utils/               # Core utility modules

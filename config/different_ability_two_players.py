@@ -66,8 +66,6 @@ PPO_DEFAULTS: Dict[str, object] = {
     "target_kl": 0.010,
     # Evaluation / stopping
     "eval_every_updates": 20,
-    "early_stop_abs_err": 0.8,
-    "early_stop_patience": 6,
 }
 
 

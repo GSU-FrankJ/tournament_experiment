@@ -107,7 +107,7 @@ def _build_log_path(args: argparse.Namespace) -> str:
     seed_val = getattr(args, "seed", None)
     seed_tag = f"_seed{int(seed_val)}" if seed_val is not None else ""
     filename = f"one_stage_two_players_{method_tag}_{q_tag}{episodes_tag}{seed_tag}_{timestamp}.log"
-    return os.path.join("results", "logs", filename)
+    return os.path.join("results", "two_players", "logs", filename)
 
 
 def _clip_effort(value: float, bounds: tuple[float, float]) -> float:
@@ -541,7 +541,7 @@ def run_gradient(
         }
         
         # Create convergence_history directory if it doesn't exist
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "two_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         
         # Save to JSON file
@@ -607,6 +607,10 @@ def run_ppo(
     disable_cheap_gate: bool = False,
     disable_exploitability: bool = False,
     ablation_name: str = "baseline",
+    # Exploit ablation sweep parameters (override config values)
+    exploit_eps: Optional[float] = None,
+    patience_exploit: Optional[int] = None,
+    exploit_M: Optional[int] = None,
 ) -> List[Dict]:
     """Train PPO via self-play with conditioning on (q, k, w_gap).
 
@@ -624,6 +628,11 @@ def run_ppo(
     - disable_cheap_gate: Gate always ON (eval eligible every update)
     - disable_exploitability: Never evaluate exploitability (converge on effort only)
     - ablation_name: Tag for this variant (appears in all output files)
+    
+    Exploit ablation sweep parameters (override config if provided):
+    - exploit_eps: Exploitability threshold for convergence (default: from config or 0.05)
+    - patience_exploit: Consecutive passes required for stopping (default: from config or 5)
+    - exploit_M: Monte Carlo samples for exploitability (default: from config or 8192)
     """
     # Validate rollout_mode
     if rollout_mode not in ("selfplay", "vs_opponent"):
@@ -788,9 +797,6 @@ def run_ppo(
 
     last_update_metrics: Optional[Dict[str, float]] = None
     eval_every = int(cfg.get("eval_every_updates", 20) or 0)
-    es_abs = float(cfg.get("early_stop_abs_err", 1.0))
-    es_pat = int(cfg.get("early_stop_patience", 5) or 0)
-    es_counter = 0
     early_stop_triggered = False
     convergence_cfg = cfg.get("convergence", {}) or {}
     convergence_enabled = bool(convergence_cfg.get("enabled", False))
@@ -824,6 +830,7 @@ def run_ppo(
     last_best_dev_effort = None
     last_symmetry_gap = None
     converged_flag = 0
+    stop_reason = "max_updates"  # default if we exhaust episodes
 
     # Reuse a single env so its RNG advances across steps; recreating it each step
     # would re-seed and make noise effectively deterministic for a fixed q.
@@ -1366,24 +1373,6 @@ def run_ppo(
         update_idx += 1
         steps_done += steps_this
 
-        if eval_every > 0 and es_pat > 0 and (update_idx % eval_every == 0):
-            abs_errs = []
-            for q_eval in eval_qs:
-                e2_star_val = clip_stage2(e_star_two_players(q_eval, w_h, w_l, k), effort_bounds)
-                state_eval = agent.state_from_params(q=float(q_eval), k=k, w_h=w_h, w_l=w_l)
-                e_eval = agent.mean_effort(state_eval)
-                abs_errs.append(abs(e_eval - e2_star_val))
-            mean_abs_err = float(np.mean(abs_errs)) if abs_errs else float("inf")
-            if mean_abs_err < es_abs:
-                es_counter += 1
-            else:
-                es_counter = 0
-            print(f"[EarlyStopProbe] updates={update_idx} mean_abs_err={mean_abs_err:.3f} ({es_counter}/{es_pat})")
-            if es_counter >= es_pat:
-                print("[EarlyStop] satisfied mean_abs_err threshold and patience. Stopping training.")
-                early_stop_triggered = True
-                break
-
         # === Convergence evaluation (optional, default OFF) ===
         # Ablation flags: disable_cheap_gate, disable_exploitability, exploit_every_updates
         if convergence_enabled and cheap_tracker is not None and rollout_mode == "selfplay":
@@ -1418,7 +1407,10 @@ def run_ppo(
                 std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
                 drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
                 patience_drift = int(cheap_cfg.get("patience_drift", 2))
-                exploit_eps = float(exploit_cfg.get("exploit_eps", 0.05))
+                # CLI override for exploit params, else fall back to config
+                exploit_eps_val = exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.05))
+                patience_exploit_val = patience_exploit if patience_exploit is not None else int(exploit_cfg.get("patience_exploit", 5))
+                exploit_M_val = exploit_M if exploit_M is not None else int(exploit_cfg.get("M", 8192))
                 mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
                 std_ok = std_kl_window is not None and std_kl_window <= std_thresh
                 drift_ok = drift_effort is not None and drift_effort <= drift_thresh
@@ -1476,7 +1468,7 @@ def run_ppo(
                         agent,
                         q=q_for_exploit,
                         effort_bounds=effort_bounds,
-                        M=int(exploit_cfg.get("M", 8192)),
+                        M=exploit_M_val,
                         grid_cfg={
                             "stage_a_step": float(grid_cfg.get("stage_a_step", 5.0)),
                             "stage_b_radius": float(grid_cfg.get("stage_b_radius", 15.0)),
@@ -1505,14 +1497,15 @@ def run_ppo(
                         f"candidates={exploit_res.get('num_candidates', 'NA')}",
                         flush=True,
                     )
-                    if exploitability_val < exploit_eps:
+                    if exploitability_val < exploit_eps_val:
                         exploit_ok_streak += 1
                     else:
                         exploit_ok_streak = 0
                         if not disable_cheap_gate:
                             drift_ok_streak = 0  # reset cheap gate streak on failure
-                    if exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
+                    if exploit_ok_streak >= patience_exploit_val:
                         converged_flag = 1
+                        stop_reason = "exploitability"
                         print(
                             f"[Convergence] Exploitability satisfied for {exploit_ok_streak} evals; stopping training.",
                             flush=True,
@@ -1553,7 +1546,7 @@ def run_ppo(
                     else:
                         decision = f"GATE_FAIL({','.join(fail_reasons)})"
                 else:
-                    decision = "EXPLOIT_OK_STREAK++" if exploitability_val is not None and exploitability_val < exploit_eps else "RUN_EXPLOIT"
+                    decision = "EXPLOIT_OK_STREAK++" if exploitability_val is not None and exploitability_val < exploit_eps_val else "RUN_EXPLOIT"
 
                 mean_status = f"{_fmt(mean_kl_window)}({'OK' if mean_ok else 'FAIL'}<={mean_thresh:.4f})"
                 std_status = f"{_fmt(std_kl_window)}({'OK' if std_ok else 'FAIL'}<={std_thresh:.4f})"
@@ -1573,7 +1566,7 @@ def run_ppo(
                     f"best_dev={best_dev_effort if best_dev_effort is not None else 'NA'} "
                     f"sym_gap={symmetry_gap_val if symmetry_gap_val is not None else 'NA'} "
                     f"streaks: drift={drift_ok_streak}/{patience_drift} "
-                    f"exploit={exploit_ok_streak}/{exploit_cfg.get('patience_exploit', 5)}",
+                    f"exploit={exploit_ok_streak}/{patience_exploit_val}",
                     flush=True,
                 )
 
@@ -1752,24 +1745,48 @@ def run_ppo(
     
     # Save convergence history for each trained q value (extended format for paper artifacts)
     if convergence_history["steps"]:  # Only save if we have data
-        convergence_dir = os.path.join("results", "convergence_history")
+        convergence_dir = os.path.join("results", "two_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         
         # Get seed from config (for filename)
         seed_val = int(cfg.get("seed", 42))
         
         for q_val in train_qs:
+            # Compute final effort for this q value
+            _theo_effort = float(clip_stage2(
+                e_star_two_players(q_val, w_h, w_l, k), tuple(effort_bounds)
+            ))
+            _s = agent.state_from_params(q=float(q_val), k=k, w_h=w_h, w_l=w_l)
+            with torch.no_grad():
+                _dist, _ = agent.dist(_s)
+                _alpha = float(_dist.concentration1.mean().item())
+                _beta = float(_dist.concentration0.mean().item())
+            _final_effort = compute_policy_mean_effort(_alpha, _beta, effort_bounds[0], effort_bounds[1])
+            _gap = abs(_final_effort - _theo_effort)
+
             convergence_data = {
                 "algorithm": "PPO",
                 "q": float(q_val),
                 "seed": seed_val,
                 "ablation_name": ablation_name,
-                "theoretical_effort": float(
-                    clip_stage2(
-                        e_star_two_players(q_val, w_h, w_l, k),
-                        tuple(effort_bounds)
-                    )
-                ),
+                "theoretical_effort": _theo_effort,
+                # Structured dicts expected by sweep parser
+                "theoretical": {
+                    "effort": _theo_effort,
+                },
+                "final": {
+                    "effort": _final_effort,
+                    "gap": _gap,
+                },
+                # Stopping info (required by sweep_exploit_ablation.py)
+                "stop_reason": stop_reason,
+                "stopped_at_update": update_idx,
+                "joint_exploit_ok_streak": exploit_ok_streak,
+                "final_exploit_1": last_exploitability,
+                "final_exploit_2": last_exploitability,  # symmetric game
+                "final_exploit_max": last_exploitability,
+                "final_br_effort_1": last_best_dev_effort,
+                "final_br_effort_2": last_best_dev_effort,  # symmetric game
                 # Core effort series
                 "steps": convergence_history["steps"],
                 "agent1_effort": convergence_history["agent1_effort"],
@@ -1792,6 +1809,14 @@ def run_ppo(
                 "disable_cheap_gate": disable_cheap_gate,
                 "disable_exploitability": disable_exploitability,
                 "exploit_every_updates": exploit_every_updates,
+                "exploit_config": {
+                    "exploit_eps": exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.05)),
+                    "patience_exploit": patience_exploit if patience_exploit is not None else int(exploit_cfg.get("patience_exploit", 5)),
+                    "exploit_every_updates": exploit_every_updates,
+                    "exploit_M": exploit_M if exploit_M is not None else int(exploit_cfg.get("M", 8192)),
+                    "disable_cheap_gate": disable_cheap_gate,
+                    "disable_exploitability": disable_exploitability,
+                },
             }
             
             # Build filename with seed and ablation (new format)
@@ -1977,6 +2002,13 @@ def _run_cli(args: argparse.Namespace) -> str:
             flush=True,
         )
     
+    # --disable-entropy: zero entropy regularization (mechanism ablation)
+    if args.disable_entropy:
+        cfg["entropy_coef_start"] = 0.0
+        cfg["entropy_coef_hold"] = 0.0
+        cfg["entropy_coef_end"] = 0.0
+        print("[ablation] --disable-entropy: entropy_coef=0 throughout training", flush=True)
+
     # === PPO training dynamics override (separate from schedule endpoints) ===
     # This is NOT subject to mutual exclusion - can be combined with other overrides.
     if args.override_update_epochs is not None:
@@ -2002,7 +2034,7 @@ def _run_cli(args: argparse.Namespace) -> str:
     print(f"[config] run_id={run_id} variant_name={variant_name}", flush=True)
 
     # Use new v2 CSV path with run_id and variant_name columns
-    csv_path = os.path.join("results", "one_stage_two_players_v2.csv")
+    csv_path = os.path.join("results", "two_players", "summary.csv")
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
     # Convergence eval enable flag (preserves default off)
@@ -2055,6 +2087,10 @@ def _run_cli(args: argparse.Namespace) -> str:
             disable_cheap_gate=args.disable_cheap_gate,
             disable_exploitability=args.disable_exploitability,
             ablation_name=args.ablation_name,
+            # Exploit ablation sweep parameters (override config)
+            exploit_eps=args.exploit_eps,
+            patience_exploit=args.exploit_patience,
+            exploit_M=args.exploit_M,
         )
         for row in rows:
             save_standardized_result(row, csv_path)
@@ -2210,6 +2246,11 @@ def main():
         help="Maximum interval between exploitability evaluations (caps worst-case cost). Default: 10.",
     )
     parser.add_argument(
+        "--disable-entropy",
+        action="store_true",
+        help="Set entropy_coef to 0 throughout training (mechanism ablation).",
+    )
+    parser.add_argument(
         "--disable-cheap-gate",
         action="store_true",
         help="Gate always ON: exploitability evaluation is eligible every update (combined with --exploit-every-updates N, evals every N updates).",
@@ -2224,6 +2265,25 @@ def main():
         type=str,
         default="baseline",
         help="Ablation variant name for paper artifacts. Included in JSON, CSV, and metadata. Default: 'baseline'.",
+    )
+    # Exploit ablation sweep parameters (override config values)
+    parser.add_argument(
+        "--exploit-eps",
+        type=float,
+        default=None,
+        help="Override exploit_eps threshold (default: from config, 0.05)",
+    )
+    parser.add_argument(
+        "--exploit-patience",
+        type=int,
+        default=None,
+        help="Override patience_exploit (default: from config, 5)",
+    )
+    parser.add_argument(
+        "--exploit-M",
+        type=int,
+        default=None,
+        help="Monte Carlo samples for exploitability (default: from config, 8192)",
     )
     args = parser.parse_args()
 

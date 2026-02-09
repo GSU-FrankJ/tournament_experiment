@@ -1,0 +1,12 @@
+{
+  "run_id": "20260207_105911",
+  "method": "ppo",
+  "q": 40.0,
+  "seed": 42,
+  "ablation_name": "eps_001",
+  "git_sha": "40c5d6b64ec1",
+  "cmdline": "run/run_two_players.py --method ppo --q 40.0 --seed 42 --episodes 2048000 --exploit-eps 0.01 --exploit-patience 5 --exploit-every-updates 10 --exploit-M 8192 --ablation-name eps_001 --enable-convergence-eval --cheap-gate-profile relaxed --theory-align-v2 --rollout-mode selfplay",
+  "timestamp": "2026-02-07T13:29:00.109015",
+  "convergence_file": "ppo_q40.0_seed42_eps_001_convergence.json",
+  "variant_name": "baseline"
+}
