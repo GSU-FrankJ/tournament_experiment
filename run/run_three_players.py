@@ -879,7 +879,7 @@ def run_ppo(
             std_thresh = float(cheap_cfg.get("std_kl_thresh", 0.0035))
             drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
             patience_drift = int(cheap_cfg.get("patience_drift", 2))
-            exploit_eps = float(exploit_cfg.get("exploit_eps", 0.05))
+            exploit_eps = float(exploit_cfg.get("exploit_eps", 0.03))
             
             mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
             std_ok = std_kl_window is not None and std_kl_window <= std_thresh
@@ -1040,7 +1040,7 @@ def run_ppo(
             "final_br_effort_2": last_best_dev_effort,  # symmetric 3-player game
             # Exploit config
             "exploit_config": {
-                "exploit_eps": float(exploit_cfg.get("exploit_eps", 0.05)),
+                "exploit_eps": float(exploit_cfg.get("exploit_eps", 0.03)),
                 "patience_exploit": int(exploit_cfg.get("patience_exploit", 5)),
                 "exploit_every_updates": exploit_every_updates,
                 "exploit_M": int(exploit_cfg.get("M", 8192)),
@@ -1259,7 +1259,7 @@ def main():
         "--exploit-eps",
         type=float,
         default=None,
-        help="Override exploit_eps threshold (default: from config, 0.05)",
+        help="Override exploit_eps threshold (default: from config, 0.03)",
     )
     parser.add_argument(
         "--exploit-patience",

@@ -98,7 +98,7 @@ config = {
             "patience_drift": 2,
         },
         "exploit": {
-            "exploit_eps": 0.05,
+            "exploit_eps": 0.03,
             "patience_exploit": 5,
             "M": 8192,
             "grid": {

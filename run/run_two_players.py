@@ -630,7 +630,7 @@ def run_ppo(
     - ablation_name: Tag for this variant (appears in all output files)
     
     Exploit ablation sweep parameters (override config if provided):
-    - exploit_eps: Exploitability threshold for convergence (default: from config or 0.05)
+    - exploit_eps: Exploitability threshold for convergence (default: from config or 0.03)
     - patience_exploit: Consecutive passes required for stopping (default: from config or 5)
     - exploit_M: Monte Carlo samples for exploitability (default: from config or 8192)
     """
@@ -1408,7 +1408,7 @@ def run_ppo(
                 drift_thresh = float(cheap_cfg.get("drift_effort_thresh", 2.0))
                 patience_drift = int(cheap_cfg.get("patience_drift", 2))
                 # CLI override for exploit params, else fall back to config
-                exploit_eps_val = exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.05))
+                exploit_eps_val = exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.03))
                 patience_exploit_val = patience_exploit if patience_exploit is not None else int(exploit_cfg.get("patience_exploit", 5))
                 exploit_M_val = exploit_M if exploit_M is not None else int(exploit_cfg.get("M", 8192))
                 mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
@@ -1810,7 +1810,7 @@ def run_ppo(
                 "disable_exploitability": disable_exploitability,
                 "exploit_every_updates": exploit_every_updates,
                 "exploit_config": {
-                    "exploit_eps": exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.05)),
+                    "exploit_eps": exploit_eps if exploit_eps is not None else float(exploit_cfg.get("exploit_eps", 0.03)),
                     "patience_exploit": patience_exploit if patience_exploit is not None else int(exploit_cfg.get("patience_exploit", 5)),
                     "exploit_every_updates": exploit_every_updates,
                     "exploit_M": exploit_M if exploit_M is not None else int(exploit_cfg.get("M", 8192)),
@@ -2271,7 +2271,7 @@ def main():
         "--exploit-eps",
         type=float,
         default=None,
-        help="Override exploit_eps threshold (default: from config, 0.05)",
+        help="Override exploit_eps threshold (default: from config, 0.03)",
     )
     parser.add_argument(
         "--exploit-patience",

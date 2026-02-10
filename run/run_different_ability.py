@@ -452,7 +452,7 @@ def run_ppo_different_ability(
     train_qs: Optional[List[float]] = None,
     *,
     ablation_name: str = "baseline",
-    exploit_eps: float = 0.05,
+    exploit_eps: float = 0.03,
     patience_exploit: int = 5,
     exploit_every_updates: int = 10,
     exploit_M: int = 8192,
@@ -471,7 +471,7 @@ def run_ppo_different_ability(
         episodes: Total training steps (default from config)
         train_qs: List of q values to train on (default from config)
         ablation_name: Tag for this variant
-        exploit_eps: Exploitability threshold for convergence (default 0.05)
+        exploit_eps: Exploitability threshold for convergence (default 0.03)
         patience_exploit: Consecutive passes required for stopping (default 5)
         exploit_every_updates: Max interval between exploitability evaluations (default 10)
         exploit_M: Monte Carlo samples for exploitability (default 8192)
@@ -1137,8 +1137,8 @@ def main():
     parser.add_argument(
         "--exploit-eps",
         type=float,
-        default=0.05,
-        help="Exploitability threshold for convergence (default: 0.05)",
+        default=0.03,
+        help="Exploitability threshold for convergence (default: 0.03)",
     )
     parser.add_argument(
         "--exploit-patience",

@@ -62,7 +62,7 @@ All profiles use `window_size: 20`.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `exploit_eps` | 0.05 | Exploitability threshold (ε for ε-Nash) |
+| `exploit_eps` | 0.03 | Exploitability threshold (ε for ε-Nash) |
 | `patience_exploit` | 5 | Consecutive passes needed to declare convergence |
 | `M` | 8192 | Monte Carlo samples for deviation payoff |
 
