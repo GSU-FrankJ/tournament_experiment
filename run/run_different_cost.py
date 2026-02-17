@@ -205,18 +205,16 @@ def gradient_descent_different_cost(
     
     lo, hi = effort_bounds
     
-    # Get theoretical equilibrium efforts (different for each player)
+    # Get theoretical equilibrium efforts (for eval logging only)
     e1_star, e2_star = e_star_two_players_asymmetric_cost(
         cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k1"], cfg["k2"]
     )
     e1_star = _clip_effort(e1_star, effort_bounds)
     e2_star = _clip_effort(e2_star, effort_bounds)
-    
-    # Initialize near but not at theoretical values (perturbed starts)
-    # Player 1: start below theory, Player 2: start above theory
-    perturb = max(init_perturb, 1e-6)
-    e1 = _clip_effort(e1_star * 0.8, effort_bounds)
-    e2 = _clip_effort(e2_star * 1.2, effort_bounds)
+
+    # Start at fixed fractions of effort range (no e* dependency)
+    e1 = _clip_effort(lo + (hi - lo) * 0.3, effort_bounds)
+    e2 = _clip_effort(lo + (hi - lo) * 0.7, effort_bounds)
     
     history = {
         "init_e1": e1,

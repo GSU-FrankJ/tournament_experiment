@@ -50,7 +50,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config.one_stage_two_players import config as base_config
 from utils.theory import e_star_two_players, clip_stage2
 from utils.eval import build_csv_row
-from utils.plot import plot_effort_curve
 from utils.logger import save_standardized_result
 from utils.rollout_stats import (
     RolloutStatsAccumulator,
@@ -385,16 +384,9 @@ def gradient_descent_two_players(
         raise ValueError("grad_eps must be positive for finite differences")
     num_samples = max(1, int(num_samples))
     lo, hi = effort_bounds
-    e_theory = float(e_star_two_players(cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"]))
-    # Start near theory but enforce e1 != e2 to avoid trivial symmetry.
-    half_perturb = max(init_perturb * 0.5, 1e-6)
-    e1 = _clip_effort(e_theory - half_perturb, effort_bounds)
-    e2 = _clip_effort(e_theory + half_perturb, effort_bounds)
-    if abs(e1 - e2) < 1e-8:
-        jitter = max(half_perturb, 0.01 * (hi - lo))
-        e2 = _clip_effort(e1 + jitter, effort_bounds)
-        if abs(e1 - e2) < 1e-8:
-            e1 = _clip_effort(e1 - jitter, effort_bounds)
+    # Start at fixed fractions of effort range (no e* dependency)
+    e1 = _clip_effort(lo + (hi - lo) * 0.3, effort_bounds)
+    e2 = _clip_effort(lo + (hi - lo) * 0.7, effort_bounds)
 
     history = {
         "init_e1": e1,
@@ -983,13 +975,10 @@ def run_ppo(
         apply_warmup_bias = update_idx < warmup_updates
         
         if apply_warmup_bias:
-            # 计算当前q的理论值
-            q_for_theory = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
-            e_theory = clip_stage2(e_star_two_players(q_for_theory, w_h, w_l, k), effort_bounds)
-            # 偏移量随训练逐渐减小
+            # Bias decays linearly over warmup
             bias_strength = 1.0 - (float(update_idx) / float(max(1, warmup_updates)))
-            # Agent1向上偏移30%，Agent2向下偏移30%
-            bias_magnitude = e_theory * 0.3 * bias_strength
+            # Use fixed fraction of effort range (no e* dependency)
+            bias_magnitude = (effort_bounds[1] - effort_bounds[0]) * 0.15 * bias_strength
             if update_idx == 0:
                 print(f"[AsymmetricInit] Warmup for {warmup_updates} updates: Agent1 bias +{bias_magnitude:.2f}, Agent2 bias -{bias_magnitude:.2f}")
 
@@ -1730,19 +1719,6 @@ def run_ppo(
 
         rows.append(row)
 
-    # Plot overlays for each q (training history)
-    plot_effort_curve(
-        efforts=history,
-        qs=eval_qs,
-        e_star_fn=e_star_two_players,
-        w_h=w_h,
-        w_l=w_l,
-        k=k,
-        title="One-Stage Two-Player learned effort vs episodes",
-        output_png=os.path.join("results", "one_stage_two_players.png"),
-        effort_bounds=effort_bounds,
-    )
-    
     # Save convergence history for each trained q value (extended format for paper artifacts)
     if convergence_history["steps"]:  # Only save if we have data
         convergence_dir = os.path.join("results", "two_players", "convergence")
@@ -1966,7 +1942,7 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_scale"] = 10000.0
         cfg["theory_align_v2_conc_max"] = 100000.0
         cfg["theory_align_v2_var_coef"] = 5e-2
-        cfg["theory_align_v2_br_coef"] = 3e-3
+        cfg["theory_align_v2_br_coef"] = 0.0
         cfg["theory_align_v2_conc_min_start"] = 100.0
         cfg["theory_align_v2_conc_scale_start"] = 100.0
         cfg["theory_align_v2_var_coef_start"] = 0.0

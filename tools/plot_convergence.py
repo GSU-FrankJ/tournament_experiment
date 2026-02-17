@@ -440,18 +440,6 @@ def main():
         else:
             print(f"  {algorithm}: No data found")
     
-    # Create plots for all data
-    if any(data.values()):
-        print("\n🎨 Generating plots...")
-        plot_convergence_figure(data)
-        plot_convergence_separate_agents(data)
-        print("\n✅ General plots generated successfully!")
-    else:
-        print("\n❌ No data available to plot.")
-        print("💡 Run your experiments first to generate convergence data:")
-        print("   - PPO: python run/run_two_players.py --method ppo --q 25 --episodes 2048000")
-        print("   - Gradient: python run/run_two_players.py --method gradient --q 25")
-    
     # Check for different_cost data and generate dedicated plots
     diff_cost_data = load_convergence_data(scenario_filter="different_cost")
     if any(diff_cost_data.values()):

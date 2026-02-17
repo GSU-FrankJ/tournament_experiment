@@ -207,16 +207,15 @@ def gradient_descent_different_ability(
     
     lo, hi = effort_bounds
     
-    # Get theoretical equilibrium effort (same for both players)
+    # Get theoretical equilibrium effort (for eval logging only)
     e_star = e_star_two_players_different_ability(
         cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"], cfg["l1"], cfg["l2"]
     )
     e_star = _clip_effort(e_star, effort_bounds)
-    
-    # Initialize with perturbation from theoretical value
-    perturb = max(init_perturb, 1e-6)
-    e1 = _clip_effort(e_star * 0.8, effort_bounds)  # Start below
-    e2 = _clip_effort(e_star * 1.2, effort_bounds)  # Start above
+
+    # Start at fixed fractions of effort range (no e* dependency)
+    e1 = _clip_effort(lo + (hi - lo) * 0.3, effort_bounds)
+    e2 = _clip_effort(lo + (hi - lo) * 0.7, effort_bounds)
     
     history = {
         "init_e1": e1,

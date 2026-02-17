@@ -355,13 +355,10 @@ def gradient_descent_three_players(
         raise ValueError("grad_eps must be positive for finite differences")
     num_samples = max(1, int(num_samples))
     lo, hi = effort_bounds
-    e_theory = float(e_star_three_players(cfg["q"], cfg["w_h"], cfg["w_l"], cfg["k"]))
-    
-    # Start near theory but enforce distinct starting points
-    perturb = max(init_perturb * 0.5, 1e-6)
-    e1 = _clip_effort(e_theory - perturb, effort_bounds)
-    e2 = _clip_effort(e_theory, effort_bounds)
-    e3 = _clip_effort(e_theory + perturb, effort_bounds)
+    # Start at fixed fractions of effort range (no e* dependency)
+    e1 = _clip_effort(lo + (hi - lo) * 0.25, effort_bounds)
+    e2 = _clip_effort(lo + (hi - lo) * 0.50, effort_bounds)
+    e3 = _clip_effort(lo + (hi - lo) * 0.75, effort_bounds)
 
     history = {
         "init_e1": e1,
@@ -777,10 +774,8 @@ def run_ppo(
         if apply_asymmetric_bias:
             # Bias strength decays linearly from 1.0 to 0.0 over warmup
             bias_strength = 1.0 - (float(update_idx) / float(max(1, asymmetric_warmup_updates)))
-            # Compute bias magnitude based on theoretical equilibrium
-            q_for_theory = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
-            e_theory = e_star_three_players(q_for_theory, w_h, w_l, k)
-            bias_amount = e_theory * asymmetric_bias_magnitude * bias_strength
+            # Use fixed fraction of effort range (no e* dependency)
+            bias_amount = (effort_bounds[1] - effort_bounds[0]) * asymmetric_bias_magnitude * bias_strength
         else:
             bias_amount = 0.0
         
@@ -1094,7 +1089,7 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_max"] = 100000.0
         # Regularization coefficients
         cfg["theory_align_v2_var_coef"] = 5e-2
-        cfg["theory_align_v2_br_coef"] = 3e-3
+        cfg["theory_align_v2_br_coef"] = 0.0
         # Ramping schedule for concentration
         cfg["theory_align_v2_conc_min_start"] = 100.0
         cfg["theory_align_v2_conc_scale_start"] = 100.0
