@@ -31,6 +31,9 @@ from .config import (
     Q_VALUES,
     e_star,
     THEORY_PARAMS,
+    AGENT_COLORS,
+    AGENT_MARKERS,
+    WEIGHT_VARIANT_LABELS,
 )
 from .extract import (
     load_all_convergence_data,
@@ -84,120 +87,184 @@ def _get_linestyle(method: str) -> str:
 def plot_convergence_main(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
+    weight_variants: List[str] = None,
     output_path: str = None,
     save_data: bool = True,
 ) -> Tuple[plt.Figure, str]:
     """
-    Generate main convergence figure: 1x3 grid faceted by q.
-    
-    Each panel shows:
-    - x-axis: Training steps
-    - y-axis: Effort
-    - Lines: Theory (dashed), Gradient (blue), TEL-PPO (orange)
-    - Multi-seed: mean + 95% CI band
-    
+    Generate main convergence figure: 2x3 grid faceted by q and weight variant.
+
+    Each panel shows per-agent efforts:
+    - Agent 1 (solid) and Agent 2 (dashed)
+    - Multi-seed: light individual traces (alpha=0.25) + bold aggregate mean with CI band
+    - Theory line from data's theoretical_effort column
+
+    Rows correspond to weight variants (top=baseline, bottom=wh8_wl4).
+    Columns correspond to q values.
+
     Args:
         df: DataFrame with convergence data (if None, loads automatically)
         q_values: Q values to plot (default: [25, 40, 55])
-        output_path: Path to save figure (default: paper_out/figures/convergence_main.png)
+        weight_variants: Ablation variants for rows (default: ["baseline", "wh8_wl4"])
+        output_path: Path to save figure
         save_data: Whether to save underlying data to CSV
-    
+
     Returns:
         (figure, output_path)
     """
     setup_matplotlib_style()
     ensure_output_dirs()
-    
+
     if df is None:
         df = load_all_convergence_data()
     if q_values is None:
         q_values = Q_VALUES
+    if weight_variants is None:
+        weight_variants = ["baseline", "wh8_wl4"]
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "convergence_main.png")
-    
-    # Filter to two_players baseline only
+
+    # Filter to two_players and selected variants
     df = df[df["q"].isin(q_values)]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
-    df = df[df["ablation"] == "baseline"]
+    df = df[df["ablation"].isin(weight_variants)]
 
-    # Check if we have multiple seeds
-    has_multi_seed = df.groupby(["method", "q"])["seed"].nunique().max() > 1
-    
-    # Create figure
-    fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["convergence_main"])
-    if len(q_values) == 1:
-        axes = [axes]
-    
-    for ax, q in zip(axes, q_values):
-        q_df = df[df["q"] == q]
-        e_theory = e_star(q, **THEORY_PARAMS)
-        
-        # Plot theory line (horizontal dashed)
-        ax.axhline(y=e_theory, color=_get_color("Theory"), linestyle=_get_linestyle("Theory"),
-                   linewidth=2, label="Theory", zorder=1)
-        
-        # Plot each method
-        for method in ["Gradient", "TEL-PPO"]:
-            method_df = q_df[q_df["method"] == method]
+    n_rows = len(weight_variants)
+    n_cols = len(q_values)
+
+    fig, axes = plt.subplots(
+        n_rows, n_cols, figsize=FIGURE_SIZES["convergence_main"],
+        squeeze=False,
+    )
+
+    for row_idx, variant in enumerate(weight_variants):
+        var_df = df[df["ablation"] == variant]
+
+        for col_idx, q in enumerate(q_values):
+            ax = axes[row_idx, col_idx]
+            q_df = var_df[var_df["q"] == q]
+
+            if q_df.empty:
+                ax.set_title(f"q = {q} (no data)")
+                continue
+
+            # Theory line from data (use first non-NaN theoretical_effort)
+            theory_vals = q_df["theoretical_effort"].dropna()
+            if not theory_vals.empty:
+                e_theory = theory_vals.iloc[0]
+                ax.axhline(
+                    y=e_theory, color="black", linestyle="--",
+                    linewidth=2, label="Theory $e^*$", zorder=1,
+                )
+
+            # Filter to PPO method
+            method_df = q_df[q_df["method"].isin(["TEL-PPO", "PPO"])]
             if method_df.empty:
-                # Try alternate names
-                if method == "TEL-PPO":
-                    method_df = q_df[q_df["method"].str.upper() == "PPO"]
-                if method_df.empty:
+                continue
+
+            seeds = sorted(method_df["seed"].unique())
+            has_multi_seed = len(seeds) > 1
+
+            # Plot per-agent efforts
+            for agent_key, col_name, ls, label_base in [
+                ("agent1", "agent1_effort", "-", "Agent 1"),
+                ("agent2", "agent2_effort", "--", "Agent 2"),
+            ]:
+                color = AGENT_COLORS[agent_key]
+
+                if col_name not in method_df.columns:
                     continue
-            
-            color = _get_color(method)
-            linestyle = _get_linestyle(method)
-            
-            if has_multi_seed:
-                # Aggregate across seeds
-                agg_df = aggregate_seeds(method_df)
-                if "effort_mean_mean" in agg_df.columns:
-                    steps = agg_df["step"].values
-                    effort_mean = agg_df["effort_mean_mean"].values
-                    effort_ci = agg_df["effort_mean_ci95"].values
-                    
-                    ax.plot(steps, effort_mean, color=color, linestyle=linestyle,
-                           linewidth=2, label=method, zorder=2)
-                    ax.fill_between(steps, effort_mean - effort_ci, effort_mean + effort_ci,
-                                   color=color, alpha=0.2, zorder=1)
-            else:
-                # Single seed: plot directly
-                for (seed, ablation), seed_df in method_df.groupby(["seed", "ablation"]):
-                    seed_df = seed_df.sort_values("step")
-                    ax.plot(seed_df["step"], seed_df["effort_mean"], color=color,
-                           linestyle=linestyle, linewidth=2, label=method if seed == method_df["seed"].iloc[0] else None,
-                           zorder=2)
-        
-        ax.set_xlabel("Training Steps")
-        ax.set_ylabel("Effort")
-        ax.set_title(f"q = {q}")
-        ax.legend(loc="best")
-        
-        # Format x-axis with scientific notation for large numbers
-        ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6 else f"{x/1e3:.0f}k" if x >= 1e3 else f"{x:.0f}"))
-    
+
+                # Individual seed traces (light)
+                if has_multi_seed:
+                    for seed in seeds:
+                        seed_df = method_df[method_df["seed"] == seed].sort_values("step")
+                        ax.plot(
+                            seed_df["step"], seed_df[col_name],
+                            color=color, linestyle=ls, alpha=0.25,
+                            linewidth=0.8, zorder=1,
+                        )
+
+                # Aggregate mean + CI
+                agg_col_mean = f"{col_name}_mean"
+                agg_col_ci = f"{col_name}_ci95"
+
+                if has_multi_seed:
+                    agg_df = aggregate_seeds(method_df)
+                    if agg_col_mean in agg_df.columns:
+                        steps = agg_df["step"].values
+                        effort_mean = agg_df[agg_col_mean].values
+                        effort_ci = agg_df[agg_col_ci].values if agg_col_ci in agg_df.columns else np.zeros_like(effort_mean)
+
+                        ax.plot(
+                            steps, effort_mean, color=color, linestyle=ls,
+                            linewidth=2, label=label_base, zorder=3,
+                        )
+                        ax.fill_between(
+                            steps, effort_mean - effort_ci, effort_mean + effort_ci,
+                            color=color, alpha=0.15, zorder=2,
+                        )
+                else:
+                    # Single seed: plot directly
+                    single = method_df.sort_values("step")
+                    ax.plot(
+                        single["step"], single[col_name],
+                        color=color, linestyle=ls, linewidth=2,
+                        label=label_base, zorder=3,
+                    )
+
+            # Axis formatting
+            if row_idx == n_rows - 1:
+                ax.set_xlabel("Training Steps")
+            ax.set_ylabel("Effort")
+
+            # Title: q value on top row only
+            if row_idx == 0:
+                ax.set_title(f"q = {int(q)}")
+
+            # Row label on the leftmost column
+            if col_idx == 0:
+                variant_label = WEIGHT_VARIANT_LABELS.get(variant, variant)
+                ax.annotate(
+                    variant_label, xy=(0, 0.5),
+                    xytext=(-50, 0), textcoords="offset points",
+                    xycoords="axes fraction", ha="right", va="center",
+                    fontsize=FONT_SIZES["axis_label"], rotation=90,
+                )
+
+            # Legend only on first panel
+            if row_idx == 0 and col_idx == n_cols - 1:
+                ax.legend(loc="best", fontsize=FONT_SIZES["legend"])
+
+            ax.xaxis.set_major_formatter(
+                ticker.FuncFormatter(
+                    lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
+                    else f"{x/1e3:.0f}k" if x >= 1e3
+                    else f"{x:.0f}"
+                )
+            )
+
     plt.tight_layout()
-    
+    plt.subplots_adjust(left=0.12)
+
     # Save figure
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
-    
-    # Also save as PDF
     pdf_path = output_path.replace(".png", ".pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    
+
     # Save underlying data
     if save_data:
         data_path = os.path.join(DATA_DIR, "convergence_main.csv")
-        df_out = df[["step", "method", "q", "seed", "ablation", "effort_mean", 
-                     "agent1_effort", "agent2_effort", "theoretical_effort"]].copy()
+        out_cols = ["step", "method", "q", "seed", "ablation", "effort_mean",
+                    "agent1_effort", "agent2_effort", "theoretical_effort"]
+        df_out = df[[c for c in out_cols if c in df.columns]].copy()
         df_out.to_csv(data_path, index=False)
         print(f"[plots] Saved data to {data_path}")
-    
+
     print(f"[plots] Saved figure to {output_path}")
     print(f"[plots] Saved figure to {pdf_path}")
-    
+
     return fig, output_path
 
 
@@ -446,7 +513,7 @@ def plot_beta_snapshots(
     if df is None:
         df = load_all_convergence_data()
     if snapshot_fractions is None:
-        snapshot_fractions = [0.1, 0.5, 1.0]
+        snapshot_fractions = [0.1, 0.5, 0.9]
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "beta_snapshots.png")
     
@@ -480,7 +547,7 @@ def plot_beta_snapshots(
         
         # Plot Beta PDF
         y = beta_dist.pdf(x, alpha, beta_val)
-        ax.plot(x, y, color="#1f77b4", linewidth=2)
+        ax.plot(x, y, color="#1f77b4", linewidth=2, label="Both agents\n(symmetric)")
         ax.fill_between(x, y, alpha=0.3, color="#1f77b4")
         
         # Mark mean
@@ -836,6 +903,8 @@ def plot_equilibrium_recovery_dotplot(
     x_pos = 0
     x_ticks = []
     x_labels = []
+    # Track whether per-agent legend entries have been added
+    _legend_added = {"agent1": False, "agent2": False, "single": False, "mean": False}
 
     for exp in experiments:
         exp_final = final[final["experiment"] == exp] if "experiment" in final.columns else pd.DataFrame()
@@ -843,52 +912,73 @@ def plot_equilibrium_recovery_dotplot(
             continue
 
         q_vals = sorted(exp_final["q"].unique())
+        is_heterogeneous_cost = (exp == "different_cost")
+
         for q in q_vals:
             q_final = exp_final[exp_final["q"] == q]
             if q_final.empty:
                 continue
 
-            # Theoretical effort
-            e_theory = q_final["theoretical_effort"].iloc[0]
+            rng = np.random.RandomState(42 + int(x_pos * 100))
 
-            # Plot theoretical as horizontal line
-            ax.hlines(
-                e_theory,
-                x_pos - 0.3,
-                x_pos + 0.3,
-                colors="black",
-                linestyles="--",
-                linewidth=2,
-                zorder=2,
-            )
+            if is_heterogeneous_cost:
+                # --- Per-agent markers with separate theory lines ---
+                for agent_key, effort_col, theory_col, agent_label in [
+                    ("agent1", "agent1_effort", "theoretical_effort1", "Agent 1 (low-cost)"),
+                    ("agent2", "agent2_effort", "theoretical_effort2", "Agent 2 (high-cost)"),
+                ]:
+                    color = AGENT_COLORS[agent_key]
+                    marker = AGENT_MARKERS[agent_key]
 
-            # Plot learned effort for each seed
-            efforts = q_final["effort_mean"].values
-            jitter = np.random.RandomState(42 + int(x_pos * 100)).uniform(-0.15, 0.15, len(efforts))
-            ax.scatter(
-                x_pos + jitter,
-                efforts,
-                color="#ff7f0e",
-                s=60,
-                zorder=3,
-                alpha=0.8,
-                edgecolors="white",
-                linewidth=0.5,
-            )
+                    # Per-agent theory line (if column exists)
+                    if theory_col in q_final.columns:
+                        e_theory_agent = q_final[theory_col].dropna()
+                        if not e_theory_agent.empty:
+                            ax.hlines(
+                                e_theory_agent.iloc[0],
+                                x_pos - 0.3, x_pos + 0.3,
+                                colors=color, linestyles="--", linewidth=2, zorder=2,
+                            )
 
-            # Mean marker
-            mean_effort = efforts.mean()
-            ax.scatter(
-                x_pos,
-                mean_effort,
-                color="#d62728",
-                marker="D",
-                s=100,
-                zorder=4,
-                edgecolors="black",
-                linewidth=1,
-                label="Mean" if x_pos == 0 else None,
-            )
+                    # Per-seed scatter
+                    if effort_col in q_final.columns:
+                        efforts = q_final[effort_col].values
+                        jitter = rng.uniform(-0.12, 0.12, len(efforts))
+                        ax.scatter(
+                            x_pos + jitter, efforts,
+                            color=color, marker=marker, s=60, zorder=3,
+                            alpha=0.8, edgecolors="white", linewidth=0.5,
+                            label=agent_label if not _legend_added[agent_key] else None,
+                        )
+                        _legend_added[agent_key] = True
+            else:
+                # --- Single-marker behavior (original) ---
+                e_theory = q_final["theoretical_effort"].iloc[0]
+                ax.hlines(
+                    e_theory,
+                    x_pos - 0.3, x_pos + 0.3,
+                    colors="black", linestyles="--", linewidth=2, zorder=2,
+                )
+
+                efforts = q_final["effort_mean"].values
+                jitter = rng.uniform(-0.15, 0.15, len(efforts))
+                ax.scatter(
+                    x_pos + jitter, efforts,
+                    color="#ff7f0e", s=60, zorder=3, alpha=0.8,
+                    edgecolors="white", linewidth=0.5,
+                    label="Per-seed" if not _legend_added["single"] else None,
+                )
+                _legend_added["single"] = True
+
+                # Mean marker
+                mean_effort = efforts.mean()
+                ax.scatter(
+                    x_pos, mean_effort,
+                    color="#d62728", marker="D", s=100, zorder=4,
+                    edgecolors="black", linewidth=1,
+                    label="Seed mean" if not _legend_added["mean"] else None,
+                )
+                _legend_added["mean"] = True
 
             x_ticks.append(x_pos)
             x_labels.append(f"q={int(q)}")
@@ -904,7 +994,6 @@ def plot_equilibrium_recovery_dotplot(
     ax.set_title("Equilibrium Recovery Across Scenarios")
 
     # Add experiment group labels
-    # Calculate group positions
     group_starts = []
     x_pos_track = 0
     for exp in experiments:
@@ -916,7 +1005,6 @@ def plot_equilibrium_recovery_dotplot(
         group_starts.append((group_center, exp_labels.get(exp, exp)))
         x_pos_track += n_q + 0.5
 
-    # Add group labels below x-axis
     for center, label in group_starts:
         ax.annotate(
             label,
@@ -924,35 +1012,37 @@ def plot_equilibrium_recovery_dotplot(
             xycoords=("data", "axes fraction"),
             xytext=(0, -35),
             textcoords="offset points",
-            ha="center",
-            va="top",
+            ha="center", va="top",
             fontsize=FONT_SIZES["annotation"],
             fontweight="bold",
         )
 
-    # Legend for markers
+    # Legend
     legend_elements = [
         Line2D([0], [0], color="black", linestyle="--", linewidth=2, label="Theory e*"),
-        Line2D(
-            [0],
-            [0],
-            marker="o",
-            color="w",
-            markerfacecolor="#ff7f0e",
-            markersize=8,
-            label="Per-seed",
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="D",
-            color="w",
-            markerfacecolor="#d62728",
-            markeredgecolor="black",
-            markersize=8,
-            label="Seed mean",
-        ),
     ]
+    if _legend_added["single"]:
+        legend_elements.append(Line2D(
+            [0], [0], marker="o", color="w", markerfacecolor="#ff7f0e",
+            markersize=8, label="Per-seed",
+        ))
+    if _legend_added["mean"]:
+        legend_elements.append(Line2D(
+            [0], [0], marker="D", color="w", markerfacecolor="#d62728",
+            markeredgecolor="black", markersize=8, label="Seed mean",
+        ))
+    if _legend_added["agent1"]:
+        legend_elements.append(Line2D(
+            [0], [0], marker=AGENT_MARKERS["agent1"], color="w",
+            markerfacecolor=AGENT_COLORS["agent1"], markersize=8,
+            label="Agent 1 (low-cost)",
+        ))
+    if _legend_added["agent2"]:
+        legend_elements.append(Line2D(
+            [0], [0], marker=AGENT_MARKERS["agent2"], color="w",
+            markerfacecolor=AGENT_COLORS["agent2"], markersize=8,
+            label="Agent 2 (high-cost)",
+        ))
     ax.legend(handles=legend_elements, loc="upper right")
 
     plt.tight_layout()
@@ -964,10 +1054,14 @@ def plot_equilibrium_recovery_dotplot(
 
     if save_data:
         data_path = os.path.join(DATA_DIR, "equilibrium_recovery_dotplot.csv")
-        cols_to_save = ["method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        cols_to_save = ["method", "q", "seed", "ablation", "effort_mean",
+                        "theoretical_effort", "agent1_effort", "agent2_effort"]
+        for extra_col in ["theoretical_effort1", "theoretical_effort2"]:
+            if extra_col in final.columns:
+                cols_to_save.append(extra_col)
         if "experiment" in final.columns:
             cols_to_save.insert(0, "experiment")
-        final[cols_to_save].to_csv(data_path, index=False)
+        final[[c for c in cols_to_save if c in final.columns]].to_csv(data_path, index=False)
 
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path

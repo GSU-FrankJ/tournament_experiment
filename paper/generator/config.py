@@ -145,7 +145,7 @@ ABLATION_COLORS: Dict[str, str] = {
 
 # Figure sizes (inches)
 FIGURE_SIZES: Dict[str, Tuple[float, float]] = {
-    "convergence_main": (12, 4),       # 1x3 grid
+    "convergence_main": (12, 8),       # 2x3 grid
     "kl_dynamics": (10, 4),
     "exploitability_dynamics": (10, 4),
     "beta_evolution": (10, 4),
@@ -160,6 +160,23 @@ FONT_SIZES: Dict[str, int] = {
     "tick_label": 10,
     "legend": 10,
     "annotation": 9,
+}
+
+# Per-agent colors and markers (for heterogeneous experiments)
+AGENT_COLORS: Dict[str, str] = {
+    "agent1": "#1f77b4",
+    "agent2": "#ff7f0e",
+}
+
+AGENT_MARKERS: Dict[str, str] = {
+    "agent1": "o",
+    "agent2": "^",
+}
+
+# Weight-variant labels for convergence figure rows
+WEIGHT_VARIANT_LABELS: Dict[str, str] = {
+    "baseline": r"$w_H=6.5,\; w_L=3.0$",
+    "wh8_wl4": r"$w_H=8,\; w_L=4$",
 }
 
 # DPI for raster output
