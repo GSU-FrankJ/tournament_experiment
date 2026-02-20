@@ -149,7 +149,7 @@ def _sample_policy_efforts_3p(
             with torch.random.fork_rng(devices=[]):
                 torch.manual_seed(seed_value)
                 samples = dist.sample((M,))
-        samples = samples.squeeze(-1).clamp(0.0, 1.0)
+        samples = samples.reshape(M).clamp(0.0, 1.0)
     low, high = effort_bounds
     return (low + samples * (high - low)).to(device)
 

@@ -1,0 +1,12 @@
+{
+  "run_id": "20260218_045832",
+  "method": "ppo",
+  "q": 25.0,
+  "seed": 42,
+  "ablation_name": "no_cheap_gate",
+  "git_sha": "688f6a3c12d0",
+  "cmdline": "run/run_two_players.py --method ppo --q 25 --seed 42 --episodes 2048000 --disable-cheap-gate --ablation-name no_cheap_gate",
+  "timestamp": "2026-02-18T12:20:58.721635",
+  "convergence_file": "ppo_q25.0_seed42_no_cheap_gate_convergence.json",
+  "variant_name": "baseline"
+}

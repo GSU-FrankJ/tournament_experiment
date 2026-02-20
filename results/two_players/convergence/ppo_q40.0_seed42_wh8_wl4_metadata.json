@@ -1,0 +1,12 @@
+{
+  "run_id": "20260219_031437",
+  "method": "ppo",
+  "q": 40.0,
+  "seed": 42,
+  "ablation_name": "wh8_wl4",
+  "git_sha": "688f6a3c12d0",
+  "cmdline": "run/run_two_players.py --method ppo --q 40 --seed 42 --w_h 8 --w_l 4 --episodes 2048000 --ablation-name wh8_wl4",
+  "timestamp": "2026-02-19T04:52:40.686352",
+  "convergence_file": "ppo_q40.0_seed42_wh8_wl4_convergence.json",
+  "variant_name": "baseline"
+}

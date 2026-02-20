@@ -33,30 +33,39 @@ class Run:
     seed: int                  # Random seed
     ablation: str              # "baseline" | "no_cheap_gate" | "no_exploitability"
     path: str                  # Path to convergence JSON
+    experiment: str = "two_players"        # "two_players" | "three_players" | "different_cost" | "different_ability"
     metadata_path: Optional[str] = None    # Path to metadata JSON (may be None)
     has_time_series: bool = False          # True if new format with KL/alpha/beta
     is_legacy_format: bool = False         # True if inferred from old filename
-    
+    is_nested_format: bool = False         # True if history-based nested JSON
+
     @property
-    def run_key(self) -> Tuple[str, float, int, str]:
+    def run_key(self) -> Tuple[str, str, float, int, str]:
         """Unique key for this run."""
-        return (self.method, self.q, self.seed, self.ablation)
-    
+        return (self.experiment, self.method, self.q, self.seed, self.ablation)
+
     def __str__(self) -> str:
         legacy_tag = " (legacy)" if self.is_legacy_format else ""
         ts_tag = " [has time-series]" if self.has_time_series else ""
-        return f"{self.method}_q{self.q}_seed{self.seed}_{self.ablation}{legacy_tag}{ts_tag}"
+        exp_tag = f" [{self.experiment}]" if self.experiment != "two_players" else ""
+        return f"{self.method}_q{self.q}_seed{self.seed}_{self.ablation}{exp_tag}{legacy_tag}{ts_tag}"
 
 
 def _parse_filename(filename: str) -> Dict[str, any]:
     """
-    Parse convergence filename to extract method, q, seed, ablation.
-    
+    Parse convergence filename to extract method, q, seed, ablation, and experiment.
+
     Supports formats:
-    - ppo_q40.0_convergence.json (legacy)
-    - ppo_q40.0_seed42_convergence.json (new baseline)
-    - ppo_q40.0_seed42_no_cheap_gate_convergence.json (new ablation)
-    - gradient_q25.0_convergence.json (gradient method)
+    - ppo_q40.0_convergence.json (legacy two_players)
+    - ppo_q40.0_seed42_convergence.json (two_players baseline)
+    - ppo_q40.0_seed42_no_cheap_gate_convergence.json (two_players ablation)
+    - gradient_q25.0_convergence.json (two_players gradient)
+    - ppo_3p_q40.0_seed42_baseline_convergence.json (three_players)
+    - gradient_3p_q40.0_convergence.json (three_players gradient)
+    - different_cost_ppo_q40.0_seed42_baseline_convergence.json
+    - different_cost_gradient_q40.0_convergence.json
+    - different_ability_ppo_q40.0_seed42_baseline_convergence.json
+    - different_ability_gradient_q40.0_convergence.json
     """
     result = {
         "method": None,
@@ -64,44 +73,121 @@ def _parse_filename(filename: str) -> Dict[str, any]:
         "seed": None,
         "ablation": None,
         "is_legacy": False,
+        "experiment": None,
     }
-    
+
     # Remove _convergence.json suffix
     base = filename.replace("_convergence.json", "")
-    
-    # Try new format with seed: {method}_q{q}_seed{seed}[_{ablation}]
-    new_pattern = r"^(ppo|gradient)_q([\d.]+)_seed(\d+)(?:_(.+))?$"
-    match = re.match(new_pattern, base, re.IGNORECASE)
+
+    # --- Three-player formats ---
+    # ppo_3p_q{q}_seed{seed}[_{ablation}]
+    pattern_3p_new = r"^(ppo)_3p_q([\d.]+)_seed(\d+)(?:_(.+))?$"
+    match = re.match(pattern_3p_new, base, re.IGNORECASE)
     if match:
-        result["method"] = match.group(1).upper()
-        if result["method"] == "PPO":
-            result["method"] = "TEL-PPO"
+        result["method"] = "TEL-PPO"
         result["q"] = float(match.group(2))
         result["seed"] = int(match.group(3))
         result["ablation"] = match.group(4) if match.group(4) else "baseline"
+        result["experiment"] = "three_players"
         return result
-    
-    # Try legacy format: {method}_q{q}
+
+    # gradient_3p_q{q}
+    pattern_3p_legacy = r"^(gradient)_3p_q([\d.]+)$"
+    match = re.match(pattern_3p_legacy, base, re.IGNORECASE)
+    if match:
+        result["method"] = "Gradient"
+        result["q"] = float(match.group(2))
+        result["seed"] = 42
+        result["ablation"] = "baseline"
+        result["is_legacy"] = True
+        result["experiment"] = "three_players"
+        return result
+
+    # --- different_cost / different_ability formats ---
+    # {prefix}_ppo_q{q}_seed{seed}[_{ablation}]
+    pattern_prefix_new = r"^(different_cost|different_ability)_(ppo|gradient)_q([\d.]+)_seed(\d+)(?:_(.+))?$"
+    match = re.match(pattern_prefix_new, base, re.IGNORECASE)
+    if match:
+        result["experiment"] = match.group(1)
+        method_raw = match.group(2).upper()
+        result["method"] = "TEL-PPO" if method_raw == "PPO" else method_raw.title()
+        result["q"] = float(match.group(3))
+        result["seed"] = int(match.group(4))
+        result["ablation"] = match.group(5) if match.group(5) else "baseline"
+        return result
+
+    # {prefix}_gradient_q{q} (legacy gradient for different_cost/different_ability)
+    pattern_prefix_legacy = r"^(different_cost|different_ability)_(gradient)_q([\d.]+)$"
+    match = re.match(pattern_prefix_legacy, base, re.IGNORECASE)
+    if match:
+        result["experiment"] = match.group(1)
+        result["method"] = "Gradient"
+        result["q"] = float(match.group(3))
+        result["seed"] = 42
+        result["ablation"] = "baseline"
+        result["is_legacy"] = True
+        return result
+
+    # --- Standard two_players formats ---
+    # {method}_q{q}_seed{seed}[_{ablation}]
+    new_pattern = r"^(ppo|gradient)_q([\d.]+)_seed(\d+)(?:_(.+))?$"
+    match = re.match(new_pattern, base, re.IGNORECASE)
+    if match:
+        method_raw = match.group(1).upper()
+        result["method"] = "TEL-PPO" if method_raw == "PPO" else "Gradient"
+        result["q"] = float(match.group(2))
+        result["seed"] = int(match.group(3))
+        result["ablation"] = match.group(4) if match.group(4) else "baseline"
+        result["experiment"] = "two_players"
+        return result
+
+    # {method}_q{q}_{ablation} (gradient with ablation, no seed)
+    gradient_ablation_pattern = r"^(gradient)_q([\d.]+)_(.+)$"
+    match = re.match(gradient_ablation_pattern, base, re.IGNORECASE)
+    if match:
+        result["method"] = "Gradient"
+        result["q"] = float(match.group(2))
+        result["seed"] = 42
+        result["ablation"] = match.group(3)
+        result["experiment"] = "two_players"
+        return result
+
+    # {method}_q{q} (legacy)
     legacy_pattern = r"^(ppo|gradient)_q([\d.]+)$"
     match = re.match(legacy_pattern, base, re.IGNORECASE)
     if match:
-        result["method"] = match.group(1).upper()
-        if result["method"] == "PPO":
-            result["method"] = "TEL-PPO"
+        method_raw = match.group(1).upper()
+        result["method"] = "TEL-PPO" if method_raw == "PPO" else "Gradient"
         result["q"] = float(match.group(2))
         result["seed"] = 42  # Default seed for legacy files
         result["ablation"] = "baseline"  # Default ablation for legacy files
         result["is_legacy"] = True
+        result["experiment"] = "two_players"
         return result
-    
+
     return result
 
 
 def _check_has_time_series(data: Dict) -> bool:
     """Check if convergence JSON has extended time-series metrics."""
+    # Flat format (two_players, three_players)
     required_fields = ["approx_kl", "alpha_mean", "beta_mean"]
-    return all(field in data and isinstance(data[field], list) and len(data[field]) > 0 
-               for field in required_fields)
+    if all(field in data and isinstance(data[field], list) and len(data[field]) > 0
+           for field in required_fields):
+        return True
+
+    # Nested format (different_cost, different_ability)
+    history = data.get("history", {})
+    if isinstance(history, dict) and "steps" in history:
+        return len(history.get("steps", [])) > 0
+
+    return False
+
+
+def _check_is_nested_format(data: Dict) -> bool:
+    """Check if convergence JSON uses the nested history format."""
+    history = data.get("history", {})
+    return isinstance(history, dict) and "steps" in history
 
 
 def _load_csv_for_fallback(csv_path: str) -> Optional[pd.DataFrame]:
@@ -179,13 +265,15 @@ def discover_runs(
             warnings.warn(f"Failed to load {filename}: {e}")
             continue
         
-        # Check for time-series metrics
+        # Check for time-series metrics and nested format
         has_time_series = _check_has_time_series(data)
-        
+        is_nested = _check_is_nested_format(data)
+
         # Get seed and ablation from various sources (priority order)
         seed = parsed["seed"]
         ablation = parsed["ablation"]
         is_legacy = parsed["is_legacy"]
+        experiment = parsed.get("experiment")
         
         # 1. Try metadata.json if available
         if has_metadata:
@@ -221,6 +309,15 @@ def discover_runs(
                 if "seed" in row and pd.notna(row["seed"]):
                     seed = int(row["seed"])
         
+        # Infer experiment from directory if not parsed from filename
+        if experiment is None:
+            for exp_name, exp_dir in CONVERGENCE_DIRS.items():
+                if os.path.normpath(cdir) == os.path.normpath(exp_dir):
+                    experiment = exp_name
+                    break
+            if experiment is None:
+                experiment = "two_players"
+
         # Create Run object
         run = Run(
             method=parsed["method"],
@@ -228,9 +325,11 @@ def discover_runs(
             seed=seed,
             ablation=ablation,
             path=filepath,
+            experiment=experiment,
             metadata_path=metadata_path if has_metadata else None,
             has_time_series=has_time_series,
             is_legacy_format=is_legacy,
+            is_nested_format=is_nested,
         )
         
         runs.append(run)
@@ -321,14 +420,18 @@ def print_discovery_report(runs: List[Run]) -> None:
     print(f"  With time-series: {ts_count}")
     print()
     
-    # List runs by method
-    by_method = group_runs_by(runs, "method")
-    for method, method_runs in sorted(by_method.items()):
-        print(f"{method}:")
-        for run in sorted(method_runs, key=lambda r: (r.q, r.seed, r.ablation)):
-            status = "✓" if run.has_time_series else "⚠"
-            legacy_tag = " (legacy)" if run.is_legacy_format else ""
-            print(f"  {status} q={run.q}, seed={run.seed}, ablation={run.ablation}{legacy_tag}")
+    # List runs by experiment then method
+    by_experiment = group_runs_by(runs, "experiment")
+    for experiment, exp_runs in sorted(by_experiment.items()):
+        print(f"\n[{experiment}]:")
+        by_method = group_runs_by(exp_runs, "method")
+        for method, method_runs in sorted(by_method.items()):
+            print(f"  {method}:")
+            for run in sorted(method_runs, key=lambda r: (r.q, r.seed, r.ablation)):
+                status = "✓" if run.has_time_series else "⚠"
+                legacy_tag = " (legacy)" if run.is_legacy_format else ""
+                nested_tag = " (nested)" if run.is_nested_format else ""
+                print(f"    {status} q={run.q}, seed={run.seed}, ablation={run.ablation}{legacy_tag}{nested_tag}")
     
     # Warnings for missing data
     missing_ts = [r for r in runs if not r.has_time_series and r.method != "Theory"]

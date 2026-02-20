@@ -1,12 +1,12 @@
 {
-  "run_id": "20260207_131509",
+  "run_id": "20260217_214908",
   "method": "ppo",
   "q": 40.0,
   "seed": 456,
   "ablation_name": "baseline",
-  "git_sha": "40c5d6b64ec1",
-  "cmdline": "run/run_two_players.py --method ppo --q 40.0 --seed 456 --episodes 2048000 --exploit-eps 0.05 --exploit-patience 5 --exploit-every-updates 10 --exploit-M 8192 --ablation-name baseline --enable-convergence-eval --cheap-gate-profile relaxed --theory-align-v2 --rollout-mode selfplay",
-  "timestamp": "2026-02-07T14:29:44.823017",
+  "git_sha": "688f6a3c12d0",
+  "cmdline": "run/run_two_players.py --method ppo --q 40 --seed 456 --w_h 8 --w_l 4 --episodes 2048000 --ablation-name baseline",
+  "timestamp": "2026-02-18T04:55:32.827712",
   "convergence_file": "ppo_q40.0_seed456_convergence.json",
   "variant_name": "baseline"
 }

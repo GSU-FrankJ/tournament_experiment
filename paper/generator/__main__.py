@@ -46,6 +46,9 @@ from .plots import (
     plot_beta_evolution,
     plot_beta_snapshots,
     plot_ablation_comparison,
+    plot_distance_to_equilibrium,
+    plot_effort_drift,
+    plot_equilibrium_recovery_dotplot,
 )
 from .tables import (
     generate_all_tables,
@@ -53,6 +56,7 @@ from .tables import (
     generate_ablation_table,
     generate_final_paper_table,
     generate_convergence_comparison_table,
+    generate_environment_config_table,
 )
 
 
@@ -64,10 +68,14 @@ PLOT_TYPES = [
     "beta_evolution",
     "beta_snapshots",
     "ablation_comparison",
+    "distance_to_equilibrium",
+    "effort_drift",
+    "equilibrium_recovery_dotplot",
 ]
 
 # Available table types
 TABLE_TYPES = [
+    "environment_config",
     "summary_metrics",
     "ablation_results",
     "final_summary",
@@ -210,6 +218,9 @@ def cmd_plot(args: argparse.Namespace) -> int:
         "beta_evolution": lambda: plot_beta_evolution(df, q_values, os.path.join(output_dir, "beta_evolution.png")),
         "beta_snapshots": lambda: plot_beta_snapshots(df, q=40.0, output_path=os.path.join(output_dir, "beta_snapshots.png")),
         "ablation_comparison": lambda: plot_ablation_comparison(df, q_values, os.path.join(output_dir, "ablation_comparison.png")),
+        "distance_to_equilibrium": lambda: plot_distance_to_equilibrium(df, q_values, os.path.join(output_dir, "distance_to_equilibrium.png")),
+        "effort_drift": lambda: plot_effort_drift(df, q_values, os.path.join(output_dir, "effort_drift.png")),
+        "equilibrium_recovery_dotplot": lambda: plot_equilibrium_recovery_dotplot(df, os.path.join(output_dir, "equilibrium_recovery_dotplot.png")),
     }
     
     fig, path = plot_funcs[plot_type]()
@@ -247,6 +258,7 @@ def cmd_table(args: argparse.Namespace) -> int:
     os.makedirs(output_dir, exist_ok=True)
     
     table_funcs = {
+        "environment_config": lambda: generate_environment_config_table(output_dir),
         "summary_metrics": lambda: generate_summary_metrics_table(df, output_dir),
         "ablation_results": lambda: generate_ablation_table(df, output_dir),
         "final_summary": lambda: generate_final_paper_table(df, output_dir),

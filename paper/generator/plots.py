@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.lines import Line2D
 from scipy.stats import beta as beta_dist
 
 from .config import (
@@ -35,6 +36,8 @@ from .extract import (
     load_all_convergence_data,
     forward_fill_exploitability,
     aggregate_seeds,
+    compute_effort_error,
+    get_final_values,
 )
 
 
@@ -112,11 +115,14 @@ def plot_convergence_main(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "convergence_main.png")
     
-    # Filter to requested q values
+    # Filter to two_players baseline only
     df = df[df["q"].isin(q_values)]
-    
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+    df = df[df["ablation"] == "baseline"]
+
     # Check if we have multiple seeds
-    has_multi_seed = df.groupby(["method", "q", "ablation"])["seed"].nunique().max() > 1
+    has_multi_seed = df.groupby(["method", "q"])["seed"].nunique().max() > 1
     
     # Create figure
     fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["convergence_main"])
@@ -216,9 +222,11 @@ def plot_kl_dynamics(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "kl_dynamics.png")
     
-    # Filter to requested q values and PPO only
-    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
-    
+    # Filter to two_players baseline PPO only
+    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
     if df.empty or "approx_kl" not in df.columns:
         print("[plots] Warning: No KL data available for kl_dynamics plot")
         return None, None
@@ -291,8 +299,10 @@ def plot_exploitability_dynamics(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "exploitability_dynamics.png")
     
-    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
-    
+    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
     if df.empty or "exploitability" not in df.columns:
         print("[plots] Warning: No exploitability data available")
         return None, None
@@ -368,12 +378,14 @@ def plot_beta_evolution(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "beta_evolution.png")
     
-    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
-    
+    df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
     if df.empty or "alpha_mean" not in df.columns:
         print("[plots] Warning: No alpha/beta data available")
         return None, None
-    
+
     fig, axes = plt.subplots(2, len(q_values), figsize=(12, 6))
     if len(q_values) == 1:
         axes = axes.reshape(2, 1)
@@ -438,8 +450,10 @@ def plot_beta_snapshots(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "beta_snapshots.png")
     
-    df = df[(df["q"] == q) & (df["method"].isin(["TEL-PPO", "PPO"]))]
-    
+    df = df[(df["q"] == q) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
     if df.empty or "alpha_mean" not in df.columns:
         print("[plots] Warning: No alpha/beta data available for snapshots")
         return None, None
@@ -510,7 +524,9 @@ def plot_ablation_comparison(
         output_path = os.path.join(FIGURES_DIR, "ablation_comparison.png")
     
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
-    
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
     if df.empty:
         print("[plots] Warning: No data for ablation comparison")
         return None, None
@@ -554,6 +570,405 @@ def plot_ablation_comparison(
         data_path = os.path.join(DATA_DIR, "ablation_comparison.csv")
         df[["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]].to_csv(data_path, index=False)
     
+    print(f"[plots] Saved figure to {output_path}")
+    return fig, output_path
+
+
+def plot_distance_to_equilibrium(
+    df: pd.DataFrame = None,
+    q_values: List[float] = None,
+    output_path: str = None,
+    save_data: bool = True,
+) -> Tuple[plt.Figure, str]:
+    """
+    Plot distance to equilibrium |ē − e*| over training (Figure 2b).
+
+    Shows convergence speed as effort error shrinks toward zero.
+    Multi-seed aggregation with 95% CI bands.
+    """
+    setup_matplotlib_style()
+    ensure_output_dirs()
+
+    if df is None:
+        df = load_all_convergence_data()
+    if q_values is None:
+        q_values = Q_VALUES
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "distance_to_equilibrium.png")
+
+    # Filter to two_players TEL-PPO baseline
+    df = df[
+        (df["q"].isin(q_values))
+        & (df["method"].isin(["TEL-PPO", "PPO"]))
+        & (df["ablation"] == "baseline")
+    ]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
+    if df.empty:
+        print("[plots] Warning: No data for distance_to_equilibrium")
+        return None, None
+
+    # Compute effort error
+    df = compute_effort_error(df)
+
+    fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+
+    q_colors = {25.0: "#1f77b4", 40.0: "#ff7f0e", 55.0: "#2ca02c"}
+
+    for q in q_values:
+        q_df = df[df["q"] == q]
+        if q_df.empty:
+            continue
+
+        color = q_colors.get(q, "gray")
+
+        # Aggregate across seeds
+        has_multi = q_df["seed"].nunique() > 1
+        if has_multi:
+            agg = aggregate_seeds(q_df)
+            if "effort_error_mean" not in agg.columns:
+                # Compute from effort_mean_mean and theoretical
+                agg["effort_error_mean"] = np.abs(
+                    agg["effort_mean_mean"] - agg["theoretical_effort"]
+                )
+                agg["effort_error_ci95"] = agg.get("effort_mean_ci95", 0)
+
+            steps = agg["step"].values
+            err_mean = agg["effort_error_mean"].values
+            err_ci = agg.get("effort_error_ci95", pd.Series([0] * len(agg))).values
+
+            ax.plot(steps, err_mean, color=color, linewidth=2, label=f"q={int(q)}")
+            ax.fill_between(
+                steps,
+                np.maximum(err_mean - err_ci, 0),
+                err_mean + err_ci,
+                color=color,
+                alpha=0.2,
+            )
+        else:
+            q_df = q_df.sort_values("step")
+            ax.plot(
+                q_df["step"],
+                q_df["effort_error"],
+                color=color,
+                linewidth=2,
+                label=f"q={int(q)}",
+            )
+
+    ax.set_xlabel("Training Steps")
+    ax.set_ylabel("|ē − e*|")
+    ax.set_title("Distance to Nash Equilibrium")
+    ax.legend(loc="best")
+    ax.set_yscale("log")
+    ax.xaxis.set_major_formatter(
+        ticker.FuncFormatter(
+            lambda x, p: f"{x/1e6:.1f}M"
+            if x >= 1e6
+            else f"{x/1e3:.0f}k"
+            if x >= 1e3
+            else f"{x:.0f}"
+        )
+    )
+
+    plt.tight_layout()
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
+    pdf_path = output_path.replace(".png", ".pdf")
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+
+    if save_data:
+        data_path = os.path.join(DATA_DIR, "distance_to_equilibrium.csv")
+        cols = ["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        if "effort_error" in df.columns:
+            cols.append("effort_error")
+        df[cols].to_csv(data_path, index=False)
+
+    print(f"[plots] Saved figure to {output_path}")
+    return fig, output_path
+
+
+def plot_effort_drift(
+    df: pd.DataFrame = None,
+    q_values: List[float] = None,
+    output_path: str = None,
+    save_data: bool = True,
+) -> Tuple[plt.Figure, str]:
+    """
+    Plot effort drift over training (Figure 3b).
+
+    Shows drift_effort metric which measures episode-to-episode policy instability.
+    """
+    setup_matplotlib_style()
+    ensure_output_dirs()
+
+    if df is None:
+        df = load_all_convergence_data()
+    if q_values is None:
+        q_values = Q_VALUES
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "effort_drift.png")
+
+    # Filter to TEL-PPO with drift data
+    df = df[
+        (df["q"].isin(q_values))
+        & (df["method"].isin(["TEL-PPO", "PPO"]))
+        & (df["ablation"] == "baseline")
+    ]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
+    if df.empty or "drift_effort" not in df.columns or df["drift_effort"].isna().all():
+        print("[plots] Warning: No drift data available for effort_drift plot")
+        return None, None
+
+    fig, axes = plt.subplots(1, len(q_values), figsize=(12, 4))
+    if len(q_values) == 1:
+        axes = [axes]
+
+    for ax, q in zip(axes, q_values):
+        q_df = df[df["q"] == q].sort_values("step")
+
+        if q_df.empty:
+            ax.set_title(f"q = {q} (no data)")
+            continue
+
+        valid = q_df[~q_df["drift_effort"].isna()]
+        if valid.empty:
+            ax.set_title(f"q = {q} (no drift data)")
+            continue
+
+        # Multi-seed: plot individual traces with transparency
+        for seed, seed_df in valid.groupby("seed"):
+            seed_df = seed_df.sort_values("step")
+            ax.plot(
+                seed_df["step"],
+                seed_df["drift_effort"],
+                alpha=0.4,
+                linewidth=1,
+                color="#1f77b4",
+            )
+
+        # Aggregate mean
+        has_multi = valid["seed"].nunique() > 1
+        if has_multi:
+            agg = aggregate_seeds(valid)
+            if "drift_effort_mean" in agg.columns:
+                ax.plot(
+                    agg["step"],
+                    agg["drift_effort_mean"],
+                    color="#ff7f0e",
+                    linewidth=2,
+                    label="Mean",
+                )
+
+        # Threshold line
+        ax.axhline(y=2.0, color="red", linestyle="--", alpha=0.5, label="Threshold")
+
+        ax.set_xlabel("Training Steps")
+        ax.set_ylabel("Effort Drift")
+        ax.set_title(f"q = {q}")
+        ax.legend(loc="best")
+
+    plt.tight_layout()
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
+    pdf_path = output_path.replace(".png", ".pdf")
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+
+    if save_data:
+        data_path = os.path.join(DATA_DIR, "effort_drift.csv")
+        cols = ["step", "method", "q", "seed", "ablation", "drift_effort"]
+        df[[c for c in cols if c in df.columns]].to_csv(data_path, index=False)
+
+    print(f"[plots] Saved figure to {output_path}")
+    return fig, output_path
+
+
+def plot_equilibrium_recovery_dotplot(
+    df: pd.DataFrame = None,
+    output_path: str = None,
+    save_data: bool = True,
+) -> Tuple[plt.Figure, str]:
+    """
+    Plot equilibrium recovery dot plot across scenarios (Figure 6).
+
+    Shows learned equilibrium effort vs theoretical for each experiment type.
+    x-axis: scenario, y-axis: effort, dots for learned, lines for theoretical.
+    """
+    setup_matplotlib_style()
+    ensure_output_dirs()
+
+    if df is None:
+        df = load_all_convergence_data()
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "equilibrium_recovery_dotplot.png")
+
+    # Only use baseline TEL-PPO runs
+    ppo_df = df[
+        (df["method"].isin(["TEL-PPO", "PPO"]))
+        & (df["ablation"] == "baseline")
+    ]
+
+    if ppo_df.empty:
+        print("[plots] Warning: No data for equilibrium recovery dotplot")
+        return None, None
+
+    # Get final values per run
+    final = get_final_values(ppo_df)
+    if "experiment" not in final.columns:
+        # Merge experiment from original df
+        exp_map = ppo_df.groupby(["method", "q", "seed", "ablation"])["experiment"].first()
+        final = final.merge(
+            exp_map.reset_index(), on=["method", "q", "seed", "ablation"], how="left"
+        )
+
+    experiments = ["two_players", "three_players", "different_cost", "different_ability"]
+    exp_labels = {
+        "two_players": "Two-Player\nSymmetric",
+        "three_players": "Three-Player",
+        "different_cost": "Heterogeneous\nCost",
+        "different_ability": "Heterogeneous\nAbility",
+    }
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+    x_pos = 0
+    x_ticks = []
+    x_labels = []
+
+    for exp in experiments:
+        exp_final = final[final["experiment"] == exp] if "experiment" in final.columns else pd.DataFrame()
+        if exp_final.empty:
+            continue
+
+        q_vals = sorted(exp_final["q"].unique())
+        for q in q_vals:
+            q_final = exp_final[exp_final["q"] == q]
+            if q_final.empty:
+                continue
+
+            # Theoretical effort
+            e_theory = q_final["theoretical_effort"].iloc[0]
+
+            # Plot theoretical as horizontal line
+            ax.hlines(
+                e_theory,
+                x_pos - 0.3,
+                x_pos + 0.3,
+                colors="black",
+                linestyles="--",
+                linewidth=2,
+                zorder=2,
+            )
+
+            # Plot learned effort for each seed
+            efforts = q_final["effort_mean"].values
+            jitter = np.random.RandomState(42 + int(x_pos * 100)).uniform(-0.15, 0.15, len(efforts))
+            ax.scatter(
+                x_pos + jitter,
+                efforts,
+                color="#ff7f0e",
+                s=60,
+                zorder=3,
+                alpha=0.8,
+                edgecolors="white",
+                linewidth=0.5,
+            )
+
+            # Mean marker
+            mean_effort = efforts.mean()
+            ax.scatter(
+                x_pos,
+                mean_effort,
+                color="#d62728",
+                marker="D",
+                s=100,
+                zorder=4,
+                edgecolors="black",
+                linewidth=1,
+                label="Mean" if x_pos == 0 else None,
+            )
+
+            x_ticks.append(x_pos)
+            x_labels.append(f"q={int(q)}")
+            x_pos += 1
+
+        # Add separator between experiments
+        if x_pos > 0:
+            x_pos += 0.5
+
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(x_labels, fontsize=FONT_SIZES["tick_label"])
+    ax.set_ylabel("Equilibrium Effort")
+    ax.set_title("Equilibrium Recovery Across Scenarios")
+
+    # Add experiment group labels
+    # Calculate group positions
+    group_starts = []
+    x_pos_track = 0
+    for exp in experiments:
+        exp_final = final[final["experiment"] == exp] if "experiment" in final.columns else pd.DataFrame()
+        if exp_final.empty:
+            continue
+        n_q = len(exp_final["q"].unique())
+        group_center = x_pos_track + (n_q - 1) / 2.0
+        group_starts.append((group_center, exp_labels.get(exp, exp)))
+        x_pos_track += n_q + 0.5
+
+    # Add group labels below x-axis
+    for center, label in group_starts:
+        ax.annotate(
+            label,
+            xy=(center, 0),
+            xycoords=("data", "axes fraction"),
+            xytext=(0, -35),
+            textcoords="offset points",
+            ha="center",
+            va="top",
+            fontsize=FONT_SIZES["annotation"],
+            fontweight="bold",
+        )
+
+    # Legend for markers
+    legend_elements = [
+        Line2D([0], [0], color="black", linestyle="--", linewidth=2, label="Theory e*"),
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="w",
+            markerfacecolor="#ff7f0e",
+            markersize=8,
+            label="Per-seed",
+        ),
+        Line2D(
+            [0],
+            [0],
+            marker="D",
+            color="w",
+            markerfacecolor="#d62728",
+            markeredgecolor="black",
+            markersize=8,
+            label="Seed mean",
+        ),
+    ]
+    ax.legend(handles=legend_elements, loc="upper right")
+
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.2)
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
+    pdf_path = output_path.replace(".png", ".pdf")
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+
+    if save_data:
+        data_path = os.path.join(DATA_DIR, "equilibrium_recovery_dotplot.csv")
+        cols_to_save = ["method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        if "experiment" in final.columns:
+            cols_to_save.insert(0, "experiment")
+        final[cols_to_save].to_csv(data_path, index=False)
+
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
 
@@ -608,9 +1023,24 @@ def generate_all_figures(
     fig, path = plot_ablation_comparison(df, q_values)
     if path:
         results["ablation_comparison"] = path
-    
+
+    # Distance to equilibrium (Fig 2b)
+    fig, path = plot_distance_to_equilibrium(df, q_values)
+    if path:
+        results["distance_to_equilibrium"] = path
+
+    # Effort drift (Fig 3b)
+    fig, path = plot_effort_drift(df, q_values)
+    if path:
+        results["effort_drift"] = path
+
+    # Equilibrium recovery dotplot (Fig 6)
+    fig, path = plot_equilibrium_recovery_dotplot(df)
+    if path:
+        results["equilibrium_recovery_dotplot"] = path
+
     plt.close('all')  # Clean up
-    
+
     return results
 
 

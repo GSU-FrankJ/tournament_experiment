@@ -336,6 +336,7 @@ def compute_cheap_gate_stats(
 @dataclass
 class SummaryMetrics:
     """Summary metrics for a single run."""
+    experiment: str
     method: str
     q: float
     seed: int
@@ -368,16 +369,29 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
         List of SummaryMetrics, one per run
     """
     results = []
-    
-    # Group by run
-    grouped = df.groupby(["method", "q", "seed", "ablation"])
-    
-    for (method, q, seed, ablation), group in grouped:
+
+    # Group by run (include experiment if present)
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    grouped = df.groupby(group_cols)
+
+    for group_key, group in grouped:
+        if "experiment" in df.columns:
+            experiment, method, q, seed, ablation = group_key
+        else:
+            method, q, seed, ablation = group_key
+            experiment = "two_players"
         group = group.sort_values("step")
-        
+
         # Get effort series
         effort_series = group["effort_mean"].values
-        e_star_val = e_star(q, **THEORY_PARAMS)
+        # Use per-file theoretical effort if available, else compute from formula
+        if "theoretical_effort" in group.columns and not group["theoretical_effort"].isna().all():
+            e_star_val = group["theoretical_effort"].iloc[0]
+        else:
+            e_star_val = e_star(q, **THEORY_PARAMS)
         
         # Get exploitability series
         exploit_series = group["exploitability"].values
@@ -424,6 +438,7 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
             first_gate_step = gate_stats.first_gate_activation
         
         results.append(SummaryMetrics(
+            experiment=experiment,
             method=method,
             q=q,
             seed=seed,
@@ -448,6 +463,7 @@ def summary_metrics_to_dataframe(metrics: List[SummaryMetrics]) -> pd.DataFrame:
     records = []
     for m in metrics:
         records.append({
+            "experiment": m.experiment,
             "method": m.method,
             "q": m.q,
             "seed": m.seed,

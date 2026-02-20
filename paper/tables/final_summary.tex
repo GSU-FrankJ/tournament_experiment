@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+\centering
+\caption{Quantitative summary across all scenarios: learned effort, gap from equilibrium, exploitability, and symmetry gap.}
+\label{tab:final_summary}
+\begin{tabular}{llrllll}
+\toprule
+Scenario & Method & Q & Effort & |E - E*| & Exploitability & Symmetric Gap \\
+\midrule
+Two-Player & Theory & 25.00 & 87.50 & 0.000 & 0.0000 & 0.000 \\
+Two-Player & Gradient & 25.00 & 98.96 & 11.462 & - & 0.000 \\
+Two-Player & TEL-PPO & 25.00 & 83.52 & 13.523 & 0.7128 & 0.008 \\
+Two-Player & Theory & 40.00 & 54.69 & 0.000 & 0.0000 & 0.000 \\
+Two-Player & Gradient & 40.00 & 54.78 & 0.096 & - & 0.000 \\
+Two-Player & TEL-PPO & 40.00 & 67.31 & 4.805 & 0.0750 & 0.009 \\
+Two-Player & Theory & 55.00 & 39.77 & 0.000 & 0.0000 & 0.000 \\
+Two-Player & Gradient & 55.00 & 39.85 & 0.073 & - & 0.000 \\
+Two-Player & TEL-PPO & 55.00 & 53.54 & 10.355 & 0.1617 & 0.008 \\
+Three-Player & Theory & 25.00 & 87.50 & 0.000 & 0.0000 & 0.000 \\
+Three-Player & Gradient & 25.00 & 98.93 & 11.425 & - & 0.000 \\
+Three-Player & TEL-PPO & 25.00 & 64.02 & 23.480 & 0.5172 & 0.000 \\
+Three-Player & Theory & 40.00 & 54.69 & 0.000 & 0.0000 & 0.000 \\
+Three-Player & Gradient & 40.00 & 54.69 & 0.001 & - & 0.000 \\
+Three-Player & TEL-PPO & 40.00 & 54.57 & 0.114 & - & 0.000 \\
+Three-Player & Theory & 55.00 & 39.77 & 0.000 & 0.0000 & 0.000 \\
+Three-Player & Gradient & 55.00 & 96.00 & 56.224 & - & 0.000 \\
+Het. Cost & Theory & 25.00 & 51.15 & 0.000 & 0.0000 & 0.000 \\
+Het. Cost & TEL-PPO & 25.00 & 48.60 & 2.554 & 0.0907 & 17.494 \\
+Het. Cost & Theory & 40.00 & 39.81 & 0.000 & 0.0000 & 0.000 \\
+Het. Cost & Gradient & 40.00 & 38.59 & 1.218 & - & 3.238 \\
+Het. Cost & TEL-PPO & 40.00 & 38.15 & 1.657 & 0.0443 & 12.619 \\
+Het. Cost & Theory & 55.00 & 31.27 & 0.000 & 0.0000 & 0.000 \\
+Het. Cost & TEL-PPO & 55.00 & 28.89 & 2.376 & 0.0457 & 9.830 \\
+Het. Ability & Theory & 25.00 & 78.75 & 0.000 & 0.0000 & 0.000 \\
+Het. Ability & TEL-PPO & 25.00 & 70.40 & 8.345 & 0.5540 & 0.000 \\
+Het. Ability & Theory & 40.00 & 51.27 & 0.000 & 0.0000 & 0.000 \\
+Het. Ability & Gradient & 40.00 & 51.27 & 0.000 & - & 0.000 \\
+Het. Ability & TEL-PPO & 40.00 & 47.17 & 4.104 & 0.0336 & 0.000 \\
+Het. Ability & Theory & 55.00 & 37.96 & 0.000 & 0.0000 & 0.000 \\
+Het. Ability & TEL-PPO & 55.00 & 35.54 & 2.428 & 0.0387 & 0.000 \\
+\bottomrule
+\end{tabular}
+
+\end{table}

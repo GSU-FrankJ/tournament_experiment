@@ -467,6 +467,7 @@ def run_gradient(
     symmetry_enforce_every: int = 50,
     symmetry_tol: float = 0.1,
     log: bool = True,
+    ablation_name: str = "baseline",
 ) -> Dict:
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
     theoretical_e = clip_stage2(e_star_two_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
@@ -537,10 +538,16 @@ def run_gradient(
         os.makedirs(convergence_dir, exist_ok=True)
         
         # Save to JSON file
-        convergence_file = os.path.join(
-            convergence_dir, 
-            f"gradient_q{q:.1f}_convergence.json"
-        )
+        if ablation_name == "baseline":
+            convergence_file = os.path.join(
+                convergence_dir,
+                f"gradient_q{q:.1f}_convergence.json"
+            )
+        else:
+            convergence_file = os.path.join(
+                convergence_dir,
+                f"gradient_q{q:.1f}_{ablation_name}_convergence.json"
+            )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
         print(f"[gradient-2p] Saved convergence history to {convergence_file}")
@@ -2039,6 +2046,7 @@ def _run_cli(args: argparse.Namespace) -> str:
                 symmetry_enforce_every=args.grad_symmetry_enforce,
                 symmetry_tol=args.grad_symmetry_tol,
                 log=True,
+                ablation_name=args.ablation_name,
             )
             save_standardized_result(row, csv_path)
     else:

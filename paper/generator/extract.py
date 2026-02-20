@@ -10,24 +10,25 @@ Handles:
 
 import json
 import warnings
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Tuple, Union
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from .run_registry import Run, discover_runs
-from .config import CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS
+from .config import CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS
 
 
 # Column schema for convergence DataFrame
 CONVERGENCE_COLUMNS = [
     # Identifiers
     "step",
-    "method", 
+    "method",
     "q",
     "seed",
     "ablation",
+    "experiment",
     # Effort (always present)
     "effort_mean",      # Average of agent1 and agent2
     "agent1_effort",
@@ -35,6 +36,8 @@ CONVERGENCE_COLUMNS = [
     "policy_mean_effort",
     # Theory reference
     "theoretical_effort",
+    "theoretical_effort1",   # Per-agent (for heterogeneous scenarios)
+    "theoretical_effort2",
     # Training metrics (present in new format, NaN in legacy)
     "approx_kl",
     "batch_entropy",
@@ -51,27 +54,38 @@ CONVERGENCE_COLUMNS = [
 def load_convergence_json(run: Run) -> pd.DataFrame:
     """
     Load convergence history from a single run's JSON file.
-    
+
+    Handles flat format (two_players, three_players) and nested format
+    (different_cost, different_ability with history dict).
+
     Args:
         run: Run object with path to convergence JSON
-    
+
     Returns:
         DataFrame with step-by-step convergence data
     """
     if not run.path or not Path(run.path).exists():
         warnings.warn(f"No convergence file for run: {run}")
         return pd.DataFrame(columns=CONVERGENCE_COLUMNS)
-    
+
     with open(run.path, 'r') as f:
         data = json.load(f)
-    
-    # Get number of steps
+
+    # Dispatch to appropriate loader
+    if run.is_nested_format:
+        return _load_nested_format(data, run)
+    else:
+        return _load_flat_format(data, run)
+
+
+def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
+    """Load flat-format convergence JSON (two_players, three_players)."""
     steps = data.get("steps", [])
     n_steps = len(steps)
-    
+
     if n_steps == 0:
         return pd.DataFrame(columns=CONVERGENCE_COLUMNS)
-    
+
     # Build DataFrame
     df = pd.DataFrame({
         "step": steps,
@@ -79,31 +93,176 @@ def load_convergence_json(run: Run) -> pd.DataFrame:
         "q": run.q,
         "seed": run.seed,
         "ablation": run.ablation,
+        "experiment": run.experiment,
         # Effort series
         "agent1_effort": data.get("agent1_effort", [np.nan] * n_steps),
         "agent2_effort": data.get("agent2_effort", [np.nan] * n_steps),
         "policy_mean_effort": data.get("policy_mean_effort", [np.nan] * n_steps),
     })
-    
+
     # Compute effort_mean as average of agent1 and agent2
     df["effort_mean"] = (df["agent1_effort"] + df["agent2_effort"]) / 2.0
-    
-    # Add theoretical effort
-    df["theoretical_effort"] = e_star(run.q, **THEORY_PARAMS)
-    
+
+    # Add theoretical effort — prefer values from the JSON itself over formula
+    theoretical = data.get("theoretical", {})
+    if "effort1" in theoretical and "effort2" in theoretical:
+        theo_e1 = theoretical["effort1"]
+        theo_e2 = theoretical["effort2"]
+        df["theoretical_effort"] = (theo_e1 + theo_e2) / 2.0
+        df["theoretical_effort1"] = theo_e1
+        df["theoretical_effort2"] = theo_e2
+    elif "effort" in theoretical:
+        df["theoretical_effort"] = theoretical["effort"]
+        df["theoretical_effort1"] = np.nan
+        df["theoretical_effort2"] = np.nan
+    elif "theoretical_effort" in data:
+        # Top-level theoretical_effort (gradient format)
+        df["theoretical_effort"] = float(data["theoretical_effort"])
+        df["theoretical_effort1"] = np.nan
+        df["theoretical_effort2"] = np.nan
+    else:
+        df["theoretical_effort"] = e_star(run.q, **THEORY_PARAMS)
+        df["theoretical_effort1"] = np.nan
+        df["theoretical_effort2"] = np.nan
+
     # Time-series metrics (new format only)
-    for col in ["approx_kl", "batch_entropy", "alpha_mean", "beta_mean", 
+    for col in ["approx_kl", "batch_entropy", "alpha_mean", "beta_mean",
                 "mean_kl_window", "drift_effort"]:
         if col in data and isinstance(data[col], list) and len(data[col]) == n_steps:
             df[col] = data[col]
         else:
             df[col] = np.nan
-    
+
     # Exploitability (sparse)
     df["exploitability"] = _load_exploitability_series(data, n_steps)
     df["exploitability_is_valid"] = _load_exploitability_valid_series(data, n_steps)
-    
+
     return df
+
+
+def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
+    """Load nested-format convergence JSON (different_cost, different_ability)."""
+    history = data.get("history", {})
+    steps = history.get("steps", [])
+    n_steps = len(steps)
+
+    if n_steps == 0:
+        return pd.DataFrame(columns=CONVERGENCE_COLUMNS)
+
+    scenario = data.get("scenario", run.experiment)
+
+    # Extract efforts based on scenario
+    if scenario == "different_cost":
+        agent1_effort = history.get("agent1_effort", [np.nan] * n_steps)
+        agent2_effort = history.get("agent2_effort", [np.nan] * n_steps)
+        # Per-agent theoretical values
+        theoretical = data.get("theoretical", {})
+        theo_e1 = theoretical.get("effort1", np.nan)
+        theo_e2 = theoretical.get("effort2", np.nan)
+        # Aggregate approx_kl from per-agent
+        kl1 = history.get("approx_kl_agent1", [np.nan] * n_steps)
+        kl2 = history.get("approx_kl_agent2", [np.nan] * n_steps)
+        approx_kl = [
+            np.nanmean([float(k1) if k1 is not None else np.nan,
+                        float(k2) if k2 is not None else np.nan])
+            for k1, k2 in zip(kl1, kl2)
+        ]
+        ent1 = history.get("batch_entropy_agent1", [np.nan] * n_steps)
+        ent2 = history.get("batch_entropy_agent2", [np.nan] * n_steps)
+        batch_entropy = [
+            np.nanmean([float(e1) if e1 is not None else np.nan,
+                        float(e2) if e2 is not None else np.nan])
+            for e1, e2 in zip(ent1, ent2)
+        ]
+    elif scenario == "different_ability":
+        # Single "effort" field (shared policy), both agents same effort
+        effort = history.get("effort", [np.nan] * n_steps)
+        agent1_effort = effort
+        agent2_effort = effort
+        theoretical = data.get("theoretical", {})
+        # different_ability: theoretical.effort is the shared equilibrium
+        theo_e1 = theoretical.get("effort", np.nan)
+        theo_e2 = theo_e1
+        approx_kl = history.get("approx_kl", [np.nan] * n_steps)
+        batch_entropy = history.get("batch_entropy", [np.nan] * n_steps)
+    else:
+        # Fallback
+        agent1_effort = history.get("agent1_effort", [np.nan] * n_steps)
+        agent2_effort = history.get("agent2_effort", [np.nan] * n_steps)
+        theo_e1 = np.nan
+        theo_e2 = np.nan
+        approx_kl = history.get("approx_kl", [np.nan] * n_steps)
+        batch_entropy = history.get("batch_entropy", [np.nan] * n_steps)
+
+    agent1_arr = np.array(agent1_effort, dtype=float)
+    agent2_arr = np.array(agent2_effort, dtype=float)
+    effort_mean = (agent1_arr + agent2_arr) / 2.0
+    theoretical_effort = (theo_e1 + theo_e2) / 2.0 if not (np.isnan(theo_e1) or np.isnan(theo_e2)) else np.nan
+
+    df = pd.DataFrame({
+        "step": steps,
+        "method": run.method,
+        "q": run.q,
+        "seed": run.seed,
+        "ablation": run.ablation,
+        "experiment": run.experiment,
+        "agent1_effort": agent1_effort,
+        "agent2_effort": agent2_effort,
+        "effort_mean": effort_mean,
+        "policy_mean_effort": effort_mean,
+        "theoretical_effort": theoretical_effort,
+        "theoretical_effort1": theo_e1,
+        "theoretical_effort2": theo_e2,
+        "approx_kl": approx_kl,
+        "batch_entropy": batch_entropy,
+        "alpha_mean": np.nan,
+        "beta_mean": np.nan,
+        "mean_kl_window": np.nan,
+        "drift_effort": np.nan,
+    })
+
+    # Exploitability from exploit_history or top-level fields
+    exploit_series, exploit_valid = _load_exploitability_nested(data, n_steps)
+    df["exploitability"] = exploit_series
+    df["exploitability_is_valid"] = exploit_valid
+
+    return df
+
+
+def _load_exploitability_nested(data: Dict, n_steps: int) -> Tuple[List[float], List[bool]]:
+    """Load exploitability and validity for nested-format files.
+
+    Returns:
+        (exploit_series, is_valid_series) tuple
+    """
+    # Check for exploit_history list
+    exploit_history = data.get("exploit_history", [])
+    if isinstance(exploit_history, list) and len(exploit_history) > 0:
+        # exploit_history entries have "update" index (0-based update number)
+        series = [np.nan] * n_steps
+
+        for entry in exploit_history:
+            if isinstance(entry, dict):
+                update_idx = entry.get("update")
+                exploit_max = entry.get("exploit_max")
+                if update_idx is not None and exploit_max is not None:
+                    if 0 <= update_idx < n_steps:
+                        series[update_idx] = float(exploit_max)
+
+        # If no entries matched, put final value at end
+        if all(np.isnan(s) for s in series):
+            final_exploit = data.get("final_exploit_max")
+            if final_exploit is not None and n_steps > 0:
+                series[-1] = float(final_exploit)
+    else:
+        # Fallback: use final_exploit_max at last step
+        series = [np.nan] * n_steps
+        final_exploit = data.get("final_exploit_max")
+        if final_exploit is not None and n_steps > 0:
+            series[-1] = float(final_exploit)
+
+    valid = [not (e is None or (isinstance(e, float) and np.isnan(e))) for e in series]
+    return series, valid
 
 
 def _load_exploitability_series(data: Dict, n_steps: int) -> List[float]:
@@ -216,29 +375,37 @@ def load_all_convergence_data(
 def add_theory_reference(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add theoretical equilibrium effort as a reference line.
-    
-    For plotting, we need theory values at the same steps as data.
+
+    For standard two_players experiments, uses e_star formula.
+    For nested experiments, theoretical values are already loaded from JSON.
     """
     if df.empty:
         return df
-    
-    # Ensure theoretical_effort column exists and is correct
+
     df = df.copy()
-    df["theoretical_effort"] = df["q"].apply(lambda q: e_star(q, **THEORY_PARAMS))
-    
+    # Only overwrite if not already set (nested format sets per-file values)
+    mask = df["theoretical_effort"].isna()
+    if mask.any():
+        df.loc[mask, "theoretical_effort"] = df.loc[mask, "q"].apply(
+            lambda q: e_star(q, **THEORY_PARAMS)
+        )
+
     return df
 
 
 def forward_fill_exploitability(df: pd.DataFrame) -> pd.DataFrame:
     """
     Forward-fill exploitability values for plotting.
-    
+
     Since exploitability is only evaluated at certain steps,
     this fills gaps with the last known value for smoother plots.
     """
     df = df.copy()
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
     df["exploitability_ffill"] = (
-        df.groupby(["method", "q", "seed", "ablation"])["exploitability"]
+        df.groupby(group_cols)["exploitability"]
         .ffill()
     )
     return df
@@ -260,17 +427,21 @@ def compute_effort_error(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_final_values(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extract final values for each run (method, q, seed, ablation).
-    
+    Extract final values for each run (experiment, method, q, seed, ablation).
+
     Returns one row per run with final effort, exploitability, etc.
     """
     if df.empty:
         return df
-    
-    # Group by run identifier and get last row
-    grouped = df.groupby(["method", "q", "seed", "ablation"])
-    
-    final = grouped.agg({
+
+    # Include experiment in groupby to avoid merging across experiments
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    grouped = df.groupby(group_cols)
+
+    agg_dict = {
         "step": "max",
         "effort_mean": "last",
         "agent1_effort": "last",
@@ -280,20 +451,26 @@ def get_final_values(df: pd.DataFrame) -> pd.DataFrame:
         "approx_kl": "last",
         "alpha_mean": "last",
         "beta_mean": "last",
-    }).reset_index()
-    
+    }
+    # Include per-agent theoretical if present
+    for col in ["theoretical_effort1", "theoretical_effort2"]:
+        if col in df.columns:
+            agg_dict[col] = "last"
+
+    final = grouped.agg(agg_dict).reset_index()
+
     # For exploitability, get last valid value
     def last_valid_exploit(group):
         valid = group[group["exploitability_is_valid"] == True]["exploitability"]
         return valid.iloc[-1] if len(valid) > 0 else np.nan
-    
+
     exploit_df = grouped.apply(last_valid_exploit).reset_index(name="exploitability_final")
-    final = final.merge(exploit_df, on=["method", "q", "seed", "ablation"])
-    
+    final = final.merge(exploit_df, on=group_cols)
+
     # Compute derived metrics
     final["symmetry_gap"] = np.abs(final["agent1_effort"] - final["agent2_effort"])
     final["effort_error"] = np.abs(final["effort_mean"] - final["theoretical_effort"])
-    
+
     return final
 
 
@@ -313,8 +490,11 @@ def aggregate_seeds(df: pd.DataFrame) -> pd.DataFrame:
         "mean_kl_window", "drift_effort", "exploitability",
     ]
     
-    # Group by (method, q, ablation, step) across seeds
-    grouped = df.groupby(["method", "q", "ablation", "step"])
+    # Group by (experiment, method, q, ablation, step) across seeds
+    group_cols = ["method", "q", "ablation", "step"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+    grouped = df.groupby(group_cols)
     
     # Compute mean and std for each numeric column
     agg_dict = {}
