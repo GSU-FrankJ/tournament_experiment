@@ -1,43 +1,43 @@
 \begin{table}[htbp]
 \centering
-\caption{Quantitative summary across all scenarios: learned effort, gap from equilibrium, exploitability, and symmetry gap.}
+\caption{Quantitative summary of equilibrium recovery across all scenarios.}
 \label{tab:final_summary}
-\begin{tabular}{llrllll}
+\begin{tabular}{lrllllll}
 \toprule
-Scenario & Method & Q & Effort & |E - E*| & Exploitability & Symmetric Gap \\
+Scenario & Q & Method & Mean±Std & |Ē−E*| & Exploitability & Symmetry Gap & Steps To Conv. \\
 \midrule
-Two-Player & Theory & 25.00 & 87.50 & 0.000 & 0.0000 & 0.000 \\
-Two-Player & Gradient & 25.00 & 98.96 & 11.462 & - & 0.000 \\
-Two-Player & TEL-PPO & 25.00 & 83.52 & 13.523 & 0.7128 & 0.008 \\
-Two-Player & Theory & 40.00 & 54.69 & 0.000 & 0.0000 & 0.000 \\
-Two-Player & Gradient & 40.00 & 54.78 & 0.096 & - & 0.000 \\
-Two-Player & TEL-PPO & 40.00 & 67.31 & 4.805 & 0.0750 & 0.009 \\
-Two-Player & Theory & 55.00 & 39.77 & 0.000 & 0.0000 & 0.000 \\
-Two-Player & Gradient & 55.00 & 39.85 & 0.073 & - & 0.000 \\
-Two-Player & TEL-PPO & 55.00 & 53.54 & 10.355 & 0.1617 & 0.008 \\
-Three-Player & Theory & 25.00 & 87.50 & 0.000 & 0.0000 & 0.000 \\
-Three-Player & Gradient & 25.00 & 98.93 & 11.425 & - & 0.000 \\
-Three-Player & TEL-PPO & 25.00 & 64.43 & 23.069 & 0.5426 & 0.000 \\
-Three-Player & Theory & 40.00 & 54.69 & 0.000 & 0.0000 & 0.000 \\
-Three-Player & Gradient & 40.00 & 54.69 & 0.001 & - & 0.000 \\
-Three-Player & TEL-PPO & 40.00 & 49.05 & 5.636 & 0.0198 & 0.000 \\
-Three-Player & Theory & 55.00 & 39.77 & 0.000 & 0.0000 & 0.000 \\
-Three-Player & Gradient & 55.00 & 96.00 & 56.224 & - & 0.000 \\
-Three-Player & TEL-PPO & 55.00 & 36.51 & 3.265 & 0.0237 & 0.000 \\
-Het. Cost & Theory & 25.00 & 51.15 & 0.000 & 0.0000 & 0.000 \\
-Het. Cost & TEL-PPO & 25.00 & 48.60 & 2.554 & 0.0907 & 17.494 \\
-Het. Cost & Theory & 40.00 & 39.81 & 0.000 & 0.0000 & 0.000 \\
-Het. Cost & Gradient & 40.00 & 38.59 & 1.218 & - & 3.238 \\
-Het. Cost & TEL-PPO & 40.00 & 38.15 & 1.657 & 0.0443 & 12.619 \\
-Het. Cost & Theory & 55.00 & 31.27 & 0.000 & 0.0000 & 0.000 \\
-Het. Cost & TEL-PPO & 55.00 & 28.89 & 2.376 & 0.0457 & 9.830 \\
-Het. Ability & Theory & 25.00 & 78.75 & 0.000 & 0.0000 & 0.000 \\
-Het. Ability & TEL-PPO & 25.00 & 70.40 & 8.345 & 0.5540 & 0.000 \\
-Het. Ability & Theory & 40.00 & 51.27 & 0.000 & 0.0000 & 0.000 \\
-Het. Ability & Gradient & 40.00 & 51.27 & 0.000 & - & 0.000 \\
-Het. Ability & TEL-PPO & 40.00 & 47.17 & 4.104 & 0.0336 & 0.000 \\
-Het. Ability & Theory & 55.00 & 37.96 & 0.000 & 0.0000 & 0.000 \\
-Het. Ability & TEL-PPO & 55.00 & 35.54 & 2.428 & 0.0387 & 0.000 \\
+Two-Player & 25 & Theory & 87.50 & 0.00 & 0.000 & 0.00 & - \\
+Two-Player & 25 & Gradient & 99.35±0.55 & 5.86 & - & 0.00 & - \\
+Two-Player & 25 & TEL-PPO & 83.52±7.18 & 13.52 & 0.713 & 0.01 & NC \\
+Two-Player & 40 & Theory & 54.69 & 0.00 & 0.000 & 0.00 & - \\
+Two-Player & 40 & Gradient & 76.14±30.21 & 17.55 & - & 0.00 & - \\
+Two-Player & 40 & TEL-PPO & 67.31±3.73 & 4.81 & 0.075 & 0.01 & NC \\
+Two-Player & 55 & Theory & 39.77 & 0.00 & 0.000 & 0.00 & - \\
+Two-Player & 55 & Gradient & 68.15±40.02 & 25.53 & - & 0.00 & - \\
+Two-Player & 55 & TEL-PPO & 53.54±12.45 & 10.35 & 0.162 & 0.01 & 999424 \\
+Three-Player & 25 & Theory & 87.50 & 0.00 & 0.000 & 0.00 & - \\
+Three-Player & 25 & Gradient & 98.93±0.00 & 11.43 & - & 0.00 & - \\
+Three-Player & 25 & TEL-PPO & 64.43±0.81 & 23.07 & 0.543 & 0.00 & NC \\
+Three-Player & 40 & Theory & 54.69 & 0.00 & 0.000 & 0.00 & - \\
+Three-Player & 40 & Gradient & 54.69±0.00 & 0.00 & - & 0.00 & - \\
+Three-Player & 40 & TEL-PPO & 49.05±4.83 & 5.64 & 0.020 & 0.00 & 1183744 \\
+Three-Player & 55 & Theory & 39.77 & 0.00 & 0.000 & 0.00 & - \\
+Three-Player & 55 & Gradient & 96.00±0.00 & 56.22 & - & 0.00 & - \\
+Three-Player & 55 & TEL-PPO & 36.51±1.08 & 3.26 & 0.024 & 0.00 & NC \\
+Het. Cost & 25 & Theory & 51.15 & 0.00 & 0.000 & 0.00 & - \\
+Het. Cost & 25 & TEL-PPO & 48.60±0.95 & 2.55 & 0.091 & 17.49 & NC \\
+Het. Cost & 40 & Theory & 39.81 & 0.00 & 0.000 & 0.00 & - \\
+Het. Cost & 40 & Gradient & 38.59±0.00 & 1.22 & - & 3.24 & - \\
+Het. Cost & 40 & TEL-PPO & 38.15±0.60 & 1.66 & 0.044 & 12.62 & NC \\
+Het. Cost & 55 & Theory & 31.27 & 0.00 & 0.000 & 0.00 & - \\
+Het. Cost & 55 & TEL-PPO & 28.89±0.21 & 2.38 & 0.046 & 9.83 & NC \\
+Het. Ability & 25 & Theory & 78.75 & 0.00 & 0.000 & 0.00 & - \\
+Het. Ability & 25 & TEL-PPO & 70.40±0.64 & 8.35 & 0.554 & 0.00 & NC \\
+Het. Ability & 40 & Theory & 51.27 & 0.00 & 0.000 & 0.00 & - \\
+Het. Ability & 40 & Gradient & 51.27±0.00 & 0.00 & - & 0.00 & - \\
+Het. Ability & 40 & TEL-PPO & 47.17±1.19 & 4.10 & 0.034 & 0.00 & NC \\
+Het. Ability & 55 & Theory & 37.96 & 0.00 & 0.000 & 0.00 & - \\
+Het. Ability & 55 & TEL-PPO & 35.54±0.27 & 2.43 & 0.039 & 0.00 & NC \\
 \bottomrule
 \end{tabular}
 

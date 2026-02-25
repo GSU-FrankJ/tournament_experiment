@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from .run_registry import Run, discover_runs
-from .config import CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS
+from .config import CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS, CONVERGENCE_CONFIG
 
 
 # Column schema for convergence DataFrame
@@ -526,6 +526,52 @@ def load_results_csv(csv_path: str = None) -> pd.DataFrame:
         return pd.DataFrame()
     
     return pd.read_csv(csv_path)
+
+
+def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the convergence step for each run (experiment, method, q, seed, ablation).
+
+    Uses the effort_delta and effort_window from CONVERGENCE_CONFIG to detect
+    the first step where |effort_mean - theoretical_effort| < delta for
+    `window` consecutive steps.
+
+    Returns a DataFrame with one row per run and columns:
+        experiment, method, q, seed, ablation, convergence_step (NaN if not converged)
+    """
+    delta = CONVERGENCE_CONFIG["effort_delta"]
+    window = int(CONVERGENCE_CONFIG["effort_window"])
+    min_steps = int(CONVERGENCE_CONFIG["min_steps"])
+
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        grp = grp.sort_values("step")
+        effort = grp["effort_mean"].values
+        theo = grp["theoretical_effort"].dropna()
+        if theo.empty:
+            e_star_val = e_star(grp["q"].iloc[0], **THEORY_PARAMS)
+        else:
+            e_star_val = theo.iloc[0]
+
+        errors = np.abs(effort - e_star_val)
+        within = errors < delta
+
+        conv_step = np.nan
+        steps_arr = grp["step"].values
+        for i in range(max(0, min_steps - window), len(effort) - window + 1):
+            if np.all(within[i : i + window]):
+                conv_step = float(steps_arr[i + window - 1])
+                break
+
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["convergence_step"] = conv_step
+        records.append(rec)
+
+    return pd.DataFrame(records)
 
 
 if __name__ == "__main__":

@@ -134,78 +134,130 @@ def generate_summary_metrics_table(
     return csv_path, tex_path
 
 
+def _classify_failure_mode(row: pd.Series) -> str:
+    """Classify failure mode for ablation table."""
+    if row.get("converged_ratio", 0) >= 0.8:
+        return "-"
+    abs_err = row.get("abs_error_mean", np.nan)
+    exploit = row.get("final_exploitability_mean", np.nan)
+    conv_step = row.get("convergence_step_mean", np.nan)
+
+    if np.isnan(conv_step) or conv_step == 0:
+        # Never converged
+        if not np.isnan(abs_err) and abs_err > 10:
+            return "diverge"
+        if not np.isnan(exploit) and exploit > 0.5:
+            return "cycle"
+        return "never terminate"
+    if not np.isnan(abs_err) and abs_err > 2:
+        return "biased mean"
+    return "-"
+
+
 def generate_ablation_table(
     df: pd.DataFrame = None,
     output_dir: str = None,
 ) -> Tuple[str, str]:
     """
-    Generate ablation results table.
-    
-    Columns: Ablation, q, Conv. Steps, Final Gap, Exploitability
-    
+    Generate ablation results table (Table 3).
+
+    Rows: TEL-PPO (baseline) | No cheap gate | No exploitability gate
+    Columns: Ablation | Final Error | Exploitability | Steps to Conv. | Failure Mode
+
+    Aggregated across all q values and seeds.
+
     Returns:
         (csv_path, tex_path)
     """
     ensure_tables_dir()
-    
+
     if df is None:
         df = load_all_convergence_data()
     if output_dir is None:
         output_dir = TABLES_DIR
-    
+
     # Compute summary metrics
     metrics = compute_summary_metrics(df)
     metrics_df = summary_metrics_to_dataframe(metrics)
-    
-    # Filter to TEL-PPO only (ablations are for PPO)
+
+    # Filter to TEL-PPO, two_players experiment only
     ppo_df = metrics_df[metrics_df["method"].isin(["TEL-PPO", "PPO"])].copy()
-    
+    if "experiment" in ppo_df.columns:
+        ppo_df = ppo_df[ppo_df["experiment"] == "two_players"]
+
     if ppo_df.empty:
         print("[tables] Warning: No PPO data for ablation table")
         return None, None
-    
-    # Group by ablation and q, aggregate across seeds
-    grouped = ppo_df.groupby(["ablation", "q"]).agg({
-        "convergence_step": ["mean", "std"],
-        "abs_error": ["mean", "std"],
-        "final_exploitability": ["mean", "std"],
-        "seed": "count",
-    })
-    
-    # Flatten column names
-    grouped.columns = ['_'.join(col).strip() for col in grouped.columns.values]
-    grouped = grouped.reset_index()
-    
-    # Format for table
-    table_df = pd.DataFrame({
-        "Ablation": grouped["ablation"],
-        "q": grouped["q"],
-        "Conv. Steps": grouped["convergence_step_mean"].apply(lambda x: _format_float(x, 0)),
-        "Final Gap": grouped["abs_error_mean"].apply(lambda x: _format_float(x, 3)),
-        "Exploitability": grouped["final_exploitability_mean"].apply(lambda x: _format_float(x, 4)),
-        "N": grouped["seed_count"],
-    })
-    
-    # Sort by Ablation and q columns (the renamed columns)
-    table_df = table_df.sort_values(["Ablation", "q"])
-    
+
+    # Map ablation names to display labels
+    ablation_labels = {
+        "baseline": "TEL-PPO (baseline)",
+        "no_cheap_gate": "No stability gate",
+        "no_exploitability": "No exploitability gate",
+        "no_entropy": "+Entropy disabled",
+    }
+
+    # Group by ablation, aggregate across q and seeds
+    grouped = ppo_df.groupby("ablation").agg(
+        abs_error_mean=("abs_error", "mean"),
+        abs_error_std=("abs_error", "std"),
+        final_exploitability_mean=("final_exploitability", "mean"),
+        final_exploitability_std=("final_exploitability", "std"),
+        convergence_step_mean=("convergence_step", "mean"),
+        convergence_step_std=("convergence_step", "std"),
+        converged_ratio=("converged", "mean"),
+        n_runs=("seed", "count"),
+    ).reset_index()
+
+    # Build table rows
+    rows = []
+    # Ensure baseline comes first
+    ablation_order = ["baseline", "no_cheap_gate", "no_exploitability"]
+    for abl in ablation_order:
+        match = grouped[grouped["ablation"] == abl]
+        if match.empty:
+            continue
+        r = match.iloc[0]
+        failure = _classify_failure_mode(r)
+        rows.append({
+            "Ablation": ablation_labels.get(abl, abl),
+            "Final Error": f"{_format_float(r['abs_error_mean'], 3)}±{_format_float(r['abs_error_std'], 3)}",
+            "Exploitability": f"{_format_float(r['final_exploitability_mean'], 4)}±{_format_float(r['final_exploitability_std'], 4)}",
+            "Steps to Conv.": _format_float(r["convergence_step_mean"], 0),
+            "Failure Mode": failure,
+        })
+
+    # Also include any other ablations not in the standard order
+    for _, r in grouped.iterrows():
+        if r["ablation"] not in ablation_order:
+            failure = _classify_failure_mode(r)
+            rows.append({
+                "Ablation": ablation_labels.get(r["ablation"], r["ablation"]),
+                "Final Error": f"{_format_float(r['abs_error_mean'], 3)}±{_format_float(r['abs_error_std'], 3)}",
+                "Exploitability": f"{_format_float(r['final_exploitability_mean'], 4)}±{_format_float(r['final_exploitability_std'], 4)}",
+                "Steps to Conv.": _format_float(r["convergence_step_mean"], 0),
+                "Failure Mode": failure,
+            })
+
+    table_df = pd.DataFrame(rows)
+
     # Save CSV
     csv_path = os.path.join(output_dir, "ablation_results.csv")
     table_df.to_csv(csv_path, index=False)
-    
+
     # Save LaTeX
     tex_path = os.path.join(output_dir, "ablation_results.tex")
     latex_str = _to_latex_table(
         table_df,
-        caption="Ablation study results comparing baseline, no-cheap-gate, and no-exploitability variants.",
+        caption="Ablation study: effect of removing TEL-PPO components on convergence quality.",
         label="tab:ablation_results",
     )
-    with open(tex_path, 'w') as f:
+    with open(tex_path, "w") as f:
         f.write(latex_str)
-    
+
     print(f"[tables] Saved ablation results to {csv_path}")
     print(f"[tables] Saved ablation results to {tex_path}")
-    
+
     return csv_path, tex_path
 
 
@@ -215,6 +267,8 @@ def generate_final_paper_table(
 ) -> Tuple[str, str]:
     """
     Generate final summary table for paper (Table 2).
+
+    Columns: Scenario | q | Method | Mean±std | |ē−e*| | Exploitability | Symmetry Gap | Steps to Convergence
 
     Covers all experiments. For each scenario/q, shows Theory, Gradient, TEL-PPO.
 
@@ -227,6 +281,10 @@ def generate_final_paper_table(
         df = load_all_convergence_data()
     if output_dir is None:
         output_dir = TABLES_DIR
+
+    # Compute convergence steps
+    from .extract import get_convergence_step
+    conv_df = get_convergence_step(df)
 
     rows = []
 
@@ -247,9 +305,9 @@ def generate_final_paper_table(
         if exp_df.empty:
             continue
 
-        q_values = sorted(exp_df["q"].unique())
+        q_values_exp = sorted(exp_df["q"].unique())
 
-        for q in q_values:
+        for q in q_values_exp:
             q_df = exp_df[exp_df["q"] == q]
 
             # Get theoretical effort from data (handles heterogeneous)
@@ -262,12 +320,13 @@ def generate_final_paper_table(
             # Theory row
             rows.append({
                 "Scenario": exp_labels.get(experiment, experiment),
+                "q": int(q),
                 "Method": "Theory",
-                "q": q,
-                "Effort": e_theory,
-                "|e - e*|": 0.0,
-                "Exploitability": 0.0,
-                "Symmetric Gap": 0.0,
+                "Mean±std": _format_float(e_theory, 2),
+                "|ē−e*|": "0.00",
+                "Exploitability": "0.000",
+                "Symmetry Gap": "0.00",
+                "Steps to Conv.": "-",
             })
 
             # Gradient
@@ -275,37 +334,48 @@ def generate_final_paper_table(
             if not grad_df.empty:
                 final = get_final_values(grad_df)
                 if not final.empty:
+                    effort_mean = final["effort_mean"].mean()
+                    effort_std = final["effort_mean"].std() if len(final) > 1 else 0
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
+                        "q": int(q),
                         "Method": "Gradient",
-                        "q": q,
-                        "Effort": final["effort_mean"].iloc[0],
-                        "|e - e*|": final["effort_error"].iloc[0],
-                        "Exploitability": final.get("exploitability_final", pd.Series([np.nan])).iloc[0],
-                        "Symmetric Gap": final["symmetry_gap"].iloc[0],
+                        "Mean±std": f"{effort_mean:.2f}±{effort_std:.2f}",
+                        "|ē−e*|": _format_float(final["effort_error"].mean(), 2),
+                        "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
+                        "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
+                        "Steps to Conv.": "-",
                     })
 
             # TEL-PPO (baseline ablation)
             if not ppo_baseline.empty:
                 final = get_final_values(ppo_baseline)
                 if not final.empty:
+                    effort_mean = final["effort_mean"].mean()
+                    effort_std = final["effort_mean"].std() if len(final) > 1 else 0
+                    # Get convergence steps
+                    conv_match = conv_df[
+                        (conv_df["q"] == q)
+                        & (conv_df["ablation"] == "baseline")
+                        & (conv_df["method"].isin(["TEL-PPO", "PPO"]))
+                    ]
+                    if "experiment" in conv_df.columns:
+                        conv_match = conv_match[conv_match["experiment"] == experiment]
+                    mean_conv = conv_match["convergence_step"].dropna().mean()
+                    conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
+
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
+                        "q": int(q),
                         "Method": "TEL-PPO",
-                        "q": q,
-                        "Effort": final["effort_mean"].mean(),
-                        "|e - e*|": final["effort_error"].mean(),
-                        "Exploitability": final.get("exploitability_final", pd.Series([np.nan])).mean(),
-                        "Symmetric Gap": final["symmetry_gap"].mean(),
+                        "Mean±std": f"{effort_mean:.2f}±{effort_std:.2f}",
+                        "|ē−e*|": _format_float(final["effort_error"].mean(), 2),
+                        "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
+                        "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
+                        "Steps to Conv.": conv_str,
                     })
 
     table_df = pd.DataFrame(rows)
-
-    # Format numbers
-    table_df["Effort"] = table_df["Effort"].apply(lambda x: _format_float(x, 2))
-    table_df["|e - e*|"] = table_df["|e - e*|"].apply(lambda x: _format_float(x, 3))
-    table_df["Exploitability"] = table_df["Exploitability"].apply(lambda x: _format_float(x, 4))
-    table_df["Symmetric Gap"] = table_df["Symmetric Gap"].apply(lambda x: _format_float(x, 3))
 
     # Save CSV
     csv_path = os.path.join(output_dir, "final_summary.csv")
@@ -315,7 +385,7 @@ def generate_final_paper_table(
     tex_path = os.path.join(output_dir, "final_summary.tex")
     latex_str = _to_latex_table(
         table_df,
-        caption="Quantitative summary across all scenarios: learned effort, gap from equilibrium, exploitability, and symmetry gap.",
+        caption="Quantitative summary of equilibrium recovery across all scenarios.",
         label="tab:final_summary",
     )
     with open(tex_path, "w") as f:
@@ -416,22 +486,28 @@ def generate_environment_config_table(
         output_dir = TABLES_DIR
 
     rows = [
-        {"Category": "Game", "Parameter": "$w_H$ (high prize)", "Value": str(THEORY_PARAMS["w_h"])},
-        {"Category": "Game", "Parameter": "$w_L$ (low prize)", "Value": str(THEORY_PARAMS["w_l"])},
+        # Game parameters
+        {"Category": "Game", "Parameter": "$w_H$ (high prize)", "Value": "6.5 / 8"},
+        {"Category": "Game", "Parameter": "$w_L$ (low prize)", "Value": "3.0 / 4"},
         {"Category": "Game", "Parameter": "$k$ (cost coeff.)", "Value": str(THEORY_PARAMS["k"])},
         {"Category": "Game", "Parameter": "$q$ (noise)", "Value": "\\{25, 40, 55\\}"},
-        {"Category": "Game", "Parameter": "Effort bounds", "Value": "[0, 250]"},
-        {"Category": "Game", "Parameter": "Noise dist.", "Value": "$\\text{Uniform}[-q, q]$"},
+        {"Category": "Game", "Parameter": "Effort bounds", "Value": "[0, 200]"},
+        {"Category": "Game", "Parameter": "Noise distribution", "Value": "$\\varepsilon_i \\sim \\text{Uniform}[-q, q]$"},
+        {"Category": "Game", "Parameter": "Number of players", "Value": "2 (baseline) / 3"},
+        # Training hyperparameters
         {"Category": "Training", "Parameter": "Algorithm", "Value": "PPO (clip)"},
-        {"Category": "Training", "Parameter": "Episodes per update", "Value": "4096"},
-        {"Category": "Training", "Parameter": "Max updates", "Value": "500"},
-        {"Category": "Training", "Parameter": "PPO clip $\\epsilon$", "Value": "0.2"},
         {"Category": "Training", "Parameter": "Learning rate", "Value": "$3 \\times 10^{-4}$"},
-        {"Category": "Training", "Parameter": "Policy", "Value": "Beta distribution"},
+        {"Category": "Training", "Parameter": "PPO clip $\\epsilon$", "Value": "0.2"},
+        {"Category": "Training", "Parameter": "Batch size (episodes/update)", "Value": "4096"},
+        {"Category": "Training", "Parameter": "Max updates", "Value": "500"},
+        {"Category": "Training", "Parameter": "Policy parameterization", "Value": "Beta($\\alpha$, $\\beta$)"},
+        {"Category": "Training", "Parameter": "Seeds per configuration", "Value": "5"},
+        # Convergence criteria
         {"Category": "Convergence", "Parameter": "Effort $\\delta$", "Value": str(CONVERGENCE_CONFIG["effort_delta"])},
-        {"Category": "Convergence", "Parameter": "Effort window", "Value": str(CONVERGENCE_CONFIG["effort_window"])},
+        {"Category": "Convergence", "Parameter": "Effort window", "Value": str(int(CONVERGENCE_CONFIG["effort_window"]))},
         {"Category": "Convergence", "Parameter": "Exploit. threshold $\\varepsilon$", "Value": str(CONVERGENCE_CONFIG["exploit_threshold"])},
-        {"Category": "Convergence", "Parameter": "Exploit. patience", "Value": str(CONVERGENCE_CONFIG["exploit_patience"])},
+        {"Category": "Convergence", "Parameter": "Exploit. patience", "Value": str(int(CONVERGENCE_CONFIG["exploit_patience"]))},
+        {"Category": "Convergence", "Parameter": "Min steps", "Value": str(int(CONVERGENCE_CONFIG["min_steps"]))},
     ]
 
     # Compute theoretical equilibrium for each q

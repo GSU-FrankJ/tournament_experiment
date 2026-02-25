@@ -120,9 +120,13 @@ def classify_quality(gap: float) -> str:
 # Plotting Styles
 # ==============================================================================
 
+# Theory line style (used across all figures)
+THEORY_LINE_COLOR = "red"
+THEORY_LINE_WIDTH = 2.5
+
 # Method colors (consistent across all figures)
 METHOD_COLORS: Dict[str, str] = {
-    "Theory": "black",
+    "Theory": THEORY_LINE_COLOR,
     "Gradient": "#1f77b4",  # Blue
     "TEL-PPO": "#ff7f0e",   # Orange
     "PPO": "#ff7f0e",       # Alias for TEL-PPO

@@ -34,6 +34,10 @@ from .config import (
     AGENT_COLORS,
     AGENT_MARKERS,
     WEIGHT_VARIANT_LABELS,
+    THEORY_LINE_COLOR,
+    THEORY_LINE_WIDTH,
+    CHEAP_GATE_CONFIG,
+    CONVERGENCE_CONFIG,
 )
 from .extract import (
     load_all_convergence_data,
@@ -41,6 +45,7 @@ from .extract import (
     aggregate_seeds,
     compute_effort_error,
     get_final_values,
+    get_convergence_step,
 )
 
 
@@ -82,6 +87,19 @@ def _get_linestyle(method: str) -> str:
     if method_upper == "PPO":
         method_upper = "TEL-PPO"
     return METHOD_LINESTYLES.get(method, METHOD_LINESTYLES.get(method_upper, "-"))
+
+
+def _unify_ylim(axes, margin: float = 0.05):
+    """Set a shared y-axis range across all given axes with optional margin."""
+    y_min = float("inf")
+    y_max = float("-inf")
+    for ax in np.asarray(axes).flat:
+        lo, hi = ax.get_ylim()
+        y_min = min(y_min, lo)
+        y_max = max(y_max, hi)
+    span = y_max - y_min
+    for ax in np.asarray(axes).flat:
+        ax.set_ylim(y_min - margin * span, y_max + margin * span)
 
 
 def plot_convergence_main(
@@ -138,6 +156,9 @@ def plot_convergence_main(
         squeeze=False,
     )
 
+    # Precompute convergence steps for vertical lines
+    conv_steps_df = get_convergence_step(df)
+
     for row_idx, variant in enumerate(weight_variants):
         var_df = df[df["ablation"] == variant]
 
@@ -146,16 +167,17 @@ def plot_convergence_main(
             q_df = var_df[var_df["q"] == q]
 
             if q_df.empty:
-                ax.set_title(f"q = {q} (no data)")
+                ax.set_title(f"Noise Level q = {q} (no data)")
                 continue
 
-            # Theory line from data (use first non-NaN theoretical_effort)
+            # Theory line from data (use first non-NaN theoretical_effort) → red bold
             theory_vals = q_df["theoretical_effort"].dropna()
+            e_theory = np.nan
             if not theory_vals.empty:
                 e_theory = theory_vals.iloc[0]
                 ax.axhline(
-                    y=e_theory, color="black", linestyle="--",
-                    linewidth=2, label="Theory $e^*$", zorder=1,
+                    y=e_theory, color=THEORY_LINE_COLOR, linestyle="--",
+                    linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$", zorder=1,
                 )
 
             # Filter to PPO method
@@ -176,13 +198,13 @@ def plot_convergence_main(
                 if col_name not in method_df.columns:
                     continue
 
-                # Individual seed traces (light)
+                # Individual seed traces (light) — lowered alpha
                 if has_multi_seed:
                     for seed in seeds:
                         seed_df = method_df[method_df["seed"] == seed].sort_values("step")
                         ax.plot(
                             seed_df["step"], seed_df[col_name],
-                            color=color, linestyle=ls, alpha=0.25,
+                            color=color, linestyle=ls, alpha=0.15,
                             linewidth=0.8, zorder=1,
                         )
 
@@ -203,7 +225,7 @@ def plot_convergence_main(
                         )
                         ax.fill_between(
                             steps, effort_mean - effort_ci, effort_mean + effort_ci,
-                            color=color, alpha=0.15, zorder=2,
+                            color=color, alpha=0.10, zorder=2,
                         )
                 else:
                     # Single seed: plot directly
@@ -214,14 +236,60 @@ def plot_convergence_main(
                         label=label_base, zorder=3,
                     )
 
+            # --- Convergence vertical lines per seed ---
+            for seed in seeds:
+                match = conv_steps_df[
+                    (conv_steps_df["q"] == q)
+                    & (conv_steps_df["seed"] == seed)
+                    & (conv_steps_df["ablation"] == variant)
+                ]
+                if "experiment" in conv_steps_df.columns:
+                    match = match[match["experiment"] == "two_players"]
+                if not match.empty:
+                    cs = match["convergence_step"].iloc[0]
+                    if not np.isnan(cs):
+                        ax.axvline(
+                            x=cs, color="green", linestyle=":",
+                            linewidth=1.2, alpha=0.6,
+                        )
+
+            # --- Final summary annotation ---
+            if not np.isnan(e_theory):
+                final_effort = method_df.groupby("seed")["effort_mean"].last().mean()
+                final_error = abs(final_effort - e_theory)
+                # Final exploitability (last valid per seed, then mean)
+                exploit_vals = []
+                sym_gaps = []
+                for seed in seeds:
+                    sdf = method_df[method_df["seed"] == seed].sort_values("step")
+                    if "exploitability" in sdf.columns:
+                        valid_ex = sdf[sdf["exploitability"].notna()]["exploitability"]
+                        if not valid_ex.empty:
+                            exploit_vals.append(valid_ex.iloc[-1])
+                    if "agent1_effort" in sdf.columns and "agent2_effort" in sdf.columns:
+                        sym_gaps.append(abs(sdf["agent1_effort"].iloc[-1] - sdf["agent2_effort"].iloc[-1]))
+
+                ann_lines = [f"|ē−e*|={final_error:.2f}"]
+                if exploit_vals:
+                    ann_lines.append(f"ε={np.mean(exploit_vals):.3f}")
+                if sym_gaps:
+                    ann_lines.append(f"Δsym={np.mean(sym_gaps):.2f}")
+
+                ax.text(
+                    0.97, 0.97, "\n".join(ann_lines),
+                    transform=ax.transAxes, fontsize=7,
+                    verticalalignment="top", horizontalalignment="right",
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="wheat", alpha=0.5),
+                )
+
             # Axis formatting
             if row_idx == n_rows - 1:
                 ax.set_xlabel("Training Steps")
             ax.set_ylabel("Effort")
 
-            # Title: q value on top row only
+            # Title: "Noise Level q = {q}" on top row only
             if row_idx == 0:
-                ax.set_title(f"q = {int(q)}")
+                ax.set_title(f"Noise Level q = {int(q)}")
 
             # Row label on the leftmost column
             if col_idx == 0:
@@ -244,6 +312,9 @@ def plot_convergence_main(
                     else f"{x:.0f}"
                 )
             )
+
+    # Unify y-axis across all panels
+    _unify_ylim(axes)
 
     plt.tight_layout()
     plt.subplots_adjust(left=0.12)
@@ -304,30 +375,55 @@ def plot_kl_dynamics(
     
     for ax, q in zip(axes, q_values):
         q_df = df[df["q"] == q].sort_values("step")
-        
+
         if q_df.empty:
             ax.set_title(f"q = {q} (no data)")
             continue
-        
-        # Plot approx_kl
-        valid_kl = q_df[~q_df["approx_kl"].isna()]
-        if not valid_kl.empty:
-            ax.plot(valid_kl["step"], valid_kl["approx_kl"], 
-                   color="#1f77b4", alpha=0.6, linewidth=1, label="approx_kl")
-        
-        # Plot mean_kl_window if available
-        if "mean_kl_window" in q_df.columns:
-            valid_window = q_df[~q_df["mean_kl_window"].isna()]
-            if not valid_window.empty:
-                ax.plot(valid_window["step"], valid_window["mean_kl_window"],
-                       color="#ff7f0e", linewidth=2, label="mean_kl_window")
-        
+
+        seeds = sorted(q_df["seed"].unique())
+        has_multi = len(seeds) > 1
+
+        # Per-seed thin traces
+        for seed in seeds:
+            sdf = q_df[q_df["seed"] == seed].sort_values("step")
+            valid_kl = sdf[~sdf["approx_kl"].isna()]
+            if not valid_kl.empty:
+                ax.plot(
+                    valid_kl["step"], valid_kl["approx_kl"],
+                    color="#1f77b4", alpha=0.3, linewidth=0.8,
+                )
+
+        # Bold mean line across seeds
+        if has_multi:
+            agg = aggregate_seeds(q_df)
+            if "approx_kl_mean" in agg.columns:
+                valid = agg[~agg["approx_kl_mean"].isna()]
+                ax.plot(
+                    valid["step"], valid["approx_kl_mean"],
+                    color="#1f77b4", linewidth=2, label="Mean approx_kl",
+                )
+        else:
+            valid_kl = q_df[~q_df["approx_kl"].isna()]
+            if not valid_kl.empty:
+                ax.plot(
+                    valid_kl["step"], valid_kl["approx_kl"],
+                    color="#1f77b4", linewidth=2, label="approx_kl",
+                )
+
+        # Target KL threshold line
+        mean_kl_thresh = CHEAP_GATE_CONFIG["mean_kl_thresh"]
+        ax.axhline(
+            y=mean_kl_thresh, color="red", linestyle="--",
+            linewidth=1.5, label=f"Mean KL threshold ({mean_kl_thresh})",
+        )
+
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("KL Divergence")
-        ax.set_title(f"q = {q}")
-        ax.legend(loc="best")
-        ax.set_yscale('log')
-    
+        ax.set_title(f"q = {int(q)}")
+        ax.legend(loc="best", fontsize=8)
+        ax.set_yscale("log")
+        ax.set_ylim(1e-4, 1e-1)
+
     plt.tight_layout()
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
@@ -376,39 +472,91 @@ def plot_exploitability_dynamics(
     
     # Forward-fill exploitability
     df = forward_fill_exploitability(df)
-    
+
+    # Precompute convergence steps
+    conv_steps_df = get_convergence_step(df)
+
     fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["exploitability_dynamics"])
     if len(q_values) == 1:
         axes = [axes]
-    
+
     for ax, q in zip(axes, q_values):
         q_df = df[df["q"] == q].sort_values("step")
-        
+
         if q_df.empty:
-            ax.set_title(f"q = {q} (no data)")
+            ax.set_title(f"q = {int(q)} (no data)")
             continue
-        
-        # Plot forward-filled exploitability
-        valid = q_df[~q_df["exploitability_ffill"].isna()]
-        if not valid.empty:
-            ax.plot(valid["step"], valid["exploitability_ffill"],
-                   color="#1f77b4", linewidth=2, label="Exploitability (ffill)")
-        
-        # Mark actual evaluation points
-        if "exploitability_is_valid" in q_df.columns:
-            eval_points = q_df[q_df["exploitability_is_valid"] == True]
-            if not eval_points.empty:
-                ax.scatter(eval_points["step"], eval_points["exploitability"],
-                          color="#ff7f0e", s=30, zorder=3, label="Evaluated")
-        
-        # Threshold line
-        ax.axhline(y=0.05, color="red", linestyle="--", alpha=0.5, label="Threshold (0.05)")
-        
+
+        seeds = sorted(q_df["seed"].unique())
+
+        # Per-seed thin lines with step drawstyle
+        for seed in seeds:
+            sdf = q_df[q_df["seed"] == seed].sort_values("step")
+            valid = sdf[~sdf["exploitability_ffill"].isna()]
+            if not valid.empty:
+                ax.plot(
+                    valid["step"], valid["exploitability_ffill"],
+                    color="#1f77b4", alpha=0.3, linewidth=0.8,
+                    drawstyle="steps-post",
+                )
+
+        # Bold mean across seeds with step drawstyle
+        if len(seeds) > 1:
+            agg = aggregate_seeds(q_df)
+            if "exploitability_ffill" not in agg.columns:
+                # exploitability_ffill wasn't aggregated; compute from exploitability_mean
+                col = "exploitability_mean" if "exploitability_mean" in agg.columns else None
+            else:
+                col = "exploitability_ffill"
+            if col is None and "exploitability_mean" in agg.columns:
+                col = "exploitability_mean"
+            if col and col in agg.columns:
+                valid = agg[~agg[col].isna()]
+                ax.plot(
+                    valid["step"], valid[col],
+                    color="#1f77b4", linewidth=2,
+                    drawstyle="steps-post", label="Exploitability",
+                )
+        else:
+            valid = q_df[~q_df["exploitability_ffill"].isna()]
+            if not valid.empty:
+                ax.plot(
+                    valid["step"], valid["exploitability_ffill"],
+                    color="#1f77b4", linewidth=2,
+                    drawstyle="steps-post", label="Exploitability",
+                )
+
+        # Threshold line → bolder
+        exploit_thresh = CONVERGENCE_CONFIG["exploit_threshold"]
+        ax.axhline(
+            y=exploit_thresh, color="red", linestyle="--",
+            linewidth=2.5, alpha=0.8, label=f"Threshold ({exploit_thresh})",
+        )
+
+        # Convergence vertical lines per seed
+        for seed in seeds:
+            match = conv_steps_df[
+                (conv_steps_df["q"] == q)
+                & (conv_steps_df["seed"] == seed)
+                & (conv_steps_df["ablation"] == "baseline")
+            ]
+            if "experiment" in conv_steps_df.columns:
+                match = match[match["experiment"] == "two_players"]
+            if not match.empty:
+                cs = match["convergence_step"].iloc[0]
+                if not np.isnan(cs):
+                    ax.axvline(
+                        x=cs, color="green", linestyle=":",
+                        linewidth=1.2, alpha=0.6,
+                    )
+
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Exploitability")
-        ax.set_title(f"q = {q}")
-        ax.legend(loc="best")
-    
+        ax.set_title(f"q = {int(q)}")
+        ax.set_yscale("log")
+        ax.set_ylim(0.01, 1)
+        ax.legend(loc="best", fontsize=8)
+
     plt.tight_layout()
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
@@ -527,38 +675,71 @@ def plot_beta_snapshots(
     
     df = df.sort_values("step")
     max_step = df["step"].max()
-    
+
+    # Compute e* for this q and the effort scale factor
+    e_theory = e_star(q, **THEORY_PARAMS)
+    e_max = 250.0  # effort upper bound from environment config
+
     fig, axes = plt.subplots(1, len(snapshot_fractions), figsize=FIGURE_SIZES["beta_snapshots"])
-    
-    x = np.linspace(0.001, 0.999, 200)
-    
+
+    x_norm = np.linspace(0.001, 0.999, 200)
+    x_effort = x_norm * e_max  # Convert normalized to effort scale
+
+    y_max_global = 0.0  # for unifying y-axis
+
+    pdf_data = []  # store (ax, frac, y_vals, ...) for second pass
+
     for ax, frac in zip(axes, snapshot_fractions):
         target_step = int(max_step * frac)
         # Find closest step
         closest_idx = (df["step"] - target_step).abs().idxmin()
         row = df.loc[closest_idx]
-        
+
         alpha = row["alpha_mean"]
         beta_val = row["beta_mean"]
-        
+
         if np.isnan(alpha) or np.isnan(beta_val):
             ax.set_title(f"Step {target_step} ({frac*100:.0f}%) - No data")
+            pdf_data.append(None)
             continue
-        
-        # Plot Beta PDF
-        y = beta_dist.pdf(x, alpha, beta_val)
-        ax.plot(x, y, color="#1f77b4", linewidth=2, label="Both agents\n(symmetric)")
-        ax.fill_between(x, y, alpha=0.3, color="#1f77b4")
-        
-        # Mark mean
-        mean = alpha / (alpha + beta_val)
-        ax.axvline(x=mean, color="#ff7f0e", linestyle="--", linewidth=2, label=f"Mean={mean:.3f}")
-        
-        ax.set_xlabel("Action (normalized)")
+
+        kappa = alpha + beta_val
+
+        # Plot Beta PDF on effort scale (divide density by e_max for proper scaling)
+        y = beta_dist.pdf(x_norm, alpha, beta_val) / e_max
+        ax.plot(x_effort, y, color=AGENT_COLORS["agent1"], linewidth=2,
+                label="Both agents (symmetric)")
+        ax.fill_between(x_effort, y, alpha=0.3, color=AGENT_COLORS["agent1"])
+
+        # Mark policy mean in effort space
+        mean_norm = alpha / kappa
+        mean_effort = mean_norm * e_max
+        ax.axvline(x=mean_effort, color=AGENT_COLORS["agent2"], linestyle="--",
+                    linewidth=2, label=f"Mean={mean_effort:.1f}")
+
+        # e* vertical line (green)
+        ax.axvline(x=e_theory, color="green", linestyle="-.",
+                    linewidth=2, label=f"$e^*$={e_theory:.1f}")
+
+        # κ annotation
+        ax.text(
+            0.03, 0.95, f"κ={kappa:.1f}",
+            transform=ax.transAxes, fontsize=8,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round,pad=0.2", facecolor="lightyellow", alpha=0.7),
+        )
+
+        ax.set_xlabel("Effort")
         ax.set_ylabel("Density")
         ax.set_title(f"Step {int(row['step'])} ({frac*100:.0f}%)\nα={alpha:.1f}, β={beta_val:.1f}")
-        ax.legend(loc="best")
-    
+        ax.legend(loc="best", fontsize=7)
+
+        y_max_global = max(y_max_global, np.max(y))
+
+    # Unify y-axis across all panels
+    for ax in axes:
+        ax.set_ylim(0, y_max_global * 1.1)
+
     plt.tight_layout()
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
@@ -679,6 +860,9 @@ def plot_distance_to_equilibrium(
     # Compute effort error
     df = compute_effort_error(df)
 
+    # Precompute convergence steps
+    conv_steps_df = get_convergence_step(df)
+
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
 
     q_colors = {25.0: "#1f77b4", 40.0: "#ff7f0e", 55.0: "#2ca02c"}
@@ -695,7 +879,6 @@ def plot_distance_to_equilibrium(
         if has_multi:
             agg = aggregate_seeds(q_df)
             if "effort_error_mean" not in agg.columns:
-                # Compute from effort_mean_mean and theoretical
                 agg["effort_error_mean"] = np.abs(
                     agg["effort_mean_mean"] - agg["theoretical_effort"]
                 )
@@ -711,7 +894,7 @@ def plot_distance_to_equilibrium(
                 np.maximum(err_mean - err_ci, 0),
                 err_mean + err_ci,
                 color=color,
-                alpha=0.2,
+                alpha=0.12,
             )
         else:
             q_df = q_df.sort_values("step")
@@ -723,11 +906,31 @@ def plot_distance_to_equilibrium(
                 label=f"q={int(q)}",
             )
 
+        # Convergence vertical line (mean across seeds for this q)
+        q_conv = conv_steps_df[conv_steps_df["q"] == q]
+        if "experiment" in conv_steps_df.columns:
+            q_conv = q_conv[q_conv["experiment"] == "two_players"]
+        q_conv = q_conv[q_conv["ablation"] == "baseline"]
+        mean_conv = q_conv["convergence_step"].dropna().mean()
+        if not np.isnan(mean_conv):
+            ax.axvline(
+                x=mean_conv, color=color, linestyle=":",
+                linewidth=1.2, alpha=0.7,
+            )
+
+    # ε threshold horizontal line
+    effort_delta = CONVERGENCE_CONFIG["effort_delta"]
+    ax.axhline(
+        y=effort_delta, color="gray", linestyle="--",
+        linewidth=1.5, alpha=0.7, label=f"ε={effort_delta}",
+    )
+
     ax.set_xlabel("Training Steps")
     ax.set_ylabel("|ē − e*|")
-    ax.set_title("Distance to Nash Equilibrium")
+    ax.set_title("Distance to the Nash Equilibrium Across Noise Levels")
     ax.legend(loc="best")
     ax.set_yscale("log")
+    ax.set_ylim(bottom=0.1)
     ax.xaxis.set_major_formatter(
         ticker.FuncFormatter(
             lambda x, p: f"{x/1e6:.1f}M"
@@ -829,13 +1032,25 @@ def plot_effort_drift(
                     label="Mean",
                 )
 
-        # Threshold line
-        ax.axhline(y=2.0, color="red", linestyle="--", alpha=0.5, label="Threshold")
+        # Threshold line → bold red with value annotation
+        drift_thresh = CHEAP_GATE_CONFIG["drift_effort_thresh"]
+        ax.axhline(
+            y=drift_thresh, color="red", linestyle="--",
+            linewidth=2.5, alpha=0.8, label=f"Threshold ({drift_thresh})",
+        )
+        # Annotate the threshold value
+        ax.text(
+            ax.get_xlim()[1], drift_thresh, f" {drift_thresh}",
+            color="red", fontsize=8, va="bottom",
+        )
 
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Effort Drift")
-        ax.set_title(f"q = {q}")
+        ax.set_title(f"q = {int(q)}")
         ax.legend(loc="best")
+
+    # Unify y-axis across all panels
+    _unify_ylim(axes)
 
     plt.tight_layout()
 
@@ -957,7 +1172,7 @@ def plot_equilibrium_recovery_dotplot(
                 ax.hlines(
                     e_theory,
                     x_pos - 0.3, x_pos + 0.3,
-                    colors="black", linestyles="--", linewidth=2, zorder=2,
+                    colors=THEORY_LINE_COLOR, linestyles="--", linewidth=3, zorder=2,
                 )
 
                 efforts = q_final["effort_mean"].values
@@ -1019,7 +1234,7 @@ def plot_equilibrium_recovery_dotplot(
 
     # Legend
     legend_elements = [
-        Line2D([0], [0], color="black", linestyle="--", linewidth=2, label="Theory e*"),
+        Line2D([0], [0], color=THEORY_LINE_COLOR, linestyle="--", linewidth=3, label="Theory e*"),
     ]
     if _legend_added["single"]:
         legend_elements.append(Line2D(
@@ -1053,15 +1268,26 @@ def plot_equilibrium_recovery_dotplot(
     fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
 
     if save_data:
+        # Compute per-seed relative error |e_learned - e*| / e*
+        save_df = final.copy()
+        save_df["relative_error"] = np.where(
+            save_df["theoretical_effort"] != 0,
+            np.abs(save_df["effort_mean"] - save_df["theoretical_effort"]) / np.abs(save_df["theoretical_effort"]),
+            np.nan,
+        )
         data_path = os.path.join(DATA_DIR, "equilibrium_recovery_dotplot.csv")
         cols_to_save = ["method", "q", "seed", "ablation", "effort_mean",
-                        "theoretical_effort", "agent1_effort", "agent2_effort"]
+                        "theoretical_effort", "agent1_effort", "agent2_effort",
+                        "relative_error"]
         for extra_col in ["theoretical_effort1", "theoretical_effort2"]:
-            if extra_col in final.columns:
+            if extra_col in save_df.columns:
                 cols_to_save.append(extra_col)
-        if "experiment" in final.columns:
+        if "experiment" in save_df.columns:
             cols_to_save.insert(0, "experiment")
-        final[[c for c in cols_to_save if c in final.columns]].to_csv(data_path, index=False)
+        save_df[[c for c in cols_to_save if c in save_df.columns]].to_csv(data_path, index=False)
+        # Print mean relative error for caption reference
+        mean_rel_err = save_df["relative_error"].mean()
+        print(f"[plots] Mean relative error for dotplot: {mean_rel_err:.4f}")
 
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
