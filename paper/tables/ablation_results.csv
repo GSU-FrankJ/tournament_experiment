@@ -1,7 +1,8 @@
 Ablation,Final Error,Exploitability,Steps to Conv.,Failure Mode
-TEL-PPO (baseline),10.675±8.859,0.3010±0.3937,244,biased mean
+TEL-PPO (baseline),16.183±9.745,0.5481±0.2711,244,biased mean
 No stability gate,12.425±4.562,0.3046±0.2221,-,diverge
 No exploitability gate,11.831±4.700,-±-,-,diverge
+baseline_v2,19.122±8.593,0.5124±0.2524,-,diverge
 eps_001,1.001±0.730,0.4590±0.6813,109,-
 eps_003,0.911±0.374,0.4209±0.6259,118,-
 eps_010,0.996±0.751,0.4387±0.6457,-,never terminate

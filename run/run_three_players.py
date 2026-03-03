@@ -1109,7 +1109,18 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["value_coef"] = 1.0
         cfg["gae_lambda"] = 1.0
         cfg["gamma"] = 1.0
-    
+
+    # Re-apply explicit CLI entropy override (takes priority over mode defaults)
+    if hasattr(args, 'override_entropy_end') and args.override_entropy_end is not None:
+        cfg["entropy_coef_end"] = float(args.override_entropy_end)
+        if float(args.override_entropy_end) > 0:
+            cfg["entropy_coef_start"] = max(float(cfg.get("entropy_coef_start", 0)),
+                                             float(args.override_entropy_end) * 2)
+            cfg["entropy_coef_hold"] = max(float(cfg.get("entropy_coef_hold", 0)),
+                                            float(args.override_entropy_end) * 2)
+        print(f"[config] CLI entropy override re-applied after mode defaults: "
+              f"entropy_coef_end={args.override_entropy_end}", flush=True)
+
     # --disable-entropy: zero entropy regularization (mechanism ablation)
     if args.disable_entropy:
         cfg["entropy_coef_start"] = 0.0
@@ -1220,7 +1231,13 @@ def main():
         dest="theory_align_v2",
         help="Enable theory-align-v2 (zero entropy, mean+conc head)",
     )
-    
+    parser.add_argument(
+        "--override-entropy-end",
+        type=float,
+        default=None,
+        help="Override entropy_coef_end (takes priority over --theory-align-v2 defaults).",
+    )
+
     # Convergence evaluation
     parser.add_argument(
         "--enable-convergence-eval",

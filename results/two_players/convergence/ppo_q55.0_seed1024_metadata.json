@@ -1,0 +1,12 @@
+{
+  "run_id": "20260301_211141",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 1024,
+  "ablation_name": "baseline",
+  "git_sha": "65111dbaddd7",
+  "cmdline": "run/run_two_players.py --method ppo --seed 1024 --episodes 6144000 --override-entropy-end 0.01 --exploit-eps 0.03 --exploit-M 8192 --ablation-name baseline",
+  "timestamp": "2026-03-02T21:17:22.203344",
+  "convergence_file": "ppo_q55.0_seed1024_convergence.json",
+  "variant_name": "entropy_end_0.01"
+}

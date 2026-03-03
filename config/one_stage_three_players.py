@@ -25,8 +25,8 @@ config = {
     "steps_per_update": 4096,
     "minibatch_size": 1024,
     "update_epochs": 6,
-    "episodes": 2_048_000,    # Default budget: 500 updates at 4096 steps/update
-    "max_updates": 500,
+    "episodes": 6_144_000,    # 1500 updates at 4096 steps/update (3x budget for q=25 convergence)
+    "max_updates": 1500,
     "eval_every_updates": 20,
 
     # Learning rate schedule
@@ -36,7 +36,7 @@ config = {
     # Entropy schedule (wider exploration that decays)
     "entropy_coef_start": 0.03,
     "entropy_coef_hold": 0.03,
-    "entropy_coef_end": 0.015,
+    "entropy_coef_end": 0.005,
 
     # Clip range schedule
     "clip_range_start": 0.50,
@@ -44,6 +44,10 @@ config = {
 
     # Target KL for adaptive updates
     "target_kl": 0.08,
+    "kl_clip_factor_up": 1.2,    # Softer than default 1.5 to reduce late-training oscillation
+    "kl_clip_factor_down": 0.8,  # Softer than default 0.7
+    "kl_lr_factor_up": 1.2,
+    "kl_lr_factor_down": 0.8,
 
     # Convergence / early-stop (ON by default for PPO with relaxed profile)
     "convergence": {
@@ -88,9 +92,9 @@ config = {
             "patience_drift": 2,
         },
         "exploit": {
-            "exploit_eps": 0.03,
+            "exploit_eps": 0.05,
             "patience_exploit": 5,
-            "M": 8192,
+            "M": 16384,
             "grid": {
                 "stage_a_step": 5.0,
                 "stage_b_radius": 15.0,

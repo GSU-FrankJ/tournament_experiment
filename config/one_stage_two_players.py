@@ -39,18 +39,22 @@ config = {
     "steps_per_update": 4096,
     "minibatch_size": 1024,
     "update_epochs": 6,
-    "episodes": 2_048_000,    # Default sweep budget: exactly 500 updates at 4096 steps/update (可用 CLI 覆盖)
-    "max_updates": 500,
+    "episodes": 6_144_000,    # 1500 updates at 4096 steps/update (3x budget for q=25 convergence)
+    "max_updates": 1500,
     "eval_every_updates": 20,
     # Sweep1_E-inspired entropy schedule: wider exploration that decays to 0.015 (更激进但稳定)
     "entropy_coef_start": 0.03,
     "entropy_coef_hold": 0.03,
-    "entropy_coef_end": 0.015,
+    "entropy_coef_end": 0.005,
     "lr_start": 3e-4,
     "lr_end": 2e-4,
     "clip_range_start": 0.50, # Wide clips from Sweep1_E best run
     "clip_range_end": 0.35,   # Tail clip remains wide to avoid collapsing updates
     "target_kl": 0.08,        # Assumes kl_low = 0.5 * target, kl_high = 3 * target inside run loop
+    "kl_clip_factor_up": 1.2,    # Softer than default 1.5 to reduce late-training oscillation
+    "kl_clip_factor_down": 0.8,  # Softer than default 0.7
+    "kl_lr_factor_up": 1.2,
+    "kl_lr_factor_down": 0.8,
     "lag_warmup_updates": 10,
     "lag_fade_updates": 10,
     "opponent_history_sample_p_end": 0.0,
@@ -98,9 +102,9 @@ config = {
             "patience_drift": 2,
         },
         "exploit": {
-            "exploit_eps": 0.03,
+            "exploit_eps": 0.05,
             "patience_exploit": 5,
-            "M": 8192,
+            "M": 16384,
             "grid": {
                 "stage_a_step": 5.0,
                 "stage_b_radius": 15.0,

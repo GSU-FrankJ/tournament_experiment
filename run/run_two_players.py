@@ -1984,7 +1984,18 @@ def _run_cli(args: argparse.Namespace) -> str:
             "lr/clip/epochs softened",
             flush=True,
         )
-    
+
+    # Re-apply explicit CLI entropy override (takes priority over mode defaults)
+    if args.override_entropy_end is not None:
+        cfg["entropy_coef_end"] = float(args.override_entropy_end)
+        if float(args.override_entropy_end) > 0:
+            cfg["entropy_coef_start"] = max(float(cfg.get("entropy_coef_start", 0)),
+                                             float(args.override_entropy_end) * 2)
+            cfg["entropy_coef_hold"] = max(float(cfg.get("entropy_coef_hold", 0)),
+                                            float(args.override_entropy_end) * 2)
+        print(f"[config] CLI entropy override re-applied after mode defaults: "
+              f"entropy_coef_end={args.override_entropy_end}", flush=True)
+
     # --disable-entropy: zero entropy regularization (mechanism ablation)
     if args.disable_entropy:
         cfg["entropy_coef_start"] = 0.0

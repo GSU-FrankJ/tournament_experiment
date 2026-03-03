@@ -1,0 +1,12 @@
+{
+  "run_id": "20260225_201618",
+  "method": "ppo",
+  "q": 25.0,
+  "seed": 456,
+  "ablation_name": "baseline_v2",
+  "git_sha": "65111dbaddd7",
+  "cmdline": "run/run_two_players.py --method ppo --rollout-mode selfplay --seed 456 --ablation-name baseline_v2 --enable-convergence-eval --cheap-gate-profile relaxed",
+  "timestamp": "2026-02-26T05:44:00.500932",
+  "convergence_file": "ppo_q25.0_seed456_baseline_v2_convergence.json",
+  "variant_name": "baseline"
+}

@@ -454,10 +454,10 @@ def run_ppo_different_cost(
     train_qs: Optional[List[float]] = None,
     *,
     ablation_name: str = "baseline",
-    exploit_eps: float = 0.03,
+    exploit_eps: Optional[float] = None,
     patience_exploit: int = 5,
     exploit_every_updates: int = 10,
-    exploit_M: int = 8192,
+    exploit_M: Optional[int] = None,
     disable_cheap_gate: bool = False,
     disable_exploitability: bool = False,
 ) -> List[Dict]:
@@ -472,10 +472,10 @@ def run_ppo_different_cost(
         episodes: Total training steps (default from config)
         train_qs: List of q values to train on (default from config)
         ablation_name: Tag for this variant
-        exploit_eps: Exploitability threshold for convergence (default 0.03)
+        exploit_eps: Exploitability threshold for convergence (default: from config or 0.03)
         patience_exploit: Consecutive passes required for stopping (default 5)
         exploit_every_updates: Max interval between exploitability evaluations (default 10)
-        exploit_M: Monte Carlo samples for exploitability (default 8192)
+        exploit_M: Monte Carlo samples for exploitability (default: from config or 8192)
         disable_cheap_gate: If True, always evaluate exploitability (no gate)
         disable_exploitability: If True, skip exploitability evaluation entirely
         
@@ -486,7 +486,14 @@ def run_ppo_different_cost(
         episodes = int(cfg.get("episodes", 2_048_000))
     else:
         episodes = int(episodes)
-    
+
+    # Resolve exploit params from config when not provided via CLI
+    exploit_cfg = cfg.get("convergence", {}).get("exploit", {})
+    if exploit_eps is None:
+        exploit_eps = float(exploit_cfg.get("exploit_eps", 0.03))
+    if exploit_M is None:
+        exploit_M = int(exploit_cfg.get("M", 8192))
+
     k1, k2 = cfg["k1"], cfg["k2"]
     w_h, w_l = cfg["w_h"], cfg["w_l"]
     effort_bounds = tuple(cfg["effort_range"])
@@ -1023,6 +1030,17 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2"] = True
         print("[TheoryAlignV2] enabled: entropy=0", flush=True)
 
+    # Re-apply explicit CLI entropy override (takes priority over mode defaults)
+    if hasattr(args, 'override_entropy_end') and args.override_entropy_end is not None:
+        cfg["entropy_coef_end"] = float(args.override_entropy_end)
+        if float(args.override_entropy_end) > 0:
+            cfg["entropy_coef_start"] = max(float(cfg.get("entropy_coef_start", 0)),
+                                             float(args.override_entropy_end) * 2)
+            cfg["entropy_coef_hold"] = max(float(cfg.get("entropy_coef_hold", 0)),
+                                            float(args.override_entropy_end) * 2)
+        print(f"[config] CLI entropy override re-applied after mode defaults: "
+              f"entropy_coef_end={args.override_entropy_end}", flush=True)
+
     # --disable-entropy: zero entropy regularization (mechanism ablation)
     if args.disable_entropy:
         cfg["entropy_coef_start"] = 0.0
@@ -1132,7 +1150,13 @@ def main():
         dest="theory_align_v2",
         help="Enable theory-align-v2 (zero entropy, mean+conc head)",
     )
-    
+    parser.add_argument(
+        "--override-entropy-end",
+        type=float,
+        default=None,
+        help="Override entropy_coef_end (takes priority over --theory-align-v2 defaults).",
+    )
+
     # Convergence evaluation
     parser.add_argument(
         "--enable-convergence-eval",
@@ -1159,8 +1183,8 @@ def main():
     parser.add_argument(
         "--exploit-eps",
         type=float,
-        default=0.03,
-        help="Exploitability threshold for convergence (default: 0.03)",
+        default=None,
+        help="Override exploit_eps threshold (default: from config, 0.05)",
     )
     parser.add_argument(
         "--exploit-patience",
@@ -1177,8 +1201,8 @@ def main():
     parser.add_argument(
         "--exploit-M",
         type=int,
-        default=8192,
-        help="Monte Carlo samples for exploitability (default: 8192)",
+        default=None,
+        help="Override exploit MC samples (default: from config, 16384)",
     )
     parser.add_argument(
         "--disable-cheap-gate",

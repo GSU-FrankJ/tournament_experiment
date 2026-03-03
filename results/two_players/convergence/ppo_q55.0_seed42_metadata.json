@@ -1,12 +1,12 @@
 {
-  "run_id": "20260217_214908",
+  "run_id": "20260301_211126",
   "method": "ppo",
   "q": 55.0,
   "seed": 42,
   "ablation_name": "baseline",
-  "git_sha": "688f6a3c12d0",
-  "cmdline": "run/run_two_players.py --method ppo --q 55 --seed 42 --w_h 8 --w_l 4 --episodes 2048000 --ablation-name baseline",
-  "timestamp": "2026-02-18T04:55:41.498919",
+  "git_sha": "65111dbaddd7",
+  "cmdline": "run/run_two_players.py --method ppo --seed 42 --episodes 6144000 --override-entropy-end 0.01 --exploit-eps 0.03 --exploit-M 8192 --ablation-name baseline",
+  "timestamp": "2026-03-02T21:15:39.728559",
   "convergence_file": "ppo_q55.0_seed42_convergence.json",
-  "variant_name": "baseline"
+  "variant_name": "entropy_end_0.01"
 }

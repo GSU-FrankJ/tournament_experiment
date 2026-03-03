@@ -50,14 +50,14 @@ config = {
     "steps_per_update": 4096,
     "minibatch_size": 1024,
     "update_epochs": 6,
-    "episodes": 2_048_000,
-    "max_updates": 500,
+    "episodes": 6_144_000,    # 1500 updates at 4096 steps/update (3x budget for q=25 convergence)
+    "max_updates": 1500,
     "eval_every_updates": 20,
     
     # Entropy schedule: wider exploration that decays
     "entropy_coef_start": 0.03,
     "entropy_coef_hold": 0.03,
-    "entropy_coef_end": 0.015,
+    "entropy_coef_end": 0.005,
     "entropy_hold_fraction": 2.0 / 3.0,
     
     # Learning rate schedule
@@ -70,6 +70,10 @@ config = {
     
     # KL target and early stop
     "target_kl": 0.08,
+    "kl_clip_factor_up": 1.2,    # Softer than default 1.5 to reduce late-training oscillation
+    "kl_clip_factor_down": 0.8,  # Softer than default 0.7
+    "kl_lr_factor_up": 1.2,
+    "kl_lr_factor_down": 0.8,
     "kl_early_stop": True,
     "kl_stop_patience": 1,
     "kl_stop_threshold": None,
@@ -116,6 +120,18 @@ config = {
             "std_kl_thresh": 0.0035,
             "drift_effort_thresh": 2.0,
             "patience_drift": 2,
+        },
+        "exploit": {
+            "exploit_eps": 0.05,
+            "patience_exploit": 5,
+            "M": 16384,
+            "grid": {
+                "stage_a_step": 5.0,
+                "stage_b_radius": 15.0,
+                "stage_b_step": 1.0,
+                "stage_c_radius": 3.0,
+                "stage_c_step": 0.25,
+            },
         },
     },
     
