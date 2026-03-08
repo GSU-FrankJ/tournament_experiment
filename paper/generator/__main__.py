@@ -36,7 +36,7 @@ from .config import (
     DATA_DIR,
     Q_VALUES,
 )
-from .run_registry import discover_runs, print_discovery_report
+from .run_registry import discover_runs, print_discovery_report, select_best_runs
 from .extract import load_all_convergence_data
 from .plots import (
     generate_all_figures,
@@ -146,11 +146,25 @@ def cmd_make_all(args: argparse.Namespace) -> int:
     
     # Load data
     print("\nLoading convergence data...")
-    df = load_all_convergence_data(
-        convergence_dir=args.runs_dir,
-        csv_path=args.csv,
-        q_values=q_values,
-    )
+    if args.best_only:
+        from .extract import load_multiple_runs
+        all_runs = discover_runs(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+        )
+        # Filter to requested q values
+        if q_values:
+            all_runs = [r for r in all_runs if r.q in q_values]
+        print(f"\nSelecting best run per (experiment, q)...")
+        best = select_best_runs(all_runs)
+        print_discovery_report(best)
+        df = load_multiple_runs(best)
+    else:
+        df = load_all_convergence_data(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+            q_values=q_values,
+        )
     print(f"Loaded {len(df)} rows from {df['method'].nunique()} methods")
     
     if df.empty:
@@ -197,16 +211,27 @@ def cmd_plot(args: argparse.Namespace) -> int:
     
     # Load data
     q_values = parse_q_values(args.q) if args.q else Q_VALUES
-    df = load_all_convergence_data(
-        convergence_dir=args.runs_dir,
-        csv_path=args.csv,
-        q_values=q_values,
-    )
-    
+    if args.best_only:
+        from .extract import load_multiple_runs
+        all_runs = discover_runs(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+        )
+        if q_values:
+            all_runs = [r for r in all_runs if r.q in q_values]
+        best = select_best_runs(all_runs)
+        df = load_multiple_runs(best)
+    else:
+        df = load_all_convergence_data(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+            q_values=q_values,
+        )
+
     if df.empty:
         print("ERROR: No data found")
         return 1
-    
+
     # Generate specific plot
     output_dir = args.out_dir or FIGURES_DIR
     os.makedirs(output_dir, exist_ok=True)
@@ -243,16 +268,27 @@ def cmd_table(args: argparse.Namespace) -> int:
     
     # Load data
     q_values = parse_q_values(args.q) if args.q else Q_VALUES
-    df = load_all_convergence_data(
-        convergence_dir=args.runs_dir,
-        csv_path=args.csv,
-        q_values=q_values,
-    )
-    
+    if args.best_only:
+        from .extract import load_multiple_runs
+        all_runs = discover_runs(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+        )
+        if q_values:
+            all_runs = [r for r in all_runs if r.q in q_values]
+        best = select_best_runs(all_runs)
+        df = load_multiple_runs(best)
+    else:
+        df = load_all_convergence_data(
+            convergence_dir=args.runs_dir,
+            csv_path=args.csv,
+            q_values=q_values,
+        )
+
     if df.empty:
         print("ERROR: No data found")
         return 1
-    
+
     # Generate specific table
     output_dir = args.out_dir or TABLES_DIR
     os.makedirs(output_dir, exist_ok=True)
@@ -308,7 +344,12 @@ def main():
         action="store_true",
         help="List discovered runs without generating anything",
     )
-    
+    parser.add_argument(
+        "--best-only",
+        action="store_true",
+        help="Select only the best seed per (experiment, q) based on lowest final effort error",
+    )
+
     # Subcommands
     subparsers = parser.add_subparsers(dest="command", help="Commands")
     

@@ -391,6 +391,48 @@ def filter_runs(
     return result
 
 
+def select_best_runs(runs: List[Run]) -> List[Run]:
+    """For each (experiment, q), keep only the run with the lowest final effort error.
+
+    - Considers all baseline variants (baseline, baseline_v2, etc.)
+    - Keeps all Gradient runs unchanged (typically one per experiment x q)
+    - Computes theoretical effort from config to evaluate error
+
+    Returns:
+        Filtered list of Run objects (one PPO per experiment x q, plus all Gradient)
+    """
+    from .extract import get_final_effort_error_from_json
+    from .config import e_star, THEORY_PARAMS
+
+    # Separate gradient and PPO runs
+    gradient_runs = [r for r in runs if r.method == "Gradient"]
+    ppo_runs = [r for r in runs if r.method != "Gradient"]
+
+    # Group PPO runs by (experiment, q)
+    groups: Dict[Tuple[str, float], List[Run]] = {}
+    for run in ppo_runs:
+        key = (run.experiment, run.q)
+        groups.setdefault(key, []).append(run)
+
+    best_runs = []
+    for (experiment, q), group in sorted(groups.items()):
+        theo = e_star(q, **THEORY_PARAMS)
+
+        # Score each run by final effort error
+        scored = []
+        for run in group:
+            err = get_final_effort_error_from_json(run.path, theo)
+            scored.append((err, run))
+
+        scored.sort(key=lambda x: x[0])
+        best_err, best_run = scored[0]
+        best_runs.append(best_run)
+        print(f"  Best run [{experiment}] q={q}: seed={best_run.seed} "
+              f"ablation={best_run.ablation} error={best_err:.4f}")
+
+    return gradient_runs + best_runs
+
+
 def group_runs_by(
     runs: List[Run],
     by: str,  # "method", "q", "seed", "ablation"

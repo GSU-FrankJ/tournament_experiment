@@ -574,6 +574,46 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def get_final_effort_error_from_json(path: str, theoretical_effort: float) -> float:
+    """Load a convergence JSON and return |final_effort_mean - theoretical|.
+
+    For flat format: uses agent1_effort[-1] and agent2_effort[-1].
+    For nested format: uses history.agent1_effort[-1] / history.effort[-1].
+
+    Returns float('inf') if the file cannot be loaded or has no data.
+    """
+    try:
+        with open(path, 'r') as f:
+            data = json.load(f)
+    except Exception:
+        return float('inf')
+
+    # Nested format (different_cost, different_ability)
+    history = data.get("history", {})
+    if isinstance(history, dict) and "steps" in history:
+        if "effort" in history and len(history["effort"]) > 0:
+            final_effort = float(history["effort"][-1])
+        elif "agent1_effort" in history and "agent2_effort" in history:
+            e1 = history["agent1_effort"]
+            e2 = history["agent2_effort"]
+            if len(e1) > 0 and len(e2) > 0:
+                final_effort = (float(e1[-1]) + float(e2[-1])) / 2.0
+            else:
+                return float('inf')
+        else:
+            return float('inf')
+    else:
+        # Flat format (two_players, three_players)
+        e1 = data.get("agent1_effort", [])
+        e2 = data.get("agent2_effort", [])
+        if len(e1) > 0 and len(e2) > 0:
+            final_effort = (float(e1[-1]) + float(e2[-1])) / 2.0
+        else:
+            return float('inf')
+
+    return abs(final_effort - theoretical_effort)
+
+
 if __name__ == "__main__":
     # Quick test: load all convergence data
     print("Loading convergence data...")
