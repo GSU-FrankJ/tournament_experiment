@@ -575,10 +575,18 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_final_effort_error_from_json(path: str, theoretical_effort: float) -> float:
-    """Load a convergence JSON and return |final_effort_mean - theoretical|.
+    """Load a convergence JSON and return the mean per-agent absolute error.
 
-    For flat format: uses agent1_effort[-1] and agent2_effort[-1].
-    For nested format: uses history.agent1_effort[-1] / history.effort[-1].
+    Uses theoretical values stored in the JSON when available (handles
+    asymmetric experiments like different_cost where agents have different
+    equilibria). Falls back to ``theoretical_effort`` for symmetric experiments.
+
+    For nested format with per-agent efforts:
+        error = (|e1_final - theo_e1| + |e2_final - theo_e2|) / 2
+    For nested format with shared effort:
+        error = |effort_final - theo_effort|
+    For flat format:
+        error = |mean(e1, e2)_final - theoretical_effort|
 
     Returns float('inf') if the file cannot be loaded or has no data.
     """
@@ -588,16 +596,24 @@ def get_final_effort_error_from_json(path: str, theoretical_effort: float) -> fl
     except Exception:
         return float('inf')
 
+    theoretical = data.get("theoretical", {})
+
     # Nested format (different_cost, different_ability)
     history = data.get("history", {})
     if isinstance(history, dict) and "steps" in history:
         if "effort" in history and len(history["effort"]) > 0:
             final_effort = float(history["effort"][-1])
+            theo_val = float(theoretical["effort"]) if "effort" in theoretical else theoretical_effort
+            return abs(final_effort - theo_val)
         elif "agent1_effort" in history and "agent2_effort" in history:
             e1 = history["agent1_effort"]
             e2 = history["agent2_effort"]
             if len(e1) > 0 and len(e2) > 0:
-                final_effort = (float(e1[-1]) + float(e2[-1])) / 2.0
+                final_e1 = float(e1[-1])
+                final_e2 = float(e2[-1])
+                theo_e1 = float(theoretical.get("effort1", theoretical_effort))
+                theo_e2 = float(theoretical.get("effort2", theoretical_effort))
+                return (abs(final_e1 - theo_e1) + abs(final_e2 - theo_e2)) / 2.0
             else:
                 return float('inf')
         else:
