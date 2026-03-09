@@ -109,6 +109,15 @@ config = {
         },
     },
 
+    # Opponent lag (disabled by default: sync_interval=0 means pure self-play)
+    "opponent_mode": "periodic",
+    "opponent_sync_interval": 0,
+    "opponent_ema_tau": 0.20,
+    "opponent_snapshot_keep": 10,
+    "opponent_history_sample_p": 0.3,
+    "lag_warmup_updates": 0,
+    "lag_fade_updates": None,
+
     # KL early-stop (defaults keep behaviour OFF)
     "kl_early_stop": True,
     "kl_stop_patience": 1,

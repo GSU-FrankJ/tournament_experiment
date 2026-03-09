@@ -42,14 +42,16 @@ v2 files include `baseline_v2` in filename (e.g., `ppo_q25.0_seed42_baseline_v2_
 
 ---
 
-## Current Retraining Status (as of 2026-02-27)
+## Current Retraining Status (as of 2026-03-06)
 
 | Experiment | v2 Runs Completed | Missing Seeds | Status |
 |------------|-------------------|---------------|--------|
+| Two-Player | 15/15 | — | DONE |
 | Three-Player | 15/15 | — | DONE |
-| Two-Player | 9/15 | seed 42, seed 1024 (all 3 q values each) | PARTIAL |
-| Different Cost | 0/15 | all | NOT STARTED |
-| Different Ability | 0/15 | all | NOT STARTED |
+| Different Cost | 15/15 | — | DONE |
+| Different Ability | 15/15 | — | DONE |
+
+**All 60 v2 runs complete. No training processes running. GPUs idle.**
 
 ### Preliminary v2 Results
 
@@ -69,23 +71,9 @@ Example q=25 seed123: final effort ~74.6 vs theoretical 87.5 (gap=12.9, ~14.7%).
 
 ## What Needs to Be Done
 
-### 1. Complete Missing v2 Runs
+### 1. ~~Complete Missing v2 Runs~~ — ALL DONE (2026-03-06)
 
-```bash
-# Two-Player: missing seeds 42 and 1024
-python run/run_two_players.py --method ppo --rollout-mode selfplay --seed 42 --ablation-name baseline_v2 --enable-convergence-eval --cheap-gate-profile relaxed
-python run/run_two_players.py --method ppo --rollout-mode selfplay --seed 1024 --ablation-name baseline_v2 --enable-convergence-eval --cheap-gate-profile relaxed
-
-# Different Cost: all 5 seeds
-for seed in 42 123 456 789 1024; do
-  python run/run_different_cost.py --method ppo --seed $seed --ablation-name baseline_v2 --enable-convergence-eval --cheap-gate-profile relaxed
-done
-
-# Different Ability: all 5 seeds
-for seed in 42 123 456 789 1024; do
-  python run/run_different_ability.py --method ppo --seed $seed --ablation-name baseline_v2 --enable-convergence-eval --cheap-gate-profile relaxed
-done
-```
+All 60 v2 runs (4 experiments × 3 q-values × 5 seeds) are complete.
 
 ### 2. Compare Results
 ```bash

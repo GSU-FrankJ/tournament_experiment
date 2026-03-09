@@ -19,6 +19,8 @@ Key differences from two-player version:
 
 from __future__ import annotations
 
+from collections import deque
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Tuple, List, Dict, Optional
 import numpy as np
@@ -168,6 +170,16 @@ class PPOConfig:
     theory_align_v2_var_coef: float = 0.0
     theory_align_v2_br_coef: float = 0.0
 
+    # Best-response regularization (disabled by default)
+    br_reg_coef: float = 0.0
+
+    # Opponent lag (disabled by default: sync_interval=0)
+    opponent_mode: str = "periodic"
+    opponent_sync_interval: int = 0
+    opponent_ema_tau: float = 0.05
+    opponent_snapshot_keep: int = 10
+    opponent_history_sample_p: float = 0.0
+
 
 class PPOThreePlayersBandit:
     """PPO agent for three-player symmetric self-play tournament.
@@ -206,10 +218,36 @@ class PPOThreePlayersBandit:
             self.net = ActorCritic(state_dim=cfg.state_dim, hidden=cfg.hidden).to(self.device)
         
         self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
-        
+
+        # Lag opponent / history configuration
+        self.opponent_mode = getattr(cfg, "opponent_mode", "periodic")
+        self.opponent_sync_interval = max(0, int(getattr(cfg, "opponent_sync_interval", 0) or 0))
+        self.opponent_ema_tau = float(getattr(cfg, "opponent_ema_tau", 0.05))
+        self.opponent_history_sample_p = max(0.0, min(1.0, float(getattr(cfg, "opponent_history_sample_p", 0.0))))
+        self.opponent_snapshot_keep = max(0, int(getattr(cfg, "opponent_snapshot_keep", 0) or 0))
+        if self.opponent_mode not in ("ema", "periodic", "snapshot"):
+            self.opponent_mode = "periodic"
+
+        # Lagged opponent network (frozen copy) — only if lag is enabled
+        if self.opponent_sync_interval > 0:
+            self.opponent_policy = deepcopy(self.net).to(self.device)
+            for p in self.opponent_policy.parameters():
+                p.requires_grad_(False)
+            self.opponent_policy.eval()
+
+            history_maxlen = self.opponent_snapshot_keep if self.opponent_snapshot_keep > 0 else None
+            self._opponent_history: deque = deque(maxlen=history_maxlen)
+
+            if self.opponent_mode == "snapshot" and self.opponent_snapshot_keep != 0:
+                self._snapshot_current()
+        else:
+            self.opponent_policy = None
+            self._opponent_history = deque()
+
         # Update counter for scheduling
         self._updates = 0
-        
+        self._last_sync_step = -1
+
         # Rollout storage
         self.reset_storage()
 
@@ -254,6 +292,57 @@ class PPOThreePlayersBandit:
         # Map normalized action to effort space
         effort = self.low + a_safe.squeeze(-1) * (self.high - self.low)
         return a_safe.detach(), effort.detach(), logp.detach(), value.detach()
+
+    def act_opponent(self, state: torch.Tensor):
+        """Sample action from opponent (lagged/historical) policy."""
+        opp_net = self._sample_opponent_policy_for_play()
+        with torch.no_grad():
+            dist, _ = self.dist(state.to(self.device), net=opp_net)
+            eps = 1e-6
+            a_norm = dist.sample()
+            a_safe = a_norm.clamp(eps, 1.0 - eps)
+            logp = dist.log_prob(a_safe).squeeze(-1)
+            effort = self.low + a_safe.squeeze(-1) * (self.high - self.low)
+        return a_safe.detach(), effort.detach(), logp.detach(), None
+
+    def _sample_opponent_policy_for_play(self) -> nn.Module:
+        """Pick which opponent policy to use: historical snapshot or current lagged."""
+        history_available = len(self._opponent_history) > 0
+        use_history = (
+            history_available
+            and self.opponent_history_sample_p > 0.0
+            and float(np.random.rand()) < float(self.opponent_history_sample_p)
+        )
+        if use_history:
+            idx = int(np.random.randint(len(self._opponent_history)))
+            return self._opponent_history[idx]
+        return self.opponent_policy
+
+    @torch.no_grad()
+    def _ema_update(self, tau: float):
+        """Exponential moving average update of opponent toward current policy."""
+        tau = float(max(0.0, min(1.0, tau)))
+        if tau <= 0.0:
+            self._hard_copy_to_opponent()
+            return
+        for p_opp, p_cur in zip(self.opponent_policy.parameters(), self.net.parameters()):
+            p_opp.data.lerp_(p_cur.data, tau)
+
+    @torch.no_grad()
+    def _hard_copy_to_opponent(self):
+        """Copy current policy weights to opponent."""
+        for p_opp, p_cur in zip(self.opponent_policy.parameters(), self.net.parameters()):
+            p_opp.data.copy_(p_cur.data)
+
+    @torch.no_grad()
+    def _snapshot_current(self):
+        """Save a frozen snapshot of the current policy to history."""
+        self._hard_copy_to_opponent()
+        snap = deepcopy(self.opponent_policy)
+        for p in snap.parameters():
+            p.requires_grad_(False)
+        snap.eval()
+        self._opponent_history.append(snap)
 
     def evaluate_actions(
         self,
@@ -342,9 +431,14 @@ class PPOThreePlayersBandit:
         return advantages, returns
 
     # ---- PPO update ----
-    def update(self):
+    def update(self, *, br_target: Optional[float] = None):
         """Perform PPO update on collected rollouts.
-        
+
+        Args:
+            br_target: Best-response effort target for BR regularization.
+                       If provided and br_reg_coef > 0, adds a penalty pushing
+                       the policy mean toward this target.
+
         Returns:
             metrics: Dictionary of training diagnostics
         """
@@ -532,6 +626,16 @@ class PPOThreePlayersBandit:
                     br_loss = float(self.cfg.theory_align_v2_br_coef) * (mean_effort - e_star).pow(2).mean()
                     loss = loss + br_loss
 
+                # Best-response regularization (theory-free)
+                if br_target is not None and self.cfg.br_reg_coef > 0.0:
+                    if dist is None:
+                        dist = self.dist(mb_states)[0]
+                    a_mean_br = dist.mean.clamp(1e-6, 1.0 - 1e-6)
+                    mean_effort_br = self.low + a_mean_br.squeeze(-1) * (self.high - self.low)
+                    br_t = torch.tensor(br_target, dtype=torch.float32, device=self.device)
+                    br_reg_loss = float(self.cfg.br_reg_coef) * (mean_effort_br - br_t).pow(2).mean()
+                    loss = loss + br_reg_loss
+
                 # Gradient step
                 self.opt.zero_grad()
                 loss.backward()
@@ -583,6 +687,18 @@ class PPOThreePlayersBandit:
 
         # Update counter
         self._updates += 1
+
+        # Update opponent with lag according to configured mode
+        if self.opponent_sync_interval > 0 and (self._updates % self.opponent_sync_interval == 0):
+            if self.opponent_mode == "ema":
+                self._ema_update(self.opponent_ema_tau)
+            elif self.opponent_mode == "periodic":
+                self._hard_copy_to_opponent()
+            elif self.opponent_mode == "snapshot":
+                self._snapshot_current()
+            else:
+                self._hard_copy_to_opponent()
+            self._last_sync_step = self._updates
 
         # Compile metrics
         metrics = {
