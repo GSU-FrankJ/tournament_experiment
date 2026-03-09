@@ -330,8 +330,8 @@ def generate_final_paper_table(
                 "Steps to Conv.": "-",
             })
 
-            # Gradient
-            grad_df = q_df[q_df["method"] == "Gradient"]
+            # Gradient (baseline ablation only, exclude weight variants)
+            grad_df = q_df[(q_df["method"] == "Gradient") & (q_df["ablation"] == "baseline")]
             if not grad_df.empty:
                 final = get_final_values(grad_df)
                 if not final.empty:

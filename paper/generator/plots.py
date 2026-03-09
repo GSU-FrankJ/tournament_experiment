@@ -779,6 +779,9 @@ def plot_ablation_comparison(
         print("[plots] Warning: No data for ablation comparison")
         return None, None
     
+    # Filter out k5e4_wh8_wl3 ablation
+    df = df[df["ablation"] != "k5e4_wh8_wl3"]
+
     # Get unique ablations
     ablations = df["ablation"].unique()
     
