@@ -746,7 +746,7 @@ def plot_beta_snapshots(
         # Plot Beta PDF on effort scale (divide density by e_max for proper scaling)
         y = beta_dist.pdf(x_norm, alpha, beta_val) / e_max
         ax.plot(x_effort, y, color=AGENT_COLORS["agent1"], linewidth=2,
-                label="Both agents (symmetric)")
+                label="Both agents")
         ax.fill_between(x_effort, y, alpha=0.3, color=AGENT_COLORS["agent1"])
 
         # Mark policy mean in effort space
@@ -759,23 +759,16 @@ def plot_beta_snapshots(
         ax.axvline(x=e_theory, color="green", linestyle="-.",
                     linewidth=2, label=f"$e^*$={e_theory:.1f}")
 
-        # κ annotation
-        ax.text(
-            0.03, 0.95, f"κ={kappa:.1f}",
-            transform=ax.transAxes, fontsize=8,
-            verticalalignment="top",
-            bbox=dict(boxstyle="round,pad=0.2", facecolor="lightyellow", alpha=0.7),
-        )
-
         ax.set_xlabel("Effort")
         ax.set_ylabel("Density")
-        ax.set_title(f"Step {int(row['step'])} ({frac*100:.0f}%)\nα={alpha:.1f}, β={beta_val:.1f}")
-        ax.legend(loc="best", fontsize=7)
+        ax.set_title(f"Step {int(row['step'])} ({frac*100:.0f}%)\nκ={kappa:.1f}")
+        ax.legend(loc="upper right", fontsize=7)
 
         y_max_global = max(y_max_global, np.max(y))
 
-    # Unify y-axis across all panels
+    # Unify axes across all panels
     for ax in axes:
+        ax.set_xlim(0, 150)
         ax.set_ylim(0, y_max_global * 1.1)
 
     plt.tight_layout()
