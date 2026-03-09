@@ -797,22 +797,51 @@ def plot_ablation_comparison(
         # Theory line
         ax.axhline(y=e_theory, color="black", linestyle="--", linewidth=1.5, label="Theory")
         
-        # Plot each ablation
+        # Plot each ablation with per-seed traces + aggregate mean + CI
         for ablation in sorted(ablations):
-            abl_df = q_df[q_df["ablation"] == ablation].sort_values("step")
+            abl_df = q_df[q_df["ablation"] == ablation]
             if abl_df.empty:
                 continue
-            
+
             color = ABLATION_COLORS.get(ablation, "gray")
-            ax.plot(abl_df["step"], abl_df["effort_mean"], 
-                   color=color, linewidth=2, label=ablation)
+            seeds = sorted(abl_df["seed"].unique())
+            has_multi = len(seeds) > 1
+
+            if has_multi:
+                # Per-seed thin traces
+                for seed in seeds:
+                    seed_df = abl_df[abl_df["seed"] == seed].sort_values("step")
+                    ax.plot(seed_df["step"], seed_df["effort_mean"],
+                            color=color, alpha=0.2, linewidth=0.8, zorder=1)
+
+                # Aggregate mean + 95% CI band
+                agg = aggregate_seeds(abl_df)
+                if "effort_mean_mean" in agg.columns:
+                    steps = agg["step"].values
+                    mean = agg["effort_mean_mean"].values
+                    ci = agg["effort_mean_ci95"].values if "effort_mean_ci95" in agg.columns else np.zeros_like(mean)
+                    ax.plot(steps, mean, color=color, linewidth=2,
+                            label=ablation, zorder=3)
+                    ax.fill_between(steps, mean - ci, mean + ci,
+                                    color=color, alpha=0.12, zorder=2)
+            else:
+                single = abl_df.sort_values("step")
+                ax.plot(single["step"], single["effort_mean"],
+                        color=color, linewidth=2, label=ablation, zorder=3)
         
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Effort")
         ax.set_title(f"q = {q}")
-        ax.legend(loc="best")
-    
+
     plt.tight_layout()
+
+    # Single legend at top of figure, outside all axes
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles, labels, loc="upper center",
+        ncol=4, fontsize=FONT_SIZES["legend"], frameon=False,
+        bbox_to_anchor=(0.5, 1.03),
+    )
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
     pdf_path = output_path.replace(".png", ".pdf")
