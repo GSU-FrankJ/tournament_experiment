@@ -352,60 +352,75 @@ def plot_kl_dynamics(
         print("[plots] Warning: No KL data available for kl_dynamics plot")
         return None, None
     
+    # Colorblind-safe palette
+    CB_BLUE = "#0072B2"
+    CB_CYAN = "#56B4E9"
+    CB_RED = "#D55E00"
+
+    x_formatter = ticker.FuncFormatter(
+        lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
+        else f"{x/1e3:.0f}k" if x >= 1e3
+        else f"{x:.0f}"
+    )
+
     fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["kl_dynamics"])
     if len(q_values) == 1:
         axes = [axes]
-    
-    for ax, q in zip(axes, q_values):
-        q_df = df[df["q"] == q].sort_values("step")
+
+    mean_kl_thresh = CHEAP_GATE_CONFIG["mean_kl_thresh"]
+
+    for idx, (ax, q) in enumerate(zip(axes, q_values)):
+        q_df = df[df["q"] == q].copy()
+
+        # Filter to positive KL only (negative values are estimation artifacts)
+        q_df = q_df[q_df["approx_kl"].notna() & (q_df["approx_kl"] > 0)]
 
         if q_df.empty:
-            ax.set_title(f"q = {q} (no data)")
+            ax.set_title(f"q = {int(q)} (no data)")
             continue
 
-        seeds = sorted(q_df["seed"].unique())
-        has_multi = len(seeds) > 1
+        # Bin the step axis into ~150 equal-width bins
+        step_min, step_max = q_df["step"].min(), q_df["step"].max()
+        bin_width = max(1, int((step_max - step_min) / 150))
+        q_df["step_bin"] = (q_df["step"] // bin_width) * bin_width
 
-        # Per-seed thin traces
-        for seed in seeds:
-            sdf = q_df[q_df["seed"] == seed].sort_values("step")
-            valid_kl = sdf[~sdf["approx_kl"].isna()]
-            if not valid_kl.empty:
-                ax.plot(
-                    valid_kl["step"], valid_kl["approx_kl"],
-                    color="#1f77b4", alpha=0.3, linewidth=0.8,
-                )
+        # Aggregate across all seeds per bin
+        binned = q_df.groupby("step_bin")["approx_kl"].agg(
+            median="median",
+            p10=lambda x: np.percentile(x, 10),
+            p90=lambda x: np.percentile(x, 90),
+        ).reset_index()
 
-        # Bold mean line across seeds
-        if has_multi:
-            agg = aggregate_seeds(q_df)
-            if "approx_kl_mean" in agg.columns:
-                valid = agg[~agg["approx_kl_mean"].isna()]
-                ax.plot(
-                    valid["step"], valid["approx_kl_mean"],
-                    color="#1f77b4", linewidth=2, label="Mean approx_kl",
-                )
-        else:
-            valid_kl = q_df[~q_df["approx_kl"].isna()]
-            if not valid_kl.empty:
-                ax.plot(
-                    valid_kl["step"], valid_kl["approx_kl"],
-                    color="#1f77b4", linewidth=2, label="approx_kl",
-                )
+        # Light rolling smooth (window=5, centered)
+        for col in ["median", "p10", "p90"]:
+            binned[col] = binned[col].rolling(5, center=True, min_periods=1).mean()
 
-        # Target KL threshold line
-        mean_kl_thresh = CHEAP_GATE_CONFIG["mean_kl_thresh"]
-        ax.axhline(
-            y=mean_kl_thresh, color="red", linestyle="--",
-            linewidth=1.5, label=f"Mean KL threshold ({mean_kl_thresh})",
+        steps = binned["step_bin"].values
+
+        # Percentile envelope
+        ax.fill_between(
+            steps, binned["p10"].values, binned["p90"].values,
+            color=CB_CYAN, alpha=0.25, label="10\u201390th pctl",
         )
 
-        ax.set_xlabel("Training Steps")
-        ax.set_ylabel("KL Divergence")
+        # Bold median line
+        ax.plot(steps, binned["median"].values,
+                color=CB_BLUE, linewidth=2, label="Median KL")
+
+        # Threshold line
+        ax.axhline(
+            y=mean_kl_thresh, color=CB_RED, linestyle="--",
+            linewidth=1.5, label=f"Threshold ({mean_kl_thresh})",
+        )
+
         ax.set_title(f"q = {int(q)}")
-        ax.legend(loc="best", fontsize=8)
         ax.set_yscale("log")
-        ax.set_ylim(1e-4, 1e-1)
+        ax.set_ylim(1e-4, 2e-1)
+        ax.xaxis.set_major_formatter(x_formatter)
+        if idx == 0:
+            ax.set_ylabel("KL Divergence")
+            ax.legend(loc="lower right", fontsize=8)
+        ax.set_xlabel("Training Steps")
 
     plt.tight_layout()
     
