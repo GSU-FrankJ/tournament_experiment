@@ -574,6 +574,78 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def get_cheap_gate_step(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the first step where the cheap gate passed (exploitability was evaluated).
+
+    Returns a DataFrame with one row per run and columns:
+        experiment, method, q, seed, ablation, cheap_gate_step (NaN if never passed)
+    """
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        grp = grp.sort_values("step")
+        gate_step = np.nan
+
+        if "exploitability_is_valid" in grp.columns:
+            valid_rows = grp[grp["exploitability_is_valid"] == True]
+            if not valid_rows.empty:
+                gate_step = float(valid_rows["step"].iloc[0])
+
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["cheap_gate_step"] = gate_step
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
+def get_nash_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the step where Nash equilibrium is declared: exploitability < threshold
+    for exploit_patience consecutive valid evaluations.
+
+    Returns a DataFrame with one row per run and columns:
+        experiment, method, q, seed, ablation, nash_step (NaN if not converged)
+    """
+    threshold = CONVERGENCE_CONFIG["exploit_threshold"]
+    patience = int(CONVERGENCE_CONFIG["exploit_patience"])
+
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        grp = grp.sort_values("step")
+        nash_step = np.nan
+
+        if "exploitability" in grp.columns:
+            valid = grp[grp["exploitability"].notna() & (grp.get("exploitability_is_valid", True) == True)]
+            if len(valid) >= patience:
+                exploit_vals = valid["exploitability"].values
+                step_vals = valid["step"].values
+                # Sliding window: patience consecutive evals below threshold
+                below = exploit_vals < threshold
+                streak = 0
+                for j in range(len(below)):
+                    if below[j]:
+                        streak += 1
+                        if streak >= patience:
+                            nash_step = float(step_vals[j])
+                            break
+                    else:
+                        streak = 0
+
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["nash_step"] = nash_step
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
 def get_final_effort_error_from_json(path: str, theoretical_effort: float) -> float:
     """Load a convergence JSON and return the mean per-agent absolute error.
 

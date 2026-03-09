@@ -233,7 +233,7 @@ def cmd_plot(args: argparse.Namespace) -> int:
         return 1
 
     # Generate specific plot
-    output_dir = args.out_dir or FIGURES_DIR
+    output_dir = os.path.join(args.out_dir, "figures") if args.out_dir else FIGURES_DIR
     os.makedirs(output_dir, exist_ok=True)
     
     plot_funcs = {

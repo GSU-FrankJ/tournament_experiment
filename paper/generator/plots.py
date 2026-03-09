@@ -471,8 +471,10 @@ def plot_exploitability_dynamics(
     # Forward-fill exploitability
     df = forward_fill_exploitability(df)
 
-    # Precompute convergence steps
-    conv_steps_df = get_convergence_step(df)
+    # Precompute cheap gate steps and Nash convergence steps
+    from .extract import get_cheap_gate_step, get_nash_convergence_step
+    gate_steps_df = get_cheap_gate_step(df)
+    nash_steps_df = get_nash_convergence_step(df)
 
     fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["exploitability_dynamics"])
     if len(q_values) == 1:
@@ -487,22 +489,26 @@ def plot_exploitability_dynamics(
 
         seeds = sorted(q_df["seed"].unique())
 
-        # Per-seed thin lines with step drawstyle
+        # Smoothing window for rolling mean
+        smooth_window = 15
+
+        # Per-seed thin lines (smoothed)
         for seed in seeds:
             sdf = q_df[q_df["seed"] == seed].sort_values("step")
             valid = sdf[~sdf["exploitability_ffill"].isna()]
             if not valid.empty:
+                smoothed = valid["exploitability_ffill"].rolling(
+                    window=smooth_window, min_periods=1, center=True,
+                ).mean()
                 ax.plot(
-                    valid["step"], valid["exploitability_ffill"],
+                    valid["step"].values, smoothed.values,
                     color="#1f77b4", alpha=0.3, linewidth=0.8,
-                    drawstyle="steps-post",
                 )
 
-        # Bold mean across seeds with step drawstyle
+        # Bold mean across seeds (smoothed)
         if len(seeds) > 1:
             agg = aggregate_seeds(q_df)
             if "exploitability_ffill" not in agg.columns:
-                # exploitability_ffill wasn't aggregated; compute from exploitability_mean
                 col = "exploitability_mean" if "exploitability_mean" in agg.columns else None
             else:
                 col = "exploitability_ffill"
@@ -510,18 +516,22 @@ def plot_exploitability_dynamics(
                 col = "exploitability_mean"
             if col and col in agg.columns:
                 valid = agg[~agg[col].isna()]
+                smoothed = valid[col].rolling(
+                    window=smooth_window, min_periods=1, center=True,
+                ).mean()
                 ax.plot(
-                    valid["step"], valid[col],
-                    color="#1f77b4", linewidth=2,
-                    drawstyle="steps-post", label="Exploitability",
+                    valid["step"].values, smoothed.values,
+                    color="#1f77b4", linewidth=2, label="Exploitability",
                 )
         else:
             valid = q_df[~q_df["exploitability_ffill"].isna()]
             if not valid.empty:
+                smoothed = valid["exploitability_ffill"].rolling(
+                    window=smooth_window, min_periods=1, center=True,
+                ).mean()
                 ax.plot(
-                    valid["step"], valid["exploitability_ffill"],
-                    color="#1f77b4", linewidth=2,
-                    drawstyle="steps-post", label="Exploitability",
+                    valid["step"].values, smoothed.values,
+                    color="#1f77b4", linewidth=2, label="Exploitability",
                 )
 
         # Threshold line → bolder
@@ -531,34 +541,61 @@ def plot_exploitability_dynamics(
             linewidth=2.5, alpha=0.8, label=f"Threshold ({exploit_thresh})",
         )
 
-        # Convergence vertical lines per seed
-        conv_label_added = False
-        for seed in seeds:
-            match = conv_steps_df[
-                (conv_steps_df["q"] == q)
-                & (conv_steps_df["seed"] == seed)
-                & (conv_steps_df["ablation"] == "baseline")
-            ]
-            if "experiment" in conv_steps_df.columns:
-                match = match[match["experiment"] == "two_players"]
-            if not match.empty:
-                cs = match["convergence_step"].iloc[0]
-                if not np.isnan(cs):
-                    label = "Convergence step" if not conv_label_added else None
-                    ax.axvline(
-                        x=cs, color="green", linestyle=":",
-                        linewidth=1.2, alpha=0.6, label=label,
-                    )
-                    conv_label_added = True
+        # Cheap gate: median across seeds → single orange line
+        gate_match = gate_steps_df[
+            (gate_steps_df["q"] == q) & (gate_steps_df["ablation"] == "baseline")
+        ]
+        if "experiment" in gate_steps_df.columns:
+            gate_match = gate_match[gate_match["experiment"] == "two_players"]
+        gate_vals = gate_match["cheap_gate_step"].dropna()
+        if not gate_vals.empty:
+            ax.axvline(
+                x=gate_vals.median(), color="orange", linestyle=":",
+                linewidth=1.5, alpha=0.8, label="Cheap gate passed",
+            )
+
+        # Nash convergence: median across seeds → single green line
+        nash_match = nash_steps_df[
+            (nash_steps_df["q"] == q) & (nash_steps_df["ablation"] == "baseline")
+        ]
+        if "experiment" in nash_steps_df.columns:
+            nash_match = nash_match[nash_match["experiment"] == "two_players"]
+        nash_vals = nash_match["nash_step"].dropna()
+        if not nash_vals.empty:
+            ax.axvline(
+                x=nash_vals.max(), color="green", linestyle="-.",
+                linewidth=1.5, alpha=0.8, label="Nash convergence",
+            )
 
         ax.set_xlabel("Training Steps")
-        ax.set_ylabel("Exploitability")
+        if ax == axes[0]:
+            ax.set_ylabel("Exploitability")
         ax.set_title(f"q = {int(q)}")
         ax.set_yscale("log")
         ax.set_ylim(0.01, 1)
-        ax.legend(loc="best", fontsize=8)
 
-    plt.tight_layout()
+    # Single shared legend at the top — collect from all panels
+    all_handles, all_labels = [], []
+    for ax in axes:
+        h, l = ax.get_legend_handles_labels()
+        all_handles.extend(h)
+        all_labels.extend(l)
+    # Deduplicate while preserving order
+    seen = set()
+    unique_handles, unique_labels = [], []
+    for h, l in zip(all_handles, all_labels):
+        if l not in seen:
+            seen.add(l)
+            unique_handles.append(h)
+            unique_labels.append(l)
+    fig.legend(
+        unique_handles, unique_labels,
+        loc="upper center", ncol=len(unique_labels),
+        fontsize=8, frameon=True,
+        bbox_to_anchor=(0.5, 1.02),
+    )
+
+    plt.tight_layout(rect=[0, 0, 1, 0.93])
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
     pdf_path = output_path.replace(".png", ".pdf")
