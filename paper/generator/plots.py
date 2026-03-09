@@ -1220,7 +1220,9 @@ def plot_effort_drift(
     if len(q_values) == 1:
         axes = [axes]
 
-    for ax, q in zip(axes, q_values):
+    conv_steps_df = get_convergence_step(df)
+
+    for i, (ax, q) in enumerate(zip(axes, q_values)):
         q_df = df[df["q"] == q].sort_values("step")
 
         if q_df.empty:
@@ -1232,49 +1234,66 @@ def plot_effort_drift(
             ax.set_title(f"q = {q} (no drift data)")
             continue
 
-        # Multi-seed: plot individual traces with transparency
-        for seed, seed_df in valid.groupby("seed"):
-            seed_df = seed_df.sort_values("step")
-            ax.plot(
-                seed_df["step"],
-                seed_df["drift_effort"],
-                alpha=0.4,
-                linewidth=1,
-                color="#1f77b4",
-            )
+        # Aggregate by step across seeds (uniform grid, no binning needed)
+        binned = valid.groupby("step")["drift_effort"].agg(
+            median="median",
+            p10=lambda x: np.percentile(x, 10),
+            p90=lambda x: np.percentile(x, 90),
+        ).reset_index()
+        binned = binned.sort_values("step")
 
-        # Aggregate mean
-        has_multi = valid["seed"].nunique() > 1
-        if has_multi:
-            agg = aggregate_seeds(valid)
-            if "drift_effort_mean" in agg.columns:
-                ax.plot(
-                    agg["step"],
-                    agg["drift_effort_mean"],
-                    color="#ff7f0e",
-                    linewidth=2,
-                    label="Mean",
-                )
+        # Light rolling smooth (window=3) to reduce jaggedness
+        for col in ["median", "p10", "p90"]:
+            binned[col] = binned[col].rolling(3, center=True, min_periods=1).mean()
 
-        # Threshold line → bold red with value annotation
+        # Shaded 10–90th percentile band
+        ax.fill_between(
+            binned["step"], binned["p10"], binned["p90"],
+            color="#56B4E9", alpha=0.25, label="10\u201390th pctl",
+        )
+
+        # Bold median line
+        ax.plot(
+            binned["step"], binned["median"],
+            color="#0072B2", linewidth=2, label="Median drift",
+        )
+
+        # Threshold line
         drift_thresh = CHEAP_GATE_CONFIG["drift_effort_thresh"]
         ax.axhline(
-            y=drift_thresh, color="red", linestyle="--",
-            linewidth=2.5, alpha=0.8, label=f"Threshold ({drift_thresh})",
+            y=drift_thresh, color="#D55E00", linestyle="--",
+            linewidth=1.5, label=f"Threshold ({drift_thresh})",
         )
-        # Annotate the threshold value
-        ax.text(
-            ax.get_xlim()[1], drift_thresh, f" {drift_thresh}",
-            color="red", fontsize=8, va="bottom",
-        )
+
+        # Convergence step vertical line
+        q_conv = conv_steps_df[conv_steps_df["q"] == q]
+        if "experiment" in conv_steps_df.columns:
+            q_conv = q_conv[q_conv["experiment"] == "two_players"]
+        q_conv = q_conv[q_conv["ablation"] == "baseline"]
+        mean_conv = q_conv["convergence_step"].dropna().mean()
+        if not np.isnan(mean_conv):
+            ax.axvline(
+                x=mean_conv, color="#009E73", linestyle=":",
+                linewidth=1.5, alpha=0.8, label="Conv. step",
+            )
 
         ax.set_xlabel("Training Steps")
-        ax.set_ylabel("Effort Drift")
+        if i == 0:
+            ax.set_ylabel("Effort Drift")
         ax.set_title(f"q = {int(q)}")
-        ax.legend(loc="best")
+        ax.set_ylim(0, 2.8)
+        ax.xaxis.set_major_formatter(
+            ticker.FuncFormatter(
+                lambda x, p: f"{x/1e6:.1f}M"
+                if x >= 1e6
+                else f"{x/1e3:.0f}k"
+                if x >= 1e3
+                else f"{x:.0f}"
+            )
+        )
+        if i == 0:
+            ax.legend(loc="best", fontsize=8)
 
-    # Unify y-axis across all panels
-    _unify_ylim(axes)
 
     plt.tight_layout()
 
@@ -1337,14 +1356,13 @@ def plot_equilibrium_recovery_dotplot(
         "different_ability": "Heterogeneous\nAbility",
     }
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    fig, ax = plt.subplots(1, 1, figsize=FIGURE_SIZES["equilibrium_recovery_dotplot"])
 
     x_pos = 0
     x_ticks = []
     x_labels = []
     # Track whether per-agent legend entries have been added
     _legend_added = {"agent1": False, "agent2": False, "single": False, "mean": False}
-
     for exp in experiments:
         exp_final = final[final["experiment"] == exp] if "experiment" in final.columns else pd.DataFrame()
         if exp_final.empty:
@@ -1390,6 +1408,16 @@ def plot_equilibrium_recovery_dotplot(
                             label=agent_label if not _legend_added[agent_key] else None,
                         )
                         _legend_added[agent_key] = True
+
+                        # Per-agent mean marker
+                        valid_efforts = efforts[~np.isnan(efforts)]
+                        if len(valid_efforts) > 0:
+                            ax.scatter(
+                                x_pos, valid_efforts.mean(),
+                                color=color, marker="D", s=100, zorder=4,
+                                edgecolors="black", linewidth=1,
+                            )
+
             else:
                 # --- Single-marker behavior (original) ---
                 e_theory = q_final["theoretical_effort"].iloc[0]
@@ -1425,12 +1453,13 @@ def plot_equilibrium_recovery_dotplot(
 
         # Add separator between experiments
         if x_pos > 0:
+            ax.axvline(x=x_pos - 0.25, color="gray", linewidth=0.5, alpha=0.3, zorder=0)
             x_pos += 0.5
 
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_labels, fontsize=FONT_SIZES["tick_label"])
     ax.set_ylabel("Equilibrium Effort")
-    ax.set_title("Equilibrium Recovery Across Scenarios")
+    ax.set_title("Equilibrium Recovery Across Scenarios", pad=30)
 
     # Add experiment group labels
     group_starts = []
@@ -1444,15 +1473,13 @@ def plot_equilibrium_recovery_dotplot(
         group_starts.append((group_center, exp_labels.get(exp, exp)))
         x_pos_track += n_q + 0.5
 
+    trans = ax.get_xaxis_transform()
     for center, label in group_starts:
-        ax.annotate(
-            label,
-            xy=(center, 0),
-            xycoords=("data", "axes fraction"),
-            xytext=(0, -35),
-            textcoords="offset points",
+        ax.text(
+            center, -0.12, label,
+            transform=trans,
             ha="center", va="top",
-            fontsize=FONT_SIZES["annotation"],
+            fontsize=FONT_SIZES["tick_label"],
             fontweight="bold",
         )
 
@@ -1482,10 +1509,17 @@ def plot_equilibrium_recovery_dotplot(
             markerfacecolor=AGENT_COLORS["agent2"], markersize=8,
             label="Agent 2 (high-cost)",
         ))
-    ax.legend(handles=legend_elements, loc="upper right")
+    ax.legend(
+        handles=legend_elements,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 1.02),
+        ncol=len(legend_elements),
+        frameon=False,
+        fontsize=FONT_SIZES["legend"],
+    )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.2)
+    plt.subplots_adjust(bottom=0.18, top=0.88)
 
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
     pdf_path = output_path.replace(".png", ".pdf")
