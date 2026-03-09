@@ -236,23 +236,6 @@ def plot_convergence_main(
                         label=label_base, zorder=3,
                     )
 
-            # --- Convergence vertical lines per seed ---
-            for seed in seeds:
-                match = conv_steps_df[
-                    (conv_steps_df["q"] == q)
-                    & (conv_steps_df["seed"] == seed)
-                    & (conv_steps_df["ablation"] == variant)
-                ]
-                if "experiment" in conv_steps_df.columns:
-                    match = match[match["experiment"] == "two_players"]
-                if not match.empty:
-                    cs = match["convergence_step"].iloc[0]
-                    if not np.isnan(cs):
-                        ax.axvline(
-                            x=cs, color="green", linestyle=":",
-                            linewidth=1.2, alpha=0.6,
-                        )
-
             # --- Final summary annotation ---
             if not np.isnan(e_theory):
                 final_effort = method_df.groupby("seed")["effort_mean"].last().mean()
@@ -301,9 +284,9 @@ def plot_convergence_main(
                     fontsize=FONT_SIZES["axis_label"], rotation=90,
                 )
 
-            # Legend only on first panel
-            if row_idx == 0 and col_idx == n_cols - 1:
-                ax.legend(loc="best", fontsize=FONT_SIZES["legend"])
+            # Legend only on top-left panel
+            if row_idx == 0 and col_idx == 0:
+                ax.legend(loc="upper left", fontsize=FONT_SIZES["legend"])
 
             ax.xaxis.set_major_formatter(
                 ticker.FuncFormatter(
@@ -534,6 +517,7 @@ def plot_exploitability_dynamics(
         )
 
         # Convergence vertical lines per seed
+        conv_label_added = False
         for seed in seeds:
             match = conv_steps_df[
                 (conv_steps_df["q"] == q)
@@ -545,10 +529,12 @@ def plot_exploitability_dynamics(
             if not match.empty:
                 cs = match["convergence_step"].iloc[0]
                 if not np.isnan(cs):
+                    label = "Convergence step" if not conv_label_added else None
                     ax.axvline(
                         x=cs, color="green", linestyle=":",
-                        linewidth=1.2, alpha=0.6,
+                        linewidth=1.2, alpha=0.6, label=label,
                     )
+                    conv_label_added = True
 
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Exploitability")
@@ -919,6 +905,7 @@ def plot_distance_to_equilibrium(
             ax.axvline(
                 x=mean_conv, color=color, linestyle=":",
                 linewidth=1.2, alpha=0.7,
+                label=f"Conv. step q={int(q)}",
             )
 
     # ε threshold horizontal line
