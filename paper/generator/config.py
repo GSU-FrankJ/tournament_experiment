@@ -155,6 +155,7 @@ FIGURE_SIZES: Dict[str, Tuple[float, float]] = {
     "beta_evolution": (10, 4),
     "beta_snapshots": (12, 4),
     "ablation_comparison": (10, 6),
+    "hyperparam_sensitivity": (14, 8),
 }
 
 # Font sizes

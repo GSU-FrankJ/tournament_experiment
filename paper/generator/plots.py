@@ -765,8 +765,8 @@ def plot_ablation_comparison(
         print("[plots] Warning: No data for ablation comparison")
         return None, None
     
-    # Filter out k5e4_wh8_wl3 ablation
-    df = df[df["ablation"] != "k5e4_wh8_wl3"]
+    # Keep only the 3 key ablations for the main paper figure
+    df = df[df["ablation"].isin(["baseline", "no_cheap_gate", "no_exploitability"])]
 
     # Get unique ablations
     ablations = df["ablation"].unique()
@@ -807,6 +807,166 @@ def plot_ablation_comparison(
         data_path = os.path.join(DATA_DIR, "ablation_comparison.csv")
         df[["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]].to_csv(data_path, index=False)
     
+    print(f"[plots] Saved figure to {output_path}")
+    return fig, output_path
+
+
+def plot_hyperparam_sensitivity(
+    df: pd.DataFrame = None,
+    q_values: List[float] = None,
+    output_path: str = None,
+    save_data: bool = True,
+) -> Tuple[plt.Figure, str]:
+    """
+    Plot hyperparameter sensitivity sweeps (appendix figure).
+
+    Top row: epsilon sweep (eps_001..eps_020 + baseline).
+    Bottom row: patience sweep (pat_01..pat_10 + baseline).
+    Columns: q values.
+    """
+    setup_matplotlib_style()
+    ensure_output_dirs()
+
+    if df is None:
+        df = load_all_convergence_data()
+    if q_values is None:
+        q_values = Q_VALUES
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "hyperparam_sensitivity.png")
+
+    # Filter to two_players PPO
+    df = df[
+        (df["q"].isin(q_values))
+        & (df["method"].isin(["TEL-PPO", "PPO"]))
+    ]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
+    # Exclude non-hyperparam ablations
+    exclude = {"k5e4_wh8_wl3", "q25_seed68", "wh8_wl4", "baseline_v2",
+               "no_cheap_gate", "no_exploitability", "no_entropy"}
+    df = df[~df["ablation"].isin(exclude)]
+
+    if df.empty:
+        print("[plots] Warning: No data for hyperparam_sensitivity")
+        return None, None
+
+    # Row definitions
+    eps_ablations = ["eps_001", "eps_003", "eps_010", "eps_020"]
+    eps_labels = {
+        "eps_001": "ε=0.01", "eps_003": "ε=0.03",
+        "eps_010": "ε=0.10", "eps_020": "ε=0.20",
+        "baseline": "baseline (ε=0.05)",
+    }
+    pat_ablations = ["pat_01", "pat_03", "pat_10"]
+    pat_labels = {
+        "pat_01": "p=1", "pat_03": "p=3", "pat_10": "p=10",
+        "baseline": "baseline (p=5)",
+    }
+
+    rows = [
+        ("Clipping ε", eps_ablations, eps_labels, plt.cm.Blues),
+        ("Patience p", pat_ablations, pat_labels, plt.cm.Oranges),
+    ]
+
+    n_cols = len(q_values)
+    fig, axes = plt.subplots(2, n_cols, figsize=FIGURE_SIZES["hyperparam_sensitivity"],
+                             squeeze=False)
+
+    x_formatter = ticker.FuncFormatter(
+        lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
+        else f"{x/1e3:.0f}k" if x >= 1e3
+        else f"{x:.0f}"
+    )
+
+    for row_idx, (row_label, sweep_ablations, label_map, cmap) in enumerate(rows):
+        # Colors: sequential for sweep, black for baseline
+        n_sweep = len(sweep_ablations)
+        cmap_positions = np.linspace(0.3, 0.85, n_sweep)
+        sweep_colors = {abl: cmap(pos) for abl, pos in zip(sweep_ablations, cmap_positions)}
+
+        plot_order = sweep_ablations + ["baseline"]
+
+        for col_idx, q in enumerate(q_values):
+            ax = axes[row_idx, col_idx]
+            e_theory = e_star(q, **THEORY_PARAMS)
+
+            # Theory line
+            ax.axhline(y=e_theory, color="black", linestyle="--",
+                       linewidth=1.5, label="Theory $e^*$", zorder=1)
+
+            for ablation in plot_order:
+                abl_df = df[(df["q"] == q) & (df["ablation"] == ablation)].sort_values("step")
+                if abl_df.empty:
+                    continue
+
+                color = "black" if ablation == "baseline" else sweep_colors.get(ablation, "gray")
+                lw = 1.5 if ablation == "baseline" else 2.0
+                label = label_map.get(ablation, ablation)
+
+                seeds = sorted(abl_df["seed"].unique())
+                has_multi = len(seeds) > 1
+
+                if has_multi:
+                    # Per-seed thin traces
+                    for seed in seeds:
+                        sdf = abl_df[abl_df["seed"] == seed].sort_values("step")
+                        ax.plot(sdf["step"], sdf["effort_mean"],
+                                color=color, alpha=0.2, linewidth=0.7, zorder=1)
+
+                    # Aggregated mean + CI
+                    agg = aggregate_seeds(abl_df)
+                    if "effort_mean_mean" in agg.columns:
+                        steps = agg["step"].values
+                        mean_vals = agg["effort_mean_mean"].values
+                        ci_vals = agg.get("effort_mean_ci95", pd.Series(np.zeros(len(agg)))).values
+                        ax.plot(steps, mean_vals, color=color, linewidth=lw,
+                                label=label, zorder=3)
+                        ax.fill_between(steps, mean_vals - ci_vals, mean_vals + ci_vals,
+                                        color=color, alpha=0.12, zorder=2)
+                    else:
+                        ax.plot(abl_df["step"], abl_df["effort_mean"],
+                                color=color, linewidth=lw, label=label, zorder=3)
+                else:
+                    ax.plot(abl_df["step"], abl_df["effort_mean"],
+                            color=color, linewidth=lw, label=label, zorder=3)
+
+            # Axis formatting
+            ax.xaxis.set_major_formatter(x_formatter)
+            if col_idx == 0:
+                ax.set_ylabel("Effort")
+            if row_idx == 0:
+                ax.set_title(f"q = {int(q)}")
+            if row_idx == 1:
+                ax.set_xlabel("Training Steps")
+
+            # Row label on leftmost panel
+            if col_idx == 0:
+                ax.annotate(
+                    row_label, xy=(0, 0.5),
+                    xytext=(-50, 0), textcoords="offset points",
+                    xycoords="axes fraction", ha="right", va="center",
+                    fontsize=FONT_SIZES["axis_label"], rotation=90,
+                )
+
+            # Legend on rightmost panel of this row
+            if col_idx == n_cols - 1:
+                ax.legend(loc="best", fontsize=FONT_SIZES["legend"])
+
+    plt.tight_layout()
+    plt.subplots_adjust(left=0.12)
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
+    pdf_path = output_path.replace(".png", ".pdf")
+    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
+
+    if save_data:
+        data_path = os.path.join(DATA_DIR, "hyperparam_sensitivity.csv")
+        out_cols = ["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        df_out = df[[c for c in out_cols if c in df.columns]].copy()
+        df_out.to_csv(data_path, index=False)
+        print(f"[plots] Saved data to {data_path}")
+
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
 
@@ -1333,6 +1493,11 @@ def generate_all_figures(
     fig, path = plot_ablation_comparison(df, q_values)
     if path:
         results["ablation_comparison"] = path
+
+    # Hyperparameter sensitivity (appendix)
+    fig, path = plot_hyperparam_sensitivity(df, q_values)
+    if path:
+        results["hyperparam_sensitivity"] = path
 
     # Distance to equilibrium (Fig 2b)
     fig, path = plot_distance_to_equilibrium(df, q_values)
