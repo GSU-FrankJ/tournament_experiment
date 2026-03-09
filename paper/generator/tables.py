@@ -324,6 +324,7 @@ def generate_final_paper_table(
                 "Method": "Theory",
                 "Mean±std": _format_float(e_theory, 2),
                 "|ē−e*|": "0.00",
+                "RelErr": "0.00%",
                 "Exploitability": "0.000",
                 "Symmetry Gap": "0.00",
                 "Steps to Conv.": "-",
@@ -336,12 +337,15 @@ def generate_final_paper_table(
                 if not final.empty:
                     effort_mean = final["effort_mean"].mean()
                     effort_std = final["effort_mean"].std() if len(final) > 1 else 0
+                    abs_err = final["effort_error"].mean()
+                    rel_err = (abs_err / e_theory * 100) if e_theory > 0 else float('nan')
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
                         "q": int(q),
                         "Method": "Gradient",
                         "Mean±std": f"{effort_mean:.2f}±{effort_std:.2f}",
-                        "|ē−e*|": _format_float(final["effort_error"].mean(), 2),
+                        "|ē−e*|": _format_float(abs_err, 2),
+                        "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
                         "Steps to Conv.": "-",
@@ -364,12 +368,15 @@ def generate_final_paper_table(
                     mean_conv = conv_match["convergence_step"].dropna().mean()
                     conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
 
+                    abs_err = final["effort_error"].mean()
+                    rel_err = (abs_err / e_theory * 100) if e_theory > 0 else float('nan')
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
                         "q": int(q),
                         "Method": "TEL-PPO",
                         "Mean±std": f"{effort_mean:.2f}±{effort_std:.2f}",
-                        "|ē−e*|": _format_float(final["effort_error"].mean(), 2),
+                        "|ē−e*|": _format_float(abs_err, 2),
+                        "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
                         "Steps to Conv.": conv_str,
