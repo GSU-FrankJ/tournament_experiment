@@ -24,9 +24,10 @@ node_modules/
 # OS specific
 .DS_Store
 
-# Task files
+# Task files (Claude Code task runner)
 tasks.json
-tasks/ 
+tasks/
+!docs/tasks/
 
 # Python
 __pycache__/

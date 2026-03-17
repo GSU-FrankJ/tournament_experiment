@@ -7,6 +7,7 @@ Documentation for the tournament experiment project.
 ```
 docs/
 ├── README.md
+├── STATE.md                    # Project-level state tracker
 ├── experiment_plan.md          # Research methodology and experiment design
 ├── guides/
 │   ├── README.md
@@ -15,6 +16,9 @@ docs/
 │   ├── plot_convergence.md     # Convergence plotting guide
 │   ├── asymmetric_init.md      # Asymmetric agent initialization
 │   └── results-folder-guide.md # Directory structure, JSON formats, naming
+├── tasks/                      # Task pipeline (see tasks/README.md)
+│   ├── README.md               # Conventions and templates
+│   └── runner-refactor/        # Example: extract shared runner logic
 └── technical/
     ├── README.md
     ├── rollout_modes.md        # Selfplay vs vs_opponent (consolidated)
@@ -27,3 +31,4 @@ docs/
 - **New to the project?** Start with `experiment_plan.md` for research context, then `guides/results-folder-guide.md` for data layout.
 - **Running experiments?** See `guides/ppo_defaults.md` and `guides/ppo_flags.md`.
 - **Understanding internals?** See `technical/rollout_modes.md` and `technical/POLICY_SCALE_DIAGNOSTICS.md`.
+- **Starting a new task?** See `tasks/README.md` for the task pipeline convention.
