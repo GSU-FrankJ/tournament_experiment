@@ -10,35 +10,23 @@ The `results/` directory stores all experiment outputs: convergence histories, t
 ```
 results/
 ├── two_players/                    # Symmetric 2-player tournament
-│   ├── convergence/                # 267 files — convergence JSONs + metadata
+│   ├── convergence/                # 221 files (115 convergence + 106 metadata)
 │   ├── logs/                       # Raw training logs
-│   ├── summary.csv                 # Aggregated results table
-│   └── summary_legacy.csv          # Pre-reorganization results
+│   └── summary.csv                 # Aggregated results table
 ├── three_players/                  # Symmetric 3-player tournament
-│   ├── convergence/                # 29 files
-│   ├── logs/
-│   └── (no summary.csv yet)
+│   ├── convergence/                # 14 files
+│   └── logs/
 ├── different_cost/                 # Asymmetric cost (k1 != k2)
-│   ├── convergence/                # 94 files
+│   ├── convergence/                # 16 files
 │   ├── logs/
 │   └── summary.csv
 ├── different_ability/              # Asymmetric ability (l1 > l2)
-│   ├── convergence/                # 87 files
+│   ├── convergence/                # 16 files
 │   ├── logs/
 │   └── summary.csv
 ├── ablation/                       # Ablation studies
 │   ├── mechanism/runs/             # Toggle cheap-gate / exploit / entropy
 │   └── exploit_params/runs/        # Sweep eps / patience parameters
-├── convergence_history/            # Legacy flat directory (pre-reorganization)
-├── convergence_plots/              # Legacy convergence plots
-├── exploit_ablation/               # Legacy exploit ablation
-├── plots/                          # Diagnostic plots (gradient, ppo, k5e4_wh8_wl3)
-├── logs/                           # Legacy logs
-├── comparison_v1_v2.csv            # v1 vs v2 hyperparameter comparison
-├── one_stage_two_players.csv       # Legacy summary CSV
-├── one_stage_two_players_v2.csv    # v2 summary CSV
-├── different_cost_two_players.csv  # Legacy different-cost CSV
-└── different_ability_two_players.csv # Legacy different-ability CSV
 ```
 
 ## Convergence JSON Files
@@ -121,21 +109,19 @@ Companion `*_metadata.json` files store hyperparameters and run configuration:
 | prefix | (none) for two_players, `3p` for three_players, `different_cost`, `different_ability` | `ppo_q25.0_...`, `ppo_3p_q25.0_...`, `different_cost_ppo_q25.0_...` |
 | method | `ppo`, `gradient` | |
 | q | `25.0`, `40.0`, `55.0` | |
-| seed | `42`, `50`, `123`, `456`, `789`, `1024` | |
-| ablation | `baseline`, `baseline_v2`, `eps_001`, `eps_003`, `eps_010`, `eps_020`, `pat_01`, `pat_03`, `pat_10`, `no_cheap_gate`, `no_exploitability` | |
+| seed | `42`, `50`, `68`, `123`, `456`, `789`, `1024` | |
+| ablation | `baseline`, `eps_001`, `eps_003`, `eps_010`, `eps_020`, `pat_01`, `pat_03`, `pat_10`, `no_cheap_gate`, `no_exploitability` | |
 
 ## Ablation Naming
 
 | Ablation | Meaning |
 |----------|---------|
-| `baseline` | v1 default hyperparameters |
-| `baseline_v2` | v2 tuned hyperparameters (more updates, lower entropy) |
+| `baseline` | Default hyperparameters |
 | `eps_001` / `eps_003` / `eps_010` / `eps_020` | Exploitability epsilon sweep |
 | `pat_01` / `pat_03` / `pat_10` | Exploitability patience sweep |
 | `no_cheap_gate` | Cheap-gate mechanism disabled |
 | `no_exploitability` | Exploitability check disabled |
 | `wh8_wl4` | Alternative prize weights (w_H=8, w_L=4) |
-| `k5e4_wh8_wl3` | Alternative cost/prize (k=5e-4, w_H=8, w_L=3) |
 
 ## Summary CSV Files
 
@@ -194,13 +180,3 @@ python -m paper.generator --best-only make_all
 python -m paper.generator --dry-run
 ```
 
-## Legacy Directories
-
-These predate the per-experiment reorganization and are kept for backward compatibility:
-
-- `convergence_history/` — flat directory with all experiments mixed together
-- `convergence_plots/` — old convergence plots
-- `exploit_ablation/` — old exploit ablation results
-- `plots/` — old diagnostic plots
-- `logs/` — old training logs
-- Root-level CSVs (`one_stage_two_players.csv`, etc.) — old summary files

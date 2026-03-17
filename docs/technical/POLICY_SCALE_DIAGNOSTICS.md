@@ -14,12 +14,12 @@ policy_mean_effort = effort_low + (alpha / (alpha + beta)) * (effort_high - effo
 
 ### Code References
 
-| Location | File:Line | Description |
-|----------|-----------|-------------|
-| Beta distribution | `agents/ppo_two_players_clean.py:45-48` | `ActorCritic.dist()` returns Beta(alpha, beta) |
-| Policy computation | `run/run_two_players.py:594-601` | `dist.mean` scaled to effort range |
-| Helper function | `utils/rollout_stats.py:175-194` | `compute_policy_mean_effort()` |
-| Verification | `run/run_two_players.py:603-606` | `policy_mean_check_err` validation |
+| Location | File | Description |
+|----------|------|-------------|
+| Beta distribution | `agents/ppo_two_players_clean.py` | `ActorCritic.dist()` returns Beta(alpha, beta) |
+| Policy computation | `run/run_two_players.py` | `dist.mean` scaled to effort range |
+| Helper function | `utils/rollout_stats.py` | `compute_policy_mean_effort()` |
+| Verification | `run/run_two_players.py` | `policy_mean_check_err` validation |
 
 ### Verification
 
@@ -49,12 +49,12 @@ The `[PolicyCheck]` line (at update 1 and every 100 updates) confirms:
 
 ### Code References
 
-| Location | File:Line | Description |
-|----------|-----------|-------------|
-| P1 effort tracking | `run/run_two_players.py:521-522` | Always tracked |
-| P2 effort (selfplay) | `run/run_two_players.py:527-528` | Always tracked |
-| P2 effort (vs_opponent) | `run/run_two_players.py:534-535` | Only when learner used |
-| Accumulator class | `utils/rollout_stats.py:73-129` | `RolloutStatsAccumulator` |
+| Location | File | Description |
+|----------|------|-------------|
+| P1 effort tracking | `run/run_two_players.py` | Always tracked |
+| P2 effort (selfplay) | `run/run_two_players.py` | Always tracked |
+| P2 effort (vs_opponent) | `run/run_two_players.py` | Only when learner used |
+| Accumulator class | `utils/rollout_stats.py` | `RolloutStatsAccumulator` |
 
 ## 3. Scale Statistics
 
@@ -74,12 +74,12 @@ All statistics computed per PPO update on stored learner transitions:
 
 ### Code References
 
-| Location | File:Line | Description |
-|----------|-----------|-------------|
-| State/reward/value stats | `agents/ppo_two_players_clean.py:255-274` | Computed in `update()` |
-| Advantage computation | `agents/ppo_two_players_clean.py:247-249` | Raw advantage mean/std |
-| Advantage normalization | `agents/ppo_two_players_clean.py:284-287` | Normalization |
-| Welford accumulator | `utils/rollout_stats.py:19-61` | Numerically stable |
+| Location | File | Description |
+|----------|------|-------------|
+| State/reward/value stats | `agents/ppo_two_players_clean.py` | Computed in `update()` |
+| Advantage computation | `agents/ppo_two_players_clean.py` | Raw advantage mean/std |
+| Advantage normalization | `agents/ppo_two_players_clean.py` | Normalization |
+| Welford accumulator | `utils/rollout_stats.py` | Numerically stable |
 
 ## 4. Console Output Format
 

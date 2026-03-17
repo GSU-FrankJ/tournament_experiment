@@ -108,7 +108,7 @@ Update 20:
 
 ### 收敛历史可视化
 
-运行 `results/plot_convergence.py` 后，生成的图表会显示：
+运行 `tools/plot_convergence.py` 后，生成的图表会显示：
 - **Agent1曲线**: 从高处下降收敛到理论值
 - **Agent2曲线**: 从低处上升收敛到理论值
 - **理论值水平线**: 两条曲线的交汇点
@@ -146,7 +146,7 @@ if apply_warmup_bias:
 
 测试脚本已验证代码正常工作：
 ```bash
-cd /home/fjiang4/tournament_experiment-4
+cd /home/fjiang4/tournament_experiment
 python3 -c "
 from agents.ppo_two_players_clean import PPOTwoPlayersBandit, PPOConfig
 agent = PPOTwoPlayersBandit((0, 200), PPOConfig(), device='cpu')

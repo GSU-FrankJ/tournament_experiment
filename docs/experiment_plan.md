@@ -1,6 +1,8 @@
 
 # Experiment Plan for Exploring the Tournament Equilibrium
 
+> **Note:** This is the original research plan. The 4 implemented experiments are: `two_players`, `three_players`, `different_cost`, `different_ability`. The two-stage tournament (Section III.3) was planned but not implemented.
+
 ## I. Methodology
 
 ### 1. Gradient-based Optimization
@@ -18,6 +20,8 @@
 We adopt a reinforcement learning (RL) framework where both agents are trained via self-play using policy-based methods. Two techniques are considered:
 
 #### a. Policy Gradient - REINFORCE
+
+> **Note:** REINFORCE was not implemented as a separate method; only PPO was used.
 
 - **Objective function**:  
   \( J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[ R(\tau) \right] \)  
@@ -84,6 +88,8 @@ We adopt a reinforcement learning (RL) framework where both agents are trained v
 
 ### 3. Two-stage Tournament
 
+> **Not implemented.** This experiment was planned but not carried out.
+
 - **Utility**: \( U = V - C \)
 - **Stage output**: \( V_t = e_{1t} + e_{2t} \)
 - **Cost**: \( C_t(e) = ke^2 \)
@@ -110,6 +116,5 @@ We adopt a reinforcement learning (RL) framework where both agents are trained v
 
 - Compare across:
   - Gradient-based optimization
-  - REINFORCE
-  - PPO  
+  - PPO
 - Metrics: effort stability, convergence speed, deviation from theoretical optimum

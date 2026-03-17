@@ -24,11 +24,11 @@
 ### 基本用法 - 生成所有图表
 
 ```bash
-cd /home/fjiang4/tournament_experiment-4
+cd /home/fjiang4/tournament_experiment
 python3 tools/plot_convergence_detailed.py
 ```
 
-这将处理 `results/convergence_history/` 中的所有JSON文件，并在 `results/convergence_plots/` 下按算法分类保存图表。
+这将处理 `results/{experiment}/convergence/` 中的所有JSON文件，并在 `results/convergence_plots/` 下按算法分类保存图表。
 
 ### 高级用法
 
@@ -63,7 +63,7 @@ python3 tools/plot_convergence_detailed.py --algorithm PPO --q 40.0
 
 ```bash
 python3 tools/plot_convergence_detailed.py \
-  --file results/convergence_history/ppo_q55.0_convergence.json
+  --file results/two_players/convergence/ppo_q55.0_convergence.json
 ```
 
 #### 5. 自定义输出目录
@@ -161,7 +161,7 @@ python3 tools/plot_convergence_detailed.py
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `--convergence-dir` | str | `results/convergence_history` | convergence JSON文件所在目录 |
+| `--convergence-dir` | str | `results/{experiment}/convergence` | convergence JSON文件所在目录 |
 | `--output-dir` | str | `results/convergence_plots` | 输出图表保存目录 |
 | `--algorithm` | str | None | 过滤算法 (PPO/gradient) |
 | `--q` | float | None | 过滤q值 (如 25.0, 40.0, 55.0) |
