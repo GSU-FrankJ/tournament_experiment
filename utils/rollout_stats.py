@@ -80,7 +80,7 @@ class RolloutStatsAccumulator:
     Accumulates rollout statistics for PPO diagnostics.
     
     Tracks sampled efforts, states, and rewards from learner-generated
-    transitions only (excludes opponent transitions in vs_opponent mode).
+    transitions only.
     
     Attributes:
         effort_stats: Welford accumulator for sampled efforts

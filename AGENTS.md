@@ -101,7 +101,6 @@ Single-step bandit setting: each episode is one tournament round. No temporal de
 **Ask first:**
 - Changing the equilibrium formula or denominator
 - Modifying the Beta policy parameterization
-- Altering self-play vs opponent-lag behavior
 - Changing convergence evaluation thresholds
 - Adding new dependencies beyond torch/numpy/pandas/matplotlib
 

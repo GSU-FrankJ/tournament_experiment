@@ -21,7 +21,7 @@ docs/
 │   └── runner-refactor/        # Example: extract shared runner logic
 └── technical/
     ├── README.md
-    ├── rollout_modes.md        # Selfplay vs vs_opponent (consolidated)
+    ├── rollout_modes.md        # Selfplay mode and historical data mixing bug
     ├── audit_theory_align_v2.md # Theory-align-v2 audit
     └── POLICY_SCALE_DIAGNOSTICS.md # Policy definition and scale metrics
 ```

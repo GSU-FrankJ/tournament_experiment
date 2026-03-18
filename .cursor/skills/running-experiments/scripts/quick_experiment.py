@@ -86,12 +86,6 @@ def build_parser() -> argparse.ArgumentParser:
     # Experiment naming
     parser.add_argument("--ablation-name", type=str, help="Ablation identifier")
     
-    # Rollout mode
-    parser.add_argument(
-        "--rollout-mode", choices=["selfplay", "vs_opponent"], default="selfplay",
-        help="PPO rollout mode"
-    )
-    
     return parser
 
 
@@ -166,7 +160,6 @@ def run_experiment(args: argparse.Namespace) -> list:
             episodes=cfg["episodes"],
             train_qs=q_values,
             eval_qs=q_values,
-            rollout_mode=args.rollout_mode,
             eval_symmetric=True,
             ablation_name=args.ablation_name,
         )

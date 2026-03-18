@@ -38,22 +38,14 @@ The `[PolicyCheck]` line (at update 1 and every 100 updates) confirms:
 
 ### Data Provenance
 
-**Selfplay mode:**
-- Include both P1 and P2 sampled efforts
-- `effort_sample_count` ~ 2 x `steps_per_update`
-
-**vs_opponent mode:**
-- Include P1 always (uses learner)
-- Include P2 only when `use_opponent=False` (P2 used learner)
-- Exclude P2 efforts when opponent policy was used
+Both P1 and P2 sampled efforts are included. `effort_sample_count` ~ 2 x `steps_per_update`.
 
 ### Code References
 
 | Location | File | Description |
 |----------|------|-------------|
 | P1 effort tracking | `run/run_two_players.py` | Always tracked |
-| P2 effort (selfplay) | `run/run_two_players.py` | Always tracked |
-| P2 effort (vs_opponent) | `run/run_two_players.py` | Only when learner used |
+| P2 effort tracking | `run/run_two_players.py` | Always tracked |
 | Accumulator class | `utils/rollout_stats.py` | `RolloutStatsAccumulator` |
 
 ## 3. Scale Statistics
@@ -118,23 +110,16 @@ At updates 1, 100, 200, ...:
 
 ### Short Sanity Run (20k episodes)
 
-**Selfplay mode:**
 ```bash
-python run/run_two_players.py --method ppo --q 40 --episodes 20000 --rollout-mode selfplay --seed 42
-```
-
-**vs_opponent mode:**
-```bash
-python run/run_two_players.py --method ppo --q 40 --episodes 20000 --rollout-mode vs_opponent --seed 42
+python run/run_two_players.py --method ppo --q 40 --episodes 20000 --seed 42
 ```
 
 ### Verification Checklist
 
 1. `sample_avg_effort` is finite (not nan/inf)
-2. Selfplay: `effort_samples` ~ 2 x steps_per_update (e.g., 8192 for 4096 steps)
-3. vs_opponent: `effort_samples` ~ steps_per_update + some P2 samples
-4. `policy_mean_check_err < 0.01`
-5. `adv_norm_std` ~ 1.0
+2. `effort_samples` ~ 2 x steps_per_update (e.g., 8192 for 4096 steps)
+3. `policy_mean_check_err < 0.01`
+4. `adv_norm_std` ~ 1.0
 
 ### Verification Commands
 

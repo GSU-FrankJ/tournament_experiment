@@ -5,7 +5,7 @@
 - B) Environment reward: `envs/two_players_env.py:expected_utility` uses `utils/prob.py:p_from_efforts` and cost term `-k*e^2`.
 - C) Effort parameterization: `agents/ppo_two_players_clean.py:ActorCritic.dist` (Beta on [0,1]) and `PPOTwoPlayersBandit.act` mapping to effort via `low + a*(high-low)`; policy mean logged via `utils/rollout_stats.compute_policy_mean_effort`.
 - D) PPO update: `agents/ppo_two_players_clean.py:PPOTwoPlayersBandit.update` (log_prob/ratio/clip/advantage; early-stop on ratio/KL).
-- E) Self-play data collection: `run/run_two_players.py` (selfplay stores both; vs_opponent stores only learner-generated transitions).
+- E) Self-play data collection: `run/run_two_players.py` (selfplay stores both P1 and P2 transitions).
 
 ## Evidence & Root-Cause Analysis (Falsifiable)
 1) **Theory matches env?**  

@@ -47,7 +47,6 @@ def main():
         episodes=args.episodes,
         train_qs=q_values,
         ablation_name="baseline_largeb",
-        rollout_mode="selfplay",
     )
 
 

@@ -76,10 +76,6 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
         "batch_entropy": experiment_data.get("batch_entropy", ""),
         "alpha_mean": experiment_data.get("alpha_mean", ""),
         "beta_mean": experiment_data.get("beta_mean", ""),
-        "eval_vs_opponent_effort": experiment_data.get("eval_vs_opponent_effort", ""),
-        "eval_vs_opponent_reward": experiment_data.get("eval_vs_opponent_reward", ""),
-        "eval_vs_opponent_opp_effort": experiment_data.get("eval_vs_opponent_opp_effort", ""),
-        "eval_vs_opponent_abs_err": experiment_data.get("eval_vs_opponent_abs_err", ""),
         "eval_vs_history_effort_mean": experiment_data.get("eval_vs_history_effort_mean", ""),
         "eval_vs_history_effort_std": experiment_data.get("eval_vs_history_effort_std", ""),
         "eval_vs_history_reward_mean": experiment_data.get("eval_vs_history_reward_mean", ""),
@@ -125,8 +121,7 @@ def save_standardized_result(experiment_data: Dict[str, Any], filename: str):
             "mean_kl_window", "std_kl_window", "drift_effort",
             "exploitability", "best_dev_effort", "symmetry_gap",
             "drift_ok_streak", "exploit_ok_streak", "converged_flag",
-            "eval_vs_opponent_effort", "eval_vs_opponent_reward", "eval_vs_opponent_opp_effort",
-            "eval_vs_opponent_abs_err", "eval_vs_history_effort_mean", "eval_vs_history_effort_std",
+            "eval_vs_history_effort_mean", "eval_vs_history_effort_std",
             "eval_vs_history_reward_mean", "eval_vs_history_reward_std", "eval_vs_history_abs_err_mean"
         ]
         writer = csv.DictWriter(file, fieldnames=fieldnames)

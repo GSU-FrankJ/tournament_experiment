@@ -62,7 +62,7 @@ e2_biased = e2 - bias_magnitude
 运行原命令，会**自动启用**20个updates的warmup偏移：
 
 ```bash
-python run/run_two_players.py --method ppo --rollout-mode selfplay --q 25 \
+python run/run_two_players.py --method ppo --q 25 \
   --episodes 2048000 --seed 50 --theory-align-v2 --enable-convergence-eval \
   --cheap-gate-profile relaxed
 ```
@@ -165,7 +165,7 @@ agent = PPOTwoPlayersBandit((0, 200), PPOConfig(), device='cpu')
 
 ```bash
 # q=25 (e*≈87.5)
-python run/run_two_players.py --method ppo --rollout-mode selfplay --q 25 \
+python run/run_two_players.py --method ppo --q 25 \
   --episodes 2048000 --seed 50 --theory-align-v2 --enable-convergence-eval \
   --cheap-gate-profile relaxed
 

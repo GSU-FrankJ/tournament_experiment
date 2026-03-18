@@ -140,7 +140,7 @@ python3 tools/plot_convergence_detailed.py --algorithm PPO
 
 ```bash
 # 运行新实验
-python run/run_two_players.py --method ppo --rollout-mode selfplay --q 55 \
+python run/run_two_players.py --method ppo --q 55 \
   --episodes 2048000 --seed 50 --theory-align-v2 --enable-convergence-eval \
   --cheap-gate-profile relaxed
 
@@ -207,7 +207,7 @@ Found 6 convergence files
 ```bash
 # 运行实验生成数据
 python run/run_two_players.py --method gradient --q 25
-python run/run_two_players.py --method ppo --rollout-mode selfplay --q 25 --episodes 2048000
+python run/run_two_players.py --method ppo --q 25 --episodes 2048000
 ```
 
 ### 问题2: "ModuleNotFoundError: No module named 'matplotlib'"

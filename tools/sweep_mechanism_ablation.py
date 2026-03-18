@@ -192,9 +192,6 @@ def build_command(
     if theory_align_v2:
         cmd.append("--theory-align-v2")
 
-    if task.experiment == "two_players":
-        cmd.extend(["--rollout-mode", "selfplay"])
-
     # Add mechanism-specific flags
     cmd.extend(task.extra_flags)
 

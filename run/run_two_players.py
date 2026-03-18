@@ -7,9 +7,9 @@ stage to the CSV's stage-2 fields (stage-1 fields set to 0).
 """
 
 # Smoke tests (theory-align experiment):
-# 1) Baseline: python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42
+# 1) Baseline: python run/run_two_players.py --method ppo --q 40 --episodes 2048000 --seed 42
 # 2) Theory-align:
-#    python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42 \
+#    python run/run_two_players.py --method ppo --q 40 --episodes 2048000 --seed 42 \
 #      --enable-convergence-eval --cheap-gate-profile aggressive --theory-align
 # Expect: [TheoryAlign] lines, ent=0, conc_mean >= 80, mean_vs_sample_gap ~0, policy -> e*=54.69.
 
@@ -593,9 +593,7 @@ def run_ppo(
     train_qs: Optional[List[float]] = None,
     eval_qs: Optional[List[float]] = None,
     *,
-    rollout_mode: str = "vs_opponent",
     eval_symmetric: bool = True,
-    eval_vs_opponent: bool = False,
     eval_vs_history: bool = False,
     run_id: Optional[str] = None,
     variant_name: str = "baseline",
@@ -615,10 +613,6 @@ def run_ppo(
 
     - Trains over ``train_qs`` (defaults to cfg["q_list"]).
     - Returns a list of CSV rows, one per q in ``eval_qs`` (defaults to train_qs).
-    - rollout_mode controls action generation and storage:
-        * "selfplay": Both players always use learner policy; store both transitions
-        * "vs_opponent": Player1 uses learner; Player2 may use opponent (with lag schedule);
-                         store only learner-generated transitions
     - run_id: Unique identifier for this run (timestamp string for log/CSV correlation)
     - variant_name: Name of the sweep variant (e.g., "baseline", "entropy_end_0.025")
     
@@ -633,9 +627,6 @@ def run_ppo(
     - patience_exploit: Consecutive passes required for stopping (default: from config or 5)
     - exploit_M: Monte Carlo samples for exploitability (default: from config or 8192)
     """
-    # Validate rollout_mode
-    if rollout_mode not in ("selfplay", "vs_opponent"):
-        raise ValueError(f"rollout_mode must be 'selfplay' or 'vs_opponent', got '{rollout_mode}'")
     if episodes is None:
         episodes = int(cfg.get("episodes", 1_800_000))
     else:
@@ -721,15 +712,6 @@ def run_ppo(
     for g in agent.opt.param_groups:
         g["lr"] = float(cfg.get("lr_start", ppo_cfg.lr))
 
-    # Print rollout mode for clarity
-    print(f"[PPO] Rollout mode: {rollout_mode.upper()}")
-    if rollout_mode == "selfplay":
-        print("[PPO]   - Both players use learner policy")
-        print("[PPO]   - Store both transitions every step")
-    else:  # vs_opponent
-        print("[PPO]   - Player1 uses learner; Player2 may use opponent (lag schedule)")
-        print("[PPO]   - Store only learner-generated transitions")
-    print(flush=True)
     if fixed_opponent_enabled:
         print(
             f"[Experiment] fixed_opponent_effort={fixed_effort_clamped:.2f} train_side={train_side}",
@@ -846,7 +828,6 @@ def run_ppo(
     # Storage counters for debugging/verification
     stored_p1_total = 0
     stored_p2_total = 0
-    skipped_p2_due_to_opponent_total = 0
     
     # Rollout stats accumulator for tracking sampled efforts (instrumentation)
     rollout_stats = RolloutStatsAccumulator()
@@ -968,7 +949,6 @@ def run_ppo(
         # Per-update storage counters
         stored_p1_this_update = 0
         stored_p2_this_update = 0
-        skipped_p2_this_update = 0
         
         # Reset rollout stats for this update period
         rollout_stats.reset()
@@ -1032,30 +1012,12 @@ def run_ppo(
                     res_p2["logp"],
                     res_p2["value"],
                 )
-                use_opponent = False
             else:
-                # Player 1: ALWAYS uses learner policy (both modes)
+                # Player 1: always uses learner policy
                 a1_norm, e1, logp1, v1 = agent.act(s1)
 
-                # Player 2: Mode-dependent action generation
-                if rollout_mode == "selfplay":
-                    # SELFPLAY MODE: Player2 always uses learner policy
-                    # Opponent lag mechanism is disabled for action generation
-                    a2_norm, e2, logp2, v2 = agent.act(s2)
-                    use_opponent = False  # Not used for action selection in selfplay
-
-                else:  # rollout_mode == "vs_opponent"
-                    # VS_OPPONENT MODE: Player2 may use opponent based on lag schedule
-                    # Early phase: with prob=lag_prob, draw opponent action from lagged/historical policy.
-                    # Late phase: fully on-policy learner sampling.
-                    use_opponent = (lag_prob > 0.0) and (rng.random() < lag_prob)
-                    if use_opponent:
-                        # Player2 uses opponent policy (lagged/historical)
-                        a2_norm, e2, logp2, _ = agent.act_opponent(s2)
-                        v2 = agent.value_only(s2)
-                    else:
-                        # Player2 uses learner policy
-                        a2_norm, e2, logp2, v2 = agent.act(s2)
+                # Player 2: always uses learner policy (selfplay)
+                a2_norm, e2, logp2, v2 = agent.act(s2)
 
             # Apply warmup bias to create asymmetric starting points
             if apply_warmup_bias:
@@ -1094,26 +1056,10 @@ def run_ppo(
                 # Track P1's sampled effort (always learner-generated)
                 rollout_stats.update_effort(float(e1_env.item()), player="p1")
 
-                # Player 2: Mode-dependent storage
-                if rollout_mode == "selfplay":
-                    # SELFPLAY: Always store player2 (learner-generated)
-                    agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
-                    stored_p2_this_update += 1
-                    # Track P2's sampled effort (learner-generated in selfplay)
-                    rollout_stats.update_effort(float(e2_env.item()), player="p2")
-
-                else:  # rollout_mode == "vs_opponent"
-                    # VS_OPPONENT: Only store player2 when it used learner policy
-                    if not use_opponent:
-                        # Player2 used learner -> store for PPO update
-                        agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
-                        stored_p2_this_update += 1
-                        # Track P2's sampled effort (learner-generated)
-                        rollout_stats.update_effort(float(e2_env.item()), player="p2")
-                    else:
-                        # Player2 used opponent -> treat as environment dynamics, don't store
-                        skipped_p2_this_update += 1
-                        # NOTE: Do NOT track P2 effort when using opponent policy
+                # Player 2: always store (selfplay, learner-generated)
+                agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+                stored_p2_this_update += 1
+                rollout_stats.update_effort(float(e2_env.item()), player="p2")
 
             history.append(float((e1_env.item() + e2_env.item()) / 2.0))
         last_update_metrics = agent.update()
@@ -1131,22 +1077,15 @@ def run_ppo(
         # Accumulate storage counters
         stored_p1_total += stored_p1_this_update
         stored_p2_total += stored_p2_this_update
-        skipped_p2_due_to_opponent_total += skipped_p2_this_update
-        
+
         # Periodic storage statistics logging (every 20 updates)
         if (update_idx + 1) % 20 == 0:
             total_stored = stored_p1_total + stored_p2_total
             effective_batch_size_this_update = stored_p1_this_update + stored_p2_this_update
-            if rollout_mode == "vs_opponent" and stored_p1_total > 0:
-                skip_pct = 100.0 * skipped_p2_due_to_opponent_total / float(stored_p1_total)
-            else:
-                skip_pct = 0.0
             print(f"[Storage Stats] Update {update_idx + 1}: "
                   f"stored_p1={stored_p1_this_update}, stored_p2={stored_p2_this_update}, "
-                  f"skipped_p2={skipped_p2_this_update}, "
                   f"effective_batch={effective_batch_size_this_update} | "
-                  f"Total: p1={stored_p1_total}, p2={stored_p2_total}, "
-                  f"skipped={skipped_p2_due_to_opponent_total} ({skip_pct:.1f}%)", flush=True)
+                  f"Total: p1={stored_p1_total}, p2={stored_p2_total}", flush=True)
         
         kl_val = float(last_update_metrics.get("approx_kl", 0.0) if last_update_metrics else 0.0)
         if not math.isfinite(kl_val):
@@ -1371,7 +1310,7 @@ def run_ppo(
 
         # === Convergence evaluation (optional, default OFF) ===
         # Ablation flags: disable_cheap_gate, disable_exploitability, exploit_every_updates
-        if convergence_enabled and cheap_tracker is not None and rollout_mode == "selfplay":
+        if convergence_enabled and cheap_tracker is not None:
             policy_effort_source = "policy_eval"
             if policy_mean_effort_current is None and last_rollout_stats:
                 policy_mean_effort_current = last_rollout_stats.get("sample_avg_effort", None)
@@ -1640,7 +1579,7 @@ def run_ppo(
         row["variant_name"] = variant_name
         row["stage2_gap_unweighted"] = stage2_gap
         row["abs_err"] = stage2_gap
-        row["rollout_mode"] = rollout_mode
+        row["rollout_mode"] = "selfplay"
         row["opp_mode"] = agent.opponent_mode
         row["opp_sync_interval"] = agent.opponent_sync_interval
         row["opp_ema_tau"] = agent.opponent_ema_tau
@@ -1652,7 +1591,6 @@ def run_ppo(
         row["beta_mean"] = beta_eval
         row["stored_p1_total"] = stored_p1_total
         row["stored_p2_total"] = stored_p2_total
-        row["skipped_p2_total"] = skipped_p2_due_to_opponent_total
         row["effective_batch_size_total"] = stored_p1_total + stored_p2_total
         row["kl_proxy_max"] = last_update_metrics.get("kl_proxy_max", float("nan")) if last_update_metrics else float("nan")
         row["kl_proxy_mean"] = last_update_metrics.get("kl_proxy_mean", float("nan")) if last_update_metrics else float("nan")
@@ -1698,13 +1636,6 @@ def run_ppo(
             row["eval_symmetric_effort"] = sym_eval["effort_self"]
             row["eval_symmetric_reward"] = sym_eval["reward_self"]
             row["eval_symmetric_abs_err"] = abs(sym_eval["effort_self"] - e2_star_val)
-
-        if eval_vs_opponent:
-            opp_eval = _evaluate_pair(agent.net, agent.opponent_policy)
-            row["eval_vs_opponent_effort"] = opp_eval["effort_self"]
-            row["eval_vs_opponent_reward"] = opp_eval["reward_self"]
-            row["eval_vs_opponent_opp_effort"] = opp_eval["effort_opp"]
-            row["eval_vs_opponent_abs_err"] = abs(opp_eval["effort_self"] - e2_star_val)
 
         if eval_vs_history:
             history_nets = list(agent._opponent_history)
@@ -1787,7 +1718,7 @@ def run_ppo(
                 "exploitability_is_valid": convergence_history["exploitability_is_valid"],
                 "exploit_eval_steps": exploit_eval_steps,
                 # Metadata
-                "rollout_mode": rollout_mode,
+                "rollout_mode": "selfplay",
                 "total_episodes": episodes,
                 "disable_cheap_gate": disable_cheap_gate,
                 "disable_exploitability": disable_exploitability,
@@ -1845,24 +1776,18 @@ def _run_cli(args: argparse.Namespace) -> str:
     # For PPO: enable modern defaults (selfplay, theory-align-v2, convergence-eval, relaxed profile)
     # For gradient: keep traditional defaults
     if args.method == "ppo":
-        if args.rollout_mode is None:
-            args.rollout_mode = "selfplay"
-            print("[config] PPO default: rollout_mode='selfplay'")
-        
         if args.theory_align_v2 is None:
             args.theory_align_v2 = True
             print("[config] PPO default: theory_align_v2=True")
-        
+
         if args.enable_convergence_eval is None:
             args.enable_convergence_eval = True
             print("[config] PPO default: enable_convergence_eval=True")
-        
+
         if args.cheap_gate_profile is None:
             args.cheap_gate_profile = "relaxed"
             print("[config] PPO default: cheap_gate_profile='relaxed'")
     else:  # gradient
-        if args.rollout_mode is None:
-            args.rollout_mode = "vs_opponent"
         if args.theory_align_v2 is None:
             args.theory_align_v2 = False
         if args.enable_convergence_eval is None:
@@ -1985,6 +1910,11 @@ def _run_cli(args: argparse.Namespace) -> str:
             flush=True,
         )
 
+    # Apply conc_max override (takes priority over theory-align-v2 defaults)
+    if args.override_conc_max is not None:
+        cfg["theory_align_v2_conc_max"] = float(args.override_conc_max)
+        print(f"[config] conc_max override: {args.override_conc_max}", flush=True)
+
     # Re-apply explicit CLI entropy override (takes priority over mode defaults)
     if args.override_entropy_end is not None:
         cfg["entropy_coef_end"] = float(args.override_entropy_end)
@@ -2069,9 +1999,7 @@ def _run_cli(args: argparse.Namespace) -> str:
             episodes=args.episodes,
             train_qs=train_qs,
             eval_qs=eval_qs,
-            rollout_mode=args.rollout_mode,
             eval_symmetric=args.eval_symmetric,
-            eval_vs_opponent=args.eval_vs_opponent,
             eval_vs_history=args.eval_vs_history,
             run_id=run_id,
             variant_name=variant_name,
@@ -2097,14 +2025,8 @@ def _run_cli(args: argparse.Namespace) -> str:
 def main():
     parser = argparse.ArgumentParser(description="One-Stage Two-Player Experiment (spec)")
     parser.add_argument("--method", choices=["gradient", "ppo"], default="gradient")
-    parser.add_argument(
-        "--rollout-mode",
-        choices=["selfplay", "vs_opponent"],
-        default=None,  # Will be set based on method
-        help="Rollout mode for PPO: 'selfplay' (both use learner, store both) or 'vs_opponent' (p2 may use opponent, store only learner samples). Default: 'selfplay' for PPO, 'vs_opponent' for gradient.",
-    )
     # Experiment 1 (fixed opponent best-response):
-    # python run/run_two_players.py --method ppo --rollout-mode selfplay --q 40 --episodes 2048000 --seed 42 \
+    # python run/run_two_players.py --method ppo --q 40 --episodes 2048000 --seed 42 \
     #   --fixed-opponent-effort 54.69 --train-side p1
     parser.add_argument(
         "--fixed-opponent-effort",
@@ -2134,7 +2056,6 @@ def main():
     parser.add_argument("--grad-lr-decay", type=float, default=base_config.get("gradient_lr_decay", 0.9995), help="Exponential decay factor for learning rate.")
     parser.add_argument("--grad-symmetry-enforce", type=int, default=base_config.get("gradient_symmetry_enforce_every", 50), help="Force symmetry every N steps (0 to disable).")
     parser.add_argument("--grad-symmetry-tol", type=float, default=base_config.get("gradient_symmetry_tol", 0.1), help="Symmetry tolerance for convergence criterion.")
-    parser.add_argument("--eval-vs-opponent", action="store_true", help="Evaluate trained policy against lagged opponent policy.")
     parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
     parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
     parser.add_argument("--no-eval-symmetric", dest="eval_symmetric", action="store_false", help="Disable symmetric self-play evaluation.")
@@ -2176,6 +2097,12 @@ def main():
         help="Override PPO update_epochs (number of optimization epochs per update). Must be >= 1.",
     )
     parser.add_argument(
+        "--override-conc-max",
+        type=float,
+        default=None,
+        help="Override theory_align_v2_conc_max (concentration upper bound).",
+    )
+    parser.add_argument(
         "--theory-align",
         action="store_true",
         help="EXPERIMENT: keep PPO stochastic but collapse policy variance to align with pure-strategy theory.",
@@ -2215,7 +2142,7 @@ def main():
         default=None,  # Will be set based on method
         help="Select cheap gate profile (default/conservative/aggressive/relaxed). Default: 'relaxed' for PPO with theory-align-v2, 'default' otherwise.",
     )
-    # Smoke test: `python run/run_two_players.py --method ppo --rollout-mode selfplay --episodes 40960 --enable-convergence-eval`
+    # Smoke test: `python run/run_two_players.py --method ppo --episodes 40960 --enable-convergence-eval`
     # Expect: after a few eval points, ConvergenceDebug shows RUN_EXPLOIT and CSV exploitability is not NA if gate passes.
     # Verification: FAIL reasons are explicit when mean/std/drift exceed thresholds; no RUN_EXPLOIT in that case.
     # Trigger: when mean_kl approx 0.002-0.004, std_kl approx 0.002-0.004, drift approx 1-2 for consecutive windows,

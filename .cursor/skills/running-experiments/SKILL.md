@@ -70,7 +70,6 @@ python run/run_mcfd.py --w-h 6.5 --w-l 3.0 --k 0.0004 --sigma1 25.0
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--rollout-mode` | `selfplay` | `selfplay` or `vs_opponent` |
 | `--theory-align-v2` | True | Mean+concentration policy head |
 | `--enable-convergence-eval` | True | Early stopping on convergence |
 | `--cheap-gate-profile` | `relaxed` | KL threshold profile |
@@ -183,7 +182,7 @@ Player with lower cost (k1) exerts more effort at equilibrium.
 
 ```bash
 python run/run_two_players.py --method ppo --q 40 --seed 50 \
-    --episodes 4096000 --rollout-mode vs_opponent
+    --episodes 4096000
 ```
 
 ```

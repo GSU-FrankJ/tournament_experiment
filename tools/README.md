@@ -23,7 +23,7 @@ Diagnostic, analysis, and utility scripts. These are standalone tools for debugg
 ### Diagnostic Tools
 | File | Description |
 |------|-------------|
-| `audit_rollout_modes.py` | Rigorous 5-point audit of rollout modes (selfplay vs vs_opponent) |
+| `audit_rollout_modes.py` | Rigorous 5-point audit of selfplay rollout mode |
 | `verify_rollout_modes.py` | Quick sanity check for rollout mode transition counts and buffer integrity |
 | `diagnose_data_provenance.py` | Debug tool to prove opponent-generated actions don't mix into learner's PPO update |
 | `check_env_noise_determinism.py` | Test whether env noise becomes deterministic due to re-seeding |

@@ -25,7 +25,7 @@ python run/run_two_players.py --method gradient --q 40
 
 # PPO with custom options
 python run/run_two_players.py --method ppo --q 55 --episodes 2048000 --seed 42 \
-  --rollout-mode vs_opponent --no-theory-align-v2
+  --no-theory-align-v2
 ```
 
 ### MC-FD Solver (run_mcfd.py)
@@ -67,7 +67,6 @@ python run/run_ppo_custom_params.py
 ### PPO-Specific (auto-enabled for --method ppo)
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--rollout-mode` | `selfplay` | `selfplay` or `vs_opponent` |
 | `--theory-align-v2` | `True` | Mean+concentration policy head |
 | `--enable-convergence-eval` | `True` | Early stopping on convergence |
 | `--cheap-gate-profile` | `relaxed` | KL threshold profile |

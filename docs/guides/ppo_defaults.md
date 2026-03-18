@@ -10,7 +10,6 @@
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `--rollout-mode` | `selfplay` | 两个agent都使用learner policy，存储两者的transitions |
 | `--theory-align-v2` | `True` | 启用mean+concentration policy head，带variance penalty |
 | `--enable-convergence-eval` | `True` | 启用收敛评估和早停机制 |
 | `--cheap-gate-profile` | `relaxed` | 使用宽松的KL阈值（适合theory-align-v2） |
@@ -21,7 +20,7 @@
 
 **之前需要：**
 ```bash
-python run/run_two_players.py --method ppo --rollout-mode selfplay --q 25 \
+python run/run_two_players.py --method ppo --q 25 \
   --episodes 2048000 --seed 50 --theory-align-v2 --enable-convergence-eval \
   --cheap-gate-profile relaxed
 ```
@@ -46,10 +45,6 @@ python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50 \
 python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50 \
   --no-convergence-eval
 
-# 使用不同的 rollout-mode
-python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50 \
-  --rollout-mode vs_opponent
-
 # 使用不同的 cheap-gate-profile
 python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50 \
   --cheap-gate-profile aggressive
@@ -61,7 +56,6 @@ Gradient 方法保持传统默认值（**未改变**）：
 
 | 参数 | 默认值 |
 |------|--------|
-| `--rollout-mode` | `vs_opponent` |
 | `--theory-align-v2` | `False` |
 | `--enable-convergence-eval` | `False` |
 
@@ -87,7 +81,7 @@ Gradient 方法保持传统默认值（**未改变**）：
 
 ```bash
 # 旧格式（仍然有效）
-python run/run_two_players.py --method ppo --rollout-mode selfplay \
+python run/run_two_players.py --method ppo \
   --theory-align-v2 --enable-convergence-eval --cheap-gate-profile relaxed \
   --q 25 --episodes 2048000 --seed 50
 
@@ -107,11 +101,7 @@ python run/run_two_players.py --method ppo \
 python run/run_two_players.py --method ppo --q 25 --episodes 2048000 \
   --no-theory-align-v2
 
-# 示例2: PPO但使用vs_opponent模式
-python run/run_two_players.py --method ppo --q 25 --episodes 2048000 \
-  --rollout-mode vs_opponent
-
-# 示例3: PPO但使用更严格的convergence profile
+# 示例2: PPO但使用更严格的convergence profile
 python run/run_two_players.py --method ppo --q 25 --episodes 2048000 \
   --cheap-gate-profile aggressive
 ```
@@ -185,7 +175,6 @@ python run/run_two_players.py --help
 ```
 
 重点关注：
-- `--rollout-mode`: 说明了默认行为
 - `--theory-align-v2` / `--no-theory-align-v2`: 启用/禁用选项
 - `--enable-convergence-eval` / `--no-convergence-eval`: 启用/禁用选项
 - `--cheap-gate-profile`: 说明了根据method选择的默认profile

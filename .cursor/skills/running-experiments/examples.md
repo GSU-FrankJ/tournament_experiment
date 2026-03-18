@@ -73,18 +73,6 @@ results = run_ppo(cfg=cfg, ...)
 
 ## Ablation Studies
 
-### Rollout Mode Comparison
-
-```bash
-# Selfplay (agents train against themselves)
-python run/run_two_players.py --method ppo --q 40 --seed 42 \
-    --rollout-mode selfplay
-
-# vs_opponent (train against lagged opponent)
-python run/run_two_players.py --method ppo --q 40 --seed 42 \
-    --rollout-mode vs_opponent
-```
-
 ### Convergence Profile Comparison
 
 ```bash

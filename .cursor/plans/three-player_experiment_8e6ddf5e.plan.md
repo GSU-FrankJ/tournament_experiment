@@ -149,7 +149,6 @@ graph TD
 **Removed functions** (not needed):
 
 - All opponent policy logic (`_use_opponent_policy`, opponent lag schedules)
-- `vs_opponent` rollout mode
 - Stage mapping helpers (`_map_to_stage_fields`)
 - `build_csv_row` complexity (direct output instead)
 
@@ -227,7 +226,6 @@ python run/run_three_players.py --method ppo --episodes 2048000 --seed 42
 
 | Feature         | Two-Player            | Three-Player  |
 | --------------- | --------------------- | ------------- |
-| Rollout modes   | selfplay, vs_opponent | selfplay only |
 | Opponent policy | EMA/periodic/snapshot | None          |
 | CSV output      | Stage1/Stage2 mapping | Direct fields |
 | Lag schedules   | warmup + fade         | None          |

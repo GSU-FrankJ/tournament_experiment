@@ -8,8 +8,18 @@ Last updated: 2026-03-18
 - Figures match e3de29a (2026-03-09) versions; generation is deterministic across runs
 - Task pipeline established: `docs/tasks/` for durable, git-tracked multi-phase planning
 - STATE.md moved from repo root into `docs/` (referenced by `.claude/CLAUDE.md`)
+- vs_opponent rollout mode fully removed from codebase (runner-refactor phase 02)
 
-## What was done (2026-03-18)
+## What was done (2026-03-18, session 2)
+1. Runner-refactor phase 02: removed vs_opponent rollout mode entirely
+   - Runners: removed rollout_mode param, vs_opponent branches, eval_vs_opponent, --rollout-mode CLI arg from run_two_players.py, run_three_players.py, run_three_players_largeb.py
+   - Utils: removed eval_vs_opponent_* columns from logger.py, updated rollout_stats.py docstring
+   - Tools: cleaned verify_rollout_modes.py, audit_rollout_modes.py, sweep_mechanism_ablation.py, sweep_exploit_ablation.py
+   - Docs: updated 9 markdown files across docs/technical/, docs/guides/, run/, tools/, AGENTS.md
+   - Cursor: updated skills, examples, quick_experiment.py, 2 plan files
+   - Verified: zero grep hits for vs_opponent in code/docs, --help confirms no --rollout-mode flag
+
+## What was done (2026-03-18, session 1)
 1. Moved `STATE.md` → `docs/STATE.md` as project-level state tracker
 2. Created `docs/tasks/README.md` with pipeline conventions and templates
 3. Seeded `docs/tasks/runner-refactor/` as first task (CLAUDE.md, STATE.md, phase01.md)
@@ -39,5 +49,6 @@ Last updated: 2026-03-18
 
 ## Next steps
 - Runner refactor phase 01: audit duplication across the 4 runners (see `docs/tasks/runner-refactor/phase01.md`)
+  - Phase 02 (vs_opponent removal) done; phase 01 (duplication audit) still pending
 - Add basic tests for theory.py, prob.py, paper generator
 - Consider git filter-repo to remove large files from history (~85 MB .git)

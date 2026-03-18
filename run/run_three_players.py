@@ -614,20 +614,14 @@ def run_ppo(
     train_qs: Optional[List[float]] = None,
     *,
     ablation_name: str = "baseline",
-    rollout_mode: str = "selfplay",
 ) -> List[Dict]:
-    """Train PPO for three-player tournament.
-
-    Supports two rollout modes:
-    - "selfplay": all 3 players share same policy (original behavior)
-    - "vs_opponent": P1 always learner, P2/P3 may use lagged opponent
+    """Train PPO for three-player tournament (pure self-play).
 
     Args:
         cfg: Configuration dictionary
         episodes: Total training steps (default from config)
         train_qs: List of q values to train on (default from config)
         ablation_name: Tag for this variant
-        rollout_mode: "selfplay" or "vs_opponent"
 
     Returns:
         List of result dictionaries, one per q value
@@ -691,11 +685,7 @@ def run_ppo(
     for g in agent.opt.param_groups:
         g["lr"] = float(cfg.get("lr_start", ppo_cfg.lr))
 
-    if rollout_mode == "vs_opponent":
-        print(f"[PPO-3p] vs_opponent mode: P1=learner, P2/P3=may use lagged opponent")
-        print(f"[PPO-3p]   opponent_mode={ppo_cfg.opponent_mode} sync_interval={ppo_cfg.opponent_sync_interval}")
-    else:
-        print(f"[PPO-3p] Pure self-play mode: all 3 players share same policy")
+    print(f"[PPO-3p] Pure self-play mode: all 3 players share same policy")
     print(f"[PPO-3p] Training on q values: {train_qs}")
     print(flush=True)
 
@@ -725,13 +715,6 @@ def run_ppo(
     hold_fraction = float(cfg.get("entropy_hold_fraction", 2.0 / 3.0))
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
-
-    # Lag schedule for vs_opponent mode
-    lag_warmup_updates = int(cfg.get("lag_warmup_updates", 0))
-    lag_fade_updates_cfg = cfg.get("lag_fade_updates", None)
-    lag_fade_updates = int(lag_fade_updates_cfg) if lag_fade_updates_cfg is not None else max(1, total_updates // 3)
-    if rollout_mode == "vs_opponent":
-        print(f"[PPO-3p] Lag schedule: warmup={lag_warmup_updates} fade={lag_fade_updates} total={total_updates}")
 
     # Best-response regularization
     br_reg_coef = float(cfg.get("br_reg_coef", ppo_cfg.br_reg_coef))
@@ -839,19 +822,6 @@ def run_ppo(
         for g in agent.opt.param_groups:
             g["lr"] = lr_base
         
-        # Compute lag probability for vs_opponent mode
-        if rollout_mode == "vs_opponent":
-            if update_idx < lag_warmup_updates:
-                lag_prob = 1.0
-            elif update_idx < lag_warmup_updates + lag_fade_updates:
-                denom = max(1, lag_fade_updates - 1)
-                lag_phase = update_idx - lag_warmup_updates
-                lag_prob = max(0.0, 1.0 - (lag_phase / denom))
-            else:
-                lag_prob = 0.0
-        else:
-            lag_prob = 0.0
-
         # Collect rollout
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
 
@@ -875,18 +845,10 @@ def run_ppo(
             # Player 1: ALWAYS uses learner policy
             a1_norm, e1, logp1, v1 = agent.act(state)
 
-            # Player 2: mode-dependent (only P2 may use lagged opponent,
-            # matching 2-player ratio of 1/2 players lagged vs 2/3)
-            use_opp_p2 = False
-            if rollout_mode == "vs_opponent" and lag_prob > 0.0 and rng.random() < lag_prob:
-                a2_norm, e2, logp2, _ = agent.act_opponent(state)
-                v2 = agent.value_only(state)
-                use_opp_p2 = True
-            else:
-                a2_norm, e2, logp2, v2 = agent.act(state)
+            # Player 2: uses learner policy (self-play)
+            a2_norm, e2, logp2, v2 = agent.act(state)
 
-            # Player 3: ALWAYS uses learner policy (keep lag ratio ≤ 1/3)
-            use_opp_p3 = False
+            # Player 3: uses learner policy (self-play)
             a3_norm, e3, logp3, v3 = agent.act(state)
             
             # Apply asymmetric bias during warmup to break symmetry
@@ -909,14 +871,10 @@ def run_ppo(
             )
             _, rewards, _, done, _ = env.step(efforts)
             
-            # P1: always store (learner-generated in both modes)
+            # Store transitions for all 3 players (all learner-generated in self-play)
             agent.store(state, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            # P2: store only if learner-generated (skip opponent transitions)
-            if not use_opp_p2:
-                agent.store(state, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
-            # P3: store only if learner-generated
-            if not use_opp_p3:
-                agent.store(state, a3_norm, logp3, float(rewards[2].item()), v3, bool(done))
+            agent.store(state, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+            agent.store(state, a3_norm, logp3, float(rewards[2].item()), v3, bool(done))
             
             steps_done += 1
         
@@ -1273,18 +1231,6 @@ def _run_cli(args: argparse.Namespace) -> str:
     if args.br_reg_warmup is not None:
         cfg["br_reg_warmup"] = int(args.br_reg_warmup)
 
-    # Opponent lag / vs_opponent mode
-    if args.opponent_mode is not None:
-        cfg["opponent_mode"] = args.opponent_mode
-    if args.opponent_sync_interval is not None:
-        cfg["opponent_sync_interval"] = int(args.opponent_sync_interval)
-    if args.opponent_ema_tau is not None:
-        cfg["opponent_ema_tau"] = float(args.opponent_ema_tau)
-    if args.lag_warmup_updates is not None:
-        cfg["lag_warmup_updates"] = int(args.lag_warmup_updates)
-    if args.lag_fade_updates is not None:
-        cfg["lag_fade_updates"] = int(args.lag_fade_updates)
-
     # Asymmetric warmup settings
     if hasattr(args, 'no_asymmetric_warmup') and args.no_asymmetric_warmup:
         cfg["asymmetric_warmup_updates"] = 0
@@ -1317,7 +1263,6 @@ def _run_cli(args: argparse.Namespace) -> str:
             episodes=args.episodes,
             train_qs=train_qs,
             ablation_name=args.ablation_name,
-            rollout_mode=args.rollout_mode,
         )
     
     return "OK"
@@ -1455,19 +1400,6 @@ def main():
         action="store_true",
         help="Disable asymmetric warmup (equivalent to --asymmetric-warmup-updates 0)",
     )
-
-    # Opponent lag / vs_opponent mode
-    parser.add_argument(
-        "--rollout-mode",
-        choices=["selfplay", "vs_opponent"],
-        default="selfplay",
-        help="Rollout mode: selfplay (default) or vs_opponent (P2/P3 use lagged policy)",
-    )
-    parser.add_argument("--lag-warmup-updates", type=int, default=None, help="Updates at full lag_prob=1.0")
-    parser.add_argument("--lag-fade-updates", type=int, default=None, help="Updates over which lag_prob fades to 0")
-    parser.add_argument("--opponent-mode", type=str, default=None, choices=["periodic", "ema", "snapshot"])
-    parser.add_argument("--opponent-sync-interval", type=int, default=None, help="Sync opponent every N updates")
-    parser.add_argument("--opponent-ema-tau", type=float, default=None, help="EMA tau for opponent update")
 
     # Best-response regularization
     parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
