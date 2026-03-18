@@ -1,14 +1,21 @@
 # Project state
 
-Last updated: 2026-03-17
+Last updated: 2026-03-18
 
 ## Current status
 - Data pruning pass 2 complete: 161 convergence JSONs retained (figure-essential only)
 - All 10 paper figures verified reproducible with `python -m paper.generator make_all` (no --best-only)
 - Figures match e3de29a (2026-03-09) versions; generation is deterministic across runs
-- 13 post-e3de29a files archived to `results/archive/` (largeb + new diff_ability sweeps)
-- 187 unused files deleted (baseline_v2, diff_cost/ability eps/pat sweeps, k5e4_wh8_wl3, q25_seed68)
-  - All recoverable from git history at commit e3de29a
+- Task pipeline established: `docs/tasks/` for durable, git-tracked multi-phase planning
+- STATE.md moved from repo root into `docs/` (referenced by `.claude/CLAUDE.md`)
+
+## What was done (2026-03-18)
+1. Moved `STATE.md` → `docs/STATE.md` as project-level state tracker
+2. Created `docs/tasks/README.md` with pipeline conventions and templates
+3. Seeded `docs/tasks/runner-refactor/` as first task (CLAUDE.md, STATE.md, phase01.md)
+4. Updated `.claude/CLAUDE.md` with Task Pipeline section and corrected STATE.md path
+5. Updated `docs/README.md` tree to include `tasks/` and `STATE.md`
+6. Added `.gitignore` exception for `docs/tasks/` (was blocked by `tasks/` rule)
 
 ## What was done (2026-03-17)
 1. Identified which convergence JSONs each of the 10 figures actually uses
@@ -24,13 +31,13 @@ Last updated: 2026-03-17
 - different_ability: baseline TEL-PPO (15) + gradient (1)
 
 ## Known tech debt
-- Runner files (run/run_*.py) have ~60% code duplication — extract shared base
+- Runner files (run/run_*.py) have ~60% code duplication — extract shared base (task: `docs/tasks/runner-refactor/`)
 - No tests exist for any module
 - No CI/CD pipeline
 - summary.csv in results/two_players/ has a parsing issue (line 14 has 46 fields, expected 39)
 - baseline_v2 runs had a bug (q parameter not effective) — all deleted, documented here for reference
 
 ## Next steps
-- Phase 2: Code refactoring (extract shared runner, reduce duplication)
+- Runner refactor phase 01: audit duplication across the 4 runners (see `docs/tasks/runner-refactor/phase01.md`)
 - Add basic tests for theory.py, prob.py, paper generator
 - Consider git filter-repo to remove large files from history (~85 MB .git)
