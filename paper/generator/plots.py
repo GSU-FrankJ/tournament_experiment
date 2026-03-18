@@ -554,7 +554,7 @@ def plot_exploitability_dynamics(
                 linewidth=1.5, alpha=0.8, label="Cheap gate passed",
             )
 
-        # Nash convergence: median across seeds → single green line
+        # Nash convergence: max across seeds → single green line (conservative: all seeds converged)
         nash_match = nash_steps_df[
             (nash_steps_df["q"] == q) & (nash_steps_df["ablation"] == "baseline")
         ]
@@ -572,7 +572,7 @@ def plot_exploitability_dynamics(
             ax.set_ylabel("Exploitability")
         ax.set_title(f"q = {int(q)}")
         ax.set_yscale("log")
-        ax.set_ylim(0.01, 1)
+        ax.set_ylim(0.01, 2)
 
     # Single shared legend at the top — collect from all panels
     all_handles, all_labels = [], []
