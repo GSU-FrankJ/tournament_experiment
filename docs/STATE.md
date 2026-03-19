@@ -4,7 +4,7 @@ Last updated: 2026-03-18
 
 ## Current status
 - Data pruning pass 2 complete: 161 convergence JSONs retained (figure-essential only)
-- All 10 paper figures verified reproducible with `python -m paper.generator make_all` (no --best-only)
+- All 10 paper figures verified reproducible with `python -m paper.generator make_all`
 - Figures match e3de29a (2026-03-09) versions; generation is deterministic across runs
 - Task pipeline established: `docs/tasks/` for durable, git-tracked multi-phase planning
 - STATE.md moved from repo root into `docs/` (referenced by `.claude/CLAUDE.md`)

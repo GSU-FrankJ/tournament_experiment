@@ -11,6 +11,9 @@ Current phase: phase01
   - Tools: cleaned verify_rollout_modes.py, audit_rollout_modes.py, sweep_mechanism_ablation.py, sweep_exploit_ablation.py
   - Docs: updated 9 markdown files (rollout_modes.md, POLICY_SCALE_DIAGNOSTICS.md, audit_theory_align_v2.md, ppo_defaults.md, plot_convergence.md, asymmetric_init.md, run/README.md, AGENTS.md, tools/README.md)
   - Cursor: updated skills, examples, quick_experiment.py, 2 plan files
+- Phase 03: Removed --best-only flag from paper generator
+  - Code: removed CLI flag, select_best_runs(), get_final_effort_error_from_json(), if/else branches in 3 command handlers
+  - Docs: updated CLAUDE.md, docs/STATE.md, results-folder-guide.md, 3 task docs
 
 ## What's next
 - Phase 01: Audit duplication across the 4 runners, identify shared logic

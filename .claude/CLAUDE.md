@@ -22,9 +22,9 @@ python run/run_three_players.py --method ppo --q 40 --episodes 2048000 --seed 42
 python run/run_different_ability.py --method both --q 25 --episodes 131072
 python run/run_different_cost.py --method both --q 25 --episodes 131072
 
-# Paper artifacts (always use --best-only)
-python -m paper.generator --best-only make_all
-python -m paper.generator --best-only --dry-run
+# Paper artifacts
+python -m paper.generator make_all
+python -m paper.generator --dry-run
 
 # Plots and diagnostics
 python tools/plot_convergence.py
@@ -68,7 +68,7 @@ Results: `results/{experiment}/convergence/`, `logs/`, `summary.csv`. Ablation: 
 - Before deleting any file, list what will be deleted and confirm
 - Before running experiments that take >1 minute, confirm parameters first
 - Never modify files in results/*/convergence/ without explicit confirmation
-- When generating paper artifacts, always use --best-only flag unless told otherwise
+- When generating paper artifacts, use: python -m paper.generator make_all
 - Read docs/STATE.md (if it exists) before starting any task
 ```
 

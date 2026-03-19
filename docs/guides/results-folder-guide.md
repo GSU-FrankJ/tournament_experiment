@@ -151,30 +151,16 @@ Common: w_H=6.5, w_L=3.0, q in {25, 40, 55}, effort bounds [0, 200].
 ```python
 # Load all runs across experiments
 from paper.generator.run_registry import discover_runs
-from paper.generator.extract import load_multiple_runs, get_final_values
+from paper.generator.extract import load_all_convergence_data, get_final_values
 
-runs = discover_runs()  # Scans all 4 convergence dirs
-df = load_multiple_runs(runs)
+df = load_all_convergence_data()  # Scans all 4 convergence dirs
 final = get_final_values(df)
-```
-
-### Select best run per experiment x q
-
-```python
-from paper.generator.run_registry import discover_runs, select_best_runs
-
-runs = discover_runs()
-best = select_best_runs(runs)  # Lowest error per (experiment, q)
 ```
 
 ### Generate paper artifacts
 
 ```bash
-# All figures and tables (all seeds)
 python -m paper.generator make_all
-
-# Best-only (one seed per experiment x q)
-python -m paper.generator --best-only make_all
 
 # Dry run (list discovered runs)
 python -m paper.generator --dry-run
