@@ -47,6 +47,13 @@ Last updated: 2026-03-18
 - summary.csv in results/two_players/ has a parsing issue (line 14 has 46 fields, expected 39)
 - baseline_v2 runs had a bug (q parameter not effective) — all deleted, documented here for reference
 
+## Active tasks
+- **perfect-exploitability-figure**: phase08 (update paper generator + regenerate figure)
+  - q=35: 5/5 converged, ready to replace q=25
+  - q=55 conc_max=1000: 5/5 converged, 4/5 RelErr<5%, mean gap=1.55
+  - q=55 conc_max=2000: 5/5 converged but systematic positive bias, mean gap=3.07
+  - Decision needed: which q=55 data to use in figure (conc_max runs vs original seed=456)
+
 ## Next steps
 - Runner refactor phase 01: audit duplication across the 4 runners (see `docs/tasks/runner-refactor/phase01.md`)
   - Phase 02 (vs_opponent removal) done; phase 01 (duplication audit) still pending
