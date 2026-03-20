@@ -67,7 +67,7 @@ def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.0004) -> f
 
 
 # Standard q values for experiments
-Q_VALUES = [25.0, 40.0, 55.0]
+Q_VALUES = [35.0, 40.0, 55.0]
 
 
 # ==============================================================================
