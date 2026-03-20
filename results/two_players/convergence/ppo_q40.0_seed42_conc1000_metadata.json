@@ -1,0 +1,12 @@
+{
+  "run_id": "20260318_224502",
+  "method": "ppo",
+  "q": 40.0,
+  "seed": 42,
+  "ablation_name": "conc1000",
+  "git_sha": "8712763d3c91",
+  "cmdline": "/home/fjiang4/tournament_experiment/run/run_two_players.py --method ppo --q 40 --episodes 6144000 --seed 42 --effort-range 0 100 --override-entropy-end 0.0001 --override-conc-max 1000 --ablation-name conc1000",
+  "timestamp": "2026-03-18T22:54:27.304636",
+  "convergence_file": "ppo_q40.0_seed42_conc1000_convergence.json",
+  "variant_name": "entropy_end_0.0001"
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "20260319_190058",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 1024,
+  "ablation_name": "conc5000",
+  "git_sha": "48a477261ba7",
+  "cmdline": "run/run_two_players.py --method ppo --q 55 --episodes 6144000 --seed 1024 --override-conc-max 5000 --ablation-name conc5000",
+  "timestamp": "2026-03-19T20:52:40.123002",
+  "convergence_file": "ppo_q55.0_seed1024_conc5000_convergence.json",
+  "variant_name": "baseline"
+}

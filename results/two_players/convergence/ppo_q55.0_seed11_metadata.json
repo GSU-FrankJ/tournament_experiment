@@ -1,0 +1,12 @@
+{
+  "run_id": "20260319_103739",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 11,
+  "ablation_name": "baseline",
+  "git_sha": "48a477261ba7",
+  "cmdline": "run/run_two_players.py --method ppo --q 55 --episodes 6144000 --seed 11 --ablation-name baseline",
+  "timestamp": "2026-03-19T14:50:09.930713",
+  "convergence_file": "ppo_q55.0_seed11_convergence.json",
+  "variant_name": "baseline"
+}
