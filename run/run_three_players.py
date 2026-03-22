@@ -1225,6 +1225,17 @@ def _run_cli(args: argparse.Namespace) -> str:
             cfg["convergence"]["exploit"] = {}
         cfg["convergence"]["exploit"]["M"] = int(args.exploit_M)
     
+    # PPO tuning overrides
+    if args.steps_per_update is not None:
+        cfg["steps_per_update"] = int(args.steps_per_update)
+        print(f"[config] CLI override: steps_per_update={cfg['steps_per_update']}", flush=True)
+    if args.minibatch_size is not None:
+        cfg["minibatch_size"] = int(args.minibatch_size)
+        print(f"[config] CLI override: minibatch_size={cfg['minibatch_size']}", flush=True)
+    if args.update_epochs is not None:
+        cfg["update_epochs"] = int(args.update_epochs)
+        print(f"[config] CLI override: update_epochs={cfg['update_epochs']}", flush=True)
+
     # Best-response regularization
     if args.br_reg_coef is not None:
         cfg["br_reg_coef"] = float(args.br_reg_coef)
@@ -1404,6 +1415,14 @@ def main():
     # Best-response regularization
     parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
     parser.add_argument("--br-reg-warmup", type=int, default=None, help="Updates before BR reg kicks in")
+
+    # PPO tuning overrides
+    parser.add_argument("--steps-per-update", type=int, default=None,
+                        help="Override steps_per_update (default: from config, 4096)")
+    parser.add_argument("--minibatch-size", type=int, default=None,
+                        help="Override minibatch_size (default: from config, 1024)")
+    parser.add_argument("--update-epochs", type=int, default=None,
+                        help="Override update_epochs (default: from config, 6)")
 
     args = parser.parse_args()
     
