@@ -19,7 +19,10 @@ docs/
 ├── tasks/                      # Task pipeline (see tasks/README.md)
 │   ├── README.md               # Conventions and templates
 │   ├── runner-refactor/        # Extract shared runner logic
-│   └── perfect-exploitability-figure/ # Fix exploitability_dynamics figure
+│   ├── perfect-exploitability-figure/ # Fix exploitability_dynamics figure
+│   ├── diagnose-all-experiments/      # Diagnostic analysis of non-two-player experiments
+│   ├── paper-figures-tables-revision/ # Revise paper figures/tables for publication
+│   └── q35-all-experiments/           # Run q=35 across all experiment types
 └── technical/
     ├── README.md
     ├── rollout_modes.md        # Selfplay mode and historical data mixing bug

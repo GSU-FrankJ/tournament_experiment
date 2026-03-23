@@ -19,6 +19,16 @@ docs/tasks/{task-name}/
 2. **Execute** — Work through phases; update STATE.md after each phase
 3. **Complete** — Mark STATE.md status as "complete", leave in place for reference
 
+## Current Tasks
+
+| Task | Status | Description |
+|------|--------|-------------|
+| `runner-refactor` | in-progress | Extract shared logic across the 4 experiment runners |
+| `perfect-exploitability-figure` | in-progress | Fix exploitability_dynamics figure and related artifacts |
+| `diagnose-all-experiments` | complete | Diagnostic analysis of three_players, different_cost, different_ability |
+| `paper-figures-tables-revision` | planning | Revise paper figures/tables for publication (restyle, rename, add q=35) |
+| `q35-all-experiments` | in-progress | Run q=35 PPO + gradient across all non-two-player experiment types |
+
 ## Naming
 
 - Task names: lowercase, hyphenated (e.g., `runner-refactor`, `add-unit-tests`)
