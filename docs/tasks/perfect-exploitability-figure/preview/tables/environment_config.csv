@@ -1,0 +1,21 @@
+Category,Parameter,Value
+Game,$w_H$ (high prize),6.5 / 8
+Game,$w_L$ (low prize),3.0 / 4
+Game,$k$ (cost coeff.),0.0004
+Game,$q$ (noise),"\{25, 40, 55\}"
+Game,Effort bounds,"[0, 200]"
+Game,Noise distribution,"$\varepsilon_i \sim \text{Uniform}[-q, q]$"
+Game,Number of players,2 (baseline) / 3
+Training,Algorithm,PPO (clip)
+Training,Learning rate,$3 \times 10^{-4}$
+Training,PPO clip $\epsilon$,0.2
+Training,Batch size (episodes/update),4096
+Training,Max updates,500
+Training,Policy parameterization,"Beta($\alpha$, $\beta$)"
+Training,Seeds per configuration,5
+Convergence,Effort $\delta$,0.5
+Convergence,Effort window,20
+Convergence,Exploit. threshold $\varepsilon$,0.05
+Convergence,Exploit. patience,5
+Convergence,Min steps,100
+Theory,$e^* = (w_H - w_L) / (4qk)$,"$e^*(q=25)=87.50$, $e^*(q=40)=54.69$, $e^*(q=55)=39.77$"

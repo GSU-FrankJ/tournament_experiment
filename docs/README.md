@@ -18,7 +18,8 @@ docs/
 │   └── results-folder-guide.md # Directory structure, JSON formats, naming
 ├── tasks/                      # Task pipeline (see tasks/README.md)
 │   ├── README.md               # Conventions and templates
-│   └── runner-refactor/        # Example: extract shared runner logic
+│   ├── runner-refactor/        # Extract shared runner logic
+│   └── perfect-exploitability-figure/ # Fix exploitability_dynamics figure
 └── technical/
     ├── README.md
     ├── rollout_modes.md        # Selfplay mode and historical data mixing bug
