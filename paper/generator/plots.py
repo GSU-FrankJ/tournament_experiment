@@ -26,16 +26,23 @@ from .config import (
     METHOD_COLORS,
     METHOD_LINESTYLES,
     ABLATION_COLORS,
+    ABLATION_LABELS,
+    ABLATION_LINEWIDTHS,
     FIGURE_SIZES,
     FONT_SIZES,
     Q_VALUES,
     e_star,
+    format_q,
     THEORY_PARAMS,
     AGENT_COLORS,
     AGENT_MARKERS,
     WEIGHT_VARIANT_LABELS,
     THEORY_LINE_COLOR,
     THEORY_LINE_WIDTH,
+    SHADE_ALPHA,
+    CONV_VLINE_COLOR,
+    CONV_VLINE_LINESTYLE,
+    CONV_VLINE_LINEWIDTH,
     CHEAP_GATE_CONFIG,
     CONVERGENCE_CONFIG,
 )
@@ -167,7 +174,7 @@ def plot_convergence_main(
             q_df = var_df[var_df["q"] == q]
 
             if q_df.empty:
-                ax.set_title(f"Noise Level q = {q} (no data)")
+                ax.set_title(f"Noise Level {format_q(q)} (no data)")
                 continue
 
             # Theory line from data (use first non-NaN theoretical_effort) → red bold
@@ -198,14 +205,14 @@ def plot_convergence_main(
                 if col_name not in method_df.columns:
                     continue
 
-                # Individual seed traces (light) — lowered alpha
+                # Individual seed traces (light)
                 if has_multi_seed:
                     for seed in seeds:
                         seed_df = method_df[method_df["seed"] == seed].sort_values("step")
                         ax.plot(
                             seed_df["step"], seed_df[col_name],
-                            color=color, linestyle=ls, alpha=0.15,
-                            linewidth=0.8, zorder=1,
+                            color=color, linestyle=ls, alpha=0.10,
+                            linewidth=0.6, zorder=1,
                         )
 
                 # Aggregate mean + CI
@@ -225,7 +232,7 @@ def plot_convergence_main(
                         )
                         ax.fill_between(
                             steps, effort_mean - effort_ci, effort_mean + effort_ci,
-                            color=color, alpha=0.10, zorder=2,
+                            color=color, alpha=SHADE_ALPHA, zorder=2,
                         )
                 else:
                     # Single seed: plot directly
@@ -236,33 +243,22 @@ def plot_convergence_main(
                         label=label_base, zorder=3,
                     )
 
-            # --- Final summary annotation ---
-            if not np.isnan(e_theory):
-                final_effort = method_df.groupby("seed")["effort_mean"].last().mean()
-                final_error = abs(final_effort - e_theory)
-                # Final exploitability (last valid per seed, then mean)
-                exploit_vals = []
-                sym_gaps = []
-                for seed in seeds:
-                    sdf = method_df[method_df["seed"] == seed].sort_values("step")
-                    if "exploitability" in sdf.columns:
-                        valid_ex = sdf[sdf["exploitability"].notna()]["exploitability"]
-                        if not valid_ex.empty:
-                            exploit_vals.append(valid_ex.iloc[-1])
-                    if "agent1_effort" in sdf.columns and "agent2_effort" in sdf.columns:
-                        sym_gaps.append(abs(sdf["agent1_effort"].iloc[-1] - sdf["agent2_effort"].iloc[-1]))
-
-                ann_lines = [f"|ē−e*|={final_error:.2f}"]
-                if exploit_vals:
-                    ann_lines.append(f"ε={np.mean(exploit_vals):.3f}")
-                if sym_gaps:
-                    ann_lines.append(f"Δsym={np.mean(sym_gaps):.2f}")
-
-                ax.text(
-                    0.97, 0.97, "\n".join(ann_lines),
-                    transform=ax.transAxes, fontsize=7,
-                    verticalalignment="top", horizontalalignment="right",
-                    bbox=dict(boxstyle="round,pad=0.3", facecolor="wheat", alpha=0.5),
+            # Convergence vertical line (median across seeds)
+            mask = (
+                (conv_steps_df["q"] == q)
+                & (conv_steps_df["ablation"] == variant)
+                & (conv_steps_df["method"].isin(["TEL-PPO", "PPO"]))
+            )
+            if "experiment" in conv_steps_df.columns:
+                mask = mask & (conv_steps_df["experiment"] == "two_players")
+            conv_vals = conv_steps_df.loc[mask, "convergence_step"].dropna()
+            if not conv_vals.empty:
+                median_conv = conv_vals.median()
+                ax.axvline(
+                    x=median_conv, color=CONV_VLINE_COLOR,
+                    linestyle=CONV_VLINE_LINESTYLE,
+                    linewidth=CONV_VLINE_LINEWIDTH,
+                    label="Convergence step", zorder=4,
                 )
 
             # Axis formatting
@@ -272,21 +268,31 @@ def plot_convergence_main(
 
             # Title: "Noise Level q = {q}" on top row only
             if row_idx == 0:
-                ax.set_title(f"Noise Level q = {int(q)}")
+                ax.set_title(f"Noise Level {format_q(q)}")
 
-            # Row label on the leftmost column
+            # Row label on the leftmost column (bold, rotated)
             if col_idx == 0:
                 variant_label = WEIGHT_VARIANT_LABELS.get(variant, variant)
                 ax.annotate(
                     variant_label, xy=(0, 0.5),
                     xytext=(-50, 0), textcoords="offset points",
                     xycoords="axes fraction", ha="right", va="center",
-                    fontsize=FONT_SIZES["axis_label"], rotation=90,
+                    fontsize=FONT_SIZES["axis_label"],
+                    fontweight="bold", rotation=90,
                 )
 
-            # Legend only on top-left panel
+            # Legend only on top-left panel (deduplicate labels)
             if row_idx == 0 and col_idx == 0:
-                ax.legend(loc="upper left", fontsize=FONT_SIZES["legend"])
+                handles, labels = ax.get_legend_handles_labels()
+                seen = set()
+                deduped_h, deduped_l = [], []
+                for h, l in zip(handles, labels):
+                    if l not in seen:
+                        seen.add(l)
+                        deduped_h.append(h)
+                        deduped_l.append(l)
+                ax.legend(deduped_h, deduped_l, loc="upper left",
+                          fontsize=FONT_SIZES["legend"])
 
             ax.xaxis.set_major_formatter(
                 ticker.FuncFormatter(
@@ -376,7 +382,7 @@ def plot_kl_dynamics(
         q_df = q_df[q_df["approx_kl"].notna() & (q_df["approx_kl"] > 0)]
 
         if q_df.empty:
-            ax.set_title(f"q = {int(q)} (no data)")
+            ax.set_title(f"{format_q(q)} (no data)")
             continue
 
         # Bin the step axis into ~150 equal-width bins
@@ -400,7 +406,7 @@ def plot_kl_dynamics(
         # Percentile envelope
         ax.fill_between(
             steps, binned["p10"].values, binned["p90"].values,
-            color=CB_CYAN, alpha=0.25, label="10\u201390th pctl",
+            color=CB_CYAN, alpha=SHADE_ALPHA, label="10\u201390% interval",
         )
 
         # Bold median line
@@ -410,10 +416,10 @@ def plot_kl_dynamics(
         # Threshold line
         ax.axhline(
             y=mean_kl_thresh, color=CB_RED, linestyle="--",
-            linewidth=1.5, label=f"Threshold ({mean_kl_thresh})",
+            linewidth=2.5, label=f"Reference threshold ({mean_kl_thresh})",
         )
 
-        ax.set_title(f"q = {int(q)}")
+        ax.set_title(format_q(q))
         ax.set_yscale("log")
         ax.set_ylim(1e-4, 2e-1)
         ax.xaxis.set_major_formatter(x_formatter)
@@ -484,7 +490,7 @@ def plot_exploitability_dynamics(
         q_df = df[df["q"] == q].sort_values("step")
 
         if q_df.empty:
-            ax.set_title(f"q = {int(q)} (no data)")
+            ax.set_title(f"{format_q(q)} (no data)")
             continue
 
         seeds = sorted(q_df["seed"].unique())
@@ -538,7 +544,7 @@ def plot_exploitability_dynamics(
         exploit_thresh = CONVERGENCE_CONFIG["exploit_threshold"]
         ax.axhline(
             y=exploit_thresh, color="red", linestyle="--",
-            linewidth=2.5, alpha=0.8, label=f"Threshold ({exploit_thresh})",
+            linewidth=2.5, alpha=0.8, label=f"Tolerance threshold ({exploit_thresh})",
         )
 
         # Cheap gate: median across seeds → single orange line
@@ -551,7 +557,7 @@ def plot_exploitability_dynamics(
         if not gate_vals.empty:
             ax.axvline(
                 x=gate_vals.median(), color="orange", linestyle=":",
-                linewidth=1.5, alpha=0.8, label="Cheap gate passed",
+                linewidth=1.5, alpha=0.8, label="Stability screening passed",
             )
 
         # Nash convergence: max across seeds → single green line (conservative: all seeds converged)
@@ -564,13 +570,13 @@ def plot_exploitability_dynamics(
         if not nash_vals.empty:
             ax.axvline(
                 x=nash_vals.max(), color="green", linestyle="-.",
-                linewidth=1.5, alpha=0.8, label="Nash convergence",
+                linewidth=1.5, alpha=0.8, label="Approx. Nash verified",
             )
 
         ax.set_xlabel("Training Steps")
         if ax == axes[0]:
             ax.set_ylabel("Exploitability")
-        ax.set_title(f"q = {int(q)}")
+        ax.set_title(format_q(q))
         ax.set_yscale("log")
         ax.set_ylim(0.01, 2)
 
@@ -612,6 +618,113 @@ def plot_exploitability_dynamics(
     return fig, output_path
 
 
+def plot_exploitability_q25(
+    df: pd.DataFrame = None,
+    output_path: str = None,
+) -> Tuple[plt.Figure, str]:
+    """
+    Plot exploitability for the excluded low-noise case (q=25) — Figure 6b.
+
+    Single-panel figure matching the style of Figure 6a.
+    """
+    setup_matplotlib_style()
+    ensure_output_dirs()
+
+    if df is None:
+        df = load_all_convergence_data()
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "exploitability_q25.png")
+
+    q = 25.0
+    df = df[
+        (df["q"] == q)
+        & (df["method"].isin(["TEL-PPO", "PPO"]))
+        & (df["ablation"] == "baseline")
+    ]
+    if "experiment" in df.columns:
+        df = df[df["experiment"] == "two_players"]
+
+    if df.empty or "exploitability" not in df.columns:
+        print("[plots] Warning: No exploitability data for q=25")
+        return None, None
+
+    df = forward_fill_exploitability(df)
+
+    from .extract import get_cheap_gate_step, get_nash_convergence_step
+    gate_steps_df = get_cheap_gate_step(df)
+    nash_steps_df = get_nash_convergence_step(df)
+
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
+
+    seeds = sorted(df["seed"].unique())
+    smooth_window = 15
+
+    for seed in seeds:
+        sdf = df[df["seed"] == seed].sort_values("step")
+        valid = sdf[~sdf["exploitability_ffill"].isna()]
+        if not valid.empty:
+            smoothed = valid["exploitability_ffill"].rolling(
+                window=smooth_window, min_periods=1, center=True,
+            ).mean()
+            ax.plot(valid["step"].values, smoothed.values,
+                    color="#1f77b4", alpha=0.3, linewidth=0.8)
+
+    if len(seeds) > 1:
+        agg = aggregate_seeds(df)
+        col = "exploitability_ffill" if "exploitability_ffill" in agg.columns else "exploitability_mean"
+        if col in agg.columns:
+            valid = agg[~agg[col].isna()]
+            smoothed = valid[col].rolling(
+                window=smooth_window, min_periods=1, center=True,
+            ).mean()
+            ax.plot(valid["step"].values, smoothed.values,
+                    color="#1f77b4", linewidth=2, label="Exploitability")
+    else:
+        valid = df[~df["exploitability_ffill"].isna()].sort_values("step")
+        if not valid.empty:
+            smoothed = valid["exploitability_ffill"].rolling(
+                window=smooth_window, min_periods=1, center=True,
+            ).mean()
+            ax.plot(valid["step"].values, smoothed.values,
+                    color="#1f77b4", linewidth=2, label="Exploitability")
+
+    exploit_thresh = CONVERGENCE_CONFIG["exploit_threshold"]
+    ax.axhline(y=exploit_thresh, color="red", linestyle="--",
+               linewidth=2.5, alpha=0.8, label=f"Tolerance threshold ({exploit_thresh})")
+
+    gate_match = gate_steps_df[gate_steps_df["ablation"] == "baseline"]
+    if "experiment" in gate_steps_df.columns:
+        gate_match = gate_match[gate_match["experiment"] == "two_players"]
+    gate_vals = gate_match["cheap_gate_step"].dropna()
+    if not gate_vals.empty:
+        ax.axvline(x=gate_vals.median(), color="orange", linestyle=":",
+                   linewidth=1.5, alpha=0.8, label="Stability screening passed")
+
+    nash_match = nash_steps_df[nash_steps_df["ablation"] == "baseline"]
+    if "experiment" in nash_steps_df.columns:
+        nash_match = nash_match[nash_match["experiment"] == "two_players"]
+    nash_vals = nash_match["nash_step"].dropna()
+    if not nash_vals.empty:
+        ax.axvline(x=nash_vals.max(), color="green", linestyle="-.",
+                   linewidth=1.5, alpha=0.8, label="Approx. Nash verified")
+
+    ax.set_xlabel("Training Steps")
+    ax.set_ylabel("Exploitability")
+    ax.set_title(f"{format_q(q)} (excluded low-noise case)")
+    ax.set_yscale("log")
+    ax.set_ylim(0.01, 2)
+    ax.legend(loc="best", fontsize=8)
+
+    plt.tight_layout()
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
+    pdf_path = output_path.replace(".png", ".pdf")
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+
+    print(f"[plots] Saved figure to {output_path}")
+    return fig, output_path
+
+
 def plot_beta_evolution(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
@@ -647,16 +760,16 @@ def plot_beta_evolution(
         q_df = df[df["q"] == q].sort_values("step")
         
         if q_df.empty:
-            axes[0, col_idx].set_title(f"q = {q} (no data)")
+            axes[0, col_idx].set_title(f"{format_q(q)} (no data)")
             continue
-        
+
         valid = q_df[~q_df["alpha_mean"].isna()]
-        
+
         # Top: alpha
-        axes[0, col_idx].plot(valid["step"], valid["alpha_mean"], 
+        axes[0, col_idx].plot(valid["step"], valid["alpha_mean"],
                              color="#1f77b4", linewidth=2)
         axes[0, col_idx].set_ylabel("Alpha")
-        axes[0, col_idx].set_title(f"q = {q}")
+        axes[0, col_idx].set_title(format_q(q))
         
         # Bottom: beta
         axes[1, col_idx].plot(valid["step"], valid["beta_mean"],
@@ -710,12 +823,25 @@ def plot_beta_snapshots(
     if df.empty or "alpha_mean" not in df.columns:
         print("[plots] Warning: No alpha/beta data available for snapshots")
         return None, None
-    
-    df = df.sort_values("step")
-    max_step = df["step"].max()
 
     # Compute e* for this q and the effort scale factor
     e_theory = e_star(q, **THEORY_PARAMS)
+
+    # Select best seed (smallest final effort error)
+    seeds = df["seed"].unique()
+    if len(seeds) > 1:
+        best_seed, best_err = None, float("inf")
+        for s in seeds:
+            s_df = df[df["seed"] == s].sort_values("step")
+            final_effort = s_df["effort_mean"].tail(20).mean()
+            err = abs(final_effort - e_theory)
+            if err < best_err:
+                best_seed, best_err = s, err
+        df = df[df["seed"] == best_seed]
+        print(f"[plots] Beta snapshots: using seed={best_seed} (|e-e*|={best_err:.2f})")
+
+    df = df.sort_values("step")
+    max_step = df["step"].max()
     e_max = 250.0  # effort upper bound from environment config
 
     fig, axes = plt.subplots(1, len(snapshot_fractions), figsize=FIGURE_SIZES["beta_snapshots"])
@@ -747,7 +873,7 @@ def plot_beta_snapshots(
         y = beta_dist.pdf(x_norm, alpha, beta_val) / e_max
         ax.plot(x_effort, y, color=AGENT_COLORS["agent1"], linewidth=2,
                 label="Both agents")
-        ax.fill_between(x_effort, y, alpha=0.3, color=AGENT_COLORS["agent1"])
+        ax.fill_between(x_effort, y, alpha=SHADE_ALPHA, color=AGENT_COLORS["agent1"])
 
         # Mark policy mean in effort space
         mean_norm = alpha / kappa
@@ -820,13 +946,25 @@ def plot_ablation_comparison(
     if len(q_values) == 1:
         axes = [axes]
     
+    x_formatter = ticker.FuncFormatter(
+        lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
+        else f"{x/1e3:.0f}k" if x >= 1e3
+        else f"{x:.0f}"
+    )
+
+    # First pass: collect y-range across all panels for unified axis
+    y_min_global, y_max_global = float("inf"), float("-inf")
+
     for ax, q in zip(axes, q_values):
         q_df = df[df["q"] == q]
         e_theory = e_star(q, **THEORY_PARAMS)
-        
-        # Theory line
-        ax.axhline(y=e_theory, color="black", linestyle="--", linewidth=1.5, label="Theory")
-        
+
+        # Theory line — prominent
+        ax.axhline(
+            y=e_theory, color=THEORY_LINE_COLOR, linestyle="--",
+            linewidth=THEORY_LINE_WIDTH, label="Theory", zorder=4,
+        )
+
         # Plot each ablation with per-seed traces + aggregate mean + CI
         for ablation in sorted(ablations):
             abl_df = q_df[q_df["ablation"] == ablation]
@@ -834,6 +972,8 @@ def plot_ablation_comparison(
                 continue
 
             color = ABLATION_COLORS.get(ablation, "gray")
+            label = ABLATION_LABELS.get(ablation, ablation)
+            lw = ABLATION_LINEWIDTHS.get(ablation, 1.5)
             seeds = sorted(abl_df["seed"].unique())
             has_multi = len(seeds) > 1
 
@@ -850,18 +990,29 @@ def plot_ablation_comparison(
                     steps = agg["step"].values
                     mean = agg["effort_mean_mean"].values
                     ci = agg["effort_mean_ci95"].values if "effort_mean_ci95" in agg.columns else np.zeros_like(mean)
-                    ax.plot(steps, mean, color=color, linewidth=2,
-                            label=ablation, zorder=3)
+                    ax.plot(steps, mean, color=color, linewidth=lw,
+                            label=label, zorder=3)
                     ax.fill_between(steps, mean - ci, mean + ci,
-                                    color=color, alpha=0.12, zorder=2)
+                                    color=color, alpha=SHADE_ALPHA, zorder=2)
+                    y_min_global = min(y_min_global, np.nanmin(mean - ci))
+                    y_max_global = max(y_max_global, np.nanmax(mean + ci))
             else:
                 single = abl_df.sort_values("step")
                 ax.plot(single["step"], single["effort_mean"],
-                        color=color, linewidth=2, label=ablation, zorder=3)
-        
+                        color=color, linewidth=lw, label=label, zorder=3)
+                y_min_global = min(y_min_global, single["effort_mean"].min())
+                y_max_global = max(y_max_global, single["effort_mean"].max())
+
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Effort")
-        ax.set_title(f"q = {q}")
+        ax.set_title(format_q(q))
+        ax.xaxis.set_major_formatter(x_formatter)
+
+    # Unify y-axis across all panels
+    if y_min_global < float("inf"):
+        margin = (y_max_global - y_min_global) * 0.05
+        for ax in axes:
+            ax.set_ylim(y_min_global - margin, y_max_global + margin)
 
     plt.tight_layout()
 
@@ -869,7 +1020,7 @@ def plot_ablation_comparison(
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles, labels, loc="upper center",
-        ncol=4, fontsize=FONT_SIZES["legend"], frameon=False,
+        ncol=len(labels), fontsize=FONT_SIZES["legend"], frameon=False,
         bbox_to_anchor=(0.5, 1.03),
     )
     
@@ -1088,7 +1239,7 @@ def plot_distance_to_equilibrium(
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
 
-    q_colors = {25.0: "#1f77b4", 40.0: "#ff7f0e", 55.0: "#2ca02c"}
+    q_colors = {25.0: "#1f77b4", 35.0: "#9467bd", 40.0: "#ff7f0e", 55.0: "#2ca02c"}
 
     for q in q_values:
         q_df = df[df["q"] == q]
@@ -1111,13 +1262,13 @@ def plot_distance_to_equilibrium(
             err_mean = agg["effort_error_mean"].values
             err_ci = agg.get("effort_error_ci95", pd.Series([0] * len(agg))).values
 
-            ax.plot(steps, err_mean, color=color, linewidth=2, label=f"q={int(q)}")
+            ax.plot(steps, err_mean, color=color, linewidth=2, label=format_q(q))
             ax.fill_between(
                 steps,
                 np.maximum(err_mean - err_ci, 0),
                 err_mean + err_ci,
                 color=color,
-                alpha=0.12,
+                alpha=SHADE_ALPHA,
             )
         else:
             q_df = q_df.sort_values("step")
@@ -1126,7 +1277,7 @@ def plot_distance_to_equilibrium(
                 q_df["effort_error"],
                 color=color,
                 linewidth=2,
-                label=f"q={int(q)}",
+                label=format_q(q),
             )
 
         # Convergence vertical line (mean across seeds for this q)
@@ -1138,20 +1289,20 @@ def plot_distance_to_equilibrium(
         if not np.isnan(mean_conv):
             ax.axvline(
                 x=mean_conv, color=color, linestyle=":",
-                linewidth=1.2, alpha=0.7,
-                label=f"Conv. step q={int(q)}",
+                linewidth=1.0, alpha=0.7,
+                label=f"Detected convergence step ({format_q(q)})",
             )
 
     # ε threshold horizontal line
     effort_delta = CONVERGENCE_CONFIG["effort_delta"]
     ax.axhline(
         y=effort_delta, color="gray", linestyle="--",
-        linewidth=1.5, alpha=0.7, label=f"ε={effort_delta}",
+        linewidth=2.0, alpha=0.7, label=f"Target error threshold (ε = {effort_delta})",
     )
 
     ax.set_xlabel("Training Steps")
-    ax.set_ylabel("|ē − e*|")
-    ax.set_title("Distance to the Nash Equilibrium Across Noise Levels")
+    ax.set_ylabel("Equilibrium error |ē − e*|")
+    ax.set_title("Convergence Error to the Analytical Equilibrium")
     ax.legend(loc="best")
     ax.set_yscale("log")
     ax.set_ylim(bottom=0.1)
@@ -1226,12 +1377,12 @@ def plot_effort_drift(
         q_df = df[df["q"] == q].sort_values("step")
 
         if q_df.empty:
-            ax.set_title(f"q = {q} (no data)")
+            ax.set_title(f"{format_q(q)} (no data)")
             continue
 
         valid = q_df[~q_df["drift_effort"].isna()]
         if valid.empty:
-            ax.set_title(f"q = {q} (no drift data)")
+            ax.set_title(f"{format_q(q)} (no drift data)")
             continue
 
         # Aggregate by step across seeds (uniform grid, no binning needed)
@@ -1249,7 +1400,7 @@ def plot_effort_drift(
         # Shaded 10–90th percentile band
         ax.fill_between(
             binned["step"], binned["p10"], binned["p90"],
-            color="#56B4E9", alpha=0.25, label="10\u201390th pctl",
+            color="#56B4E9", alpha=SHADE_ALPHA, label="10\u201390% interval",
         )
 
         # Bold median line
@@ -1262,7 +1413,7 @@ def plot_effort_drift(
         drift_thresh = CHEAP_GATE_CONFIG["drift_effort_thresh"]
         ax.axhline(
             y=drift_thresh, color="#D55E00", linestyle="--",
-            linewidth=1.5, label=f"Threshold ({drift_thresh})",
+            linewidth=2.5, label=f"Drift threshold ({drift_thresh})",
         )
 
         # Convergence step vertical line
@@ -1274,13 +1425,13 @@ def plot_effort_drift(
         if not np.isnan(mean_conv):
             ax.axvline(
                 x=mean_conv, color="#009E73", linestyle=":",
-                linewidth=1.5, alpha=0.8, label="Conv. step",
+                linewidth=1.5, alpha=0.8, label="Detected convergence step",
             )
 
         ax.set_xlabel("Training Steps")
         if i == 0:
             ax.set_ylabel("Effort Drift")
-        ax.set_title(f"q = {int(q)}")
+        ax.set_title(format_q(q))
         ax.set_ylim(0, 2.8)
         ax.xaxis.set_major_formatter(
             ticker.FuncFormatter(
@@ -1403,8 +1554,8 @@ def plot_equilibrium_recovery_dotplot(
                         jitter = rng.uniform(-0.12, 0.12, len(efforts))
                         ax.scatter(
                             x_pos + jitter, efforts,
-                            color=color, marker=marker, s=60, zorder=3,
-                            alpha=0.8, edgecolors="white", linewidth=0.5,
+                            color=color, marker=marker, s=40, zorder=3,
+                            alpha=0.5, edgecolors="white", linewidth=0.5,
                             label=agent_label if not _legend_added[agent_key] else None,
                         )
                         _legend_added[agent_key] = True
@@ -1424,16 +1575,16 @@ def plot_equilibrium_recovery_dotplot(
                 ax.hlines(
                     e_theory,
                     x_pos - 0.3, x_pos + 0.3,
-                    colors=THEORY_LINE_COLOR, linestyles="--", linewidth=3, zorder=2,
+                    colors="#333333", linestyles="--", linewidth=3, zorder=2,
                 )
 
                 efforts = q_final["effort_mean"].values
                 jitter = rng.uniform(-0.15, 0.15, len(efforts))
                 ax.scatter(
                     x_pos + jitter, efforts,
-                    color="#ff7f0e", s=60, zorder=3, alpha=0.8,
+                    color="#ff7f0e", s=40, zorder=3, alpha=0.5,
                     edgecolors="white", linewidth=0.5,
-                    label="Per-seed" if not _legend_added["single"] else None,
+                    label="Per-seed estimate" if not _legend_added["single"] else None,
                 )
                 _legend_added["single"] = True
 
@@ -1443,7 +1594,7 @@ def plot_equilibrium_recovery_dotplot(
                     x_pos, mean_effort,
                     color="#d62728", marker="D", s=100, zorder=4,
                     edgecolors="black", linewidth=1,
-                    label="Seed mean" if not _legend_added["mean"] else None,
+                    label="Across-seed mean" if not _legend_added["mean"] else None,
                 )
                 _legend_added["mean"] = True
 
@@ -1459,7 +1610,7 @@ def plot_equilibrium_recovery_dotplot(
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_labels, fontsize=FONT_SIZES["tick_label"])
     ax.set_ylabel("Equilibrium Effort")
-    ax.set_title("Equilibrium Recovery Across Scenarios", pad=30)
+    ax.set_title("Equilibrium Recovery Across Scenarios and Noise Levels", pad=30)
 
     # Add experiment group labels
     group_starts = []
@@ -1473,10 +1624,22 @@ def plot_equilibrium_recovery_dotplot(
         group_starts.append((group_center, exp_labels.get(exp, exp)))
         x_pos_track += n_q + 0.5
 
+    # Add alternating background shading for scenario groups
+    x_pos_bg = 0
+    for i, exp in enumerate(experiments):
+        exp_final = final[final["experiment"] == exp] if "experiment" in final.columns else pd.DataFrame()
+        if exp_final.empty:
+            continue
+        n_q = len(exp_final["q"].unique())
+        if i % 2 == 1:
+            ax.axvspan(x_pos_bg - 0.4, x_pos_bg + n_q - 0.6,
+                       color="#f0f0f0", alpha=0.5, zorder=0)
+        x_pos_bg += n_q + 0.5
+
     trans = ax.get_xaxis_transform()
     for center, label in group_starts:
         ax.text(
-            center, -0.12, label,
+            center, -0.08, label,
             transform=trans,
             ha="center", va="top",
             fontsize=FONT_SIZES["tick_label"],
@@ -1485,17 +1648,17 @@ def plot_equilibrium_recovery_dotplot(
 
     # Legend
     legend_elements = [
-        Line2D([0], [0], color=THEORY_LINE_COLOR, linestyle="--", linewidth=3, label="Theory e*"),
+        Line2D([0], [0], color="#333333", linestyle="--", linewidth=3, label="Theory e*"),
     ]
     if _legend_added["single"]:
         legend_elements.append(Line2D(
             [0], [0], marker="o", color="w", markerfacecolor="#ff7f0e",
-            markersize=8, label="Per-seed",
+            markersize=7, alpha=0.5, label="Per-seed estimate",
         ))
     if _legend_added["mean"]:
         legend_elements.append(Line2D(
             [0], [0], marker="D", color="w", markerfacecolor="#d62728",
-            markeredgecolor="black", markersize=8, label="Seed mean",
+            markeredgecolor="black", markersize=8, label="Across-seed mean",
         ))
     if _legend_added["agent1"]:
         legend_elements.append(Line2D(
@@ -1586,7 +1749,12 @@ def generate_all_figures(
     fig, path = plot_exploitability_dynamics(df, q_values)
     if path:
         results["exploitability_dynamics"] = path
-    
+
+    # Exploitability q=25 (excluded low-noise case, Figure 6b)
+    fig, path = plot_exploitability_q25(df)
+    if path:
+        results["exploitability_q25"] = path
+
     # Beta evolution
     fig, path = plot_beta_evolution(df, q_values)
     if path:

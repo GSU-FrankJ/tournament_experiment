@@ -9,7 +9,7 @@ Contains:
 """
 
 import os
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 # ==============================================================================
 # Directory Paths
@@ -67,7 +67,12 @@ def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.0004) -> f
 
 
 # Standard q values for experiments
-Q_VALUES = [35.0, 40.0, 55.0]
+Q_VALUES: List[float] = [35.0, 40.0, 55.0]
+
+
+def format_q(q: float) -> str:
+    """Format q value without .0 suffix (e.g., 35.0 -> 'q = 35')."""
+    return f"q = {int(q)}" if q == int(q) else f"q = {q}"
 
 
 # ==============================================================================
@@ -120,9 +125,17 @@ def classify_quality(gap: float) -> str:
 # Plotting Styles
 # ==============================================================================
 
+# Global shading alpha for fill_between bands (lighter than previous defaults)
+SHADE_ALPHA = 0.15
+
 # Theory line style (used across all figures)
 THEORY_LINE_COLOR = "red"
 THEORY_LINE_WIDTH = 2.5
+
+# Convergence vertical line style (marks detected convergence step)
+CONV_VLINE_COLOR = "#888888"
+CONV_VLINE_LINESTYLE = "--"
+CONV_VLINE_LINEWIDTH = 1.0
 
 # Method colors (consistent across all figures)
 METHOD_COLORS: Dict[str, str] = {
@@ -140,11 +153,25 @@ METHOD_LINESTYLES: Dict[str, str] = {
     "PPO": "-",            # Alias
 }
 
-# Ablation colors
+# Ablation colors (keyed by internal ablation_name from convergence JSON)
 ABLATION_COLORS: Dict[str, str] = {
     "baseline": "#1f77b4",
     "no_cheap_gate": "#ff7f0e",
     "no_exploitability": "#2ca02c",
+}
+
+# Ablation display labels (internal name -> paper label)
+ABLATION_LABELS: Dict[str, str] = {
+    "baseline": "TEL-PPO",
+    "no_cheap_gate": "No stability screening",
+    "no_exploitability": "No exploitability verification",
+}
+
+# Ablation line widths (TEL-PPO thicker, ablation variants thinner)
+ABLATION_LINEWIDTHS: Dict[str, float] = {
+    "baseline": 2.5,
+    "no_cheap_gate": 1.5,
+    "no_exploitability": 1.5,
 }
 
 # Figure sizes (inches)
@@ -179,10 +206,10 @@ AGENT_MARKERS: Dict[str, str] = {
     "agent2": "^",
 }
 
-# Weight-variant labels for convergence figure rows
+# Weight-variant labels for convergence figure rows (include k value)
 WEIGHT_VARIANT_LABELS: Dict[str, str] = {
-    "baseline": r"$w_H=6.5,\; w_L=3.0$",
-    "wh8_wl4": r"$w_H=8,\; w_L=4$",
+    "baseline": r"$w_H=6.5,\; w_L=3.0,\; k=0.0004$",
+    "wh8_wl4": r"$w_H=8,\; w_L=4,\; k=0.0004$",
 }
 
 # DPI for raster output

@@ -43,6 +43,7 @@ from .plots import (
     plot_convergence_main,
     plot_kl_dynamics,
     plot_exploitability_dynamics,
+    plot_exploitability_q25,
     plot_beta_evolution,
     plot_beta_snapshots,
     plot_ablation_comparison,
@@ -65,6 +66,7 @@ PLOT_TYPES = [
     "convergence_main",
     "kl_dynamics",
     "exploitability_dynamics",
+    "exploitability_q25",
     "beta_evolution",
     "beta_snapshots",
     "ablation_comparison",
@@ -144,12 +146,11 @@ def cmd_make_all(args: argparse.Namespace) -> int:
     print(f"Q values: {q_values}")
     print(f"Output dir: {args.out_dir}")
     
-    # Load data
+    # Load data (load ALL q values; individual figures filter as needed)
     print("\nLoading convergence data...")
     df = load_all_convergence_data(
         convergence_dir=args.runs_dir,
         csv_path=args.csv,
-        q_values=q_values,
     )
     print(f"Loaded {len(df)} rows from {df['method'].nunique()} methods")
     
@@ -215,6 +216,7 @@ def cmd_plot(args: argparse.Namespace) -> int:
         "convergence_main": lambda: plot_convergence_main(df, q_values, os.path.join(output_dir, "convergence_main.png")),
         "kl_dynamics": lambda: plot_kl_dynamics(df, q_values, os.path.join(output_dir, "kl_dynamics.png")),
         "exploitability_dynamics": lambda: plot_exploitability_dynamics(df, q_values, os.path.join(output_dir, "exploitability_dynamics.png")),
+        "exploitability_q25": lambda: plot_exploitability_q25(df, os.path.join(output_dir, "exploitability_q25.png")),
         "beta_evolution": lambda: plot_beta_evolution(df, q_values, os.path.join(output_dir, "beta_evolution.png")),
         "beta_snapshots": lambda: plot_beta_snapshots(df, q=40.0, output_path=os.path.join(output_dir, "beta_snapshots.png")),
         "ablation_comparison": lambda: plot_ablation_comparison(df, q_values, os.path.join(output_dir, "ablation_comparison.png")),

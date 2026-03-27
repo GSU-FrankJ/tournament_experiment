@@ -305,7 +305,8 @@ def generate_final_paper_table(
         if exp_df.empty:
             continue
 
-        q_values_exp = sorted(exp_df["q"].unique())
+        # Use primary q values only (exclude q=25 from main tables)
+        q_values_exp = sorted(q for q in exp_df["q"].unique() if q in Q_VALUES)
 
         for q in q_values_exp:
             q_df = exp_df[exp_df["q"] == q]
@@ -497,7 +498,7 @@ def generate_environment_config_table(
         {"Category": "Game", "Parameter": "$w_H$ (high prize)", "Value": "6.5 / 8"},
         {"Category": "Game", "Parameter": "$w_L$ (low prize)", "Value": "3.0 / 4"},
         {"Category": "Game", "Parameter": "$k$ (cost coeff.)", "Value": str(THEORY_PARAMS["k"])},
-        {"Category": "Game", "Parameter": "$q$ (noise)", "Value": "\\{25, 40, 55\\}"},
+        {"Category": "Game", "Parameter": "$q$ (noise)", "Value": "\\{35, 40, 55\\}"},
         {"Category": "Game", "Parameter": "Effort bounds", "Value": "[0, 200]"},
         {"Category": "Game", "Parameter": "Noise distribution", "Value": "$\\varepsilon_i \\sim \\text{Uniform}[-q, q]$"},
         {"Category": "Game", "Parameter": "Number of players", "Value": "2 (baseline) / 3"},
