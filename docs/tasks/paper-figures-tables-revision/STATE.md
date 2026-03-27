@@ -1,7 +1,7 @@
 # Paper Figures & Tables Revision
 
-Status: in-progress
-Current phase: complete
+Status: complete
+Current phase: all done
 
 ## Key decisions
 - **q values**: {35, 40, 55} in all main figures and tables; q=25 only in Figure 6b
@@ -16,7 +16,7 @@ Current phase: complete
 - Confirmed all 20 paper baseline runs use entropy schedule (no theory-align-v2)
 - **Phase 01 complete**: added SHADE_ALPHA, format_q(), CONV_VLINE_*, ABLATION_LABELS, ABLATION_LINEWIDTHS, updated WEIGHT_VARIANT_LABELS with k
 - **Phase 02 complete**: Figure 1 restyled — q=35/40/55 columns, k in labels, lighter shading, convergence vline, deduplicated legend
-  - **Open**: no wh8_wl4 data for q=35 (bottom-left panel empty); error box kept pending user decision
+  - **Resolved**: wh8_wl4 gradient for q=35 generated (gap=0.17); PPO data already existed (5 seeds). Panel now populated
 
 - **Phase 03 complete**: Figure 2 (effort_drift) restyled — SHADE_ALPHA for lighter shading, thicker threshold line (2.5), standardized legend entries, format_q() titles
 
@@ -36,7 +36,10 @@ Current phase: complete
 - **Phase 11 complete**: Tables 3-4 — q=25 rows excluded from final_summary (filtered to Q_VALUES only); q=35 rows now included. Fixed make_all data loader to not pre-filter by q_values (needed for exploitability_q25)
 
 ## What's next
-- All 11 phases complete. `python -m paper.generator make_all` generates 11 figures + 5 tables
+- All done. `python -m paper.generator make_all` generates 11 figures + 5 tables. All panels populated.
 
 ## Blockers
 - (none)
+
+## Resolved issues
+- q=35 wh8_wl4 gradient required 50000 steps with lr=0.3, lr_decay=0.99999, samples=2048 (MC gradient solver converges slowly for q=35 due to flatter landscape)

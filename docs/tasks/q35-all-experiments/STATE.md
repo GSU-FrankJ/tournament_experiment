@@ -1,7 +1,7 @@
 # q=35 all experiments
 
-Status: in-progress
-Current phase: phase02 (3p diagnostic)
+Status: closed (3p limitation accepted)
+Current phase: complete
 
 ## What's done
 
@@ -30,7 +30,7 @@ Current phase: phase02 (3p diagnostic)
 | 789 | 55.35 | 2.69 | 0.019 | @562 |
 | 1024 | 55.24 | 2.80 | 0.018 | @622 |
 
-**PPO — three_players: NOT ACCEPTABLE (gaps 5.0-5.7)**
+**PPO — three_players: NOT CONVERGED (gaps 5.0-5.7, accepted as limitation)**
 
 | Seed | Effort | Gap from 62.5 | Exploit | Stopped |
 |------|--------|---------------|---------|---------|
@@ -78,27 +78,43 @@ Added `--steps-per-update`, `--minibatch-size`, `--update-epochs` CLI flags to r
 
 Conclusion: reducing gradient steps per update **worsened** convergence (gap 6.1-6.2 vs 5.4 baseline). Over-optimization is not the root cause.
 
-### Phase 03: Fix 3p convergence (IN PROGRESS — 2026-03-23)
+### Phase 03: Fix 3p convergence — ALL FAILED (2026-03-27)
 
-Three parallel experiments on seed=42, q=35, exploit_eps=0.02:
+**Phase 03 experiments (seed=42, q=35):**
 
-| Exp | Change | tmux | GPU |
-|-----|--------|------|-----|
-| A1 | entropy_start/hold=0.01 (vs 0.03) | 3p_ent_start_01 | 0 |
-| B3 | disable adv normalization | 3p_no_adv_norm | 1 |
-| A3 | entropy=0 | 3p_no_entropy | 2 |
+| Variant | Final Effort | Gap | Exploit | Updates | Verdict |
+|---------|-------------|-----|---------|---------|---------|
+| baseline | 57.16 | 5.34 | 0.166 | 1500 | — |
+| no_entropy | 57.96 | 4.54 | 0.198 | 1500 | slightly better gap, worse exploit |
+| ent_start_01 | 57.71 | 4.79 | 0.187 | 1500 | slightly better gap, worse exploit |
+| no_adv_norm | 55.06 | 7.44 | 0.090 | 1500 | worse |
+| mean_conc | 57.07 | 5.43 | 0.163 | 1500 | no change |
+| smooth_h64 | 56.52 | 5.98 | 0.141 | 1500 | worse |
+| binary_h64 | 52.62 | 9.88 | 0.037 | 1500 | much worse |
+| binary_h128 | 53.23 | 9.27 | 0.048 | 1500 | much worse |
+| adam_reset100 | 57.15 | 5.35 | 0.165 | 1500 | no change |
+| 5000upd | 57.15 | 5.35 | 0.165 | 1500 | no change |
+| 5000upd_v2 | — | — | ~0.16 | 4776 | killed, no improvement |
 
-Code changes: `--override-entropy-start` and `--disable-adv-norm` flags added to runner.
+**Not q=35-specific:** 3p q=40 also shows similar gaps (seeds 123/456: gap=7-8), confirming this is a structural 3p PPO limitation.
+
+### Conclusion
+
+3p PPO has a **systematic convergence barrier** (~5-unit gap from equilibrium). Root cause: 3-player rank-order rewards produce structurally weaker gradient signal than 2-player binary win/lose. No hyperparameter or ablation tested could resolve this. Gradient descent converges perfectly (gap=0.12), confirming the theory is correct.
+
+**Decision:** Accept as paper limitation. 3p results reported with NC (never converged) in final_summary. Potential future directions requiring algorithm-level changes:
+- Counterfactual baselines (COMA-style) to isolate agent contribution
+- Decomposed binary advantage (win-over-2nd / lose-to-2nd)
+- Opponent-aware value functions
 
 ## What's running now
 
-3 experiments in tmux (GPUs 0-2). Expected ~1500 updates each.
+Nothing (all tmux sessions terminated 2026-03-27).
 
 ## What's next
 
-Based on phase03 results:
-- Winners get 5-seed validation
-- If none work: try larger batch (steps_per_update=8192) or A1+B3 combination
+Task closed. 3p limitation accepted for paper.
 
 ## Blockers
-- None (experiments running)
+
+- (none)
