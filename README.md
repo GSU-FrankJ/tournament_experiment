@@ -8,7 +8,7 @@ Game-theoretic tournament experiments with PPO reinforcement learning. The activ
 
 | Directory | Purpose | Key Entry Point |
 |-----------|---------|-----------------|
-| [`run/`](run/README.md) | Experiment runners | `python run/run_two_players.py --method ppo --q 25` |
+| [`run/`](run/README.md) | Experiment runners | `python run/run_two_players.py --method ppo --q 40` |
 | [`agents/`](agents/README.md) | Learning algorithms | `PPOTwoPlayersBandit`, `MCFDConfig` |
 | [`envs/`](envs/README.md) | Game environments | `TwoPlayersEnv` |
 | [`config/`](config/README.md) | Experiment configs | `one_stage_two_players.py` |
@@ -21,7 +21,7 @@ Game-theoretic tournament experiments with PPO reinforcement learning. The activ
 **Quick commands:**
 ```bash
 # Run PPO experiment
-python run/run_two_players.py --method ppo --q 25 --episodes 2048000 --seed 50
+python run/run_two_players.py --method ppo --q 40 --episodes 2048000 --seed 42
 
 # Run gradient baseline
 python run/run_two_players.py --method gradient --q 40
@@ -39,10 +39,11 @@ python -m paper.generator make_all
 tournament_experiment/
 ├── agents/              # Learning algorithms (PPO, MC-FD gradient solver)
 ├── config/              # Experiment configurations
-├── docs/                # Documentation (guides, technical, archive)
+├── docs/                # Documentation (guides, technical, tasks)
+│   ├── STATE.md         # Project-level state tracker
 │   ├── guides/          # User guides (PPO defaults, plotting, etc.)
 │   ├── technical/       # Implementation docs, audit reports
-│   └── archive/         # Legacy materials
+│   └── tasks/           # Multi-phase task pipeline (per-task STATE.md + phases)
 ├── envs/                # Game environments
 ├── paper/               # Paper generation & outputs
 │   ├── generator/       # Python package (figure/table pipeline)
@@ -84,9 +85,7 @@ pip install -r requirements.txt
 - clip schedule: 0.25 early; late‑phase anneal 0.35 → 0.25
 - entropy schedule: 0.02 → 0.002 over first 50 updates; forced to 0.0 in last ~30 updates
 - learning rate: 3e‑4 base; boosted to 4e‑4 in last ~50 updates
-- self‑play sampling:
-  - Early phase: learner vs lagged opponent; only learner transitions stored
-  - Late phase: fully on‑policy symmetric sampling; store both players’ transitions
+- self‑play sampling: pure self-play; both players always act from the current learner policy, storing both P1 and P2 transitions every step
 - state encoding (3‑D): `[q/60, k/1e‑3, (w_h−w_l)/10]`
 - Assumptions documented for this track:
   - Two-player environment uses closed-form expected utilities (no stochastic noise is sampled during rollouts).
@@ -96,28 +95,20 @@ pip install -r requirements.txt
 
 - Prizes: `w_H=6.5`, `w_L=3.0`
 - Cost: `k=0.0004` (fixed)
-- Noise list: `q_list=[25.0, 40.0, 55.0]`
+- Noise list: `q_list=[35.0, 40.0, 55.0]` (q=25 replaced by q=35; q=25 violates participation constraint)
 - Effort bounds: `[0, 200]`
 
 ### Train and Evaluate
-
-- Train once across all q’s (`config/one_stage_two_players.py:q_list=[25,40,55]`) and evaluate each q:
-
-```
-python3 run/run_two_players.py --method ppo --episodes 131072
-```
-
-- Train only on a specific q (and evaluate that q):
 
 ```
 python3 run/run_two_players.py --method ppo --q 40 --episodes 131072
 ```
 
 Tips:
+- `--q` specifies the noise parameter (required for PPO).
 - `--episodes` is the total number of environment steps (bandit: one step per episode). Set it to a multiple of `steps_per_update=16384` for clean updates (e.g., 65536, 131072, 262144).
-- Override the training/eval set via `--q`; omit it to sweep all values in `q_list`.
 
-- Closed‑form baseline rows (denominator 4):
+Closed‑form baseline (denominator 4):
 
 ```
 python3 run/run_two_players.py --method gradient --q 40

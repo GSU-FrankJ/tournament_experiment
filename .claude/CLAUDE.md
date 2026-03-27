@@ -61,6 +61,19 @@ Results: `results/{experiment}/convergence/`, `logs/`, `summary.csv`. Ablation: 
 - If a change touches both code and results, split into two commits
 ```
 
+## Disagreement and Error Handling
+
+```
+- When the user points out an error, do NOT immediately agree. First independently
+  analyze whether the issue actually exists: check the data, re-read the code, verify
+  the logic. State your reasoning, then decide whether to accept or push back.
+- If you agree, explain WHY (what evidence convinced you), not just "you're right".
+- If you disagree, say so clearly with specific counter-evidence.
+- Correlation ≠ causation. When claiming a root cause, identify what experiment would
+  distinguish your hypothesis from alternatives. Do not elevate "plausible factor" to
+  "confirmed root cause" without causal evidence.
+```
+
 ## Workflow Boundaries
 
 ```
@@ -70,6 +83,9 @@ Results: `results/{experiment}/convergence/`, `logs/`, `summary.csv`. Ablation: 
 - Never modify files in results/*/convergence/ without explicit confirmation
 - When generating paper artifacts, use: python -m paper.generator make_all
 - Read docs/STATE.md (if it exists) before starting any task
+- Long-running commands (training, sweeps, etc.) MUST run in tmux:
+  tmux new-session -d -s <name> "<command>"
+  Never use nohup or bare background tasks for training runs
 ```
 
 ## Code Style
@@ -88,7 +104,7 @@ Results: `results/{experiment}/convergence/`, `logs/`, `summary.csv`. Ablation: 
 - **Denominator 4** for two-player equilibrium. Never mix with denominator-6
 - **Beta mean for evaluation**, not mode, even when α,β > 1
 - **Closed-form expected utilities** — no stochastic noise during rollouts
-- **Both players' transitions** stored in rollouts (self-play, lagged opponent)
+- **Both players' transitions** stored in rollouts (pure self-play; opponent lag mechanism exists in agent code but is never used for action selection)
 - Results are precious and irreproducible (GPU training runs). Never delete without confirmation
 - Never modify `paper/generator/config.py` theory parameters without confirming — they match the paper's math
 

@@ -78,17 +78,27 @@ Added `--steps-per-update`, `--minibatch-size`, `--update-epochs` CLI flags to r
 
 Conclusion: reducing gradient steps per update **worsened** convergence (gap 6.1-6.2 vs 5.4 baseline). Over-optimization is not the root cause.
 
+### Phase 03: Fix 3p convergence (IN PROGRESS — 2026-03-23)
+
+Three parallel experiments on seed=42, q=35, exploit_eps=0.02:
+
+| Exp | Change | tmux | GPU |
+|-----|--------|------|-----|
+| A1 | entropy_start/hold=0.01 (vs 0.03) | 3p_ent_start_01 | 0 |
+| B3 | disable adv normalization | 3p_no_adv_norm | 1 |
+| A3 | entropy=0 | 3p_no_entropy | 2 |
+
+Code changes: `--override-entropy-start` and `--disable-adv-norm` flags added to runner.
+
 ## What's running now
 
-Nothing. All experiments stopped.
+3 experiments in tmux (GPUs 0-2). Expected ~1500 updates each.
 
 ## What's next
 
-Both experiment A (entropy) and B (gradient steps) failed. Remaining options:
-1. Combine A+B (low confidence — both individually had no/negative effect)
-2. More aggressive changes: different advantage normalization, 1 transition per step
-3. Accept 3p gap≈5.4 as a known PPO limitation for rank-order tournaments
-4. Try conc_max cap (worked for 2p q=55)
+Based on phase03 results:
+- Winners get 5-seed validation
+- If none work: try larger batch (steps_per_update=8192) or A1+B3 combination
 
 ## Blockers
-- No viable fix found for 3p convergence gap — user decision needed on next approach
+- None (experiments running)

@@ -25,7 +25,9 @@ Revise all paper figures and tables to match updated revision notes: restyle plo
 - Figures must remain publication-quality (300 DPI, proper font sizes)
 - Label renames are exact — use the specific text from revision notes
 - q values displayed without `.0` suffix (e.g., `q = 35` not `q = 35.0`)
-- Keep q=25 results available for analysis but primary figures use q={35, 40, 55}
+- **Primary q values: {35, 40, 55}** — q=25 does NOT appear in main figures or tables
+- q=25 appears ONLY in Figure 6b (excluded low-noise case) and is discussed separately in text
+- Tables 3–4: q=25 rows replaced by q=35 (not appended)
 - Verify each figure visually after generation before moving to next phase
 
 ## Terminology mapping (revision notes)

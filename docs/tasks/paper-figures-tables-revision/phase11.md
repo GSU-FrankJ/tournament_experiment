@@ -2,12 +2,12 @@
 
 ## Objective
 
-Update quantitative summary tables to include q=35 data and ensure all metrics are current.
+Update quantitative summary tables: replace q=25 rows with q=35 and ensure all metrics are current.
 
 ## Changes
 
-1. Add q=35 rows for all scenarios (two-player, three-player, het. cost, het. ability)
-2. Ensure q=25 rows remain for analysis (may be in a separate appendix table or kept inline)
+1. Replace q=25 rows with q=35 for all scenarios (two-player, three-player, het. cost, het. ability)
+2. q=25 does NOT appear in Tables 3–4 (discussed separately in text)
 3. Verify all metric values against latest convergence JSON files:
    - Mean effort +/- std
    - |e_bar - e*|

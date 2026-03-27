@@ -2,7 +2,7 @@
 
 ## Objective
 
-Major restyle of ablation figure: unified y-axis, renamed labels, line weight differentiation, x-axis formatting, optional summary panel.
+Major restyle of ablation figure: unified y-axis, renamed labels, line weight differentiation, x-axis formatting, optional summary panel. Panels are q=35/40/55 (q=25 removed).
 
 ## Changes
 
