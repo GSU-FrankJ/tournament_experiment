@@ -2,7 +2,7 @@ Category,Parameter,Value
 Game,$w_H$ (high prize),6.5 / 8
 Game,$w_L$ (low prize),3.0 / 4
 Game,$k$ (cost coeff.),0.0004
-Game,$q$ (noise),"\{25, 40, 55\}"
+Game,$q$ (noise),"\{35, 40, 55\}"
 Game,Effort bounds,"[0, 200]"
 Game,Noise distribution,"$\varepsilon_i \sim \text{Uniform}[-q, q]$"
 Game,Number of players,2 (baseline) / 3
