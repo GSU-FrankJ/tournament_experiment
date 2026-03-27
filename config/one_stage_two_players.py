@@ -27,12 +27,14 @@ config = {
     "gradient_num_samples": 64,
     "gradient_init_perturb": 1.0,
 
-    # Opponent (lag) settings – periodic sync every 2 updates, short warmup/fade,
-    # no opponent-history sampling (与 Sweep1_E 一致，保持频繁同步、短期滞后)
+    # Opponent (lag) settings – VESTIGIAL: the agent code maintains a lagged
+    # opponent network, but selfplay rollout mode never calls act_opponent(),
+    # so these values have no effect on training. Kept at 0/disabled to avoid
+    # misleading readers into thinking lag is active.
     "opponent_mode": "periodic",
-    "opponent_sync_interval": 2,
-    "opponent_ema_tau": 0.20,
-    "opponent_snapshot_keep": 10,
+    "opponent_sync_interval": 0,
+    "opponent_ema_tau": 0.0,
+    "opponent_snapshot_keep": 0,
     "opponent_history_sample_p": 0.0,
 
     # PPO rollout & update (bandit-friendly defaults)

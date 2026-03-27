@@ -30,7 +30,8 @@ class ThreePlayersEnv:
                  seed: int = 42, mc_samples: int = 3000,
                  allow_near_symmetric_shortcut: bool = True,
                  track_shortcut_stats: bool = False,
-                 use_analytic_probabilities: bool = True):
+                 use_analytic_probabilities: bool = True,
+                 use_binary_rewards: bool = False):
         self.w_h = float(w_h)
         self.w_l = float(w_l)
         self.k = float(k)
@@ -42,6 +43,8 @@ class ThreePlayersEnv:
         self.allow_near_symmetric_shortcut = bool(allow_near_symmetric_shortcut)
         self.track_shortcut_stats = bool(track_shortcut_stats)
         self.use_analytic = bool(use_analytic_probabilities)
+        self.use_binary_rewards = bool(use_binary_rewards)
+        self._rng = np.random.default_rng(self.seed)
 
         # Episode counter for deterministic RNG per-episode
         self._episode = 0
@@ -113,21 +116,28 @@ class ThreePlayersEnv:
             e = max(lo, min(hi, e))
             efforts.append(e)
 
-        p1, p2, p3 = self._win_probs(efforts[0], efforts[1], efforts[2])
-        win_probs = [p1, p2, p3]
+        costs_list: List[float] = [self.k * e * e for e in efforts]
 
-        # utilities and costs
-        utilities: List[float] = []
-        costs: List[float] = []
-        for i in range(3):
-            reward = self.w_l + win_probs[i] * (self.w_h - self.w_l)
-            cost = self.k * efforts[i] * efforts[i]
-            utilities.append(reward - cost)
-            costs.append(cost)
+        if self.use_binary_rewards:
+            # Stochastic binary rewards: sample noise, pick winner, w_H/w_L payoffs
+            # Matches 2-player env reward structure for consistent gradient signals
+            eps = self._rng.uniform(-self.q, self.q, size=3)
+            outputs = [efforts[i] + eps[i] for i in range(3)]
+            winner = int(np.argmax(outputs))
+            payoffs = [self.w_l] * 3
+            payoffs[winner] = self.w_h
+            utilities = [payoffs[i] - costs_list[i] for i in range(3)]
+            win_probs = [0.0, 0.0, 0.0]
+            win_probs[winner] = 1.0
+        else:
+            p1, p2, p3 = self._win_probs(efforts[0], efforts[1], efforts[2])
+            win_probs = [p1, p2, p3]
+            utilities = [self.w_l + win_probs[i] * (self.w_h - self.w_l) - costs_list[i]
+                         for i in range(3)]
 
         obs = (torch.tensor([0.0]), torch.tensor([0.0]), torch.tensor([0.0]))
         rewards = torch.tensor(utilities, dtype=torch.float32)
-        costs_t = torch.tensor(costs, dtype=torch.float32)
+        costs_t = torch.tensor(costs_list, dtype=torch.float32)
         done = True
         info: Dict[str, Any] = {
             "efforts": tuple(efforts),

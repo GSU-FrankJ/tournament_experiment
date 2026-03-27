@@ -649,7 +649,7 @@ def run_ppo(
         epochs=int(cfg.get("update_epochs", 6)),
         minibatch_size=int(cfg.get("minibatch_size", 1024)),
         state_dim=3,  # [q_norm, k_norm, wgap_norm]
-        hidden=128,
+        hidden=int(cfg.get("hidden_size", 128)),
         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
         lr=float(cfg.get("lr_start", 3e-4)),
         clip_eps=float(cfg.get("clip_range_start", 0.50)),
@@ -675,6 +675,7 @@ def run_ppo(
         opponent_ema_tau=float(cfg.get("opponent_ema_tau", 0.05)),
         opponent_snapshot_keep=int(cfg.get("opponent_snapshot_keep", 10)),
         opponent_history_sample_p=float(cfg.get("opponent_history_sample_p", 0.0)),
+        normalize_advantages=bool(cfg.get("normalize_advantages", True)),
     )
     
     agent = PPOThreePlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
@@ -759,7 +760,10 @@ def run_ppo(
         q=q_init,
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
+        use_binary_rewards=bool(cfg.get("use_binary_rewards", False)),
     )
+    if cfg.get("use_binary_rewards", False):
+        print("[env] Binary rewards enabled: stochastic winner, w_H/w_L payoffs", flush=True)
     
     # Convergence history for plotting
     convergence_history: Dict[str, Any] = {
@@ -888,6 +892,12 @@ def run_ppo(
         # PPO update
         metrics = agent.update(br_target=br_target)
         last_update_metrics = metrics
+
+        # Reset Adam state if requested (clears crash-polluted second moment)
+        reset_at = cfg.get("reset_adam_at")
+        if reset_at is not None and update_idx == int(reset_at):
+            agent.opt.state.clear()
+            print(f"[optimizer] Adam state reset at update {update_idx}", flush=True)
 
         # Compute policy mean effort
         test_state = agent.state_from_params(q=float(train_qs[0]), k=k, w_h=w_h, w_l=w_l)
@@ -1177,6 +1187,17 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["gae_lambda"] = 1.0
         cfg["gamma"] = 1.0
 
+    # --mean-conc-param: switch to mean+conc network architecture only, keep all other hyperparams
+    if hasattr(args, 'mean_conc_param') and args.mean_conc_param and not args.theory_align_v2:
+        cfg["theory_align_v2"] = True
+        cfg["theory_align_v2_conc_min"] = 1.0
+        cfg["theory_align_v2_conc_scale"] = 1.0
+        cfg["theory_align_v2_conc_max"] = None
+        cfg["theory_align_v2_var_coef"] = 0.0
+        cfg["theory_align_v2_br_coef"] = 0.0
+        print("[config] --mean-conc-param: using ActorCriticMeanConc with zero regularization, "
+              "all other hyperparams unchanged", flush=True)
+
     # Re-apply explicit CLI entropy override (takes priority over mode defaults)
     if hasattr(args, 'override_entropy_end') and args.override_entropy_end is not None:
         cfg["entropy_coef_end"] = float(args.override_entropy_end)
@@ -1194,6 +1215,37 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["entropy_coef_hold"] = 0.0
         cfg["entropy_coef_end"] = 0.0
         print("[ablation] --disable-entropy: entropy_coef=0 throughout training", flush=True)
+
+    # --override-entropy-start: override start/hold while keeping end unchanged
+    if hasattr(args, 'override_entropy_start') and args.override_entropy_start is not None:
+        cfg["entropy_coef_start"] = float(args.override_entropy_start)
+        cfg["entropy_coef_hold"] = float(args.override_entropy_start)
+        print(f"[config] entropy_coef_start/hold overridden to {args.override_entropy_start}, "
+              f"entropy_coef_end={cfg.get('entropy_coef_end', 0.005)}", flush=True)
+
+    # --disable-adv-norm: skip advantage normalization
+    if hasattr(args, 'disable_adv_norm') and args.disable_adv_norm:
+        cfg["normalize_advantages"] = False
+        print("[ablation] --disable-adv-norm: advantage normalization disabled", flush=True)
+
+    # --binary-rewards: stochastic binary w_H/w_L instead of smooth analytic
+    if hasattr(args, 'binary_rewards') and args.binary_rewards:
+        cfg["use_binary_rewards"] = True
+
+    # --hidden-size: override network hidden layer size
+    if hasattr(args, 'hidden_size') and args.hidden_size is not None:
+        cfg["hidden_size"] = int(args.hidden_size)
+
+    # --reset-adam-at: reset Adam optimizer state at specified update
+    if hasattr(args, 'reset_adam_at') and args.reset_adam_at is not None:
+        cfg["reset_adam_at"] = int(args.reset_adam_at)
+        print(f"[config] Adam optimizer will be reset at update {args.reset_adam_at}", flush=True)
+
+    # --max-updates: override training budget
+    if hasattr(args, 'max_updates') and args.max_updates is not None:
+        cfg["max_updates"] = int(args.max_updates)
+        cfg["episodes"] = int(args.max_updates) * int(cfg.get("steps_per_update", 4096))
+        print(f"[config] max_updates overridden to {args.max_updates}", flush=True)
 
     # Convergence eval settings
     if "convergence" not in cfg:
@@ -1316,6 +1368,12 @@ def main():
         help="Enable theory-align-v2 (zero entropy, mean+conc head)",
     )
     parser.add_argument(
+        "--mean-conc-param",
+        action="store_true",
+        help="Use mean+conc network parameterization (decoupled from concentration) "
+             "without changing any other hyperparameters. No regularization, no entropy override.",
+    )
+    parser.add_argument(
         "--override-entropy-end",
         type=float,
         default=None,
@@ -1387,10 +1445,33 @@ def main():
         help="Set entropy_coef to 0 throughout training (mechanism ablation).",
     )
     parser.add_argument(
+        "--override-entropy-start",
+        type=float,
+        default=None,
+        help="Override entropy_coef_start and entropy_coef_hold (keeps entropy_coef_end unchanged).",
+    )
+    parser.add_argument(
+        "--disable-adv-norm",
+        action="store_true",
+        help="Disable advantage normalization in PPO updates (weak-signal experiment).",
+    )
+    parser.add_argument(
         "--ablation-name",
         type=str,
         default="baseline",
         help="Ablation variant name for output files",
+    )
+    parser.add_argument(
+        "--max-updates",
+        type=int,
+        default=None,
+        help="Override max_updates (default: from config, 1500).",
+    )
+    parser.add_argument(
+        "--reset-adam-at",
+        type=int,
+        default=None,
+        help="Reset Adam optimizer state (m and v) at this update number.",
     )
 
     # Asymmetric warmup to break symmetry
@@ -1413,6 +1494,17 @@ def main():
     )
 
     # Best-response regularization
+    parser.add_argument(
+        "--binary-rewards",
+        action="store_true",
+        help="Use stochastic binary rewards (w_H/w_L) instead of smooth analytic win probs.",
+    )
+    parser.add_argument(
+        "--hidden-size",
+        type=int,
+        default=128,
+        help="Hidden layer size for actor-critic network (default: 128, 2P uses 64).",
+    )
     parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
     parser.add_argument("--br-reg-warmup", type=int, default=None, help="Updates before BR reg kicks in")
 

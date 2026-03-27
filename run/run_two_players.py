@@ -936,7 +936,8 @@ def run_ppo(
         for g in agent.opt.param_groups:
             g["lr"] = lr_val
         lr_base_current = lr_base
-        # Determine probability of sampling lagged-opponent paths for this update
+        # lag_prob schedule (vestigial: computed and logged but never used for
+        # action selection — selfplay mode always uses the learner policy)
         if update_idx < lag_warmup_updates:
             lag_prob = 1.0
         elif update_idx < lag_warmup_updates + lag_fade_updates:

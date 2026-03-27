@@ -170,6 +170,9 @@ class PPOConfig:
     theory_align_v2_var_coef: float = 0.0
     theory_align_v2_br_coef: float = 0.0
 
+    # Advantage normalization (standard PPO practice, can disable for weak-signal experiments)
+    normalize_advantages: bool = True
+
     # Best-response regularization (disabled by default)
     br_reg_coef: float = 0.0
 
@@ -471,8 +474,9 @@ class PPOThreePlayersBandit:
         if advantages.dim() != 1 or returns.dim() != 1:
             raise RuntimeError(f"returns/advantages shapes unexpected: {advantages.shape}, {returns.shape}")
         
-        # Normalize advantages (standard PPO practice)
-        advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
+        # Normalize advantages (standard PPO practice; can be disabled via cfg)
+        if self.cfg.normalize_advantages:
+            advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
         adv_norm_std = float(advantages.std(unbiased=False).item())
 
         dataset_size = states.size(0)
