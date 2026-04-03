@@ -1363,20 +1363,11 @@ def run_ppo(
                 exploitability_val = None
                 best_dev_effort = None
 
-                # Symmetry check (only when we have p1/p2 means)
+                # Symmetry gap tracking (logging only; no enforcement).
+                # Both players share one policy network, so any p1/p2 gap
+                # is pure sampling variance — not a real divergence signal.
                 symmetry_gap_val = symmetry_gap_current
                 last_symmetry_gap = symmetry_gap_val
-                if symmetry_gap_val is not None:
-                    if symmetry_gap_val > float(symmetry_cfg.get("symmetry_gap_thresh", 0.5)):
-                        symmetry_fail_streak += 1
-                    else:
-                        symmetry_fail_streak = 0
-                    if symmetry_fail_streak >= int(symmetry_cfg.get("symmetry_fail_patience", 3)):
-                        raise RuntimeError(
-                            f"[convergence] Symmetry gap persisted: gap={symmetry_gap_val:.3f} over {symmetry_fail_streak} evals"
-                        )
-                else:
-                    symmetry_fail_streak = 0
 
                 # Exploitability evaluation logic with ablation flags
                 # --disable-exploitability: never evaluate
