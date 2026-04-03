@@ -1,7 +1,7 @@
 # Runner Refactor
 
-Status: in-progress
-Current phase: phase01
+Status: deferred
+Current phase: phase01 (not started)
 
 ## What's done
 - Task folder created with scope and constraints documented

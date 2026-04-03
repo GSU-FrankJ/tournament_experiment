@@ -1,12 +1,42 @@
 # Project state
 
-Last updated: 2026-03-27
+Last updated: 2026-03-28
 
 ## Current status
-- Paper figures/tables revision complete: 11 figures + 5 tables generated via `python -m paper.generator make_all`
-- q=35 experiments complete for all 4 scenarios (two_players, three_players, different_cost, different_ability)
-- 3p PPO convergence gap (~5 units) accepted as paper limitation — discussed as NC in final_summary
-- All tmux sessions terminated
+- **CRITICAL**: Theoretical equilibrium e*=(w_H-w_L)/(4qk) is NOT a global NE for
+  3-player at q=25,35,40 (and 2-player at q=25). See section below.
+- 3p algorithm improvement task pivoted from "fix PPO" to "fix game theory"
+- Paper figures/tables revision complete
+- q=35 experiments complete for all 4 scenarios
+
+## Critical finding: interior NE validity (2026-03-28)
+
+The interior FOC equilibrium is only a LOCAL optimum. The global best response can be
+to shirk (e≈0). The interior NE is globally valid iff:
+
+    q >= sqrt(N * w_gap / (16k))
+
+| N | q_crit | q=25 | q=35 | q=40 | q=55 |
+|---|--------|------|------|------|------|
+| 2 | 33.07  | FAIL | pass | pass | pass |
+| 3 | 40.50  | FAIL | FAIL | FAIL | pass |
+
+This explains ALL experimental anomalies:
+- 3p q=35 gap ~5: no pure-strategy symmetric NE exists, PPO finds interior local optimum
+- 3p q=55 gap ~3: NE IS valid, PPO converges (slowly) in correct direction
+- 2p q=25 gap ~3: NE invalid even for 2 players, PPO finds local optimum
+- 2p q=35,40 gap <2: NE valid, PPO converges correctly
+
+Gradient solver is misleading — it follows local gradients to the interior solution
+without checking global deviations (e→0). Exploitability eval correctly catches this.
+
+## What was done (2026-03-28)
+1. Implemented pairwise_binary, hybrid, and COMA reward modes for 3p env
+2. Ran pairwise_binary PPO (gap=11.64, worse — converges to flat exploit region)
+3. Ran hybrid ns=0.3 and bigbatch 16384 (same failure mode)
+4. Discovered via exploitability analysis that e*=62.5 is not a global NE at q=35
+5. Derived participation constraint: q >= sqrt(N*w_gap/(16k))
+6. Verified: 3p NE only valid at q=55, 2p NE fails at q=25
 
 ## What was done (2026-03-27, session 2)
 1. Generated missing gradient baseline for q=35 wh8_wl4 (w_H=8, w_L=4, e*=71.43, gap=0.17)
@@ -31,9 +61,10 @@ Last updated: 2026-03-27
 ### q=35 3p diagnostic (phase 03 — closed)
 - Tested 11 variants (entropy, adv norm, network arch, optimizer reset, 5000 updates)
 - All failed: gap remains ~5 units from equilibrium
-- Root cause: 3-player rank-order reward produces structurally weaker gradient signal than 2-player
-- Gradient descent converges perfectly (gap=0.12), confirming theory is correct
-- Decision: accept as limitation
+- Original hypothesis: weaker gradient signal → gap ~5 (wrong)
+- Actual root cause (found 2026-03-28): interior NE is not globally valid at q=35
+- Gradient descent finds local optimum but misses global deviation to e≈0
+- Decision: needs theory correction (see critical finding above)
 
 ## Data inventory
 - two_players: baseline + wh8_wl4 + ablations + sweeps (~115 convergence JSONs)
@@ -57,11 +88,16 @@ Last updated: 2026-03-27
 | q35-all-experiments | closed | 3p limitation accepted |
 | perfect-exploitability-figure | closed | decisions resolved, work transferred |
 | diagnose-all-experiments | complete | — |
-| runner-refactor | in-progress (phase01) | low priority, duplication audit pending |
-| 3p-algorithm-improvement | not-started | proposals documented, pending implementation |
+| runner-refactor | deferred | post-project cleanup, user will revisit later |
+| 3p-algorithm-improvement | blocked | Interior NE invalid at q=25,35,40; need theory fix or parameter change |
 
 ## Next steps
-- 3p algorithm improvement: implement pairwise advantage decomposition (Proposal 1 in `docs/tasks/3p-algorithm-improvement/PROPOSALS.md`)
+- **Decide paper strategy for 3-player**:
+  (a) Restrict 3p results to q≥55 (only valid NE),
+  (b) Change game parameters so NE is valid at lower q (reduce k or w_gap),
+  (c) Characterize mixed-strategy equilibrium for q < q_crit
+- Derive participation constraint formally for the paper's theory section
+- Verify 3p q=55 convergence with more episodes (current gap ~3.3)
 - Runner refactor phase 01: audit duplication across the 4 runners
 - Add basic tests for theory.py, prob.py, paper generator
 - Consider git filter-repo to remove large files from history (~85 MB .git)
