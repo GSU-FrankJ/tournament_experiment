@@ -1,0 +1,12 @@
+{
+  "run_id": "20260401_192617",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 456,
+  "ablation_name": "no_theory_align",
+  "git_sha": "9cd12d590b3d",
+  "cmdline": "run/run_two_players.py --method ppo --q 55 --seed 456 --episodes 6144000 --no-theory-align-v2 --ablation-name no_theory_align",
+  "timestamp": "2026-04-02T04:09:37.980758",
+  "convergence_file": "ppo_q55.0_seed456_no_theory_align_convergence.json",
+  "variant_name": "baseline"
+}
