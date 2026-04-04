@@ -1,7 +1,7 @@
 # q=35 all experiments
 
-Status: closed (3p limitation accepted)
-Current phase: complete
+Status: in-progress
+Current phase: phase05 (2p ablations — not started)
 
 ## What's done
 
@@ -109,11 +109,12 @@ Conclusion: reducing gradient steps per update **worsened** convergence (gap 6.1
 
 ## What's running now
 
-Nothing (all tmux sessions terminated 2026-03-27).
+Nothing.
 
 ## What's next
 
-Task closed. 3p limitation accepted for paper.
+- **phase05**: Run 2p q=35 ablation experiments (no_cheap_gate + no_exploitability, 3 seeds each)
+  to fill the missing green/orange lines in `ablation_comparison.png`. See `phase05-2p-ablations.md`.
 
 ## Blockers
 

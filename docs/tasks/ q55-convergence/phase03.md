@@ -1,34 +1,35 @@
-# Phase 03: Simple Adaptive Entropy (conditional)
+# Phase 03: Cross-q Validation (q=35, q=40 regression check)
 
 ## Precondition
-Only execute if Phase 02 shows q=35/40 regress under fixed high entropy, meaning different q values need different entropy levels.
+Phase 02 confirms standard mode + entropy_end=0.002 is stable across seeds for q=55.
 
 ## Objective
-Implement minimal SAC-style adaptive entropy: a single learnable log_α that tracks a fixed target entropy H_target.
+Verify that standard mode (no theory_align_v2) does not regress q=35 and q=40 convergence.
+All prior q=35/40 baselines used theory_align_v2 — we have no data for standard mode.
 
-## Design
-```python
-# Once per rollout (after collecting batch, before PPO epochs):
-H_batch = mean(entropy_of_beta(alpha, beta))
-log_alpha += eta_alpha * (H_target - H_batch)
-log_alpha = clip(log_alpha, log_alpha_min, log_alpha_max)
-entropy_coef = exp(log_alpha)
-# Freeze entropy_coef for all PPO epochs in this update
+## Experiments
+Run q=35 and q=40 with the same config that works for q=55:
+- `--no-theory-align-v2 --override-entropy-end 0.002`
+- seed=42 for quick validation, then 5 seeds if it looks good
+
+```bash
+for Q in 35 40; do
+  tmux new-session -d -s q${Q}_std_test \
+    "CUDA_VISIBLE_DEVICES=X python run/run_two_players.py --method ppo --q ${Q} --seed 42 \
+     --episodes 131072 --no-theory-align-v2 \
+     --override-entropy-end 0.002 \
+     --ablation-name no_tv2_ent002 \
+     2>&1 | tee logs/q${Q}_seed42_no_tv2_ent002.log"
+done
 ```
 
-## Key parameters
-| Parameter | Initial value | Source |
-|-----------|--------------|--------|
-| H_target | TBD | Entropy at q=35 mid-transport |
-| eta_alpha | 0.01 | Conservative; tune if too slow |
-| log_alpha_min | -5 | entropy_coef ≈ 0.007 |
-| log_alpha_max | 0 | entropy_coef ≈ 1.0 |
+## Success criteria
+- q=35 and q=40 converge with gap < 2 (comparable to theory_align_v2 baseline)
+- Convergence speed within 2x of baseline
 
-## Files to modify
-- `agents/ppo_two_players_clean.py` — add log_alpha state, adaptive update method
-- `run/run_two_players.py` — call adaptive update, log entropy_coef trajectory
-
-## Verification
-- q=55 seed=42 converges
-- q=35, q=40 seed=42 still converge
-- entropy_coef trajectory: high during transport, decays during contraction
+## Interpretation
+| Result | Next step |
+|--------|-----------|
+| q=35/40 unaffected | Standard mode is a universal fix — Phase 04 unnecessary |
+| q=35/40 slower but converge | Acceptable; document tradeoff |
+| q=35/40 fail | Different q values need different config → Phase 04 (adaptive entropy) |

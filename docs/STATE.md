@@ -85,13 +85,33 @@ without checking global deviations (e→0). Exploitability eval correctly catche
 | Task | Status | Notes |
 |------|--------|-------|
 | paper-figures-tables-revision | complete | 11 phases done, all figures/tables regenerated, q=35 wh8_wl4 panel filled |
-| q35-all-experiments | closed | 3p limitation accepted |
+| q35-all-experiments | in-progress | phase05: 2p ablations missing for ablation_comparison figure |
 | perfect-exploitability-figure | closed | decisions resolved, work transferred |
 | diagnose-all-experiments | complete | — |
 | runner-refactor | deferred | post-project cleanup, user will revisit later |
 | 3p-algorithm-improvement | blocked | Interior NE invalid at q=25,35,40; need theory fix or parameter change |
+| q55-convergence | in-progress | Standard ActorCritic + entropy fixes 2p q=55 (6/6 seeds). See below. |
+
+## q=55 convergence update (2026-04-03)
+**Root cause**: theory_align_v2 (default PPO mode) zeros entropy and uses MeanConc with
+conc_max=100000. Concentration grows unchecked, pairwise signal dies before convergence.
+
+**Solution**: Split configuration by q value:
+- q=35, q=40: **theory_align_v2** (default) — converges well, gap 0-2
+- q=55: **standard mode** (`--no-theory-align-v2 --override-entropy-end 0.002`) — 6/6 seeds converge, avg gap=2.53
+
+Standard mode regresses q=35/40 (gap 6-7 vs 0-2 with tv2), so no universal config exists.
+Adaptive entropy (Phase 04) was skipped in favor of this split.
+
+**Abandoned approaches** (do NOT revisit):
+- conc_max=1000: works but is per-q manual tuning, no theoretical basis
+- theory_align_v2 + entropy restored: MeanConc conc_head overwhelms entropy, stuck at gap=17
+- Standard mode for all q values: regresses q=35/40 precision
+
+See `docs/tasks/ q55-convergence/STATE.md` for full details.
 
 ## Next steps
+- **q55-convergence Phase 02-03**: finish multi-seed validation, cross-q regression check
 - **Decide paper strategy for 3-player**:
   (a) Restrict 3p results to q≥55 (only valid NE),
   (b) Change game parameters so NE is valid at lower q (reduce k or w_gap),
