@@ -736,14 +736,14 @@ def plot_beta_evolution(
     """
     setup_matplotlib_style()
     ensure_output_dirs()
-    
+
     if df is None:
         df = load_all_convergence_data()
     if q_values is None:
         q_values = Q_VALUES
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "beta_evolution.png")
-    
+
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
@@ -752,41 +752,96 @@ def plot_beta_evolution(
         print("[plots] Warning: No alpha/beta data available")
         return None, None
 
+    x_formatter = ticker.FuncFormatter(
+        lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
+        else f"{x/1e3:.0f}k" if x >= 1e3
+        else f"{x:.0f}"
+    )
+
+    param_info = [
+        ("alpha_mean", r"$\alpha$", "#1f77b4"),
+        ("beta_mean", r"$\beta$", "#ff7f0e"),
+    ]
+
     fig, axes = plt.subplots(2, len(q_values), figsize=(12, 6))
     if len(q_values) == 1:
         axes = axes.reshape(2, 1)
-    
+
+    # Collect y-ranges per row for unified axes
+    y_ranges = [[float("inf"), float("-inf")] for _ in range(2)]
+
     for col_idx, q in enumerate(q_values):
-        q_df = df[df["q"] == q].sort_values("step")
-        
+        q_df = df[df["q"] == q]
+
         if q_df.empty:
             axes[0, col_idx].set_title(f"{format_q(q)} (no data)")
             continue
 
-        valid = q_df[~q_df["alpha_mean"].isna()]
+        seeds = sorted(q_df["seed"].unique())
+        has_multi = len(seeds) > 1
 
-        # Top: alpha
-        axes[0, col_idx].plot(valid["step"], valid["alpha_mean"],
-                             color="#1f77b4", linewidth=2)
-        axes[0, col_idx].set_ylabel("Alpha")
-        axes[0, col_idx].set_title(format_q(q))
-        
-        # Bottom: beta
-        axes[1, col_idx].plot(valid["step"], valid["beta_mean"],
-                             color="#ff7f0e", linewidth=2)
-        axes[1, col_idx].set_xlabel("Training Steps")
-        axes[1, col_idx].set_ylabel("Beta")
-    
+        for row_idx, (col_name, label, color) in enumerate(param_info):
+            ax = axes[row_idx, col_idx]
+
+            if has_multi:
+                # Per-seed thin traces
+                for seed in seeds:
+                    seed_df = q_df[q_df["seed"] == seed].sort_values("step")
+                    valid = seed_df[~seed_df[col_name].isna()]
+                    ax.plot(valid["step"], valid[col_name],
+                            color=color, alpha=0.2, linewidth=0.8, zorder=1)
+
+                # Aggregate mean + 95% CI band
+                agg = aggregate_seeds(q_df)
+                mean_col = f"{col_name}_mean"
+                ci_col = f"{col_name}_ci95"
+                if mean_col in agg.columns:
+                    steps = agg["step"].values
+                    mean = agg[mean_col].values
+                    ci = agg[ci_col].values if ci_col in agg.columns else np.zeros_like(mean)
+                    ax.plot(steps, mean, color=color, linewidth=2, zorder=3)
+                    ax.fill_between(steps, mean - ci, mean + ci,
+                                    color=color, alpha=SHADE_ALPHA, zorder=2)
+                    y_ranges[row_idx][0] = min(y_ranges[row_idx][0], np.nanmin(mean - ci))
+                    y_ranges[row_idx][1] = max(y_ranges[row_idx][1], np.nanmax(mean + ci))
+            else:
+                single = q_df.sort_values("step")
+                valid = single[~single[col_name].isna()]
+                ax.plot(valid["step"], valid[col_name],
+                        color=color, linewidth=2, zorder=3)
+                y_ranges[row_idx][0] = min(y_ranges[row_idx][0], valid[col_name].min())
+                y_ranges[row_idx][1] = max(y_ranges[row_idx][1], valid[col_name].max())
+
+            ax.xaxis.set_major_formatter(x_formatter)
+
+            # Title only on top row
+            if row_idx == 0:
+                ax.set_title(format_q(q))
+            # Y-label only on leftmost column
+            if col_idx == 0:
+                ax.set_ylabel(label)
+            # X-label only on bottom row
+            if row_idx == len(param_info) - 1:
+                ax.set_xlabel("Training Steps")
+
+    # Unify y-axis per row
+    for row_idx in range(2):
+        ymin, ymax = y_ranges[row_idx]
+        if ymin < float("inf"):
+            margin = (ymax - ymin) * 0.05
+            for col_idx in range(len(q_values)):
+                axes[row_idx, col_idx].set_ylim(ymin - margin, ymax + margin)
+
     plt.tight_layout()
-    
+
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
     pdf_path = output_path.replace(".png", ".pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    
+
     if save_data:
         data_path = os.path.join(DATA_DIR, "beta_evolution.csv")
         df[["step", "method", "q", "seed", "ablation", "alpha_mean", "beta_mean"]].to_csv(data_path, index=False)
-    
+
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
 
