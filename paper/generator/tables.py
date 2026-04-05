@@ -425,8 +425,10 @@ def generate_convergence_comparison_table(
     metrics_df = summary_metrics_to_dataframe(metrics)
     
     # Pivot table: rows = q, columns = method
-    # Filter to baseline only
-    baseline_df = metrics_df[metrics_df["ablation"] == "baseline"].copy()
+    # Filter to baseline and standard q values only
+    baseline_df = metrics_df[
+        (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(Q_VALUES))
+    ].copy()
     
     # Group by method and q, average across seeds
     grouped = baseline_df.groupby(["method", "q"]).agg({
