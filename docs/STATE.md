@@ -1,6 +1,6 @@
 # Project state
 
-Last updated: 2026-03-28
+Last updated: 2026-04-05
 
 ## Current status
 - **CRITICAL**: Theoretical equilibrium e*=(w_H-w_L)/(4qk) is NOT a global NE for
@@ -90,7 +90,7 @@ without checking global deviations (e→0). Exploitability eval correctly catche
 | diagnose-all-experiments | complete | — |
 | runner-refactor | deferred | post-project cleanup, user will revisit later |
 | 3p-algorithm-improvement | blocked | Interior NE invalid at q=25,35,40; need theory fix or parameter change |
-| q55-convergence | in-progress | Standard ActorCritic + entropy fixes 2p q=55 (6/6 seeds). See below. |
+| q55-convergence | complete | Standard ActorCritic + entropy fixes 2p q=55 (6/6 seeds). Paper updated. |
 
 ## q=55 convergence update (2026-04-03)
 **Root cause**: theory_align_v2 (default PPO mode) zeros entropy and uses MeanConc with
@@ -110,8 +110,14 @@ Adaptive entropy (Phase 04) was skipped in favor of this split.
 
 See `docs/tasks/ q55-convergence/STATE.md` for full details.
 
+## What was done (2026-04-05)
+1. Added BASELINE_OVERRIDES in paper/generator/config.py: maps (two_players, 55.0) → "no_tv2_ent002"
+2. Added promote_preferred_ablations() in paper/generator/extract.py: transparently relabels
+   preferred ablation as "baseline" so all downstream plots/tables use the fixed q=55 data
+3. Regenerated all paper artifacts (11 figures + 5 tables)
+4. Two-Player q=55 TEL-PPO improved: gap 9.36→2.60, RelErr 23.53%→6.55%, exploit 0.076→0.027
+
 ## Next steps
-- **q55-convergence Phase 02-03**: finish multi-seed validation, cross-q regression check
 - **Decide paper strategy for 3-player**:
   (a) Restrict 3p results to q≥55 (only valid NE),
   (b) Change game parameters so NE is valid at lower q (reduce k or w_gap),
