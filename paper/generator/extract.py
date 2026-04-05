@@ -17,7 +17,10 @@ import numpy as np
 import pandas as pd
 
 from .run_registry import Run, discover_runs
-from .config import CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS, CONVERGENCE_CONFIG
+from .config import (
+    CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS,
+    CONVERGENCE_CONFIG, BASELINE_OVERRIDES,
+)
 
 
 # Column schema for convergence DataFrame
@@ -341,6 +344,34 @@ def load_multiple_runs(runs: List[Run]) -> pd.DataFrame:
     return pd.concat(dfs, ignore_index=True)
 
 
+def promote_preferred_ablations(df: pd.DataFrame) -> pd.DataFrame:
+    """Replace baseline with preferred ablation for overridden (experiment, q) combos.
+
+    For each entry in BASELINE_OVERRIDES, drops old "baseline" rows and relabels
+    the preferred ablation as "baseline" so all downstream code works transparently.
+    """
+    if df.empty or not BASELINE_OVERRIDES:
+        return df
+
+    df = df.copy()
+    for (experiment, q), preferred in BASELINE_OVERRIDES.items():
+        mask_old = (
+            (df["experiment"] == experiment)
+            & (df["q"] == q)
+            & (df["ablation"] == "baseline")
+            & (df["method"].isin(["TEL-PPO", "PPO"]))
+        )
+        mask_new = (
+            (df["experiment"] == experiment)
+            & (df["q"] == q)
+            & (df["ablation"] == preferred)
+        )
+        if mask_new.any():
+            df = df[~mask_old]
+            df.loc[mask_new, "ablation"] = "baseline"
+    return df
+
+
 def load_all_convergence_data(
     convergence_dir: str = None,
     csv_path: str = None,
@@ -369,7 +400,8 @@ def load_all_convergence_data(
         runs = [r for r in runs if r.method.upper() in methods_upper or
                 (r.method == "TEL-PPO" and "PPO" in methods_upper)]
     
-    return load_multiple_runs(runs)
+    df = load_multiple_runs(runs)
+    return promote_preferred_ablations(df)
 
 
 def add_theory_reference(df: pd.DataFrame) -> pd.DataFrame:

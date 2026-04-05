@@ -70,6 +70,22 @@ def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.0004) -> f
 Q_VALUES: List[float] = [35.0, 40.0, 55.0]
 
 
+# ==============================================================================
+# Baseline Overrides
+# ==============================================================================
+# Map (experiment, q) → ablation name that should be treated as "baseline".
+# Used when the default "baseline" runs are known to be broken and a different
+# ablation variant is the correct primary result.
+#
+# Rationale: theory_align_v2 (the default PPO mode) fails at q=55 because
+# concentration grows unchecked and kills the learning signal.  Standard mode
+# with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
+# q55-convergence/STATE.md for details.
+BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
+    ("two_players", 55.0): "no_tv2_ent002",
+}
+
+
 def format_q(q: float) -> str:
     """Format q value without .0 suffix (e.g., 35.0 -> 'q = 35')."""
     return f"q = {int(q)}" if q == int(q) else f"q = {q}"
