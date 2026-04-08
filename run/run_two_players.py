@@ -126,6 +126,29 @@ def _batch_payoffs_uniform(env: TwoPlayersEnv, e1: float, e2: float, eps1: np.nd
     return float(u1.mean()), float(u2.mean())
 
 
+def _closed_form_fd_gradients(
+    env: TwoPlayersEnv,
+    e1: float,
+    e2: float,
+    delta: float,
+) -> tuple[float, float]:
+    """Central-difference gradients using closed-form expected utility (no noise)."""
+    bounds = (env.effort_low, env.effort_high)
+    e1_plus = _clip_effort(e1 + delta, bounds)
+    e1_minus = _clip_effort(e1 - delta, bounds)
+    e2_plus = _clip_effort(e2 + delta, bounds)
+    e2_minus = _clip_effort(e2 - delta, bounds)
+
+    u1_plus = env.expected_utility(e1_plus, e2)
+    u1_minus = env.expected_utility(e1_minus, e2)
+    u2_plus = env.expected_utility(e2_plus, e1)
+    u2_minus = env.expected_utility(e2_minus, e1)
+
+    g1 = (u1_plus - u1_minus) / (e1_plus - e1_minus) if e1_plus != e1_minus else 0.0
+    g2 = (u2_plus - u2_minus) / (e2_plus - e2_minus) if e2_plus != e2_minus else 0.0
+    return float(g1), float(g2)
+
+
 def _stochastic_fd_gradients(
     env: TwoPlayersEnv,
     e1: float,
@@ -403,7 +426,7 @@ def gradient_descent_two_players(
         # Adaptive learning rate with exponential decay
         lr_current = lr * (lr_decay ** step)
         
-        g1, g2 = _stochastic_fd_gradients(env, e1, e2, delta=eps, num_samples=num_samples)
+        g1, g2 = _closed_form_fd_gradients(env, e1, e2, delta=eps)
         e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
         e2_new = _clip_effort(e2 + lr_current * g2, effort_bounds)
 

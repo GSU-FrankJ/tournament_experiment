@@ -5,25 +5,26 @@
 
 config = {
     # Core parameters
-    "k": 0.0004,
-    "k1": 0.0004,
-    "k2": 0.0004,
-    "q": 40.0,
-    "q_list": [25.0, 40.0, 55.0],
+    "k": 0.00055,
+    "k1": 0.00055,
+    "k2": 0.00055,
+    "q": 45.0,
+    "q_list": [35.0, 45.0, 55.0],
     "w_h": 6.5,
     "w_l": 3.0,
     "stage1_weight": 3.0,   # Map to w_L for standardized CSV
     "stage2_weight": 6.5,   # Map to w_H for standardized CSV
-    "effort_range": [0, 200],
+    "effort_range": [0, 100],
     "effort_bounds_stage1": [0, 100],
-    "effort_bounds_stage2": [0, 200],
+    "effort_bounds_stage2": [0, 100],
     "seed": 42,
 
     # Gradient (one-stage 2p, uniform noise)
-    "gradient_lr": 0.08,
-    "gradient_steps": 1500,
-    "gradient_delta": 0.5,
-    "gradient_tol": 1e-4,
+    "gradient_lr": 5.0,
+    "gradient_steps": 5000,
+    "gradient_delta": 0.01,
+    "gradient_lr_decay": 1.0,
+    "gradient_tol": 1e-6,
     "gradient_num_samples": 64,
     "gradient_init_perturb": 1.0,
 

@@ -15,20 +15,21 @@ config = {
     "k2": 0.00055,      # Player 2 cost parameter (higher)
     
     # === Game parameters ===
-    "w_h": 6.5,         # High prize (winner)
-    "w_l": 3.0,         # Low prize (loser)
-    "q": 40.0,          # Default noise parameter
-    "q_list": [25.0, 40.0, 55.0],  # Q values to sweep
-    "effort_range": [0, 200],
-    "effort_bounds_stage2": [0, 200],
+    "w_h": 8.0,          # High prize (winner)
+    "w_l": 5.5,          # Low prize (loser)
+    "q": 35.0,           # Default noise parameter
+    "q_list": [35.0, 55.0],  # Q values to sweep
+    "effort_range": [0, 100],
+    "effort_bounds_stage2": [0, 100],
     "seed": 42,
     "num_players": 2,
     
     # === Gradient descent parameters ===
-    "gradient_lr": 0.08,
-    "gradient_steps": 1500,
-    "gradient_delta": 0.5,
-    "gradient_tol": 1e-4,
+    "gradient_lr": 5.0,
+    "gradient_steps": 5000,
+    "gradient_delta": 0.01,
+    "gradient_lr_decay": 1.0,
+    "gradient_tol": 1e-6,
     "gradient_num_samples": 64,
     "gradient_init_perturb": 1.0,
     

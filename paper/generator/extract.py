@@ -19,7 +19,7 @@ import pandas as pd
 from .run_registry import Run, discover_runs
 from .config import (
     CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS,
-    CONVERGENCE_CONFIG, BASELINE_OVERRIDES,
+    CONVERGENCE_CONFIG, BASELINE_OVERRIDES, get_theory_params,
 )
 
 
@@ -124,7 +124,8 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
         df["theoretical_effort1"] = np.nan
         df["theoretical_effort2"] = np.nan
     else:
-        df["theoretical_effort"] = e_star(run.q, **THEORY_PARAMS)
+        params = get_theory_params(run.experiment)
+        df["theoretical_effort"] = e_star(run.q, **params)
         df["theoretical_effort1"] = np.nan
         df["theoretical_effort2"] = np.nan
 
@@ -418,9 +419,16 @@ def add_theory_reference(df: pd.DataFrame) -> pd.DataFrame:
     # Only overwrite if not already set (nested format sets per-file values)
     mask = df["theoretical_effort"].isna()
     if mask.any():
-        df.loc[mask, "theoretical_effort"] = df.loc[mask, "q"].apply(
-            lambda q: e_star(q, **THEORY_PARAMS)
-        )
+        if "experiment" in df.columns:
+            for exp, exp_mask in df.loc[mask].groupby("experiment").groups.items():
+                params = get_theory_params(exp)
+                df.loc[exp_mask, "theoretical_effort"] = df.loc[exp_mask, "q"].apply(
+                    lambda q: e_star(q, **params)
+                )
+        else:
+            df.loc[mask, "theoretical_effort"] = df.loc[mask, "q"].apply(
+                lambda q: e_star(q, **THEORY_PARAMS)
+            )
 
     return df
 
@@ -585,7 +593,9 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
         effort = grp["effort_mean"].values
         theo = grp["theoretical_effort"].dropna()
         if theo.empty:
-            e_star_val = e_star(grp["q"].iloc[0], **THEORY_PARAMS)
+            exp = grp["experiment"].iloc[0] if "experiment" in grp.columns else None
+            params = get_theory_params(exp)
+            e_star_val = e_star(grp["q"].iloc[0], **params)
         else:
             e_star_val = theo.iloc[0]
 

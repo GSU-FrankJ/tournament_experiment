@@ -4,20 +4,21 @@
 
 config = {
     # Core game parameters (identical competitors)
-    "k": 0.0004,
-    "q": 40.0,
-    "q_list": [25.0, 40.0, 55.0],
+    "k": 0.001,
+    "q": 35.0,
+    "q_list": [35.0, 55.0],
     "w_h": 6.5,
     "w_l": 3.0,
-    "effort_range": [0, 200],
+    "effort_range": [0, 100],
     "seed": 42,
     "num_players": 3,
 
     # Gradient method settings (one-stage 3-player, uniform noise)
-    "gradient_lr": 0.08,
-    "gradient_steps": 1500,
-    "gradient_delta": 0.5,
-    "gradient_tol": 1e-4,
+    "gradient_lr": 5.0,
+    "gradient_steps": 5000,
+    "gradient_delta": 0.01,
+    "gradient_lr_decay": 1.0,
+    "gradient_tol": 1e-6,
     "gradient_num_samples": 64,
     "gradient_init_perturb": 1.0,
 

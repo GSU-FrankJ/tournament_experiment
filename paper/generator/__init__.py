@@ -25,6 +25,10 @@ from .config import (
     OUTPUT_DIR,
     Q_VALUES,
     THEORY_PARAMS,
+    EXPERIMENT_Q_VALUES,
+    EXPERIMENT_THEORY_PARAMS,
+    get_q_values,
+    get_theory_params,
 )
 
 __all__ = [
@@ -33,4 +37,8 @@ __all__ = [
     "OUTPUT_DIR",
     "Q_VALUES",
     "THEORY_PARAMS",
+    "EXPERIMENT_Q_VALUES",
+    "EXPERIMENT_THEORY_PARAMS",
+    "get_q_values",
+    "get_theory_params",
 ]

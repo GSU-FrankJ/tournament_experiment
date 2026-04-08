@@ -19,6 +19,9 @@ from .config import (
     Q_VALUES,
     e_star,
     THEORY_PARAMS,
+    get_theory_params,
+    get_q_values,
+    EXPERIMENT_Q_VALUES,
     CONVERGENCE_CONFIG,
     classify_quality,
 )
@@ -305,8 +308,9 @@ def generate_final_paper_table(
         if exp_df.empty:
             continue
 
-        # Use primary q values only (exclude q=25 from main tables)
-        q_values_exp = sorted(q for q in exp_df["q"].unique() if q in Q_VALUES)
+        # Use primary q values only (per-experiment q sets)
+        exp_q_values = get_q_values(experiment)
+        q_values_exp = sorted(q for q in exp_df["q"].unique() if q in exp_q_values)
 
         for q in q_values_exp:
             q_df = exp_df[exp_df["q"] == q]
@@ -316,7 +320,8 @@ def generate_final_paper_table(
             if not ppo_baseline.empty:
                 e_theory = ppo_baseline["theoretical_effort"].iloc[0]
             else:
-                e_theory = e_star(q, **THEORY_PARAMS)
+                params = get_theory_params(experiment)
+                e_theory = e_star(q, **params)
 
             # Theory row
             rows.append({
@@ -426,8 +431,12 @@ def generate_convergence_comparison_table(
     
     # Pivot table: rows = q, columns = method
     # Filter to baseline and standard q values only
+    # Use all known q values across experiments
+    all_q = set()
+    for qv in EXPERIMENT_Q_VALUES.values():
+        all_q.update(qv)
     baseline_df = metrics_df[
-        (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(Q_VALUES))
+        (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(all_q))
     ].copy()
     
     # Group by method and q, average across seeds
@@ -498,10 +507,10 @@ def generate_environment_config_table(
     rows = [
         # Game parameters
         {"Category": "Game", "Parameter": "$w_H$ (high prize)", "Value": "6.5 / 8"},
-        {"Category": "Game", "Parameter": "$w_L$ (low prize)", "Value": "3.0 / 4"},
-        {"Category": "Game", "Parameter": "$k$ (cost coeff.)", "Value": str(THEORY_PARAMS["k"])},
-        {"Category": "Game", "Parameter": "$q$ (noise)", "Value": "\\{35, 40, 55\\}"},
-        {"Category": "Game", "Parameter": "Effort bounds", "Value": "[0, 200]"},
+        {"Category": "Game", "Parameter": "$w_L$ (low prize)", "Value": "3.0 / 4 / 5.5"},
+        {"Category": "Game", "Parameter": "$k$ (cost coeff.)", "Value": "0.00055 / 0.001 / 0.0005"},
+        {"Category": "Game", "Parameter": "$q$ (noise)", "Value": "\\{35, 45, 55\\} / \\{35, 55\\}"},
+        {"Category": "Game", "Parameter": "Effort bounds", "Value": "[0, 100]"},
         {"Category": "Game", "Parameter": "Noise distribution", "Value": "$\\varepsilon_i \\sim \\text{Uniform}[-q, q]$"},
         {"Category": "Game", "Parameter": "Number of players", "Value": "2 (baseline) / 3"},
         # Training hyperparameters
@@ -520,11 +529,11 @@ def generate_environment_config_table(
         {"Category": "Convergence", "Parameter": "Min steps", "Value": str(int(CONVERGENCE_CONFIG["min_steps"]))},
     ]
 
-    # Compute theoretical equilibrium for each q
+    # Compute theoretical equilibrium for each q (two_players Set 1)
     e_star_str = ", ".join(
         f"$e^*(q={int(q)})={e_star(q, **THEORY_PARAMS):.2f}$" for q in Q_VALUES
     )
-    rows.append({"Category": "Theory", "Parameter": "$e^* = (w_H - w_L) / (4qk)$", "Value": e_star_str})
+    rows.append({"Category": "Theory", "Parameter": "$e^* = (w_H - w_L) / (4qk)$ (Set 1)", "Value": e_star_str})
     table_df = pd.DataFrame(rows)
 
     # Save CSV

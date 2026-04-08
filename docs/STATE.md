@@ -1,129 +1,72 @@
 # Project state
 
-Last updated: 2026-04-05
+Last updated: 2026-04-08
 
 ## Current status
-- **CRITICAL**: Theoretical equilibrium e*=(w_H-w_L)/(4qk) is NOT a global NE for
-  3-player at q=25,35,40 (and 2-player at q=25). See section below.
-- 3p algorithm improvement task pivoted from "fix PPO" to "fix game theory"
-- Paper figures/tables revision complete
-- q=35 experiments complete for all 4 scenarios
+- **Parameter overhaul**: All configs updated to match `docs/experiment_config_040726.md`
+- All old results deleted — fresh experiments needed with new parameters
+- Two-stage runner deferred to separate task
+- Paper generator updated with per-experiment theory params
 
-## Critical finding: interior NE validity (2026-03-28)
+## Parameter overhaul (2026-04-08)
 
-The interior FOC equilibrium is only a LOCAL optimum. The global best response can be
-to shirk (e≈0). The interior NE is globally valid iff:
+Updated all experiment configs to new parameters that satisfy SOC and participation constraints.
 
-    q >= sqrt(N * w_gap / (16k))
+### Config changes applied
 
-| N | q_crit | q=25 | q=35 | q=40 | q=55 |
-|---|--------|------|------|------|------|
-| 2 | 33.07  | FAIL | pass | pass | pass |
-| 3 | 40.50  | FAIL | FAIL | FAIL | pass |
+| Experiment | k | (w_h, w_l) | q_list | effort_range |
+|---|---|---|---|---|
+| 2P Set 1 | 0.00055 | (6.5, 3.0) | [35, 45, 55] | [0, 100] |
+| 2P Set 2 | via CLI: --k 0.0006 --w_h 8 --w_l 4 | (8, 4) | [35, 45, 55] | [0, 100] |
+| 3P | 0.001 | (6.5, 3.0) | [35, 55] | [0, 100] |
+| Diff Cost | k1=0.0004, k2=0.00055 | (8, 5.5) | [35, 55] | [0, 100] |
+| Diff Ability | 0.0005 | (6.5, 3.0) | [35, 55] | [0, 100] |
+| Two Stage | 0.0004 | (6.5, 3.0) | [25, 40, 55] | stage1=[0,100], stage2=[0,100] |
 
-This explains ALL experimental anomalies:
-- 3p q=35 gap ~5: no pure-strategy symmetric NE exists, PPO finds interior local optimum
-- 3p q=55 gap ~3: NE IS valid, PPO converges (slowly) in correct direction
-- 2p q=25 gap ~3: NE invalid even for 2 players, PPO finds local optimum
-- 2p q=35,40 gap <2: NE valid, PPO converges correctly
+### Theoretical equilibria (verified)
 
-Gradient solver is misleading — it follows local gradients to the interior solution
-without checking global deviations (e→0). Exploitability eval correctly catches this.
+| Experiment | q=35 | q=45 | q=55 |
+|---|---|---|---|
+| 2P Set 1 | 45.45 | 35.35 | 28.93 |
+| 2P Set 2 | 47.62 | 37.04 | 30.30 |
+| 3P | 25.00 | — | 15.91 |
+| Diff Cost | e1=38.03, e2=27.66 | — | e1=26.54, e2=19.30 |
+| Diff Ability | 46.43 | — | 30.37 |
 
-## What was done (2026-03-28)
-1. Implemented pairwise_binary, hybrid, and COMA reward modes for 3p env
-2. Ran pairwise_binary PPO (gap=11.64, worse — converges to flat exploit region)
-3. Ran hybrid ns=0.3 and bigbatch 16384 (same failure mode)
-4. Discovered via exploitability analysis that e*=62.5 is not a global NE at q=35
-5. Derived participation constraint: q >= sqrt(N*w_gap/(16k))
-6. Verified: 3p NE only valid at q=55, 2p NE fails at q=25
+### Files modified
+- `config/one_stage_two_players.py` — k, q, q_list, effort_range
+- `config/one_stage_three_players.py` — k, q, q_list, effort_range
+- `config/one_stage_different_cost.py` — w_h, w_l, q, q_list, effort_range
+- `config/one_stage_different_ability.py` — k, q, q_list, effort_range
+- `config/two_stage_two_players.py` — effort_bounds_stage2
+- `paper/generator/config.py` — per-experiment THEORY_PARAMS, Q_VALUES, updated e_star defaults
+- `paper/generator/extract.py` — per-experiment theory param lookup
+- `paper/generator/metrics.py` — per-experiment theory param lookup
+- `paper/generator/tables.py` — per-experiment q_values and theory params
+- `paper/generator/__init__.py` — export new symbols
 
-## What was done (2026-03-27, session 2)
-1. Generated missing gradient baseline for q=35 wh8_wl4 (w_H=8, w_L=4, e*=71.43, gap=0.17)
-2. Regenerated baseline gradient for q=35 (w_H=6.5, w_L=3.0, e*=62.5, gap=0.15) — required 50k steps
-3. Regenerated convergence_main figure — all 6 panels now populated
-4. Closed q35-all-experiments task (3p limitation accepted)
-5. Created 3p-algorithm-improvement task with full problem diagnosis and 6 proposals
-6. Killed running tmux session (3p_5000upd_v2)
+### Results deleted
+- All convergence JSONs, logs, and summary CSVs from previous parameter runs
 
-## What was done (2026-03-27, session 1)
+## Previous critical finding: interior NE validity (2026-03-28)
 
-### Paper figures & tables revision (phases 03–11)
-1. **Phase 03**: Effort drift — SHADE_ALPHA, thicker threshold, standardized legend
-2. **Phase 04**: KL dynamics — SHADE_ALPHA, "Reference threshold" label
-3. **Phase 05**: Distance to equilibrium — new title, y-axis label, q=35 color
-4. **Phase 06**: Beta snapshots/evolution — auto-select best seed (42), lighter shading
-5. **Phase 07**: Exploitability 6a — renamed labels; new Figure 6b for q=25
-6. **Phase 08**: Ablation — ABLATION_LABELS/LINEWIDTHS, prominent Theory line, unified y-axis
-7. **Phase 09**: Dotplot — alternating backgrounds, smaller per-seed dots, renamed labels
-8. **Phase 10–11**: Tables — q=25 excluded, q=35 included, data loader fix for make_all
-
-### q=35 3p diagnostic (phase 03 — closed)
-- Tested 11 variants (entropy, adv norm, network arch, optimizer reset, 5000 updates)
-- All failed: gap remains ~5 units from equilibrium
-- Original hypothesis: weaker gradient signal → gap ~5 (wrong)
-- Actual root cause (found 2026-03-28): interior NE is not globally valid at q=35
-- Gradient descent finds local optimum but misses global deviation to e≈0
-- Decision: needs theory correction (see critical finding above)
-
-## Data inventory
-- two_players: baseline + wh8_wl4 + ablations + sweeps (~115 convergence JSONs)
-- three_players: baseline (5 seeds) + gradient + 11 diagnostic variants for q=35
-- different_cost: baseline (5 seeds per q) + gradient
-- different_ability: baseline (5 seeds per q) + gradient
-
-## Known tech debt
-- Runner files (run/run_*.py) have ~60% code duplication — extract shared base (task: `docs/tasks/runner-refactor/`)
-- No tests exist for any module
-- No CI/CD pipeline
-- summary.csv in results/two_players/ has a parsing issue (line 14 has 46 fields, expected 39)
-- Vestigial opponent lag code in agents/ppo_two_players_clean.py (deepcopy, sync logic, act_opponent — all unused)
-- q=35 baseline gradient solver needs 50k steps (MC gradient noisy for low-q; existing q=40/55 files were generated with different params)
+Still relevant. The new parameters were chosen to satisfy the participation constraint:
+- q_crit(2P, k=0.00055) = sqrt(2*3.5/(16*0.00055)) = 28.2 → q=35 passes
+- q_crit(3P, k=0.001) = sqrt(3*3.5/(16*0.001)) = 25.6 → q=35 passes
+- All experiments now use q >= 35, satisfying both SOC and participation constraint
 
 ## Task status
 
 | Task | Status | Notes |
 |------|--------|-------|
-| paper-figures-tables-revision | complete | 11 phases done, all figures/tables regenerated, q=35 wh8_wl4 panel filled |
-| q35-all-experiments | in-progress | phase05: 2p ablations missing for ablation_comparison figure |
-| perfect-exploitability-figure | closed | decisions resolved, work transferred |
-| diagnose-all-experiments | complete | — |
-| runner-refactor | deferred | post-project cleanup, user will revisit later |
-| 3p-algorithm-improvement | blocked | Interior NE invalid at q=25,35,40; need theory fix or parameter change |
-| q55-convergence | complete | Standard ActorCritic + entropy fixes 2p q=55 (6/6 seeds). Paper updated. |
-
-## q=55 convergence update (2026-04-03)
-**Root cause**: theory_align_v2 (default PPO mode) zeros entropy and uses MeanConc with
-conc_max=100000. Concentration grows unchecked, pairwise signal dies before convergence.
-
-**Solution**: Split configuration by q value:
-- q=35, q=40: **theory_align_v2** (default) — converges well, gap 0-2
-- q=55: **standard mode** (`--no-theory-align-v2 --override-entropy-end 0.002`) — 6/6 seeds converge, avg gap=2.53
-
-Standard mode regresses q=35/40 (gap 6-7 vs 0-2 with tv2), so no universal config exists.
-Adaptive entropy (Phase 04) was skipped in favor of this split.
-
-**Abandoned approaches** (do NOT revisit):
-- conc_max=1000: works but is per-q manual tuning, no theoretical basis
-- theory_align_v2 + entropy restored: MeanConc conc_head overwhelms entropy, stuck at gap=17
-- Standard mode for all q values: regresses q=35/40 precision
-
-See `docs/tasks/ q55-convergence/STATE.md` for full details.
-
-## What was done (2026-04-05)
-1. Added BASELINE_OVERRIDES in paper/generator/config.py: maps (two_players, 55.0) → "no_tv2_ent002"
-2. Added promote_preferred_ablations() in paper/generator/extract.py: transparently relabels
-   preferred ablation as "baseline" so all downstream plots/tables use the fixed q=55 data
-3. Regenerated all paper artifacts (11 figures + 5 tables)
-4. Two-Player q=55 TEL-PPO improved: gap 9.36→2.60, RelErr 23.53%→6.55%, exploit 0.076→0.027
+| parameter-overhaul | **complete** | All configs match experiment_config_040726.md |
+| two-stage-runner | deferred | Config and env exist, runner needs to be built |
+| paper-figures-tables-revision | stale | Needs re-run after new experiment data |
+| runner-refactor | deferred | Post-project cleanup |
 
 ## Next steps
-- **Decide paper strategy for 3-player**:
-  (a) Restrict 3p results to q≥55 (only valid NE),
-  (b) Change game parameters so NE is valid at lower q (reduce k or w_gap),
-  (c) Characterize mixed-strategy equilibrium for q < q_crit
-- Derive participation constraint formally for the paper's theory section
-- Verify 3p q=55 convergence with more episodes (current gap ~3.3)
-- Runner refactor phase 01: audit duplication across the 4 runners
-- Add basic tests for theory.py, prob.py, paper generator
-- Consider git filter-repo to remove large files from history (~85 MB .git)
+1. Run gradient baselines for all experiment types with new parameters
+2. Run PPO experiments (5 seeds each) for all q values
+3. Two-player Set 2 via CLI flags: `--k 0.0006 --w_h 8 --w_l 4`
+4. Regenerate paper artifacts after results are collected
+5. Build two-stage runner (separate task)

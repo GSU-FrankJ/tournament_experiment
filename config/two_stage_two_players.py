@@ -16,9 +16,9 @@ config = {
     "q_list": [25.0, 40.0, 55.0],
     "w_h": 6.5,         # High prize
     "w_l": 3.0,         # Low prize
-    "effort_range": [0, 200],
+    "effort_range": [0, 100],
     "effort_bounds_stage1": [0, 100],
-    "effort_bounds_stage2": [0, 200],
+    "effort_bounds_stage2": [0, 100],
     "seed": 42,
     "num_players": 2,
 

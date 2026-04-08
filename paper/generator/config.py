@@ -53,21 +53,52 @@ DATA_DIR = os.path.join(OUTPUT_DIR, "data")
 # Theory Parameters
 # ==============================================================================
 
-# Game parameters (tournament model)
+# Default theory parameters (two_players Set 1 — most common experiment type)
 THEORY_PARAMS: Dict[str, float] = {
-    "w_h": 6.5,      # High prize
-    "w_l": 3.0,      # Low prize
-    "k": 0.0004,     # Cost coefficient
+    "w_h": 6.5,       # High prize
+    "w_l": 3.0,       # Low prize
+    "k": 0.00055,     # Cost coefficient
 }
 
+# Per-experiment theory parameters (experiment_config_040726.md)
+EXPERIMENT_THEORY_PARAMS: Dict[str, Dict[str, float]] = {
+    "two_players": {"w_h": 6.5, "w_l": 3.0, "k": 0.00055},
+    "three_players": {"w_h": 6.5, "w_l": 3.0, "k": 0.001},
+    "different_cost": {"w_h": 8.0, "w_l": 5.5, "k1": 0.0004, "k2": 0.00055},
+    "different_ability": {"w_h": 6.5, "w_l": 3.0, "k": 0.0005},
+}
+
+
+def get_theory_params(experiment: str = None) -> Dict[str, float]:
+    """Get theory parameters for an experiment type, or default."""
+    if experiment and experiment in EXPERIMENT_THEORY_PARAMS:
+        return EXPERIMENT_THEORY_PARAMS[experiment]
+    return THEORY_PARAMS
+
+
 # Theoretical equilibrium effort formula: e* = (w_H - w_L) / (4 * q * k)
-def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.0004) -> float:
+def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.00055) -> float:
     """Compute theoretical equilibrium effort for noise parameter q."""
     return (w_h - w_l) / (4.0 * q * k)
 
 
-# Standard q values for experiments
-Q_VALUES: List[float] = [35.0, 40.0, 55.0]
+# Default q values (two_players)
+Q_VALUES: List[float] = [35.0, 45.0, 55.0]
+
+# Per-experiment q values (experiment_config_040726.md)
+EXPERIMENT_Q_VALUES: Dict[str, List[float]] = {
+    "two_players": [35.0, 45.0, 55.0],
+    "three_players": [35.0, 55.0],
+    "different_cost": [35.0, 55.0],
+    "different_ability": [35.0, 55.0],
+}
+
+
+def get_q_values(experiment: str = None) -> List[float]:
+    """Get q values for an experiment type, or default."""
+    if experiment and experiment in EXPERIMENT_Q_VALUES:
+        return EXPERIMENT_Q_VALUES[experiment]
+    return Q_VALUES
 
 
 # ==============================================================================
@@ -82,7 +113,7 @@ Q_VALUES: List[float] = [35.0, 40.0, 55.0]
 # with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
 # q55-convergence/STATE.md for details.
 BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
-    ("two_players", 55.0): "no_tv2_ent002",
+    # Cleared: old overrides were for previous parameter set (k=0.0004)
 }
 
 
@@ -224,8 +255,8 @@ AGENT_MARKERS: Dict[str, str] = {
 
 # Weight-variant labels for convergence figure rows (include k value)
 WEIGHT_VARIANT_LABELS: Dict[str, str] = {
-    "baseline": r"$w_H=6.5,\; w_L=3.0,\; k=0.0004$",
-    "wh8_wl4": r"$w_H=8,\; w_L=4,\; k=0.0004$",
+    "baseline": r"$w_H=6.5,\; w_L=3.0,\; k=0.00055$",
+    "wh8_wl4": r"$w_H=8,\; w_L=4,\; k=0.0006$",
 }
 
 # DPI for raster output

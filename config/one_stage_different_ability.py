@@ -7,7 +7,7 @@
 #   e* = ((2q - (l1 - l2)) * (w_H - w_L)) / (8kq²)
 #   Both players exert the same effort; player 1 wins more often due to ability.
 # 
-# Default parameters: l1=10, l2=5, k=0.0004, w_h=6.5, w_l=3.0
+# Default parameters: l1=10, l2=5, k=0.0005, w_h=6.5, w_l=3.0
 
 from __future__ import annotations
 
@@ -23,17 +23,17 @@ config = {
     "l2": DEFAULT_L2,   # Player 2 ability parameter (lower)
     
     # === Cost parameters (equal for both players) ===
-    "k": 0.0004,        # Cost coefficient
-    "k1": 0.0004,       # Player 1 cost (= k)
-    "k2": 0.0004,       # Player 2 cost (= k)
+    "k": 0.0005,         # Cost coefficient
+    "k1": 0.0005,        # Player 1 cost (= k)
+    "k2": 0.0005,        # Player 2 cost (= k)
     
     # === Game parameters ===
     "w_h": 6.5,         # High prize (winner)
     "w_l": 3.0,         # Low prize (loser)
-    "q": 40.0,          # Default noise parameter
-    "q_list": [25.0, 40.0, 55.0],  # Q values to sweep
-    "effort_range": [0, 200],
-    "effort_bounds_stage2": [0, 200],
+    "q": 35.0,           # Default noise parameter
+    "q_list": [35.0, 55.0],  # Q values to sweep
+    "effort_range": [0, 100],
+    "effort_bounds_stage2": [0, 100],
     "seed": 42,
     "num_players": 2,
     
@@ -41,8 +41,9 @@ config = {
     # Note: Higher learning rate (5.0) needed for fast convergence
     "gradient_lr": 5.0,
     "gradient_steps": 5000,
-    "gradient_delta": 0.5,
-    "gradient_tol": 1e-4,
+    "gradient_delta": 0.01,
+    "gradient_lr_decay": 1.0,
+    "gradient_tol": 1e-6,
     "gradient_num_samples": 64,
     "gradient_init_perturb": 1.0,
     
