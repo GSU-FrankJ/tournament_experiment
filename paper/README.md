@@ -46,7 +46,7 @@ python -m paper.generator table convergence_comparison
 | `--runs-dir` | scan all `results/*/convergence/` | Path to convergence directory |
 | `--csv` | `results/two_players/summary.csv` | Path to results CSV |
 | `--out-dir` | `paper/` | Output directory |
-| `--q` | `25,40,55` | Comma-separated q values |
+| `--q` | per-experiment (e.g. `35,45,55`) | Comma-separated q values |
 | `--dry-run` | — | List discovered runs without generating |
 
 ## Dependencies & Contracts
@@ -67,7 +67,7 @@ python -m paper.generator table convergence_comparison
 |--------|---------|
 | `generator/__main__.py` | CLI entry point (argparse dispatcher) |
 | `generator/__init__.py` | Package init, exports `RESULTS_DIR`, `OUTPUT_DIR`, `Q_VALUES`, `THEORY_PARAMS` |
-| `generator/config.py` | Paths, theory params (`w_h=6.5, w_l=3.0, k=0.0004`), plot styles, quality thresholds |
+| `generator/config.py` | Paths, per-experiment theory params (`EXPERIMENT_THEORY_PARAMS`), plot styles, quality thresholds |
 | `generator/extract.py` | Data loading — JSON→DataFrame, multi-run aggregation, seed aggregation, forward-fill |
 | `generator/metrics.py` | Convergence detection, cheap-gate stats, summary metrics computation |
 | `generator/plots.py` | All figure generation (matplotlib, publication style, PNG+PDF output) |

@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Game-theory research project (TEL-PPO paper): PPO agents learn Nash equilibrium effort in tournament games. Python 3.8+ / PyTorch. Theory: `e*(q) = (w_H - w_L) / (4qk)`, defaults: w_H=6.5, w_L=3.0, k=0.0004, q∈{25,40,55}.
+Game-theory research project (TEL-PPO paper): PPO agents learn Nash equilibrium effort in tournament games. Python 3.8+ / PyTorch. Theory: `e*(q) = (w_H - w_L) / (4qk)`. Parameters vary by experiment (see `docs/experiment_config_040726.md`):
+- 2P Set 1: k=0.00055, w_H=6.5, w_L=3.0, q∈{35,45,55}
+- 2P Set 2: k=0.0006, w_H=8, w_L=4, q∈{35,45,55} (via CLI flags)
+- 3P: k=0.001, w_H=6.5, w_L=3.0, q∈{35,55}
+- Different Cost: k1=0.0004, k2=0.00055, w_H=8, w_L=5.5, q∈{35,55}
+- Different Ability: k=0.0005, l1=10, l2=5, w_H=6.5, w_L=3.0, q∈{35,55}
 
-4 experiment types: `two_players`, `three_players`, `different_cost`, `different_ability`.
+5 experiment types: `two_players`, `three_players`, `different_cost`, `different_ability`, `two_stage` (runner deferred).
 
 Pipeline: `results/*/convergence/*.json` → `paper/generator/` → `paper/{figures,tables,data}/`
 
@@ -15,12 +20,13 @@ Pipeline: `results/*/convergence/*.json` → `paper/generator/` → `paper/{figu
 ```bash
 pip install -r requirements.txt
 
-# Run experiments
-python run/run_two_players.py --method ppo --q 25 --episodes 131072 --seed 42
-python run/run_two_players.py --method gradient --q 40
-python run/run_three_players.py --method ppo --q 40 --episodes 2048000 --seed 42
-python run/run_different_ability.py --method both --q 25 --episodes 131072
-python run/run_different_cost.py --method both --q 25 --episodes 131072
+# Run experiments (use config default episodes, never copy quick-run examples)
+python run/run_two_players.py --method ppo --q 35 --seed 42
+python run/run_two_players.py --method gradient --q 45
+python run/run_two_players.py --method ppo --q 35 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --seed 42  # Set 2
+python run/run_three_players.py --method ppo --q 35 --seed 42
+python run/run_different_ability.py --method both --q 35
+python run/run_different_cost.py --method both --q 35
 
 # Paper artifacts
 python -m paper.generator make_all
