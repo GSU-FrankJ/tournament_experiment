@@ -18,8 +18,8 @@ import pandas as pd
 
 from .run_registry import Run, discover_runs
 from .config import (
-    CONVERGENCE_DIR, CSV_PATH, e_star, THEORY_PARAMS, CONVERGENCE_DIRS,
-    CONVERGENCE_CONFIG, BASELINE_OVERRIDES, get_theory_params,
+    CONVERGENCE_DIR, CSV_PATH, e_star, e_star_for_experiment, THEORY_PARAMS,
+    CONVERGENCE_DIRS, CONVERGENCE_CONFIG, BASELINE_OVERRIDES, get_theory_params,
 )
 
 
@@ -421,9 +421,8 @@ def add_theory_reference(df: pd.DataFrame) -> pd.DataFrame:
     if mask.any():
         if "experiment" in df.columns:
             for exp, exp_mask in df.loc[mask].groupby("experiment").groups.items():
-                params = get_theory_params(exp)
                 df.loc[exp_mask, "theoretical_effort"] = df.loc[exp_mask, "q"].apply(
-                    lambda q: e_star(q, **params)
+                    lambda q, _exp=exp: e_star_for_experiment(q, _exp)
                 )
         else:
             df.loc[mask, "theoretical_effort"] = df.loc[mask, "q"].apply(
@@ -594,8 +593,7 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
         theo = grp["theoretical_effort"].dropna()
         if theo.empty:
             exp = grp["experiment"].iloc[0] if "experiment" in grp.columns else None
-            params = get_theory_params(exp)
-            e_star_val = e_star(grp["q"].iloc[0], **params)
+            e_star_val = e_star_for_experiment(grp["q"].iloc[0], exp) if exp else e_star(grp["q"].iloc[0])
         else:
             e_star_val = theo.iloc[0]
 

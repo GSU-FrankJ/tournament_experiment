@@ -19,6 +19,7 @@ from .config import (
     CHEAP_GATE_CONFIG,
     classify_quality,
     e_star,
+    e_star_for_experiment,
     THEORY_PARAMS,
     get_theory_params,
 )
@@ -392,8 +393,7 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
         if "theoretical_effort" in group.columns and not group["theoretical_effort"].isna().all():
             e_star_val = group["theoretical_effort"].iloc[0]
         else:
-            params = get_theory_params(experiment)
-            e_star_val = e_star(q, **params)
+            e_star_val = e_star_for_experiment(q, experiment)
         
         # Get exploitability series
         exploit_series = group["exploitability"].values

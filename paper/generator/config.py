@@ -77,9 +77,39 @@ def get_theory_params(experiment: str = None) -> Dict[str, float]:
 
 
 # Theoretical equilibrium effort formula: e* = (w_H - w_L) / (4 * q * k)
-def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.00055) -> float:
-    """Compute theoretical equilibrium effort for noise parameter q."""
+def e_star(q: float, w_h: float = 6.5, w_l: float = 3.0, k: float = 0.00055, **kwargs) -> float:
+    """Compute theoretical equilibrium effort for noise parameter q.
+
+    Extra kwargs (e.g. k1, k2) are silently ignored for compatibility
+    with per-experiment param dicts that include asymmetric cost keys.
+    """
     return (w_h - w_l) / (4.0 * q * k)
+
+
+def e_star_for_experiment(q: float, experiment: str) -> float:
+    """Compute theoretical equilibrium effort for any experiment type.
+
+    Handles symmetric (two_players, three_players), asymmetric cost
+    (different_cost), and different ability experiments.
+
+    Returns average effort for asymmetric experiments.
+    """
+    from utils.theory import (
+        e_star_two_players_asymmetric_cost,
+        e_star_two_players_different_ability,
+    )
+    params = get_theory_params(experiment)
+    if experiment == "different_cost":
+        e1, e2 = e_star_two_players_asymmetric_cost(
+            q, params["w_h"], params["w_l"], params["k1"], params["k2"]
+        )
+        return (e1 + e2) / 2.0
+    elif experiment == "different_ability":
+        return e_star_two_players_different_ability(
+            q, params["w_h"], params["w_l"], params["k"], 10.0, 5.0
+        )
+    else:
+        return e_star(q, **params)
 
 
 # Default q values (two_players)

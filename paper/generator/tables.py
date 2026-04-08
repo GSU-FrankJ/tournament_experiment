@@ -18,6 +18,7 @@ from .config import (
     TABLES_DIR,
     Q_VALUES,
     e_star,
+    e_star_for_experiment,
     THEORY_PARAMS,
     get_theory_params,
     get_q_values,
@@ -320,8 +321,7 @@ def generate_final_paper_table(
             if not ppo_baseline.empty:
                 e_theory = ppo_baseline["theoretical_effort"].iloc[0]
             else:
-                params = get_theory_params(experiment)
-                e_theory = e_star(q, **params)
+                e_theory = e_star_for_experiment(q, experiment)
 
             # Theory row
             rows.append({
