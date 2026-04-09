@@ -561,16 +561,12 @@ def run_gradient(
         os.makedirs(convergence_dir, exist_ok=True)
         
         # Save to JSON file
-        if ablation_name == "baseline":
-            convergence_file = os.path.join(
-                convergence_dir,
-                f"gradient_q{q:.1f}_convergence.json"
-            )
-        else:
-            convergence_file = os.path.join(
-                convergence_dir,
-                f"gradient_q{q:.1f}_{ablation_name}_convergence.json"
-            )
+        parts = [f"gradient_q{q:.1f}"]
+        if ablation_name not in ("baseline", "", None):
+            parts.append(ablation_name)
+        convergence_file = os.path.join(
+            convergence_dir, "_".join(parts) + "_convergence.json"
+        )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
         print(f"[gradient-2p] Saved convergence history to {convergence_file}")
@@ -1748,18 +1744,16 @@ def run_ppo(
                 },
             }
             
-            # Build filename with seed and ablation (new format)
-            # Format: ppo_q{q}_seed{seed}_{ablation}_convergence.json
-            if ablation_name == "baseline":
-                convergence_file = os.path.join(
-                    convergence_dir,
-                    f"ppo_q{q_val:.1f}_seed{seed_val}_convergence.json"
-                )
-            else:
-                convergence_file = os.path.join(
-                    convergence_dir,
-                    f"ppo_q{q_val:.1f}_seed{seed_val}_{ablation_name}_convergence.json"
-                )
+            # Build filename with seed, variant, and ablation
+            # Format: ppo_q{q}_seed{seed}[_{variant}][_{ablation}]_convergence.json
+            parts = [f"ppo_q{q_val:.1f}_seed{seed_val}"]
+            if variant_name not in ("baseline", "", None):
+                parts.append(variant_name)
+            if ablation_name not in ("baseline", "", None):
+                parts.append(ablation_name)
+            convergence_file = os.path.join(
+                convergence_dir, "_".join(parts) + "_convergence.json"
+            )
             
             with open(convergence_file, 'w') as f:
                 json.dump(convergence_data, f, indent=2)
