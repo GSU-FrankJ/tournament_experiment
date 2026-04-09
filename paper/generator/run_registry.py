@@ -34,6 +34,7 @@ class Run:
     ablation: str              # "baseline" | "no_cheap_gate" | "no_exploitability"
     path: str                  # Path to convergence JSON
     experiment: str = "two_players"        # "two_players" | "three_players" | "different_cost" | "different_ability"
+    weight_variant: str = "baseline"       # "baseline" | "wh8_wl4" (parameter set variant)
     metadata_path: Optional[str] = None    # Path to metadata JSON (may be None)
     has_time_series: bool = False          # True if new format with KL/alpha/beta
     is_legacy_format: bool = False         # True if inferred from old filename
@@ -274,24 +275,42 @@ def discover_runs(
         ablation = parsed["ablation"]
         is_legacy = parsed["is_legacy"]
         experiment = parsed.get("experiment")
-        
+        weight_variant = "baseline"
+
+        # Detect weight_variant from filename-parsed ablation
+        # Filename like ppo_q35.0_seed42_wh8_wl4_convergence.json parses ablation="wh8_wl4"
+        # This is actually a weight variant, not a code ablation
+        KNOWN_WEIGHT_VARIANTS = {"wh8_wl4"}
+        if ablation in KNOWN_WEIGHT_VARIANTS:
+            weight_variant = ablation
+            ablation = "baseline"  # The actual ablation is baseline
+
         # 1. Try metadata.json if available
         if has_metadata:
             try:
                 with open(metadata_path, 'r') as f:
                     metadata = json.load(f)
                 seed = metadata.get("seed", seed)
-                ablation = metadata.get("ablation_name", ablation)
+                # Use ablation_name from metadata only for real ablations
+                meta_ablation = metadata.get("ablation_name", "baseline")
+                if meta_ablation not in KNOWN_WEIGHT_VARIANTS:
+                    ablation = meta_ablation
+                # Read variant_name from metadata (authoritative source)
+                meta_variant = metadata.get("variant_name", "baseline")
+                if meta_variant in KNOWN_WEIGHT_VARIANTS:
+                    weight_variant = meta_variant
                 is_legacy = False  # Has metadata, not legacy
             except Exception:
                 pass
-        
+
         # 2. Try data from JSON itself (new format includes these)
         if "seed" in data:
             seed = int(data["seed"])
             is_legacy = False
         if "ablation_name" in data:
-            ablation = data["ablation_name"]
+            data_ablation = data["ablation_name"]
+            if data_ablation not in KNOWN_WEIGHT_VARIANTS:
+                ablation = data_ablation
             is_legacy = False
         
         # 3. If still legacy, try CSV fallback
@@ -326,6 +345,7 @@ def discover_runs(
             ablation=ablation,
             path=filepath,
             experiment=experiment,
+            weight_variant=weight_variant,
             metadata_path=metadata_path if has_metadata else None,
             has_time_series=has_time_series,
             is_legacy_format=is_legacy,

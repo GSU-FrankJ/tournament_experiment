@@ -96,6 +96,7 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
         "q": run.q,
         "seed": run.seed,
         "ablation": run.ablation,
+        "weight_variant": run.weight_variant,
         "experiment": run.experiment,
         # Effort series
         "agent1_effort": data.get("agent1_effort", [np.nan] * n_steps),
@@ -209,6 +210,7 @@ def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
         "q": run.q,
         "seed": run.seed,
         "ablation": run.ablation,
+        "weight_variant": run.weight_variant,
         "experiment": run.experiment,
         "agent1_effort": agent1_effort,
         "agent2_effort": agent2_effort,

@@ -306,6 +306,10 @@ def generate_final_paper_table(
         else:
             exp_df = df if experiment == "two_players" else pd.DataFrame()
 
+        # Filter to baseline weight variant (exclude Set 2 / wh8_wl4)
+        if "weight_variant" in exp_df.columns:
+            exp_df = exp_df[exp_df["weight_variant"] == "baseline"]
+
         if exp_df.empty:
             continue
 

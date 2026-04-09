@@ -56,6 +56,13 @@ from .extract import (
 )
 
 
+def _baseline_only(df: pd.DataFrame) -> pd.DataFrame:
+    """Filter to baseline weight variant (exclude wh8_wl4 etc.)."""
+    if "weight_variant" in df.columns:
+        return df[df["weight_variant"] == "baseline"]
+    return df
+
+
 def setup_matplotlib_style():
     """Configure matplotlib for publication-quality figures."""
     plt.rcParams.update({
@@ -153,7 +160,10 @@ def plot_convergence_main(
     df = df[df["q"].isin(q_values)]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
-    df = df[df["ablation"].isin(weight_variants)]
+    if "weight_variant" in df.columns:
+        df = df[df["weight_variant"].isin(weight_variants)]
+    else:
+        df = df[df["ablation"].isin(weight_variants)]
 
     n_rows = len(weight_variants)
     n_cols = len(q_values)
@@ -167,7 +177,8 @@ def plot_convergence_main(
     conv_steps_df = get_convergence_step(df)
 
     for row_idx, variant in enumerate(weight_variants):
-        var_df = df[df["ablation"] == variant]
+        wv_col = "weight_variant" if "weight_variant" in df.columns else "ablation"
+        var_df = df[df[wv_col] == variant]
 
         for col_idx, q in enumerate(q_values):
             ax = axes[row_idx, col_idx]
@@ -351,6 +362,7 @@ def plot_kl_dynamics(
     
     # Filter to two_players baseline PPO only
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -467,6 +479,7 @@ def plot_exploitability_dynamics(
         output_path = os.path.join(FIGURES_DIR, "exploitability_dynamics.png")
     
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -641,6 +654,7 @@ def plot_exploitability_q25(
         & (df["method"].isin(["TEL-PPO", "PPO"]))
         & (df["ablation"] == "baseline")
     ]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -745,6 +759,7 @@ def plot_beta_evolution(
         output_path = os.path.join(FIGURES_DIR, "beta_evolution.png")
 
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -872,6 +887,7 @@ def plot_beta_snapshots(
         output_path = os.path.join(FIGURES_DIR, "beta_snapshots.png")
     
     df = df[(df["q"] == q) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -1279,6 +1295,7 @@ def plot_distance_to_equilibrium(
         & (df["method"].isin(["TEL-PPO", "PPO"]))
         & (df["ablation"] == "baseline")
     ]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -1415,6 +1432,7 @@ def plot_effort_drift(
         & (df["method"].isin(["TEL-PPO", "PPO"]))
         & (df["ablation"] == "baseline")
     ]
+    df = _baseline_only(df)
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
 
@@ -1540,6 +1558,7 @@ def plot_equilibrium_recovery_dotplot(
         (df["method"].isin(["TEL-PPO", "PPO"]))
         & (df["ablation"] == "baseline")
     ]
+    ppo_df = _baseline_only(ppo_df)
 
     if ppo_df.empty:
         print("[plots] Warning: No data for equilibrium recovery dotplot")
