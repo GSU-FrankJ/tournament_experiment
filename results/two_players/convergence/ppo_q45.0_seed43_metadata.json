@@ -1,0 +1,12 @@
+{
+  "run_id": "20260410_093447",
+  "method": "ppo",
+  "q": 45.0,
+  "seed": 43,
+  "ablation_name": "baseline",
+  "git_sha": "eab86defca65",
+  "cmdline": "run/run_two_players.py --method ppo --q 45 --seed 43 --override-conc-ramp-warmup 200 --episodes 6144000",
+  "timestamp": "2026-04-10T11:04:02.668817",
+  "convergence_file": "ppo_q45.0_seed43_convergence.json",
+  "variant_name": "baseline"
+}
