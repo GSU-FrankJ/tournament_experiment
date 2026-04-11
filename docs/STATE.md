@@ -1,12 +1,70 @@
 # Project state
 
-Last updated: 2026-04-08
+Last updated: 2026-04-10
 
 ## Current status
 - **Parameter overhaul**: All configs updated to match `docs/experiment_config_040726.md`
-- All old results deleted — fresh experiments needed with new parameters
+- **Concentration fix (major)**: `--override-conc-ramp-warmup 200` resolves q=45/55 convergence
+  - Root cause: theory_align_v2 concentration ramp froze policy in ~20 updates, before effort reached e*
+  - Fix: extend warmup from 20→200, giving policy time to descend to e* before concentration rises
+  - Results (Round 2, 5 seeds): q=35 gap 0.3%, q=45 gap 0.1%, q=55 gap 0.1%
+  - Old entropy_end_0.002 files archived to `results/two_players/convergence/_archive_pre_warmup_fix/`
+- **Figure pipeline**: All 12 figures regenerated with warmup=200 results
+- **Pending**: q=35 seeds 44/45, q=45 seed 44 retrying (OOM from parallel run)
 - Two-stage runner deferred to separate task
-- Paper generator updated with per-experiment theory params
+
+## Figure pipeline (2026-04-09)
+
+### Step 0: Style gate — PASSED
+- Updated `paper/generator/config.py`: Wong palette, IEEE/ACM font sizes (8/9/10pt),
+  TrueType embedding (pdf.fonttype=42), horizontal-only grid
+- Gate checks: no Type 3 fonts, PDF width 6.70" (within 6.75±0.05"), all Wong colors verified
+- Output: `paper/generator/output/style_test/style_test.{pdf,png}`
+
+### F1: Equilibrium Recovery (hero) — COMPLETE
+- Patched `run_registry.py`: `BASELINE_ALIASES = {"entropy_end_0.002"}` (line ~283)
+  so q=45/55 Set 1 runs classified as baseline
+- All 5 experiment groups × all q values plotted (14 conditions total)
+- Bootstrap percentile 95% CI (n=5, n_resamples=2000)
+- All seed counts = 5, all CI widths < 5 effort units
+- q=55 2P Set 1 gray band + "See Fig. 2" annotation
+- Output: `paper/generator/output/figures/F1_equilibrium_recovery.{pdf,png}`
+
+### F2: EU Landscape & Gradient Signal — COMPLETE
+- 3 panels: (a) EU landscape, (b) symmetric gradient, (c) stall-point bars at e=36
+- Theory values verified: e*, gradient at e*=0, gradient at 36 matches plan
+- Output: `paper/generator/output/figures/F2_eu_landscape.{pdf,png}`
+
+### F3: Training Diagnostics — COMPLETE
+- 2×3 grid: KL (top) + exploitability (bottom) × q=35/45/55
+- Output: `paper/generator/output/figures/F3_training_diagnostics.{pdf,png}`
+
+### F4: Distance to Equilibrium — COMPLETE
+- Single-column, log-scale |e-e*| with terminal gaps: q=35: 1.6, q=45: 4.3, q=55: 7.6
+- Output: `paper/generator/output/figures/F4_distance_to_equilibrium.{pdf,png}`
+
+### F5: Ablation — BLOCKED (no data)
+
+### Appendix (8 figures) — ALL COMPLETE
+- FA_2p, FA_set2, FA_gvp, FA_3p, FA_het, FA_beta, FA_snap, FA_drift
+- All in `paper/generator/output/figures/`
+
+## Figure Manifest (Phase 3 complete)
+
+| fig_id | filename | width | fonts | status |
+|--------|----------|-------|-------|--------|
+| F1 | F1_equilibrium_recovery.pdf | 6.70" | TT | done |
+| F2 | F2_eu_landscape.pdf | 6.77" | TT | done |
+| F3 | F3_training_diagnostics.pdf | 6.69" | TT | done |
+| F4 | F4_distance_to_equilibrium.pdf | 3.20" | TT | done |
+| FA_2p | FA_2p_convergence.pdf | 6.69" | TT | done |
+| FA_3p | FA_3p_convergence.pdf | 3.20" | TT | done |
+| FA_beta | FA_beta_evolution.pdf | 6.67" | TT | done |
+| FA_drift | FA_drift_post_convergence.pdf | 6.69" | TT | done |
+| FA_gvp | FA_gvp_comparison.pdf | 6.69" | TT | done |
+| FA_het | FA_het_convergence.pdf | 6.69" | TT | done |
+| FA_set2 | FA_set2_convergence.pdf | 6.69" | TT | done |
+| FA_snap | FA_snap_beta_pdf.pdf | 6.70" | TT | done |
 
 ## Parameter overhaul (2026-04-08)
 
