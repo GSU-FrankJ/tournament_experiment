@@ -591,7 +591,7 @@ def plot_exploitability_dynamics(
             ax.set_ylabel("Exploitability")
         ax.set_title(format_q(q))
         ax.set_yscale("log")
-        ax.set_ylim(0.01, 2)
+        ax.set_ylim(0.005, 2)
 
     # Single shared legend at the top — collect from all panels
     all_handles, all_labels = [], []
@@ -1002,11 +1002,12 @@ def plot_ablation_comparison(
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
+    df = _baseline_only(df)
 
     if df.empty:
         print("[plots] Warning: No data for ablation comparison")
         return None, None
-    
+
     # Keep only the 3 key ablations for the main paper figure
     df = df[df["ablation"].isin(["baseline", "no_cheap_gate", "no_exploitability"])]
 
@@ -1130,13 +1131,14 @@ def plot_hyperparam_sensitivity(
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "hyperparam_sensitivity.png")
 
-    # Filter to two_players PPO
+    # Filter to two_players PPO, baseline weight variant only
     df = df[
         (df["q"].isin(q_values))
         & (df["method"].isin(["TEL-PPO", "PPO"]))
     ]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
+    df = _baseline_only(df)
 
     # Exclude non-hyperparam ablations
     exclude = {"k5e4_wh8_wl3", "q25_seed68", "wh8_wl4", "baseline_v2",

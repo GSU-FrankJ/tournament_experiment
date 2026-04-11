@@ -1923,6 +1923,9 @@ def _run_cli(args: argparse.Namespace) -> str:
     if args.override_conc_max is not None:
         cfg["theory_align_v2_conc_max"] = float(args.override_conc_max)
         print(f"[config] conc_max override: {args.override_conc_max}", flush=True)
+    if args.override_conc_ramp_warmup is not None:
+        cfg["theory_align_v2_ramp_warmup"] = int(args.override_conc_ramp_warmup)
+        print(f"[config] conc_ramp_warmup override: {args.override_conc_ramp_warmup}", flush=True)
 
     # Re-apply explicit CLI entropy override (takes priority over mode defaults)
     if args.override_entropy_end is not None:
@@ -2110,6 +2113,13 @@ def main():
         type=float,
         default=None,
         help="Override theory_align_v2_conc_max (concentration upper bound).",
+    )
+    parser.add_argument(
+        "--override-conc-ramp-warmup",
+        type=int,
+        default=None,
+        help="Override theory_align_v2_ramp_warmup (updates before concentration ramp begins). "
+             "Default: 20. Higher values give the policy more low-concentration updates to find e*.",
     )
     parser.add_argument(
         "--theory-align",
