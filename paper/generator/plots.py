@@ -234,15 +234,15 @@ def plot_convergence_main(
                     agg_df = aggregate_seeds(method_df)
                     if agg_col_mean in agg_df.columns:
                         steps = agg_df["step"].values
-                        effort_mean = agg_df[agg_col_mean].values
-                        effort_ci = agg_df[agg_col_ci].values if agg_col_ci in agg_df.columns else np.zeros_like(effort_mean)
+                        sample_effort_mean = agg_df[agg_col_mean].values
+                        effort_ci = agg_df[agg_col_ci].values if agg_col_ci in agg_df.columns else np.zeros_like(sample_effort_mean)
 
                         ax.plot(
-                            steps, effort_mean, color=color, linestyle=ls,
+                            steps, sample_effort_mean, color=color, linestyle=ls,
                             linewidth=2, label=label_base, zorder=3,
                         )
                         ax.fill_between(
-                            steps, effort_mean - effort_ci, effort_mean + effort_ci,
+                            steps, sample_effort_mean - effort_ci, sample_effort_mean + effort_ci,
                             color=color, alpha=SHADE_ALPHA, zorder=2,
                         )
                 else:
@@ -327,7 +327,7 @@ def plot_convergence_main(
     # Save underlying data
     if save_data:
         data_path = os.path.join(DATA_DIR, "convergence_main.csv")
-        out_cols = ["step", "method", "q", "seed", "ablation", "effort_mean",
+        out_cols = ["step", "method", "q", "seed", "ablation", "policy_mean_effort",
                     "agent1_effort", "agent2_effort", "theoretical_effort"]
         df_out = df[[c for c in out_cols if c in df.columns]].copy()
         df_out.to_csv(data_path, index=False)
@@ -904,7 +904,7 @@ def plot_beta_snapshots(
         best_seed, best_err = None, float("inf")
         for s in seeds:
             s_df = df[df["seed"] == s].sort_values("step")
-            final_effort = s_df["effort_mean"].tail(20).mean()
+            final_effort = s_df["policy_mean_effort"].iloc[-1]
             err = abs(final_effort - e_theory)
             if err < best_err:
                 best_seed, best_err = s, err
@@ -1053,15 +1053,15 @@ def plot_ablation_comparison(
                 # Per-seed thin traces
                 for seed in seeds:
                     seed_df = abl_df[abl_df["seed"] == seed].sort_values("step")
-                    ax.plot(seed_df["step"], seed_df["effort_mean"],
+                    ax.plot(seed_df["step"], seed_df["policy_mean_effort"],
                             color=color, alpha=0.2, linewidth=0.8, zorder=1)
 
                 # Aggregate mean + 95% CI band
                 agg = aggregate_seeds(abl_df)
-                if "effort_mean_mean" in agg.columns:
+                if "policy_mean_effort_mean" in agg.columns:
                     steps = agg["step"].values
-                    mean = agg["effort_mean_mean"].values
-                    ci = agg["effort_mean_ci95"].values if "effort_mean_ci95" in agg.columns else np.zeros_like(mean)
+                    mean = agg["policy_mean_effort_mean"].values
+                    ci = agg["policy_mean_effort_ci95"].values if "policy_mean_effort_ci95" in agg.columns else np.zeros_like(mean)
                     ax.plot(steps, mean, color=color, linewidth=lw,
                             label=label, zorder=3)
                     ax.fill_between(steps, mean - ci, mean + ci,
@@ -1070,10 +1070,10 @@ def plot_ablation_comparison(
                     y_max_global = max(y_max_global, np.nanmax(mean + ci))
             else:
                 single = abl_df.sort_values("step")
-                ax.plot(single["step"], single["effort_mean"],
+                ax.plot(single["step"], single["policy_mean_effort"],
                         color=color, linewidth=lw, label=label, zorder=3)
-                y_min_global = min(y_min_global, single["effort_mean"].min())
-                y_max_global = max(y_max_global, single["effort_mean"].max())
+                y_min_global = min(y_min_global, single["policy_mean_effort"].min())
+                y_max_global = max(y_max_global, single["policy_mean_effort"].max())
 
         ax.set_xlabel("Training Steps")
         ax.set_ylabel("Effort")
@@ -1102,7 +1102,7 @@ def plot_ablation_comparison(
     
     if save_data:
         data_path = os.path.join(DATA_DIR, "ablation_comparison.csv")
-        df[["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]].to_csv(data_path, index=False)
+        df[["step", "method", "q", "seed", "ablation", "policy_mean_effort", "theoretical_effort"]].to_csv(data_path, index=False)
     
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
@@ -1209,24 +1209,24 @@ def plot_hyperparam_sensitivity(
                     # Per-seed thin traces
                     for seed in seeds:
                         sdf = abl_df[abl_df["seed"] == seed].sort_values("step")
-                        ax.plot(sdf["step"], sdf["effort_mean"],
+                        ax.plot(sdf["step"], sdf["policy_mean_effort"],
                                 color=color, alpha=0.2, linewidth=0.7, zorder=1)
 
                     # Aggregated mean + CI
                     agg = aggregate_seeds(abl_df)
-                    if "effort_mean_mean" in agg.columns:
+                    if "policy_mean_effort_mean" in agg.columns:
                         steps = agg["step"].values
-                        mean_vals = agg["effort_mean_mean"].values
-                        ci_vals = agg.get("effort_mean_ci95", pd.Series(np.zeros(len(agg)))).values
+                        mean_vals = agg["policy_mean_effort_mean"].values
+                        ci_vals = agg.get("policy_mean_effort_ci95", pd.Series(np.zeros(len(agg)))).values
                         ax.plot(steps, mean_vals, color=color, linewidth=lw,
                                 label=label, zorder=3)
                         ax.fill_between(steps, mean_vals - ci_vals, mean_vals + ci_vals,
                                         color=color, alpha=0.12, zorder=2)
                     else:
-                        ax.plot(abl_df["step"], abl_df["effort_mean"],
+                        ax.plot(abl_df["step"], abl_df["policy_mean_effort"],
                                 color=color, linewidth=lw, label=label, zorder=3)
                 else:
-                    ax.plot(abl_df["step"], abl_df["effort_mean"],
+                    ax.plot(abl_df["step"], abl_df["policy_mean_effort"],
                             color=color, linewidth=lw, label=label, zorder=3)
 
             # Axis formatting
@@ -1260,7 +1260,7 @@ def plot_hyperparam_sensitivity(
 
     if save_data:
         data_path = os.path.join(DATA_DIR, "hyperparam_sensitivity.csv")
-        out_cols = ["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        out_cols = ["step", "method", "q", "seed", "ablation", "policy_mean_effort", "theoretical_effort"]
         df_out = df[[c for c in out_cols if c in df.columns]].copy()
         df_out.to_csv(data_path, index=False)
         print(f"[plots] Saved data to {data_path}")
@@ -1328,9 +1328,9 @@ def plot_distance_to_equilibrium(
             agg = aggregate_seeds(q_df)
             if "effort_error_mean" not in agg.columns:
                 agg["effort_error_mean"] = np.abs(
-                    agg["effort_mean_mean"] - agg["theoretical_effort"]
+                    agg["policy_mean_effort_mean"] - agg["theoretical_effort"]
                 )
-                agg["effort_error_ci95"] = agg.get("effort_mean_ci95", 0)
+                agg["effort_error_ci95"] = agg.get("policy_mean_effort_ci95", 0)
 
             steps = agg["step"].values
             err_mean = agg["effort_error_mean"].values
@@ -1398,7 +1398,7 @@ def plot_distance_to_equilibrium(
 
     if save_data:
         data_path = os.path.join(DATA_DIR, "distance_to_equilibrium.csv")
-        cols = ["step", "method", "q", "seed", "ablation", "effort_mean", "theoretical_effort"]
+        cols = ["step", "method", "q", "seed", "ablation", "policy_mean_effort", "theoretical_effort"]
         if "effort_error" in df.columns:
             cols.append("effort_error")
         df[cols].to_csv(data_path, index=False)
@@ -1654,7 +1654,7 @@ def plot_equilibrium_recovery_dotplot(
                     colors="#333333", linestyles="--", linewidth=3, zorder=2,
                 )
 
-                efforts = q_final["effort_mean"].values
+                efforts = q_final["policy_mean_effort"].values
                 jitter = rng.uniform(-0.15, 0.15, len(efforts))
                 ax.scatter(
                     x_pos + jitter, efforts,
@@ -1769,11 +1769,11 @@ def plot_equilibrium_recovery_dotplot(
         save_df = final.copy()
         save_df["relative_error"] = np.where(
             save_df["theoretical_effort"] != 0,
-            np.abs(save_df["effort_mean"] - save_df["theoretical_effort"]) / np.abs(save_df["theoretical_effort"]),
+            np.abs(save_df["policy_mean_effort"] - save_df["theoretical_effort"]) / np.abs(save_df["theoretical_effort"]),
             np.nan,
         )
         data_path = os.path.join(DATA_DIR, "equilibrium_recovery_dotplot.csv")
-        cols_to_save = ["method", "q", "seed", "ablation", "effort_mean",
+        cols_to_save = ["method", "q", "seed", "ablation", "policy_mean_effort",
                         "theoretical_effort", "agent1_effort", "agent2_effort",
                         "relative_error"]
         for extra_col in ["theoretical_effort1", "theoretical_effort2"]:

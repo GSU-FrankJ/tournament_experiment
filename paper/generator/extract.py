@@ -33,7 +33,7 @@ CONVERGENCE_COLUMNS = [
     "ablation",
     "experiment",
     # Effort (always present)
-    "effort_mean",      # Average of agent1 and agent2
+    "sample_effort_mean",      # Average of agent1 and agent2
     "agent1_effort",
     "agent2_effort",
     "policy_mean_effort",
@@ -90,6 +90,26 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
         return pd.DataFrame(columns=CONVERGENCE_COLUMNS)
 
     # Build DataFrame
+    agent1 = data.get("agent1_effort", [np.nan] * n_steps)
+    agent2 = data.get("agent2_effort", [np.nan] * n_steps)
+
+    if "policy_mean_effort" in data:
+        # PPO/TEL-PPO flat format: agent1_effort/agent2_effort are sample means
+        # from rollouts; policy_mean_effort is the deterministic Beta-distribution
+        # mean (Metric B).
+        policy_mean = data["policy_mean_effort"]
+    elif run.method in ("TEL-PPO", "PPO"):
+        raise ValueError(
+            f"PPO flat-format JSON is missing 'policy_mean_effort'. "
+            f"All PPO runners (run_two_players.py, run_three_players.py) "
+            f"write this field; missing = corrupted file or ancient runner. "
+            f"Run path: {run.path}"
+        )
+    else:
+        # Gradient / other methods: efforts are deterministic, no separate
+        # policy distribution.  agent1/agent2 efforts ARE the computed efforts.
+        policy_mean = [(a1 + a2) / 2.0 for a1, a2 in zip(agent1, agent2)]
+
     df = pd.DataFrame({
         "step": steps,
         "method": run.method,
@@ -98,14 +118,15 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
         "ablation": run.ablation,
         "weight_variant": run.weight_variant,
         "experiment": run.experiment,
-        # Effort series
-        "agent1_effort": data.get("agent1_effort", [np.nan] * n_steps),
-        "agent2_effort": data.get("agent2_effort", [np.nan] * n_steps),
-        "policy_mean_effort": data.get("policy_mean_effort", [np.nan] * n_steps),
+        "agent1_effort": agent1,
+        "agent2_effort": agent2,
+        "policy_mean_effort": policy_mean,
     })
 
-    # Compute effort_mean as average of agent1 and agent2
-    df["effort_mean"] = (df["agent1_effort"] + df["agent2_effort"]) / 2.0
+    # sample_effort_mean: average of per-agent sample means from rollouts.
+    # For PPO: distinct from policy_mean_effort.
+    # For Gradient: identical to policy_mean_effort (both are deterministic).
+    df["sample_effort_mean"] = (df["agent1_effort"] + df["agent2_effort"]) / 2.0
 
     # Add theoretical effort — prefer values from the JSON itself over formula
     theoretical = data.get("theoretical", {})
@@ -201,8 +222,22 @@ def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
 
     agent1_arr = np.array(agent1_effort, dtype=float)
     agent2_arr = np.array(agent2_effort, dtype=float)
-    effort_mean = (agent1_arr + agent2_arr) / 2.0
     theoretical_effort = (theo_e1 + theo_e2) / 2.0 if not (np.isnan(theo_e1) or np.isnan(theo_e2)) else np.nan
+
+    # policy_mean_effort: nested-format runners (run_different_cost.py:716-717,
+    # run_different_ability.py) store policy means directly in agent1_effort /
+    # agent2_effort (via agent.mean_effort()), NOT sample means.  If the JSON
+    # explicitly provides a policy_mean_effort field, use it; otherwise average
+    # the two per-agent policy means.
+    if "policy_mean_effort" in history:
+        policy_mean_arr = np.array(history["policy_mean_effort"], dtype=float)
+    else:
+        policy_mean_arr = (agent1_arr + agent2_arr) / 2.0
+
+    # Nested format does not record sample-action averages.  Set to NaN so
+    # downstream code that accidentally reads this column gets an explicit
+    # signal rather than silently using policy means as if they were samples.
+    sample_effort_mean_arr = np.full(n_steps, np.nan)
 
     df = pd.DataFrame({
         "step": steps,
@@ -214,8 +249,8 @@ def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
         "experiment": run.experiment,
         "agent1_effort": agent1_effort,
         "agent2_effort": agent2_effort,
-        "effort_mean": effort_mean,
-        "policy_mean_effort": effort_mean,
+        "sample_effort_mean": sample_effort_mean_arr,
+        "policy_mean_effort": policy_mean_arr,
         "theoretical_effort": theoretical_effort,
         "theoretical_effort1": theo_e1,
         "theoretical_effort2": theo_e2,
@@ -460,9 +495,9 @@ def compute_symmetry_gap(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_effort_error(df: pd.DataFrame) -> pd.DataFrame:
-    """Add column for |effort_mean - theoretical_effort|."""
+    """Add column for |policy_mean_effort - theoretical_effort|."""
     df = df.copy()
-    df["effort_error"] = np.abs(df["effort_mean"] - df["theoretical_effort"])
+    df["effort_error"] = np.abs(df["policy_mean_effort"] - df["theoretical_effort"])
     return df
 
 
@@ -484,7 +519,7 @@ def get_final_values(df: pd.DataFrame) -> pd.DataFrame:
 
     agg_dict = {
         "step": "max",
-        "effort_mean": "last",
+        "sample_effort_mean": "last",
         "agent1_effort": "last",
         "agent2_effort": "last",
         "policy_mean_effort": "last",
@@ -510,7 +545,7 @@ def get_final_values(df: pd.DataFrame) -> pd.DataFrame:
 
     # Compute derived metrics
     final["symmetry_gap"] = np.abs(final["agent1_effort"] - final["agent2_effort"])
-    final["effort_error"] = np.abs(final["effort_mean"] - final["theoretical_effort"])
+    final["effort_error"] = np.abs(final["policy_mean_effort"] - final["theoretical_effort"])
 
     return final
 
@@ -526,7 +561,7 @@ def aggregate_seeds(df: pd.DataFrame) -> pd.DataFrame:
     
     # Numeric columns to aggregate
     numeric_cols = [
-        "effort_mean", "agent1_effort", "agent2_effort", "policy_mean_effort",
+        "sample_effort_mean", "agent1_effort", "agent2_effort", "policy_mean_effort",
         "approx_kl", "batch_entropy", "alpha_mean", "beta_mean",
         "mean_kl_window", "drift_effort", "exploitability",
     ]
@@ -574,7 +609,7 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     Compute the convergence step for each run (experiment, method, q, seed, ablation).
 
     Uses the effort_delta and effort_window from CONVERGENCE_CONFIG to detect
-    the first step where |effort_mean - theoretical_effort| < delta for
+    the first step where |policy_mean_effort - theoretical_effort| < delta for
     `window` consecutive steps.
 
     Returns a DataFrame with one row per run and columns:
@@ -591,7 +626,7 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     records = []
     for key, grp in df.groupby(group_cols):
         grp = grp.sort_values("step")
-        effort = grp["effort_mean"].values
+        effort = grp["policy_mean_effort"].values
         theo = grp["theoretical_effort"].dropna()
         if theo.empty:
             exp = grp["experiment"].iloc[0] if "experiment" in grp.columns else None
@@ -700,4 +735,4 @@ if __name__ == "__main__":
     # Test final values extraction
     print("\nFinal values:")
     final = get_final_values(df)
-    print(final[["method", "q", "seed", "ablation", "effort_mean", "theoretical_effort", "effort_error"]])
+    print(final[["method", "q", "seed", "ablation", "sample_effort_mean", "theoretical_effort", "effort_error"]])

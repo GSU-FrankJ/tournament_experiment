@@ -388,7 +388,7 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
         group = group.sort_values("step")
 
         # Get effort series
-        effort_series = group["effort_mean"].values
+        effort_series = group["policy_mean_effort"].values
         # Use per-file theoretical effort if available, else compute from formula
         if "theoretical_effort" in group.columns and not group["theoretical_effort"].isna().all():
             e_star_val = group["theoretical_effort"].iloc[0]

@@ -7,7 +7,7 @@ Last updated: 2026-04-10
 - **Concentration fix (major)**: `--override-conc-ramp-warmup 200` resolves q=45/55 convergence
   - Root cause: theory_align_v2 concentration ramp froze policy in ~20 updates, before effort reached e*
   - Fix: extend warmup from 20→200, giving policy time to descend to e* before concentration rises
-  - Results (Round 2, 5 seeds): q=35 gap 0.3%, q=45 gap 0.1%, q=55 gap 0.1%
+  - Results (Round 2, 5 seeds, Metric B): q=35 rel 4.3%, q=45 rel 2.1%, q=55 rel 2.4%
   - Old entropy_end_0.002 files archived to `results/two_players/convergence/_archive_pre_warmup_fix/`
 - **Figure pipeline**: All 12 figures regenerated with warmup=200 results
 - **Pending**: q=35 seeds 44/45, q=45 seed 44 retrying (OOM from parallel run)
@@ -40,7 +40,7 @@ Last updated: 2026-04-10
 - Output: `paper/generator/output/figures/F3_training_diagnostics.{pdf,png}`
 
 ### F4: Distance to Equilibrium — COMPLETE
-- Single-column, log-scale |e-e*| with terminal gaps: q=35: 1.6, q=45: 4.3, q=55: 7.6
+- Single-column, log-scale |e-e*| with terminal gaps (Metric B): q=35: 1.96, q=45: 0.74, q=55: 0.68
 - Output: `paper/generator/output/figures/F4_distance_to_equilibrium.{pdf,png}`
 
 ### F5: Ablation — BLOCKED (no data)
@@ -121,6 +121,56 @@ Still relevant. The new parameters were chosen to satisfy the participation cons
 | two-stage-runner | deferred | Config and env exist, runner needs to be built |
 | paper-figures-tables-revision | stale | Needs re-run after new experiment data |
 | runner-refactor | deferred | Post-project cleanup |
+
+## Phase 2 (Metric B Migration) — Complete
+
+### Loader schema (two formats)
+
+| format | experiments | policy_mean_effort | sample_effort_mean |
+|--------|------------|-------------------|-------------------|
+| flat | two_players, three_players | from JSON `policy_mean_effort` field (deterministic Beta mean) | `(agent1_effort + agent2_effort) / 2` (sample rollout averages) |
+| nested | different_cost, different_ability | `(agent1_effort + agent2_effort) / 2` (agents store policy means directly) | NaN (not recorded by nested runners) |
+| flat (gradient) | all (gradient method) | `(agent1_effort + agent2_effort) / 2` (deterministic, same as sample) | same as policy_mean_effort |
+
+### Changes
+
+- Renamed column `effort_mean` → `sample_effort_mean` (4 files, 48 call sites)
+- Switched all paper-reporting metrics from sample_effort_mean to `policy_mean_effort`:
+  - `extract.py`: effort_error (lines 479, 527), convergence step detection (line 608)
+  - `metrics.py`: effort_series (line 391)
+  - `tables.py`: final summary Mean/Std (lines 348-349, 368-369)
+  - `plots.py`: best-seed selection (line 907), F4 distance curve (line 1331), dotplot (lines 1657, 1772), all trajectory plots (lines 1056, 1073, 1212, 1226, 1229)
+- Fixed nested loader (extract.py): `policy_mean_effort` computed from agent policy means, `sample_effort_mean` set to NaN
+- Fixed flat loader (extract.py): raises ValueError for missing `policy_mean_effort` in PPO runs; falls back to agent average for gradient runs
+- All convergence trajectory plots now use `policy_mean_effort` (removes sample noise)
+
+### Verification
+
+- Schema verification passed (verify_loader_schema.py): 6/6 assertions
+- Metric B sanity check passed (verify_metric_b.py): 6/6 assertions (flat gap=0.362, nested gap=2.233)
+
+### Regenerated artifacts
+
+- Tables: final_summary.tex, convergence_comparison.tex, summary_metrics.tex, ablation_results.tex, environment_config.tex
+- Data: convergence_main.csv, equilibrium_recovery_dotplot.csv, distance_to_equilibrium.csv, + 6 others
+- Figures: convergence_main.pdf, equilibrium_recovery_dotplot.pdf, distance_to_equilibrium.pdf, + 6 others
+
+### Verified numbers
+
+| q | decision doc | regenerated table | match? |
+|---|-------------|-------------------|--------|
+| 35 | 4.3% | 4.30% | yes |
+| 45 | 2.1% | 2.08% | yes |
+| 55 | 2.4% | 2.36% | yes |
+
+### Known items NOT done this round
+
+- `docs/metric_diagnosis.md` — intentionally preserves old-metric context
+- `docs/round2_metric_decision.md` — intentionally preserves old-vs-new comparison
+
+### Commit suggestion
+
+`refactor: switch paper reporting to Metric B (policy_mean_effort[-1])`
 
 ## Next steps
 1. Run gradient baselines for all experiment types with new parameters

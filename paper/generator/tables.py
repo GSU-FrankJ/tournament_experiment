@@ -345,8 +345,8 @@ def generate_final_paper_table(
             if not grad_df.empty:
                 final = get_final_values(grad_df)
                 if not final.empty:
-                    effort_mean = final["effort_mean"].mean()
-                    effort_std = final["effort_mean"].std() if len(final) > 1 else 0
+                    effort_mean = final["policy_mean_effort"].mean()
+                    effort_std = final["policy_mean_effort"].std() if len(final) > 1 else 0
                     abs_err = final["effort_error"].mean()
                     rel_err = (abs_err / e_theory * 100) if e_theory > 0 else float('nan')
                     rows.append({
@@ -365,8 +365,8 @@ def generate_final_paper_table(
             if not ppo_baseline.empty:
                 final = get_final_values(ppo_baseline)
                 if not final.empty:
-                    effort_mean = final["effort_mean"].mean()
-                    effort_std = final["effort_mean"].std() if len(final) > 1 else 0
+                    effort_mean = final["policy_mean_effort"].mean()
+                    effort_std = final["policy_mean_effort"].std() if len(final) > 1 else 0
                     # Get convergence steps
                     conv_match = conv_df[
                         (conv_df["q"] == q)
