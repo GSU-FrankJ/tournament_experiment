@@ -172,6 +172,28 @@ Still relevant. The new parameters were chosen to satisfy the participation cons
 
 `refactor: switch paper reporting to Metric B (policy_mean_effort[-1])`
 
+## Conc-ramp warmup port: three_players (in progress)
+
+Ported concentration ramp logic from `run_two_players.py:889-910` to `run_three_players.py`.
+Added CLI flag `--override-conc-ramp-warmup`. Default stays at 20 (as in theory_align_v2 defaults block).
+
+### Agent attribute mapping (two_players vs three_players)
+
+| attribute | PPOTwoPlayersBandit | PPOThreePlayersBandit | match? |
+|-----------|--------------------|-----------------------|--------|
+| `agent.net.conc_min` | yes (ActorCriticMeanConc:80) | yes (ActorCriticMeanConc:100) | identical |
+| `agent.net.conc_scale` | yes (:81) | yes (:101) | identical |
+| `agent.net.conc_max` | yes (:82) | yes (:102) | identical |
+| `agent.opponent_policy.conc_min` | yes (deepcopy of net) | yes (deepcopy of net) | identical |
+| `agent.cfg.theory_align_v2_var_coef` | yes (PPOConfig:145-146) | yes (PPOConfig:167-168) | identical |
+
+All attributes match 1:1. The ramp code is an exact copy.
+
+### Not yet ported (pending results from 3p)
+
+- `run_different_cost.py`: uses TWO agents (agent1, agent2) — ramp needs to apply to both. Deferred.
+- `run_different_ability.py`: single shared agent, similar to two_players. Deferred.
+
 ## Next steps
 1. Run gradient baselines for all experiment types with new parameters
 2. Run PPO experiments (5 seeds each) for all q values
