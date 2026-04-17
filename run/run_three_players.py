@@ -643,6 +643,7 @@ def run_ppo(
     train_qs: Optional[List[float]] = None,
     *,
     ablation_name: str = "baseline",
+    output_tag: Optional[str] = None,
 ) -> List[Dict]:
     """Train PPO for three-player tournament (pure self-play).
 
@@ -651,6 +652,7 @@ def run_ppo(
         episodes: Total training steps (default from config)
         train_qs: List of q values to train on (default from config)
         ablation_name: Tag for this variant
+        output_tag: Optional tag inserted into output filename (e.g., 'round3')
 
     Returns:
         List of result dictionaries, one per q value
@@ -671,6 +673,12 @@ def run_ppo(
     theory_align_v2_conc_min = float(cfg.get("theory_align_v2_conc_min", 1.0))
     theory_align_v2_conc_scale = float(cfg.get("theory_align_v2_conc_scale", 1.0))
     theory_align_v2_conc_max = cfg.get("theory_align_v2_conc_max", None)
+    theory_align_v2_conc_min_start = float(cfg.get("theory_align_v2_conc_min_start", theory_align_v2_conc_min))
+    theory_align_v2_conc_scale_start = float(cfg.get("theory_align_v2_conc_scale_start", theory_align_v2_conc_scale))
+    theory_align_v2_var_coef = float(cfg.get("theory_align_v2_var_coef", 0.0))
+    theory_align_v2_var_coef_start = float(cfg.get("theory_align_v2_var_coef_start", theory_align_v2_var_coef))
+    theory_align_v2_ramp_warmup = int(cfg.get("theory_align_v2_ramp_warmup", 0))
+    theory_align_v2_ramp_steps = int(cfg.get("theory_align_v2_ramp_steps", 0))
     
     # PPO agent configuration (simplified for self-play)
     ppo_cfg = PPOConfig(
@@ -773,6 +781,7 @@ def run_ppo(
     converged_flag = 0
     stop_reason = "max_updates"  # default if we exhaust episodes
     early_stop_triggered = False
+    min_updates = int(cfg.get("min_updates", 0))
     last_exploit_eval_step = -999999
     exploit_every_updates = int(cfg.get("exploit_every_updates", 10))
     exploit_eval_steps: List[int] = []
@@ -812,6 +821,8 @@ def run_ppo(
         "policy_mean_effort": [],
         "approx_kl": [],
         "batch_entropy": [],
+        "alpha_mean": [],
+        "beta_mean": [],
         "mean_kl_window": [],
         "drift_effort": [],
         # Exploitability: sparse (NaN when not evaluated this update)
@@ -832,6 +843,30 @@ def run_ppo(
         print(flush=True)
     
     while steps_done < total_steps_target:
+        # Concentration ramp schedule (ported from run_two_players.py:889-910)
+        if theory_align_v2_enabled:
+            warmup = max(0, int(theory_align_v2_ramp_warmup))
+            ramp_steps = max(0, int(theory_align_v2_ramp_steps))
+            if update_idx < warmup:
+                ramp_t = 0.0
+            elif ramp_steps <= 0:
+                ramp_t = 1.0
+            else:
+                ramp_t = float(update_idx - warmup + 1) / float(ramp_steps)
+                ramp_t = max(0.0, min(1.0, ramp_t))
+            conc_min = theory_align_v2_conc_min_start + (theory_align_v2_conc_min - theory_align_v2_conc_min_start) * ramp_t
+            conc_scale = theory_align_v2_conc_scale_start + (theory_align_v2_conc_scale - theory_align_v2_conc_scale_start) * ramp_t
+            var_coef = theory_align_v2_var_coef_start + (theory_align_v2_var_coef - theory_align_v2_var_coef_start) * ramp_t
+            if hasattr(agent.net, "conc_min"):
+                agent.net.conc_min = float(conc_min)
+            if hasattr(agent.net, "conc_scale"):
+                agent.net.conc_scale = float(conc_scale)
+            if hasattr(agent.opponent_policy, "conc_min"):
+                agent.opponent_policy.conc_min = float(conc_min)
+            if hasattr(agent.opponent_policy, "conc_scale"):
+                agent.opponent_policy.conc_scale = float(conc_scale)
+            agent.cfg.theory_align_v2_var_coef = float(var_coef)
+
         # Update entropy schedule
         if update_idx < hold_updates:
             if hold_updates > 1:
@@ -952,15 +987,19 @@ def run_ppo(
             agent.opt.state.clear()
             print(f"[optimizer] Adam state reset at update {update_idx}", flush=True)
 
-        # Compute policy mean effort
+        # Compute policy mean effort and concentration
         test_state = agent.state_from_params(q=float(train_qs[0]), k=k, w_h=w_h, w_l=w_l)
         policy_mean_effort = agent.mean_effort(test_state)
         theoretical_e = e_star_three_players(float(train_qs[0]), w_h, w_l, k)
-        
+        with torch.no_grad():
+            _dist, _ = agent.dist(test_state)
+            _alpha_mean = float(_dist.concentration1.mean().item())
+            _beta_mean = float(_dist.concentration0.mean().item())
+
         # Update convergence tracker
         if cheap_tracker is not None:
             cheap_tracker.update(metrics.get("approx_kl"), policy_mean_effort)
-        
+
         # Record convergence history
         convergence_history["steps"].append(steps_done)
         convergence_history["agent1_effort"].append(policy_mean_effort)
@@ -969,6 +1008,8 @@ def run_ppo(
         convergence_history["policy_mean_effort"].append(policy_mean_effort)
         convergence_history["approx_kl"].append(metrics.get("approx_kl", 0.0))
         convergence_history["batch_entropy"].append(metrics.get("batch_entropy", 0.0))
+        convergence_history["alpha_mean"].append(_alpha_mean)
+        convergence_history["beta_mean"].append(_beta_mean)
         convergence_history["mean_kl_window"].append(float("nan"))
         convergence_history["drift_effort"].append(float("nan"))
         convergence_history["exploitability"].append(float("nan"))
@@ -1070,17 +1111,27 @@ def run_ppo(
                     exploit_ok_streak = 0
                     drift_ok_streak = 0  # reset cheap gate streak on failure
                 if exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
-                    converged_flag = 1
-                    stop_reason = "exploitability"
-                    print(
-                        f"[Convergence] Exploitability satisfied for {exploit_ok_streak} evals; stopping training.",
-                        flush=True,
-                    )
-                    early_stop_triggered = True
+                    if update_idx < min_updates:
+                        print(
+                            f"[Convergence] Exploitability streak satisfied at upd={update_idx}, "
+                            f"but min_updates={min_updates} not reached; continuing.",
+                            flush=True,
+                        )
+                    else:
+                        converged_flag = 1
+                        stop_reason = "exploitability"
+                        print(
+                            f"[Convergence] Exploitability satisfied for {exploit_ok_streak} evals; stopping training.",
+                            flush=True,
+                        )
+                        early_stop_triggered = True
             else:
-                exploit_ok_streak = 0
+                # Non-eval update: do NOT reset exploit_ok_streak or
+                # last_best_dev_effort.  Only an actual eval failure (line 1109)
+                # should reset the streak.  Resetting here made it impossible
+                # to accumulate a streak of 5 with periodic-only (gap=10) evals.
+                # See docs/3p_stop_drilldown.md for full analysis.
                 last_exploitability = None
-                last_best_dev_effort = None
             
             # Convergence status logging (every 20 updates or when exploit evaluated)
             if update_idx % 20 == 0 or run_exploit:
@@ -1104,6 +1155,40 @@ def run_ppo(
         
         update_idx += 1
     
+    # Forced final exploitability evaluation (ensures BR fields are populated
+    # regardless of stop_reason — fixes null final_br_effort on max_updates stops)
+    if convergence_enabled:
+        q_for_exploit = float(train_qs[0]) if train_qs else float(cfg.get("q", q_init))
+        eval_seed = int(cfg.get("seed", 42)) + int(update_idx + 9999)
+        grid_cfg = exploit_cfg.get("grid", {}) if exploit_cfg else {}
+        try:
+            final_exploit_res = eval_exploitability_3p(
+                agent,
+                q=q_for_exploit,
+                effort_bounds=effort_bounds,
+                M=int(exploit_cfg.get("M", 8192)),
+                grid_cfg={
+                    "stage_a_step": grid_cfg.get("stage_a_step", 5.0),
+                    "stage_b_radius": grid_cfg.get("stage_b_radius", 15.0),
+                    "stage_b_step": grid_cfg.get("stage_b_step", 1.0),
+                    "stage_c_radius": grid_cfg.get("stage_c_radius", 3.0),
+                    "stage_c_step": grid_cfg.get("stage_c_step", 0.25),
+                },
+                seed=eval_seed,
+                w_h=w_h,
+                w_l=w_l,
+                k=k,
+            )
+            last_exploitability = final_exploit_res["exploitability"]
+            last_best_dev_effort = final_exploit_res["best_dev_effort"]
+            print(
+                f"[Convergence] Forced final exploit eval: "
+                f"exploit={last_exploitability:.4f}, BR={last_best_dev_effort:.2f}",
+                flush=True,
+            )
+        except Exception as e:
+            print(f"[Convergence] Forced final exploit eval failed: {e}", flush=True)
+
     # Final evaluation
     results = []
     for q in train_qs:
@@ -1176,9 +1261,10 @@ def run_ppo(
         convergence_dir = os.path.join("results", "three_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
         seed_val = cfg.get("seed", 42)
+        tag_part = f"_{output_tag}" if output_tag else ""
         convergence_file = os.path.join(
-            convergence_dir, 
-            f"ppo_3p_q{q:.1f}_seed{seed_val}_{ablation_name}_convergence.json"
+            convergence_dir,
+            f"ppo_3p_q{q:.1f}_seed{seed_val}{tag_part}_{ablation_name}_convergence.json"
         )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
@@ -1275,6 +1361,16 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["entropy_coef_hold"] = float(args.override_entropy_start)
         print(f"[config] entropy_coef_start/hold overridden to {args.override_entropy_start}, "
               f"entropy_coef_end={cfg.get('entropy_coef_end', 0.005)}", flush=True)
+
+    # --override-conc-ramp-warmup: override concentration ramp warmup
+    if hasattr(args, 'override_conc_ramp_warmup') and args.override_conc_ramp_warmup is not None:
+        cfg["theory_align_v2_ramp_warmup"] = int(args.override_conc_ramp_warmup)
+        print(f"[config] conc_ramp_warmup override: {args.override_conc_ramp_warmup}", flush=True)
+
+    # --min-updates: minimum updates before early stop
+    if hasattr(args, 'min_updates') and args.min_updates > 0:
+        cfg["min_updates"] = int(args.min_updates)
+        print(f"[config] min_updates: {args.min_updates}", flush=True)
 
     # --disable-adv-norm: skip advantage normalization
     if hasattr(args, 'disable_adv_norm') and args.disable_adv_norm:
@@ -1387,6 +1483,7 @@ def _run_cli(args: argparse.Namespace) -> str:
             episodes=args.episodes,
             train_qs=train_qs,
             ablation_name=args.ablation_name,
+            output_tag=args.output_tag,
         )
     
     return "OK"
@@ -1439,6 +1536,21 @@ def main():
         type=float,
         default=None,
         help="Override entropy_coef_end (takes priority over --theory-align-v2 defaults).",
+    )
+    parser.add_argument(
+        "--override-conc-ramp-warmup",
+        type=int,
+        default=None,
+        help="Override theory_align_v2_ramp_warmup (updates before concentration ramp begins). "
+             "Use 200 for the concentration fix validated in Round 2 two-player experiments.",
+    )
+
+    parser.add_argument(
+        "--min-updates",
+        type=int,
+        default=0,
+        help="Minimum updates before exploitability-based early stop is allowed. "
+             "0 = no minimum (default).",
     )
 
     # Convergence evaluation
@@ -1521,6 +1633,12 @@ def main():
         type=str,
         default="baseline",
         help="Ablation variant name for output files",
+    )
+    parser.add_argument(
+        "--output-tag",
+        type=str,
+        default=None,
+        help="Optional tag inserted into convergence JSON filename (e.g., 'round3').",
     )
     parser.add_argument(
         "--max-updates",

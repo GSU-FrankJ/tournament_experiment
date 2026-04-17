@@ -503,7 +503,16 @@ def run_ppo_different_cost(
     
     # Theory-align settings
     theory_align_v2_enabled = bool(cfg.get("theory_align_v2", False))
-    
+    theory_align_v2_conc_min = float(cfg.get("theory_align_v2_conc_min", 1.0))
+    theory_align_v2_conc_scale = float(cfg.get("theory_align_v2_conc_scale", 1.0))
+    theory_align_v2_conc_max = cfg.get("theory_align_v2_conc_max", None)
+    theory_align_v2_conc_min_start = float(cfg.get("theory_align_v2_conc_min_start", theory_align_v2_conc_min))
+    theory_align_v2_conc_scale_start = float(cfg.get("theory_align_v2_conc_scale_start", theory_align_v2_conc_scale))
+    theory_align_v2_var_coef = float(cfg.get("theory_align_v2_var_coef", 0.0))
+    theory_align_v2_var_coef_start = float(cfg.get("theory_align_v2_var_coef_start", theory_align_v2_var_coef))
+    theory_align_v2_ramp_warmup = int(cfg.get("theory_align_v2_ramp_warmup", 0))
+    theory_align_v2_ramp_steps = int(cfg.get("theory_align_v2_ramp_steps", 0))
+
     # PPO configuration (shared by both agents)
     ppo_cfg = PPOConfig(
         steps_per_update=int(cfg.get("steps_per_update", 4096)),
@@ -520,6 +529,9 @@ def run_ppo_different_cost(
         ratio_stop_threshold=cfg.get("ratio_stop_threshold"),
         target_kl=float(cfg.get("target_kl", 0.08)),
         theory_align_v2=theory_align_v2_enabled,
+        theory_align_v2_conc_min=theory_align_v2_conc_min,
+        theory_align_v2_conc_scale=theory_align_v2_conc_scale,
+        theory_align_v2_conc_max=theory_align_v2_conc_max,
     )
     
     # Create two separate agents (one per player, different k values)
@@ -573,6 +585,7 @@ def run_ppo_different_cost(
     # Exploitability tracking
     joint_exploit_ok_streak = 0
     stop_reason = "max_updates"  # default if we exhaust episodes
+    min_updates = int(cfg.get("min_updates", 0))
     converged_flag = 0
     last_exploit_1 = None
     last_exploit_2 = None
@@ -658,7 +671,32 @@ def run_ppo_different_cost(
                 lr_base = lr_hold + (lr_final - lr_hold) * lr_tail_progress
             for g in agent.opt.param_groups:
                 g["lr"] = lr_base
-        
+
+        # Concentration ramp schedule (ported from run_two_players.py:889-910)
+        if theory_align_v2_enabled:
+            warmup = max(0, int(theory_align_v2_ramp_warmup))
+            ramp_steps = max(0, int(theory_align_v2_ramp_steps))
+            if update_idx < warmup:
+                ramp_t = 0.0
+            elif ramp_steps <= 0:
+                ramp_t = 1.0
+            else:
+                ramp_t = float(update_idx - warmup + 1) / float(ramp_steps)
+                ramp_t = max(0.0, min(1.0, ramp_t))
+            conc_min = theory_align_v2_conc_min_start + (theory_align_v2_conc_min - theory_align_v2_conc_min_start) * ramp_t
+            conc_scale = theory_align_v2_conc_scale_start + (theory_align_v2_conc_scale - theory_align_v2_conc_scale_start) * ramp_t
+            var_coef = theory_align_v2_var_coef_start + (theory_align_v2_var_coef - theory_align_v2_var_coef_start) * ramp_t
+            for agent in [agent1, agent2]:
+                if hasattr(agent.net, "conc_min"):
+                    agent.net.conc_min = float(conc_min)
+                if hasattr(agent.net, "conc_scale"):
+                    agent.net.conc_scale = float(conc_scale)
+                if hasattr(agent.opponent_policy, "conc_min"):
+                    agent.opponent_policy.conc_min = float(conc_min)
+                if hasattr(agent.opponent_policy, "conc_scale"):
+                    agent.opponent_policy.conc_scale = float(conc_scale)
+                agent.cfg.theory_align_v2_var_coef = float(var_coef)
+
         # Collect rollout
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
         
@@ -829,13 +867,20 @@ def run_ppo_different_cost(
                 
                 # Check stopping condition
                 if joint_exploit_ok_streak >= patience_exploit:
-                    stop_reason = "exploitability"
-                    converged_flag = 1
-                    print(
-                        f"[Convergence] Exploitability satisfied for {joint_exploit_ok_streak} evals; stopping training.",
-                        flush=True,
-                    )
-                    break
+                    if update_idx < min_updates:
+                        print(
+                            f"[Convergence] Exploitability streak satisfied at upd={update_idx}, "
+                            f"but min_updates={min_updates} not reached; continuing.",
+                            flush=True,
+                        )
+                    else:
+                        stop_reason = "exploitability"
+                        converged_flag = 1
+                        print(
+                            f"[Convergence] Exploitability satisfied for {joint_exploit_ok_streak} evals; stopping training.",
+                            flush=True,
+                        )
+                        break
         
         update_idx += 1
     
@@ -1028,7 +1073,30 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["entropy_coef_hold"] = 0.0
         cfg["entropy_coef_end"] = 0.0
         cfg["theory_align_v2"] = True
-        print("[TheoryAlignV2] enabled: entropy=0", flush=True)
+        cfg["theory_align_v2_conc_min"] = 1000.0
+        cfg["theory_align_v2_conc_scale"] = 10000.0
+        cfg["theory_align_v2_conc_max"] = 100000.0
+        cfg["theory_align_v2_var_coef"] = 5e-2
+        cfg["theory_align_v2_conc_min_start"] = 100.0
+        cfg["theory_align_v2_conc_scale_start"] = 100.0
+        cfg["theory_align_v2_var_coef_start"] = 0.0
+        cfg["theory_align_v2_ramp_warmup"] = 20
+        cfg["theory_align_v2_ramp_steps"] = 50
+        cfg["lr_start"] = 5e-5
+        cfg["lr_end"] = 2e-5
+        cfg["update_epochs"] = 1
+        cfg["clip_range_start"] = 0.2
+        cfg["clip_range_end"] = 0.15
+        cfg["target_kl"] = 0.06
+        cfg["ratio_stop_threshold"] = 2.2
+        cfg["max_grad_norm"] = 0.25
+        cfg["value_coef"] = 1.0
+        print(
+            "[TheoryAlignV2] enabled: entropy=0, mean+conc head, var_coef=5e-2, "
+            "conc_min=1000, conc_scale=10000, conc_max=100000, ramp_warmup=20, ramp_steps=50, "
+            "lr/clip/epochs softened",
+            flush=True,
+        )
 
     # Re-apply explicit CLI entropy override (takes priority over mode defaults)
     if hasattr(args, 'override_entropy_end') and args.override_entropy_end is not None:
@@ -1047,6 +1115,16 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["entropy_coef_hold"] = 0.0
         cfg["entropy_coef_end"] = 0.0
         print("[ablation] --disable-entropy: entropy_coef=0 throughout training", flush=True)
+
+    # --override-conc-ramp-warmup: override concentration ramp warmup
+    if hasattr(args, 'override_conc_ramp_warmup') and args.override_conc_ramp_warmup is not None:
+        cfg["theory_align_v2_ramp_warmup"] = int(args.override_conc_ramp_warmup)
+        print(f"[config] conc_ramp_warmup override: {args.override_conc_ramp_warmup}", flush=True)
+
+    # --min-updates: minimum updates before early stop
+    if hasattr(args, 'min_updates') and args.min_updates > 0:
+        cfg["min_updates"] = int(args.min_updates)
+        print(f"[config] min_updates: {args.min_updates}", flush=True)
 
     # Convergence eval settings
     if "convergence" not in cfg:
@@ -1155,6 +1233,18 @@ def main():
         type=float,
         default=None,
         help="Override entropy_coef_end (takes priority over --theory-align-v2 defaults).",
+    )
+    parser.add_argument(
+        "--override-conc-ramp-warmup",
+        type=int,
+        default=None,
+        help="Override theory_align_v2_ramp_warmup (updates before concentration ramp begins).",
+    )
+    parser.add_argument(
+        "--min-updates",
+        type=int,
+        default=0,
+        help="Minimum updates before exploitability-based early stop is allowed.",
     )
 
     # Convergence evaluation
