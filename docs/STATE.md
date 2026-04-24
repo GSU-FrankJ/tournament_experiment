@@ -1,17 +1,34 @@
 # Project state
 
-Last updated: 2026-04-10
+Last updated: 2026-04-20
 
 ## Current status
-- **Parameter overhaul**: All configs updated to match `docs/experiment_config_040726.md`
-- **Concentration fix (major)**: `--override-conc-ramp-warmup 200` resolves q=45/55 convergence
-  - Root cause: theory_align_v2 concentration ramp froze policy in ~20 updates, before effort reached e*
-  - Fix: extend warmup from 20→200, giving policy time to descend to e* before concentration rises
-  - Results (Round 2, 5 seeds, Metric B): q=35 rel 4.3%, q=45 rel 2.1%, q=55 rel 2.4%
-  - Old entropy_end_0.002 files archived to `results/two_players/convergence/_archive_pre_warmup_fix/`
-- **Figure pipeline**: All 12 figures regenerated with warmup=200 results
-- **Pending**: q=35 seeds 44/45, q=45 seed 44 retrying (OOM from parallel run)
+- **Round 3/4 COMPLETE (2026-04-20)**: all non-2P scenarios now <3% mean rel gap (Metric B). See §Round 3/4 results below and `docs/round3_round4_report.md`.
+- **2P (Round 2, unchanged)**: q=35 rel 4.3%, q=45 rel 2.1%, q=55 rel 2.4%
+- **Parameter overhaul (2026-04-08)**: All configs match `docs/experiment_config_040726.md`
+- **Pending**: paper artifacts regeneration with Round 3/4 data (next step)
 - Two-stage runner deferred to separate task
+
+## Round 3/4 results (2026-04-20) — COMPLETE
+
+All non-2P scenarios brought below 3% mean relative gap (Metric B, 5 seeds each). Detailed per-scenario diagnosis + fixes in `docs/round3_round4_report.md`.
+
+### Final per-scenario rel% (5 seeds each)
+
+| Scenario | q=35 | q=45 | q=55 | Fix applied |
+|----------|-----:|-----:|-----:|------|
+| Two-Player | 4.30% | 2.08% | 2.36% | (Round 2 unchanged) |
+| Three-Player | 0.57% | — | 0.84% | streak fix + ramp + min_updates=300 |
+| Het. Cost | 1.07% | — | 0.97% | ramp + eps=0.03 + min_updates=300 |
+| Het. Ability | 1.61% | — | **0.64%** | eps=0.03 + min_updates=1000 |
+
+### da q=55 re-run incident (2026-04-20)
+
+First q=55 batch ran in worktree `hardcore-diffie-49ca45` (started ~10:51 Apr 19). Three seeds (s42/45/46) completed and wrote JSONs, one (s43) exited without JSON, one (s44) still training at upd=906 — at which point the entire worktree directory was externally deleted (not by the running Claude session). All JSONs/logs in the deleted tree were lost; only one FD on the s44 tee process briefly held a readable inode, which was lost before salvage succeeded.
+
+Batch restarted in the committed worktree `jovial-leakey-c2c923`. All 5 seeds (42-46) completed cleanly: mean 0.64% ± 0.89% (max 2.22% on s43), all stopped via `exploitability` at upd=1000 (min_updates floor), streak 960-972/1000.
+
+**Mitigation for future long-running batches**: run inside the worktree you intend to keep; do not launch long GPU jobs from a throwaway worktree.
 
 ## Figure pipeline (2026-04-09)
 
@@ -118,8 +135,9 @@ Still relevant. The new parameters were chosen to satisfy the participation cons
 | Task | Status | Notes |
 |------|--------|-------|
 | parameter-overhaul | **complete** | All configs match experiment_config_040726.md |
+| round3-round4-fixes | **complete** | All non-2P scenarios <3% mean rel gap (2026-04-20) |
+| paper-figures-tables-revision | **in progress** | Regenerating with Round 3/4 data (2026-04-20) |
 | two-stage-runner | deferred | Config and env exist, runner needs to be built |
-| paper-figures-tables-revision | stale | Needs re-run after new experiment data |
 | runner-refactor | deferred | Post-project cleanup |
 
 ## Phase 2 (Metric B Migration) — Complete
@@ -195,8 +213,9 @@ All attributes match 1:1. The ramp code is an exact copy.
 - `run_different_ability.py`: single shared agent, similar to two_players. Deferred.
 
 ## Next steps
-1. Run gradient baselines for all experiment types with new parameters
-2. Run PPO experiments (5 seeds each) for all q values
-3. Two-player Set 2 via CLI flags: `--k 0.0006 --w_h 8 --w_l 4`
-4. Regenerate paper artifacts after results are collected
-5. Build two-stage runner (separate task)
+1. Regenerate paper artifacts with Round 3/4 data: `python -m paper.generator make_all`
+2. Verify regenerated figures/tables reflect new numbers (esp. Het. Ability q=55 at 0.64%, up from "in progress")
+3. Address `round3_round4_report.md` §8 open questions:
+   - Whether da ~1.6% at q=35 is a shared-policy architectural floor (separate-policy variant TBD)
+   - Whether 3P q=55 std=0.35% holds under broader conditions
+4. Build two-stage runner (separate task)

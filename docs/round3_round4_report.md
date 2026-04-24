@@ -134,9 +134,21 @@ Mean 1.8%, std 0.19 effort units across three seeds.
 | q | mean_gap | mean_rel% | std_rel% | max_rel% |
 |--:|---------:|----------:|---------:|---------:|
 | 35 | 0.746 | 1.61% | 0.95% | 2.44% |
-| 55 | in progress | in progress | in progress | in progress |
+| 55 | 0.193 | 0.64% | 0.89% | 2.22% |
 
-q=35 complete. q=55 batch (5 seeds) launched after q=35 finished; status at the time of this report is "running, no completions yet."
+Both batches complete. q=55 tracks q=35 with the same mechanism; q=55 is slightly tighter (mean 0.64% vs 1.61%) because |e\*−init| is smaller at q=55 (30.37 vs 46.43), requiring less policy travel. Both batches stopped via `exploitability` at upd=1000 (min_updates floor); q=55 streaks were 960-972/1000 (satisfied from upd~30, stable for the remainder).
+
+q=55 per-seed (completed 2026-04-20 re-run in `jovial-leakey-c2c923`; the original batch in `hardcore-diffie-49ca45` was destroyed when that worktree was externally deleted mid-run — see `docs/STATE.md` for the incident):
+
+| seed | final e | gap | rel% | stop | streak |
+|:---:|--------:|-----:|------:|:---:|------:|
+| 42 | 30.310 | 0.062 | 0.21% | exploitability | 971 |
+| 43 | 29.697 | 0.675 | 2.22% | exploitability | 972 |
+| 44 | 30.269 | 0.103 | 0.34% | exploitability | 968 |
+| 45 | 30.429 | 0.058 | 0.19% | exploitability | 968 |
+| 46 | 30.440 | 0.068 | 0.22% | exploitability | 960 |
+
+s43 is the outlier at 2.22%, but its last-500-updates tail mean is 30.146 (rel 0.74%, bias −0.23 from e\*=30.372), so the snapshot-of-oscillation pattern flagged in §4.3 for q=35 also shows up here: the stop-point sample landed at −1.4σ from the tail distribution. All five seeds' tail means lie within [30.13, 30.19] — a consistent bias of ~0.2 effort units below e\*, same direction as q=35.
 
 ## 5. Paper-ready final summary
 
@@ -150,9 +162,9 @@ q=35 complete. q=55 batch (5 seeds) launched after q=35 finished; status at the 
 | Het. Cost | 35 | 4.44% | 1.07% | ramp + `eps=0.03` + `min_updates=300` |
 | Het. Cost | 55 | 5.51% | 0.97% | ramp + `eps=0.03` + `min_updates=300` |
 | Het. Ability | 35 | 6.83% | 1.61% | `eps=0.03` + `min_updates=1000` |
-| Het. Ability | 55 | 5.01% | in progress | `eps=0.03` + `min_updates=1000` |
+| Het. Ability | 55 | 5.01% | 0.64% | `eps=0.03` + `min_updates=1000` |
 
-All completed entries land below 3% mean relative gap. 2P entries unchanged — no regression path was exercised on those runners.
+All entries land below 3% mean relative gap. 2P entries unchanged — no regression path was exercised on those runners.
 
 ## 6. Reproducing each scenario
 
@@ -192,5 +204,5 @@ Note the config asymmetry: 3P and dc use `theory-align-v2 + ramp`; da intentiona
 ## 8. Open questions
 
 - Whether the da bias of ~0.8 effort units (1.6% relative) is a fundamental limit of the shared-policy architecture on the heterogeneous-ability game, or can be further reduced. The BR efforts differ by ~2 units (44.25 vs 46.75 in the diagnostic), so a shared policy that satisfies one player's BR will miss the other's. TBD whether a separate-policy variant can close this gap further or whether the current number is the right story to tell.
-- Whether da q=55 (batch in progress) tracks q=35. The mechanism is expected to be the same, but the q=55 gradient landscape has different slope; the batch will confirm or refute.
+- ~~Whether da q=55 tracks q=35.~~ **Resolved (2026-04-20)**: q=55 batch complete, mean 0.64% ± 0.89% (max 2.22% on s43), slightly tighter than q=35's 1.61% ± 0.95%. Mechanism identical. Tail-mean across the 5 seeds is 30.13-30.19 (bias −0.18 to −0.24 from e\*=30.372); s43's 2.22% is a snapshot −1.4σ from the stable tail, same pattern as §4.3. Confirms the shared-policy bias carries to q=55 with smaller magnitude proportional to smaller e\*.
 - Whether the 3P q=55 variance (std 0.35%) will hold under broader conditions — this is the tightest batch in the report but comes from a single ablation config.
