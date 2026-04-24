@@ -143,7 +143,17 @@ def get_q_values(experiment: str = None) -> List[float]:
 # with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
 # q55-convergence/STATE.md for details.
 BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
-    # Cleared: old overrides were for previous parameter set (k=0.0004)
+    # Round 3/4 fixes: promote the ablation used in the final paper batches to
+    # "baseline" so tables.py `ablation == "baseline"` filter picks them up.
+    # See docs/round3_round4_report.md §5 for the per-scenario fix rationale.
+    #   different_ability: `r4_h1_long` = eps=0.03 + min_updates=1000
+    #   different_cost:    `r4_dc_final` = ramp + eps=0.03 + min_updates=300
+    # three_players round3_baseline is named `baseline` internally (ablation_name
+    # metadata) so it already lands in the "baseline" bucket — no override needed.
+    ("different_ability", 35.0): "r4_h1_long",
+    ("different_ability", 55.0): "r4_h1_long",
+    ("different_cost", 35.0): "r4_dc_final",
+    ("different_cost", 55.0): "r4_dc_final",
 }
 
 
