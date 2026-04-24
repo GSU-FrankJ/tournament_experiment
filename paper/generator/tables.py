@@ -265,6 +265,40 @@ def generate_ablation_table(
     return csv_path, tex_path
 
 
+def _compute_error_metrics(final_df: pd.DataFrame, e_theory_avg: float) -> Tuple[float, float]:
+    """Compute (abs_err, rel_err%) aggregated across seeds.
+
+    For heterogeneous scenarios with distinct per-agent equilibria
+    (theoretical_effort1 != theoretical_effort2, e.g. `different_cost`), uses the
+    per-seed max-across-agents gap — i.e. `max(|a1-e1*|, |a2-e2*|)` for abs_err
+    and `max(|a1-e1*|/e1*, |a2-e2*|/e2*)` for rel_err, then mean across seeds.
+    This matches the report's definition (see
+    `docs/round3_round4_report.md` §3.3) and correctly reports the worst
+    per-agent distance to NE rather than the symmetric-average which can
+    mask agent-level misfit.
+
+    For symmetric scenarios (agents share e*), falls back to the canonical
+    avg-based `|ē−e*|/e*` computation.
+    """
+    has_per_agent_theory = (
+        "theoretical_effort1" in final_df.columns
+        and "theoretical_effort2" in final_df.columns
+        and not final_df["theoretical_effort1"].isna().all()
+        and not final_df["theoretical_effort2"].isna().all()
+    )
+    if has_per_agent_theory:
+        gap1 = np.abs(final_df["agent1_effort"] - final_df["theoretical_effort1"])
+        gap2 = np.abs(final_df["agent2_effort"] - final_df["theoretical_effort2"])
+        rel1 = gap1 / final_df["theoretical_effort1"]
+        rel2 = gap2 / final_df["theoretical_effort2"]
+        abs_err = float(np.maximum(gap1, gap2).mean())
+        rel_err = float(np.maximum(rel1, rel2).mean() * 100)
+    else:
+        abs_err = float(final_df["effort_error"].mean())
+        rel_err = (abs_err / e_theory_avg * 100) if e_theory_avg > 0 else float("nan")
+    return abs_err, rel_err
+
+
 def generate_final_paper_table(
     df: pd.DataFrame = None,
     output_dir: str = None,
@@ -347,8 +381,7 @@ def generate_final_paper_table(
                 if not final.empty:
                     effort_mean = final["policy_mean_effort"].mean()
                     effort_std = final["policy_mean_effort"].std() if len(final) > 1 else 0
-                    abs_err = final["effort_error"].mean()
-                    rel_err = (abs_err / e_theory * 100) if e_theory > 0 else float('nan')
+                    abs_err, rel_err = _compute_error_metrics(final, e_theory)
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
                         "q": int(q),
@@ -378,8 +411,7 @@ def generate_final_paper_table(
                     mean_conv = conv_match["convergence_step"].dropna().mean()
                     conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
 
-                    abs_err = final["effort_error"].mean()
-                    rel_err = (abs_err / e_theory * 100) if e_theory > 0 else float('nan')
+                    abs_err, rel_err = _compute_error_metrics(final, e_theory)
                     rows.append({
                         "Scenario": exp_labels.get(experiment, experiment),
                         "q": int(q),
