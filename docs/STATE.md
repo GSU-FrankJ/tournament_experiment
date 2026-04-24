@@ -1,6 +1,6 @@
 # Project state
 
-Last updated: 2026-04-20
+Last updated: 2026-04-24
 
 ## Current status
 - **Round 3/4 COMPLETE (2026-04-20)**: all non-2P scenarios now <3% mean rel gap (Metric B). See §Round 3/4 results below and `docs/round3_round4_report.md`.
@@ -30,58 +30,28 @@ Batch restarted in the committed worktree `jovial-leakey-c2c923`. All 5 seeds (4
 
 **Mitigation for future long-running batches**: run inside the worktree you intend to keep; do not launch long GPU jobs from a throwaway worktree.
 
-## Figure pipeline (2026-04-09)
+## Figure pipeline (current, 2026-04-24)
 
-### Step 0: Style gate — PASSED
-- Updated `paper/generator/config.py`: Wong palette, IEEE/ACM font sizes (8/9/10pt),
-  TrueType embedding (pdf.fonttype=42), horizontal-only grid
-- Gate checks: no Type 3 fonts, PDF width 6.70" (within 6.75±0.05"), all Wong colors verified
-- Output: `paper/generator/output/style_test/style_test.{pdf,png}`
+`python -m paper.generator make_all` produces 10 figures at `paper/figures/*.{pdf,png}` plus companion CSVs in `paper/data/` and 5 tables in `paper/tables/`. All consumers (BASELINE_OVERRIDES, filename parsing, Metric B) live in `paper/generator/`.
 
-### F1: Equilibrium Recovery (hero) — COMPLETE
-- Patched `run_registry.py`: `BASELINE_ALIASES = {"entropy_end_0.002"}` (line ~283)
-  so q=45/55 Set 1 runs classified as baseline
-- All 5 experiment groups × all q values plotted (14 conditions total)
-- Bootstrap percentile 95% CI (n=5, n_resamples=2000)
-- All seed counts = 5, all CI widths < 5 effort units
-- q=55 2P Set 1 gray band + "See Fig. 2" annotation
-- Output: `paper/generator/output/figures/F1_equilibrium_recovery.{pdf,png}`
+| Figure | Purpose |
+|--------|---------|
+| convergence_main | Effort-vs-step trajectories per q (PPO vs Gradient, all experiments) |
+| kl_dynamics | Approx-KL over training, per q |
+| exploitability_dynamics | Periodic exploitability over training |
+| beta_evolution | Beta policy α/β parameters over training |
+| beta_snapshots | Beta PDF snapshots at 10%/50%/90% of training (2P q=45) |
+| ablation_comparison | Entropy / cheap-gate / exploit-disable ablation sweep |
+| hyperparam_sensitivity | Appendix — hyperparameter sweep |
+| distance_to_equilibrium | Log-scale \|e−e\*\| over training |
+| effort_drift | Post-convergence drift statistics |
+| equilibrium_recovery_dotplot | Per-seed final effort vs e\* across experiments |
 
-### F2: EU Landscape & Gradient Signal — COMPLETE
-- 3 panels: (a) EU landscape, (b) symmetric gradient, (c) stall-point bars at e=36
-- Theory values verified: e*, gradient at e*=0, gradient at 36 matches plan
-- Output: `paper/generator/output/figures/F2_eu_landscape.{pdf,png}`
+Tables: `environment_config`, `summary_metrics`, `ablation_results`, `final_summary`, `convergence_comparison`.
 
-### F3: Training Diagnostics — COMPLETE
-- 2×3 grid: KL (top) + exploitability (bottom) × q=35/45/55
-- Output: `paper/generator/output/figures/F3_training_diagnostics.{pdf,png}`
+### Historical note — Phase 3 pipeline (2026-04-09, superseded)
 
-### F4: Distance to Equilibrium — COMPLETE
-- Single-column, log-scale |e-e*| with terminal gaps (Metric B): q=35: 1.96, q=45: 0.74, q=55: 0.68
-- Output: `paper/generator/output/figures/F4_distance_to_equilibrium.{pdf,png}`
-
-### F5: Ablation — BLOCKED (no data)
-
-### Appendix (8 figures) — ALL COMPLETE
-- FA_2p, FA_set2, FA_gvp, FA_3p, FA_het, FA_beta, FA_snap, FA_drift
-- All in `paper/generator/output/figures/`
-
-## Figure Manifest (Phase 3 complete)
-
-| fig_id | filename | width | fonts | status |
-|--------|----------|-------|-------|--------|
-| F1 | F1_equilibrium_recovery.pdf | 6.70" | TT | done |
-| F2 | F2_eu_landscape.pdf | 6.77" | TT | done |
-| F3 | F3_training_diagnostics.pdf | 6.69" | TT | done |
-| F4 | F4_distance_to_equilibrium.pdf | 3.20" | TT | done |
-| FA_2p | FA_2p_convergence.pdf | 6.69" | TT | done |
-| FA_3p | FA_3p_convergence.pdf | 3.20" | TT | done |
-| FA_beta | FA_beta_evolution.pdf | 6.67" | TT | done |
-| FA_drift | FA_drift_post_convergence.pdf | 6.69" | TT | done |
-| FA_gvp | FA_gvp_comparison.pdf | 6.69" | TT | done |
-| FA_het | FA_het_convergence.pdf | 6.69" | TT | done |
-| FA_set2 | FA_set2_convergence.pdf | 6.69" | TT | done |
-| FA_snap | FA_snap_beta_pdf.pdf | 6.70" | TT | done |
+Earlier pipeline produced 12 figures (F1–F4 hero + 8 FA_\* appendix) at `paper/generator/output/figures/`. Files no longer exist on disk; the generator was restructured to write flat names (`convergence_main`, `beta_snapshots`, etc.) into `paper/figures/`. If any paper draft still references `F1_equilibrium_recovery.pdf` etc., update to the current names.
 
 ## Parameter overhaul (2026-04-08)
 
