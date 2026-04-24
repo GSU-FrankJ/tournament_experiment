@@ -863,7 +863,7 @@ def plot_beta_evolution(
 
 def plot_beta_snapshots(
     df: pd.DataFrame = None,
-    q: float = 40.0,
+    q: float = 45.0,
     snapshot_fractions: List[float] = None,
     output_path: str = None,
 ) -> Tuple[plt.Figure, str]:
@@ -1836,8 +1836,8 @@ def generate_all_figures(
     if path:
         results["beta_evolution"] = path
     
-    # Beta snapshots (for q=40)
-    fig, path = plot_beta_snapshots(df, q=40.0)
+    # Beta snapshots (for q=45, mid-range 2P Set 1)
+    fig, path = plot_beta_snapshots(df, q=45.0)
     if path:
         results["beta_snapshots"] = path
     
