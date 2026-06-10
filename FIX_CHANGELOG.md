@@ -357,3 +357,42 @@ summary.csv · V1 read-only dry-run acceptance check (5 seeds/cell, post-fix tag
 duplicates, all stop_reason=exploitability) · E regeneration via make_all — **blocked on
 owner approval**, and even then interim until the post-env-fix `r5_sampled` re-run wave
 (gradient re-runs additionally need overwrite protection: gradient filenames carry no tag/seed).
+
+---
+
+## 14. Canonicalization executed C1→V1 (owner-approved); E still blocked
+
+**Owner approval (2026-06-10):** 3P → `round3_baseline`, dc → `r4_dc_final`,
+da → `r4_h1_long` — explicitly as TEMPORARY picks (all closed-form-trained legacy; the
+`r5_sampled` sampled-training wave replaces them). Recorded decisions: (1) da's pick is
+standard-config, NOT theory-align-v2 — the da v2-vs-standard question is an **open decision
+for r5_sampled** (run both under sampled training and compare); (2) provenance footnotes
+required at E: round3's gate was eps=0.05 (measured exploitability also passes 0.03), and
+r4_dc_final has no committed launch script. Both are recorded as comments on
+`BASELINE_OVERRIDES` and in the plan doc.
+
+- `5999165` **C2** `fix: keep filename batch tags distinct in run registry, guard duplicates`
+  — a "baseline" ablation_name from metadata/JSON no longer erases a more specific filename
+  tag (fixes the 3P `--output-tag` collision at the source: round3 files now classify as
+  `round3_baseline`); plus a duplicate-run-identity guard (warn with both paths, keep newer).
+  Verified: 112 runs, 0 duplicate identities, 0 guard warnings, 10 round3 + 10 distinct
+  pre-fix 3P runs.
+- `58fcc26` **C3** `fix: key run-level aggregation on weight_variant` — weight_variant added
+  to per-run groupbys in `get_convergence_step` / `get_verified_convergence_step` /
+  `compute_summary_metrics` (carried through `SummaryMetrics`), and table cells filter
+  weight_variant=baseline. Verified: 2P Set 1 / Set 2 now 15+15 separate rows.
+- `d048418` **D1** `chore: add da q=55 Round-4 (r4_h1_long) results and summary rows` —
+  data-only commit of the five untracked JSONs + summary.csv.
+- `2044608` **C1+V1** `feat: canonicalize approved Round-3/4 runs as interim baseline` —
+  BASELINE_OVERRIDES populated with the approved tags + provenance/caveat comments;
+  `tests/test_registry_canonicalization.py` added as the repeatable V1 acceptance check.
+
+**V1 acceptance result (read-only): PASS** — 0 duplicate identities across 112 runs; exactly
+seeds {42..46} in every (experiment, q) baseline cell; every promoted row sourced from the
+approved post-fix tag (verified against registry file paths); all stop_reason="exploitability"
+with conv updates: 3P q35 [309,300,305,308,307], q55 [304,307,307,305,303]; dc q35
+[300,307,304,307,302], q55 [306,301,301,308,302]; da q35/q55 all [1000]×5 (min_updates floor);
+2P q35 [69,49,49,49,49], q45 [69,69,59,69,69], q55 [99,89,109,89,79]; Set 2 kept separate
+(15 PPO + 3 gradient).
+
+**NOT executed:** E (`python -m paper.generator make_all`) — awaiting explicit go-ahead.

@@ -1,10 +1,24 @@
 # Registry canonicalization plan — PREREQUISITE FOR `make_all` REGENERATION
 
-**Status: PLAN ONLY. Nothing below has been executed. `make_all` has NOT been run, no
-overrides have been set, no results files have been moved or committed.** Awaiting owner
-approval; the execution checklist at the end maps one-to-one onto future commits.
+**Status (2026-06-10): APPROVED per scenario and EXECUTED through V1.**
+C2 = commit `5999165`, C3 = `58fcc26`, D1 = `d048418`, C1 + V1 acceptance test = `2044608`.
+**E (`make_all` regeneration) remains BLOCKED on a separate owner go-ahead — not executed.**
 
-Date: 2026-06-10 · Branch: `fix/audit-remediation` · Companion: `FIX_CHANGELOG.md` §13,
+**Owner decisions recorded with the approval:**
+1. 3-player → `round3_baseline`, het-cost → `r4_dc_final`, het-ability → `r4_h1_long` — all
+   three are closed-form-trained legacy, accepted as TEMPORARY picks solely so `make_all` is
+   runnable; the `r5_sampled` wave replaces them.
+2. da: `r4_h1_long` is accepted despite being standard-config (NOT theory-align-v2), purely as
+   the cleanest complete group. **OPEN DECISION for r5_sampled: run het-ability BOTH
+   theory-align-v2 and standard under sampled training and settle the config explicitly.**
+3. Provenance footnotes that MUST accompany any artifact generated at E (also recorded as
+   comments on `BASELINE_OVERRIDES` in `paper/generator/config.py`):
+   - `round3_baseline` ran under the pre-unification exploit_eps=0.05 gate (measured
+     exploitability at stop 0.0002–0.0047 also passes the unified 0.03);
+   - `r4_dc_final` has no committed launch script (provenance = docs/round3_round4_report.md +
+     per-JSON exploit_config + stops at the --min-updates 300 floor).
+
+Date: 2026-06-10 · Branch: `fix/audit-remediation` · Companion: `FIX_CHANGELOG.md` §13-14,
 `AUDIT_REPORT.md` §5.5.
 
 ---
