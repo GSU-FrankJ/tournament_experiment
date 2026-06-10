@@ -96,3 +96,34 @@ Old wording replaced:
 New invariant (both files): training uses sampled outcomes only — fresh uniform noise, realized
 rank, w_H/w_L prizes minus cost; closed-form win-prob / expected-payoff / e* are
 evaluation/baseline-only and never enter training rewards or policy updates.
+
+---
+
+## 5. `fix: make 2P gradient baseline true MC-FD with CRN, drop symmetry projection`
+
+**Spec rationale (Appendix A):** the baseline is MC-FD gradient play — sampled performance with
+common random numbers, central finite-difference step delta, projected gradient ascent,
+simultaneous update, tolerance tau; NO closed-form win probability, no symmetry projection.
+
+- `run/run_two_players.py`:
+  - `gradient_descent_two_players` now calls `_stochastic_fd_gradients` (sampled payoffs; one
+    shared noise+tie-break batch reused for all four perturbed evaluations = CRN) instead of
+    `_closed_form_fd_gradients`, which is deleted.
+  - Removed the periodic symmetry enforcement (`e1 = e2 = avg` every 50 steps) and the
+    `symmetry_gap < symmetry_tol` term in the stop criterion; symmetry gap is now reported only.
+    Stop = `grad_norm < tol AND max step change < tol` (tolerance tau). Projection via effort
+    clipping and simultaneous updates unchanged.
+  - Dropped now-dead `--grad-symmetry-enforce` / `--grad-symmetry-tol` CLI flags and the
+    corresponding parameters.
+  - The saved `gradient_mode = "stochastic_uniform"` label is now truthful (previously a
+    mislabel over closed-form FD).
+- **Verification:** py_compile + 300-iteration smoke (no files written): from init (30, 70) both
+  efforts move toward e* = 45.45 under sampled gradients; values finite and projected.
+
+**Effect on results:** existing `gradient_*_convergence.json` files were produced by the old
+closed-form solver and no longer reflect this code path; baseline re-runs are required before the
+gradient rows/figures are quoted (out of scope this session).
+
+**Known leftover (intentional):** the 3P/dc/da gradient baselines still use the envs'
+closed-form helpers (now explicitly EVAL/BASELINE-ONLY). Porting the sampled MC-FD pattern to
+those runners is follow-up work; this session's target was the 2P implementation.

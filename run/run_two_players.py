@@ -126,29 +126,6 @@ def _batch_payoffs_uniform(env: TwoPlayersEnv, e1: float, e2: float, eps1: np.nd
     return float(u1.mean()), float(u2.mean())
 
 
-def _closed_form_fd_gradients(
-    env: TwoPlayersEnv,
-    e1: float,
-    e2: float,
-    delta: float,
-) -> tuple[float, float]:
-    """Central-difference gradients using closed-form expected utility (no noise)."""
-    bounds = (env.effort_low, env.effort_high)
-    e1_plus = _clip_effort(e1 + delta, bounds)
-    e1_minus = _clip_effort(e1 - delta, bounds)
-    e2_plus = _clip_effort(e2 + delta, bounds)
-    e2_minus = _clip_effort(e2 - delta, bounds)
-
-    u1_plus = env.expected_utility(e1_plus, e2)
-    u1_minus = env.expected_utility(e1_minus, e2)
-    u2_plus = env.expected_utility(e2_plus, e1)
-    u2_minus = env.expected_utility(e2_minus, e1)
-
-    g1 = (u1_plus - u1_minus) / (e1_plus - e1_minus) if e1_plus != e1_minus else 0.0
-    g2 = (u2_plus - u2_minus) / (e2_plus - e2_minus) if e2_plus != e2_minus else 0.0
-    return float(g1), float(g2)
-
-
 def _stochastic_fd_gradients(
     env: TwoPlayersEnv,
     e1: float,
@@ -156,7 +133,12 @@ def _stochastic_fd_gradients(
     delta: float,
     num_samples: int,
 ) -> tuple[float, float]:
-    """Central-difference gradients for each player using uniform noise samples."""
+    """MC-FD gradients (Appendix A): central differences on SAMPLED payoffs.
+
+    One shared batch of uniform noise draws + tie-breaks (common random
+    numbers) is reused for all four perturbed evaluations, so the central
+    difference is taken under identical randomness.
+    """
     eps1, eps2, tie_breaks = env.draw_noise_batch(num_samples)
 
     e1_plus = _clip_effort(e1 + delta, (env.effort_low, env.effort_high))
@@ -389,11 +371,12 @@ def gradient_descent_two_players(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> tuple[tuple[float, float], Dict[str, float]]:
-    """Two-player gradient ascent with uniform noise and distinct starts."""
+    """MC-FD gradient play (Appendix A): sampled payoffs with common random
+    numbers, central finite differences (step ``eps``), projected gradient
+    ascent, simultaneous updates, tolerance ``tol``. No closed-form win
+    probability and no symmetry projection — symmetry is only reported."""
     effort_bounds = tuple(cfg["effort_bounds_stage2"])
     env = TwoPlayersEnv(
         w_h=cfg["w_h"],
@@ -425,8 +408,9 @@ def gradient_descent_two_players(
     for step in range(1, steps + 1):
         # Adaptive learning rate with exponential decay
         lr_current = lr * (lr_decay ** step)
-        
-        g1, g2 = _closed_form_fd_gradients(env, e1, e2, delta=eps)
+
+        # Sampled MC-FD gradient with common random numbers (Appendix A)
+        g1, g2 = _stochastic_fd_gradients(env, e1, e2, delta=eps, num_samples=num_samples)
         e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
         e2_new = _clip_effort(e2 + lr_current * g2, effort_bounds)
 
@@ -434,15 +418,9 @@ def gradient_descent_two_players(
         delta_e2 = abs(e2_new - e2)
         grad_norm = max(abs(g1), abs(g2))
 
+        # Simultaneous (projected) update
         e1, e2 = e1_new, e2_new
-        
-        # Periodic symmetry enforcement (prevent drift to asymmetric points)
-        if symmetry_enforce_every > 0 and step % symmetry_enforce_every == 0:
-            e_avg = 0.5 * (e1 + e2)
-            e1 = e2 = e_avg
-            if log and step <= 100:  # Debug info in early steps
-                print(f"  [symmetry enforce] step={step} e_avg={e_avg:.6f}")
-        
+
         history["iterations"] = float(step)
         history["final_grad"] = float(grad_norm)
         history["final_grad_pair"] = (float(g1), float(g2))
@@ -452,7 +430,7 @@ def gradient_descent_two_players(
         history["e2_history"].append(float(e2))
         history["step_history"].append(step)
         
-        # Enhanced logging with symmetry gap
+        # Symmetry gap is REPORTED only (never enforced, never a stop criterion)
         symmetry_gap = abs(e1 - e2)
         if log and (step == 1 or step % 250 == 0 or step == steps):
             print(
@@ -460,15 +438,13 @@ def gradient_descent_two_players(
                 f"grad=({g1:.6f},{g2:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e}) "
                 f"lr={lr_current:.6f} sym_gap={symmetry_gap:.4f}"
             )
-        
-        # Stricter convergence criteria: gradient small AND symmetric AND stable
-        if (grad_norm < tol and 
-            symmetry_gap < symmetry_tol and
-            max(delta_e1, delta_e2) < tol):
+
+        # Tolerance tau: gradient estimate and update step both below tol
+        if grad_norm < tol and max(delta_e1, delta_e2) < tol:
             if log:
                 print(
                     f"[gradient-2p] converged at step={step} "
-                    f"grad_norm={grad_norm:.3e} symmetry_gap={symmetry_gap:.3e}"
+                    f"grad_norm={grad_norm:.3e} sym_gap={symmetry_gap:.3e}"
                 )
             break
 
@@ -487,8 +463,6 @@ def run_gradient(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
     ablation_name: str = "baseline",
 ) -> Dict:
@@ -503,8 +477,6 @@ def run_gradient(
         num_samples=num_samples,
         init_perturb=init_perturb,
         lr_decay=lr_decay,
-        symmetry_enforce_every=symmetry_enforce_every,
-        symmetry_tol=symmetry_tol,
         log=log,
     )
     final_e = 0.5 * (e1 + e2)
@@ -1996,8 +1968,6 @@ def _run_cli(args: argparse.Namespace) -> str:
                 num_samples=args.grad_samples,
                 init_perturb=args.grad_init_perturb,
                 lr_decay=args.grad_lr_decay,
-                symmetry_enforce_every=args.grad_symmetry_enforce,
-                symmetry_tol=args.grad_symmetry_tol,
                 log=True,
                 ablation_name=args.ablation_name,
             )
@@ -2066,8 +2036,6 @@ def main():
     parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 256), help="Monte Carlo samples for uniform-noise gradients.")
     parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0), help="Initial asymmetry to avoid symmetric starts.")
     parser.add_argument("--grad-lr-decay", type=float, default=base_config.get("gradient_lr_decay", 0.9995), help="Exponential decay factor for learning rate.")
-    parser.add_argument("--grad-symmetry-enforce", type=int, default=base_config.get("gradient_symmetry_enforce_every", 50), help="Force symmetry every N steps (0 to disable).")
-    parser.add_argument("--grad-symmetry-tol", type=float, default=base_config.get("gradient_symmetry_tol", 0.1), help="Symmetry tolerance for convergence criterion.")
     parser.add_argument("--eval-vs-history", action="store_true", help="Evaluate policy against each opponent snapshot and report averages.")
     parser.add_argument("--eval-symmetric", dest="eval_symmetric", action="store_true", help="Evaluate policy against itself (default enabled).")
     parser.add_argument("--no-eval-symmetric", dest="eval_symmetric", action="store_false", help="Disable symmetric self-play evaluation.")
