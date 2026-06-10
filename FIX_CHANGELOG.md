@@ -331,3 +331,29 @@ With commits 10-12, all four scenarios' numerical baselines are sampled MC-FD wi
 contain no closed-form win probability, no symmetry projection, and no e*-dependent stopping.
 All existing `gradient_*_convergence.json` artifacts predate this and require re-runs before
 being quoted.
+
+---
+
+## 13. `docs: registry canonicalization plan (PLAN ONLY — awaiting approval)`
+
+**Deliverable:** `docs/registry_canonicalization_plan.md`. **Nothing executed** — `make_all`
+NOT run, `BASELINE_OVERRIDES` NOT edited, no results files moved/committed.
+
+New read-only findings sharpening the audit's registry issue:
+- 28 duplicate run keys in the current registry: the 10 real 3P collisions (pre-fix and
+  `round3_baseline` files BOTH carry JSON `ablation_name="baseline"` — the Round-3 batch used
+  `--output-tag`, which only renames the file), whose trajectories the loader silently MERGES
+  per seed; plus 18 Set 1/Set 2 pairs that merge because run-level groupbys omit
+  `weight_variant`.
+- dc/da Round-4 canonical runs are cleanly tagged in JSON (`r4_dc_final`, `r4_h1_long`) — a
+  pure `BASELINE_OVERRIDES` fix; 3P additionally needs a narrow filename-tag precedence rule
+  in the registry plus a duplicate-key guard.
+
+Plan summary (full details + exact override dict in the plan doc):
+C1 populate BASELINE_OVERRIDES (3P→round3_baseline, dc→r4_dc_final, da→r4_h1_long; 2P
+unchanged) · C2 registry filename-tag precedence + duplicate-key guard · C3 add
+weight_variant to run-level groupbys · D1 commit the 5 untracked da q=55 r4 JSONs +
+summary.csv · V1 read-only dry-run acceptance check (5 seeds/cell, post-fix tags only, zero
+duplicates, all stop_reason=exploitability) · E regeneration via make_all — **blocked on
+owner approval**, and even then interim until the post-env-fix `r5_sampled` re-run wave
+(gradient re-runs additionally need overwrite protection: gradient filenames carry no tag/seed).
