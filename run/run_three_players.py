@@ -38,7 +38,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.one_stage_three_players import config as base_config
 from utils.theory import e_star_three_players, clip_stage2
-from utils.prob import win_prob_three_players, win_prob_three_players_grad
+from utils.prob import win_prob_three_players_grad
 from envs.three_players_env import ThreePlayersEnv
 from agents.ppo_three_players import PPOThreePlayersBandit, PPOConfig
 
@@ -284,75 +284,15 @@ def _stochastic_fd_gradients_3p(
     delta: float,
     num_samples: int,
 ) -> tuple[float, float, float]:
-    """Central-difference gradients for three-player tournament using Monte Carlo.
-    
-    For symmetric equilibrium, we can use the analytic gradient from the environment.
-    This function provides a stochastic alternative for validation.
+    """Gradient for the three-player numerical reference.
+
+    Delegates to the env's closed-form gradient (EVAL/BASELINE-ONLY helper).
+    delta/num_samples are kept in the signature for a future fully-sampled
+    MC-FD variant matching Appendix A (see _stochastic_fd_gradients in
+    run_two_players.py for the reference implementation).
     """
-    # Use analytic gradient from environment (more accurate)
-    if env.use_analytic:
-        return env.expected_utility_gradient(e1, e2, e3)
-    
-    # Fallback to finite differences if analytic not available
-    lo, hi = env.effort_range
-    
-    def _utility_estimate(e_i: float, e_j: float, e_k: float, player: int) -> float:
-        """Estimate utility for given player via Monte Carlo."""
-        rng = np.random.default_rng(42)
-        utils = []
-        for _ in range(num_samples):
-            eps = rng.uniform(-env.q, env.q, size=3)
-            scores = [e_i + eps[0], e_j + eps[1], e_k + eps[2]]
-            winner = int(np.argmax(scores))
-            efforts = [e_i, e_j, e_k]
-            for p in range(3):
-                payoff = env.w_h if p == winner else env.w_l
-                cost = env.k * efforts[p] ** 2
-                if p == player:
-                    utils.append(payoff - cost)
-        return float(np.mean(utils))
-    
-    # Compute finite difference gradients
-    e1_plus = _clip_effort(e1 + delta, (lo, hi))
-    e1_minus = _clip_effort(e1 - delta, (lo, hi))
-    e2_plus = _clip_effort(e2 + delta, (lo, hi))
-    e2_minus = _clip_effort(e2 - delta, (lo, hi))
-    e3_plus = _clip_effort(e3 + delta, (lo, hi))
-    e3_minus = _clip_effort(e3 - delta, (lo, hi))
-    
-    g1 = (_utility_estimate(e1_plus, e2, e3, 0) - _utility_estimate(e1_minus, e2, e3, 0)) / (2.0 * delta)
-    g2 = (_utility_estimate(e1, e2_plus, e3, 1) - _utility_estimate(e1, e2_minus, e3, 1)) / (2.0 * delta)
-    g3 = (_utility_estimate(e1, e2, e3_plus, 2) - _utility_estimate(e1, e2, e3_minus, 2)) / (2.0 * delta)
-    
-    return float(g1), float(g2), float(g3)
-
-
-def _coma_baseline(
-    agent,
-    state: torch.Tensor,
-    opp_e1: float,
-    opp_e2: float,
-    q: float,
-    k: float,
-    w_h: float,
-    w_l: float,
-    K: int = 32,
-) -> float:
-    """Compute COMA counterfactual baseline via MC samples from current policy.
-
-    Returns E_{e'~π}[utility(e', opp_e1, opp_e2)] — the expected reward if
-    the focal player plays according to the current policy while opponents
-    are fixed at opp_e1, opp_e2.
-    """
-    w_gap = w_h - w_l
-    total = 0.0
-    with torch.no_grad():
-        for _ in range(K):
-            _, e_sample, _, _ = agent.act(state)
-            e_s = float(e_sample.item())
-            p_i = win_prob_three_players(e_s, opp_e1, opp_e2, q)
-            total += w_l + p_i * w_gap - k * e_s * e_s
-    return total / K
+    del delta, num_samples
+    return env.expected_utility_gradient(e1, e2, e3)
 
 
 def gradient_descent_three_players(
@@ -378,7 +318,6 @@ def gradient_descent_three_players(
         q=cfg["q"],
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
-        reward_mode=str(cfg.get("reward_mode", "expected")),
     )
     if eps <= 0:
         raise ValueError("grad_eps must be positive for finite differences")
@@ -789,11 +728,10 @@ def run_ppo(
     if convergence_enabled:
         print(f"[Convergence] enabled=True cheap_gate_profile={cheap_profile_name}", flush=True)
     
-    # Create environment (reuse across steps for RNG continuity)
+    # Create environment (reuse across steps for RNG continuity).
+    # Rewards are SAMPLED rank-order outcomes (winner w_H, losers w_L) — the
+    # env exposes no closed-form reward mode anymore (spec: train/eval split).
     q_init = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
-    reward_mode = str(cfg.get("reward_mode", "expected"))
-    noise_scale = float(cfg.get("noise_scale", 0.0))
-    coma_k = int(cfg.get("coma_k", 0))
     env = ThreePlayersEnv(
         w_h=w_h,
         w_l=w_l,
@@ -801,16 +739,7 @@ def run_ppo(
         q=q_init,
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
-        use_binary_rewards=bool(cfg.get("use_binary_rewards", False)),
-        reward_mode=reward_mode,
-        noise_scale=noise_scale,
     )
-    if reward_mode != "expected":
-        print(f"[env] Reward mode: {reward_mode} noise_scale={noise_scale}", flush=True)
-    if coma_k > 0:
-        print(f"[env] COMA counterfactual baseline: K={coma_k} MC samples", flush=True)
-    if cfg.get("use_binary_rewards", False):
-        print("[env] Binary rewards enabled: stochastic winner, w_H/w_L payoffs", flush=True)
     
     # Convergence history for plotting
     convergence_history: Dict[str, Any] = {
@@ -948,20 +877,9 @@ def run_ppo(
             )
             _, rewards, _, done, _ = env.step(efforts)
 
-            # COMA counterfactual baseline: subtract E_{e'~π}[R(e', opponents)]
             r1 = float(rewards[0].item())
             r2 = float(rewards[1].item())
             r3 = float(rewards[2].item())
-            if coma_k > 0:
-                ef1 = float(e1_biased.item())
-                ef2 = float(e2_biased.item())
-                ef3 = float(e3_biased.item())
-                cf1 = _coma_baseline(agent, state, ef2, ef3, q, k, w_h, w_l, coma_k)
-                cf2 = _coma_baseline(agent, state, ef1, ef3, q, k, w_h, w_l, coma_k)
-                cf3 = _coma_baseline(agent, state, ef1, ef2, q, k, w_h, w_l, coma_k)
-                r1 -= cf1
-                r2 -= cf2
-                r3 -= cf3
 
             # Store transitions for all 3 players (all learner-generated in self-play)
             agent.store(state, a1_norm, logp1, r1, v1, bool(done))
@@ -1377,17 +1295,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["normalize_advantages"] = False
         print("[ablation] --disable-adv-norm: advantage normalization disabled", flush=True)
 
-    # --reward-mode, --noise-scale, --coma-k
-    if hasattr(args, 'reward_mode') and args.reward_mode is not None:
-        cfg["reward_mode"] = str(args.reward_mode)
-    if hasattr(args, 'noise_scale'):
-        cfg["noise_scale"] = float(args.noise_scale)
-    if hasattr(args, 'coma_k'):
-        cfg["coma_k"] = int(args.coma_k)
-
-    # --binary-rewards: stochastic binary w_H/w_L instead of smooth analytic
-    if hasattr(args, 'binary_rewards') and args.binary_rewards:
-        cfg["use_binary_rewards"] = True
 
     # --hidden-size: override network hidden layer size
     if hasattr(args, 'hidden_size') and args.hidden_size is not None:
@@ -1672,35 +1579,11 @@ def main():
         help="Disable asymmetric warmup (equivalent to --asymmetric-warmup-updates 0)",
     )
 
-    # Best-response regularization
-    parser.add_argument(
-        "--binary-rewards",
-        action="store_true",
-        help="Use stochastic binary rewards (w_H/w_L) instead of smooth analytic win probs.",
-    )
     parser.add_argument(
         "--hidden-size",
         type=int,
         default=128,
         help="Hidden layer size for actor-critic network (default: 128, 2P uses 64).",
-    )
-    parser.add_argument(
-        "--reward-mode",
-        choices=["expected", "pairwise_binary", "hybrid"],
-        default="expected",
-        help="Reward mode: expected, pairwise_binary, or hybrid. Default: expected.",
-    )
-    parser.add_argument(
-        "--noise-scale",
-        type=float,
-        default=0.0,
-        help="Noise scale for hybrid reward mode (0=expected, 1=full binary). Default: 0.",
-    )
-    parser.add_argument(
-        "--coma-k",
-        type=int,
-        default=0,
-        help="COMA counterfactual baseline MC samples (0=disabled). Default: 0.",
     )
     parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
     parser.add_argument("--br-reg-warmup", type=int, default=None, help="Updates before BR reg kicks in")
