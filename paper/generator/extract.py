@@ -642,6 +642,8 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     min_steps = int(CONVERGENCE_CONFIG["min_steps"])
 
     group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")  # keep Set 1 / Set 2 runs distinct
     if "experiment" in df.columns:
         group_cols = ["experiment"] + group_cols
 
@@ -688,6 +690,8 @@ def get_verified_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
         convergence_update (NaN if not verified)
     """
     group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")  # keep Set 1 / Set 2 runs distinct
     if "experiment" in df.columns:
         group_cols = ["experiment"] + group_cols
 

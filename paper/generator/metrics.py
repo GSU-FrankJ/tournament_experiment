@@ -343,6 +343,7 @@ class SummaryMetrics:
     q: float
     seed: int
     ablation: str
+    weight_variant: str
     # Effort metrics
     final_effort: float
     theoretical_effort: float
@@ -372,19 +373,24 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
     """
     results = []
 
-    # Group by run (include experiment if present)
+    # Group by run (include experiment / weight_variant when present so that
+    # Set 1 / Set 2 prize variants never merge into one run)
     group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")
     if "experiment" in df.columns:
         group_cols = ["experiment"] + group_cols
 
     grouped = df.groupby(group_cols)
 
     for group_key, group in grouped:
-        if "experiment" in df.columns:
-            experiment, method, q, seed, ablation = group_key
-        else:
-            method, q, seed, ablation = group_key
-            experiment = "two_players"
+        key_map = dict(zip(group_cols, group_key if isinstance(group_key, tuple) else (group_key,)))
+        experiment = key_map.get("experiment", "two_players")
+        method = key_map["method"]
+        q = key_map["q"]
+        seed = key_map["seed"]
+        ablation = key_map["ablation"]
+        weight_variant = key_map.get("weight_variant", "baseline")
         group = group.sort_values("step")
 
         # Get effort series
@@ -471,6 +477,7 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
             q=q,
             seed=seed,
             ablation=ablation,
+            weight_variant=weight_variant,
             final_effort=final_effort,
             theoretical_effort=e_star_val,
             abs_error=abs_error,
@@ -496,6 +503,7 @@ def summary_metrics_to_dataframe(metrics: List[SummaryMetrics]) -> pd.DataFrame:
             "q": m.q,
             "seed": m.seed,
             "ablation": m.ablation,
+            "weight_variant": m.weight_variant,
             "final_effort": m.final_effort,
             "theoretical_effort": m.theoretical_effort,
             "abs_error": m.abs_error,

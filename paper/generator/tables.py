@@ -383,6 +383,8 @@ def generate_final_paper_table(
                     ]
                     if "experiment" in conv_df.columns:
                         conv_match = conv_match[conv_match["experiment"] == experiment]
+                    if "weight_variant" in conv_df.columns:
+                        conv_match = conv_match[conv_match["weight_variant"] == "baseline"]
                     mean_conv = conv_match["convergence_update"].dropna().mean()
                     conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
 
@@ -450,6 +452,8 @@ def generate_convergence_comparison_table(
     baseline_df = metrics_df[
         (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(all_q))
     ].copy()
+    if "weight_variant" in baseline_df.columns:
+        baseline_df = baseline_df[baseline_df["weight_variant"] == "baseline"]
     
     # Group by method and q, average across seeds
     grouped = baseline_df.groupby(["method", "q"]).agg({
