@@ -412,7 +412,16 @@ def generate_final_paper_table(
     tex_path = os.path.join(output_dir, "final_summary.tex")
     latex_str = _to_latex_table(
         table_df,
-        caption="Quantitative summary of equilibrium recovery across all scenarios.",
+        caption=(
+            "Quantitative summary of equilibrium recovery across all scenarios. "
+            "INTERIM: all TEL-PPO baselines are closed-form-trained legacy runs "
+            "(to be replaced by the r5\\_sampled sampled-training wave). "
+            "Provenance: the three-player baseline (round3\\_baseline) ran under the "
+            "pre-unification exploitability gate $\\varepsilon=0.05$ (measured "
+            "exploitability at stop, 0.0002--0.0047, also passes the unified 0.03); "
+            "the het-cost baseline (r4\\_dc\\_final) has no committed launch script "
+            "(provenance: docs/round3\\_round4\\_report.md and per-run exploit\\_config)."
+        ),
         label="tab:final_summary",
     )
     with open(tex_path, "w") as f:
