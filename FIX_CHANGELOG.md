@@ -422,3 +422,38 @@ seven new/legacy gradient filename forms incl. `r5_sampled` tags and the Set-2 w
 `--force` visible in all four `--help`s; V1 acceptance test still PASS. Existing
 `gradient_*` files on disk are untouched (legacy names remain readable; new runs simply write
 new names).
+
+---
+
+## 16. E executed: `make_all` regeneration (INTERIM artifacts)
+
+- `a4c630c` `feat: stamp interim provenance footnotes into final summary caption` — the
+  generated final_summary caption now carries the INTERIM marking and both mandatory
+  footnotes (round3 gate-was-0.05 with measured exploitability 0.0002-0.0047 also passing
+  0.03; r4_dc_final no-committed-script), so artifacts are self-describing.
+- `a82c92e` `chore: regenerate paper artifacts from canonicalized runs (INTERIM)` —
+  `python -m paper.generator make_all`, exit 0; 9 figures + 5 tables + data CSVs (22 files).
+
+**Pipeline status: works end-to-end after canonicalization.** Every TEL-PPO cell populates —
+zero NC. final_summary now reads (RelErr, conv update): 2P 4.30%/2.08%/2.36% @ 53/67/93
+(unchanged Round-2 set); 3P 0.57%/0.84% @ 306/305; dc 0.42%/0.29% @ 304/304 (effort gaps
+10.45/7.11 vs analytic 10.37/7.24 — consistent); da 1.61%/0.86% @ 1000/1000. All values read
+from the canonical JSONs; nothing estimated.
+
+**Flagged (non-fatal) issues from the E run:**
+1. `[plots] Warning: No exploitability data for q=25` and `No alpha/beta data available for
+   snapshots` — the two optional sub-figures (exploitability_q25, beta_snapshots) skip on
+   missing data, as before the canonicalization (q=25 was dropped in the parameter overhaul;
+   the canonical nested runs record no alpha/beta series). Not regressions.
+2. `hyperparam_sensitivity` is DEGENERATE in this regeneration: its CSV contains only
+   ablation=baseline rows because the entropy_end/lr_end variant runs live solely in the
+   untracked `results/two_players/convergence/_archive_pre_warmup_fix/` outside the registry
+   glob. The figure renders but shows no actual sensitivity — do not quote it; needs either
+   archive restoration into the discovery path or a fresh sweep (existing follow-up).
+3. `ablation_results` still has a single row (TEL-PPO baseline, now with finite conv update
+   72 and no failure mode) — the Fig-7 component-ablation runs (no_stability_screen /
+   no_exploit_verification) remain unexecuted (existing BUILD/RUN item).
+4. `convergence_comparison` retains its pre-existing cross-experiment pooling (rows keyed by
+   q only): its q=35 "TEL-PPO Conv." of 416 is the mean of 2P 53, 3P 306, dc 304, da 1000 —
+   per-scenario numbers must come from final_summary, not this table. This flaw was in the
+   audit's FIX list but not in the approved fix targets; left as-is and flagged.
