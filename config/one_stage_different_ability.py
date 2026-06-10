@@ -123,7 +123,7 @@ config = {
             "patience_drift": 2,
         },
         "exploit": {
-            "exploit_eps": 0.05,
+            "exploit_eps": 0.03,  # unified across all scenarios (audit decision; Round-4 runs already used 0.03 via CLI)
             "patience_exploit": 5,
             "M": 16384,
             "grid": {

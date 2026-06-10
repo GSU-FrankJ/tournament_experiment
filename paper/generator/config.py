@@ -162,7 +162,8 @@ CONVERGENCE_CONFIG: Dict[str, float] = {
     "effort_window": 20,      # Consecutive updates
     
     # Exploitability convergence: < threshold for patience consecutive evals
-    "exploit_threshold": 0.05,
+    # (unified eps_eq = 0.03 across all scenarios, matching the runner gates)
+    "exploit_threshold": 0.03,
     "exploit_patience": 5,
     
     # Minimum steps before declaring convergence

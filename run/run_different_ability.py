@@ -1250,7 +1250,7 @@ def main():
         "--exploit-eps",
         type=float,
         default=None,
-        help="Override exploit_eps threshold (default: from config, 0.05)",
+        help="Override exploit_eps threshold (default: from config, 0.03)",
     )
     parser.add_argument(
         "--exploit-patience",

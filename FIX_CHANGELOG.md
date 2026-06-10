@@ -154,3 +154,24 @@ Removed entirely:
 **Verification:** `grep -rn "br_coef|br_reg|br_target|local_best_response"` over all Python
 directories → zero matches. py_compile clean. Smoke: both agents construct and run a full
 store→update cycle under the canonical theory-align-v2 config (var_coef=5e-2) on CPU.
+
+---
+
+## 7. `fix: unify exploitability tolerance to eps_eq=0.03 across configs`
+
+**Decision (fixed up-front):** eps_eq = 0.03 everywhere; max PPO updates = 1500.
+
+- `config/one_stage_three_players.py`, `config/one_stage_different_cost.py`,
+  `config/one_stage_different_ability.py`: `exploit_eps` 0.05 → **0.03** (2P config was already
+  0.03; the canonical Round-4 dc/da runs already passed `--exploit-eps 0.03` on the CLI, so for
+  dc/da this aligns defaults with the runs actually used).
+- `run/run_different_cost.py` / `run_different_ability.py`: stale `--exploit-eps` help text
+  ("default … 0.05") corrected to 0.03.
+- `paper/generator/config.py`: diagnostic `CONVERGENCE_CONFIG.exploit_threshold` 0.05 → **0.03**
+  so post-hoc diagnostics use the same tolerance as the runner gates.
+- **max_updates:** verified `"max_updates": 1500` in all four configs and grep found no
+  500-update reference anywhere — nothing to change (decision already satisfied by code).
+
+**Note:** existing 3P round3 JSONs were stopped under eps=0.05 (their recorded measured
+exploitability at stop was < 0.03, but the gate was 0.05); re-runs under the unified 0.03 gate
+are part of the post-env-fix re-run batch anyway.
