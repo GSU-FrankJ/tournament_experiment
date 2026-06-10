@@ -142,8 +142,31 @@ def get_q_values(experiment: str = None) -> List[float]:
 # concentration grows unchecked and kills the learning signal.  Standard mode
 # with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
 # q55-convergence/STATE.md for details.
+# INTERIM canonical picks, owner-approved 2026-06-10 (see
+# docs/registry_canonicalization_plan.md and FIX_CHANGELOG.md §14). All three
+# are CLOSED-FORM-TRAINED LEGACY runs; the r5_sampled re-run wave (sampled
+# training, eps=0.03) replaces them, at which point every entry below — and a
+# two_players one — flips to "r5_sampled".
+#
+# PROVENANCE FOOTNOTES (must accompany any artifact generated from these):
+# - three_players/round3_baseline: ran under exploit_eps=0.05 (pre-unification
+#   gate); measured exploitability at stop is 0.0002-0.0047, i.e. also passes
+#   the unified 0.03. Launch scripts committed (results/round3_3p_wave1.sh,
+#   round3_wave2_and_diag.sh).
+# - different_cost/r4_dc_final: no committed launch script; provenance =
+#   docs/round3_round4_report.md + per-JSON exploit_config (eps=0.03) + all
+#   stops at the --min-updates 300 floor.
+# - different_ability/r4_h1_long: STANDARD config, NOT theory-align-v2 (the
+#   ramp was found harmful for da; the only complete da group). OPEN DECISION
+#   for r5_sampled: run da both v2 and standard under sampled training and
+#   settle the config explicitly.
 BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
-    # Cleared: old overrides were for previous parameter set (k=0.0004)
+    ("three_players", 35.0): "round3_baseline",
+    ("three_players", 55.0): "round3_baseline",
+    ("different_cost", 35.0): "r4_dc_final",
+    ("different_cost", 55.0): "r4_dc_final",
+    ("different_ability", 35.0): "r4_h1_long",
+    ("different_ability", 55.0): "r4_h1_long",
 }
 
 
