@@ -1,14 +1,14 @@
 \begin{table}[htbp]
 \centering
-\caption{Convergence comparison: steps to convergence and final gap for each method.}
+\caption{Convergence comparison: convergence point and final gap for each method. Gradient: solver iteration where the effort-band diagnostic holds; TEL-PPO: PPO update at which the method's own verification (stability screen + exploitability streak) fired.}
 \label{tab:convergence_comparison}
 \begin{tabular}{rllllll}
 \toprule
 Q & Gradient Conv. & Gradient Gap & Gradient Quality & Tel-Ppo Conv. & Tel-Ppo Gap & Tel-Ppo Quality \\
 \midrule
-35.00 & 769 & 0.546 & Excellent & - & 2.173 & Fair \\
-45.00 & 3607 & 0.002 & Excellent & - & 1.811 & Fair \\
-55.00 & 938 & 0.348 & Excellent & - & 1.331 & Fair \\
+35.00 & 657 & 0.006 & Excellent & 416 & 0.746 & Excellent \\
+45.00 & 567 & 0.002 & Excellent & 67 & 0.735 & Excellent \\
+55.00 & 871 & 0.004 & Excellent & 425 & 0.286 & Excellent \\
 \bottomrule
 \end{tabular}
 
