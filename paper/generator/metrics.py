@@ -398,15 +398,41 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
         # Get exploitability series
         exploit_series = group["exploitability"].values
         exploit_valid = group["exploitability_is_valid"].values if "exploitability_is_valid" in group.columns else None
-        
-        # Convergence with exploitability
-        if exploit_valid is not None and np.any(exploit_valid):
-            conv_result = convergence_step_with_exploitability(
-                effort_series, exploit_series, e_star_val
+
+        # Convergence: prefer the method's OWN verification verdict when the
+        # run recorded one (PPO runners write stop_reason/stopped_at_update —
+        # stop_reason == "exploitability" means the stability screen +
+        # exploitability streak fired; "max_updates" means NC). The effort-band
+        # detectors below remain only as a diagnostic fallback for runs without
+        # a recorded verdict (e.g., the gradient baseline).
+        stop_reason = None
+        if "stop_reason" in group.columns:
+            non_null = group["stop_reason"].dropna()
+            if len(non_null) > 0:
+                stop_reason = str(non_null.iloc[0])
+        stopped_at_update = np.nan
+        if "stopped_at_update" in group.columns:
+            vals = group["stopped_at_update"].dropna()
+            if len(vals) > 0:
+                stopped_at_update = float(vals.iloc[0])
+
+        if method in ("TEL-PPO", "PPO") and stop_reason is not None:
+            converged_flag = stop_reason == "exploitability"
+            convergence_step_val = (
+                int(round(stopped_at_update))
+                if converged_flag and not np.isnan(stopped_at_update)
+                else None
             )
         else:
-            conv_result = convergence_step(effort_series, e_star_val)
-        
+            if exploit_valid is not None and np.any(exploit_valid):
+                conv_result = convergence_step_with_exploitability(
+                    effort_series, exploit_series, e_star_val
+                )
+            else:
+                conv_result = convergence_step(effort_series, e_star_val)
+            converged_flag = conv_result.converged
+            convergence_step_val = conv_result.convergence_step
+
         # Final values
         final_effort = float(effort_series[-1]) if len(effort_series) > 0 else np.nan
         abs_error = abs(final_effort - e_star_val) if not np.isnan(final_effort) else np.nan
@@ -451,8 +477,8 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
             quality=classify_quality(abs_error) if not np.isnan(abs_error) else "Unknown",
             final_exploitability=final_exploitability,
             symmetry_gap=symmetry_gap,
-            converged=conv_result.converged,
-            convergence_step=conv_result.convergence_step,
+            converged=converged_flag,
+            convergence_step=convergence_step_val,
             gate_on_ratio=gate_on_ratio,
             first_gate_step=first_gate_step,
         ))

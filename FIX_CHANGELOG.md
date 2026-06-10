@@ -175,3 +175,39 @@ store→update cycle under the canonical theory-align-v2 config (var_coef=5e-2) 
 **Note:** existing 3P round3 JSONs were stopped under eps=0.05 (their recorded measured
 exploitability at stop was < 0.03, but the gate was 0.05); re-runs under the unified 0.03 gate
 are part of the post-env-fix re-run batch anyway.
+
+---
+
+## 8. `fix: report steps-to-convergence from the method's own verification`
+
+**Spec rationale:** convergence is defined by the method's verification module (stability screen
+AND exploitability streak ⇒ stop; else budget ⇒ NC). The all-NC Tables 3/4 came from a second,
+mis-specified post-hoc gate (|e−e*| < 0.5 for 20 consecutive logged updates, min 100 updates,
+`paper/generator/config.py:CONVERGENCE_CONFIG`) that early-stopping runs can never satisfy.
+
+- `paper/generator/extract.py`:
+  - flat + nested loaders now carry the run-level verification verdict as columns
+    (`stop_reason`, `stopped_at_update` — both already recorded in every convergence JSON).
+  - new `get_verified_convergence_step(df)`: per run, `verified = (stop_reason ==
+    "exploitability")`, `convergence_update = stopped_at_update` (PPO update index) when
+    verified, NaN (→ "NC") when the run hit `max_updates`.
+  - `get_convergence_step` (the effort-band detector) kept but re-documented as
+    **DIAGNOSTIC-ONLY** with an explanation of why it must not be used for paper tables.
+- `paper/generator/metrics.py` `compute_summary_metrics`: PPO runs now take
+  `converged`/`convergence_step` from the recorded verification verdict; the effort-band
+  detectors remain only as fallback for runs without a verdict (gradient baseline).
+- `paper/generator/tables.py`: `final_summary` consumes `get_verified_convergence_step`;
+  column renamed "Steps to Conv." → **"Conv. Update (verified)"** (unit = PPO updates, making
+  the semantics change explicit); `convergence_comparison` caption now states the per-method
+  semantics (gradient: effort-band iteration; TEL-PPO: verified-stop update).
+- **Method stopping logic untouched** (runners unchanged in this commit).
+
+**Read-only validation (no artifacts written):** loading all current JSONs through the modified
+pipeline, every (experiment, q) baseline group is now verified 5/5 with finite mean
+convergence_update — e.g. two_players q=35/45/55 → 53/67/93 updates; three_players 99/53;
+dc 35/33; da 34/32 — where the old criterion produced all-NC. Values are read directly from each
+run's recorded `stopped_at_update`; nothing fabricated.
+
+**Deliberately NOT done here:** `paper/tables/*` were not regenerated. Regeneration must wait
+for (a) registry canonicalization (pre-fix vs Round-3/4 run selection — audit known issue) and
+(b) the post-env-fix re-runs; regenerating now would mix non-canonical runs.

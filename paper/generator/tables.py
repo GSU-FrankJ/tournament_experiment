@@ -272,9 +272,15 @@ def generate_final_paper_table(
     """
     Generate final summary table for paper (Table 2).
 
-    Columns: Scenario | q | Method | Mean±std | |ē−e*| | Exploitability | Symmetry Gap | Steps to Convergence
+    Columns: Scenario | q | Method | Mean±std | |ē−e*| | Exploitability | Symmetry Gap | Conv. Update (verified)
 
     Covers all experiments. For each scenario/q, shows Theory, Gradient, TEL-PPO.
+
+    "Conv. Update (verified)" is the PPO update at which the method's OWN
+    verification (stability screen + exploitability streak) stopped the run
+    (stop_reason == "exploitability"); runs that hit the budget are NC. The
+    legacy |e−e*|-band detector is NOT used here (it is diagnostic-only; see
+    extract.get_convergence_step).
 
     Returns:
         (csv_path, tex_path)
@@ -286,9 +292,9 @@ def generate_final_paper_table(
     if output_dir is None:
         output_dir = TABLES_DIR
 
-    # Compute convergence steps
-    from .extract import get_convergence_step
-    conv_df = get_convergence_step(df)
+    # Convergence from the method's own verification verdict
+    from .extract import get_verified_convergence_step
+    conv_df = get_verified_convergence_step(df)
 
     rows = []
 
@@ -337,7 +343,7 @@ def generate_final_paper_table(
                 "RelErr": "0.00%",
                 "Exploitability": "0.000",
                 "Symmetry Gap": "0.00",
-                "Steps to Conv.": "-",
+                "Conv. Update (verified)": "-",
             })
 
             # Gradient (baseline ablation only, exclude weight variants)
@@ -358,7 +364,7 @@ def generate_final_paper_table(
                         "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
-                        "Steps to Conv.": "-",
+                        "Conv. Update (verified)": "-",
                     })
 
             # TEL-PPO (baseline ablation)
@@ -367,7 +373,9 @@ def generate_final_paper_table(
                 if not final.empty:
                     effort_mean = final["policy_mean_effort"].mean()
                     effort_std = final["policy_mean_effort"].std() if len(final) > 1 else 0
-                    # Get convergence steps
+                    # Verified convergence: PPO update where the method's own
+                    # verification fired (mean over verified seeds); NC only if
+                    # no seed's verification fired before the budget.
                     conv_match = conv_df[
                         (conv_df["q"] == q)
                         & (conv_df["ablation"] == "baseline")
@@ -375,7 +383,7 @@ def generate_final_paper_table(
                     ]
                     if "experiment" in conv_df.columns:
                         conv_match = conv_match[conv_match["experiment"] == experiment]
-                    mean_conv = conv_match["convergence_step"].dropna().mean()
+                    mean_conv = conv_match["convergence_update"].dropna().mean()
                     conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
 
                     abs_err = final["effort_error"].mean()
@@ -389,7 +397,7 @@ def generate_final_paper_table(
                         "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
-                        "Steps to Conv.": conv_str,
+                        "Conv. Update (verified)": conv_str,
                     })
 
     table_df = pd.DataFrame(rows)
@@ -479,7 +487,12 @@ def generate_convergence_comparison_table(
     tex_path = os.path.join(output_dir, "convergence_comparison.tex")
     latex_str = _to_latex_table(
         table_df,
-        caption="Convergence comparison: steps to convergence and final gap for each method.",
+        caption=(
+            "Convergence comparison: convergence point and final gap for each method. "
+            "Gradient: solver iteration where the effort-band diagnostic holds; "
+            "TEL-PPO: PPO update at which the method's own verification "
+            "(stability screen + exploitability streak) fired."
+        ),
         label="tab:convergence_comparison",
     )
     with open(tex_path, 'w') as f:

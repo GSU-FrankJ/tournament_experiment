@@ -51,6 +51,10 @@ CONVERGENCE_COLUMNS = [
     # Exploitability (sparse: NaN when not evaluated)
     "exploitability",
     "exploitability_is_valid",
+    # Run-level verification outcome (constant per run; from the runner's own
+    # stability + exploitability stopping rule)
+    "stop_reason",
+    "stopped_at_update",
 ]
 
 
@@ -163,6 +167,14 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
     df["exploitability"] = _load_exploitability_series(data, n_steps)
     df["exploitability_is_valid"] = _load_exploitability_valid_series(data, n_steps)
 
+    # Run-level verification outcome (constant per run): the runner's OWN
+    # convergence verdict. stop_reason == "exploitability" means the
+    # stability-screen + exploitability-streak verification fired;
+    # "max_updates" means the run exhausted its budget (NC).
+    df["stop_reason"] = data.get("stop_reason")
+    stopped = data.get("stopped_at_update")
+    df["stopped_at_update"] = float(stopped) if stopped is not None else np.nan
+
     return df
 
 
@@ -266,6 +278,11 @@ def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
     exploit_series, exploit_valid = _load_exploitability_nested(data, n_steps)
     df["exploitability"] = exploit_series
     df["exploitability_is_valid"] = exploit_valid
+
+    # Run-level verification outcome (constant per run; see flat loader)
+    df["stop_reason"] = data.get("stop_reason")
+    stopped = data.get("stopped_at_update")
+    df["stopped_at_update"] = float(stopped) if stopped is not None else np.nan
 
     return df
 
@@ -606,11 +623,16 @@ def load_results_csv(csv_path: str = None) -> pd.DataFrame:
 
 def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Compute the convergence step for each run (experiment, method, q, seed, ablation).
+    DIAGNOSTIC-ONLY effort-band detector — NOT the paper convergence criterion.
 
-    Uses the effort_delta and effort_window from CONVERGENCE_CONFIG to detect
-    the first step where |policy_mean_effort - theoretical_effort| < delta for
-    `window` consecutive steps.
+    Detects the first step where |policy_mean_effort - theoretical_effort| <
+    effort_delta for effort_window consecutive logged steps (CONVERGENCE_CONFIG).
+    This is structurally unsatisfiable for runs that early-stop via the method's
+    own exploitability verification (they terminate before min_steps logged
+    updates), which is exactly what produced the all-"NC" tables. Paper tables
+    must use ``get_verified_convergence_step`` instead; this helper is kept only
+    for trajectory diagnostics and for the gradient baseline, which has no
+    verification module.
 
     Returns a DataFrame with one row per run and columns:
         experiment, method, q, seed, ablation, convergence_step (NaN if not converged)
@@ -646,6 +668,47 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
 
         rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
         rec["convergence_step"] = conv_step
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
+def get_verified_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Per-run convergence from the method's OWN verification (the paper criterion).
+
+    A TEL-PPO run converges when its in-training verification fires: the
+    stability screen + exploitability streak stop the run with
+    ``stop_reason == "exploitability"``. The reported value is
+    ``stopped_at_update`` — the PPO update index at which verification fired.
+    Runs that hit the budget (``stop_reason == "max_updates"``) are NC (NaN).
+
+    Returns a DataFrame with one row per run and columns:
+        experiment, method, q, seed, ablation, stop_reason, verified (bool),
+        convergence_update (NaN if not verified)
+    """
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        stop_reason = None
+        if "stop_reason" in grp.columns:
+            non_null = grp["stop_reason"].dropna()
+            if len(non_null) > 0:
+                stop_reason = str(non_null.iloc[0])
+        stopped_at = np.nan
+        if "stopped_at_update" in grp.columns:
+            vals = grp["stopped_at_update"].dropna()
+            if len(vals) > 0:
+                stopped_at = float(vals.iloc[0])
+
+        verified = stop_reason == "exploitability"
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["stop_reason"] = stop_reason
+        rec["verified"] = verified
+        rec["convergence_update"] = stopped_at if verified and not np.isnan(stopped_at) else np.nan
         records.append(rec)
 
     return pd.DataFrame(records)
