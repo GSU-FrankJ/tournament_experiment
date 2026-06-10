@@ -396,3 +396,29 @@ with conv updates: 3P q35 [309,300,305,308,307], q55 [304,307,307,305,303]; dc q
 (15 PPO + 3 gradient).
 
 **NOT executed:** E (`python -m paper.generator make_all`) — awaiting explicit go-ahead.
+
+---
+
+## 15. `fix: seed/tag-qualify gradient result filenames, refuse overwrites`
+
+**Rationale:** gradient result filenames carried no seed or tag, so any re-run silently
+clobbered the previous file — the audit already caught one such silent overwrite
+(`ppo_3p_q35.0_seed42_baseline_convergence.json`, clobbered by an untagged Round-3-era run).
+This had to land BEFORE the r5_sampled re-run wave touches any gradient baseline.
+
+- All four runners (`run_two_players.py`, `run_three_players.py`, `run_different_cost.py`,
+  `run_different_ability.py`): gradient outputs now write to
+  `<prefix>_gradient…_q{q}_seed{seed}[_{ablation}]_convergence.json` — the same
+  qualification scheme as the PPO outputs (`--ablation-name` is now threaded into the 3P/dc/da
+  gradient paths too, and the seed is also embedded in the JSON body for registry use).
+- New `--force` flag on every runner; without it, writing onto an existing gradient file
+  raises `FileExistsError` with a remediation hint instead of overwriting.
+- `paper/generator/run_registry.py`: the 3-player pattern now accepts
+  `(ppo|gradient)_3p_q…_seed…[_tag]` so the new seeded gradient filenames stay discoverable
+  (dc/da/2P patterns already covered seeded gradient files; legacy un-seeded names still parse).
+
+**Verification (no training):** py_compile on all five files; `_parse_filename` round-trips
+seven new/legacy gradient filename forms incl. `r5_sampled` tags and the Set-2 weight variant;
+`--force` visible in all four `--help`s; V1 acceptance test still PASS. Existing
+`gradient_*` files on disk are untouched (legacy names remain readable; new runs simply write
+new names).

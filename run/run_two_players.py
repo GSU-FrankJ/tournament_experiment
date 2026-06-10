@@ -465,6 +465,7 @@ def run_gradient(
     lr_decay: float = 0.9995,
     log: bool = True,
     ablation_name: str = "baseline",
+    force: bool = False,
 ) -> Dict:
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
     theoretical_e = clip_stage2(e_star_two_players(q, w_h, w_l, k), tuple(cfg["effort_bounds_stage2"]))
@@ -531,14 +532,22 @@ def run_gradient(
         # Create convergence_history directory if it doesn't exist
         convergence_dir = os.path.join("results", "two_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
-        
-        # Save to JSON file
-        parts = [f"gradient_q{q:.1f}"]
+
+        # Save to JSON file — seed- and tag-qualified like the PPO outputs, so
+        # distinct runs never share a filename
+        seed_val = int(cfg.get("seed", 42))
+        convergence_data["seed"] = seed_val
+        parts = [f"gradient_q{q:.1f}", f"seed{seed_val}"]
         if ablation_name not in ("baseline", "", None):
             parts.append(ablation_name)
         convergence_file = os.path.join(
             convergence_dir, "_".join(parts) + "_convergence.json"
         )
+        if os.path.exists(convergence_file) and not force:
+            raise FileExistsError(
+                f"Refusing to overwrite existing gradient result: {convergence_file}. "
+                "Pass --force to overwrite, or distinguish the run via --seed/--ablation-name."
+            )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
         print(f"[gradient-2p] Saved convergence history to {convergence_file}")
@@ -1967,6 +1976,7 @@ def _run_cli(args: argparse.Namespace) -> str:
                 lr_decay=args.grad_lr_decay,
                 log=True,
                 ablation_name=args.ablation_name,
+                force=args.force,
             )
             save_standardized_result(row, csv_path)
     else:
@@ -2171,6 +2181,11 @@ def main():
         type=str,
         default="baseline",
         help="Ablation variant name for paper artifacts. Included in JSON, CSV, and metadata. Default: 'baseline'.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing gradient result file (default: refuse).",
     )
     # Exploit ablation sweep parameters (override config values)
     parser.add_argument(

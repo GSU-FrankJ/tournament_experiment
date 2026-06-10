@@ -456,6 +456,8 @@ def run_gradient(
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
     log: bool = True,
+    ablation_name: str = "baseline",
+    force: bool = False,
 ) -> Dict:
     """Run gradient-based solver for three-player tournament."""
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
@@ -514,10 +516,21 @@ def run_gradient(
         
         convergence_dir = os.path.join("results", "three_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
+        # Seed- and tag-qualified filename (mirrors the PPO scheme) so distinct
+        # gradient runs never share a file
+        seed_val = int(cfg.get("seed", 42))
+        convergence_data["seed"] = seed_val
+        parts = [f"gradient_3p_q{q:.1f}", f"seed{seed_val}"]
+        if ablation_name not in ("baseline", "", None):
+            parts.append(ablation_name)
         convergence_file = os.path.join(
-            convergence_dir, 
-            f"gradient_3p_q{q:.1f}_convergence.json"
+            convergence_dir, "_".join(parts) + "_convergence.json"
         )
+        if os.path.exists(convergence_file) and not force:
+            raise FileExistsError(
+                f"Refusing to overwrite existing gradient result: {convergence_file}. "
+                "Pass --force to overwrite, or distinguish the run via --seed/--ablation-name."
+            )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
         print(f"[gradient-3p] Saved convergence history to {convergence_file}")
@@ -1372,6 +1385,8 @@ def _run_cli(args: argparse.Namespace) -> str:
                 init_perturb=args.grad_init_perturb,
                 lr_decay=args.grad_lr_decay,
                 log=True,
+                ablation_name=args.ablation_name,
+                force=args.force,
             )
     else:
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])
@@ -1528,6 +1543,11 @@ def main():
         type=str,
         default="baseline",
         help="Ablation variant name for output files",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing gradient result file (default: refuse).",
     )
     parser.add_argument(
         "--output-tag",

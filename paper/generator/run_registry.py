@@ -81,11 +81,11 @@ def _parse_filename(filename: str) -> Dict[str, any]:
     base = filename.replace("_convergence.json", "")
 
     # --- Three-player formats ---
-    # ppo_3p_q{q}_seed{seed}[_{ablation}]
-    pattern_3p_new = r"^(ppo)_3p_q([\d.]+)_seed(\d+)(?:_(.+))?$"
+    # (ppo|gradient)_3p_q{q}_seed{seed}[_{ablation}]
+    pattern_3p_new = r"^(ppo|gradient)_3p_q([\d.]+)_seed(\d+)(?:_(.+))?$"
     match = re.match(pattern_3p_new, base, re.IGNORECASE)
     if match:
-        result["method"] = "TEL-PPO"
+        result["method"] = "TEL-PPO" if match.group(1).lower() == "ppo" else "Gradient"
         result["q"] = float(match.group(2))
         result["seed"] = int(match.group(3))
         result["ablation"] = match.group(4) if match.group(4) else "baseline"
