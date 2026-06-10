@@ -83,6 +83,18 @@ class DifferentAbilityEnv:
         if len(self.effort_range) != 2 or self.effort_range[0] >= self.effort_range[1]:
             raise ValueError("Effort range must be (min, max) with min < max")
 
+    def draw_noise_batch(self, batch_size: int):
+        """Draw Uniform(-q, q) noise and tie-break decisions for CRN-friendly batches.
+
+        Mirrors TwoPlayersEnv.draw_noise_batch: one shared batch is reused for
+        all perturbed evaluations of an MC-FD central difference (common random
+        numbers).
+        """
+        eps1 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        eps2 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        tie_breaks = self.rng.integers(0, 2, size=int(batch_size))
+        return eps1, eps2, tie_breaks
+
     # ---- closed-form helpers (EVALUATION / BASELINE ONLY) ----
     def probability_win_player1(self, e1: float, e2: float) -> float:
         """P(e1 + l1 + ε1 > e2 + l2 + ε2) with ε1, ε2 ~ U(-q, q).

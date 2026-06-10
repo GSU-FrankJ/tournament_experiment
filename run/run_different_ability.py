@@ -115,43 +115,69 @@ def _clip_effort(value: float, bounds: Tuple[float, float]) -> float:
 
 # === Gradient-based solver ===
 
+def _batch_payoffs_uniform_da(
+    env: DifferentAbilityEnv,
+    e1: float,
+    e2: float,
+    eps1: np.ndarray,
+    eps2: np.ndarray,
+    tie_breaks: np.ndarray,
+) -> Tuple[float, float]:
+    """Vectorized sampled mean payoffs using provided Uniform(-q, q) noise (CRN).
+
+    y_i = e_i + l_i + eps_i; the realized winner takes w_H, the loser w_L;
+    each player's payoff subtracts k_i * e_i^2.
+    """
+    y1 = e1 + env.l1 + eps1
+    y2 = e2 + env.l2 + eps2
+    winners = np.where(y1 > y2, 0, np.where(y2 > y1, 1, tie_breaks))
+    payoff1 = np.where(winners == 0, env.w_h, env.w_l)
+    payoff2 = np.where(winners == 0, env.w_l, env.w_h)
+    u1 = payoff1 - env.k1 * (e1 ** 2)
+    u2 = payoff2 - env.k2 * (e2 ** 2)
+    return float(u1.mean()), float(u2.mean())
+
+
 def _compute_gradients_different_ability(
     env: DifferentAbilityEnv,
     e1: float,
     e2: float,
     delta: float,
+    num_samples: int,
 ) -> Tuple[float, float]:
-    """
-    Central-difference gradients for two-player tournament with different abilities.
-    
-    Uses the environment's compute_utility method for expected utility.
-    
+    """MC-FD gradients (Appendix A): central differences on SAMPLED payoffs.
+
+    One shared batch of uniform noise draws + tie-breaks (common random
+    numbers) is reused for all four perturbed evaluations, so each central
+    difference is taken under identical randomness. Mirrors
+    _stochastic_fd_gradients in run_two_players.py with the ability-shifted
+    outputs y_i = e_i + l_i + eps_i.
+
     Args:
         env: DifferentAbilityEnv instance
         e1: Current effort for player 1
         e2: Current effort for player 2
         delta: Finite difference step size
-        
+        num_samples: Number of Monte Carlo samples
+
     Returns:
         (g1, g2): Gradients for player 1 and player 2
     """
     lo, hi = env.effort_range
-    
-    # Compute finite difference gradients for each player
-    # Player 1 gradient: d/de1 EU1(e1, e2)
+    eps1, eps2, tie_breaks = env.draw_noise_batch(num_samples)
+
     e1_plus = _clip_effort(e1 + delta, (lo, hi))
     e1_minus = _clip_effort(e1 - delta, (lo, hi))
-    u1_plus, _ = env.compute_utility(0, e1_plus, e2)
-    u1_minus, _ = env.compute_utility(0, e1_minus, e2)
-    g1 = (u1_plus - u1_minus) / (2.0 * delta)
-    
-    # Player 2 gradient: d/de2 EU2(e2, e1)
     e2_plus = _clip_effort(e2 + delta, (lo, hi))
     e2_minus = _clip_effort(e2 - delta, (lo, hi))
-    u2_plus, _ = env.compute_utility(1, e2_plus, e1)
-    u2_minus, _ = env.compute_utility(1, e2_minus, e1)
+
+    u1_plus, _ = _batch_payoffs_uniform_da(env, e1_plus, e2, eps1, eps2, tie_breaks)
+    u1_minus, _ = _batch_payoffs_uniform_da(env, e1_minus, e2, eps1, eps2, tie_breaks)
+    _, u2_plus = _batch_payoffs_uniform_da(env, e1, e2_plus, eps1, eps2, tie_breaks)
+    _, u2_minus = _batch_payoffs_uniform_da(env, e1, e2_minus, eps1, eps2, tie_breaks)
+
+    g1 = (u1_plus - u1_minus) / (2.0 * delta)
     g2 = (u2_plus - u2_minus) / (2.0 * delta)
-    
     return float(g1), float(g2)
 
 
@@ -162,26 +188,30 @@ def gradient_descent_different_ability(
     steps: int = 2000,
     eps: float = 0.1,
     tol: float = 1e-5,
+    num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
     log: bool = True,
 ) -> Tuple[Tuple[float, float], Dict[str, Any]]:
     """
-    Two-player gradient ascent for different ability (symmetric equilibrium).
-    
-    Both players independently maximize their expected utility.
-    Since equilibrium is symmetric, both should converge to same effort.
-    
+    MC-FD gradient play (Appendix A) for the different-ability game: sampled
+    payoffs with common random numbers, central finite differences (step
+    ``eps``), projected gradient ascent, simultaneous updates, tolerance
+    ``tol``. No closed-form win probability and no e*-dependent stopping —
+    gaps to theory are logged for evaluation only. The equilibrium is
+    symmetric, but symmetry is never enforced.
+
     Args:
         cfg: Configuration dictionary with l1, l2, k, q, w_h, w_l, effort_range
         lr: Initial learning rate
         steps: Maximum gradient steps
         eps: Finite difference delta
         tol: Convergence tolerance
+        num_samples: MC samples per CRN batch
         init_perturb: Initial perturbation from theory
         lr_decay: Learning rate decay per step
         log: Whether to print progress
-        
+
     Returns:
         ((e1, e2), history): Final efforts and convergence history
     """
@@ -234,8 +264,8 @@ def gradient_descent_different_ability(
         # Adaptive learning rate with exponential decay
         lr_current = lr * (lr_decay ** step)
         
-        # Compute gradients
-        g1, g2 = _compute_gradients_different_ability(env, e1, e2, eps)
+        # Sampled MC-FD gradient with common random numbers (Appendix A)
+        g1, g2 = _compute_gradients_different_ability(env, e1, e2, eps, num_samples)
         
         # Gradient ascent update
         e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
@@ -270,9 +300,11 @@ def gradient_descent_different_ability(
                 f"lr={lr_current:.6f}"
             )
         
-        # Convergence criteria: both players near theoretical value
+        # Tolerance tau: gradient estimate and update step both below tol.
+        # (Gap to theoretical e* is logged above but is NOT a stop criterion —
+        # the baseline must not condition its termination on the answer.)
         max_delta = max(delta_e1, delta_e2)
-        if grad_norm < tol and max_gap < tol and max_delta < tol:
+        if grad_norm < tol and max_delta < tol:
             if log:
                 print(
                     f"[gradient-diff-ability] converged at step={step} "
@@ -295,6 +327,7 @@ def run_gradient(
     steps: int = 2000,
     grad_eps: float = 0.1,
     tol: float = 1e-5,
+    num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
     log: bool = True,
@@ -315,6 +348,7 @@ def run_gradient(
         steps=steps,
         eps=grad_eps,
         tol=tol,
+        num_samples=num_samples,
         init_perturb=init_perturb,
         lr_decay=lr_decay,
         log=log,
@@ -1134,6 +1168,7 @@ def _run_cli(args: argparse.Namespace) -> str:
                 steps=args.grad_steps,
                 grad_eps=args.grad_epsilon,
                 tol=args.grad_tol,
+                num_samples=args.grad_samples,
                 init_perturb=args.grad_init_perturb,
                 lr_decay=args.grad_lr_decay,
                 log=True,
@@ -1186,6 +1221,8 @@ def main():
     parser.add_argument("--grad-steps", type=int, default=base_config.get("gradient_steps", 1500))
     parser.add_argument("--grad-epsilon", type=float, default=base_config.get("gradient_delta", 0.5))
     parser.add_argument("--grad-tol", type=float, default=base_config.get("gradient_tol", 1e-4))
+    parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 64),
+                        help="Monte Carlo samples per CRN batch for uniform-noise gradients.")
     parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0))
     parser.add_argument("--grad-lr-decay", type=float, default=0.9995)
     

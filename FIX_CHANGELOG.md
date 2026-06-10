@@ -305,3 +305,29 @@ criterion. The baseline must not condition its stopping on the answer; gaps stay
   (analytical equilibrium, q=35; gradients ≈ 0) and (30, 30): mean of 50 CRN-batch gradients
   (8192 samples each) vs closed-form FD at the same delta.
   **PASS** — max |diff| = 0.00038, tolerance ≈ 0.002. Committed only after this passed.
+
+---
+
+## 12. `fix: port true MC-FD baseline to the het-ability gradient solver`
+
+**Spec rationale:** same Appendix-A port with ability-shifted outputs
+`y_i = e_i + l_i + ε_i`; the da solver also had the e*-dependent `max_gap < tol` stop term
+(removed; gaps logged for evaluation only).
+
+- `envs/different_ability_env.py`: added `draw_noise_batch` (CRN batches from the env RNG).
+- `run/run_different_ability.py`: new `_batch_payoffs_uniform_da` (sampled rank payoffs over
+  ability-shifted outputs); `_compute_gradients_different_ability` now does central differences
+  of sampled payoffs under ONE shared CRN batch (was: closed-form `env.compute_utility`
+  differences) and gains the previously-missing `num_samples` parameter, plumbed through
+  `gradient_descent_different_ability` → `run_gradient` → new `--grad-samples` CLI flag
+  (default from config `gradient_num_samples`, matching dc); `max_gap < tol` removed from the
+  stop rule.
+- **Safeguard test:** `tests/test_different_ability_mcfd_gradient.py` — at (46.43, 46.43)
+  (analytical symmetric equilibrium, q=35; gradients ≈ 0) and (40, 50): mean of 50 CRN-batch
+  gradients (8192 samples each) vs closed-form FD at the same delta.
+  **PASS** — max |diff| = 0.00041, tolerance ≈ 0.0036-0.0043. Committed only after this passed.
+
+With commits 10-12, all four scenarios' numerical baselines are sampled MC-FD with CRN and
+contain no closed-form win probability, no symmetry projection, and no e*-dependent stopping.
+All existing `gradient_*_convergence.json` artifacts predate this and require re-runs before
+being quoted.
