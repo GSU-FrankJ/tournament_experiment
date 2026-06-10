@@ -531,51 +531,6 @@ class CheapGateTracker:
         }
 
 
-def local_best_response_3p(
-    e_opp: float,
-    q: float,
-    w_h: float,
-    w_l: float,
-    k: float,
-    lo: float,
-    hi: float,
-) -> float:
-    """Compute interior (FOC-based) best-response effort against two opponents.
-
-    Solves the first-order condition:
-        (w_h - w_l) * dp_i/de_i(e, e_opp, e_opp) = 2k * e
-
-    Uses bisection on the FOC residual. At symmetric play dp/de_i = 1/(2q)
-    (constant), so the interior BR is always e* = (w_h - w_l) / (4qk).
-    For asymmetric play, dp/de_i varies and the BR shifts accordingly.
-    """
-    dw = w_h - w_l
-
-    def foc_residual(e: float) -> float:
-        dp_de_i, _, _ = win_prob_three_players_grad(e, e_opp, e_opp, q)
-        return dw * dp_de_i - 2.0 * k * e
-
-    # Bisection: foc > 0 means effort too low, foc < 0 means too high
-    a, b = max(lo, 1e-6), hi
-    fa, fb = foc_residual(a), foc_residual(b)
-
-    # If no sign change, return the boundary where FOC is closest to zero
-    if fa <= 0:
-        return a
-    if fb >= 0:
-        return b
-
-    for _ in range(60):
-        mid = (a + b) / 2.0
-        fm = foc_residual(mid)
-        if fm > 0:
-            a = mid
-        else:
-            b = mid
-
-    return (a + b) / 2.0
-
-
 def run_ppo(
     cfg: Dict,
     episodes: Optional[int] = None,
@@ -643,8 +598,6 @@ def run_ppo(
         gae_lambda=float(cfg.get("gae_lambda", 0.95)),
         value_coef=float(cfg.get("value_coef", 0.5)),
         max_grad_norm=float(cfg.get("max_grad_norm", 0.5)),
-        # Best-response regularization
-        br_reg_coef=float(cfg.get("br_reg_coef", 0.0)),
         # Opponent lag parameters
         opponent_mode=cfg.get("opponent_mode", "periodic"),
         opponent_sync_interval=int(cfg.get("opponent_sync_interval", 0)),
@@ -692,12 +645,6 @@ def run_ppo(
     hold_fraction = float(cfg.get("entropy_hold_fraction", 2.0 / 3.0))
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
-
-    # Best-response regularization
-    br_reg_coef = float(cfg.get("br_reg_coef", ppo_cfg.br_reg_coef))
-    br_reg_warmup = int(cfg.get("br_reg_warmup", 0))
-    if br_reg_coef > 0:
-        print(f"[PPO-3p] BR regularization: coef={br_reg_coef} warmup={br_reg_warmup}")
 
     # Convergence tracking (exploitability-based, theory-free)
     convergence_cfg = cfg.get("convergence", {}) or {}
@@ -888,15 +835,8 @@ def run_ppo(
             
             steps_done += 1
         
-        # Compute BR target for regularization (before update)
-        # At symmetric play dp/de_i = 1/(2q) for all effort levels,
-        # so the interior FOC solution is always e* = (w_h - w_l) / (4qk).
-        br_target = None
-        if br_reg_coef > 0 and update_idx >= br_reg_warmup:
-            br_target = e_star_three_players(float(train_qs[0]), w_h, w_l, k)
-
         # PPO update
-        metrics = agent.update(br_target=br_target)
+        metrics = agent.update()
         last_update_metrics = metrics
 
         # Reset Adam state if requested (clears crash-polluted second moment)
@@ -1223,7 +1163,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_max"] = 100000.0
         # Regularization coefficients
         cfg["theory_align_v2_var_coef"] = 5e-2
-        cfg["theory_align_v2_br_coef"] = 0.0
         # Ramping schedule for concentration
         cfg["theory_align_v2_conc_min_start"] = 100.0
         cfg["theory_align_v2_conc_scale_start"] = 100.0
@@ -1251,7 +1190,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_scale"] = 1.0
         cfg["theory_align_v2_conc_max"] = None
         cfg["theory_align_v2_var_coef"] = 0.0
-        cfg["theory_align_v2_br_coef"] = 0.0
         print("[config] --mean-conc-param: using ActorCriticMeanConc with zero regularization, "
               "all other hyperparams unchanged", flush=True)
 
@@ -1351,12 +1289,6 @@ def _run_cli(args: argparse.Namespace) -> str:
     if args.update_epochs is not None:
         cfg["update_epochs"] = int(args.update_epochs)
         print(f"[config] CLI override: update_epochs={cfg['update_epochs']}", flush=True)
-
-    # Best-response regularization
-    if args.br_reg_coef is not None:
-        cfg["br_reg_coef"] = float(args.br_reg_coef)
-    if args.br_reg_warmup is not None:
-        cfg["br_reg_warmup"] = int(args.br_reg_warmup)
 
     # Asymmetric warmup settings
     if hasattr(args, 'no_asymmetric_warmup') and args.no_asymmetric_warmup:
@@ -1585,8 +1517,6 @@ def main():
         default=128,
         help="Hidden layer size for actor-critic network (default: 128, 2P uses 64).",
     )
-    parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
-    parser.add_argument("--br-reg-warmup", type=int, default=None, help="Updates before BR reg kicks in")
 
     # PPO tuning overrides
     parser.add_argument("--steps-per-update", type=int, default=None,

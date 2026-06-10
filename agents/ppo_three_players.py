@@ -168,13 +168,9 @@ class PPOConfig:
     theory_align_v2_conc_scale: float = 1.0
     theory_align_v2_conc_max: Optional[float] = None
     theory_align_v2_var_coef: float = 0.0
-    theory_align_v2_br_coef: float = 0.0
 
     # Advantage normalization (standard PPO practice, can disable for weak-signal experiments)
     normalize_advantages: bool = True
-
-    # Best-response regularization (disabled by default)
-    br_reg_coef: float = 0.0
 
     # Opponent lag (disabled by default: sync_interval=0)
     opponent_mode: str = "periodic"
@@ -434,13 +430,8 @@ class PPOThreePlayersBandit:
         return advantages, returns
 
     # ---- PPO update ----
-    def update(self, *, br_target: Optional[float] = None):
+    def update(self):
         """Perform PPO update on collected rollouts.
-
-        Args:
-            br_target: Best-response effort target for BR regularization.
-                       If provided and br_reg_coef > 0, adds a penalty pushing
-                       the policy mean toward this target.
 
         Returns:
             metrics: Dictionary of training diagnostics
@@ -536,9 +527,7 @@ class PPOThreePlayersBandit:
                 conc = None
                 dist = None
                 want_conc = self.cfg.theory_align and self.cfg.theory_align_conc_weight > 0.0
-                want_dist = self.use_theory_align_v2 and (
-                    self.cfg.theory_align_v2_var_coef > 0.0 or self.cfg.theory_align_v2_br_coef > 0.0
-                )
+                want_dist = self.use_theory_align_v2 and self.cfg.theory_align_v2_var_coef > 0.0
                 if want_conc and want_dist:
                     logp, entropy, values, conc, dist = self.evaluate_actions(
                         mb_states, mb_actions, return_conc=True, return_dist=True,
@@ -617,28 +606,6 @@ class PPOThreePlayersBandit:
                     var_effort = var_action * ((self.high - self.low) ** 2)
                     var_loss = float(self.cfg.theory_align_v2_var_coef) * var_effort.mean()
                     loss = loss + var_loss
-                if self.use_theory_align_v2 and self.cfg.theory_align_v2_br_coef > 0.0:
-                    if dist is None:
-                        dist = self.dist(mb_states)[0]
-                    a_mean = dist.mean.clamp(1e-6, 1.0 - 1e-6)
-                    mean_effort = self.low + a_mean.squeeze(-1) * (self.high - self.low)
-                    q = mb_states[:, 0] * 60.0
-                    k = mb_states[:, 1] * 1e-3
-                    w_gap = mb_states[:, 2] * 10.0
-                    denom = 4.0 * q * k + 1e-8
-                    e_star = (w_gap / denom).clamp(self.low, self.high)
-                    br_loss = float(self.cfg.theory_align_v2_br_coef) * (mean_effort - e_star).pow(2).mean()
-                    loss = loss + br_loss
-
-                # Best-response regularization (theory-free)
-                if br_target is not None and self.cfg.br_reg_coef > 0.0:
-                    if dist is None:
-                        dist = self.dist(mb_states)[0]
-                    a_mean_br = dist.mean.clamp(1e-6, 1.0 - 1e-6)
-                    mean_effort_br = self.low + a_mean_br.squeeze(-1) * (self.high - self.low)
-                    br_t = torch.tensor(br_target, dtype=torch.float32, device=self.device)
-                    br_reg_loss = float(self.cfg.br_reg_coef) * (mean_effort_br - br_t).pow(2).mean()
-                    loss = loss + br_reg_loss
 
                 # Gradient step
                 self.opt.zero_grad()

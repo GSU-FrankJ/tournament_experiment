@@ -146,7 +146,6 @@ class PPOConfig:
     theory_align_v2_conc_scale: float = 1.0
     theory_align_v2_conc_max: Optional[float] = None
     theory_align_v2_var_coef: float = 0.0
-    theory_align_v2_br_coef: float = 0.0
 
 
 class PPOTwoPlayersBandit:
@@ -457,9 +456,7 @@ class PPOTwoPlayersBandit:
                 conc = None
                 dist = None
                 want_conc = self.cfg.theory_align and self.cfg.theory_align_conc_weight > 0.0
-                want_dist = self.use_theory_align_v2 and (
-                    self.cfg.theory_align_v2_var_coef > 0.0 or self.cfg.theory_align_v2_br_coef > 0.0
-                )
+                want_dist = self.use_theory_align_v2 and self.cfg.theory_align_v2_var_coef > 0.0
                 if want_conc and want_dist:
                     logp, entropy, values, conc, dist = self.evaluate_actions(
                         mb_states,
@@ -540,18 +537,6 @@ class PPOTwoPlayersBandit:
                     var_effort = var_action * ((self.high - self.low) ** 2)
                     var_loss = float(self.cfg.theory_align_v2_var_coef) * var_effort.mean()
                     loss = loss + var_loss
-                if self.use_theory_align_v2 and self.cfg.theory_align_v2_br_coef > 0.0:
-                    if dist is None:
-                        dist = self.dist(mb_states)[0]
-                    a_mean = dist.mean.clamp(1e-6, 1.0 - 1e-6)
-                    mean_effort = self.low + a_mean.squeeze(-1) * (self.high - self.low)
-                    q = mb_states[:, 0] * 60.0
-                    k = mb_states[:, 1] * 1e-3
-                    w_gap = mb_states[:, 2] * 10.0
-                    denom = 4.0 * q * k + 1e-8
-                    e_star = (w_gap / denom).clamp(self.low, self.high)
-                    br_loss = float(self.cfg.theory_align_v2_br_coef) * (mean_effort - e_star).pow(2).mean()
-                    loss = loss + br_loss
 
                 self.opt.zero_grad()
                 loss.backward()

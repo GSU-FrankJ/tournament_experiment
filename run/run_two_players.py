@@ -637,7 +637,6 @@ def run_ppo(
     if theory_align_v2_conc_max is not None:
         theory_align_v2_conc_max = float(theory_align_v2_conc_max)
     theory_align_v2_var_coef = float(cfg.get("theory_align_v2_var_coef", 0.0))
-    theory_align_v2_br_coef = float(cfg.get("theory_align_v2_br_coef", 0.0))
     theory_align_v2_var_coef_start = float(cfg.get("theory_align_v2_var_coef_start", theory_align_v2_var_coef))
     theory_align_v2_ramp_warmup = int(cfg.get("theory_align_v2_ramp_warmup", 0))
     theory_align_v2_ramp_steps = int(cfg.get("theory_align_v2_ramp_steps", 0))
@@ -695,7 +694,6 @@ def run_ppo(
         theory_align_v2_conc_scale=theory_align_v2_conc_scale,
         theory_align_v2_conc_max=theory_align_v2_conc_max,
         theory_align_v2_var_coef=theory_align_v2_var_coef,
-        theory_align_v2_br_coef=theory_align_v2_br_coef,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
     agent.cfg.entropy_coef = float(cfg.get("entropy_coef_start", agent.cfg.entropy_coef))
@@ -1855,7 +1853,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_scale"] = 10000.0
         cfg["theory_align_v2_conc_max"] = 100000.0
         cfg["theory_align_v2_var_coef"] = 5e-2
-        cfg["theory_align_v2_br_coef"] = 0.0
         cfg["theory_align_v2_conc_min_start"] = 100.0
         cfg["theory_align_v2_conc_scale_start"] = 100.0
         cfg["theory_align_v2_var_coef_start"] = 0.0

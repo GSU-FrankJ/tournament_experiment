@@ -127,3 +127,30 @@ gradient rows/figures are quoted (out of scope this session).
 **Known leftover (intentional):** the 3P/dc/da gradient baselines still use the envs'
 closed-form helpers (now explicitly EVAL/BASELINE-ONLY). Porting the sampled MC-FD pattern to
 those runners is follow-up work; this session's target was the 2P implementation.
+
+---
+
+## 6. `refactor: remove dormant e*-in-loss paths from PPO agents`
+
+**Spec rationale:** analytical e* must never appear in the policy update. Two dormant
+(coefficient-0.0 everywhere) but one-flag-away paths existed:
+
+1. `theory_align_v2_br_coef` — reconstructed `e* = w_gap/(4qk)` from the de-normalized state
+   inside the minibatch loss and penalized `(mean_effort − e*)²`
+   (`agents/ppo_two_players_clean.py` and `agents/ppo_three_players.py`).
+2. 3P `br_reg_coef` — runner computed `br_target = e_star_three_players(q, w_h, w_l, k)` each
+   update and passed it into `agent.update(br_target=…)` as a squared-error target.
+
+Removed entirely:
+- both agents: the `theory_align_v2_br_coef` config field, the `want_dist` br-term, and the
+  e*-loss block; 3P agent additionally loses `br_reg_coef` field, the `br_target` parameter of
+  `update()`, and the br-reg loss block.
+- `run/run_two_players.py`: br_coef read/passthrough and the preset line.
+- `run/run_three_players.py`: PPOConfig passthrough, br_reg plumbing/print, the
+  `br_target = e_star_three_players(...)` block (update now `agent.update()`), preset lines,
+  `--br-reg-coef`/`--br-reg-warmup` CLI flags, and the now-orphaned `local_best_response_3p`
+  FOC-bisection helper (zero callers).
+
+**Verification:** `grep -rn "br_coef|br_reg|br_target|local_best_response"` over all Python
+directories → zero matches. py_compile clean. Smoke: both agents construct and run a full
+store→update cycle under the canonical theory-align-v2 config (var_coef=5e-2) on CPU.
