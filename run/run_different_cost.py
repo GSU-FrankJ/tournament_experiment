@@ -111,6 +111,29 @@ def _clip_effort(value: float, bounds: Tuple[float, float]) -> float:
 
 # === Gradient-based solver ===
 
+def _batch_payoffs_uniform_dc(
+    env: DifferentCostEnv,
+    e1: float,
+    e2: float,
+    eps1: np.ndarray,
+    eps2: np.ndarray,
+    tie_breaks: np.ndarray,
+) -> Tuple[float, float]:
+    """Vectorized sampled mean payoffs using provided Uniform(-q, q) noise (CRN).
+
+    y_i = e_i + eps_i; the realized winner takes w_H, the loser w_L; each
+    player's payoff subtracts their OWN cost k_i * e_i^2.
+    """
+    y1 = e1 + eps1
+    y2 = e2 + eps2
+    winners = np.where(y1 > y2, 0, np.where(y2 > y1, 1, tie_breaks))
+    payoff1 = np.where(winners == 0, env.w_h, env.w_l)
+    payoff2 = np.where(winners == 0, env.w_l, env.w_h)
+    u1 = payoff1 - env.k1 * (e1 ** 2)
+    u2 = payoff2 - env.k2 * (e2 ** 2)
+    return float(u1.mean()), float(u2.mean())
+
+
 def _compute_gradients_different_cost(
     env: DifferentCostEnv,
     e1: float,
@@ -118,40 +141,39 @@ def _compute_gradients_different_cost(
     delta: float,
     num_samples: int,
 ) -> Tuple[float, float]:
-    """
-    Central-difference gradients for two-player tournament with different costs.
-    
-    Uses Monte Carlo estimation to compute expected utility gradients.
-    No symmetry assumption - players have different cost parameters k1, k2.
-    
+    """MC-FD gradients (Appendix A): central differences on SAMPLED payoffs.
+
+    One shared batch of uniform noise draws + tie-breaks (common random
+    numbers) is reused for all four perturbed evaluations, so each central
+    difference is taken under identical randomness. No symmetry assumption —
+    players have different cost parameters k1, k2. Mirrors
+    _stochastic_fd_gradients in run_two_players.py.
+
     Args:
         env: DifferentCostEnv instance
         e1: Current effort for player 1
         e2: Current effort for player 2
         delta: Finite difference step size
         num_samples: Number of Monte Carlo samples
-        
+
     Returns:
         (g1, g2): Gradients for player 1 and player 2
     """
     lo, hi = env.low, env.high
-    
-    def _utility_estimate(e_self: float, e_opp: float, k_self: float) -> float:
-        """Estimate expected utility via Monte Carlo."""
-        # Use the exact expected utility from environment (closed-form)
-        return env.expected_utility(e_self=e_self, e_opp=e_opp, k_self=k_self)
-    
-    # Compute finite difference gradients for each player
-    # Player 1 gradient: d/de1 EU1(e1, e2)
+    eps1, eps2, tie_breaks = env.draw_noise_batch(num_samples)
+
     e1_plus = _clip_effort(e1 + delta, (lo, hi))
     e1_minus = _clip_effort(e1 - delta, (lo, hi))
-    g1 = (_utility_estimate(e1_plus, e2, env.k1) - _utility_estimate(e1_minus, e2, env.k1)) / (2.0 * delta)
-    
-    # Player 2 gradient: d/de2 EU2(e2, e1)
     e2_plus = _clip_effort(e2 + delta, (lo, hi))
     e2_minus = _clip_effort(e2 - delta, (lo, hi))
-    g2 = (_utility_estimate(e2_plus, e1, env.k2) - _utility_estimate(e2_minus, e1, env.k2)) / (2.0 * delta)
-    
+
+    u1_plus, _ = _batch_payoffs_uniform_dc(env, e1_plus, e2, eps1, eps2, tie_breaks)
+    u1_minus, _ = _batch_payoffs_uniform_dc(env, e1_minus, e2, eps1, eps2, tie_breaks)
+    _, u2_plus = _batch_payoffs_uniform_dc(env, e1, e2_plus, eps1, eps2, tie_breaks)
+    _, u2_minus = _batch_payoffs_uniform_dc(env, e1, e2_minus, eps1, eps2, tie_breaks)
+
+    g1 = (u1_plus - u1_minus) / (2.0 * delta)
+    g2 = (u2_plus - u2_minus) / (2.0 * delta)
     return float(g1), float(g2)
 
 
@@ -168,22 +190,23 @@ def gradient_descent_different_cost(
     log: bool = True,
 ) -> Tuple[Tuple[float, float], Dict[str, Any]]:
     """
-    Two-player gradient ascent for k1 != k2 (no symmetry enforcement).
-    
-    Each player independently maximizes their expected utility by gradient ascent.
-    Unlike symmetric case, we do NOT average or enforce equal efforts.
-    
+    MC-FD gradient play (Appendix A) for k1 != k2: sampled payoffs with common
+    random numbers, central finite differences (step ``eps``), projected
+    gradient ascent, simultaneous updates, tolerance ``tol``. No closed-form
+    win probability, no symmetry assumption (asymmetric equilibrium), and no
+    e*-dependent stopping — gaps to theory are logged for evaluation only.
+
     Args:
         cfg: Configuration dictionary with k1, k2, q, w_h, w_l, effort_range
         lr: Initial learning rate
         steps: Maximum gradient steps
         eps: Finite difference delta
         tol: Convergence tolerance
-        num_samples: MC samples (unused - using closed-form utility)
+        num_samples: MC samples per CRN batch
         init_perturb: Initial perturbation from theory
         lr_decay: Learning rate decay per step
         log: Whether to print progress
-        
+
     Returns:
         ((e1, e2), history): Final efforts and convergence history
     """
@@ -270,9 +293,11 @@ def gradient_descent_different_cost(
                 f"lr={lr_current:.6f}"
             )
         
-        # Convergence criteria: both players near their respective theoretical values
+        # Tolerance tau: gradient estimate and update step both below tol.
+        # (Gap to theoretical e* is logged above but is NOT a stop criterion —
+        # the baseline must not condition its termination on the answer.)
         max_delta = max(delta_e1, delta_e2)
-        if grad_norm < tol and max_gap < tol and max_delta < tol:
+        if grad_norm < tol and max_delta < tol:
             if log:
                 print(
                     f"[gradient-diff-cost] converged at step={step} "

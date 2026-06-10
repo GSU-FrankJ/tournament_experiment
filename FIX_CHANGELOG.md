@@ -284,3 +284,24 @@ the env's closed-form analytic gradient plus a symmetry projection every 50 step
   the central difference of the closed-form EU at the same delta (valid because
   E[sampled payoff] = closed-form EU, proven by the env equivalence test).
   **PASS** — max |diff| = 0.00088, tolerance ≈ 0.003-0.004. Committed only after this passed.
+
+---
+
+## 11. `fix: port true MC-FD baseline to the het-cost gradient solver`
+
+**Spec rationale:** same Appendix-A port; additionally the dc solver's stop rule contained
+`max_gap < tol` — distance to the analytical (e1*, e2*) — i.e., an e*-dependent termination
+criterion. The baseline must not condition its stopping on the answer; gaps stay logged
+(evaluation-only).
+
+- `envs/different_cost_env.py`: added `draw_noise_batch` (eps1, eps2, tie_breaks from the env
+  RNG; exact mirror of `TwoPlayersEnv.draw_noise_batch`).
+- `run/run_different_cost.py`: new `_batch_payoffs_uniform_dc` (sampled rank payoffs with
+  per-player k_i); `_compute_gradients_different_cost` now does central differences of sampled
+  payoffs under ONE shared CRN batch (was: closed-form `env.expected_utility` differences);
+  `max_gap < tol` removed from the stop rule (now grad_norm < tol AND max step change < tol);
+  no symmetry machinery existed (asymmetric equilibrium) and none was added.
+- **Safeguard test:** `tests/test_different_cost_mcfd_gradient.py` — at (38.03, 27.66)
+  (analytical equilibrium, q=35; gradients ≈ 0) and (30, 30): mean of 50 CRN-batch gradients
+  (8192 samples each) vs closed-form FD at the same delta.
+  **PASS** — max |diff| = 0.00038, tolerance ≈ 0.002. Committed only after this passed.

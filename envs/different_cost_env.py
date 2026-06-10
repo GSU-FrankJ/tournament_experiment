@@ -45,6 +45,18 @@ class DifferentCostEnv:
         # run so noise is not re-seeded between episodes.
         self.rng = np.random.default_rng(self.seed)
 
+    def draw_noise_batch(self, batch_size: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Draw Uniform(-q, q) noise and tie-break decisions for CRN-friendly batches.
+
+        Mirrors TwoPlayersEnv.draw_noise_batch: one shared batch is reused for
+        all perturbed evaluations of an MC-FD central difference (common random
+        numbers).
+        """
+        eps1 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        eps2 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        tie_breaks = self.rng.integers(0, 2, size=int(batch_size))
+        return eps1, eps2, tie_breaks
+
     # ---- closed-form helper (EVALUATION / BASELINE ONLY) ----
     def expected_utility(self, *, e_self: float, e_opp: float, k_self: float) -> float:
         """Closed-form E[u] — used by the numerical gradient reference and
