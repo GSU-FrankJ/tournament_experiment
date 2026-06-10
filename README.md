@@ -88,7 +88,7 @@ pip install -r requirements.txt
 - self‑play sampling: pure self-play; both players always act from the current learner policy, storing both P1 and P2 transitions every step
 - state encoding (3‑D): `[q/60, k/1e‑3, (w_h−w_l)/10]`
 - Assumptions documented for this track:
-  - Two-player environment uses closed-form expected utilities (no stochastic noise is sampled during rollouts).
+  - Training uses sampled outcomes ONLY: every env step draws fresh uniform noise, ranks the realized outputs, and pays w_H/w_L minus cost. Closed-form win-probability / expected-utility / e* objects are evaluation- and baseline-only and never enter training rewards or policy updates.
   - Evaluation converts the learned Beta policy to actions via the distribution mean; we do **not** switch to the mode even when α,β>1.
 
 ### Config (defaults)

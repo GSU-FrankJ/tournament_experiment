@@ -45,7 +45,7 @@ No formal test suite. Validation via theory-alignment and exploitability evaluat
 **Data flow:** `config/*.py` → `run/run_*.py` → `agents/ppo_*.py` + `envs/*_env.py` → `results/`
 
 - **`agents/ppo_two_players_clean.py`** — PPO trainer (`PPOTwoPlayersBandit`), Beta distribution policy over [0,1] scaled to `effort_bounds`
-- **`envs/`** — Gym-like environments. Closed-form expected utilities (no stochastic sampling)
+- **`envs/`** — Gym-like environments. Training rewards are SAMPLED one-step outcomes (uniform noise, realized rank, w_H/w_L prizes); closed-form helpers on envs are evaluation/baseline-only
 - **`utils/prob.py`** — `p_from_diff(d, q)`: piecewise triangular win probability (core math)
 - **`utils/theory.py`** — Closed-form equilibrium formulas for all 4 experiment types
 - **`utils/eval.py`** — Convergence quality: Excellent <0.5, Good <1.0, Fair <5.0, Poor ≥5.0
@@ -109,7 +109,7 @@ Results: `results/{experiment}/convergence/`, `logs/`, `summary.csv`. Ablation: 
 
 - **Denominator 4** for two-player equilibrium. Never mix with denominator-6
 - **Beta mean for evaluation**, not mode, even when α,β > 1
-- **Closed-form expected utilities** — no stochastic noise during rollouts
+- **Sampled training rewards only** — agents train on sampled tournament outcomes (y_i = e_i (+ l_i) + eps_i, eps ~ U(-q,q); realized winner gets w_H, others w_L, minus k_i e_i^2). Closed-form win probability, expected payoff, and analytical e* are evaluation-only and must never enter the env step reward or the policy update
 - **Both players' transitions** stored in rollouts (pure self-play; opponent lag mechanism exists in agent code but is never used for action selection)
 - Results are precious and irreproducible (GPU training runs). Never delete without confirmation
 - Never modify `paper/generator/config.py` theory parameters without confirming — they match the paper's math

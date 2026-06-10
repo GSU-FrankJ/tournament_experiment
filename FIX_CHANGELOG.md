@@ -77,3 +77,22 @@ The old `step()` returned closed-form `w_L + p₁(win)·(w_H−w_L) − k_i e_i�
 
 **Effect on results:** none yet; existing da JSONs (incl. `r4_h1_long`) were produced under
 closed-form rewards and are non-canonical pending re-runs.
+
+---
+
+## 4. `docs: state sampled-training invariant in CLAUDE.md and README`
+
+**Spec rationale:** the repo docs codified the leakage violation as an "invariant", which would
+steer future edits back into non-compliance.
+
+Old wording replaced:
+- `.claude/CLAUDE.md:48`: "**`envs/`** — Gym-like environments. Closed-form expected utilities
+  (no stochastic sampling)"
+- `.claude/CLAUDE.md:112` (Critical Invariants): "**Closed-form expected utilities** — no
+  stochastic noise during rollouts"
+- `README.md:91`: "Two-player environment uses closed-form expected utilities (no stochastic
+  noise is sampled during rollouts)."
+
+New invariant (both files): training uses sampled outcomes only — fresh uniform noise, realized
+rank, w_H/w_L prizes minus cost; closed-form win-prob / expected-payoff / e* are
+evaluation/baseline-only and never enter training rewards or policy updates.
