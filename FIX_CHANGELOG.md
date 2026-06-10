@@ -211,3 +211,47 @@ run's recorded `stopped_at_update`; nothing fabricated.
 **Deliberately NOT done here:** `paper/tables/*` were not regenerated. Regeneration must wait
 for (a) registry canonicalization (pre-fix vs Round-3/4 run selection — audit known issue) and
 (b) the post-env-fix re-runs; regenerating now would mix non-canonical runs.
+
+---
+
+## 9. `feat: wire Fig-7 ablation toggles into the 3P runner`
+
+**Spec rationale:** Fig 7's component ablation requires the stability screen and the
+exploitability verification to be independently disable-able.
+
+- **Status check:** `run_two_players.py`, `run_different_cost.py`, `run_different_ability.py`
+  already expose AND plumb `--disable-cheap-gate` / `--disable-exploitability` (verified via
+  grep + `--help`). `run_three_players.py` DECLARED both flags but never read them — args were
+  silently ignored.
+- `run/run_three_players.py`: flags now flow `args → cfg → run_ppo`;
+  `--disable-cheap-gate` forces the stability screen to pass (same semantics as 2P);
+  `--disable-exploitability` suppresses all exploitability evals so the run goes to budget with
+  `stop_reason="max_updates"`; both toggles are recorded in the output JSON's `exploit_config`
+  for provenance. No behavior change when neither flag is passed.
+- **Verification:** py_compile; introspection confirms run_ppo reads both toggles; `--help` on
+  all four runners lists both flags. Nothing executed beyond CLI help.
+
+---
+
+## Session verification summary
+
+- `tests/test_three_players_env_sampled.py` — PASS (max |diff| 0.0068, tol ≈ 0.029)
+- `tests/test_different_cost_env_sampled.py` — PASS (max |diff| 0.0053, tol ≈ 0.021)
+- `tests/test_different_ability_env_sampled.py` — PASS (max |diff| 0.0061, tol = 0.03)
+- py_compile clean on every touched file; agents smoke-tested (construct + update) under the
+  canonical theory-align-v2 config; 2P MC-FD solver smoke-tested (300 iters, no files written);
+  verified-convergence extraction validated read-only against all existing JSONs (every
+  baseline group 5/5 verified with finite conv updates vs all-NC before).
+- No training runs executed; no experimental numbers created or edited; `results/` and
+  `paper/{tables,figures,data}` artifacts untouched.
+
+## Follow-ups intentionally left for later sessions
+
+1. Re-run 3P/dc/da training (and 2P/all gradient baselines) under the fixed sampled-reward
+   envs and unified eps=0.03 — all existing non-2P PPO results and all gradient results are
+   non-canonical against the fixed code.
+2. Port the sampled MC-FD baseline to the 3P/dc/da runners (2P implementation is the reference).
+3. Registry canonicalization (select Round-3/4 runs as baseline, exclude pre-fix), then
+   regenerate tables/figures via `python -m paper.generator make_all`.
+4. Run the Fig-7 component-ablation batch (full / no-stability-screen / no-exploitability).
+5. DELETE-bucket cleanup per AUDIT_REPORT.md §3 (explicitly out of scope this session).

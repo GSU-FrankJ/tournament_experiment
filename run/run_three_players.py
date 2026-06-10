@@ -670,6 +670,16 @@ def run_ppo(
     min_updates = int(cfg.get("min_updates", 0))
     last_exploit_eval_step = -999999
     exploit_every_updates = int(cfg.get("exploit_every_updates", 10))
+    # Ablation toggles (Fig. 7): each verification component is independently
+    # disable-able. disable_cheap_gate => stability screen always passes;
+    # disable_exploitability => exploitability is never evaluated (run goes to
+    # budget, stop_reason stays "max_updates").
+    disable_cheap_gate = bool(cfg.get("disable_cheap_gate", False))
+    disable_exploitability = bool(cfg.get("disable_exploitability", False))
+    if disable_cheap_gate:
+        print("[ablation] disable_cheap_gate: stability screen always passes", flush=True)
+    if disable_exploitability:
+        print("[ablation] disable_exploitability: exploitability never evaluated", flush=True)
     exploit_eval_steps: List[int] = []
     
     if convergence_enabled:
@@ -908,21 +918,26 @@ def run_ppo(
             mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
             std_ok = std_kl_window is not None and std_kl_window <= std_thresh
             drift_ok = drift_effort is not None and drift_effort <= drift_thresh
-            drift_pass = mean_ok and std_ok and drift_ok
-            
+            # Ablation: --disable-cheap-gate forces the stability screen to pass
+            drift_pass = True if disable_cheap_gate else (mean_ok and std_ok and drift_ok)
+
             if drift_pass:
                 drift_ok_streak += 1
             else:
                 drift_ok_streak = 0
-            
+
             exploitability_val = None
             best_dev_effort = None
-            
+
             # Determine whether to run exploitability evaluation
             steps_since_last_exploit = update_idx - last_exploit_eval_step
             periodic_due = steps_since_last_exploit >= exploit_every_updates
             gate_triggered = drift_pass and drift_ok_streak >= patience_drift
-            run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
+            # Ablation: --disable-exploitability never evaluates (run goes to budget)
+            if disable_exploitability:
+                run_exploit = False
+            else:
+                run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
             
             if run_exploit:
                 last_exploit_eval_step = update_idx
@@ -1112,6 +1127,8 @@ def run_ppo(
                 "patience_exploit": int(exploit_cfg.get("patience_exploit", 5)),
                 "exploit_every_updates": exploit_every_updates,
                 "exploit_M": int(exploit_cfg.get("M", 8192)),
+                "disable_cheap_gate": disable_cheap_gate,
+                "disable_exploitability": disable_exploitability,
             },
             **convergence_history,
         }
@@ -1260,6 +1277,11 @@ def _run_cli(args: argparse.Namespace) -> str:
     # Exploitability overrides
     if hasattr(args, 'exploit_every_updates') and args.exploit_every_updates is not None:
         cfg["exploit_every_updates"] = int(args.exploit_every_updates)
+    # Ablation toggles (Fig. 7): independently disable each verification component
+    if getattr(args, 'disable_cheap_gate', False):
+        cfg["disable_cheap_gate"] = True
+    if getattr(args, 'disable_exploitability', False):
+        cfg["disable_exploitability"] = True
     if args.exploit_eps is not None:
         if "convergence" not in cfg:
             cfg["convergence"] = {}
