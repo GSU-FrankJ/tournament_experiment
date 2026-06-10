@@ -33,3 +33,24 @@ or policy update.
 
 **Effect on results:** none yet — no runs re-executed. All existing 3P convergence JSONs were
 produced by the old closed-form reward path and are now non-canonical pending re-runs.
+
+---
+
+## 2. `fix: train different-cost env on sampled rank rewards`
+
+**Spec rationale:** same train/eval invariant — het-cost reward must be the realized
+`w_H`/`w_L` by rank minus `k_i e_i²`, with `y_i = e_i + ε_i`, `ε ~ U(-q,q)`; the old `step()`
+returned the closed-form `w_L + p·(w_H−w_L) − k_i e_i²` (exact triangular-CDF p).
+
+- `envs/different_cost_env.py` — `step()` now samples noise, ranks realized outputs, pays
+  w_H/w_L, subtracts per-player cost (mirrors `TwoPlayersEnv.step`, incl. uniform tie-break).
+  Added a per-env RNG (constructed once per run; advances across steps). `expected_utility`
+  kept verbatim but documented EVALUATION/BASELINE-ONLY (it is the FD-baseline oracle and the
+  reference for the safeguard test).
+- **Safeguard test:** `tests/test_different_cost_env_sampled.py` — profiles (38.03, 27.66)
+  (the analytical equilibrium at q=35), (30,30), (60,15) at paper params
+  (k1=0.0004, k2=0.00055, w=(8,5.5)); 120,000 sampled draws vs the OLD closed-form reward.
+  **PASS** — max |diff| = 0.0053, tolerance ≈ 0.021. Committed only after this passed.
+
+**Effect on results:** none yet; existing dc JSONs (incl. `r4_dc_final`) were produced under
+closed-form rewards and are non-canonical pending re-runs.
