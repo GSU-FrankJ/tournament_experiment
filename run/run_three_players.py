@@ -276,6 +276,35 @@ def eval_exploitability_3p(
 
 # === Gradient-based solver ===
 
+def _batch_payoffs_uniform_3p(
+    env: ThreePlayersEnv,
+    e1: float,
+    e2: float,
+    e3: float,
+    eps: np.ndarray,
+    tie_breaks: np.ndarray,
+) -> tuple[float, float, float]:
+    """Vectorized sampled mean payoffs for all three players under provided noise (CRN).
+
+    y_i = e_i + eps_i; the realized winner takes w_H, both losers w_L; each
+    player's payoff subtracts k*e_i^2. Exact output ties (probability zero
+    under continuous noise) are resolved with the provided tie-break draws.
+    """
+    efforts = np.array([e1, e2, e3], dtype=float)
+    y = efforts[None, :] + eps  # (batch, 3)
+    winners = np.argmax(y, axis=1)
+    is_max = y == y.max(axis=1, keepdims=True)
+    tie_rows = np.flatnonzero(is_max.sum(axis=1) > 1)
+    for r in tie_rows:
+        idxs = np.flatnonzero(is_max[r])
+        winners[r] = idxs[int(tie_breaks[r]) % len(idxs)]
+    costs = env.k * efforts ** 2
+    u1 = float(np.where(winners == 0, env.w_h, env.w_l).mean() - costs[0])
+    u2 = float(np.where(winners == 1, env.w_h, env.w_l).mean() - costs[1])
+    u3 = float(np.where(winners == 2, env.w_h, env.w_l).mean() - costs[2])
+    return u1, u2, u3
+
+
 def _stochastic_fd_gradients_3p(
     env: ThreePlayersEnv,
     e1: float,
@@ -284,15 +313,34 @@ def _stochastic_fd_gradients_3p(
     delta: float,
     num_samples: int,
 ) -> tuple[float, float, float]:
-    """Gradient for the three-player numerical reference.
+    """MC-FD gradients (Appendix A): central differences on SAMPLED payoffs.
 
-    Delegates to the env's closed-form gradient (EVAL/BASELINE-ONLY helper).
-    delta/num_samples are kept in the signature for a future fully-sampled
-    MC-FD variant matching Appendix A (see _stochastic_fd_gradients in
-    run_two_players.py for the reference implementation).
+    One shared batch of uniform noise draws + tie-breaks (common random
+    numbers) is reused for all six perturbed evaluations, so each central
+    difference is taken under identical randomness. Mirrors
+    _stochastic_fd_gradients in run_two_players.py for the 3-player game.
     """
-    del delta, num_samples
-    return env.expected_utility_gradient(e1, e2, e3)
+    eps, tie_breaks = env.draw_noise_batch(num_samples)
+    lo, hi = env.effort_range
+
+    e1_plus = _clip_effort(e1 + delta, (lo, hi))
+    e1_minus = _clip_effort(e1 - delta, (lo, hi))
+    e2_plus = _clip_effort(e2 + delta, (lo, hi))
+    e2_minus = _clip_effort(e2 - delta, (lo, hi))
+    e3_plus = _clip_effort(e3 + delta, (lo, hi))
+    e3_minus = _clip_effort(e3 - delta, (lo, hi))
+
+    u1_plus, _, _ = _batch_payoffs_uniform_3p(env, e1_plus, e2, e3, eps, tie_breaks)
+    u1_minus, _, _ = _batch_payoffs_uniform_3p(env, e1_minus, e2, e3, eps, tie_breaks)
+    _, u2_plus, _ = _batch_payoffs_uniform_3p(env, e1, e2_plus, e3, eps, tie_breaks)
+    _, u2_minus, _ = _batch_payoffs_uniform_3p(env, e1, e2_minus, e3, eps, tie_breaks)
+    _, _, u3_plus = _batch_payoffs_uniform_3p(env, e1, e2, e3_plus, eps, tie_breaks)
+    _, _, u3_minus = _batch_payoffs_uniform_3p(env, e1, e2, e3_minus, eps, tie_breaks)
+
+    g1 = (u1_plus - u1_minus) / (2.0 * delta)
+    g2 = (u2_plus - u2_minus) / (2.0 * delta)
+    g3 = (u3_plus - u3_minus) / (2.0 * delta)
+    return float(g1), float(g2), float(g3)
 
 
 def gradient_descent_three_players(
@@ -305,11 +353,13 @@ def gradient_descent_three_players(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> tuple[tuple[float, float, float], Dict[str, Any]]:
-    """Three-player gradient ascent with uniform noise and distinct starts."""
+    """MC-FD gradient play (Appendix A), three-player variant: sampled payoffs
+    with common random numbers, central finite differences (step ``eps``),
+    projected gradient ascent, simultaneous updates, tolerance ``tol``. No
+    closed-form win probability and no symmetry projection — symmetry is only
+    reported."""
     effort_bounds = tuple(cfg["effort_range"])
     env = ThreePlayersEnv(
         w_h=cfg["w_h"],
@@ -343,10 +393,10 @@ def gradient_descent_three_players(
     for step in range(1, steps + 1):
         # Adaptive learning rate with exponential decay
         lr_current = lr * (lr_decay ** step)
-        
-        # Use analytic gradient from environment
-        g1, g2, g3 = env.expected_utility_gradient(e1, e2, e3)
-        
+
+        # Sampled MC-FD gradient with common random numbers (Appendix A)
+        g1, g2, g3 = _stochastic_fd_gradients_3p(env, e1, e2, e3, delta=eps, num_samples=num_samples)
+
         e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
         e2_new = _clip_effort(e2 + lr_current * g2, effort_bounds)
         e3_new = _clip_effort(e3 + lr_current * g3, effort_bounds)
@@ -356,15 +406,9 @@ def gradient_descent_three_players(
         delta_e3 = abs(e3_new - e3)
         grad_norm = max(abs(g1), abs(g2), abs(g3))
 
+        # Simultaneous (projected) update
         e1, e2, e3 = e1_new, e2_new, e3_new
-        
-        # Periodic symmetry enforcement
-        if symmetry_enforce_every > 0 and step % symmetry_enforce_every == 0:
-            e_avg = (e1 + e2 + e3) / 3.0
-            e1 = e2 = e3 = e_avg
-            if log and step <= 100:
-                print(f"  [symmetry enforce] step={step} e_avg={e_avg:.6f}")
-        
+
         history["iterations"] = float(step)
         history["final_grad"] = float(grad_norm)
         history["final_grad_tuple"] = (float(g1), float(g2), float(g3))
@@ -375,25 +419,23 @@ def gradient_descent_three_players(
         history["e3_history"].append(float(e3))
         history["step_history"].append(step)
         
-        # Compute symmetry gap (max difference among efforts)
+        # Symmetry gap is REPORTED only (never enforced, never a stop criterion)
         symmetry_gap = max(abs(e1 - e2), abs(e1 - e3), abs(e2 - e3))
         max_delta = max(delta_e1, delta_e2, delta_e3)
-        
+
         if log and (step == 1 or step % 250 == 0 or step == steps):
             print(
                 f"[gradient-3p] step={step:05d} e1={e1:.6f} e2={e2:.6f} e3={e3:.6f} "
                 f"grad=({g1:.6f},{g2:.6f},{g3:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e},{delta_e3:.3e}) "
                 f"lr={lr_current:.6f} sym_gap={symmetry_gap:.4f}"
             )
-        
-        # Convergence criteria
-        if (grad_norm < tol and 
-            symmetry_gap < symmetry_tol and
-            max_delta < tol):
+
+        # Tolerance tau: gradient estimate and update step both below tol
+        if grad_norm < tol and max_delta < tol:
             if log:
                 print(
                     f"[gradient-3p] converged at step={step} "
-                    f"grad_norm={grad_norm:.3e} symmetry_gap={symmetry_gap:.3e}"
+                    f"grad_norm={grad_norm:.3e} sym_gap={symmetry_gap:.3e}"
                 )
             break
 
@@ -413,8 +455,6 @@ def run_gradient(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> Dict:
     """Run gradient-based solver for three-player tournament."""
@@ -431,8 +471,6 @@ def run_gradient(
         num_samples=num_samples,
         init_perturb=init_perturb,
         lr_decay=lr_decay,
-        symmetry_enforce_every=symmetry_enforce_every,
-        symmetry_tol=symmetry_tol,
         log=log,
     )
     final_e = (e1 + e2 + e3) / 3.0
@@ -1333,8 +1371,6 @@ def _run_cli(args: argparse.Namespace) -> str:
                 num_samples=args.grad_samples,
                 init_perturb=args.grad_init_perturb,
                 lr_decay=args.grad_lr_decay,
-                symmetry_enforce_every=args.grad_symmetry_enforce,
-                symmetry_tol=args.grad_symmetry_tol,
                 log=True,
             )
     else:
@@ -1370,8 +1406,6 @@ def main():
     parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 64))
     parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0))
     parser.add_argument("--grad-lr-decay", type=float, default=0.9995)
-    parser.add_argument("--grad-symmetry-enforce", type=int, default=50)
-    parser.add_argument("--grad-symmetry-tol", type=float, default=0.1)
     
     # Game parameter overrides
     parser.add_argument("--k", type=float, help="Override cost parameter k")

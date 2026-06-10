@@ -45,6 +45,18 @@ class ThreePlayersEnv:
         self._rng = np.random.default_rng(self.seed)
         self._episode = 0
 
+    def draw_noise_batch(self, batch_size: int) -> Tuple[np.ndarray, np.ndarray]:
+        """Draw Uniform(-q, q) noise (batch, 3) and tie-break draws for CRN-friendly batches.
+
+        Mirrors TwoPlayersEnv.draw_noise_batch: one shared batch is reused for
+        all perturbed evaluations of an MC-FD central difference (common random
+        numbers). tie_breaks are uniform ints in [0, 3), consumed only on exact
+        output ties (probability zero under continuous noise).
+        """
+        eps = self._rng.uniform(-self.q, self.q, size=(int(batch_size), 3))
+        tie_breaks = self._rng.integers(0, 3, size=int(batch_size))
+        return eps, tie_breaks
+
     # --- gym-like API ---
     def reset(self) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         self._episode += 1

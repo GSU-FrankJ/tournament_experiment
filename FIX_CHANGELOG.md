@@ -255,3 +255,32 @@ exploitability verification to be independently disable-able.
    regenerate tables/figures via `python -m paper.generator make_all`.
 4. Run the Fig-7 component-ablation batch (full / no-stability-screen / no-exploitability).
 5. DELETE-bucket cleanup per AUDIT_REPORT.md §3 (explicitly out of scope this session).
+
+---
+
+# Follow-up session (post-review)
+
+## 10. `fix: port true MC-FD baseline to the three-player gradient solver`
+
+**Spec rationale (Appendix A):** the numerical reference is MC-FD gradient play — sampled
+payoffs with common random numbers, central finite differences, projected simultaneous ascent,
+tolerance tau, no closed-form win probability, no symmetry projection. The 3P solver still used
+the env's closed-form analytic gradient plus a symmetry projection every 50 steps.
+
+- `envs/three_players_env.py`: added `draw_noise_batch(batch_size)` → `(eps (n,3), tie_breaks)`
+  mirroring `TwoPlayersEnv.draw_noise_batch` (CRN-friendly batches from the env RNG).
+- `run/run_three_players.py`:
+  - new `_batch_payoffs_uniform_3p`: vectorized sampled payoffs — rank realized
+    `y_i = e_i + eps_i`, winner w_H / losers w_L, minus k·e_i²; exact ties (measure-zero)
+    resolved with the provided tie-break draws.
+  - `_stochastic_fd_gradients_3p` now computes central differences of those sampled payoffs
+    under ONE shared CRN batch for all six perturbed evaluations (was: delegation to
+    closed-form `env.expected_utility_gradient`, which remains EVAL-ONLY).
+  - `gradient_descent_three_players`: uses the sampled gradient; symmetry enforcement and the
+    symmetry stop-term removed (symmetry reported only); stop = grad_norm < tol AND max step
+    change < tol; `--grad-symmetry-enforce`/`--grad-symmetry-tol` CLI flags dropped.
+- **Safeguard test:** `tests/test_three_players_mcfd_gradient.py` — at (25,25,25) (=e*, q=35)
+  and (20,25,30), the mean of 50 independent CRN-batch gradients (8192 samples each) must match
+  the central difference of the closed-form EU at the same delta (valid because
+  E[sampled payoff] = closed-form EU, proven by the env equivalence test).
+  **PASS** — max |diff| = 0.00088, tolerance ≈ 0.003-0.004. Committed only after this passed.
