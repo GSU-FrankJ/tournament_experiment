@@ -54,3 +54,26 @@ returned the closed-form `w_L + p·(w_H−w_L) − k_i e_i²` (exact triangular-
 
 **Effect on results:** none yet; existing dc JSONs (incl. `r4_dc_final`) were produced under
 closed-form rewards and are non-canonical pending re-runs.
+
+---
+
+## 3. `fix: train different-ability env on sampled rank rewards`
+
+**Spec rationale:** same train/eval invariant, het-ability variant — performance is
+`y_i = e_i + l_i + ε_i`, `ε ~ U(-q,q)`; reward is realized `w_H`/`w_L` by rank minus `k_i e_i²`.
+The old `step()` returned closed-form `w_L + p₁(win)·(w_H−w_L) − k_i e_i²` (exact triangular CDF).
+
+- `envs/different_ability_env.py` — `step()` now samples noise, ranks realized ability-shifted
+  outputs, pays w_H/w_L, subtracts cost (uniform tie-break). Added per-env RNG (constructed once
+  per run). `probability_win_player1` / `compute_utility` / `analyze_equilibrium` /
+  `compute_gradients` kept verbatim but documented EVALUATION/BASELINE-ONLY (FD-baseline oracle
+  + safeguard-test reference). `info["win_probabilities"]` replaced by sampled
+  `noises`/`outputs`/`winner` (no consumer read the old key; the PPO loop discards info, and
+  `tools/check_env_noise_determinism.py` expects the new keys).
+- **Safeguard test:** `tests/test_different_ability_env_sampled.py` — profiles (46.43, 46.43)
+  (analytical symmetric equilibrium at q=35), (40,50), (20,30) at paper params
+  (l=(10,5), k=0.0005, w=(6.5,3)); 120,000 sampled draws vs the OLD closed-form reward.
+  **PASS** — max |diff| = 0.0061, tolerance 0.03. Committed only after this passed.
+
+**Effect on results:** none yet; existing da JSONs (incl. `r4_h1_long`) were produced under
+closed-form rewards and are non-canonical pending re-runs.
