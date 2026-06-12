@@ -205,11 +205,13 @@ gap is ~0 by construction; 3P/dc gradient symmetry gaps are genuine measurements
    the untracked `results/two_players/convergence/_archive_pre_warmup_fix/` (closed-form-era
    2P runs, outside the registry glob). Do not quote until the sweep is re-run under sampled
    training or the figure is dropped.
-2. **beta_snapshots / exploitability_q25 - not generated** (no alpha/beta series in nested
-   runs; q=25 dropped in the parameter overhaul). Pre-existing, data-driven skips.
-3. **convergence_comparison.{csv,tex} - traceable but POOLED.** Rows are keyed by q only and
-   average across scenarios sharing that q (e.g. q=35 pools 2P/3P/dc/da). Per-scenario
-   numbers must come from final_summary. Pre-existing design flaw, flagged since the audit.
+2. **beta_snapshots / exploitability_q25 - RETIRED (2026-06-12).** Both code paths were
+   dormant under canonical data (no alpha/beta snapshot series; q=25 dropped in the parameter
+   overhaul) and have been removed from plots.py and the make_all pipeline. No files existed.
+3. **convergence_comparison.{csv,tex} - RETIRED (2026-06-12).** It pooled scenarios per q
+   (cross-experiment averaging), which is semantically misleading; the function, wiring, and
+   generated files are removed. Per-scenario convergence lives in final_summary's
+   "Conv. Update (verified)" column.
 4. **environment_config.{csv,tex}** - static, traces to config/*.py (no runs).
 
 ## 5. Notes for manuscript section 5.3 (eps_eq gate semantics; owner-held framing decision)
