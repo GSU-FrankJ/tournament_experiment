@@ -554,3 +554,29 @@ clean.
   that eps_003 duplicates the baseline gate and serves as a consistency arm.
 - Verified: bash -n clean; dry-run prints 105 (and 195 with the flag); zero tmux sessions
   created. **No training launched this session.**
+
+## 23. Session verification + drift fix + handoff (`SESSION_STATE.md`)
+
+Adversarial 3-lens verification workflow over the cleanup changes:
+- retirement-completeness: PASS — zero dangling references (only intentional NOTE comments,
+  historical docs, the stale `.claude/worktrees/` copy, and an unrelated diagnostics
+  filename in tools/); PLOT_TYPES=8, TABLE_TYPES=4; py_compile + imports clean; artifact
+  dirs hold no retiree files.
+- sweep-script-audit: PASS — all nine CLI flags exist; `--exploit-eps`/`--exploit-patience`
+  are independent of the mutually-exclusive override group; all 105 dry-run target paths
+  match the runner's PPO naming 1:1; an end-to-end synthetic-file test confirmed the
+  registry classifies `eps_001` outputs correctly and the promotion never relabels/drops
+  eps_*/pat_* rows; default mode launches nothing.
+- pipeline-regression: caught REAL drift — the committed hyperparam_sensitivity figure
+  still displayed the stale "ε=0.05" label (the af85060 label fix landed after the last
+  render). Regeneration is otherwise fully deterministic: all tables/data CSVs and 8/9 PNGs
+  byte-identical; PDFs differ only in CreationDate metadata. Fixed in `9af59df`
+  (re-rendered that one figure; data still baseline-only pending the sweep). Minor
+  pre-existing quirks recorded (hyperparam_sensitivity is make_all-only; global CLI flags
+  must precede the subcommand) — left as-is.
+- `run/r5_sensitivity_sweep.sh`: comment accuracy fix (inlined worker loop, not a
+  worker.sh reuse) + dead env var removed.
+- **`SESSION_STATE.md`** written at the repo root: full handoff (branch/HEAD, effort
+  summary, adopted canonical state + honest r5 headline, THE one open TODO with exact
+  commands and acceptance check, the ordered still-pending list, provenance pointers, and
+  the hard rules that carry over).

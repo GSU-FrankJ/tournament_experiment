@@ -53,8 +53,8 @@
 # SAFETY:
 #   - PPO outputs have no runner-level --force guard, so this script REFUSES
 #     to launch if ANY target output file already exists (no overwrites).
-#   - Launch uses the committed r5 worker/queue pattern (one run per GPU,
-#     tmux, atomic claims): results/r5_sampled/worker.sh.
+#   - Launch replicates the r5 worker/queue pattern (one run per GPU, tmux,
+#     atomic flock claims) with an inlined worker loop below.
 #   - After the wave: `python -m paper.generator make_all` refills the figure;
 #     then run the before/after format check (same layout/axes/legend; only
 #     data and the corrected baseline-gate label differ).
@@ -121,7 +121,7 @@ rm -f "$WAVE_DIR/.jobs.cursor"
 # Point it at this wave's queue/manifest via a thin wrapper per GPU.
 for g in 0 1 2 3 4 5 6 7; do
   tmux new-session -d -s "r5sens_gpu$g" \
-    "MANIFEST=$WAVE_DIR/manifest.csv bash -c '
+    "bash -c '
       QUEUE=$WAVE_DIR/jobs.txt; LOCK=$WAVE_DIR/.jobs.lock; CURSOR=$WAVE_DIR/.jobs.cursor
       TOTAL=\$(wc -l < \$QUEUE)
       while true; do
