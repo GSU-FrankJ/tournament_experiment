@@ -469,3 +469,35 @@ identical stopping flags): std rel. error 5.25%/3.26% (seed-std ±0.20/±0.85) v
 theory-align-v2 config does not transfer to het-ability; the paper now has sampled evidence
 for this scenario-specific deviation. Recorded in the canonicalization plan and on the
 BASELINE_OVERRIDES comment block. The override flip itself lands in §18.
+
+---
+
+## 18. r5 promotion + final artifact regeneration
+
+- `4db3bdb` `feat: promote r5_sampled wave to canonical baseline everywhere` —
+  BASELINE_OVERRIDES → r5 tags for all four scenarios (da = r5_sampled_std per §17);
+  promote_preferred_ablations accepts tag tuples, includes Gradient (legacy closed-form
+  gradient rows dropped), leaves Theory rows untouched; registry splits compound
+  weight-variant suffixes (r5_sampled_wh8_wl4 → r5_sampled + wh8_wl4); ablation table maps
+  the r5_fig7 arms with revision-notes terminology and filters to Set 1; final_summary
+  caption switched from INTERIM to final/sampled. Acceptance test updated: 272 runs, 0
+  duplicate identities, 5 r5 seeds per cell, all stop_reason=exploitability, sampled
+  gradient baseline everywhere — PASS.
+- `693e74c` `chore: regenerate paper artifacts from r5_sampled baselines (final)` —
+  make_all exit 0; every TEL-PPO/gradient cell now sampled: 2P 4.12/1.54/2.74%, 3P
+  8.03/6.63%, dc 2.88/4.69% (effort gaps 10.48/7.37 vs analytic 10.37/7.24), da std
+  5.25/3.26%; gradient 0.14–0.65% ±std. ablation_results carries all three Fig-7 arms for
+  the first time: TEL-PPO 1.070±0.967 @72 / No stability screening 1.564±1.225 @71 /
+  No exploitability verification 2.431±1.704, never terminates.
+
+## 19. `docs: add paper/PROVENANCE.md` (commit 3160cf8)
+
+Per-cell and per-figure provenance for the final artifacts: every final_summary cell maps
+to its 5 r5 run files (with stop_reason@update or iteration count), seeds, and launch
+command; figures map to their data CSVs and the same promoted baselines; MC-FD solver
+parameters documented with the correction history. UNVERIFIED list: hyperparam_sensitivity
+(degenerate — variant sources only in the untracked pre-warmup-fix archive),
+beta_snapshots/exploitability_q25 (data-driven skips), convergence_comparison (cross-scenario
+pooling caveat). Section 5 captures the eps_eq mechanism note for manuscript §5.3 (utility-
+vs effort-scale tolerance; 3P flat-EU landscape) — framing decision held by the owner.
+main.tex untouched throughout.
