@@ -142,32 +142,29 @@ def get_q_values(experiment: str = None) -> List[float]:
 # concentration grows unchecked and kills the learning signal.  Standard mode
 # with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
 # q55-convergence/STATE.md for details.
-# INTERIM canonical picks, owner-approved 2026-06-10 (see
-# docs/registry_canonicalization_plan.md and FIX_CHANGELOG.md §14). All three
-# are CLOSED-FORM-TRAINED LEGACY runs; the r5_sampled re-run wave (sampled
-# training, eps=0.03) replaces them, at which point every entry below — and a
-# two_players one — flips to "r5_sampled".
-#
-# PROVENANCE FOOTNOTES (must accompany any artifact generated from these):
-# - three_players/round3_baseline: ran under exploit_eps=0.05 (pre-unification
-#   gate); measured exploitability at stop is 0.0002-0.0047, i.e. also passes
-#   the unified 0.03. Launch scripts committed (results/round3_3p_wave1.sh,
-#   round3_wave2_and_diag.sh).
-# - different_cost/r4_dc_final: no committed launch script; provenance =
-#   docs/round3_round4_report.md + per-JSON exploit_config (eps=0.03) + all
-#   stops at the --min-updates 300 floor.
-# - different_ability/r4_h1_long: STANDARD config, NOT theory-align-v2 (the
-#   ramp was found harmful for da; the only complete da group). RESOLVED
-#   2026-06-12: the r5_sampled std-vs-v2 head-to-head confirms STANDARD as
-#   da's canonical config (v2: equal-or-worse error, 3-14x seed variance);
-#   see docs/registry_canonicalization_plan.md.
-BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
-    ("three_players", 35.0): "round3_baseline",
-    ("three_players", 55.0): "round3_baseline",
-    ("different_cost", 35.0): "r4_dc_final",
-    ("different_cost", 55.0): "r4_dc_final",
-    ("different_ability", 35.0): "r4_h1_long",
-    ("different_ability", 55.0): "r4_h1_long",
+# FINAL canonical picks, owner-approved 2026-06-12: the r5_sampled wave
+# (sampled training, eps_eq=0.03, 5 seeds, verified stopping; commit d6a6e81).
+# Values may be a tuple: every listed tag is promoted to "baseline" for that
+# (experiment, q) and the legacy "baseline" rows (PPO + Gradient) are dropped.
+# - two_players: Set 1 and Set 2 both carry ablation "r5_sampled" (Set 2 is
+#   distinguished by weight_variant="wh8_wl4"); gradient runs share the tag.
+# - different_ability: PPO arm is "r5_sampled_std" (STANDARD config — the
+#   sampled std-vs-v2 head-to-head rejected theory-align-v2 for this scenario;
+#   see docs/registry_canonicalization_plan.md); its gradient tag is
+#   "r5_sampled". The rejected v2 arm stays on disk as "r5_sampled_v2".
+# - Interim closed-form-era picks (round3_baseline / r4_dc_final / r4_h1_long,
+#   2026-06-10) are superseded and remain on disk under their own tags;
+#   history in FIX_CHANGELOG.md §13-§16.
+BASELINE_OVERRIDES: Dict[Tuple[str, float], Tuple[str, ...]] = {
+    ("two_players", 35.0): ("r5_sampled",),
+    ("two_players", 45.0): ("r5_sampled",),
+    ("two_players", 55.0): ("r5_sampled",),
+    ("three_players", 35.0): ("r5_sampled",),
+    ("three_players", 55.0): ("r5_sampled",),
+    ("different_cost", 35.0): ("r5_sampled",),
+    ("different_cost", 55.0): ("r5_sampled",),
+    ("different_ability", 35.0): ("r5_sampled_std", "r5_sampled"),
+    ("different_ability", 55.0): ("r5_sampled_std", "r5_sampled"),
 }
 
 

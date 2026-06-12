@@ -184,20 +184,26 @@ def generate_ablation_table(
     metrics = compute_summary_metrics(df)
     metrics_df = summary_metrics_to_dataframe(metrics)
 
-    # Filter to TEL-PPO, two_players experiment only
+    # Filter to TEL-PPO, two_players experiment, Set 1 only (the Fig-7 "full"
+    # arm reuses the Set-1 baseline runs; Set 2 prize variants are excluded)
     ppo_df = metrics_df[metrics_df["method"].isin(["TEL-PPO", "PPO"])].copy()
     if "experiment" in ppo_df.columns:
         ppo_df = ppo_df[ppo_df["experiment"] == "two_players"]
+    if "weight_variant" in ppo_df.columns:
+        ppo_df = ppo_df[ppo_df["weight_variant"] == "baseline"]
 
     if ppo_df.empty:
         print("[tables] Warning: No PPO data for ablation table")
         return None, None
 
-    # Map ablation names to display labels
+    # Map ablation names to display labels (revision-notes terminology)
     ablation_labels = {
-        "baseline": "TEL-PPO (baseline)",
-        "no_cheap_gate": "No stability gate",
-        "no_exploitability": "No exploitability gate",
+        "baseline": "TEL-PPO",
+        "r5_fig7_no_stability": "No stability screening",
+        "r5_fig7_no_exploit": "No exploitability verification",
+        # legacy tags (pre-r5 sweeps), kept for backward compatibility
+        "no_cheap_gate": "No stability screening",
+        "no_exploitability": "No exploitability verification",
         "no_entropy": "+Entropy disabled",
     }
 
@@ -215,8 +221,14 @@ def generate_ablation_table(
 
     # Build table rows
     rows = []
-    # Ensure baseline comes first
-    ablation_order = ["baseline", "no_cheap_gate", "no_exploitability"]
+    # Ensure baseline comes first, then the two r5 component-ablation arms
+    ablation_order = [
+        "baseline",
+        "r5_fig7_no_stability",
+        "r5_fig7_no_exploit",
+        "no_cheap_gate",
+        "no_exploitability",
+    ]
     for abl in ablation_order:
         match = grouped[grouped["ablation"] == abl]
         if match.empty:
@@ -414,13 +426,12 @@ def generate_final_paper_table(
         table_df,
         caption=(
             "Quantitative summary of equilibrium recovery across all scenarios. "
-            "INTERIM: all TEL-PPO baselines are closed-form-trained legacy runs "
-            "(to be replaced by the r5\\_sampled sampled-training wave). "
-            "Provenance: the three-player baseline (round3\\_baseline) ran under the "
-            "pre-unification exploitability gate $\\varepsilon=0.05$ (measured "
-            "exploitability at stop, 0.0002--0.0047, also passes the unified 0.03); "
-            "the het-cost baseline (r4\\_dc\\_final) has no committed launch script "
-            "(provenance: docs/round3\\_round4\\_report.md and per-run exploit\\_config)."
+            "All TEL-PPO and gradient-baseline entries are sampled-training runs "
+            "(r5\\_sampled wave: 5 seeds per cell, $\\varepsilon_{eq}=0.03$, stopping by the "
+            "method's own stability+exploitability verification; gradient = sampled MC-FD "
+            "with common random numbers). Het-ability uses the standard configuration "
+            "(theory-align-v2 rejected on sampled evidence). Launch provenance: "
+            "results/r5\\_sampled/MANIFEST.md; per-cell mapping: paper/PROVENANCE.md."
         ),
         label="tab:final_summary",
     )

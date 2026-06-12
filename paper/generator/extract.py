@@ -400,30 +400,31 @@ def load_multiple_runs(runs: List[Run]) -> pd.DataFrame:
 
 
 def promote_preferred_ablations(df: pd.DataFrame) -> pd.DataFrame:
-    """Replace baseline with preferred ablation for overridden (experiment, q) combos.
+    """Replace baseline with preferred ablation(s) for overridden (experiment, q) combos.
 
-    For each entry in BASELINE_OVERRIDES, drops old "baseline" rows and relabels
-    the preferred ablation as "baseline" so all downstream code works transparently.
+    For each entry in BASELINE_OVERRIDES, drops old "baseline" rows (TEL-PPO,
+    PPO, and Gradient — Theory rows are untouched) and relabels the preferred
+    ablation(s) as "baseline" so all downstream code works transparently.
+    Values may be a single tag or a tuple of tags (e.g. het-ability promotes
+    the PPO arm "r5_sampled_std" and the gradient tag "r5_sampled" together).
     """
     if df.empty or not BASELINE_OVERRIDES:
         return df
 
     df = df.copy()
     for (experiment, q), preferred in BASELINE_OVERRIDES.items():
-        mask_old = (
-            (df["experiment"] == experiment)
-            & (df["q"] == q)
+        preferred_set = {preferred} if isinstance(preferred, str) else set(preferred)
+        is_cell = (df["experiment"] == experiment) & (df["q"] == q)
+        if not (is_cell & df["ablation"].isin(preferred_set)).any():
+            continue
+        drop = (
+            is_cell
             & (df["ablation"] == "baseline")
-            & (df["method"].isin(["TEL-PPO", "PPO"]))
+            & df["method"].isin(["TEL-PPO", "PPO", "Gradient"])
         )
-        mask_new = (
-            (df["experiment"] == experiment)
-            & (df["q"] == q)
-            & (df["ablation"] == preferred)
-        )
-        if mask_new.any():
-            df = df[~mask_old]
-            df.loc[mask_new, "ablation"] = "baseline"
+        df = df[~drop]
+        is_cell = (df["experiment"] == experiment) & (df["q"] == q)
+        df.loc[is_cell & df["ablation"].isin(preferred_set), "ablation"] = "baseline"
     return df
 
 

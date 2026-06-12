@@ -29,10 +29,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 EXPECTED_SEEDS = {42, 43, 44, 45, 46}
 CANONICAL = {
-    "three_players": {"qs": [35.0, 55.0], "tag": "round3_baseline"},
-    "different_cost": {"qs": [35.0, 55.0], "tag": "r4_dc_final"},
-    "different_ability": {"qs": [35.0, 55.0], "tag": "r4_h1_long"},
-    "two_players": {"qs": [35.0, 45.0, 55.0], "tag": "baseline"},
+    "three_players": {"qs": [35.0, 55.0], "tag": "r5_sampled"},
+    "different_cost": {"qs": [35.0, 55.0], "tag": "r5_sampled"},
+    "different_ability": {"qs": [35.0, 55.0], "tag": "r5_sampled_std"},
+    "two_players": {"qs": [35.0, 45.0, 55.0], "tag": "r5_sampled"},
 }
 
 
@@ -102,7 +102,8 @@ def test_registry_canonicalization():
             )
 
     # two_players Set 2 still present as a separate variant (not pooled):
-    # 15 PPO runs (3 q x 5 seeds) + 3 gradient reference runs
+    # 15 r5 PPO runs (3 q x 5 seeds) + 15 r5 gradient runs (legacy Set-2 rows
+    # are dropped by the promotion)
     set2 = conv[
         (conv["experiment"] == "two_players")
         & (conv["weight_variant"] == "wh8_wl4")
@@ -111,8 +112,20 @@ def test_registry_canonicalization():
     n_ppo = len(set2[set2["method"].isin(["TEL-PPO", "PPO"])])
     n_grad = len(set2[set2["method"] == "Gradient"])
     assert n_ppo == 15, f"expected 15 Set-2 PPO runs, got {n_ppo}"
-    assert n_grad == 3, f"expected 3 Set-2 gradient runs, got {n_grad}"
+    assert n_grad == 15, f"expected 15 Set-2 gradient runs, got {n_grad}"
     print(f"[V1] two_players Set 2 (wh8_wl4): {n_ppo} PPO + {n_grad} gradient runs kept separate (not pooled)")
+
+    # Gradient baseline must also be the sampled r5 runs: 5 seeds per cell
+    gbase = conv[
+        (conv["method"] == "Gradient")
+        & (conv["ablation"] == "baseline")
+        & (conv["weight_variant"] == "baseline")
+    ]
+    for exp, spec in CANONICAL.items():
+        for q in spec["qs"]:
+            n = len(gbase[(gbase["experiment"] == exp) & (gbase["q"] == q)])
+            assert n == 5, f"gradient baseline {exp} q={q}: expected 5 seeds, got {n}"
+    print(f"[V1] gradient baseline: 5 sampled MC-FD seeds in every (experiment, q) cell")
     print("[V1] ACCEPTANCE: PASS")
 
 

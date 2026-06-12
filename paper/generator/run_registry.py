@@ -284,6 +284,16 @@ def discover_runs(
         if ablation in KNOWN_WEIGHT_VARIANTS:
             weight_variant = ablation
             ablation = "baseline"  # The actual ablation is baseline
+        else:
+            # Compound tags like "r5_sampled_wh8_wl4" (gradient runs tag the
+            # prize variant via --ablation-name because the gradient path has
+            # no --variant-name): split the weight-variant suffix off so the
+            # run carries ablation="r5_sampled", weight_variant="wh8_wl4".
+            for wv in KNOWN_WEIGHT_VARIANTS:
+                if ablation and ablation.endswith("_" + wv):
+                    weight_variant = wv
+                    ablation = ablation[: -(len(wv) + 1)]
+                    break
 
         # Filename-derived tag (after weight-variant extraction). Runners'
         # --output-tag renames the FILE (e.g. ..._round3_baseline_...) while
