@@ -457,3 +457,15 @@ from the canonical JSONs; nothing estimated.
    q only): its q=35 "TEL-PPO Conv." of 416 is the mean of 2P 53, 3P 306, dc 304, da 1000 —
    per-scenario numbers must come from final_summary, not this table. This flaw was in the
    audit's FIX list but not in the approved fix targets; left as-is and flagged.
+
+---
+
+## 17. `docs: resolve da config decision — standard adopted, v2 rejected (sampled)`
+
+**Owner decision (2026-06-12), closing the r5 open item from §13/§14:** het-ability's
+canonical configuration is STANDARD. Sampled head-to-head (r5 wave, 5 seeds × q∈{35,55},
+identical stopping flags): std rel. error 5.25%/3.26% (seed-std ±0.20/±0.85) vs v2
+5.50%/7.35% (±2.93/±2.77) — v2 equal-or-worse with 3–14× the variance. The cross-scenario
+theory-align-v2 config does not transfer to het-ability; the paper now has sampled evidence
+for this scenario-specific deviation. Recorded in the canonicalization plan and on the
+BASELINE_OVERRIDES comment block. The override flip itself lands in §18.

@@ -157,9 +157,10 @@ def get_q_values(experiment: str = None) -> List[float]:
 #   docs/round3_round4_report.md + per-JSON exploit_config (eps=0.03) + all
 #   stops at the --min-updates 300 floor.
 # - different_ability/r4_h1_long: STANDARD config, NOT theory-align-v2 (the
-#   ramp was found harmful for da; the only complete da group). OPEN DECISION
-#   for r5_sampled: run da both v2 and standard under sampled training and
-#   settle the config explicitly.
+#   ramp was found harmful for da; the only complete da group). RESOLVED
+#   2026-06-12: the r5_sampled std-vs-v2 head-to-head confirms STANDARD as
+#   da's canonical config (v2: equal-or-worse error, 3-14x seed variance);
+#   see docs/registry_canonicalization_plan.md.
 BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
     ("three_players", 35.0): "round3_baseline",
     ("three_players", 55.0): "round3_baseline",

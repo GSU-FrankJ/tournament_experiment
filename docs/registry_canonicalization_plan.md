@@ -9,8 +9,15 @@ C2 = commit `5999165`, C3 = `58fcc26`, D1 = `d048418`, C1 + V1 acceptance test =
    three are closed-form-trained legacy, accepted as TEMPORARY picks solely so `make_all` is
    runnable; the `r5_sampled` wave replaces them.
 2. da: `r4_h1_long` is accepted despite being standard-config (NOT theory-align-v2), purely as
-   the cleanest complete group. **OPEN DECISION for r5_sampled: run het-ability BOTH
-   theory-align-v2 and standard under sampled training and settle the config explicitly.**
+   the cleanest complete group. ~~OPEN DECISION for r5_sampled: run het-ability BOTH
+   theory-align-v2 and standard under sampled training and settle the config explicitly.~~
+   **RESOLVED 2026-06-12 (owner): het-ability canonical config = STANDARD.** The r5_sampled
+   head-to-head (5 seeds × q∈{35,55}, sampled training, identical stopping flags) rejects
+   theory-align-v2: rel. error std 5.25%/3.26% vs v2 5.50%/7.35%, with v2 seed-std 3–14×
+   larger (±2.93/±2.77 vs ±0.20/±0.85). Evidence: `*_r5_sampled_std_*` vs `*_r5_sampled_v2_*`
+   in results/different_ability/convergence/ (commit d6a6e81). v2's concentration ramp is
+   destabilizing for this scenario under sampled rewards — the cross-scenario v2 config does
+   not transfer to het-ability, and the paper can state this with sampled evidence.
 3. Provenance footnotes that MUST accompany any artifact generated at E (also recorded as
    comments on `BASELINE_OVERRIDES` in `paper/generator/config.py`):
    - `round3_baseline` ran under the pre-unification exploit_eps=0.05 gate (measured
