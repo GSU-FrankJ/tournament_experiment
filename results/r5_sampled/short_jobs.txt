@@ -1,0 +1,44 @@
+python3 run/run_two_players.py --method ppo --q 35 --seed 43 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 44 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 45 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 46 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 42 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 43 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 44 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 45 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 46 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 42 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 43 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 44 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 45 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 46 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 42 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 43 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 44 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 45 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 46 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 42 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 43 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 44 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 45 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 45 --seed 46 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 42 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 43 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 44 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 45 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 55 --seed 46 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled
+python3 run/run_two_players.py --method ppo --q 35 --seed 42 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 35 --seed 43 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 35 --seed 44 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 35 --seed 45 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 35 --seed 46 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 45 --seed 42 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 45 --seed 43 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 45 --seed 44 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 45 --seed 45 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 45 --seed 46 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 55 --seed 42 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 55 --seed 43 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 55 --seed 44 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 55 --seed 45 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability
+python3 run/run_two_players.py --method ppo --q 55 --seed 46 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_fig7_no_stability

@@ -1,0 +1,12 @@
+{
+  "run_id": "20260610_212918",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 45,
+  "ablation_name": "r5_sampled",
+  "git_sha": "444636040fa9",
+  "cmdline": "run/run_two_players.py --method ppo --q 55 --seed 45 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled",
+  "timestamp": "2026-06-10T21:45:09.200098",
+  "convergence_file": "ppo_q55.0_seed45_r5_sampled_convergence.json",
+  "variant_name": "baseline"
+}

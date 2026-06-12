@@ -1,0 +1,12 @@
+{
+  "run_id": "20260610_223055",
+  "method": "ppo",
+  "q": 45.0,
+  "seed": 44,
+  "ablation_name": "r5_sampled",
+  "git_sha": "444636040fa9",
+  "cmdline": "run/run_two_players.py --method ppo --q 45 --seed 44 --k 0.0006 --w_h 8 --w_l 4 --variant-name wh8_wl4 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r5_sampled",
+  "timestamp": "2026-06-10T22:44:29.946357",
+  "convergence_file": "ppo_q45.0_seed44_wh8_wl4_r5_sampled_convergence.json",
+  "variant_name": "wh8_wl4"
+}
