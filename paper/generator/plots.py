@@ -929,7 +929,9 @@ def plot_hyperparam_sensitivity(
     eps_labels = {
         "eps_001": "ε=0.01", "eps_003": "ε=0.03",
         "eps_010": "ε=0.10", "eps_020": "ε=0.20",
-        "baseline": "baseline (ε=0.05)",
+        # canonical gate is the unified eps_eq=0.03 (eps_003 therefore
+        # duplicates the baseline gate and serves as a consistency arm)
+        "baseline": "baseline (ε=0.03)",
     }
     pat_ablations = ["pat_01", "pat_03", "pat_10"]
     pat_labels = {

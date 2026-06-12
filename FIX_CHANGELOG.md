@@ -531,3 +531,26 @@ entries, the `beta_snapshots` FIGURE_SIZES key, and the README index lines; PROV
 updated from "data-driven skip" to "retired". Grep confirms zero remaining live references
 (only the stale `.claude/worktrees/` copy and historical docs). py_compile + package import
 clean.
+
+## 22. `feat: prepare r5_sensitivity sweep (NOT launched) + fix stale gate label`
+
+- **Key finding:** `plot_hyperparam_sensitivity` does NOT consume entropy_end/lr_end/clip_end
+  variants — the current (redesigned) figure sweeps the VERIFICATION hyperparameters:
+  exploitability tolerance (ablations `eps_001/eps_003/eps_010/eps_020`) and patience
+  (`pat_01/pat_03/pat_10`), 2P, q∈{35,45,55}, with the black baseline curve = the promoted
+  r5_sampled runs. The owner-mentioned training-hparam grid belongs to the figure's OLD
+  design (the archived closed-form-era files).
+- `run/r5_sensitivity_sweep.sh` (committed, ready to launch, **dry-run by default; requires
+  explicit `--launch`**): primary grid = the eps/patience variants the figure consumes —
+  105 runs (7 variants × 3 q × 5 seeds), base flags identical to the canonical r5 A1 runs,
+  `--run-id r5_sensitivity` provenance, tag/seed-qualified outputs
+  (`ppo_q{Q}.0_seed{S}_{variant}_convergence.json`), full matrix + per-run paths printed in
+  dry-run and listed in the header comments. Preflight refuses launch if any target exists
+  (PPO runs have no runner-level --force). Optional `--include-training-hparams` stage adds
+  the literally-requested entropy/lr/clip grid (90 runs) but is clearly marked as NOT
+  consumed by the current figure. Launch reuses the r5 worker/tmux/queue pattern.
+- `plots.py`: corrected the stale baseline legend label "baseline (ε=0.05)" →
+  "baseline (ε=0.03)" (the unified gate) — a data-correctness fix, not a restyle; noted
+  that eps_003 duplicates the baseline gate and serves as a consistency arm.
+- Verified: bash -n clean; dry-run prints 105 (and 195 with the flag); zero tmux sessions
+  created. **No training launched this session.**
