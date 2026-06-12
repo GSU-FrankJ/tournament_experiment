@@ -444,90 +444,6 @@ def generate_final_paper_table(
     return csv_path, tex_path
 
 
-def generate_convergence_comparison_table(
-    df: pd.DataFrame = None,
-    output_dir: str = None,
-) -> Tuple[str, str]:
-    """
-    Generate convergence comparison table across methods.
-    
-    Shows convergence steps and quality for each (method, q) combination.
-    """
-    ensure_tables_dir()
-    
-    if df is None:
-        df = load_all_convergence_data()
-    if output_dir is None:
-        output_dir = TABLES_DIR
-    
-    metrics = compute_summary_metrics(df)
-    metrics_df = summary_metrics_to_dataframe(metrics)
-    
-    # Pivot table: rows = q, columns = method
-    # Filter to baseline and standard q values only
-    # Use all known q values across experiments
-    all_q = set()
-    for qv in EXPERIMENT_Q_VALUES.values():
-        all_q.update(qv)
-    baseline_df = metrics_df[
-        (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(all_q))
-    ].copy()
-    if "weight_variant" in baseline_df.columns:
-        baseline_df = baseline_df[baseline_df["weight_variant"] == "baseline"]
-    
-    # Group by method and q, average across seeds
-    grouped = baseline_df.groupby(["method", "q"]).agg({
-        "convergence_step": "mean",
-        "abs_error": "mean",
-        "quality": lambda x: x.mode()[0] if len(x.mode()) > 0 else "Unknown",
-    }).reset_index()
-    
-    # Pivot
-    pivot_steps = grouped.pivot(index="q", columns="method", values="convergence_step")
-    pivot_error = grouped.pivot(index="q", columns="method", values="abs_error")
-    pivot_quality = grouped.pivot(index="q", columns="method", values="quality")
-    
-    # Combine into single table
-    table_rows = []
-    for q in sorted(grouped["q"].unique()):
-        row = {"q": q}
-        for method in ["Gradient", "TEL-PPO"]:
-            if method in pivot_steps.columns:
-                steps = pivot_steps.loc[q, method] if q in pivot_steps.index else np.nan
-                error = pivot_error.loc[q, method] if q in pivot_error.index else np.nan
-                quality = pivot_quality.loc[q, method] if q in pivot_quality.index else "N/A"
-                row[f"{method} Conv."] = _format_float(steps, 0)
-                row[f"{method} Gap"] = _format_float(error, 3)
-                row[f"{method} Quality"] = quality
-        table_rows.append(row)
-    
-    table_df = pd.DataFrame(table_rows)
-    
-    # Save CSV
-    csv_path = os.path.join(output_dir, "convergence_comparison.csv")
-    table_df.to_csv(csv_path, index=False)
-    
-    # Save LaTeX
-    tex_path = os.path.join(output_dir, "convergence_comparison.tex")
-    latex_str = _to_latex_table(
-        table_df,
-        caption=(
-            "Convergence comparison: convergence point and final gap for each method. "
-            "Gradient: solver iteration where the effort-band diagnostic holds; "
-            "TEL-PPO: PPO update at which the method's own verification "
-            "(stability screen + exploitability streak) fired."
-        ),
-        label="tab:convergence_comparison",
-    )
-    with open(tex_path, 'w') as f:
-        f.write(latex_str)
-    
-    print(f"[tables] Saved convergence comparison to {csv_path}")
-    print(f"[tables] Saved convergence comparison to {tex_path}")
-    
-    return csv_path, tex_path
-
-
 def generate_environment_config_table(
     output_dir: str = None,
 ) -> Tuple[str, str]:
@@ -631,10 +547,9 @@ def generate_all_tables(
     if paths[0]:
         results["final_summary"] = paths
 
-    # Convergence comparison
-    paths = generate_convergence_comparison_table(df, output_dir)
-    if paths[0]:
-        results["convergence_comparison"] = paths
+    # NOTE: convergence_comparison retired 2026-06-12 — it pooled scenarios
+    # per q (cross-experiment averaging), which is semantically misleading;
+    # per-scenario convergence lives in final_summary ("Conv. Update (verified)").
 
     return results
 

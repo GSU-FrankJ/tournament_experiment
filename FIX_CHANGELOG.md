@@ -501,3 +501,22 @@ beta_snapshots/exploitability_q25 (data-driven skips), convergence_comparison (c
 pooling caveat). Section 5 captures the eps_eq mechanism note for manuscript §5.3 (utility-
 vs effort-scale tolerance; 3P flat-EU landscape) — framing decision held by the owner.
 main.tex untouched throughout.
+
+---
+
+# Cleanup session (2026-06-12, code-only — no training)
+
+## 20. `refactor: retire convergence_comparison table (cross-scenario pooled)`
+
+Owner decision: the table pooled scenarios per q (its q=35 "TEL-PPO Conv." averaged 2P/3P/dc/da
+into one number), which is semantically misleading; per-scenario convergence already lives in
+final_summary's "Conv. Update (verified)" column. Removed
+`generate_convergence_comparison_table` and its `generate_all_tables` call (tables.py), the
+import/TABLE_TYPES/dispatch entries (`__main__.py`), the README index lines, and the generated
+`paper/tables/convergence_comparison.{csv,tex}` (git rm). Reference sweep: no `main.tex` exists
+anywhere in the repo (only generated table .tex files + a stale committed worktree copy), so no
+manuscript include depends on it; remaining grep hits are historical docs
+(docs/STATE.md, metric-fix notes), the unrelated diagnostic filename
+`results/convergence_comparison.png` in tools/plot_convergence.py and tools/migrate_structure.py
+(different artifact, untouched), and the stale `.claude/worktrees/` copy — all reported, none
+edited.

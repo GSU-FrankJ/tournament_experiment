@@ -36,7 +36,6 @@ python -m paper.generator plot ablation_comparison
 python -m paper.generator table summary_metrics
 python -m paper.generator table ablation_results
 python -m paper.generator table final_summary
-python -m paper.generator table convergence_comparison
 ```
 
 ### CLI Options
@@ -100,7 +99,6 @@ paper/
 │   ├── summary_metrics.csv/tex     # Summary metrics for all runs
 │   ├── ablation_results.csv/tex    # Ablation study results
 │   ├── final_summary.csv/tex       # Final paper comparison table
-│   ├── convergence_comparison.csv/tex  # Convergence comparison across methods
 │   └── README.md
 ├── data/
 │   ├── convergence_main.csv        # Main convergence data

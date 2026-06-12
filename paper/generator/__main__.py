@@ -56,7 +56,6 @@ from .tables import (
     generate_summary_metrics_table,
     generate_ablation_table,
     generate_final_paper_table,
-    generate_convergence_comparison_table,
     generate_environment_config_table,
 )
 
@@ -81,7 +80,6 @@ TABLE_TYPES = [
     "summary_metrics",
     "ablation_results",
     "final_summary",
-    "convergence_comparison",
 ]
 
 
@@ -264,7 +262,6 @@ def cmd_table(args: argparse.Namespace) -> int:
         "summary_metrics": lambda: generate_summary_metrics_table(df, output_dir),
         "ablation_results": lambda: generate_ablation_table(df, output_dir),
         "final_summary": lambda: generate_final_paper_table(df, output_dir),
-        "convergence_comparison": lambda: generate_convergence_comparison_table(df, output_dir),
     }
     
     paths = table_funcs[table_type]()
