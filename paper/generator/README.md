@@ -121,7 +121,6 @@ paper_out/
 │   ├── kl_dynamics.png
 │   ├── exploitability_dynamics.png
 │   ├── beta_evolution.png
-│   ├── beta_snapshots.png
 │   └── ablation_comparison.png
 ├── tables/
 │   ├── summary_metrics.csv

@@ -520,3 +520,14 @@ manuscript include depends on it; remaining grep hits are historical docs
 `results/convergence_comparison.png` in tools/plot_convergence.py and tools/migrate_structure.py
 (different artifact, untouched), and the stale `.claude/worktrees/` copy — all reported, none
 edited.
+
+## 21. `refactor: retire dormant plot paths exploitability_q25 and beta_snapshots`
+
+Both produced no files under canonical data (q=25 dropped in the Apr-8 parameter overhaul;
+canonical runs record no alpha/beta snapshot series) and only emitted skip warnings on every
+make_all. Removed `plot_exploitability_q25` (108 lines) and `plot_beta_snapshots` (117 lines)
+from plots.py, their generate_all_figures blocks, the `__main__.py` imports/PLOT_TYPES/dispatch
+entries, the `beta_snapshots` FIGURE_SIZES key, and the README index lines; PROVENANCE §4
+updated from "data-driven skip" to "retired". Grep confirms zero remaining live references
+(only the stale `.claude/worktrees/` copy and historical docs). py_compile + package import
+clean.

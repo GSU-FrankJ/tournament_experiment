@@ -631,114 +631,6 @@ def plot_exploitability_dynamics(
     return fig, output_path
 
 
-def plot_exploitability_q25(
-    df: pd.DataFrame = None,
-    output_path: str = None,
-) -> Tuple[plt.Figure, str]:
-    """
-    Plot exploitability for the excluded low-noise case (q=25) — Figure 6b.
-
-    Single-panel figure matching the style of Figure 6a.
-    """
-    setup_matplotlib_style()
-    ensure_output_dirs()
-
-    if df is None:
-        df = load_all_convergence_data()
-    if output_path is None:
-        output_path = os.path.join(FIGURES_DIR, "exploitability_q25.png")
-
-    q = 25.0
-    df = df[
-        (df["q"] == q)
-        & (df["method"].isin(["TEL-PPO", "PPO"]))
-        & (df["ablation"] == "baseline")
-    ]
-    df = _baseline_only(df)
-    if "experiment" in df.columns:
-        df = df[df["experiment"] == "two_players"]
-
-    if df.empty or "exploitability" not in df.columns:
-        print("[plots] Warning: No exploitability data for q=25")
-        return None, None
-
-    df = forward_fill_exploitability(df)
-
-    from .extract import get_cheap_gate_step, get_nash_convergence_step
-    gate_steps_df = get_cheap_gate_step(df)
-    nash_steps_df = get_nash_convergence_step(df)
-
-    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-
-    seeds = sorted(df["seed"].unique())
-    smooth_window = 15
-
-    for seed in seeds:
-        sdf = df[df["seed"] == seed].sort_values("step")
-        valid = sdf[~sdf["exploitability_ffill"].isna()]
-        if not valid.empty:
-            smoothed = valid["exploitability_ffill"].rolling(
-                window=smooth_window, min_periods=1, center=True,
-            ).mean()
-            ax.plot(valid["step"].values, smoothed.values,
-                    color="#1f77b4", alpha=0.3, linewidth=0.8)
-
-    if len(seeds) > 1:
-        agg = aggregate_seeds(df)
-        col = "exploitability_ffill" if "exploitability_ffill" in agg.columns else "exploitability_mean"
-        if col in agg.columns:
-            valid = agg[~agg[col].isna()]
-            smoothed = valid[col].rolling(
-                window=smooth_window, min_periods=1, center=True,
-            ).mean()
-            ax.plot(valid["step"].values, smoothed.values,
-                    color="#1f77b4", linewidth=2, label="Exploitability")
-    else:
-        valid = df[~df["exploitability_ffill"].isna()].sort_values("step")
-        if not valid.empty:
-            smoothed = valid["exploitability_ffill"].rolling(
-                window=smooth_window, min_periods=1, center=True,
-            ).mean()
-            ax.plot(valid["step"].values, smoothed.values,
-                    color="#1f77b4", linewidth=2, label="Exploitability")
-
-    exploit_thresh = CONVERGENCE_CONFIG["exploit_threshold"]
-    ax.axhline(y=exploit_thresh, color="red", linestyle="--",
-               linewidth=2.5, alpha=0.8, label=f"Tolerance threshold ({exploit_thresh})")
-
-    gate_match = gate_steps_df[gate_steps_df["ablation"] == "baseline"]
-    if "experiment" in gate_steps_df.columns:
-        gate_match = gate_match[gate_match["experiment"] == "two_players"]
-    gate_vals = gate_match["cheap_gate_step"].dropna()
-    if not gate_vals.empty:
-        ax.axvline(x=gate_vals.median(), color="orange", linestyle=":",
-                   linewidth=1.5, alpha=0.8, label="Stability screening passed")
-
-    nash_match = nash_steps_df[nash_steps_df["ablation"] == "baseline"]
-    if "experiment" in nash_steps_df.columns:
-        nash_match = nash_match[nash_match["experiment"] == "two_players"]
-    nash_vals = nash_match["nash_step"].dropna()
-    if not nash_vals.empty:
-        ax.axvline(x=nash_vals.max(), color="green", linestyle="-.",
-                   linewidth=1.5, alpha=0.8, label="Approx. Nash verified")
-
-    ax.set_xlabel("Training Steps")
-    ax.set_ylabel("Exploitability")
-    ax.set_title(f"{format_q(q)} (excluded low-noise case)")
-    ax.set_yscale("log")
-    ax.set_ylim(0.01, 2)
-    ax.legend(loc="best", fontsize=8)
-
-    plt.tight_layout()
-
-    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
-    pdf_path = output_path.replace(".png", ".pdf")
-    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
-
-    print(f"[plots] Saved figure to {output_path}")
-    return fig, output_path
-
-
 def plot_beta_evolution(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
@@ -857,123 +749,6 @@ def plot_beta_evolution(
         data_path = os.path.join(DATA_DIR, "beta_evolution.csv")
         df[["step", "method", "q", "seed", "ablation", "alpha_mean", "beta_mean"]].to_csv(data_path, index=False)
 
-    print(f"[plots] Saved figure to {output_path}")
-    return fig, output_path
-
-
-def plot_beta_snapshots(
-    df: pd.DataFrame = None,
-    q: float = 40.0,
-    snapshot_fractions: List[float] = None,
-    output_path: str = None,
-) -> Tuple[plt.Figure, str]:
-    """
-    Plot Beta distribution snapshots at different training stages.
-    
-    Args:
-        df: DataFrame with convergence data
-        q: Q value to use
-        snapshot_fractions: Fractions of training to snapshot (default: [0.1, 0.5, 1.0])
-        output_path: Output path
-    """
-    setup_matplotlib_style()
-    ensure_output_dirs()
-    
-    if df is None:
-        df = load_all_convergence_data()
-    if snapshot_fractions is None:
-        snapshot_fractions = [0.1, 0.5, 0.9]
-    if output_path is None:
-        output_path = os.path.join(FIGURES_DIR, "beta_snapshots.png")
-    
-    df = df[(df["q"] == q) & (df["method"].isin(["TEL-PPO", "PPO"])) & (df["ablation"] == "baseline")]
-    df = _baseline_only(df)
-    if "experiment" in df.columns:
-        df = df[df["experiment"] == "two_players"]
-
-    if df.empty or "alpha_mean" not in df.columns:
-        print("[plots] Warning: No alpha/beta data available for snapshots")
-        return None, None
-
-    # Compute e* for this q and the effort scale factor
-    e_theory = e_star(q, **THEORY_PARAMS)
-
-    # Select best seed (smallest final effort error)
-    seeds = df["seed"].unique()
-    if len(seeds) > 1:
-        best_seed, best_err = None, float("inf")
-        for s in seeds:
-            s_df = df[df["seed"] == s].sort_values("step")
-            final_effort = s_df["policy_mean_effort"].iloc[-1]
-            err = abs(final_effort - e_theory)
-            if err < best_err:
-                best_seed, best_err = s, err
-        df = df[df["seed"] == best_seed]
-        print(f"[plots] Beta snapshots: using seed={best_seed} (|e-e*|={best_err:.2f})")
-
-    df = df.sort_values("step")
-    max_step = df["step"].max()
-    e_max = 250.0  # effort upper bound from environment config
-
-    fig, axes = plt.subplots(1, len(snapshot_fractions), figsize=FIGURE_SIZES["beta_snapshots"])
-
-    x_norm = np.linspace(0.001, 0.999, 200)
-    x_effort = x_norm * e_max  # Convert normalized to effort scale
-
-    y_max_global = 0.0  # for unifying y-axis
-
-    pdf_data = []  # store (ax, frac, y_vals, ...) for second pass
-
-    for ax, frac in zip(axes, snapshot_fractions):
-        target_step = int(max_step * frac)
-        # Find closest step
-        closest_idx = (df["step"] - target_step).abs().idxmin()
-        row = df.loc[closest_idx]
-
-        alpha = row["alpha_mean"]
-        beta_val = row["beta_mean"]
-
-        if np.isnan(alpha) or np.isnan(beta_val):
-            ax.set_title(f"Step {target_step} ({frac*100:.0f}%) - No data")
-            pdf_data.append(None)
-            continue
-
-        kappa = alpha + beta_val
-
-        # Plot Beta PDF on effort scale (divide density by e_max for proper scaling)
-        y = beta_dist.pdf(x_norm, alpha, beta_val) / e_max
-        ax.plot(x_effort, y, color=AGENT_COLORS["agent1"], linewidth=2,
-                label="Both agents")
-        ax.fill_between(x_effort, y, alpha=SHADE_ALPHA, color=AGENT_COLORS["agent1"])
-
-        # Mark policy mean in effort space
-        mean_norm = alpha / kappa
-        mean_effort = mean_norm * e_max
-        ax.axvline(x=mean_effort, color=AGENT_COLORS["agent2"], linestyle="--",
-                    linewidth=2, label=f"Mean={mean_effort:.1f}")
-
-        # e* vertical line (green)
-        ax.axvline(x=e_theory, color="green", linestyle="-.",
-                    linewidth=2, label=f"$e^*$={e_theory:.1f}")
-
-        ax.set_xlabel("Effort")
-        ax.set_ylabel("Density")
-        ax.set_title(f"Step {int(row['step'])} ({frac*100:.0f}%)\nκ={kappa:.1f}")
-        ax.legend(loc="upper right", fontsize=7)
-
-        y_max_global = max(y_max_global, np.max(y))
-
-    # Unify axes across all panels
-    for ax in axes:
-        ax.set_xlim(0, 150)
-        ax.set_ylim(0, y_max_global * 1.1)
-
-    plt.tight_layout()
-    
-    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
-    pdf_path = output_path.replace(".png", ".pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
 
@@ -1826,21 +1601,15 @@ def generate_all_figures(
     if path:
         results["exploitability_dynamics"] = path
 
-    # Exploitability q=25 (excluded low-noise case, Figure 6b)
-    fig, path = plot_exploitability_q25(df)
-    if path:
-        results["exploitability_q25"] = path
+    # NOTE: plot_exploitability_q25 and plot_beta_snapshots retired 2026-06-12 —
+    # both were dormant under canonical data (q=25 dropped in the parameter
+    # overhaul; no alpha/beta snapshot series in the canonical runs).
 
     # Beta evolution
     fig, path = plot_beta_evolution(df, q_values)
     if path:
         results["beta_evolution"] = path
-    
-    # Beta snapshots (for q=40)
-    fig, path = plot_beta_snapshots(df, q=40.0)
-    if path:
-        results["beta_snapshots"] = path
-    
+
     # Ablation comparison
     fig, path = plot_ablation_comparison(df, q_values)
     if path:

@@ -29,7 +29,6 @@ python -m paper.generator plot convergence_main
 python -m paper.generator plot kl_dynamics
 python -m paper.generator plot exploitability_dynamics
 python -m paper.generator plot beta_evolution
-python -m paper.generator plot beta_snapshots
 python -m paper.generator plot ablation_comparison
 
 # Generate a specific table
@@ -92,7 +91,6 @@ paper/
 │   ├── kl_dynamics.png/pdf         # KL divergence over training
 │   ├── exploitability_dynamics.png/pdf  # Exploitability over training
 │   ├── beta_evolution.png/pdf      # Alpha/beta parameter evolution (2×3 grid)
-│   ├── beta_snapshots.png/pdf      # Beta distribution snapshots
 │   ├── ablation_comparison.png/pdf # Ablation study comparison
 │   └── README.md
 ├── tables/
