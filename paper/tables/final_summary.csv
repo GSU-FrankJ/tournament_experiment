@@ -1,28 +1,28 @@
 Scenario,q,Method,Mean±std,|ē−e*|,RelErr,Exploitability,Symmetry Gap,Conv. Update (verified)
 Two-Player,35,Theory,45.45,0.00,0.00%,0.000,0.00,-
-Two-Player,35,Gradient,45.45±0.00,0.00,0.01%,-,0.00,-
-Two-Player,35,TEL-PPO,44.10±1.97,1.96,4.30%,0.011,0.08,53
+Two-Player,35,Gradient,45.22±0.09,0.24,0.53%,-,0.00,-
+Two-Player,35,TEL-PPO,43.58±1.25,1.87,4.12%,0.009,0.10,55
 Two-Player,45,Theory,35.35,0.00,0.00%,0.000,0.00,-
-Two-Player,45,Gradient,35.35±0.00,0.00,0.01%,-,0.00,-
-Two-Player,45,TEL-PPO,34.96±0.98,0.74,2.08%,0.008,0.04,67
+Two-Player,45,Gradient,35.18±0.07,0.18,0.50%,-,0.00,-
+Two-Player,45,TEL-PPO,35.46±0.60,0.54,1.54%,0.008,0.06,75
 Two-Player,55,Theory,28.93,0.00,0.00%,0.000,0.00,-
-Two-Player,55,Gradient,28.92±0.00,0.00,0.00%,-,0.00,-
-Two-Player,55,TEL-PPO,28.88±0.81,0.68,2.36%,0.006,0.07,93
+Two-Player,55,Gradient,28.74±0.03,0.19,0.65%,-,0.00,-
+Two-Player,55,TEL-PPO,29.65±0.76,0.79,2.74%,0.006,0.04,87
 Three-Player,35,Theory,25.00,0.00,0.00%,0.000,0.00,-
-Three-Player,35,Gradient,25.00±0.00,0.00,0.00%,-,0.00,-
-Three-Player,35,TEL-PPO,24.96±0.19,0.14,0.57%,0.004,0.00,306
+Three-Player,35,Gradient,24.90±0.12,0.10,0.39%,-,0.16,-
+Three-Player,35,TEL-PPO,22.99±0.28,2.01,8.03%,0.006,0.00,305
 Three-Player,55,Theory,15.91,0.00,0.00%,0.000,0.00,-
-Three-Player,55,Gradient,15.91±0.00,0.00,0.00%,-,0.00,-
-Three-Player,55,TEL-PPO,15.96±0.15,0.13,0.84%,0.003,0.00,305
+Three-Player,55,Gradient,15.86±0.10,0.06,0.40%,-,0.10,-
+Three-Player,55,TEL-PPO,15.31±1.13,1.05,6.63%,0.004,0.00,303
 Het. Cost,35,Theory,32.84,0.00,0.00%,0.000,0.00,-
-Het. Cost,35,Gradient,32.84±0.00,0.00,0.01%,-,10.38,-
-Het. Cost,35,TEL-PPO,32.93±0.14,0.14,0.42%,0.002,10.45,304
+Het. Cost,35,Gradient,32.91±0.09,0.09,0.27%,-,10.37,-
+Het. Cost,35,TEL-PPO,32.47±1.12,0.94,2.88%,0.002,10.48,305
 Het. Cost,55,Theory,22.92,0.00,0.00%,0.000,0.00,-
-Het. Cost,55,Gradient,22.92±0.00,0.00,0.02%,-,7.24,-
-Het. Cost,55,TEL-PPO,22.99±0.07,0.07,0.29%,0.002,7.11,304
+Het. Cost,55,Gradient,22.93±0.11,0.09,0.37%,-,7.24,-
+Het. Cost,55,TEL-PPO,22.71±1.40,1.07,4.69%,0.002,7.37,303
 Het. Ability,35,Theory,46.43,0.00,0.00%,0.000,0.00,-
-Het. Ability,35,Gradient,46.45±0.00,0.02,0.04%,-,0.00,-
-Het. Ability,35,TEL-PPO,45.68±0.44,0.75,1.61%,0.009,0.00,1000
+Het. Ability,35,Gradient,46.42±0.14,0.09,0.20%,-,0.00,-
+Het. Ability,35,TEL-PPO,43.99±0.20,2.44,5.25%,0.029,0.00,1153
 Het. Ability,55,Theory,30.37,0.00,0.00%,0.000,0.00,-
-Het. Ability,55,Gradient,30.38±0.00,0.01,0.03%,-,0.00,-
-Het. Ability,55,TEL-PPO,30.11±0.30,0.26,0.86%,0.005,0.00,1000
+Het. Ability,55,Gradient,30.38±0.06,0.04,0.14%,-,0.00,-
+Het. Ability,55,TEL-PPO,29.70±0.85,0.99,3.26%,0.026,0.00,1002
