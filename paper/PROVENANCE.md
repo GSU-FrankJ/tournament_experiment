@@ -186,7 +186,7 @@ table cells.
 | distance_to_equilibrium | distance_to_equilibrium.csv | baseline TEL-PPO |e-e*| trajectories |
 | equilibrium_recovery_dotplot | equilibrium_recovery_dotplot.csv | per-seed final efforts, all scenarios |
 | ablation_comparison | ablation_comparison.csv | 2P baseline arm (the Fig-7 TABLE carries all three arms; see section 1) |
-| hyperparam_sensitivity | hyperparam_sensitivity.csv | UNVERIFIED - see section 4 |
+| hyperparam_sensitivity | hyperparam_sensitivity.csv | 2P baseline + ε/patience verification sweeps (r5_sensitivity wave); see section 4 |
 
 ## 3. MC-FD gradient solver parameters (all gradient cells)
 
@@ -200,11 +200,14 @@ gap is ~0 by construction; 3P/dc gradient symmetry gaps are genuine measurements
 
 ## 4. UNVERIFIED / caveated artifacts
 
-1. **hyperparam_sensitivity.{pdf,png,csv} - UNVERIFIED (degenerate).** Contains only
-   baseline rows: the entropy_end/lr_end variant runs it was designed around exist solely in
-   the untracked `results/two_players/convergence/_archive_pre_warmup_fix/` (closed-form-era
-   2P runs, outside the registry glob). Do not quote until the sweep is re-run under sampled
-   training or the figure is dropped.
+1. **hyperparam_sensitivity.{pdf,png,csv} - VERIFIED (refilled 2026-06-18).** Baseline curve =
+   promoted r5_sampled runs; the ε row (eps_001/003/010/020 = `--exploit-eps`
+   0.01/0.03/0.10/0.20) and patience row (pat_01/03/10 = `--exploit-patience` 1/3/10) are the
+   r5_sensitivity wave: 105 two-player PPO runs, q∈{35,45,55} × seeds 42-46, sampled training,
+   `--override-conc-ramp-warmup 200`, all `stop_reason=exploitability` (data commit 5922b5d).
+   eps_003 (ε=0.03) duplicates the canonical gate as a consistency arm. The CSV also carries
+   the r5_fig7 arms (picked up by the registry glob; not in the figure's plot_order, so
+   unplotted). Supersedes the prior degenerate closed-form-era placeholder.
 2. **beta_snapshots / exploitability_q25 - RETIRED (2026-06-12).** Both code paths were
    dormant under canonical data (no alpha/beta snapshot series; q=25 dropped in the parameter
    overhaul) and have been removed from plots.py and the make_all pipeline. No files existed.
