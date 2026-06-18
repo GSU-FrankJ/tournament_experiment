@@ -232,3 +232,34 @@ certifies effort-level precision. The same effect, milder, appears in dc (verifi
 take: report eps_eq explicitly as a utility-scale tolerance alongside effort-scale error
 (honest two-metric framing), and/or relate eps_eq to an effort-band via the local curvature
 |U''| ~ 2k + (w_H-w_L)/(4q^2) per scenario.
+
+## 6. KNOWN ISSUE (OPEN — fix held pending owner sign-off): ablation leak into convergence_main + 2 tables
+
+Found 2026-06-18 while refilling hyperparam_sensitivity. Three builders select the "baseline"
+result by `weight_variant` (or no filter) WITHOUT also constraining `ablation == "baseline"`,
+so every two_players PPO run tagged `weight_variant=baseline` but a non-baseline ablation —
+the dormant `r5_fig7_no_exploit`/`r5_fig7_no_stability` arms, and now the r5_sensitivity
+`eps_*`/`pat_*` sweep — leaks into the baseline result:
+
+- **plots.py `plot_convergence_main`** (per-weight-variant loop ~L181): mixes ablations into
+  the top-row (Set-1) baseline curve + CI band. PROVEN already fig7-contaminated in the
+  CURRENTLY-COMMITTED figure — baseline-only (fixed) bands are tighter than committed at every
+  q: top-row effort floor q35 33.2 vs 30.9, q45 34.3 vs 29.6, q55 28.9 vs 24.8; committed
+  overlays 3 mean-curves (baseline + 2 fig7), the fix draws 1. eps/pat would push it to 10.
+- **tables.py `generate_summary_metrics_table`** (L79, no weight/ablation filter): emits one
+  per-run row per ablation → +105 eps/pat rows on regen.
+- **tables.py `generate_ablation_table`** (L192, `weight_variant=="baseline"` only): admits
+  eps/pat as if they were mechanism ablations → +7 rows on regen.
+
+NOT affected (verified): the other 8 figures and `final_summary` all constrain
+`ablation=="baseline"` (final_summary also `weight_variant=="baseline"`); environment_config
+is static; `aggregate_seeds`/`get_convergence_step`/metrics grouping all key on ablation.
+Headline rel-err numbers trace to final_summary (e.g. 2P q35 TEL-PPO 43.58±1.25, 4.12%) — safe.
+
+CURRENT STATE: committed convergence_main / summary_metrics / ablation_results are the
+PRE-eps/pat versions (the contaminated `make_all` regen was reverted, not committed); they
+still carry the pre-existing fig7 leak but not the new eps/pat one. **Running `make_all` now
+will re-contaminate them.** The fix (constrain ablation within each weight_variant / table) is
+held pending owner sign-off because it ALSO changes the accepted convergence_main (removes the
+fig7 leak) and the two tables. main.tex is external to this repo — owner must check any
+figure/number sourced from convergence_main, summary_metrics, or ablation_results.
