@@ -192,6 +192,12 @@ def generate_ablation_table(
     if "weight_variant" in ppo_df.columns:
         ppo_df = ppo_df[ppo_df["weight_variant"] == "baseline"]
 
+    # Curated mechanism-ablation table: drop verification-hyperparameter sweeps
+    # (eps_*/pat_*). Those belong to the hyperparam_sensitivity figure, not the
+    # mechanism ablation study; without this they leak in via the catch-all that
+    # appends any non-standard ablation below.
+    ppo_df = ppo_df[~ppo_df["ablation"].astype(str).str.match(r"^(eps_|pat_)")]
+
     if ppo_df.empty:
         print("[tables] Warning: No PPO data for ablation table")
         return None, None
