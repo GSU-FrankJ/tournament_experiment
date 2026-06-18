@@ -1,0 +1,12 @@
+{
+  "run_id": "r5_sensitivity",
+  "method": "ppo",
+  "q": 45.0,
+  "seed": 45,
+  "ablation_name": "eps_010",
+  "git_sha": "2ee175a6a079",
+  "cmdline": "run/run_two_players.py --method ppo --override-conc-ramp-warmup 200 --episodes 6144000 --run-id r5_sensitivity --q 45 --seed 45 --exploit-eps 0.10 --ablation-name eps_010",
+  "timestamp": "2026-06-18T04:57:11.744009",
+  "convergence_file": "ppo_q45.0_seed45_eps_010_convergence.json",
+  "variant_name": "baseline"
+}

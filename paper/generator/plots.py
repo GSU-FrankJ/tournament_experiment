@@ -179,6 +179,12 @@ def plot_convergence_main(
     for row_idx, variant in enumerate(weight_variants):
         wv_col = "weight_variant" if "weight_variant" in df.columns else "ablation"
         var_df = df[df[wv_col] == variant]
+        # Fix #1: when selecting a weight-variant row, restrict to the baseline
+        # ablation so non-baseline arms (r5_fig7_*, eps_*/pat_* sweeps) do not
+        # leak into the baseline convergence curve / CI band. (No-op when keyed
+        # on ablation, i.e. when there is no weight_variant column.)
+        if wv_col == "weight_variant":
+            var_df = var_df[var_df["ablation"] == "baseline"]
 
         for col_idx, q in enumerate(q_values):
             ax = axes[row_idx, col_idx]
