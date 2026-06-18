@@ -38,7 +38,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.one_stage_three_players import config as base_config
 from utils.theory import e_star_three_players, clip_stage2
-from utils.prob import win_prob_three_players, win_prob_three_players_grad
+from utils.prob import win_prob_three_players_grad
 from envs.three_players_env import ThreePlayersEnv
 from agents.ppo_three_players import PPOThreePlayersBandit, PPOConfig
 
@@ -276,6 +276,35 @@ def eval_exploitability_3p(
 
 # === Gradient-based solver ===
 
+def _batch_payoffs_uniform_3p(
+    env: ThreePlayersEnv,
+    e1: float,
+    e2: float,
+    e3: float,
+    eps: np.ndarray,
+    tie_breaks: np.ndarray,
+) -> tuple[float, float, float]:
+    """Vectorized sampled mean payoffs for all three players under provided noise (CRN).
+
+    y_i = e_i + eps_i; the realized winner takes w_H, both losers w_L; each
+    player's payoff subtracts k*e_i^2. Exact output ties (probability zero
+    under continuous noise) are resolved with the provided tie-break draws.
+    """
+    efforts = np.array([e1, e2, e3], dtype=float)
+    y = efforts[None, :] + eps  # (batch, 3)
+    winners = np.argmax(y, axis=1)
+    is_max = y == y.max(axis=1, keepdims=True)
+    tie_rows = np.flatnonzero(is_max.sum(axis=1) > 1)
+    for r in tie_rows:
+        idxs = np.flatnonzero(is_max[r])
+        winners[r] = idxs[int(tie_breaks[r]) % len(idxs)]
+    costs = env.k * efforts ** 2
+    u1 = float(np.where(winners == 0, env.w_h, env.w_l).mean() - costs[0])
+    u2 = float(np.where(winners == 1, env.w_h, env.w_l).mean() - costs[1])
+    u3 = float(np.where(winners == 2, env.w_h, env.w_l).mean() - costs[2])
+    return u1, u2, u3
+
+
 def _stochastic_fd_gradients_3p(
     env: ThreePlayersEnv,
     e1: float,
@@ -284,75 +313,34 @@ def _stochastic_fd_gradients_3p(
     delta: float,
     num_samples: int,
 ) -> tuple[float, float, float]:
-    """Central-difference gradients for three-player tournament using Monte Carlo.
-    
-    For symmetric equilibrium, we can use the analytic gradient from the environment.
-    This function provides a stochastic alternative for validation.
+    """MC-FD gradients (Appendix A): central differences on SAMPLED payoffs.
+
+    One shared batch of uniform noise draws + tie-breaks (common random
+    numbers) is reused for all six perturbed evaluations, so each central
+    difference is taken under identical randomness. Mirrors
+    _stochastic_fd_gradients in run_two_players.py for the 3-player game.
     """
-    # Use analytic gradient from environment (more accurate)
-    if env.use_analytic:
-        return env.expected_utility_gradient(e1, e2, e3)
-    
-    # Fallback to finite differences if analytic not available
+    eps, tie_breaks = env.draw_noise_batch(num_samples)
     lo, hi = env.effort_range
-    
-    def _utility_estimate(e_i: float, e_j: float, e_k: float, player: int) -> float:
-        """Estimate utility for given player via Monte Carlo."""
-        rng = np.random.default_rng(42)
-        utils = []
-        for _ in range(num_samples):
-            eps = rng.uniform(-env.q, env.q, size=3)
-            scores = [e_i + eps[0], e_j + eps[1], e_k + eps[2]]
-            winner = int(np.argmax(scores))
-            efforts = [e_i, e_j, e_k]
-            for p in range(3):
-                payoff = env.w_h if p == winner else env.w_l
-                cost = env.k * efforts[p] ** 2
-                if p == player:
-                    utils.append(payoff - cost)
-        return float(np.mean(utils))
-    
-    # Compute finite difference gradients
+
     e1_plus = _clip_effort(e1 + delta, (lo, hi))
     e1_minus = _clip_effort(e1 - delta, (lo, hi))
     e2_plus = _clip_effort(e2 + delta, (lo, hi))
     e2_minus = _clip_effort(e2 - delta, (lo, hi))
     e3_plus = _clip_effort(e3 + delta, (lo, hi))
     e3_minus = _clip_effort(e3 - delta, (lo, hi))
-    
-    g1 = (_utility_estimate(e1_plus, e2, e3, 0) - _utility_estimate(e1_minus, e2, e3, 0)) / (2.0 * delta)
-    g2 = (_utility_estimate(e1, e2_plus, e3, 1) - _utility_estimate(e1, e2_minus, e3, 1)) / (2.0 * delta)
-    g3 = (_utility_estimate(e1, e2, e3_plus, 2) - _utility_estimate(e1, e2, e3_minus, 2)) / (2.0 * delta)
-    
+
+    u1_plus, _, _ = _batch_payoffs_uniform_3p(env, e1_plus, e2, e3, eps, tie_breaks)
+    u1_minus, _, _ = _batch_payoffs_uniform_3p(env, e1_minus, e2, e3, eps, tie_breaks)
+    _, u2_plus, _ = _batch_payoffs_uniform_3p(env, e1, e2_plus, e3, eps, tie_breaks)
+    _, u2_minus, _ = _batch_payoffs_uniform_3p(env, e1, e2_minus, e3, eps, tie_breaks)
+    _, _, u3_plus = _batch_payoffs_uniform_3p(env, e1, e2, e3_plus, eps, tie_breaks)
+    _, _, u3_minus = _batch_payoffs_uniform_3p(env, e1, e2, e3_minus, eps, tie_breaks)
+
+    g1 = (u1_plus - u1_minus) / (2.0 * delta)
+    g2 = (u2_plus - u2_minus) / (2.0 * delta)
+    g3 = (u3_plus - u3_minus) / (2.0 * delta)
     return float(g1), float(g2), float(g3)
-
-
-def _coma_baseline(
-    agent,
-    state: torch.Tensor,
-    opp_e1: float,
-    opp_e2: float,
-    q: float,
-    k: float,
-    w_h: float,
-    w_l: float,
-    K: int = 32,
-) -> float:
-    """Compute COMA counterfactual baseline via MC samples from current policy.
-
-    Returns E_{e'~π}[utility(e', opp_e1, opp_e2)] — the expected reward if
-    the focal player plays according to the current policy while opponents
-    are fixed at opp_e1, opp_e2.
-    """
-    w_gap = w_h - w_l
-    total = 0.0
-    with torch.no_grad():
-        for _ in range(K):
-            _, e_sample, _, _ = agent.act(state)
-            e_s = float(e_sample.item())
-            p_i = win_prob_three_players(e_s, opp_e1, opp_e2, q)
-            total += w_l + p_i * w_gap - k * e_s * e_s
-    return total / K
 
 
 def gradient_descent_three_players(
@@ -365,11 +353,13 @@ def gradient_descent_three_players(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
 ) -> tuple[tuple[float, float, float], Dict[str, Any]]:
-    """Three-player gradient ascent with uniform noise and distinct starts."""
+    """MC-FD gradient play (Appendix A), three-player variant: sampled payoffs
+    with common random numbers, central finite differences (step ``eps``),
+    projected gradient ascent, simultaneous updates, tolerance ``tol``. No
+    closed-form win probability and no symmetry projection — symmetry is only
+    reported."""
     effort_bounds = tuple(cfg["effort_range"])
     env = ThreePlayersEnv(
         w_h=cfg["w_h"],
@@ -378,7 +368,6 @@ def gradient_descent_three_players(
         q=cfg["q"],
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
-        reward_mode=str(cfg.get("reward_mode", "expected")),
     )
     if eps <= 0:
         raise ValueError("grad_eps must be positive for finite differences")
@@ -404,10 +393,10 @@ def gradient_descent_three_players(
     for step in range(1, steps + 1):
         # Adaptive learning rate with exponential decay
         lr_current = lr * (lr_decay ** step)
-        
-        # Use analytic gradient from environment
-        g1, g2, g3 = env.expected_utility_gradient(e1, e2, e3)
-        
+
+        # Sampled MC-FD gradient with common random numbers (Appendix A)
+        g1, g2, g3 = _stochastic_fd_gradients_3p(env, e1, e2, e3, delta=eps, num_samples=num_samples)
+
         e1_new = _clip_effort(e1 + lr_current * g1, effort_bounds)
         e2_new = _clip_effort(e2 + lr_current * g2, effort_bounds)
         e3_new = _clip_effort(e3 + lr_current * g3, effort_bounds)
@@ -417,15 +406,9 @@ def gradient_descent_three_players(
         delta_e3 = abs(e3_new - e3)
         grad_norm = max(abs(g1), abs(g2), abs(g3))
 
+        # Simultaneous (projected) update
         e1, e2, e3 = e1_new, e2_new, e3_new
-        
-        # Periodic symmetry enforcement
-        if symmetry_enforce_every > 0 and step % symmetry_enforce_every == 0:
-            e_avg = (e1 + e2 + e3) / 3.0
-            e1 = e2 = e3 = e_avg
-            if log and step <= 100:
-                print(f"  [symmetry enforce] step={step} e_avg={e_avg:.6f}")
-        
+
         history["iterations"] = float(step)
         history["final_grad"] = float(grad_norm)
         history["final_grad_tuple"] = (float(g1), float(g2), float(g3))
@@ -436,25 +419,23 @@ def gradient_descent_three_players(
         history["e3_history"].append(float(e3))
         history["step_history"].append(step)
         
-        # Compute symmetry gap (max difference among efforts)
+        # Symmetry gap is REPORTED only (never enforced, never a stop criterion)
         symmetry_gap = max(abs(e1 - e2), abs(e1 - e3), abs(e2 - e3))
         max_delta = max(delta_e1, delta_e2, delta_e3)
-        
+
         if log and (step == 1 or step % 250 == 0 or step == steps):
             print(
                 f"[gradient-3p] step={step:05d} e1={e1:.6f} e2={e2:.6f} e3={e3:.6f} "
                 f"grad=({g1:.6f},{g2:.6f},{g3:.6f}) delta=({delta_e1:.3e},{delta_e2:.3e},{delta_e3:.3e}) "
                 f"lr={lr_current:.6f} sym_gap={symmetry_gap:.4f}"
             )
-        
-        # Convergence criteria
-        if (grad_norm < tol and 
-            symmetry_gap < symmetry_tol and
-            max_delta < tol):
+
+        # Tolerance tau: gradient estimate and update step both below tol
+        if grad_norm < tol and max_delta < tol:
             if log:
                 print(
                     f"[gradient-3p] converged at step={step} "
-                    f"grad_norm={grad_norm:.3e} symmetry_gap={symmetry_gap:.3e}"
+                    f"grad_norm={grad_norm:.3e} sym_gap={symmetry_gap:.3e}"
                 )
             break
 
@@ -474,9 +455,9 @@ def run_gradient(
     num_samples: int = 256,
     init_perturb: float = 1.0,
     lr_decay: float = 0.9995,
-    symmetry_enforce_every: int = 50,
-    symmetry_tol: float = 0.1,
     log: bool = True,
+    ablation_name: str = "baseline",
+    force: bool = False,
 ) -> Dict:
     """Run gradient-based solver for three-player tournament."""
     w_h, w_l, k, q = cfg["w_h"], cfg["w_l"], cfg["k"], cfg["q"]
@@ -492,8 +473,6 @@ def run_gradient(
         num_samples=num_samples,
         init_perturb=init_perturb,
         lr_decay=lr_decay,
-        symmetry_enforce_every=symmetry_enforce_every,
-        symmetry_tol=symmetry_tol,
         log=log,
     )
     final_e = (e1 + e2 + e3) / 3.0
@@ -537,10 +516,21 @@ def run_gradient(
         
         convergence_dir = os.path.join("results", "three_players", "convergence")
         os.makedirs(convergence_dir, exist_ok=True)
+        # Seed- and tag-qualified filename (mirrors the PPO scheme) so distinct
+        # gradient runs never share a file
+        seed_val = int(cfg.get("seed", 42))
+        convergence_data["seed"] = seed_val
+        parts = [f"gradient_3p_q{q:.1f}", f"seed{seed_val}"]
+        if ablation_name not in ("baseline", "", None):
+            parts.append(ablation_name)
         convergence_file = os.path.join(
-            convergence_dir, 
-            f"gradient_3p_q{q:.1f}_convergence.json"
+            convergence_dir, "_".join(parts) + "_convergence.json"
         )
+        if os.path.exists(convergence_file) and not force:
+            raise FileExistsError(
+                f"Refusing to overwrite existing gradient result: {convergence_file}. "
+                "Pass --force to overwrite, or distinguish the run via --seed/--ablation-name."
+            )
         with open(convergence_file, 'w') as f:
             json.dump(convergence_data, f, indent=2)
         print(f"[gradient-3p] Saved convergence history to {convergence_file}")
@@ -590,51 +580,6 @@ class CheapGateTracker:
             "std_kl_window": std_kl,
             "drift_effort": float(drift),
         }
-
-
-def local_best_response_3p(
-    e_opp: float,
-    q: float,
-    w_h: float,
-    w_l: float,
-    k: float,
-    lo: float,
-    hi: float,
-) -> float:
-    """Compute interior (FOC-based) best-response effort against two opponents.
-
-    Solves the first-order condition:
-        (w_h - w_l) * dp_i/de_i(e, e_opp, e_opp) = 2k * e
-
-    Uses bisection on the FOC residual. At symmetric play dp/de_i = 1/(2q)
-    (constant), so the interior BR is always e* = (w_h - w_l) / (4qk).
-    For asymmetric play, dp/de_i varies and the BR shifts accordingly.
-    """
-    dw = w_h - w_l
-
-    def foc_residual(e: float) -> float:
-        dp_de_i, _, _ = win_prob_three_players_grad(e, e_opp, e_opp, q)
-        return dw * dp_de_i - 2.0 * k * e
-
-    # Bisection: foc > 0 means effort too low, foc < 0 means too high
-    a, b = max(lo, 1e-6), hi
-    fa, fb = foc_residual(a), foc_residual(b)
-
-    # If no sign change, return the boundary where FOC is closest to zero
-    if fa <= 0:
-        return a
-    if fb >= 0:
-        return b
-
-    for _ in range(60):
-        mid = (a + b) / 2.0
-        fm = foc_residual(mid)
-        if fm > 0:
-            a = mid
-        else:
-            b = mid
-
-    return (a + b) / 2.0
 
 
 def run_ppo(
@@ -704,8 +649,6 @@ def run_ppo(
         gae_lambda=float(cfg.get("gae_lambda", 0.95)),
         value_coef=float(cfg.get("value_coef", 0.5)),
         max_grad_norm=float(cfg.get("max_grad_norm", 0.5)),
-        # Best-response regularization
-        br_reg_coef=float(cfg.get("br_reg_coef", 0.0)),
         # Opponent lag parameters
         opponent_mode=cfg.get("opponent_mode", "periodic"),
         opponent_sync_interval=int(cfg.get("opponent_sync_interval", 0)),
@@ -754,12 +697,6 @@ def run_ppo(
     hold_updates = max(1, int(math.ceil(total_updates * hold_fraction)))
     tail_updates = max(1, total_updates - hold_updates)
 
-    # Best-response regularization
-    br_reg_coef = float(cfg.get("br_reg_coef", ppo_cfg.br_reg_coef))
-    br_reg_warmup = int(cfg.get("br_reg_warmup", 0))
-    if br_reg_coef > 0:
-        print(f"[PPO-3p] BR regularization: coef={br_reg_coef} warmup={br_reg_warmup}")
-
     # Convergence tracking (exploitability-based, theory-free)
     convergence_cfg = cfg.get("convergence", {}) or {}
     convergence_enabled = bool(convergence_cfg.get("enabled", False))
@@ -784,16 +721,25 @@ def run_ppo(
     min_updates = int(cfg.get("min_updates", 0))
     last_exploit_eval_step = -999999
     exploit_every_updates = int(cfg.get("exploit_every_updates", 10))
+    # Ablation toggles (Fig. 7): each verification component is independently
+    # disable-able. disable_cheap_gate => stability screen always passes;
+    # disable_exploitability => exploitability is never evaluated (run goes to
+    # budget, stop_reason stays "max_updates").
+    disable_cheap_gate = bool(cfg.get("disable_cheap_gate", False))
+    disable_exploitability = bool(cfg.get("disable_exploitability", False))
+    if disable_cheap_gate:
+        print("[ablation] disable_cheap_gate: stability screen always passes", flush=True)
+    if disable_exploitability:
+        print("[ablation] disable_exploitability: exploitability never evaluated", flush=True)
     exploit_eval_steps: List[int] = []
     
     if convergence_enabled:
         print(f"[Convergence] enabled=True cheap_gate_profile={cheap_profile_name}", flush=True)
     
-    # Create environment (reuse across steps for RNG continuity)
+    # Create environment (reuse across steps for RNG continuity).
+    # Rewards are SAMPLED rank-order outcomes (winner w_H, losers w_L) — the
+    # env exposes no closed-form reward mode anymore (spec: train/eval split).
     q_init = float(train_qs[0]) if train_qs else float(cfg.get("q", 40.0))
-    reward_mode = str(cfg.get("reward_mode", "expected"))
-    noise_scale = float(cfg.get("noise_scale", 0.0))
-    coma_k = int(cfg.get("coma_k", 0))
     env = ThreePlayersEnv(
         w_h=w_h,
         w_l=w_l,
@@ -801,16 +747,7 @@ def run_ppo(
         q=q_init,
         effort_bounds=effort_bounds,
         seed=cfg.get("seed", 42),
-        use_binary_rewards=bool(cfg.get("use_binary_rewards", False)),
-        reward_mode=reward_mode,
-        noise_scale=noise_scale,
     )
-    if reward_mode != "expected":
-        print(f"[env] Reward mode: {reward_mode} noise_scale={noise_scale}", flush=True)
-    if coma_k > 0:
-        print(f"[env] COMA counterfactual baseline: K={coma_k} MC samples", flush=True)
-    if cfg.get("use_binary_rewards", False):
-        print("[env] Binary rewards enabled: stochastic winner, w_H/w_L payoffs", flush=True)
     
     # Convergence history for plotting
     convergence_history: Dict[str, Any] = {
@@ -948,20 +885,9 @@ def run_ppo(
             )
             _, rewards, _, done, _ = env.step(efforts)
 
-            # COMA counterfactual baseline: subtract E_{e'~π}[R(e', opponents)]
             r1 = float(rewards[0].item())
             r2 = float(rewards[1].item())
             r3 = float(rewards[2].item())
-            if coma_k > 0:
-                ef1 = float(e1_biased.item())
-                ef2 = float(e2_biased.item())
-                ef3 = float(e3_biased.item())
-                cf1 = _coma_baseline(agent, state, ef2, ef3, q, k, w_h, w_l, coma_k)
-                cf2 = _coma_baseline(agent, state, ef1, ef3, q, k, w_h, w_l, coma_k)
-                cf3 = _coma_baseline(agent, state, ef1, ef2, q, k, w_h, w_l, coma_k)
-                r1 -= cf1
-                r2 -= cf2
-                r3 -= cf3
 
             # Store transitions for all 3 players (all learner-generated in self-play)
             agent.store(state, a1_norm, logp1, r1, v1, bool(done))
@@ -970,15 +896,8 @@ def run_ppo(
             
             steps_done += 1
         
-        # Compute BR target for regularization (before update)
-        # At symmetric play dp/de_i = 1/(2q) for all effort levels,
-        # so the interior FOC solution is always e* = (w_h - w_l) / (4qk).
-        br_target = None
-        if br_reg_coef > 0 and update_idx >= br_reg_warmup:
-            br_target = e_star_three_players(float(train_qs[0]), w_h, w_l, k)
-
         # PPO update
-        metrics = agent.update(br_target=br_target)
+        metrics = agent.update()
         last_update_metrics = metrics
 
         # Reset Adam state if requested (clears crash-polluted second moment)
@@ -1050,21 +969,26 @@ def run_ppo(
             mean_ok = mean_kl_window is not None and mean_kl_window <= mean_thresh
             std_ok = std_kl_window is not None and std_kl_window <= std_thresh
             drift_ok = drift_effort is not None and drift_effort <= drift_thresh
-            drift_pass = mean_ok and std_ok and drift_ok
-            
+            # Ablation: --disable-cheap-gate forces the stability screen to pass
+            drift_pass = True if disable_cheap_gate else (mean_ok and std_ok and drift_ok)
+
             if drift_pass:
                 drift_ok_streak += 1
             else:
                 drift_ok_streak = 0
-            
+
             exploitability_val = None
             best_dev_effort = None
-            
+
             # Determine whether to run exploitability evaluation
             steps_since_last_exploit = update_idx - last_exploit_eval_step
             periodic_due = steps_since_last_exploit >= exploit_every_updates
             gate_triggered = drift_pass and drift_ok_streak >= patience_drift
-            run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
+            # Ablation: --disable-exploitability never evaluates (run goes to budget)
+            if disable_exploitability:
+                run_exploit = False
+            else:
+                run_exploit = periodic_due or (gate_triggered and steps_since_last_exploit >= 1)
             
             if run_exploit:
                 last_exploit_eval_step = update_idx
@@ -1254,6 +1178,8 @@ def run_ppo(
                 "patience_exploit": int(exploit_cfg.get("patience_exploit", 5)),
                 "exploit_every_updates": exploit_every_updates,
                 "exploit_M": int(exploit_cfg.get("M", 8192)),
+                "disable_cheap_gate": disable_cheap_gate,
+                "disable_exploitability": disable_exploitability,
             },
             **convergence_history,
         }
@@ -1305,7 +1231,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_max"] = 100000.0
         # Regularization coefficients
         cfg["theory_align_v2_var_coef"] = 5e-2
-        cfg["theory_align_v2_br_coef"] = 0.0
         # Ramping schedule for concentration
         cfg["theory_align_v2_conc_min_start"] = 100.0
         cfg["theory_align_v2_conc_scale_start"] = 100.0
@@ -1333,7 +1258,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["theory_align_v2_conc_scale"] = 1.0
         cfg["theory_align_v2_conc_max"] = None
         cfg["theory_align_v2_var_coef"] = 0.0
-        cfg["theory_align_v2_br_coef"] = 0.0
         print("[config] --mean-conc-param: using ActorCriticMeanConc with zero regularization, "
               "all other hyperparams unchanged", flush=True)
 
@@ -1377,17 +1301,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["normalize_advantages"] = False
         print("[ablation] --disable-adv-norm: advantage normalization disabled", flush=True)
 
-    # --reward-mode, --noise-scale, --coma-k
-    if hasattr(args, 'reward_mode') and args.reward_mode is not None:
-        cfg["reward_mode"] = str(args.reward_mode)
-    if hasattr(args, 'noise_scale'):
-        cfg["noise_scale"] = float(args.noise_scale)
-    if hasattr(args, 'coma_k'):
-        cfg["coma_k"] = int(args.coma_k)
-
-    # --binary-rewards: stochastic binary w_H/w_L instead of smooth analytic
-    if hasattr(args, 'binary_rewards') and args.binary_rewards:
-        cfg["use_binary_rewards"] = True
 
     # --hidden-size: override network hidden layer size
     if hasattr(args, 'hidden_size') and args.hidden_size is not None:
@@ -1415,6 +1328,11 @@ def _run_cli(args: argparse.Namespace) -> str:
     # Exploitability overrides
     if hasattr(args, 'exploit_every_updates') and args.exploit_every_updates is not None:
         cfg["exploit_every_updates"] = int(args.exploit_every_updates)
+    # Ablation toggles (Fig. 7): independently disable each verification component
+    if getattr(args, 'disable_cheap_gate', False):
+        cfg["disable_cheap_gate"] = True
+    if getattr(args, 'disable_exploitability', False):
+        cfg["disable_exploitability"] = True
     if args.exploit_eps is not None:
         if "convergence" not in cfg:
             cfg["convergence"] = {}
@@ -1445,12 +1363,6 @@ def _run_cli(args: argparse.Namespace) -> str:
         cfg["update_epochs"] = int(args.update_epochs)
         print(f"[config] CLI override: update_epochs={cfg['update_epochs']}", flush=True)
 
-    # Best-response regularization
-    if args.br_reg_coef is not None:
-        cfg["br_reg_coef"] = float(args.br_reg_coef)
-    if args.br_reg_warmup is not None:
-        cfg["br_reg_warmup"] = int(args.br_reg_warmup)
-
     # Asymmetric warmup settings
     if hasattr(args, 'no_asymmetric_warmup') and args.no_asymmetric_warmup:
         cfg["asymmetric_warmup_updates"] = 0
@@ -1472,9 +1384,9 @@ def _run_cli(args: argparse.Namespace) -> str:
                 num_samples=args.grad_samples,
                 init_perturb=args.grad_init_perturb,
                 lr_decay=args.grad_lr_decay,
-                symmetry_enforce_every=args.grad_symmetry_enforce,
-                symmetry_tol=args.grad_symmetry_tol,
                 log=True,
+                ablation_name=args.ablation_name,
+                force=args.force,
             )
     else:
         train_qs = [args.q] if args.q is not None else list(cfg["q_list"])
@@ -1509,8 +1421,6 @@ def main():
     parser.add_argument("--grad-samples", type=int, default=base_config.get("gradient_num_samples", 64))
     parser.add_argument("--grad-init-perturb", type=float, default=base_config.get("gradient_init_perturb", 1.0))
     parser.add_argument("--grad-lr-decay", type=float, default=0.9995)
-    parser.add_argument("--grad-symmetry-enforce", type=int, default=50)
-    parser.add_argument("--grad-symmetry-tol", type=float, default=0.1)
     
     # Game parameter overrides
     parser.add_argument("--k", type=float, help="Override cost parameter k")
@@ -1635,6 +1545,11 @@ def main():
         help="Ablation variant name for output files",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite an existing gradient result file (default: refuse).",
+    )
+    parser.add_argument(
         "--output-tag",
         type=str,
         default=None,
@@ -1672,38 +1587,12 @@ def main():
         help="Disable asymmetric warmup (equivalent to --asymmetric-warmup-updates 0)",
     )
 
-    # Best-response regularization
-    parser.add_argument(
-        "--binary-rewards",
-        action="store_true",
-        help="Use stochastic binary rewards (w_H/w_L) instead of smooth analytic win probs.",
-    )
     parser.add_argument(
         "--hidden-size",
         type=int,
         default=128,
         help="Hidden layer size for actor-critic network (default: 128, 2P uses 64).",
     )
-    parser.add_argument(
-        "--reward-mode",
-        choices=["expected", "pairwise_binary", "hybrid"],
-        default="expected",
-        help="Reward mode: expected, pairwise_binary, or hybrid. Default: expected.",
-    )
-    parser.add_argument(
-        "--noise-scale",
-        type=float,
-        default=0.0,
-        help="Noise scale for hybrid reward mode (0=expected, 1=full binary). Default: 0.",
-    )
-    parser.add_argument(
-        "--coma-k",
-        type=int,
-        default=0,
-        help="COMA counterfactual baseline MC samples (0=disabled). Default: 0.",
-    )
-    parser.add_argument("--br-reg-coef", type=float, default=None, help="BR regularization coefficient (0=disabled)")
-    parser.add_argument("--br-reg-warmup", type=int, default=None, help="Updates before BR reg kicks in")
 
     # PPO tuning overrides
     parser.add_argument("--steps-per-update", type=int, default=None,

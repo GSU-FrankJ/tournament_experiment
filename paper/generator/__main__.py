@@ -43,9 +43,7 @@ from .plots import (
     plot_convergence_main,
     plot_kl_dynamics,
     plot_exploitability_dynamics,
-    plot_exploitability_q25,
     plot_beta_evolution,
-    plot_beta_snapshots,
     plot_ablation_comparison,
     plot_distance_to_equilibrium,
     plot_effort_drift,
@@ -56,7 +54,6 @@ from .tables import (
     generate_summary_metrics_table,
     generate_ablation_table,
     generate_final_paper_table,
-    generate_convergence_comparison_table,
     generate_environment_config_table,
 )
 
@@ -66,9 +63,7 @@ PLOT_TYPES = [
     "convergence_main",
     "kl_dynamics",
     "exploitability_dynamics",
-    "exploitability_q25",
     "beta_evolution",
-    "beta_snapshots",
     "ablation_comparison",
     "distance_to_equilibrium",
     "effort_drift",
@@ -81,7 +76,6 @@ TABLE_TYPES = [
     "summary_metrics",
     "ablation_results",
     "final_summary",
-    "convergence_comparison",
 ]
 
 
@@ -216,9 +210,7 @@ def cmd_plot(args: argparse.Namespace) -> int:
         "convergence_main": lambda: plot_convergence_main(df, q_values, os.path.join(output_dir, "convergence_main.png")),
         "kl_dynamics": lambda: plot_kl_dynamics(df, q_values, os.path.join(output_dir, "kl_dynamics.png")),
         "exploitability_dynamics": lambda: plot_exploitability_dynamics(df, q_values, os.path.join(output_dir, "exploitability_dynamics.png")),
-        "exploitability_q25": lambda: plot_exploitability_q25(df, os.path.join(output_dir, "exploitability_q25.png")),
         "beta_evolution": lambda: plot_beta_evolution(df, q_values, os.path.join(output_dir, "beta_evolution.png")),
-        "beta_snapshots": lambda: plot_beta_snapshots(df, q=40.0, output_path=os.path.join(output_dir, "beta_snapshots.png")),
         "ablation_comparison": lambda: plot_ablation_comparison(df, q_values, os.path.join(output_dir, "ablation_comparison.png")),
         "distance_to_equilibrium": lambda: plot_distance_to_equilibrium(df, q_values, os.path.join(output_dir, "distance_to_equilibrium.png")),
         "effort_drift": lambda: plot_effort_drift(df, q_values, os.path.join(output_dir, "effort_drift.png")),
@@ -264,7 +256,6 @@ def cmd_table(args: argparse.Namespace) -> int:
         "summary_metrics": lambda: generate_summary_metrics_table(df, output_dir),
         "ablation_results": lambda: generate_ablation_table(df, output_dir),
         "final_summary": lambda: generate_final_paper_table(df, output_dir),
-        "convergence_comparison": lambda: generate_convergence_comparison_table(df, output_dir),
     }
     
     paths = table_funcs[table_type]()

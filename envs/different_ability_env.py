@@ -5,14 +5,19 @@ Different Ability Environment for Two Players Tournament Game
 This environment implements a two-player contest with different ability
 parameters (l1 > l2) under a single-stage setting with uniform noise.
 
-Key points:
-- Output (stage one): y_i = e_i + l_i + ε_i, ε_i ~ U(-q, q)
+Model (one-step stochastic game):
+- Output (stage one): y_i = e_i + l_i + ε_i, ε_i ~ U(-q, q) drawn fresh each episode
+- Rank-order payoff: the player with the higher realized output receives w_H,
+  the other w_L (exact ties broken uniformly at random)
 - Cost: c(e_i) = k_i e_i^2 with k1 = k2 in this scenario
-- Expected utility: w_L + p_i(win) (w_H - w_L) - k_i e_i^2
-- Win probability uses the exact triangular CDF for ε1 - ε2 ∈ [-2q, 2q]
+- Reward: r_i = payoff_i - k_i e_i^2 — a REALIZED, SAMPLED outcome, never an
+  expectation
 
-This file is migrated from backup with no behavior changes, so agents and
-run scripts can import envs.different_ability_env.DifferentAbilityEnv.
+Training agents observe ONLY these sampled outcomes (mirrors TwoPlayersEnv).
+The closed-form helpers below (``probability_win_player1``, ``compute_utility``,
+``analyze_equilibrium``, ``compute_gradients``) are EVALUATION/BASELINE-ONLY
+(numerical gradient reference, offline diagnostics) and must never enter the
+training reward path.
 """
 
 from __future__ import annotations
@@ -55,6 +60,10 @@ class DifferentAbilityEnv:
         self.theoretical_effort1 = float(config.get("theoretical_effort1", 0.0))
         self.theoretical_effort2 = float(config.get("theoretical_effort2", 0.0))
 
+        # Single RNG that advances across steps; construct the env once per
+        # run so noise is not re-seeded between episodes.
+        self.rng = np.random.default_rng(self.seed)
+
         self._validate_config()
 
         logger.info(
@@ -74,9 +83,23 @@ class DifferentAbilityEnv:
         if len(self.effort_range) != 2 or self.effort_range[0] >= self.effort_range[1]:
             raise ValueError("Effort range must be (min, max) with min < max")
 
-    # ---- probability / utility ----
+    def draw_noise_batch(self, batch_size: int):
+        """Draw Uniform(-q, q) noise and tie-break decisions for CRN-friendly batches.
+
+        Mirrors TwoPlayersEnv.draw_noise_batch: one shared batch is reused for
+        all perturbed evaluations of an MC-FD central difference (common random
+        numbers).
+        """
+        eps1 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        eps2 = self.rng.uniform(-self.q, self.q, size=int(batch_size))
+        tie_breaks = self.rng.integers(0, 2, size=int(batch_size))
+        return eps1, eps2, tie_breaks
+
+    # ---- closed-form helpers (EVALUATION / BASELINE ONLY) ----
     def probability_win_player1(self, e1: float, e2: float) -> float:
-        """P(e1 + l1 + ε1 > e2 + l2 + ε2) with ε1, ε2 ~ U(-q, q)."""
+        """P(e1 + l1 + ε1 > e2 + l2 + ε2) with ε1, ε2 ~ U(-q, q).
+
+        EVALUATION/BASELINE ONLY — must never be used as a training reward."""
         score1 = e1 + self.l1
         score2 = e2 + self.l2
         d = score2 - score1  # threshold for ε1 - ε2
@@ -90,6 +113,7 @@ class DifferentAbilityEnv:
         return ((2 * self.q - d) ** 2) / (8 * self.q ** 2)
 
     def compute_utility(self, player_id: int, effort: float, other_effort: float) -> Tuple[float, float]:
+        """Closed-form E[u] — EVALUATION/BASELINE ONLY (FD reference, diagnostics)."""
         if player_id == 0:
             p_win = self.probability_win_player1(effort, other_effort)
             cost = self.k1 * effort * effort
@@ -112,9 +136,24 @@ class DifferentAbilityEnv:
         e1 = max(low, min(high, e1))
         e2 = max(low, min(high, e2))
 
-        u1, c1 = self.compute_utility(0, e1, e2)
-        u2, c2 = self.compute_utility(1, e2, e1)
-        p1 = self.probability_win_player1(e1, e2)
+        # Sampled tournament outcome: y_i = e_i + l_i + eps_i, winner takes w_H.
+        eps1 = float(self.rng.uniform(-self.q, self.q))
+        eps2 = float(self.rng.uniform(-self.q, self.q))
+        y1 = e1 + self.l1 + eps1
+        y2 = e2 + self.l2 + eps2
+        if y1 > y2:
+            winner = 0
+        elif y2 > y1:
+            winner = 1
+        else:
+            winner = int(self.rng.integers(0, 2))
+
+        c1 = self.k1 * e1 * e1
+        c2 = self.k2 * e2 * e2
+        payoffs = [self.w_l, self.w_l]
+        payoffs[winner] = self.w_h
+        u1 = payoffs[0] - c1
+        u2 = payoffs[1] - c2
 
         obs = (torch.tensor([0.0]), torch.tensor([0.0]))
         rewards = torch.tensor([u1, u2], dtype=torch.float32)
@@ -123,7 +162,9 @@ class DifferentAbilityEnv:
         info = {
             "efforts": [e1, e2],
             "effective_efforts": [e1 + self.l1, e2 + self.l2],
-            "win_probabilities": [p1, 1.0 - p1],
+            "noises": [eps1, eps2],
+            "outputs": [y1, y2],
+            "winner": winner,
             "costs": [c1, c2],
             "utilities": [u1, u2],
             "ability_parameters": [self.l1, self.l2],

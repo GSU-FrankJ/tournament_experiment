@@ -81,11 +81,11 @@ def _parse_filename(filename: str) -> Dict[str, any]:
     base = filename.replace("_convergence.json", "")
 
     # --- Three-player formats ---
-    # ppo_3p_q{q}_seed{seed}[_{ablation}]
-    pattern_3p_new = r"^(ppo)_3p_q([\d.]+)_seed(\d+)(?:_(.+))?$"
+    # (ppo|gradient)_3p_q{q}_seed{seed}[_{ablation}]
+    pattern_3p_new = r"^(ppo|gradient)_3p_q([\d.]+)_seed(\d+)(?:_(.+))?$"
     match = re.match(pattern_3p_new, base, re.IGNORECASE)
     if match:
-        result["method"] = "TEL-PPO"
+        result["method"] = "TEL-PPO" if match.group(1).lower() == "ppo" else "Gradient"
         result["q"] = float(match.group(2))
         result["seed"] = int(match.group(3))
         result["ablation"] = match.group(4) if match.group(4) else "baseline"
@@ -284,6 +284,23 @@ def discover_runs(
         if ablation in KNOWN_WEIGHT_VARIANTS:
             weight_variant = ablation
             ablation = "baseline"  # The actual ablation is baseline
+        else:
+            # Compound tags like "r5_sampled_wh8_wl4" (gradient runs tag the
+            # prize variant via --ablation-name because the gradient path has
+            # no --variant-name): split the weight-variant suffix off so the
+            # run carries ablation="r5_sampled", weight_variant="wh8_wl4".
+            for wv in KNOWN_WEIGHT_VARIANTS:
+                if ablation and ablation.endswith("_" + wv):
+                    weight_variant = wv
+                    ablation = ablation[: -(len(wv) + 1)]
+                    break
+
+        # Filename-derived tag (after weight-variant extraction). Runners'
+        # --output-tag renames the FILE (e.g. ..._round3_baseline_...) while
+        # leaving JSON ablation_name as "baseline"; a "baseline" claim from
+        # metadata/JSON must therefore not erase a more specific filename tag,
+        # or distinct batches silently merge under one run identity.
+        filename_tag = ablation
 
         # 1. Try metadata.json if available
         if has_metadata:
@@ -294,7 +311,8 @@ def discover_runs(
                 # Use ablation_name from metadata only for real ablations
                 meta_ablation = metadata.get("ablation_name", "baseline")
                 if meta_ablation not in KNOWN_WEIGHT_VARIANTS:
-                    ablation = meta_ablation
+                    if not (meta_ablation == "baseline" and filename_tag != "baseline"):
+                        ablation = meta_ablation
                 # Read variant_name from metadata (authoritative source)
                 meta_variant = metadata.get("variant_name", "baseline")
                 if meta_variant in KNOWN_WEIGHT_VARIANTS:
@@ -310,7 +328,8 @@ def discover_runs(
         if "ablation_name" in data:
             data_ablation = data["ablation_name"]
             if data_ablation not in KNOWN_WEIGHT_VARIANTS:
-                ablation = data_ablation
+                if not (data_ablation == "baseline" and filename_tag != "baseline"):
+                    ablation = data_ablation
             is_legacy = False
         
         # 3. If still legacy, try CSV fallback
@@ -353,8 +372,30 @@ def discover_runs(
         )
         
         runs.append(run)
-    
-    return runs
+
+    # Duplicate-identity guard: two files must never share the same run key,
+    # or downstream groupbys silently merge their trajectories into one run.
+    # On collision keep the newest file (mtime) and warn with both paths.
+    by_key: Dict[Tuple, Run] = {}
+    deduped: List[Run] = []
+    for run in runs:
+        key = (run.experiment, run.method, run.q, run.seed, run.ablation, run.weight_variant)
+        prev = by_key.get(key)
+        if prev is None:
+            by_key[key] = run
+            deduped.append(run)
+            continue
+        keep, drop = (run, prev) if os.path.getmtime(run.path) >= os.path.getmtime(prev.path) else (prev, run)
+        warnings.warn(
+            f"Duplicate run identity {key}: keeping newer '{keep.path}', "
+            f"excluding '{drop.path}'. Tag batches explicitly (--ablation-name) "
+            f"to avoid collisions."
+        )
+        if keep is run:
+            deduped[deduped.index(prev)] = run
+            by_key[key] = run
+
+    return deduped
 
 
 def discover_theory_runs(q_values: List[float] = None) -> List[Run]:

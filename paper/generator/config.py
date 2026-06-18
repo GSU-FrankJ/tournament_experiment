@@ -142,8 +142,29 @@ def get_q_values(experiment: str = None) -> List[float]:
 # concentration grows unchecked and kills the learning signal.  Standard mode
 # with entropy_end=0.002 ("no_tv2_ent002") fixes this.  See docs/tasks/
 # q55-convergence/STATE.md for details.
-BASELINE_OVERRIDES: Dict[Tuple[str, float], str] = {
-    # Cleared: old overrides were for previous parameter set (k=0.0004)
+# FINAL canonical picks, owner-approved 2026-06-12: the r5_sampled wave
+# (sampled training, eps_eq=0.03, 5 seeds, verified stopping; commit d6a6e81).
+# Values may be a tuple: every listed tag is promoted to "baseline" for that
+# (experiment, q) and the legacy "baseline" rows (PPO + Gradient) are dropped.
+# - two_players: Set 1 and Set 2 both carry ablation "r5_sampled" (Set 2 is
+#   distinguished by weight_variant="wh8_wl4"); gradient runs share the tag.
+# - different_ability: PPO arm is "r5_sampled_std" (STANDARD config — the
+#   sampled std-vs-v2 head-to-head rejected theory-align-v2 for this scenario;
+#   see docs/registry_canonicalization_plan.md); its gradient tag is
+#   "r5_sampled". The rejected v2 arm stays on disk as "r5_sampled_v2".
+# - Interim closed-form-era picks (round3_baseline / r4_dc_final / r4_h1_long,
+#   2026-06-10) are superseded and remain on disk under their own tags;
+#   history in FIX_CHANGELOG.md §13-§16.
+BASELINE_OVERRIDES: Dict[Tuple[str, float], Tuple[str, ...]] = {
+    ("two_players", 35.0): ("r5_sampled",),
+    ("two_players", 45.0): ("r5_sampled",),
+    ("two_players", 55.0): ("r5_sampled",),
+    ("three_players", 35.0): ("r5_sampled",),
+    ("three_players", 55.0): ("r5_sampled",),
+    ("different_cost", 35.0): ("r5_sampled",),
+    ("different_cost", 55.0): ("r5_sampled",),
+    ("different_ability", 35.0): ("r5_sampled_std", "r5_sampled"),
+    ("different_ability", 55.0): ("r5_sampled_std", "r5_sampled"),
 }
 
 
@@ -162,7 +183,8 @@ CONVERGENCE_CONFIG: Dict[str, float] = {
     "effort_window": 20,      # Consecutive updates
     
     # Exploitability convergence: < threshold for patience consecutive evals
-    "exploit_threshold": 0.05,
+    # (unified eps_eq = 0.03 across all scenarios, matching the runner gates)
+    "exploit_threshold": 0.03,
     "exploit_patience": 5,
     
     # Minimum steps before declaring convergence
@@ -257,7 +279,6 @@ FIGURE_SIZES: Dict[str, Tuple[float, float]] = {
     "kl_dynamics": (10, 4),
     "exploitability_dynamics": (10, 4),
     "beta_evolution": (10, 4),
-    "beta_snapshots": (12, 4),
     "ablation_comparison": (10, 6),
     "hyperparam_sensitivity": (14, 8),
     "equilibrium_recovery_dotplot": (10, 6),

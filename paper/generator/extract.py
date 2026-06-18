@@ -51,6 +51,10 @@ CONVERGENCE_COLUMNS = [
     # Exploitability (sparse: NaN when not evaluated)
     "exploitability",
     "exploitability_is_valid",
+    # Run-level verification outcome (constant per run; from the runner's own
+    # stability + exploitability stopping rule)
+    "stop_reason",
+    "stopped_at_update",
 ]
 
 
@@ -163,6 +167,14 @@ def _load_flat_format(data: Dict, run: Run) -> pd.DataFrame:
     df["exploitability"] = _load_exploitability_series(data, n_steps)
     df["exploitability_is_valid"] = _load_exploitability_valid_series(data, n_steps)
 
+    # Run-level verification outcome (constant per run): the runner's OWN
+    # convergence verdict. stop_reason == "exploitability" means the
+    # stability-screen + exploitability-streak verification fired;
+    # "max_updates" means the run exhausted its budget (NC).
+    df["stop_reason"] = data.get("stop_reason")
+    stopped = data.get("stopped_at_update")
+    df["stopped_at_update"] = float(stopped) if stopped is not None else np.nan
+
     return df
 
 
@@ -266,6 +278,11 @@ def _load_nested_format(data: Dict, run: Run) -> pd.DataFrame:
     exploit_series, exploit_valid = _load_exploitability_nested(data, n_steps)
     df["exploitability"] = exploit_series
     df["exploitability_is_valid"] = exploit_valid
+
+    # Run-level verification outcome (constant per run; see flat loader)
+    df["stop_reason"] = data.get("stop_reason")
+    stopped = data.get("stopped_at_update")
+    df["stopped_at_update"] = float(stopped) if stopped is not None else np.nan
 
     return df
 
@@ -383,30 +400,31 @@ def load_multiple_runs(runs: List[Run]) -> pd.DataFrame:
 
 
 def promote_preferred_ablations(df: pd.DataFrame) -> pd.DataFrame:
-    """Replace baseline with preferred ablation for overridden (experiment, q) combos.
+    """Replace baseline with preferred ablation(s) for overridden (experiment, q) combos.
 
-    For each entry in BASELINE_OVERRIDES, drops old "baseline" rows and relabels
-    the preferred ablation as "baseline" so all downstream code works transparently.
+    For each entry in BASELINE_OVERRIDES, drops old "baseline" rows (TEL-PPO,
+    PPO, and Gradient — Theory rows are untouched) and relabels the preferred
+    ablation(s) as "baseline" so all downstream code works transparently.
+    Values may be a single tag or a tuple of tags (e.g. het-ability promotes
+    the PPO arm "r5_sampled_std" and the gradient tag "r5_sampled" together).
     """
     if df.empty or not BASELINE_OVERRIDES:
         return df
 
     df = df.copy()
     for (experiment, q), preferred in BASELINE_OVERRIDES.items():
-        mask_old = (
-            (df["experiment"] == experiment)
-            & (df["q"] == q)
+        preferred_set = {preferred} if isinstance(preferred, str) else set(preferred)
+        is_cell = (df["experiment"] == experiment) & (df["q"] == q)
+        if not (is_cell & df["ablation"].isin(preferred_set)).any():
+            continue
+        drop = (
+            is_cell
             & (df["ablation"] == "baseline")
-            & (df["method"].isin(["TEL-PPO", "PPO"]))
+            & df["method"].isin(["TEL-PPO", "PPO", "Gradient"])
         )
-        mask_new = (
-            (df["experiment"] == experiment)
-            & (df["q"] == q)
-            & (df["ablation"] == preferred)
-        )
-        if mask_new.any():
-            df = df[~mask_old]
-            df.loc[mask_new, "ablation"] = "baseline"
+        df = df[~drop]
+        is_cell = (df["experiment"] == experiment) & (df["q"] == q)
+        df.loc[is_cell & df["ablation"].isin(preferred_set), "ablation"] = "baseline"
     return df
 
 
@@ -606,11 +624,16 @@ def load_results_csv(csv_path: str = None) -> pd.DataFrame:
 
 def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Compute the convergence step for each run (experiment, method, q, seed, ablation).
+    DIAGNOSTIC-ONLY effort-band detector — NOT the paper convergence criterion.
 
-    Uses the effort_delta and effort_window from CONVERGENCE_CONFIG to detect
-    the first step where |policy_mean_effort - theoretical_effort| < delta for
-    `window` consecutive steps.
+    Detects the first step where |policy_mean_effort - theoretical_effort| <
+    effort_delta for effort_window consecutive logged steps (CONVERGENCE_CONFIG).
+    This is structurally unsatisfiable for runs that early-stop via the method's
+    own exploitability verification (they terminate before min_steps logged
+    updates), which is exactly what produced the all-"NC" tables. Paper tables
+    must use ``get_verified_convergence_step`` instead; this helper is kept only
+    for trajectory diagnostics and for the gradient baseline, which has no
+    verification module.
 
     Returns a DataFrame with one row per run and columns:
         experiment, method, q, seed, ablation, convergence_step (NaN if not converged)
@@ -620,6 +643,8 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
     min_steps = int(CONVERGENCE_CONFIG["min_steps"])
 
     group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")  # keep Set 1 / Set 2 runs distinct
     if "experiment" in df.columns:
         group_cols = ["experiment"] + group_cols
 
@@ -646,6 +671,49 @@ def get_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
 
         rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
         rec["convergence_step"] = conv_step
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
+def get_verified_convergence_step(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Per-run convergence from the method's OWN verification (the paper criterion).
+
+    A TEL-PPO run converges when its in-training verification fires: the
+    stability screen + exploitability streak stop the run with
+    ``stop_reason == "exploitability"``. The reported value is
+    ``stopped_at_update`` — the PPO update index at which verification fired.
+    Runs that hit the budget (``stop_reason == "max_updates"``) are NC (NaN).
+
+    Returns a DataFrame with one row per run and columns:
+        experiment, method, q, seed, ablation, stop_reason, verified (bool),
+        convergence_update (NaN if not verified)
+    """
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")  # keep Set 1 / Set 2 runs distinct
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        stop_reason = None
+        if "stop_reason" in grp.columns:
+            non_null = grp["stop_reason"].dropna()
+            if len(non_null) > 0:
+                stop_reason = str(non_null.iloc[0])
+        stopped_at = np.nan
+        if "stopped_at_update" in grp.columns:
+            vals = grp["stopped_at_update"].dropna()
+            if len(vals) > 0:
+                stopped_at = float(vals.iloc[0])
+
+        verified = stop_reason == "exploitability"
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["stop_reason"] = stop_reason
+        rec["verified"] = verified
+        rec["convergence_update"] = stopped_at if verified and not np.isnan(stopped_at) else np.nan
         records.append(rec)
 
     return pd.DataFrame(records)

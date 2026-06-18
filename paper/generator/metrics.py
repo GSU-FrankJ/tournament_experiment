@@ -343,6 +343,7 @@ class SummaryMetrics:
     q: float
     seed: int
     ablation: str
+    weight_variant: str
     # Effort metrics
     final_effort: float
     theoretical_effort: float
@@ -372,19 +373,24 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
     """
     results = []
 
-    # Group by run (include experiment if present)
+    # Group by run (include experiment / weight_variant when present so that
+    # Set 1 / Set 2 prize variants never merge into one run)
     group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")
     if "experiment" in df.columns:
         group_cols = ["experiment"] + group_cols
 
     grouped = df.groupby(group_cols)
 
     for group_key, group in grouped:
-        if "experiment" in df.columns:
-            experiment, method, q, seed, ablation = group_key
-        else:
-            method, q, seed, ablation = group_key
-            experiment = "two_players"
+        key_map = dict(zip(group_cols, group_key if isinstance(group_key, tuple) else (group_key,)))
+        experiment = key_map.get("experiment", "two_players")
+        method = key_map["method"]
+        q = key_map["q"]
+        seed = key_map["seed"]
+        ablation = key_map["ablation"]
+        weight_variant = key_map.get("weight_variant", "baseline")
         group = group.sort_values("step")
 
         # Get effort series
@@ -398,15 +404,41 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
         # Get exploitability series
         exploit_series = group["exploitability"].values
         exploit_valid = group["exploitability_is_valid"].values if "exploitability_is_valid" in group.columns else None
-        
-        # Convergence with exploitability
-        if exploit_valid is not None and np.any(exploit_valid):
-            conv_result = convergence_step_with_exploitability(
-                effort_series, exploit_series, e_star_val
+
+        # Convergence: prefer the method's OWN verification verdict when the
+        # run recorded one (PPO runners write stop_reason/stopped_at_update —
+        # stop_reason == "exploitability" means the stability screen +
+        # exploitability streak fired; "max_updates" means NC). The effort-band
+        # detectors below remain only as a diagnostic fallback for runs without
+        # a recorded verdict (e.g., the gradient baseline).
+        stop_reason = None
+        if "stop_reason" in group.columns:
+            non_null = group["stop_reason"].dropna()
+            if len(non_null) > 0:
+                stop_reason = str(non_null.iloc[0])
+        stopped_at_update = np.nan
+        if "stopped_at_update" in group.columns:
+            vals = group["stopped_at_update"].dropna()
+            if len(vals) > 0:
+                stopped_at_update = float(vals.iloc[0])
+
+        if method in ("TEL-PPO", "PPO") and stop_reason is not None:
+            converged_flag = stop_reason == "exploitability"
+            convergence_step_val = (
+                int(round(stopped_at_update))
+                if converged_flag and not np.isnan(stopped_at_update)
+                else None
             )
         else:
-            conv_result = convergence_step(effort_series, e_star_val)
-        
+            if exploit_valid is not None and np.any(exploit_valid):
+                conv_result = convergence_step_with_exploitability(
+                    effort_series, exploit_series, e_star_val
+                )
+            else:
+                conv_result = convergence_step(effort_series, e_star_val)
+            converged_flag = conv_result.converged
+            convergence_step_val = conv_result.convergence_step
+
         # Final values
         final_effort = float(effort_series[-1]) if len(effort_series) > 0 else np.nan
         abs_error = abs(final_effort - e_star_val) if not np.isnan(final_effort) else np.nan
@@ -445,14 +477,15 @@ def compute_summary_metrics(df: pd.DataFrame) -> List[SummaryMetrics]:
             q=q,
             seed=seed,
             ablation=ablation,
+            weight_variant=weight_variant,
             final_effort=final_effort,
             theoretical_effort=e_star_val,
             abs_error=abs_error,
             quality=classify_quality(abs_error) if not np.isnan(abs_error) else "Unknown",
             final_exploitability=final_exploitability,
             symmetry_gap=symmetry_gap,
-            converged=conv_result.converged,
-            convergence_step=conv_result.convergence_step,
+            converged=converged_flag,
+            convergence_step=convergence_step_val,
             gate_on_ratio=gate_on_ratio,
             first_gate_step=first_gate_step,
         ))
@@ -470,6 +503,7 @@ def summary_metrics_to_dataframe(metrics: List[SummaryMetrics]) -> pd.DataFrame:
             "q": m.q,
             "seed": m.seed,
             "ablation": m.ablation,
+            "weight_variant": m.weight_variant,
             "final_effort": m.final_effort,
             "theoretical_effort": m.theoretical_effort,
             "abs_error": m.abs_error,

@@ -29,14 +29,12 @@ python -m paper.generator plot convergence_main
 python -m paper.generator plot kl_dynamics
 python -m paper.generator plot exploitability_dynamics
 python -m paper.generator plot beta_evolution
-python -m paper.generator plot beta_snapshots
 python -m paper.generator plot ablation_comparison
 
 # Generate a specific table
 python -m paper.generator table summary_metrics
 python -m paper.generator table ablation_results
 python -m paper.generator table final_summary
-python -m paper.generator table convergence_comparison
 ```
 
 ### CLI Options
@@ -93,14 +91,12 @@ paper/
 │   ├── kl_dynamics.png/pdf         # KL divergence over training
 │   ├── exploitability_dynamics.png/pdf  # Exploitability over training
 │   ├── beta_evolution.png/pdf      # Alpha/beta parameter evolution (2×3 grid)
-│   ├── beta_snapshots.png/pdf      # Beta distribution snapshots
 │   ├── ablation_comparison.png/pdf # Ablation study comparison
 │   └── README.md
 ├── tables/
 │   ├── summary_metrics.csv/tex     # Summary metrics for all runs
 │   ├── ablation_results.csv/tex    # Ablation study results
 │   ├── final_summary.csv/tex       # Final paper comparison table
-│   ├── convergence_comparison.csv/tex  # Convergence comparison across methods
 │   └── README.md
 ├── data/
 │   ├── convergence_main.csv        # Main convergence data

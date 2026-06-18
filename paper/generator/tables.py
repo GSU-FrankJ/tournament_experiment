@@ -184,20 +184,26 @@ def generate_ablation_table(
     metrics = compute_summary_metrics(df)
     metrics_df = summary_metrics_to_dataframe(metrics)
 
-    # Filter to TEL-PPO, two_players experiment only
+    # Filter to TEL-PPO, two_players experiment, Set 1 only (the Fig-7 "full"
+    # arm reuses the Set-1 baseline runs; Set 2 prize variants are excluded)
     ppo_df = metrics_df[metrics_df["method"].isin(["TEL-PPO", "PPO"])].copy()
     if "experiment" in ppo_df.columns:
         ppo_df = ppo_df[ppo_df["experiment"] == "two_players"]
+    if "weight_variant" in ppo_df.columns:
+        ppo_df = ppo_df[ppo_df["weight_variant"] == "baseline"]
 
     if ppo_df.empty:
         print("[tables] Warning: No PPO data for ablation table")
         return None, None
 
-    # Map ablation names to display labels
+    # Map ablation names to display labels (revision-notes terminology)
     ablation_labels = {
-        "baseline": "TEL-PPO (baseline)",
-        "no_cheap_gate": "No stability gate",
-        "no_exploitability": "No exploitability gate",
+        "baseline": "TEL-PPO",
+        "r5_fig7_no_stability": "No stability screening",
+        "r5_fig7_no_exploit": "No exploitability verification",
+        # legacy tags (pre-r5 sweeps), kept for backward compatibility
+        "no_cheap_gate": "No stability screening",
+        "no_exploitability": "No exploitability verification",
         "no_entropy": "+Entropy disabled",
     }
 
@@ -215,8 +221,14 @@ def generate_ablation_table(
 
     # Build table rows
     rows = []
-    # Ensure baseline comes first
-    ablation_order = ["baseline", "no_cheap_gate", "no_exploitability"]
+    # Ensure baseline comes first, then the two r5 component-ablation arms
+    ablation_order = [
+        "baseline",
+        "r5_fig7_no_stability",
+        "r5_fig7_no_exploit",
+        "no_cheap_gate",
+        "no_exploitability",
+    ]
     for abl in ablation_order:
         match = grouped[grouped["ablation"] == abl]
         if match.empty:
@@ -272,9 +284,15 @@ def generate_final_paper_table(
     """
     Generate final summary table for paper (Table 2).
 
-    Columns: Scenario | q | Method | Mean±std | |ē−e*| | Exploitability | Symmetry Gap | Steps to Convergence
+    Columns: Scenario | q | Method | Mean±std | |ē−e*| | Exploitability | Symmetry Gap | Conv. Update (verified)
 
     Covers all experiments. For each scenario/q, shows Theory, Gradient, TEL-PPO.
+
+    "Conv. Update (verified)" is the PPO update at which the method's OWN
+    verification (stability screen + exploitability streak) stopped the run
+    (stop_reason == "exploitability"); runs that hit the budget are NC. The
+    legacy |e−e*|-band detector is NOT used here (it is diagnostic-only; see
+    extract.get_convergence_step).
 
     Returns:
         (csv_path, tex_path)
@@ -286,9 +304,9 @@ def generate_final_paper_table(
     if output_dir is None:
         output_dir = TABLES_DIR
 
-    # Compute convergence steps
-    from .extract import get_convergence_step
-    conv_df = get_convergence_step(df)
+    # Convergence from the method's own verification verdict
+    from .extract import get_verified_convergence_step
+    conv_df = get_verified_convergence_step(df)
 
     rows = []
 
@@ -337,7 +355,7 @@ def generate_final_paper_table(
                 "RelErr": "0.00%",
                 "Exploitability": "0.000",
                 "Symmetry Gap": "0.00",
-                "Steps to Conv.": "-",
+                "Conv. Update (verified)": "-",
             })
 
             # Gradient (baseline ablation only, exclude weight variants)
@@ -358,7 +376,7 @@ def generate_final_paper_table(
                         "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
-                        "Steps to Conv.": "-",
+                        "Conv. Update (verified)": "-",
                     })
 
             # TEL-PPO (baseline ablation)
@@ -367,7 +385,9 @@ def generate_final_paper_table(
                 if not final.empty:
                     effort_mean = final["policy_mean_effort"].mean()
                     effort_std = final["policy_mean_effort"].std() if len(final) > 1 else 0
-                    # Get convergence steps
+                    # Verified convergence: PPO update where the method's own
+                    # verification fired (mean over verified seeds); NC only if
+                    # no seed's verification fired before the budget.
                     conv_match = conv_df[
                         (conv_df["q"] == q)
                         & (conv_df["ablation"] == "baseline")
@@ -375,7 +395,9 @@ def generate_final_paper_table(
                     ]
                     if "experiment" in conv_df.columns:
                         conv_match = conv_match[conv_match["experiment"] == experiment]
-                    mean_conv = conv_match["convergence_step"].dropna().mean()
+                    if "weight_variant" in conv_df.columns:
+                        conv_match = conv_match[conv_match["weight_variant"] == "baseline"]
+                    mean_conv = conv_match["convergence_update"].dropna().mean()
                     conv_str = _format_float(mean_conv, 0) if not np.isnan(mean_conv) else "NC"
 
                     abs_err = final["effort_error"].mean()
@@ -389,7 +411,7 @@ def generate_final_paper_table(
                         "RelErr": f"{rel_err:.2f}%",
                         "Exploitability": _format_float(final.get("exploitability_final", pd.Series([np.nan])).mean(), 3),
                         "Symmetry Gap": _format_float(final["symmetry_gap"].mean(), 2),
-                        "Steps to Conv.": conv_str,
+                        "Conv. Update (verified)": conv_str,
                     })
 
     table_df = pd.DataFrame(rows)
@@ -402,7 +424,15 @@ def generate_final_paper_table(
     tex_path = os.path.join(output_dir, "final_summary.tex")
     latex_str = _to_latex_table(
         table_df,
-        caption="Quantitative summary of equilibrium recovery across all scenarios.",
+        caption=(
+            "Quantitative summary of equilibrium recovery across all scenarios. "
+            "All TEL-PPO and gradient-baseline entries are sampled-training runs "
+            "(r5\\_sampled wave: 5 seeds per cell, $\\varepsilon_{eq}=0.03$, stopping by the "
+            "method's own stability+exploitability verification; gradient = sampled MC-FD "
+            "with common random numbers). Het-ability uses the standard configuration "
+            "(theory-align-v2 rejected on sampled evidence). Launch provenance: "
+            "results/r5\\_sampled/MANIFEST.md; per-cell mapping: paper/PROVENANCE.md."
+        ),
         label="tab:final_summary",
     )
     with open(tex_path, "w") as f:
@@ -411,83 +441,6 @@ def generate_final_paper_table(
     print(f"[tables] Saved final summary to {csv_path}")
     print(f"[tables] Saved final summary to {tex_path}")
 
-    return csv_path, tex_path
-
-
-def generate_convergence_comparison_table(
-    df: pd.DataFrame = None,
-    output_dir: str = None,
-) -> Tuple[str, str]:
-    """
-    Generate convergence comparison table across methods.
-    
-    Shows convergence steps and quality for each (method, q) combination.
-    """
-    ensure_tables_dir()
-    
-    if df is None:
-        df = load_all_convergence_data()
-    if output_dir is None:
-        output_dir = TABLES_DIR
-    
-    metrics = compute_summary_metrics(df)
-    metrics_df = summary_metrics_to_dataframe(metrics)
-    
-    # Pivot table: rows = q, columns = method
-    # Filter to baseline and standard q values only
-    # Use all known q values across experiments
-    all_q = set()
-    for qv in EXPERIMENT_Q_VALUES.values():
-        all_q.update(qv)
-    baseline_df = metrics_df[
-        (metrics_df["ablation"] == "baseline") & (metrics_df["q"].isin(all_q))
-    ].copy()
-    
-    # Group by method and q, average across seeds
-    grouped = baseline_df.groupby(["method", "q"]).agg({
-        "convergence_step": "mean",
-        "abs_error": "mean",
-        "quality": lambda x: x.mode()[0] if len(x.mode()) > 0 else "Unknown",
-    }).reset_index()
-    
-    # Pivot
-    pivot_steps = grouped.pivot(index="q", columns="method", values="convergence_step")
-    pivot_error = grouped.pivot(index="q", columns="method", values="abs_error")
-    pivot_quality = grouped.pivot(index="q", columns="method", values="quality")
-    
-    # Combine into single table
-    table_rows = []
-    for q in sorted(grouped["q"].unique()):
-        row = {"q": q}
-        for method in ["Gradient", "TEL-PPO"]:
-            if method in pivot_steps.columns:
-                steps = pivot_steps.loc[q, method] if q in pivot_steps.index else np.nan
-                error = pivot_error.loc[q, method] if q in pivot_error.index else np.nan
-                quality = pivot_quality.loc[q, method] if q in pivot_quality.index else "N/A"
-                row[f"{method} Conv."] = _format_float(steps, 0)
-                row[f"{method} Gap"] = _format_float(error, 3)
-                row[f"{method} Quality"] = quality
-        table_rows.append(row)
-    
-    table_df = pd.DataFrame(table_rows)
-    
-    # Save CSV
-    csv_path = os.path.join(output_dir, "convergence_comparison.csv")
-    table_df.to_csv(csv_path, index=False)
-    
-    # Save LaTeX
-    tex_path = os.path.join(output_dir, "convergence_comparison.tex")
-    latex_str = _to_latex_table(
-        table_df,
-        caption="Convergence comparison: steps to convergence and final gap for each method.",
-        label="tab:convergence_comparison",
-    )
-    with open(tex_path, 'w') as f:
-        f.write(latex_str)
-    
-    print(f"[tables] Saved convergence comparison to {csv_path}")
-    print(f"[tables] Saved convergence comparison to {tex_path}")
-    
     return csv_path, tex_path
 
 
@@ -594,10 +547,9 @@ def generate_all_tables(
     if paths[0]:
         results["final_summary"] = paths
 
-    # Convergence comparison
-    paths = generate_convergence_comparison_table(df, output_dir)
-    if paths[0]:
-        results["convergence_comparison"] = paths
+    # NOTE: convergence_comparison retired 2026-06-12 — it pooled scenarios
+    # per q (cross-experiment averaging), which is semantically misleading;
+    # per-scenario convergence lives in final_summary ("Conv. Update (verified)").
 
     return results
 
