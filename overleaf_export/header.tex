@@ -1,0 +1,16 @@
+% ---- Custom preamble additions injected by pandoc (-H) ----
+% Map the few non-ASCII symbols that appear in body text so the document
+% compiles under pdfLaTeX (default Overleaf engine) as well as XeLaTeX/LuaLaTeX.
+\usepackage{newunicodechar}
+\newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{−}{\ensuremath{-}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{ē}{\ensuremath{\bar{e}}}
+\newunicodechar{；}{;}
+\newunicodechar{？}{?}
+
+% Figures live in ./figures
+\graphicspath{{figures/}}
