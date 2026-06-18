@@ -233,7 +233,7 @@ take: report eps_eq explicitly as a utility-scale tolerance alongside effort-sca
 (honest two-metric framing), and/or relate eps_eq to an effort-band via the local curvature
 |U''| ~ 2k + (w_H-w_L)/(4q^2) per scenario.
 
-## 6. KNOWN ISSUE (OPEN — fix held pending owner sign-off): ablation leak into convergence_main + 2 tables
+## 6. RESOLVED (2026-06-18): ablation leak into convergence_main + ablation_results (fig7 / eps-pat)
 
 Found 2026-06-18 while refilling hyperparam_sensitivity. Three builders select the "baseline"
 result by `weight_variant` (or no filter) WITHOUT also constraining `ablation == "baseline"`,
@@ -256,10 +256,22 @@ NOT affected (verified): the other 8 figures and `final_summary` all constrain
 is static; `aggregate_seeds`/`get_convergence_step`/metrics grouping all key on ablation.
 Headline rel-err numbers trace to final_summary (e.g. 2P q35 TEL-PPO 43.58±1.25, 4.12%) — safe.
 
-CURRENT STATE: committed convergence_main / summary_metrics / ablation_results are the
-PRE-eps/pat versions (the contaminated `make_all` regen was reverted, not committed); they
-still carry the pre-existing fig7 leak but not the new eps/pat one. **Running `make_all` now
-will re-contaminate them.** The fix (constrain ablation within each weight_variant / table) is
-held pending owner sign-off because it ALSO changes the accepted convergence_main (removes the
-fig7 leak) and the two tables. main.tex is external to this repo — owner must check any
-figure/number sourced from convergence_main, summary_metrics, or ablation_results.
+RESOLUTION (2026-06-18, owner-approved): fix applied to both code paths.
+- `plot_convergence_main`: now constrains `ablation=="baseline"` within each weight-variant
+  row. This is a fig7-LEAK CORRECTION, **NOT a data change** — same underlying r5 runs; the
+  baseline panel simply stops averaging in the non-baseline arms. Effect on convergence_main
+  (PNG md5 `a766b0f9` committed → `a884d748` fixed): the top-row x-axis collapses from the
+  never-terminating `r5_fig7_no_exploit` arm (6.14M steps) back to the true baseline scale —
+  q35 6.14M→279k (22×), q45 6.14M→319k (19×), q55 6.14M→442k (14×); shared y-floor 20.1→24.6
+  as fig7's low drift leaves; top-row curves 3→1, CI bands tighten. Set-2 (bottom) row is
+  byte-identical (only `ablation==baseline` runs exist there).
+- `generate_ablation_table`: drops `eps_*`/`pat_*` sweeps → stays the curated mechanism table
+  (TEL-PPO / No stability screening / No exploitability verification); regenerates identical to
+  the prior committed file.
+- `generate_summary_metrics_table`: left as ALL-RUNS by decision (eps/pat included, 200→305
+  rows) — generator hygiene only, no manuscript impact.
+MANUSCRIPT: the only contaminated artifact in the compiled paper was the Fig 2 image
+(`convergence_main.pdf`); the corrected render was re-exported into `overleaf_export/figures/`.
+No manuscript `.tex` was touched. SEPARATE / OUT OF SCOPE: Tables 3/4 carry stale hand-entered
+numbers (e.g. 44.10/4.30%, pre-r5) — unrelated to this leak; owner handles the r5 number-swap
+later.
