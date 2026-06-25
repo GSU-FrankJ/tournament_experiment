@@ -101,7 +101,11 @@ def main():
     print("\n" + "=" * 100); print("2P DO-NO-HARM (debiased BR): polished must not regress baseline beyond cross-seed σ")
     print("=" * 100)
     for q in (35.0, 55.0):
-        fs = sorted(glob.glob(f"results/two_players/convergence/ppo_q{q}_seed*_r5_sampled_convergence.json"))
+        # Set 1 baseline only (k=0.00055, w_h=6.5, w_l=3.0); exclude Set 2 'wh8_wl4' variant,
+        # which has a DIFFERENT equilibrium and would contaminate the e*=45.45/28.93 comparison.
+        fs = [f for f in sorted(glob.glob(
+            f"results/two_players/convergence/ppo_q{q}_seed*_r5_sampled_convergence.json"))
+            if "wh8_wl4" not in f]
         es = (6.5 - 3.0) / (4 * 0.00055 * q)
         mean_b, mode_b, pol = [], [], []
         for si, f in enumerate(fs):
