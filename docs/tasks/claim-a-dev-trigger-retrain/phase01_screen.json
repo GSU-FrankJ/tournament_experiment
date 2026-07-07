@@ -1,0 +1,698 @@
+{
+  "params": {
+    "k": 0.001,
+    "w_h": 6.5,
+    "w_l": 3.0,
+    "q": 35.0,
+    "e_star": 25.0,
+    "bounds": [
+      0.0,
+      100.0
+    ]
+  },
+  "A1_deterministic_curve": [
+    {
+      "c": 14.0,
+      "gain": 0.11834250000000024,
+      "br": 24.75,
+      "dist": 10.75
+    },
+    {
+      "c": 14.5,
+      "gain": 0.10689249999999939,
+      "br": 24.0,
+      "dist": 9.5
+    },
+    {
+      "c": 15.0,
+      "gain": 0.09815499999999977,
+      "br": 23.75,
+      "dist": 8.75
+    },
+    {
+      "c": 15.5,
+      "gain": 0.09212499999999979,
+      "br": 25.0,
+      "dist": 9.5
+    },
+    {
+      "c": 16.0,
+      "gain": 0.08048750000000027,
+      "br": 25.25,
+      "dist": 9.25
+    },
+    {
+      "c": 16.5,
+      "gain": 0.06977500000000036,
+      "br": 24.25,
+      "dist": 7.75
+    },
+    {
+      "c": 17.0,
+      "gain": 0.0661350000000005,
+      "br": 25.5,
+      "dist": 8.5
+    },
+    {
+      "c": 17.5,
+      "gain": 0.052839999999999776,
+      "br": 24.25,
+      "dist": 6.75
+    },
+    {
+      "c": 18.0,
+      "gain": 0.04972999999999983,
+      "br": 24.5,
+      "dist": 6.5
+    },
+    {
+      "c": 18.5,
+      "gain": 0.04282250000000021,
+      "br": 24.75,
+      "dist": 6.25
+    },
+    {
+      "c": 19.0,
+      "gain": 0.03955499999999912,
+      "br": 25.25,
+      "dist": 6.25
+    },
+    {
+      "c": 19.5,
+      "gain": 0.032647499999999496,
+      "br": 24.5,
+      "dist": 5.0
+    },
+    {
+      "c": 20.0,
+      "gain": 0.02838499999999966,
+      "br": 25.5,
+      "dist": 5.5
+    },
+    {
+      "c": 20.5,
+      "gain": 0.020405000000000673,
+      "br": 25.75,
+      "dist": 5.25
+    },
+    {
+      "c": 21.0,
+      "gain": 0.01807499999999962,
+      "br": 25.0,
+      "dist": 4.0
+    },
+    {
+      "c": 21.5,
+      "gain": 0.013672500000000198,
+      "br": 24.5,
+      "dist": 3.0
+    },
+    {
+      "c": 22.0,
+      "gain": 0.010940000000000616,
+      "br": 24.75,
+      "dist": 2.75
+    },
+    {
+      "c": 22.5,
+      "gain": 0.006535000000000402,
+      "br": 25.25,
+      "dist": 2.75
+    },
+    {
+      "c": 23.0,
+      "gain": 0.0060549999999999216,
+      "br": 25.5,
+      "dist": 2.5
+    },
+    {
+      "c": 23.5,
+      "gain": 0.0043199999999998795,
+      "br": 24.5,
+      "dist": 1.0
+    },
+    {
+      "c": 24.0,
+      "gain": 0.0017175000000002605,
+      "br": 25.0,
+      "dist": 1.0
+    },
+    {
+      "c": 24.5,
+      "gain": 0.0009075000000002831,
+      "br": 25.5,
+      "dist": 1.0
+    },
+    {
+      "c": 25.0,
+      "gain": 0.0009650000000007708,
+      "br": 25.5,
+      "dist": 0.5
+    },
+    {
+      "c": 25.5,
+      "gain": 0.0021100000000000563,
+      "br": 25.75,
+      "dist": 0.25
+    },
+    {
+      "c": 26.0,
+      "gain": 0.005152500000000337,
+      "br": 21.75,
+      "dist": 4.25
+    },
+    {
+      "c": 26.5,
+      "gain": 0.008054999999999701,
+      "br": 21.5,
+      "dist": 5.0
+    },
+    {
+      "c": 27.0,
+      "gain": 0.016152500000000458,
+      "br": 21.0,
+      "dist": 6.0
+    },
+    {
+      "c": 27.5,
+      "gain": 0.020757500000000206,
+      "br": 20.0,
+      "dist": 7.5
+    },
+    {
+      "c": 28.0,
+      "gain": 0.028969999999999274,
+      "br": 19.0,
+      "dist": 9.0
+    }
+  ],
+  "A2_stochastic_backtest": {
+    "seed42": {
+      "trigger_update": 880,
+      "done_update": 959,
+      "n_updates": 960,
+      "checkpoints": [
+        {
+          "update": 150,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.48,
+          "policy_mean": 21.345,
+          "br": 22.7,
+          "dist_br_mean": 1.355
+        },
+        {
+          "update": 300,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.176,
+          "policy_mean": 21.069,
+          "br": 22.7,
+          "dist_br_mean": 1.631
+        },
+        {
+          "update": 450,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.95,
+          "policy_mean": 20.864,
+          "br": 22.5,
+          "dist_br_mean": 1.636
+        },
+        {
+          "update": 600,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.974,
+          "policy_mean": 21.795,
+          "br": 22.2,
+          "dist_br_mean": 0.405
+        },
+        {
+          "update": 750,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.722,
+          "policy_mean": 20.656,
+          "br": 23.9,
+          "dist_br_mean": 3.244
+        },
+        {
+          "update": 880,
+          "is_trigger": true,
+          "kappa": 20.0,
+          "mode": 17.887,
+          "policy_mean": 20.806,
+          "br": 22.5,
+          "dist_br_mean": 1.694
+        }
+      ]
+    },
+    "seed43": {
+      "trigger_update": 1059,
+      "done_update": 1138,
+      "n_updates": 1139,
+      "checkpoints": [
+        {
+          "update": 150,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.719,
+          "policy_mean": 21.562,
+          "br": 23.2,
+          "dist_br_mean": 1.638
+        },
+        {
+          "update": 300,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.762,
+          "policy_mean": 21.602,
+          "br": 22.5,
+          "dist_br_mean": 0.898
+        },
+        {
+          "update": 450,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.334,
+          "policy_mean": 21.213,
+          "br": 23.5,
+          "dist_br_mean": 2.287
+        },
+        {
+          "update": 600,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.389,
+          "policy_mean": 21.262,
+          "br": 22.7,
+          "dist_br_mean": 1.438
+        },
+        {
+          "update": 750,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.736,
+          "policy_mean": 21.578,
+          "br": 22.7,
+          "dist_br_mean": 1.122
+        },
+        {
+          "update": 900,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.269,
+          "policy_mean": 20.245,
+          "br": 24.1,
+          "dist_br_mean": 3.855
+        },
+        {
+          "update": 1050,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.577,
+          "policy_mean": 21.434,
+          "br": 23.7,
+          "dist_br_mean": 2.266
+        },
+        {
+          "update": 1059,
+          "is_trigger": true,
+          "kappa": 20.0,
+          "mode": 17.966,
+          "policy_mean": 20.879,
+          "br": 23.7,
+          "dist_br_mean": 2.821
+        }
+      ]
+    },
+    "seed44": {
+      "trigger_update": 878,
+      "done_update": 957,
+      "n_updates": 962,
+      "checkpoints": [
+        {
+          "update": 150,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 19.853,
+          "policy_mean": 22.594,
+          "br": 21.7,
+          "dist_br_mean": 0.894
+        },
+        {
+          "update": 300,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.954,
+          "policy_mean": 20.867,
+          "br": 22.6,
+          "dist_br_mean": 1.733
+        },
+        {
+          "update": 450,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.524,
+          "policy_mean": 21.385,
+          "br": 23.3,
+          "dist_br_mean": 1.915
+        },
+        {
+          "update": 600,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.05,
+          "policy_mean": 20.955,
+          "br": 22.7,
+          "dist_br_mean": 1.745
+        },
+        {
+          "update": 750,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.841,
+          "policy_mean": 20.765,
+          "br": 23.6,
+          "dist_br_mean": 2.835
+        },
+        {
+          "update": 878,
+          "is_trigger": true,
+          "kappa": 20.0,
+          "mode": 18.79,
+          "policy_mean": 21.627,
+          "br": 23.1,
+          "dist_br_mean": 1.473
+        }
+      ]
+    },
+    "seed45": {
+      "trigger_update": 877,
+      "done_update": 956,
+      "n_updates": 957,
+      "checkpoints": [
+        {
+          "update": 150,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.94,
+          "policy_mean": 21.764,
+          "br": 23.7,
+          "dist_br_mean": 1.936
+        },
+        {
+          "update": 300,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.699,
+          "policy_mean": 21.545,
+          "br": 21.8,
+          "dist_br_mean": 0.255
+        },
+        {
+          "update": 450,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.075,
+          "policy_mean": 20.978,
+          "br": 22.7,
+          "dist_br_mean": 1.722
+        },
+        {
+          "update": 600,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.847,
+          "policy_mean": 21.679,
+          "br": 23.8,
+          "dist_br_mean": 2.121
+        },
+        {
+          "update": 750,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.154,
+          "policy_mean": 21.049,
+          "br": 23.5,
+          "dist_br_mean": 2.451
+        },
+        {
+          "update": 877,
+          "is_trigger": true,
+          "kappa": 20.0,
+          "mode": 18.24,
+          "policy_mean": 21.128,
+          "br": 24.2,
+          "dist_br_mean": 3.072
+        }
+      ]
+    },
+    "seed46": {
+      "trigger_update": null,
+      "done_update": null,
+      "n_updates": 1500,
+      "checkpoints": [
+        {
+          "update": 150,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.953,
+          "policy_mean": 20.866,
+          "br": 22.5,
+          "dist_br_mean": 1.634
+        },
+        {
+          "update": 300,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.996,
+          "policy_mean": 20.905,
+          "br": 24.5,
+          "dist_br_mean": 3.595
+        },
+        {
+          "update": 450,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.572,
+          "policy_mean": 20.52,
+          "br": 23.5,
+          "dist_br_mean": 2.98
+        },
+        {
+          "update": 600,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.526,
+          "policy_mean": 21.387,
+          "br": 23.6,
+          "dist_br_mean": 2.213
+        },
+        {
+          "update": 750,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.155,
+          "policy_mean": 20.141,
+          "br": 22.5,
+          "dist_br_mean": 2.359
+        },
+        {
+          "update": 900,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.912,
+          "policy_mean": 20.829,
+          "br": 23.2,
+          "dist_br_mean": 2.371
+        },
+        {
+          "update": 1050,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 18.762,
+          "policy_mean": 21.602,
+          "br": 22.3,
+          "dist_br_mean": 0.698
+        },
+        {
+          "update": 1200,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.804,
+          "policy_mean": 20.731,
+          "br": 24.4,
+          "dist_br_mean": 3.669
+        },
+        {
+          "update": 1350,
+          "is_trigger": false,
+          "kappa": 20.0,
+          "mode": 17.804,
+          "policy_mean": 20.731,
+          "br": 23.1,
+          "dist_br_mean": 2.369
+        }
+      ]
+    }
+  },
+  "A3_window_calibration": {
+    "seed42": {
+      "triggered": true,
+      "trigger_update": 880,
+      "done_update": 959,
+      "resid_dist_at_trigger": 7.113,
+      "stages": [
+        {
+          "kappa": 20.0,
+          "updates": 19,
+          "vel_per_update": 0.229,
+          "mode_start": 17.039,
+          "mode_end": 21.39
+        },
+        {
+          "kappa": 50.0,
+          "updates": 20,
+          "vel_per_update": 0.048,
+          "mode_start": 21.39,
+          "mode_end": 22.351
+        },
+        {
+          "kappa": 100.0,
+          "updates": 20,
+          "vel_per_update": 0.0061,
+          "mode_start": 22.351,
+          "mode_end": 22.472
+        },
+        {
+          "kappa": 200.0,
+          "updates": 20,
+          "vel_per_update": -0.0024,
+          "mode_start": 22.472,
+          "mode_end": 22.425
+        }
+      ],
+      "max_vel_per_update": 0.229,
+      "implied_hold_to_close_resid": 31.1
+    },
+    "seed43": {
+      "triggered": true,
+      "trigger_update": 1059,
+      "done_update": 1138,
+      "resid_dist_at_trigger": 7.034,
+      "stages": [
+        {
+          "kappa": 20.0,
+          "updates": 19,
+          "vel_per_update": 0.0681,
+          "mode_start": 17.335,
+          "mode_end": 18.629
+        },
+        {
+          "kappa": 50.0,
+          "updates": 20,
+          "vel_per_update": 0.0649,
+          "mode_start": 18.629,
+          "mode_end": 19.926
+        },
+        {
+          "kappa": 100.0,
+          "updates": 20,
+          "vel_per_update": 0.0796,
+          "mode_start": 19.926,
+          "mode_end": 21.517
+        },
+        {
+          "kappa": 200.0,
+          "updates": 20,
+          "vel_per_update": 0.0601,
+          "mode_start": 21.517,
+          "mode_end": 22.719
+        }
+      ],
+      "max_vel_per_update": 0.0796,
+      "implied_hold_to_close_resid": 88.4
+    },
+    "seed44": {
+      "triggered": true,
+      "trigger_update": 878,
+      "done_update": 957,
+      "resid_dist_at_trigger": 6.21,
+      "stages": [
+        {
+          "kappa": 20.0,
+          "updates": 19,
+          "vel_per_update": -0.066,
+          "mode_start": 21.246,
+          "mode_end": 19.992
+        },
+        {
+          "kappa": 50.0,
+          "updates": 20,
+          "vel_per_update": 0.1483,
+          "mode_start": 19.992,
+          "mode_end": 22.957
+        },
+        {
+          "kappa": 100.0,
+          "updates": 20,
+          "vel_per_update": 0.1267,
+          "mode_start": 22.957,
+          "mode_end": 25.491
+        },
+        {
+          "kappa": 200.0,
+          "updates": 20,
+          "vel_per_update": 0.0756,
+          "mode_start": 25.491,
+          "mode_end": 27.004
+        }
+      ],
+      "max_vel_per_update": 0.1483,
+      "implied_hold_to_close_resid": 41.9
+    },
+    "seed45": {
+      "triggered": true,
+      "trigger_update": 877,
+      "done_update": 956,
+      "resid_dist_at_trigger": 6.76,
+      "stages": [
+        {
+          "kappa": 20.0,
+          "updates": 19,
+          "vel_per_update": 0.0785,
+          "mode_start": 19.267,
+          "mode_end": 20.758
+        },
+        {
+          "kappa": 50.0,
+          "updates": 20,
+          "vel_per_update": 0.0827,
+          "mode_start": 20.758,
+          "mode_end": 22.412
+        },
+        {
+          "kappa": 100.0,
+          "updates": 20,
+          "vel_per_update": 0.011,
+          "mode_start": 22.412,
+          "mode_end": 22.632
+        },
+        {
+          "kappa": 200.0,
+          "updates": 20,
+          "vel_per_update": -0.1029,
+          "mode_start": 22.632,
+          "mode_end": 20.574
+        }
+      ],
+      "max_vel_per_update": 0.0827,
+      "implied_hold_to_close_resid": 81.7
+    },
+    "seed46": {
+      "triggered": false
+    }
+  }
+}

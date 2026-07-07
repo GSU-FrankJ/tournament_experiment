@@ -624,7 +624,37 @@ def run_ppo(
     theory_align_v2_var_coef_start = float(cfg.get("theory_align_v2_var_coef_start", theory_align_v2_var_coef))
     theory_align_v2_ramp_warmup = int(cfg.get("theory_align_v2_ramp_warmup", 0))
     theory_align_v2_ramp_steps = int(cfg.get("theory_align_v2_ramp_steps", 0))
-    
+
+    # Component-2 mode-conc ramp settings (exploitability-triggered κ ramp)
+    mode_conc_ramp_enabled = bool(cfg.get("mode_conc_ramp", False))
+    kappa_schedule = [float(x) for x in cfg.get("kappa_schedule", [20.0, 50.0, 100.0, 200.0])]
+    ramp_trigger_exp = float(cfg.get("ramp_trigger_exp", 0.05))
+    ramp_trigger_patience = int(cfg.get("ramp_trigger_patience", 3))
+    kappa_stage_hold = int(cfg.get("kappa_stage_hold", 20))
+    kappa_explore_min = float(cfg.get("mode_conc_kappa_min", 1.0))
+    kappa_explore_max = float(cfg.get("mode_conc_kappa_max", 20.0))
+
+    # Claim-A κ-continuation settings (kinematic-convergence-gated ladder with
+    # adaptive batch; distinct from the Component-2 gain-triggered ramp above)
+    continuation_enabled = bool(cfg.get("kappa_continuation", False))
+    cont_ladder = [float(x) for x in cfg.get("continuation_ladder",
+                                             [20.0, 35.0, 60.0, 100.0, 200.0, 400.0])]
+    cont_batches = [int(x) for x in cfg.get("continuation_batch",
+                                            [16384, 16384, 16384, 65536, 65536, 65536])]
+    if continuation_enabled and len(cont_batches) != len(cont_ladder):
+        raise ValueError(f"--continuation-batch needs {len(cont_ladder)} entries "
+                         f"(one per ladder stage), got {len(cont_batches)}")
+    cont_conv_tau = float(cfg.get("cont_conv_tau", 0.3))
+    cont_conv_window = int(cfg.get("cont_conv_window", 30))
+    cont_min_hold = int(cfg.get("cont_min_hold", 60))
+    cont_max_hold = int(cfg.get("cont_max_hold", 250))
+    cont_explore_min = int(cfg.get("cont_explore_min", 200))
+    cont_lr = float(cfg.get("cont_lr", 3e-4))
+    cont_entropy_coef = float(cfg.get("cont_entropy_coef", 0.02))
+    cont_done_exploit_every = int(cfg.get("cont_done_exploit_every", 3))
+    if mode_conc_ramp_enabled and continuation_enabled:
+        raise ValueError("--mode-conc-ramp and --kappa-continuation are mutually exclusive")
+
     # PPO agent configuration (simplified for self-play)
     ppo_cfg = PPOConfig(
         steps_per_update=int(cfg.get("steps_per_update", 4096)),
@@ -644,6 +674,11 @@ def run_ppo(
         theory_align_v2_conc_min=theory_align_v2_conc_min,
         theory_align_v2_conc_scale=theory_align_v2_conc_scale,
         theory_align_v2_conc_max=theory_align_v2_conc_max,
+        mode_conc_ramp=mode_conc_ramp_enabled,
+        kappa_continuation=continuation_enabled,
+        mode_conc_kappa_min=kappa_explore_min,
+        mode_conc_kappa_scale=float(cfg.get("mode_conc_kappa_scale", 1.0)),
+        mode_conc_kappa_max=kappa_explore_max,
         # Pass through stability parameters from config
         gamma=float(cfg.get("gamma", 0.99)),
         gae_lambda=float(cfg.get("gae_lambda", 0.95)),
@@ -721,6 +756,56 @@ def run_ppo(
     min_updates = int(cfg.get("min_updates", 0))
     last_exploit_eval_step = -999999
     exploit_every_updates = int(cfg.get("exploit_every_updates", 10))
+
+    # Component-2 mode-conc ramp state machine. Phases:
+    #   "explore"  — κ pinned [kappa_explore_min, kappa_explore_max], entropy-driven;
+    #                policy mean free to climb. Normal exploit-stop SUPPRESSED here.
+    #   "ramping"  — after EXP_raw < ramp_trigger_exp for ramp_trigger_patience
+    #                consecutive in-loop evals, walk κ through kappa_schedule,
+    #                kappa_stage_hold updates per stage (κ pinned min=max=stage).
+    #   "done"     — final stage (κ=κ_max) reached; hand off to the normal
+    #                exploitability stop (eps_eq=0.03, patience 5).
+    # Only active when mode_conc_ramp_enabled; otherwise a no-op ("disabled").
+    ramp_phase = "explore" if mode_conc_ramp_enabled else "disabled"
+    ramp_trigger_streak = 0
+    ramp_stage_idx = -1
+    ramp_stage_entered_update = None
+    if mode_conc_ramp_enabled:
+        print(
+            f"[Component-2] mode-conc ramp enabled: explore κ∈[{kappa_explore_min:g},"
+            f"{kappa_explore_max:g}], trigger EXP_raw<{ramp_trigger_exp:g}×{ramp_trigger_patience}, "
+            f"schedule={kappa_schedule}, stage_hold={kappa_stage_hold}",
+            flush=True,
+        )
+
+    # Claim-A κ-continuation state machine. Phases:
+    #   "explore" — κ free in [kappa_explore_min, kappa_explore_max], base batch,
+    #               normal schedules. Advance via the kinematic gate after
+    #               cont_explore_min updates.
+    #   "ladder"  — κ pinned min=max=cont_ladder[stage]; batch/minibatch scaled to
+    #               cont_batches[stage]; lr/entropy pinned (cont_lr/cont_entropy).
+    #               Advance stage when |mean(mode last W) − mean(mode prior W)| <
+    #               cont_conv_tau (W=cont_conv_window) after cont_min_hold updates;
+    #               forced advance at cont_max_hold (logged, counts against pilot).
+    #   "done"    — top κ reached + converged; normal exploit-stop takes over
+    #               (in-loop eval every cont_done_exploit_every updates).
+    # Stop is SUPPRESSED until "done". No payoff-gain trigger, no clock, no
+    # analytic e* anywhere in the gate (mode history is a policy statistic).
+    cont_phase = "explore" if continuation_enabled else "disabled"
+    cont_stage_idx = -1
+    cont_stage_entered_update = 0
+    cont_forced_advances = 0
+    base_steps_per_update = int(ppo_cfg.steps_per_update)
+    base_minibatch_size = int(ppo_cfg.minibatch_size)
+    if continuation_enabled:
+        print(
+            f"[Claim-A cont] κ-continuation enabled: explore κ∈[{kappa_explore_min:g},"
+            f"{kappa_explore_max:g}] (min {cont_explore_min} upd), ladder={cont_ladder}, "
+            f"batches={cont_batches}, gate |Δmode|<{cont_conv_tau:g} over "
+            f"W={cont_conv_window} (hold {cont_min_hold}-{cont_max_hold}), "
+            f"ladder lr={cont_lr:g} entropy={cont_entropy_coef:g}",
+            flush=True,
+        )
     # Ablation toggles (Fig. 7): each verification component is independently
     # disable-able. disable_cheap_gate => stability screen always passes;
     # disable_exploitability => exploitability is never evaluated (run goes to
@@ -760,6 +845,13 @@ def run_ppo(
         "batch_entropy": [],
         "alpha_mean": [],
         "beta_mean": [],
+        # Component-2 diagnostics (mode is diagnostic-only; headline effort = mean)
+        "mode_effort": [],
+        "kappa": [],
+        "ramp_phase": [],
+        # Claim-A κ-continuation diagnostics
+        "cont_phase": [],
+        "batch_size": [],
         "mean_kl_window": [],
         "drift_effort": [],
         # Exploitability: sparse (NaN when not evaluated this update)
@@ -804,6 +896,30 @@ def run_ppo(
                 agent.opponent_policy.conc_scale = float(conc_scale)
             agent.cfg.theory_align_v2_var_coef = float(var_coef)
 
+        # Component-2: advance the κ ramp stage and pin the net's κ range. The
+        # trigger (explore -> ramping) happens after the exploitability eval
+        # below; here we only handle stage timing once "ramping"/"done".
+        if ramp_phase == "ramping":
+            if ramp_stage_entered_update is None:
+                ramp_stage_entered_update = update_idx
+            if update_idx - ramp_stage_entered_update >= kappa_stage_hold:
+                if ramp_stage_idx + 1 >= len(kappa_schedule):
+                    ramp_phase = "done"  # final stage reached; normal stop takes over
+                    print(f"[Component-2] κ ramp complete at κ={kappa_schedule[-1]:g} "
+                          f"(update {update_idx}); normal exploit-stop now active.", flush=True)
+                else:
+                    ramp_stage_idx += 1
+                    ramp_stage_entered_update = update_idx
+                    print(f"[Component-2] κ ramp -> stage {ramp_stage_idx} "
+                          f"(κ={kappa_schedule[ramp_stage_idx]:g}) at update {update_idx}.", flush=True)
+        if ramp_phase in ("ramping", "done"):
+            stage_kappa = float(kappa_schedule[max(0, ramp_stage_idx)])
+            agent.net.kappa_min = stage_kappa
+            agent.net.kappa_max = stage_kappa
+        elif ramp_phase == "explore":
+            agent.net.kappa_min = kappa_explore_min
+            agent.net.kappa_max = kappa_explore_max
+
         # Update entropy schedule
         if update_idx < hold_updates:
             if hold_updates > 1:
@@ -835,7 +951,58 @@ def run_ppo(
             lr_base = lr_hold + (lr_final - lr_hold) * lr_tail_progress
         for g in agent.opt.param_groups:
             g["lr"] = lr_base
-        
+
+        # Claim-A κ-continuation: kinematic gate + stage transitions + pinning.
+        # Runs AFTER the schedule assignments above so ladder pins override them.
+        if cont_phase in ("explore", "ladder"):
+            mode_hist = convergence_history["mode_effort"]
+            stage_len = update_idx - cont_stage_entered_update
+            w = cont_conv_window
+            min_hold = cont_explore_min if cont_phase == "explore" else cont_min_hold
+            gate_ready = stage_len >= max(min_hold, 2 * w) and len(mode_hist) >= 2 * w
+            converged_here = False
+            if gate_ready:
+                recent = float(np.mean(mode_hist[-w:]))
+                prior = float(np.mean(mode_hist[-2 * w:-w]))
+                converged_here = abs(recent - prior) < cont_conv_tau
+            forced = cont_phase == "ladder" and stage_len >= cont_max_hold
+            if converged_here or forced:
+                if forced and not converged_here:
+                    cont_forced_advances += 1
+                    print(f"[Claim-A cont] FORCED advance at update {update_idx} "
+                          f"(stage κ={cont_ladder[cont_stage_idx]:g} not converged "
+                          f"within {cont_max_hold} updates).", flush=True)
+                if cont_stage_idx + 1 >= len(cont_ladder):
+                    cont_phase = "done"
+                    print(f"[Claim-A cont] ladder complete at κ="
+                          f"{cont_ladder[-1]:g} (update {update_idx}); normal "
+                          f"exploit-stop now active (eval every "
+                          f"{cont_done_exploit_every} updates).", flush=True)
+                else:
+                    cont_phase = "ladder"
+                    cont_stage_idx += 1
+                    cont_stage_entered_update = update_idx
+                    print(f"[Claim-A cont] advance -> stage {cont_stage_idx} "
+                          f"(κ={cont_ladder[cont_stage_idx]:g}, batch="
+                          f"{cont_batches[cont_stage_idx]}) at update {update_idx} "
+                          f"({'forced' if forced and not converged_here else 'gate'}).",
+                          flush=True)
+        if cont_phase in ("ladder", "done"):
+            stage_kappa = float(cont_ladder[max(0, cont_stage_idx)])
+            stage_batch = int(cont_batches[max(0, cont_stage_idx)])
+            agent.net.kappa_min = stage_kappa
+            agent.net.kappa_max = stage_kappa
+            agent.cfg.steps_per_update = stage_batch
+            agent.cfg.minibatch_size = max(
+                base_minibatch_size,
+                base_minibatch_size * (stage_batch // max(1, base_steps_per_update)))
+            agent.cfg.entropy_coef = cont_entropy_coef
+            for g in agent.opt.param_groups:
+                g["lr"] = cont_lr
+        elif cont_phase == "explore":
+            agent.net.kappa_min = kappa_explore_min
+            agent.net.kappa_max = kappa_explore_max
+
         # Collect rollout
         steps_this = min(ppo_cfg.steps_per_update, total_steps_target - steps_done)
 
@@ -912,8 +1079,19 @@ def run_ppo(
         theoretical_e = e_star_three_players(float(train_qs[0]), w_h, w_l, k)
         with torch.no_grad():
             _dist, _ = agent.dist(test_state)
-            _alpha_mean = float(_dist.concentration1.mean().item())
-            _beta_mean = float(_dist.concentration0.mean().item())
+            _alpha = _dist.concentration1
+            _beta = _dist.concentration0
+            _alpha_mean = float(_alpha.mean().item())
+            _beta_mean = float(_beta.mean().item())
+            # Diagnostic only (Component-2): Beta MODE mapped to effort bounds.
+            # Headline effort stays the MEAN (policy_mean_effort); at high κ the
+            # two coincide. mode = (α-1)/(α+β-2) for α,β>1, else boundary.
+            _denom = _alpha + _beta - 2.0
+            _mode01 = torch.where(_denom > 1e-8, (_alpha - 1.0) / _denom,
+                                  torch.full_like(_denom, 0.5))
+            _mode01 = torch.clamp(_mode01, 0.0, 1.0)
+            _lo, _hi = effort_bounds
+            _mode_effort = float((_lo + _mode01 * (_hi - _lo)).mean().item())
 
         # Update convergence tracker
         if cheap_tracker is not None:
@@ -929,6 +1107,13 @@ def run_ppo(
         convergence_history["batch_entropy"].append(metrics.get("batch_entropy", 0.0))
         convergence_history["alpha_mean"].append(_alpha_mean)
         convergence_history["beta_mean"].append(_beta_mean)
+        convergence_history["mode_effort"].append(_mode_effort)
+        convergence_history["kappa"].append(
+            float(getattr(agent.net, "kappa_max", float("nan")))
+            if (mode_conc_ramp_enabled or continuation_enabled) else float("nan"))
+        convergence_history["ramp_phase"].append(ramp_phase)
+        convergence_history["cont_phase"].append(cont_phase)
+        convergence_history["batch_size"].append(int(agent.cfg.steps_per_update))
         convergence_history["mean_kl_window"].append(float("nan"))
         convergence_history["drift_effort"].append(float("nan"))
         convergence_history["exploitability"].append(float("nan"))
@@ -982,7 +1167,11 @@ def run_ppo(
 
             # Determine whether to run exploitability evaluation
             steps_since_last_exploit = update_idx - last_exploit_eval_step
-            periodic_due = steps_since_last_exploit >= exploit_every_updates
+            # Claim-A continuation "done": each update is ~16x cost, so evaluate
+            # more often to confirm the stop streak without burning budget.
+            effective_exploit_every = (cont_done_exploit_every
+                                       if cont_phase == "done" else exploit_every_updates)
+            periodic_due = steps_since_last_exploit >= effective_exploit_every
             gate_triggered = drift_pass and drift_ok_streak >= patience_drift
             # Ablation: --disable-exploitability never evaluates (run goes to budget)
             if disable_exploitability:
@@ -1029,12 +1218,38 @@ def run_ppo(
                     f"candidates={exploit_res.get('num_candidates', 'NA')}",
                     flush=True,
                 )
+
+                # Component-2: fire the κ ramp once raw exploitability is low for
+                # ramp_trigger_patience consecutive in-loop evals (EXP_raw is this
+                # exploitability_val — the same sampled deviation gain, at explore κ).
+                if ramp_phase == "explore":
+                    if exploitability_val < ramp_trigger_exp:
+                        ramp_trigger_streak += 1
+                    else:
+                        ramp_trigger_streak = 0
+                    if ramp_trigger_streak >= ramp_trigger_patience:
+                        ramp_phase = "ramping"
+                        ramp_stage_idx = 0
+                        ramp_stage_entered_update = update_idx
+                        print(
+                            f"[Component-2] ramp TRIGGERED at update {update_idx} "
+                            f"(EXP_raw<{ramp_trigger_exp:g} ×{ramp_trigger_streak}); "
+                            f"entering stage 0 (κ={kappa_schedule[0]:g}).",
+                            flush=True,
+                        )
+
                 if exploitability_val < exploit_eps:
                     exploit_ok_streak += 1
                 else:
                     exploit_ok_streak = 0
                     drift_ok_streak = 0  # reset cheap gate streak on failure
-                if exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
+                # Component-2: suppress the normal exploit-stop until the κ ramp
+                # has reached its final stage — stopping mid-explore would freeze
+                # the wide, undershooting low-κ policy this retrain aims to sharpen.
+                # Claim-A continuation: same suppression until the ladder is done.
+                ramp_allows_stop = (ramp_phase in ("disabled", "done")
+                                    and cont_phase in ("disabled", "done"))
+                if ramp_allows_stop and exploit_ok_streak >= int(exploit_cfg.get("patience_exploit", 5)):
                     if update_idx < min_updates:
                         print(
                             f"[Convergence] Exploitability streak satisfied at upd={update_idx}, "
@@ -1181,6 +1396,22 @@ def run_ppo(
                 "disable_cheap_gate": disable_cheap_gate,
                 "disable_exploitability": disable_exploitability,
             },
+            # Claim-A κ-continuation config + outcome (None when disabled)
+            "continuation_config": ({
+                "ladder": cont_ladder,
+                "batches": cont_batches,
+                "conv_tau": cont_conv_tau,
+                "conv_window": cont_conv_window,
+                "min_hold": cont_min_hold,
+                "max_hold": cont_max_hold,
+                "explore_min": cont_explore_min,
+                "cont_lr": cont_lr,
+                "cont_entropy_coef": cont_entropy_coef,
+                "done_exploit_every": cont_done_exploit_every,
+                "forced_advances": cont_forced_advances,
+                "final_phase": cont_phase,
+                "final_stage_idx": cont_stage_idx,
+            } if continuation_enabled else None),
             **convergence_history,
         }
         
@@ -1295,6 +1526,41 @@ def _run_cli(args: argparse.Namespace) -> str:
     if hasattr(args, 'min_updates') and args.min_updates > 0:
         cfg["min_updates"] = int(args.min_updates)
         print(f"[config] min_updates: {args.min_updates}", flush=True)
+
+    # Component-2 mode-conc ramp (exploitability-triggered κ ramp)
+    if getattr(args, 'mode_conc_ramp', False):
+        cfg["mode_conc_ramp"] = True
+        cfg["kappa_schedule"] = [float(x) for x in str(args.kappa_schedule).split(",")]
+        cfg["ramp_trigger_exp"] = float(args.ramp_trigger_exp)
+        cfg["ramp_trigger_patience"] = int(args.ramp_trigger_patience)
+        cfg["kappa_stage_hold"] = int(args.kappa_stage_hold)
+        # Explore-phase κ range = [1, first stage]; stages pin κ_min=κ_max=stage.
+        cfg["mode_conc_kappa_min"] = 1.0
+        cfg["mode_conc_kappa_max"] = float(cfg["kappa_schedule"][0])
+        print(f"[config] --mode-conc-ramp: schedule={cfg['kappa_schedule']} "
+              f"trigger EXP_raw<{cfg['ramp_trigger_exp']}×{cfg['ramp_trigger_patience']} "
+              f"stage_hold={cfg['kappa_stage_hold']}", flush=True)
+
+    # Claim-A κ-continuation (kinematic-gated ladder + adaptive batch)
+    if getattr(args, 'kappa_continuation', False):
+        cfg["kappa_continuation"] = True
+        cfg["continuation_ladder"] = [float(x) for x in str(args.continuation_ladder).split(",")]
+        cfg["continuation_batch"] = [int(x) for x in str(args.continuation_batch).split(",")]
+        cfg["cont_conv_tau"] = float(args.cont_conv_tau)
+        cfg["cont_conv_window"] = int(args.cont_conv_window)
+        cfg["cont_min_hold"] = int(args.cont_min_hold)
+        cfg["cont_max_hold"] = int(args.cont_max_hold)
+        cfg["cont_explore_min"] = int(args.cont_explore_min)
+        cfg["cont_lr"] = float(args.cont_lr)
+        cfg["cont_entropy_coef"] = float(args.cont_entropy_coef)
+        cfg["cont_done_exploit_every"] = int(args.cont_done_exploit_every)
+        # Explore-phase κ range = [1, first ladder stage]
+        cfg["mode_conc_kappa_min"] = 1.0
+        cfg["mode_conc_kappa_max"] = float(cfg["continuation_ladder"][0])
+        print(f"[config] --kappa-continuation: ladder={cfg['continuation_ladder']} "
+              f"batches={cfg['continuation_batch']} gate |Δmode|<{cfg['cont_conv_tau']} "
+              f"W={cfg['cont_conv_window']} hold {cfg['cont_min_hold']}-{cfg['cont_max_hold']} "
+              f"explore_min={cfg['cont_explore_min']}", flush=True)
 
     # --disable-adv-norm: skip advantage normalization
     if hasattr(args, 'disable_adv_norm') and args.disable_adv_norm:
@@ -1462,6 +1728,88 @@ def main():
         help="Minimum updates before exploitability-based early stop is allowed. "
              "0 = no minimum (default).",
     )
+
+    # Component-2: mode-conc head + exploitability-triggered concentration ramp
+    parser.add_argument(
+        "--mode-conc-ramp",
+        action="store_true",
+        help="Enable Component-2: mode-concentration policy head (α,β≥1) + an "
+             "exploitability-triggered κ ramp. Distinct code path from "
+             "--theory-align-v2. Tests whether PPO's own output reaches e* (Claim A).",
+    )
+    parser.add_argument(
+        "--kappa-schedule",
+        type=str,
+        default="20,50,100,200",
+        help="Comma-separated κ stages walked after the ramp triggers "
+             "(default: 20,50,100,200).",
+    )
+    parser.add_argument(
+        "--ramp-trigger-exp",
+        type=float,
+        default=0.05,
+        help="Raw exploitability threshold that (for --ramp-trigger-patience "
+             "consecutive in-loop evals) fires the κ ramp (default: 0.05).",
+    )
+    parser.add_argument(
+        "--ramp-trigger-patience",
+        type=int,
+        default=3,
+        help="Consecutive in-loop evals with EXP_raw below --ramp-trigger-exp "
+             "required to fire the ramp (default: 3, guards against transient dips).",
+    )
+    parser.add_argument(
+        "--kappa-stage-hold",
+        type=int,
+        default=20,
+        help="Updates held at each κ stage before advancing (default: 20).",
+    )
+
+    # Claim-A κ-continuation: kinematic-convergence-gated κ ladder + adaptive batch
+    parser.add_argument(
+        "--kappa-continuation",
+        action="store_true",
+        help="Enable Claim-A κ-continuation: ModeConc head + a κ ladder advanced by a "
+             "kinematic convergence gate (|Δmode| over a window), with per-stage "
+             "enlarged batch to shrink the plateau diffusion band. Mutually exclusive "
+             "with --mode-conc-ramp.",
+    )
+    parser.add_argument(
+        "--continuation-ladder",
+        type=str,
+        default="20,35,60,100,200,400",
+        help="Comma-separated κ ladder stages (default: 20,35,60,100,200,400).",
+    )
+    parser.add_argument(
+        "--continuation-batch",
+        type=str,
+        default="16384,16384,16384,65536,65536,65536",
+        help="Comma-separated steps_per_update per ladder stage (parallel to "
+             "--continuation-ladder). Minibatch is scaled proportionally so the "
+             "grad-step count per update stays constant.",
+    )
+    parser.add_argument("--cont-conv-tau", type=float, default=0.3,
+                        help="Kinematic gate: |mean(mode last W) − mean(mode prior W)| "
+                             "threshold in effort units (default: 0.3).")
+    parser.add_argument("--cont-conv-window", type=int, default=30,
+                        help="Kinematic gate window W in updates (default: 30).")
+    parser.add_argument("--cont-min-hold", type=int, default=60,
+                        help="Minimum updates per ladder stage (default: 60; the gate "
+                             "also needs 2W samples).")
+    parser.add_argument("--cont-max-hold", type=int, default=250,
+                        help="Forced stage advance after this many updates (default: "
+                             "250; logged, counts against the pilot gate).")
+    parser.add_argument("--cont-explore-min", type=int, default=200,
+                        help="Minimum explore updates before the ladder may start "
+                             "(default: 200).")
+    parser.add_argument("--cont-lr", type=float, default=3e-4,
+                        help="lr pinned during ladder+done (default: 3e-4, the value "
+                             "at which c2's healthy ramp segments were measured).")
+    parser.add_argument("--cont-entropy-coef", type=float, default=0.02,
+                        help="entropy_coef pinned during ladder+done (default: 0.02).")
+    parser.add_argument("--cont-done-exploit-every", type=int, default=3,
+                        help="In-loop exploitability eval interval during done "
+                             "(default: 3; each done update is ~16x cost).")
 
     # Convergence evaluation
     parser.add_argument(

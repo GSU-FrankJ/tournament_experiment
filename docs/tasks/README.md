@@ -23,6 +23,9 @@ docs/tasks/{task-name}/
 
 | Task | Status | Description |
 |------|--------|-------------|
+| `component2-mode-conc-retrain` | complete | Claim-A test #1: mode-conc head + gain-triggered κ ramp (negative result) |
+| `claim-a-dev-trigger-retrain` | complete | Claim-A test #2: Phase-A zero-GPU screen; closed at Gate A (owner → branch ii) |
+| `claim-a-nonlocking-continuation` | in-progress | Claim-A test #3: kill overruled by owner → adaptive-batch κ-continuation; 1-seed pilot running |
 | `runner-refactor` | in-progress | Extract shared logic across the 4 experiment runners |
 | `perfect-exploitability-figure` | in-progress | Fix exploitability_dynamics figure and related artifacts |
 | `diagnose-all-experiments` | complete | Diagnostic analysis of three_players, different_cost, different_ability |
