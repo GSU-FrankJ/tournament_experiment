@@ -27,6 +27,87 @@ Last updated: 2026-07-07
 - Details + per-seed table: `docs/tasks/claim-a-nonlocking-continuation/STATE.md`.
   Data: `results/three_players/convergence/ppo_3p_q35.0_seed{42..47}_c3_cont_convergence.json`.
 
+## Phase-0 response doc audit + corrections (2026-07-02)
+
+- Audited `docs/phase0_response_to_revision_plan.md` against code, convergence JSONs,
+  `results/phase0_verify_20260701_1941.log`, theory formulas, and git history. All §3/§6.3
+  numbers, Finding A/B values, attribution finding, and provenance claims verified correct.
+- **Corrected 4 issues found by the audit** (doc + upstream sources, no result files touched):
+  1. §6.4 mechanism ("κ ramp freezes the mean at trigger") was contradicted by the stored
+     mode/mean trajectories — mode moved +2.7..+7.2 units toward e* after trigger. Rewritten
+     as "premature trigger + fixed-length ramp window too short; per-seed travel variance is
+     the 6.5x std source". Same fix in `SESSION_STATE.md` and
+     `docs/tasks/component2-mode-conc-retrain/STATE.md` (old wording RETRACTED, do not resurrect).
+  2. Leg (c) description: implementation is `drift<0.1 OR within-trajectory SE<0.1`
+     (`tools/phase0_verify.py:45`), not "cross-seed SE"; 4/6 cells passed via the SE branch.
+     Fixed in response doc §3, `SESSION_STATE.md` §B, and the verify script docstring
+     (comment only — criterion code untouched).
+  3. §6.2 flag count: 4 companion flags (incl. `--kappa-schedule`), not 3.
+  4. Finding A max|mean−mode|: 0.19–0.30 per run (at conc≈210–270), not flat 0.20.
+- Known issue: leg (c) as implemented is a weak sanity check (SE branch nearly always passes);
+  acceptance weight rests on legs (a)+(b). Documented, not changed.
+- Next: owner decision on Claim B framing (response doc §7); if Claim A is still pursued,
+  a redesigned retrain (longer/slower ramp or effort-proximity trigger) needs new authorization.
+
+## Claim-A dev-trigger retrain — Phase A screen (2026-07-02)
+
+- New task `docs/tasks/claim-a-dev-trigger-retrain/` for a redesigned Claim-A attempt
+  (replace the trigger observable: payoff-gain → best-response distance).
+- **Phase A (zero-GPU screen, `tools/claim_a_phase_a_screen.py`) complete.** Findings:
+  the trigger observable is fixable (A1: deterministic-mean BR-distance is a clean
+  6.5→0.5 signal near e*), BUT (A2) the signal collapses at explore-κ and must be
+  defined vs the deterministic mean, and (A3) raising κ freezes the climb — corroborated
+  by r5 (raw PPO stalls at 22.99 on the full 6M budget, no κ lock). The 2-unit
+  undershoot is a PPO-dynamics property, not a trigger/schedule one.
+- **Gate A recommendation: lean STOP / adopt Claim B.** A Component-2-style GPU retrain
+  would most likely reproduce the stall. One non-locking redesign lever remains but
+  fights the r5 stall; needs its own authorization. Details:
+  `docs/tasks/claim-a-dev-trigger-retrain/phase01_findings.md`.
+
+## Claim-A non-locking continuation — design analysis KILL (2026-07-02)
+
+- Owner authorized the non-locking redesign (Gate A branch (ii)); new task
+  `docs/tasks/claim-a-nonlocking-continuation/` created; predecessor task closed.
+- Phase01 (`tools/claim_a_continuation_design.py`, zero GPU) measured the
+  exploration-smoothed equilibrium curve **μ*(κ)**: 22.59 (κ=20) → 23.96 (κ=200) →
+  24.74 (κ=400). Component-2's κ_top=200 structurally capped its target at ~24;
+  r5's 22.99 "stall" sits in [μ*(20), μ*(60)] — raw PPO converges to the smoothed
+  equilibrium, not a failure.
+- **Pre-registered kill fired**: all velocity deaths in the c2 ramps occurred with
+  HEALTHY approx_kl → gradient-SNR physics (diffusion within ~1.5 units of target at
+  batch 4096); optimizer floors cannot fix it. Predicted landing spread ±1.5–2
+  violates Gate C in expectation. **Recommendation: STOP before GPU; adopt Claim B
+  upgraded by the μ*(κ) curve** (candidate paper figure). Claim A now has three
+  concordant negative results; do not resurrect without variance-reduction evidence.
+- Owner decision pending at the kill gate (accept STOP vs overrule).
+- **UPDATE 2026-07-02**: owner OVERRULED the kill → adaptive-batch continuation variant
+  (16× batch on the κ ladder to shrink the diffusion band ∝ 1/√B). Implemented as
+  `--kappa-continuation` (additive, default off), CPU+GPU smoked, **1-seed pilot
+  running** (tmux `c3_pilot`, GPU 0, tag `c3_cont`, 20M episodes, ~1–1.5 days).
+  Pre-registered pilot gate before any 5-seed spend — see
+  `docs/tasks/claim-a-nonlocking-continuation/{phase02.md,STATE.md}`.
+  NOTE: host NVML broken (nvidia-smi unusable); torch CUDA verified fine — monitor
+  via torch.cuda.mem_get_info.
+- **RECHECK 2026-07-03**: pilot #1 hit a budget bug — base config `max_updates: 1500`
+  caps the run at 1500×4096 = 6.144M STEPS, but the adaptive 65536-step tail updates
+  exhausted that in only 417 updates, truncating the ladder at κ=100 (never reached
+  κ=200/400). Fixed with `--episodes 34000000 --max-updates 9000 --cont-max-hold 120`;
+  pilot #2 relaunched (tmux `c3_pilot2`). Salvaged partial band data (stages 0-2):
+  band shrinks 1.07→0.72→0.55 as batch grows 4096→16384→65536, mean tracks μ*(κ) —
+  both gate metrics borderline, decision rides on the truncated κ=200/400 stages.
+  Truncated pilot #1 preserved at
+  `docs/tasks/claim-a-nonlocking-continuation/phase02_pilot_truncated_seed42.*`.
+  CAUTION for any adaptive-batch run here: `max_updates` caps by STEPS at base batch —
+  always raise it when later updates use a larger batch.
+- **PILOT #2 COMPLETE (2026-07-04)**: clean exit, all 6 ladder stages to κ=400,
+  0 forced advances, final mean 24.30 (gap 0.70), κ=400 band 0.59. **Borderline** —
+  misses Gate C (mean ≥24.5, band ≤0.5) by ~0.2–0.3 / ~0.1; not a kill (band ≪1.0,
+  mean ≥24.0). 16× batch bought only ~2× band (half the band is policy diffusion).
+- **PHASE03 LAUNCHED (2026-07-06)**: owner chose the 5-seed run. Gate C scored on
+  5 FRESH seeds 43–47 (pilot 42 excluded → no pilot-selection bias; owner-confirmed).
+  tmux `c3_s43`–`c3_s47`, GPUs 0–4, params byte-identical to pilot #2. ETA ~18h.
+  Gate C: PASS mean ≥24.5 AND cross-seed std ≤0.5; KILL std >1.0 OR mean <24.0.
+
 ## Current status
 - **Parameter overhaul**: All configs updated to match `docs/experiment_config_040726.md`
 - **Concentration fix (major)**: `--override-conc-ramp-warmup 200` resolves q=45/55 convergence
