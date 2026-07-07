@@ -8,7 +8,9 @@ Acceptance per pre-registered gate, per cell, on the frozen polished profile:
   (b) |FOC| < τ_g=0.001            — first-order FD, FRESH seed + DIFFERENT step (0.75) +
                                       LARGER M (1e6) than the polish (150k); independent of the
                                       polish's zeroth-order vertex
-  (c) |Δe_polished| < τ_e=0.1      — Polyak-window drift (SE reported as the cleaner companion)
+  (c) drift < τ_e=0.1 OR window SE < τ_e=0.1 — per-seed within-trajectory Polyak-window
+                                      quantities (an OR; weak sanity check on polish
+                                      convergence — (a)+(b) are the load-bearing legs)
 """
 
 from __future__ import annotations
