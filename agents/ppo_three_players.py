@@ -130,6 +130,65 @@ class ActorCriticMeanConc(nn.Module):
         return dist, value
 
 
+class ActorCriticModeConc(nn.Module):
+    """Actor-critic with a MODE + concentration parameterization (Component-2).
+
+    Unlike ``ActorCriticMeanConc`` (which parameterizes the Beta by its MEAN and
+    can produce alpha,beta < 1), this head parameterizes by the Beta MODE and
+    forces alpha,beta >= 1 so the mode is always interior:
+
+        s     = sigmoid(mode_head(h))                         in (0, 1)
+        kappa = clamp(softplus(conc_head(h)) * scale + kappa_min, max=kappa_max)
+        alpha = 1 + s * kappa
+        beta  = 1 + (1 - s) * kappa
+
+    Then mode(Beta) = (alpha-1)/(alpha+beta-2) = s exactly, so the deterministic
+    effort is ``s`` mapped to the effort bounds. ``kappa_min``/``kappa_max`` are
+    mutated by the runner's conditional-ramp state machine (Explore pins
+    [1, 20]; each ramp stage pins kappa_min = kappa_max = stage).
+
+    Reporting note: the paper reports the Beta MEAN (CLAUDE.md invariant); at high
+    kappa mode ~= mean. This head only changes how the policy is *learned*, not
+    which statistic is reported.
+    """
+
+    def __init__(
+        self,
+        state_dim: int = 3,
+        hidden: int = 64,
+        kappa_min: float = 1.0,
+        kappa_scale: float = 1.0,
+        kappa_max: float = 20.0,
+    ):
+        super().__init__()
+        self.shared = nn.Sequential(
+            nn.Linear(state_dim, hidden), nn.Tanh(),
+            nn.Linear(hidden, hidden), nn.Tanh(),
+        )
+        self.mode_head = nn.Linear(hidden, 1)
+        self.conc_head = nn.Linear(hidden, 1)
+        self.value_head = nn.Linear(hidden, 1)
+        self.kappa_min = float(kappa_min)
+        self.kappa_scale = float(kappa_scale)
+        self.kappa_max = float(kappa_max)
+
+    def forward(self, x: torch.Tensor):
+        h = self.shared(x)
+        s = torch.sigmoid(self.mode_head(h))
+        scale = max(self.kappa_scale, 1e-8)
+        kappa = F.softplus(self.conc_head(h)) * scale + self.kappa_min
+        kappa = torch.clamp(kappa, max=self.kappa_max)
+        alpha = 1.0 + s * kappa
+        beta = 1.0 + (1.0 - s) * kappa
+        value = self.value_head(h).squeeze(-1)
+        return alpha, beta, value
+
+    def dist(self, x: torch.Tensor):
+        alpha, beta, value = self.forward(x)
+        dist = torch.distributions.Beta(alpha, beta)
+        return dist, value
+
+
 @dataclass
 class PPOConfig:
     """Configuration for PPO agent (simplified for three-player self-play)."""
@@ -169,6 +228,19 @@ class PPOConfig:
     theory_align_v2_conc_max: Optional[float] = None
     theory_align_v2_var_coef: float = 0.0
 
+    # Component-2 mode-conc ramp (default OFF). Selects ActorCriticModeConc and
+    # enables the runner's exploitability-triggered concentration ramp. Distinct
+    # code path from theory_align_v2 (which stays untouched for r5 reproducibility).
+    mode_conc_ramp: bool = False
+    mode_conc_kappa_min: float = 1.0
+    mode_conc_kappa_scale: float = 1.0
+    mode_conc_kappa_max: float = 20.0
+
+    # Claim-A κ-continuation (default OFF). Also selects ActorCriticModeConc; the
+    # runner drives a kinematic-convergence-gated κ ladder with adaptive batch.
+    # Distinct state machine from mode_conc_ramp (which stays untouched).
+    kappa_continuation: bool = False
+
     # Advantage normalization (standard PPO practice, can disable for weak-signal experiments)
     normalize_advantages: bool = True
 
@@ -199,9 +271,21 @@ class PPOThreePlayersBandit:
         self.cfg = cfg
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Initialize network based on theory_align_v2 setting
+        # Initialize network. Component-2 mode-conc ramp / Claim-A κ-continuation
+        # take precedence (both use the ModeConc head); else theory_align_v2
+        # mean-conc head; else standard actor-critic.
+        self.use_mode_conc_ramp = bool(getattr(cfg, "mode_conc_ramp", False))
+        self.use_kappa_continuation = bool(getattr(cfg, "kappa_continuation", False))
         self.use_theory_align_v2 = bool(getattr(cfg, "theory_align_v2", False))
-        if self.use_theory_align_v2:
+        if self.use_mode_conc_ramp or self.use_kappa_continuation:
+            self.net = ActorCriticModeConc(
+                state_dim=cfg.state_dim,
+                hidden=cfg.hidden,
+                kappa_min=float(getattr(cfg, "mode_conc_kappa_min", 1.0)),
+                kappa_scale=float(getattr(cfg, "mode_conc_kappa_scale", 1.0)),
+                kappa_max=float(getattr(cfg, "mode_conc_kappa_max", 20.0)),
+            ).to(self.device)
+        elif self.use_theory_align_v2:
             conc_min = float(getattr(cfg, "theory_align_v2_conc_min", 1.0))
             conc_scale = float(getattr(cfg, "theory_align_v2_conc_scale", 1.0))
             conc_max = getattr(cfg, "theory_align_v2_conc_max", None)
