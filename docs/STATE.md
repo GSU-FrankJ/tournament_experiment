@@ -1,6 +1,31 @@
 # Project state
 
-Last updated: 2026-04-10
+Last updated: 2026-07-07
+
+## Claim-A κ-continuation 5-seed run + Gate C (2026-07-07)
+
+- Pilot #2 (seed 42) completed 2026-07-04: clean exit, all 6 ladder stages to
+  κ=400, 0 forced advances, final 24.30 — borderline vs Gate C, owner chose the
+  5-seed run. **Gate C scored on 5 FRESH seeds 43–47** (pilot 42 excluded to avoid
+  pilot-selection bias; owner-confirmed); tmux `c3_s43`–`c3_s47`, GPUs 0–4, params
+  byte-identical to pilot #2.
+- **All 5 seeds clean** (exploitability stop, forced_advances=0, exploit
+  0.004–0.011). **Gate C verdict: BORDERLINE — no branch fired.** Final-snapshot
+  metric: cross-seed mean 24.034 (|err| 3.86%, KILL line is 4%), std 0.688
+  (success ≤0.5, KILL >1.0).
+- **Decomposition is decisive though**: snapshot spread ≈ within-run κ=400
+  diffusion sampled at 1 update ("done" stops on its first update). Time-averaged
+  (κ=400 stage, last 30 upd): cross-seed mean **24.29, std 0.146** (SE 0.065) —
+  variance solved (~11× tighter than c2's 1.67), but mean misses the 24.5 success
+  line by ~3 SE. **Undershoot is systematic bias, not noise; strong Claim A is
+  dead in this parameterization.** All 6 runs land 24.1–24.4, ~0.4 below
+  μ*(400)=24.7.
+- Recommendation: adopt Claim B final form (PPO → smoothed equilibrium μ*(κ);
+  continuation tracks it reproducibly; MC-BR bridges the last 0.7). No more GPU
+  on Claim A without new variance-reduction evidence — this is now four
+  concordant negatives (r5, c2, design analysis, c3 5-seed).
+- Details + per-seed table: `docs/tasks/claim-a-nonlocking-continuation/STATE.md`.
+  Data: `results/three_players/convergence/ppo_3p_q35.0_seed{42..47}_c3_cont_convergence.json`.
 
 ## Current status
 - **Parameter overhaul**: All configs updated to match `docs/experiment_config_040726.md`
