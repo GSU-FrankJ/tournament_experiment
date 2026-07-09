@@ -115,6 +115,30 @@ def main() -> int:
     print(f"[{'OK ' if ok4 else 'BAD'}] gap increment (equal effort): "
           f"mean={mean_inc:+.3f} var={var_inc:.1f} (theory {var_theo:.1f})")
 
+    # --- Check 5: step_batch matches scalar step under common random numbers ---
+    env4 = make_env(seed=99)
+    rng = np.random.default_rng(5)
+    max_abs = 0.0
+    for _ in range(2000):
+        t = int(rng.integers(1, 3))
+        d = float(rng.uniform(-120, 120))
+        a0 = float(rng.uniform(0, 100))
+        a1 = float(rng.uniform(0, 100))
+        eps0 = float(rng.uniform(-Q, Q))
+        eps1 = float(rng.uniform(-Q, Q))
+        env4.reset(t, d)
+        res = env4.step((a0, a1), noise=(eps0, eps1))
+        b = env4.step_batch(np.array([t]), np.array([d]), np.array([a0]),
+                            np.array([a1]), noise=(np.array([eps0]), np.array([eps1])))
+        # gap and per-player rewards must match exactly (prizes deterministic given gap sign)
+        max_abs = max(max_abs,
+                      abs(res.info["gap_out"] - b["gap_next"][0]),
+                      abs(res.rewards[0].item() - b["reward0"][0]),
+                      abs(res.rewards[1].item() - b["reward1"][0]))
+    ok5 = max_abs < 1e-5
+    failures += not ok5
+    print(f"[{'OK ' if ok5 else 'BAD'}] step_batch == scalar step (CRN): max abs diff {max_abs:.2e}")
+
     print("PASS" if failures == 0 else f"FAIL ({failures} checks)")
     return 0 if failures == 0 else 1
 

@@ -185,6 +185,34 @@ class MultiStageRolloutBuffer:
         self._current.rewards.append(torch.as_tensor(reward, dtype=torch.float32))
         self._current.values.append(value.squeeze().detach().cpu())
 
+    def add_np(
+        self,
+        state: "np.ndarray",
+        action_norm: float,
+        logp: float,
+        reward: float,
+        value: float,
+    ) -> None:
+        """Append one transition from numpy/scalar values (vectorized rollout).
+
+        Args:
+            state: Observation row, shape ``(state_dim,)``.
+            action_norm: Normalized action scalar in [0, 1].
+            logp: Log-prob scalar.
+            reward: Sampled stage reward scalar.
+            value: Critic value scalar.
+
+        Raises:
+            RuntimeError: If no trajectory is open.
+        """
+        if self._current is None:
+            raise RuntimeError("add_np called with no open trajectory")
+        self._current.states.append(torch.as_tensor(state, dtype=torch.float32))
+        self._current.actions_norm.append(torch.as_tensor(action_norm, dtype=torch.float32))
+        self._current.logps.append(torch.as_tensor(logp, dtype=torch.float32))
+        self._current.rewards.append(torch.as_tensor(reward, dtype=torch.float32))
+        self._current.values.append(torch.as_tensor(value, dtype=torch.float32))
+
     def end_trajectory(self) -> None:
         """Close the open trajectory and store it.
 
@@ -418,6 +446,26 @@ class MultiStagePPO:
         a_norm = a.squeeze(0)                        # (1,)
         effort = self.low + float(a_norm.item()) * (self.high - self.low)
         return a_norm, effort, logp, value.squeeze(0)
+
+    @torch.no_grad()
+    def act_batch(
+        self, states: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Sample actions for a batch of states (vectorized rollout).
+
+        Args:
+            states: State batch, shape ``(N, state_dim)``.
+
+        Returns:
+            ``(action_norm[N], effort[N], logp[N], value[N])`` as numpy arrays.
+        """
+        s = torch.as_tensor(states, dtype=torch.float32, device=self.device)
+        dist, value = self.net.dist(s)             # value already shape (N,)
+        a = dist.sample()                          # (N, 1)
+        logp = dist.log_prob(a).squeeze(-1)        # (N,)
+        a_norm = a.squeeze(-1).cpu().numpy()       # (N,)
+        effort = self.low + a_norm * (self.high - self.low)
+        return a_norm, effort, logp.cpu().numpy(), value.cpu().numpy()
 
     @torch.no_grad()
     def mean_effort(self, state) -> float:

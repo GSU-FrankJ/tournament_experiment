@@ -289,6 +289,115 @@ class MultiStageEnv:
         return StepResult(obs=obs, rewards=rewards, costs=costs, done=is_terminal, info=info)
 
     # ------------------------------------------------------------------
+    # Vectorized rollout support (batched transition; same game math)
+    # ------------------------------------------------------------------
+
+    def obs_batch(self, stages: np.ndarray, gaps: np.ndarray) -> np.ndarray:
+        """Normalized observations [t/T, d/(q*sqrt(t))] for a batch of states.
+
+        Single source of truth for the observation encoding, matching
+        :meth:`_obs_vector`. Player 1's observations are obtained by passing
+        ``-gaps``.
+
+        Args:
+            stages: Per-env current stage (int array).
+            gaps: Per-env player gap (float array).
+
+        Returns:
+            Array of shape ``(N, 2)``.
+        """
+        stages = np.asarray(stages, dtype=np.float32)
+        gaps = np.asarray(gaps, dtype=np.float32)
+        d_norm = gaps / (self.q * np.sqrt(np.maximum(stages, 1.0)))
+        return np.stack([stages / self.T, d_norm], axis=-1)
+
+    def step_batch(
+        self,
+        stages: np.ndarray,
+        gaps: np.ndarray,
+        e0: np.ndarray,
+        e1: np.ndarray,
+        noise: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    ) -> Dict[str, np.ndarray]:
+        """Vectorized one-stage transition for a batch of independent envs.
+
+        Uses exactly the same dynamics as :meth:`step` (verified in
+        ``tools/verify_multi_stage_env.py``): sampled outcomes only, terminal
+        winner from the realized accumulated gap. Envs are terminal
+        individually when ``stages == T``.
+
+        Args:
+            stages: Per-env current stage (int array, 1..T).
+            gaps: Per-env player-0 gap (float array).
+            e0: Player-0 efforts (clipped to bounds).
+            e1: Player-1 efforts (clipped to bounds).
+            noise: Optional pre-drawn ``(eps0, eps1)`` arrays for CRN.
+
+        Returns:
+            Dict with ``gap_next``, ``reward0``, ``reward1``, ``cost0``,
+            ``cost1``, ``terminal`` (bool array).
+        """
+        stages = np.asarray(stages)
+        gaps = np.asarray(gaps, dtype=float)
+        e0 = np.clip(np.asarray(e0, dtype=float), self.effort_low, self.effort_high)
+        e1 = np.clip(np.asarray(e1, dtype=float), self.effort_low, self.effort_high)
+        n = gaps.shape[0]
+
+        if noise is None:
+            eps0 = self.rng.uniform(-self.q, self.q, size=n)
+            eps1 = self.rng.uniform(-self.q, self.q, size=n)
+        else:
+            eps0 = np.asarray(noise[0], dtype=float)
+            eps1 = np.asarray(noise[1], dtype=float)
+
+        gap_next = gaps + (e0 - e1) + (eps0 - eps1)
+        cost0 = self.k * e0 * e0
+        cost1 = self.k * e1 * e1
+        terminal = stages >= self.T
+
+        # Prizes from the realized final gap; ties (measure zero) broken uniformly.
+        tie_break0 = self.rng.integers(0, 2, size=n).astype(float)  # 1 => player 0 wins tie
+        p0_wins = np.where(gap_next > 0.0, 1.0, np.where(gap_next < 0.0, 0.0, tie_break0))
+        prize0 = self.w_l + p0_wins * (self.w_h - self.w_l)
+        prize1 = self.w_l + (1.0 - p0_wins) * (self.w_h - self.w_l)
+
+        reward0 = np.where(terminal, prize0 - cost0, -cost0)
+        reward1 = np.where(terminal, prize1 - cost1, -cost1)
+        return {
+            "gap_next": gap_next,
+            "reward0": reward0,
+            "reward1": reward1,
+            "cost0": cost0,
+            "cost1": cost1,
+            "terminal": terminal,
+        }
+
+    def sample_exploring_starts_batch(self, n: int) -> Tuple[np.ndarray, np.ndarray]:
+        """Vectorized exploring-starts sampler: returns ``(t0[n], d0[n])``.
+
+        Mirrors :meth:`sample_exploring_start`: an ``es_on_path_fraction``
+        share is the root (1, 0); the rest draw a stage (uniform) and a gap
+        d0 ~ Uniform(-R, R) with R = es_d_range_factor * 2q * sqrt(t0-1).
+
+        Args:
+            n: Number of starts to draw.
+
+        Returns:
+            ``(t0, d0)`` integer and float arrays of length ``n``.
+        """
+        if not self.exploring_starts:
+            return np.ones(n, dtype=int), np.zeros(n)
+        on_path = self.rng.random(n) < self.es_on_path_fraction
+        if self.es_stage_distribution != "uniform":
+            raise ValueError(f"Unknown es_stage_distribution: {self.es_stage_distribution}")
+        t0 = self.rng.integers(1, self.T + 1, size=n)
+        t0 = np.where(on_path, 1, t0)
+        r = self.es_d_range_factor * 2.0 * self.q * np.sqrt(np.maximum(t0 - 1, 0))
+        d0 = self.rng.uniform(-1.0, 1.0, size=n) * r
+        d0 = np.where(t0 == 1, 0.0, d0)
+        return t0.astype(int), d0
+
+    # ------------------------------------------------------------------
     # Evaluation-only helpers (NOT training rewards)
     # ------------------------------------------------------------------
 
