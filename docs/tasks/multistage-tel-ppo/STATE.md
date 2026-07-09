@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase02 (complete) -> phase03 (DP verifier, not started)
+Current phase: phase03 (complete) -> phase04 (multi-step PPO trainer, not started)
 
 ## What's done
 
@@ -40,6 +40,21 @@ Current phase: phase02 (complete) -> phase03 (DP verifier, not started)
     phase04 runner interleaves p0/p1 transitions — store each player's
     stages contiguously or make GAE trajectory-aware. Fix + unit test before
     the first T=2 GPU run.
+
+- **Phase 03 (2026-07-09): independent DP best-response verifier.**
+  - `utils/dp_verifier.py`: backward-induction BR (opponent fixed at ê),
+    closed-form terminal integration via F_ξ (no interp of the step
+    reward), deterministic triangular quadrature via a 1-D smoothed value,
+    parabolic polish on the BR argmax, grid refinement + Richardson.
+  - Certificate: PRIMARY = dReach (BR-reachable-support Δ-sum), which
+    upper-bounds root EXP and excludes unreachable states (fixes the
+    stage-1 off-path spurious term the full-grid worst-case shows).
+    dFull and on-path Δ also reported.
+  - `tools/calibrate_verifier.py` (all checks PASS): closed form floor
+    EXP=dReach=0.0001 & certified; 5 bad policies all EXP≫floor & not
+    certified; dReach≥EXP for all; Richardson stable. T=3 smoke OK.
+  - Imports only F_ξ/f_ξ from theory; never imports env or agent
+    (external verdict).
 
 ## Known issues / open items
 
