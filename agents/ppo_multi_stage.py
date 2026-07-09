@@ -23,9 +23,12 @@ cannot introduce this bug by storing in the wrong order.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 def compute_gae_single(
@@ -242,4 +245,311 @@ class MultiStageRolloutBuffer:
             "values": torch.cat(values_list),
             "advantages": advantages,
             "returns": returns,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Actor-critic (Beta policy, mean/concentration parametrization)
+# ---------------------------------------------------------------------------
+
+class MultiStageActorCritic(nn.Module):
+    """Shared-trunk Beta actor + value critic over the 2-D state [t/T, d_norm].
+
+    Uses the mean/concentration parametrization so the reported effort
+    (Beta MEAN, the repo invariant) is read directly off ``mean``:
+
+        mean = sigmoid(mean_head(h)) in (0, 1)
+        conc = softplus(conc_head(h)) * conc_scale + conc_min   (opt. clamped)
+        alpha = mean * conc,  beta = (1 - mean) * conc
+
+    No theory-align concentration ramp or opponent-lag head: those were
+    one-stage stabilizers and are not part of the multi-stage plan.
+    """
+
+    def __init__(
+        self,
+        state_dim: int = 2,
+        hidden: int = 64,
+        conc_min: float = 1.0,
+        conc_scale: float = 1.0,
+        conc_max: Optional[float] = None,
+    ):
+        """Initialize the network.
+
+        Args:
+            state_dim: Observation dimension (2 for [t/T, d/(q sqrt t)]).
+            hidden: Hidden width of the shared trunk.
+            conc_min: Floor on the Beta concentration alpha+beta.
+            conc_scale: Multiplier on the softplus concentration.
+            conc_max: Optional cap on the concentration.
+        """
+        super().__init__()
+        self.shared = nn.Sequential(
+            nn.Linear(state_dim, hidden), nn.Tanh(),
+            nn.Linear(hidden, hidden), nn.Tanh(),
+        )
+        self.mean_head = nn.Linear(hidden, 1)
+        self.conc_head = nn.Linear(hidden, 1)
+        self.value_head = nn.Linear(hidden, 1)
+        self.conc_min = float(conc_min)
+        self.conc_scale = float(conc_scale)
+        self.conc_max = None if conc_max is None else float(conc_max)
+
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return Beta ``(alpha, beta)`` and the state value.
+
+        Args:
+            x: State batch, shape ``(B, state_dim)``.
+
+        Returns:
+            ``(alpha, beta, value)`` with ``alpha``/``beta`` shape ``(B, 1)``
+            and ``value`` shape ``(B,)``.
+        """
+        h = self.shared(x)
+        mean = torch.sigmoid(self.mean_head(h))
+        conc = F.softplus(self.conc_head(h)) * max(self.conc_scale, 1e-8) + self.conc_min
+        if self.conc_max is not None:
+            conc = torch.clamp(conc, max=self.conc_max)
+        alpha = mean * conc
+        beta = (1.0 - mean) * conc
+        value = self.value_head(h).squeeze(-1)
+        return alpha, beta, value
+
+    def dist(self, x: torch.Tensor) -> Tuple[torch.distributions.Beta, torch.Tensor]:
+        """Return the Beta policy distribution and the state value.
+
+        Args:
+            x: State batch, shape ``(B, state_dim)``.
+
+        Returns:
+            ``(Beta(alpha, beta), value)``.
+        """
+        alpha, beta, value = self.forward(x)
+        return torch.distributions.Beta(alpha, beta), value
+
+
+@dataclass
+class MultiStagePPOConfig:
+    """Hyperparameters for the multi-stage PPO trainer.
+
+    Defaults follow the plan's training spec. Note gamma = gae_lambda = 1.0
+    (finite-horizon economic payoff, plan section 3.4) -- deliberately NOT
+    the one-stage agent's 0.99/0.95, which must never leak in.
+    """
+
+    state_dim: int = 2
+    hidden: int = 64
+    lr: float = 3e-4
+    gamma: float = 1.0
+    gae_lambda: float = 1.0
+    clip_eps: float = 0.2
+    value_coef: float = 0.5
+    entropy_coef: float = 0.01
+    max_grad_norm: float = 0.5
+    epochs: int = 10
+    minibatch_size: int = 256
+    conc_min: float = 1.0
+    conc_scale: float = 1.0
+    conc_max: Optional[float] = None
+    seed: int = 42
+
+
+class MultiStagePPO:
+    """Symmetric self-play PPO candidate generator for the multi-stage game.
+
+    Both players share this single policy; player j simply observes -d. The
+    trainer is the Claim-B candidate GENERATOR: the DP verifier certifies its
+    output. Reported effort is the Beta MEAN (repo invariant).
+    """
+
+    def __init__(
+        self,
+        effort_bounds: Tuple[float, float],
+        cfg: MultiStagePPOConfig = MultiStagePPOConfig(),
+        device: Optional[str] = None,
+    ):
+        """Construct the trainer.
+
+        Args:
+            effort_bounds: ``(low, high)`` effort range; normalized Beta
+                actions in [0, 1] map to ``low + a * (high - low)``.
+            cfg: Hyperparameters.
+            device: Torch device string; auto-selects cuda when available.
+        """
+        self.cfg = cfg
+        self.low, self.high = float(effort_bounds[0]), float(effort_bounds[1])
+        self.device = torch.device(
+            device if device is not None else ("cuda" if torch.cuda.is_available() else "cpu")
+        )
+        torch.manual_seed(cfg.seed)
+        np.random.seed(cfg.seed)
+        self.net = MultiStageActorCritic(
+            state_dim=cfg.state_dim,
+            hidden=cfg.hidden,
+            conc_min=cfg.conc_min,
+            conc_scale=cfg.conc_scale,
+            conc_max=cfg.conc_max,
+        ).to(self.device)
+        self.opt = torch.optim.Adam(self.net.parameters(), lr=cfg.lr)
+        self.buffer = MultiStageRolloutBuffer()
+
+    def _state_tensor(self, state) -> torch.Tensor:
+        """Coerce a state to a ``(1, state_dim)`` float tensor on the device."""
+        t = state if isinstance(state, torch.Tensor) else torch.tensor(state, dtype=torch.float32)
+        t = t.to(self.device, dtype=torch.float32)
+        return t.view(1, -1)
+
+    def act(self, state) -> Tuple[torch.Tensor, float, torch.Tensor, torch.Tensor]:
+        """Sample an action for one state.
+
+        Args:
+            state: Observation (length ``state_dim`` tensor or sequence).
+
+        Returns:
+            ``(action_norm[1], effort, logp[], value[])`` — the normalized
+            action tensor, the scaled effort (float), the log-prob, and the
+            critic value (both 0-d tensors).
+        """
+        s = self._state_tensor(state)
+        with torch.no_grad():
+            dist, value = self.net.dist(s)
+            a = dist.sample()                       # (1, 1)
+            logp = dist.log_prob(a).squeeze()       # ()
+        a_norm = a.squeeze(0)                        # (1,)
+        effort = self.low + float(a_norm.item()) * (self.high - self.low)
+        return a_norm, effort, logp, value.squeeze(0)
+
+    @torch.no_grad()
+    def mean_effort(self, state) -> float:
+        """Deterministic reported effort = Beta mean mapped to effort units.
+
+        Args:
+            state: Observation.
+
+        Returns:
+            Effort (float) in ``[low, high]``.
+        """
+        s = self._state_tensor(state)
+        dist, _ = self.net.dist(s)
+        a_mean = float(dist.mean.clamp(1e-6, 1 - 1e-6).item())
+        return self.low + a_mean * (self.high - self.low)
+
+    @torch.no_grad()
+    def effort_function(self, t: int, d: np.ndarray, T: int, q: float) -> np.ndarray:
+        """Vectorized learned effort function e_hat_t(d) for the verifier.
+
+        Builds the normalized state [t/T, d/(q sqrt t)] for each gap and
+        returns the Beta-mean effort. This is the object passed to
+        ``utils.dp_verifier.verify``.
+
+        Args:
+            t: Stage (1-indexed).
+            d: Score gaps (array).
+            T: Horizon.
+            q: Noise half-width (for the state normalization).
+
+        Returns:
+            Effort array, same shape as ``d``.
+        """
+        d = np.asarray(d, dtype=np.float32)
+        t_norm = np.full_like(d, t / T)
+        d_norm = d / (q * np.sqrt(max(t, 1)))
+        states = torch.tensor(np.stack([t_norm, d_norm], axis=-1), dtype=torch.float32,
+                              device=self.device)
+        dist, _ = self.net.dist(states)
+        a_mean = dist.mean.squeeze(-1).clamp(1e-6, 1 - 1e-6).cpu().numpy()
+        return self.low + a_mean * (self.high - self.low)
+
+    def evaluate_actions(
+        self, states: torch.Tensor, actions_norm: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Log-probs, entropy, and values for a batch (PPO inner loop).
+
+        Args:
+            states: ``(N, state_dim)`` states.
+            actions_norm: ``(N, 1)`` normalized actions in [0, 1].
+
+        Returns:
+            ``(logp[N], entropy[], values[N])``.
+        """
+        dist, values = self.net.dist(states)
+        a_safe = actions_norm.clamp(1e-6, 1 - 1e-6)
+        logp = dist.log_prob(a_safe).squeeze(-1)
+        entropy = dist.entropy().mean()
+        return logp, entropy, values.view(-1)
+
+    def update(self) -> Dict[str, float]:
+        """Run a PPO update from the rollout buffer, then clear it.
+
+        Advantages/returns come from the trajectory-aware GAE
+        (``buffer.compute``), so storage order is irrelevant. Standard
+        clipped-surrogate + value-MSE + entropy objective with advantage
+        normalization and minibatch epochs.
+
+        Returns:
+            Diagnostics dict (losses, entropy, approx_kl, clip_frac,
+            grad_norm, transitions).
+
+        Raises:
+            RuntimeError: If the buffer is empty.
+        """
+        if len(self.buffer) == 0:
+            raise RuntimeError("update called with an empty buffer")
+        data = self.buffer.compute(self.cfg.gamma, self.cfg.gae_lambda)
+        states = data["states"].to(self.device)
+        actions_norm = data["actions_norm"].view(-1, 1).to(self.device)
+        old_logp = data["logp"].to(self.device)
+        returns = data["returns"].to(self.device)
+        advantages = data["advantages"].to(self.device)
+        advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
+
+        n = states.size(0)
+        clip_eps = float(self.cfg.clip_eps)
+        idx = np.arange(n)
+        pl, vl, ent, kl, cf, gn = [], [], [], [], [], []
+
+        for _ in range(self.cfg.epochs):
+            np.random.shuffle(idx)
+            for start in range(0, n, self.cfg.minibatch_size):
+                mb = idx[start:start + self.cfg.minibatch_size]
+                mb_states = states[mb]
+                mb_actions = actions_norm[mb]
+                mb_adv = advantages[mb]
+                mb_ret = returns[mb]
+                mb_old_logp = old_logp[mb]
+
+                logp, entropy, values = self.evaluate_actions(mb_states, mb_actions)
+                log_ratio = logp - mb_old_logp
+                ratio = torch.exp(log_ratio)
+                surr1 = ratio * mb_adv
+                surr2 = torch.clamp(ratio, 1 - clip_eps, 1 + clip_eps) * mb_adv
+                policy_loss = -torch.min(surr1, surr2).mean()
+                value_loss = F.mse_loss(values, mb_ret)
+                loss = (
+                    policy_loss
+                    + self.cfg.value_coef * value_loss
+                    - self.cfg.entropy_coef * entropy
+                )
+
+                self.opt.zero_grad()
+                loss.backward()
+                grad_norm = nn.utils.clip_grad_norm_(self.net.parameters(), self.cfg.max_grad_norm)
+                self.opt.step()
+
+                pl.append(float(policy_loss.item()))
+                vl.append(float(value_loss.item()))
+                ent.append(float(entropy.item()))
+                kl.append(float((mb_old_logp - logp).mean().item()))
+                cf.append(float((ratio.gt(1 + clip_eps) | ratio.lt(1 - clip_eps)).float().mean().item()))
+                gn.append(float(grad_norm))
+
+        self.buffer.reset()
+        return {
+            "policy_loss": float(np.mean(pl)),
+            "value_loss": float(np.mean(vl)),
+            "entropy": float(np.mean(ent)),
+            "approx_kl": float(np.mean(kl)),
+            "clip_frac": float(np.mean(cf)),
+            "grad_norm": float(np.mean(gn)),
+            "transitions": int(n),
         }
