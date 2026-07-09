@@ -48,13 +48,43 @@ verifier hook yields EXP=0.073 (EXP/DW=1.8%), dReach=0.50, uncertified.
 Convergence to the closed form is NOT asserted here (step 3/4 with a real
 budget); this step verifies the plumbing is correct and numerically sane.
 
-## Step 3: self-play rollout loop + exploring starts (NOT STARTED)
+## Step 3: production rollout loop + exploring starts (COMPLETE 2026-07-09)
 
-- Both players share the symmetric policy; player j observes -d. Store each
-  player's episode as its OWN trajectory in the buffer (never interleave).
-- Exploring starts via `env.reset_exploring()` (phase02) so off-path (t, d)
-  get gradient signal -> supports the full approximate-MPE claim.
-- Sampled rewards only (env already enforces).
+`run/run_multi_stage.py` + vectorized env support (`env.step_batch`,
+`env.obs_batch`, `env.sample_exploring_starts_batch`) + agent batch methods
+(`act_batch`, `buffer.add_np`).
+
+- VECTORIZED self-play rollout: N parallel episodes, batched policy forward
+  + batched env transition; heterogeneous exploring-start stages handled by
+  stepping only still-active envs. Each env's two players stored as two
+  SEPARATE trajectories (the trajectory-aware GAE contract).
+- `env.step_batch` verified to match the scalar `step` under common random
+  numbers to 2e-7 (`tools/verify_multi_stage_env.py` check 5) -- single
+  source of truth for the game math, no divergence.
+- Param validation (`config.validate`) runs BEFORE training: q <= q_crit
+  raises. Periodic DP-verifier eval; best checkpoint tracked by validation
+  dReach; convergence JSON under results/multi_stage/.
+
+### Validation run (T=2, q=50, seed 42, 1000 upd x 256 ep, entropy 0.005, CPU ~4.6 min)
+
+**The pipeline works and the policy CERTIFIES from update 100 on.**
+Final EXP=0.018 (EXP/DW=0.46%), dReach 0.033-0.086 (<< 3% gate),
+cert=True. stage-1(0)=44.7 (g1=46.67, RE_1~4%). stage-2 learned
+[13.8, 45.1, 59.2, 28.3, 7.5] vs CF [0, 35, 70, 35, 0] at
+d=[-100,-50,0,50,100]: clearly hump-shaped, peak 59 at d=0.
+
+Two honest findings (NOT blockers; the certificate holds):
+1. **Peak undershoot** (59 vs 70): the exploration-smoothed mu*(kappa)
+   effect from the one-stage saga, in the multi-stage setting. Exactly why
+   the Claim-B framing (verifier certifies; not "e_hat ~ e*") is correct.
+   The verifier certifies the smoothed candidate as an approx-MPE.
+2. **Stage-2 asymmetry** (45 at d=-50 vs 28 at d=+50) where the closed form
+   is even. Certificate still holds because BR-reachable mass concentrates
+   near d=0. Likely finite-sample/single-seed; revisit under step-4 seed
+   robustness / longer budget / optional symmetry regularization.
+
+Validation JSON not committed (single-seed CPU characterization); the real
+gated multi-seed runs are step 4.
 
 ## Step 4: extraction + verifier hook + pre-registered T=2 gate (NOT STARTED)
 

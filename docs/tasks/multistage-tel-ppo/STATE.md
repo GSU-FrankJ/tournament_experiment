@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase04 step 2 (actor-critic + PPO, complete) -> step 3 (rollout loop + exploring starts)
+Current phase: phase04 step 3 (rollout loop, complete) -> step 4 (extraction + pre-registered T=2 gate)
 
 ## What's done
 
@@ -78,6 +78,19 @@ Current phase: phase04 step 2 (actor-critic + PPO, complete) -> step 3 (rollout 
     NOT asserted (step 3/4 with real budget).
   - Remaining: step 3 production rollout loop + exploring-starts tuning;
     step 4 extraction + pre-registered T=2 verifier gate.
+- **Phase 04 step 3 (2026-07-09): production rollout loop.**
+  - `run/run_multi_stage.py`: validates params (q_crit) before training,
+    vectorized self-play rollout with exploring starts (each player's
+    episode its own trajectory), periodic DP-verifier eval, best-checkpoint
+    by dReach, convergence JSON.
+  - Vectorized env: `env.step_batch`/`obs_batch`/`sample_exploring_starts_batch`;
+    agent `act_batch` + `buffer.add_np`. step_batch == scalar step under CRN
+    to 2e-7 (verify check 5).
+  - **Validation (T=2, q=50, seed42, 1000upd x 256ep, CPU): CERTIFIES from
+    u100 on.** Final EXP/DW=0.46%, dReach 0.033-0.086 (<3% gate). stage-1
+    44.7 (g1=46.67). stage-2 hump-shaped peak 59 (CF 70). Findings: peak
+    undershoot = exploration-smoothed mu*(kappa) (Claim-B vindicated);
+    stage-2 asymmetry (finite-sample, step-4 seed item). JSON not committed.
 
 ## Known issues / open items
 
