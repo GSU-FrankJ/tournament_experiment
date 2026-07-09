@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase03 (complete) -> phase04 (multi-step PPO trainer, not started)
+Current phase: phase04 step 1 (GAE fix, complete) -> step 2 (actor-critic + PPO update)
 
 ## What's done
 
@@ -55,6 +55,19 @@ Current phase: phase03 (complete) -> phase04 (multi-step PPO trainer, not starte
     certified; dReach≥EXP for all; Richardson stable. T=3 smoke OK.
   - Imports only F_ξ/f_ξ from theory; never imports env or agent
     (external verdict).
+
+- **Phase 04 step 1 (2026-07-09): trajectory-aware GAE + rollout buffer.**
+  - `agents/ppo_multi_stage.py`: `compute_gae_single`,
+    `compute_gae_trajectories`, `MultiStageRolloutBuffer`. Ordering-
+    independent (per-trajectory, zero terminal bootstrap) so the
+    interleaving misbootstrap cannot recur.
+  - `tools/test_multi_stage_gae.py` (all PASS): reproduces the flat-GAE
+    interleaving bug and confirms the fix; hand-computed 2-step;
+    gamma=lam=1 == Monte Carlo; ordering independence; buffer guard rails.
+  - One-stage agent left untouched (scope). Remaining phase04: actor-critic
+    (Beta, state_dim=2, gamma=lam=1 override), self-play rollout with
+    exploring starts (store each player's episode as its own trajectory),
+    extraction + verifier hook, pre-registered T=2 gate.
 
 ## Known issues / open items
 
