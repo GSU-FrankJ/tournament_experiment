@@ -40,8 +40,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from agents.ppo_multi_stage import MultiStagePPO, MultiStagePPOConfig  # noqa: E402
 from config.multi_stage_two_players import config as base_config  # noqa: E402
 from config.multi_stage_two_players import validate as validate_config  # noqa: E402
+from dataclasses import asdict as _asdict  # noqa: E402
 from envs.multi_stage_env import MultiStageEnv  # noqa: E402
-from utils.dp_verifier import verify  # noqa: E402
+from utils.dp_verifier import verify, verify_grid_refinement  # noqa: E402
+from utils.multi_stage_metrics import recovery_metrics  # noqa: E402
 from utils.theory_multistage import g1_two_stage, g2_two_stage  # noqa: E402
 
 
@@ -124,6 +126,8 @@ def evaluate(agent: MultiStagePPO, cfg: Dict, q: float, T: int) -> Dict:
         "delta_sum_full": r.delta_sum_full,
         "delta_onpath_sum": r.delta_onpath_sum,
         "certified": bool(r.certified),
+        "v_e_root": r.v_e_root,
+        "v_br_root": r.v_br_root,
     }
 
 
@@ -202,11 +206,40 @@ def main() -> int:
                   f"ent={diag['entropy']:.3f} kl={diag['approx_kl']:.4f}")
 
     elapsed = time.time() - t_start
+
+    # Pre-registered checkpoint rule: select the lowest-validation-dReach
+    # checkpoint (NOT the final policy, NOT a visual fit).
+    if best["state_dict"] is not None:
+        agent.net.load_state_dict(best["state_dict"])
+        print(f"[ckpt] restored best checkpoint @u{best['update']} "
+              f"(dReach={best['delta_sum_reachable']:.4f})")
+
     final_eval = evaluate(agent, cfg, args.q, args.T)
     final_snap = effort_snapshot(agent, args.q, args.T)
 
-    # Closed-form targets for T=2 reporting.
+    # EXP^UCB via grid refinement (deterministic verifier: Richardson residual).
+    def _policy(t, d):
+        return agent.effort_function(t, d, T=args.T, q=args.q)
+
+    ref = verify_grid_refinement(
+        _policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=args.q, T=args.T,
+        e_bar=cfg["effort_range"][1], d_grid_sizes=cfg["verifier"]["d_grid_sizes"],
+    )
+    exp_seq = ref["exp"]
+    exp_ucb = exp_seq[-1] + (abs(exp_seq[-1] - exp_seq[-2]) if len(exp_seq) >= 2 else 0.0)
+    dw = cfg["w_h"] - cfg["w_l"]
+    grid_refinement = {
+        "d_grid_sizes": ref["d_grid_sizes"],
+        "exp": exp_seq,
+        "delta_sum_reachable": ref["delta_sum_reachable"],
+        "exp_richardson": ref["exp_richardson"],
+        "exp_ucb": exp_ucb,
+        "exp_ucb_over_dw": exp_ucb / dw,
+    }
+
+    # Closed-form targets + recovery metrics for T=2 reporting.
     cf = None
+    recovery = None
     if args.T == 2:
         g1 = g1_two_stage(args.q, cfg["w_h"], cfg["w_l"], cfg["k"])
         cf = {
@@ -215,6 +248,11 @@ def main() -> int:
                                          args.q, cfg["w_h"], cfg["w_l"], cfg["k"],
                                          cfg["effort_range"][1]).tolist(),
         }
+        rm = recovery_metrics(
+            _policy, q=args.q, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"],
+            e_bar=cfg["effort_range"][1], v_e_root=final_eval.get("v_e_root"),
+        )
+        recovery = _asdict(rm)
 
     out_dir = os.path.join("results", "multi_stage", "convergence")
     os.makedirs(out_dir, exist_ok=True)
@@ -232,6 +270,8 @@ def main() -> int:
         "history": history,
         "final_eval": final_eval,
         "final_effort": final_snap,
+        "grid_refinement": grid_refinement,
+        "recovery_metrics": recovery,
         "best_checkpoint": {"update": best["update"], "eval": best["eval"]},
         "closed_form": cf,
     }
@@ -239,10 +279,13 @@ def main() -> int:
     with open(out_path, "w") as f:
         json.dump(result, f, indent=2)
 
-    print(f"[done] {elapsed:.1f}s | final EXP={final_eval['exp']:.4f} "
-          f"dReach={final_eval['delta_sum_reachable']:.4f} cert={final_eval['certified']} | "
-          f"best dReach={best['delta_sum_reachable']:.4f} @u{best['update']}")
-    if cf is not None:
+    print(f"[done] {elapsed:.1f}s | ckpt EXP={final_eval['exp']:.4f} "
+          f"EXP^UCB/DW={grid_refinement['exp_ucb_over_dw']:.4f} "
+          f"dReach/DW={final_eval['delta_sum_reachable'] / dw:.4f} "
+          f"cert={final_eval['certified']} @u{best['update']}")
+    if recovery is not None:
+        print(f"[recovery] RE_1={recovery['re_1']:.3f} RPE_2_core={recovery['rpe_2_core']:.3f} "
+              f"RPE_2={recovery['rpe_2']:.3f} PL_2/DW={recovery['pl_2_over_dw']:.3f}")
         print(f"[effort] stage1(0)={final_snap['stage1_at_0']:.2f} (g1={cf['g1']:.2f}) | "
               f"stage2 learned={[round(x, 1) for x in final_snap['stage2_learned']]} "
               f"vs CF={[round(x, 1) for x in cf['stage2_probe']]} @ d={final_snap['stage2_probe_d']}")
