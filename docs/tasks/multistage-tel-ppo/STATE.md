@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase04 step 1 (GAE fix, complete) -> step 2 (actor-critic + PPO update)
+Current phase: phase04 step 2 (actor-critic + PPO, complete) -> step 3 (rollout loop + exploring starts)
 
 ## What's done
 
@@ -64,10 +64,20 @@ Current phase: phase04 step 1 (GAE fix, complete) -> step 2 (actor-critic + PPO 
   - `tools/test_multi_stage_gae.py` (all PASS): reproduces the flat-GAE
     interleaving bug and confirms the fix; hand-computed 2-step;
     gamma=lam=1 == Monte Carlo; ordering independence; buffer guard rails.
-  - One-stage agent left untouched (scope). Remaining phase04: actor-critic
-    (Beta, state_dim=2, gamma=lam=1 override), self-play rollout with
-    exploring starts (store each player's episode as its own trajectory),
-    extraction + verifier hook, pre-registered T=2 gate.
+  - One-stage agent left untouched (scope).
+- **Phase 04 step 2 (2026-07-09): actor-critic + PPO update.**
+  - `agents/ppo_multi_stage.py`: `MultiStageActorCritic` (Beta mean/conc,
+    state_dim=2), `MultiStagePPOConfig` (gamma=lambda=1.0, no one-stage
+    default leak), `MultiStagePPO` (act, mean_effort, effort_function
+    verifier hook, clipped PPO update via trajectory-aware GAE). No
+    theory_align/opponent-lag.
+  - `tools/smoke_multi_stage_ppo.py` (PASS, ~17s CPU): self-play rollout
+    with exploring starts (each player's episode its own trajectory),
+    finite diagnostics + in-bounds effort throughout, non-degenerate
+    policy, entropy drop, verifier hook returns finite EXP. Convergence
+    NOT asserted (step 3/4 with real budget).
+  - Remaining: step 3 production rollout loop + exploring-starts tuning;
+    step 4 extraction + pre-registered T=2 verifier gate.
 
 ## Known issues / open items
 

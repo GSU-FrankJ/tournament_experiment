@@ -25,16 +25,28 @@ Unit-test coverage: hand-computed 2-step (gamma=1, lam=0.5); gamma=lam=1
 == Monte Carlo return (the plan's main spec); ordering independence;
 interleaving-bug reproduction + fix; buffer guard rails.
 
-## Step 2: actor-critic + PPO update (NOT STARTED)
+## Step 2: actor-critic + PPO update (COMPLETE 2026-07-09)
 
-- Beta policy (repo invariant), critic over the 2-D state [t/T, d/(q sqrt t)].
-  state_dim=2 (per-cell training drops the constant params). Reuse the Beta
-  head / mean extraction pattern from the one-stage `ActorCriticMeanConc`,
-  but a fresh network (different input dim, no theory_align concentration
-  ramp — that was a one-stage stabilizer).
-- gamma=1, lambda=1 (override the agent defaults 0.99/0.95 — they must NOT
-  leak in). Clip, entropy, epochs per the training protocol.
-- Policy extraction = Beta MEAN (repo invariant).
+`agents/ppo_multi_stage.py` extended with `MultiStageActorCritic`,
+`MultiStagePPOConfig`, `MultiStagePPO`. `tools/smoke_multi_stage_ppo.py`
+(all checks PASS, ~17s CPU).
+
+- Beta policy, mean/conc parametrization (Beta MEAN extraction = repo
+  invariant), critic over the 2-D state [t/T, d/(q sqrt t)]. Fresh network,
+  state_dim=2; NO theory_align ramp or opponent-lag (one-stage stabilizers).
+- `MultiStagePPOConfig` defaults gamma=gae_lambda=1.0 (finite-horizon
+  economic payoff) — deliberately not the one-stage 0.99/0.95; no leak.
+- Standard clipped-surrogate + value-MSE + entropy update; advantages from
+  the trajectory-aware GAE (`buffer.compute`), so storage order is safe.
+- `effort_function(t, d, T, q)` builds the normalized state and returns the
+  Beta-mean effort — the object the phase03 verifier consumes.
+
+Smoke result (T=2, q=50, 150 updates x 32 episodes, tiny budget): finite
+diagnostics + in-bounds effort throughout; policy non-degenerate (stage-1
+effort ~49.5 near g1=46.67, stage-2 moving); entropy drops (sharpening);
+verifier hook yields EXP=0.073 (EXP/DW=1.8%), dReach=0.50, uncertified.
+Convergence to the closed form is NOT asserted here (step 3/4 with a real
+budget); this step verifies the plumbing is correct and numerically sane.
 
 ## Step 3: self-play rollout loop + exploring starts (NOT STARTED)
 
