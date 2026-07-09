@@ -1,4 +1,34 @@
-# Phase 02: multi-stage environment rewrite (NOT STARTED)
+# Phase 02: multi-stage environment rewrite (COMPLETE 2026-07-09)
+
+## Status
+
+Done. `envs/multi_stage_env.py` + `tools/verify_multi_stage_env.py`
+(all self-checks PASS). Env drives end-to-end on sampled outcomes only and
+independently reproduces the closed form (env never imports theory, so
+agreement is genuine cross-validation, not a tautology — addresses
+shared-assumption risk M7).
+
+## Self-check results (T=2, q=50, canonical params)
+
+| Check | Result |
+|---|---|
+| mean total payoff vs U_eq=2.678 | 2.6816 +/- 0.0032 OK |
+| E[stage-2 effort] vs g1=46.67 | 46.693 OK |
+| terminal win rate vs F_xi(d), d in {-60..60} | max abs err 0.002 OK |
+| gap increment (equal effort): mean~0, var~2q^2/3 | +0.013, 1660 vs 1667 OK |
+| T=3 horizon, reward structure, reset(t0>1) remaining stages | smoke OK |
+| exploring-starts sampler (on-path frac, d0=0 at t0=1) | smoke OK |
+
+## Carry-forward for phase04 (trainer)
+
+**GAE ordering trap:** `agents/ppo_two_players_clean._compute_gae`
+(line 342) chains `next_value` across consecutive storage indices. This is
+correct for single-step bandit (all done=True) but will MISBOOTSTRAP if the
+multi-stage runner interleaves p0/p1 transitions (p0 stage-1's next_value
+would read p1 stage-1's value). The runner must store each player's stage
+sequence CONTIGUOUSLY, or GAE must be made trajectory-aware. Must be fixed
+and unit-tested before the first T=2 GPU run.
+
 
 ## Objective
 

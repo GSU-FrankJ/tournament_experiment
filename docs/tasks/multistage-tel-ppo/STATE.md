@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase01 (complete) -> phase02 (env rewrite, not started)
+Current phase: phase02 (complete) -> phase03 (DP verifier, not started)
 
 ## What's done
 
@@ -25,6 +25,21 @@ Current phase: phase01 (complete) -> phase02 (env rewrite, not started)
   - `tools/verify_two_stage_benchmark.py`: all numerical checks PASS
     (validity flips exactly at q_SOC; corrected curvature matches
     numerics; U_eq closed form matches to 4+ digits).
+
+- **Phase 02 (2026-07-09): multi-stage env rewrite.**
+  - `envs/multi_stage_env.py`: terminal-reward game, SAMPLED rewards only
+    (intermediate = -k e^2, terminal realizes winner from accumulated
+    sampled gap), Markov state (t, d), normalized obs [t/T, d/(q sqrt t)],
+    T configurable, exploring-starts reset API (reset/sample/reset_exploring),
+    both players' transitions via symmetric obs.
+  - `tools/verify_multi_stage_env.py`: all checks PASS (payoff=U_eq,
+    E[stage-2 effort]=g1, win rate=F_xi(d), transition moments; T=3 +
+    exploring-starts smoke). Env cross-validated against theory via
+    independent code paths.
+  - Carry-forward: `_compute_gae` (agent line 342) will misbootstrap if the
+    phase04 runner interleaves p0/p1 transitions — store each player's
+    stages contiguously or make GAE trajectory-aware. Fix + unit test before
+    the first T=2 GPU run.
 
 ## Known issues / open items
 
