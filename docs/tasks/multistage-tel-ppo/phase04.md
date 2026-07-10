@@ -86,12 +86,42 @@ Two honest findings (NOT blockers; the certificate holds):
 Validation JSON not committed (single-seed CPU characterization); the real
 gated multi-seed runs are step 4.
 
-## Step 4: extraction + verifier hook + pre-registered T=2 gate (NOT STARTED)
+## Step 4: extraction + pre-registered T=2 gate (COMPLETE 2026-07-09) — GATE PASSED
 
-- Extract e_hat_t(d) (Beta mean) on a d-grid; feed the phase03 verifier.
-- Pre-register the T=2 acceptance gate (RE_1, RPE_2 vs closed form; EXP^UCB
-  / dReach thresholds) BEFORE the first GPU run. No GPU on T>=3 until T=2
-  passes.
+`utils/multi_stage_metrics.py` (recovery metrics + gate), gate wired into
+`run/run_multi_stage.py` (best-checkpoint restore, EXP^UCB via grid
+refinement), `tools/evaluate_gate.py`, and the frozen
+`preregistration_T2.md`. Thresholds committed (e73775c) BEFORE the run.
+
+### Gated run: T=2, q=50, 5 seeds (42-46), 2000 upd x 512 ep, GPU, ~30 min/seed
+
+**GATE PASS — 5/5 seeds certify.** dReach/DW mean 0.0063 (max 0.0078),
+well under the 0.03 threshold; the certification is reproducible.
+
+| seed | EXP/DW | EXP^UCB/DW | dReach/DW | cert | RE_1 | RPE2_core | PL_2/DW |
+|---|---|---|---|---|---|---|---|
+| 42 | 0.0018 | 0.0018 | 0.0051 | yes | 0.052 | 0.040 | +0.011 |
+| 43 | 0.0008 | 0.0008 | 0.0059 | yes | 0.022 | 0.036 | -0.017 |
+| 44 | 0.0017 | 0.0017 | 0.0057 | yes | 0.051 | 0.086 | +0.001 |
+| 45 | 0.0016 | 0.0016 | 0.0070 | yes | 0.006 | 0.052 | -0.006 |
+| 46 | 0.0021 | 0.0022 | 0.0078 | yes | 0.094 | 0.050 | +0.024 |
+
+Secondary recovery diagnostics ALSO clear their (non-gating) targets:
+RE_1 mean 0.045 (< 0.10), RPE_2_core mean 0.052 (< 0.15). With the full
+budget + best-checkpoint (lowest-dReach) selection, the recovered stage-2
+is near-symmetric and close to the closed form (seed 42:
+e2=[7.4, 34.6, 64.0, 31.5, 10.1] vs CF [0, 35, 70, 35, 0] @ d=[-100..100];
+peak 64 vs 70 is the residual mu*(kappa) smoothing). The step-3 single-seed
+asymmetry did not survive to the gated run.
+
+**Per the pre-registration, PASS authorizes T=3 GPU spend.**
+
+### Note for T>=3: the tiny policy is CPU-bound on GPU
+
+The 64-hidden net barely uses the GPU; act_batch's torch->numpy->torch
+round trips make `--device cuda` no faster than CPU (rollout pegs one CPU
+core). For T>=3 / larger budgets, run on CPU or optimize the rollout
+(keep actions on-device, or multiprocess env transitions).
 
 ## Constraints
 

@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase04 step 3 (rollout loop, complete) -> step 4 (extraction + pre-registered T=2 gate)
+Current phase: phase04 step 4 (T=2 gate, PASSED) -> phase05 (T=3 verified equilibrium)
 
 ## What's done
 
@@ -91,6 +91,22 @@ Current phase: phase04 step 3 (rollout loop, complete) -> step 4 (extraction + p
     44.7 (g1=46.67). stage-2 hump-shaped peak 59 (CF 70). Findings: peak
     undershoot = exploration-smoothed mu*(kappa) (Claim-B vindicated);
     stage-2 asymmetry (finite-sample, step-4 seed item). JSON not committed.
+- **Phase 04 step 4 (2026-07-09): pre-registered T=2 gate -> PASSED.**
+  - `utils/multi_stage_metrics.py` (recovery metrics + gate),
+    `tools/evaluate_gate.py`, frozen `preregistration_T2.md`. Thresholds
+    committed (e73775c) BEFORE the gated run. Runner restores the
+    best-dReach checkpoint and saves recovery metrics + EXP^UCB.
+  - **Gated run T=2, q=50, seeds 42-46, 2000upd x 512ep, GPU (~30min/seed):
+    GATE PASS, 5/5 certify.** dReach/DW mean 0.0063 (max 0.0078 << 0.03).
+    EXP/DW mean 0.0016. Recovery also clears targets: RE_1 0.045 (<0.10),
+    RPE_2_core 0.052 (<0.15). Recovered stage-2 near-symmetric (seed42
+    e2=[7.4,34.6,64.0,31.5,10.1] vs CF [0,35,70,35,0]); peak 64 vs 70 =
+    residual smoothing. Step-3 asymmetry did not survive.
+    Results: `results/multi_stage/convergence/ms_T2_q50_seed{42..46}_gateT2_convergence.json`.
+  - **Per pre-registration, PASS authorizes T=3 GPU spend.**
+  - Perf note: tiny 64-hidden net is CPU-bound; `--device cuda` no faster
+    than CPU (act_batch torch<->numpy round trips). For T>=3, run CPU or
+    optimize the rollout.
 
 ## Known issues / open items
 
@@ -103,11 +119,14 @@ Current phase: phase04 step 3 (rollout loop, complete) -> step 4 (extraction + p
 
 ## What's next
 
-- **Phase 02: env rewrite** (`envs/multi_stage_env.py`): terminal-reward
-  game, sampled outcomes only, state (t, d), exploring-starts reset API,
-  T configurable. Spec in phase02.md.
-- Phase 03: DP verifier + Δ_t(d) certificate (calibrate on closed form:
-  EXP(e*_CF) ~ error floor; falsification suite).
-- Phase 04: multi-step PPO trainer (critic over (t,d), gamma=1 override,
-  GAE path validated); curriculum + ablations per plan.
-- Pre-register T=2 gate thresholds before first GPU run.
+Phases 01-04 complete; T=2 gate PASSED (T=3 GPU spend authorized).
+
+- **Phase 05: T=3 verified equilibrium** (plan 5.3, the main contribution).
+  No closed form; PPO computes e_hat_1/2/3(d), the DP verifier certifies.
+  Pre-register a T=3 gate (dReach/DW threshold; seed robustness). Report
+  learned effort functions, BR-vs-learned, Δ_t(d), exploitability
+  certificate. Curriculum (T=1->2->3) + no-curriculum ablation.
+- Robustness (plan 5.4): grid refinement (already in verifier), seed
+  robustness, falsification, optional adversarial-RL BR cross-check.
+- Multi-stage extension T=4,5 (plan 5.5) as benchmark extensions.
+- Optional: optimize the CPU-bound rollout before larger-T budgets.
