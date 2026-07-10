@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase05 (T=3 verified equilibrium) — GATE PASSED (5/5 certify)
+Current phase: phase05 complete — T=2/3/4 gates PASS (5/5), T=5 PASS (4/5); figures/ablations deferred
 
 ## What's done
 
@@ -122,6 +122,19 @@ Current phase: phase05 (T=3 verified equilibrium) — GATE PASSED (5/5 certify)
     legitimate for T>=3). stage-3 peak ~65 vs myopic ~70 = residual
     smoothing.
   - Results: `results/multi_stage/convergence/ms_T3_q50_seed{42..46}_gateT3_convergence.json`.
+- **Phase 05 T=4/T=5 (2026-07-09): benchmark extensions — BOTH GATES PASS.**
+  - Pre-registered `preregistration_T4_T5.md` (frozen 80ee48c); same
+    verifier/threshold (grid-stable <0.3% 201->401); budget 1000*T upd.
+    Runner adds onpath_summary (total effort/cost, Main Q4 / Table 4).
+  - **T=4: PASS 5/5** (dReach/DW mean 0.0155, max 0.0217, EXP/DW 0.0044).
+  - **T=5: PASS 4/5** (dReach/DW mean 0.0190, max 0.0321; seed 46 lone
+    non-cert at 0.0321). Certificate binds first at T=5 (expected).
+  - Multi-stage summary (cross-seed): certify 5/5,5/5,5/5,4/5 for T=2,3,4,5;
+    dReach/DW 0.006/0.010/0.016/0.019 (monotone up); total effort
+    93.3/108.1/116.8/128.0 (Main Q4: increases with T); e_hat_t(0) rising
+    within each T (Main Q1). Final-stage effort ~60-64 (myopic ~70, residual
+    smoothing); early-stage effort falls as T grows.
+  - Results: `results/multi_stage/convergence/ms_T{4,5}_q50_seed{42..46}_gate{T4,T5}_convergence.json`.
 
 ## Known issues / open items
 
@@ -134,14 +147,18 @@ Current phase: phase05 (T=3 verified equilibrium) — GATE PASSED (5/5 certify)
 
 ## What's next
 
-Phases 01-04 complete; T=2 gate PASSED (T=3 GPU spend authorized).
+Phases 01-05 complete. Full pipeline built and validated end to end:
+T=2 closed-form recovery + verifier calibration (gate PASS), T=3 verified
+equilibrium (gate PASS, main contribution), T=4/T=5 benchmark extensions
+(gates PASS 5/5 and 4/5). Certified eps-approx MPE across horizons.
 
-- **Phase 05: T=3 verified equilibrium** (plan 5.3, the main contribution).
-  No closed form; PPO computes e_hat_1/2/3(d), the DP verifier certifies.
-  Pre-register a T=3 gate (dReach/DW threshold; seed robustness). Report
-  learned effort functions, BR-vs-learned, Δ_t(d), exploitability
-  certificate. Curriculum (T=1->2->3) + no-curriculum ablation.
-- Robustness (plan 5.4): grid refinement (already in verifier), seed
-  robustness, falsification, optional adversarial-RL BR cross-check.
-- Multi-stage extension T=4,5 (plan 5.5) as benchmark extensions.
-- Optional: optimize the CPU-bound rollout before larger-T budgets.
+Remaining (all deferred; none started):
+- **Figures + paper tables** from the saved effort_curves: learned effort
+  functions (Fig 3), BR-vs-learned (Fig 4), Δ_t(d) (Fig 5), and the
+  multi-stage summary (Table 4). Data is all in the JSONs.
+- **Curriculum (T=1->2->3) ablation** and **adversarial-RL BR cross-check**
+  (plan 5.4) — need checkpoint-transfer / a second BR method.
+- Optional: optimize the CPU-bound rollout; re-run T=2/T=3 to backfill
+  onpath_summary/effort_curves for a fully uniform Table 4 (T=2 currently
+  uses the analytic recovered total effort).
+- Fold the 5 benchmark-derivation errata back into the plan Word doc.

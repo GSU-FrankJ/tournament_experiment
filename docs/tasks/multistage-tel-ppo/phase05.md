@@ -66,14 +66,59 @@ Peak stage-3 effort ~65 (vs the myopic final-stage optimum ~70) is the same
 residual mu*(kappa) smoothing seen at T=2 — expected under Claim-B; the
 verifier certifies the smoothed candidate.
 
-## Deliverables
+## T=4 / T=5 benchmark extensions (COMPLETE 2026-07-09) — BOTH GATES PASSED
 
-- Certificate table (per seed + cross-seed mean/std) — plan Table 2.
-- Per-stage effort functions, BR-vs-learned, Δ_t(d) curves in the JSONs
-  (plotting is a follow-up) — plan Figures 3-5.
-- Qualitative check of expected economic patterns.
+Plan section 5.5. Pre-registered in `preregistration_T4_T5.md` (frozen
+80ee48c, before the runs). Same verifier/threshold; grid-stable at T=4/5
+(<0.3% EXP change 201->401). Budget 1000*T updates x 512 ep, seeds 42-46,
+CPU (~45 min T=4, ~75 min T=5).
+
+- **T=4: GATE PASS — 5/5 certify.** dReach/DW mean 0.0155 (max 0.0217),
+  EXP/DW mean 0.0044.
+- **T=5: GATE PASS — 4/5 certify** (exactly the 80% threshold). dReach/DW
+  mean 0.0190 (max 0.0321). Seed 46 is the lone non-certifier
+  (dReach/DW=0.0321, just over 0.03; EXP/DW still tiny at 0.0062). T=5 is
+  where the conservative reachable-Δ certificate starts to bind — the
+  expected "certification degrades at larger horizons" (plan). Reported
+  with numerical caveats, not a blocker (benchmark extension).
+
+Results: `results/multi_stage/convergence/ms_T{4,5}_q50_seed{42..46}_gate{T4,T5}_convergence.json`.
+
+## Multi-stage summary (plan Table 4; cross-seed mean)
+
+| T | certify | dReach/DW (max) | EXP/DW | total effort | e_hat_t(0) per stage |
+|---|---|---|---|---|---|
+| 2 | 5/5 | 0.0063 (0.0078) | 0.0016 | 93.3* | ~[46.7, 46.7]* (recovers CF) |
+| 3 | 5/5 | 0.0097 (0.0144) | 0.0027 | 108.1 | [43.3, 50.9, 64.8] |
+| 4 | 5/5 | 0.0155 (0.0217) | 0.0044 | 116.8 | [40.3, 42.6, 50.2, 64.0] |
+| 5 | 4/5 | 0.0190 (0.0321) | 0.0051 | 128.0 | [38.9, 39.4, 41.9, 47.4, 59.8] |
+
+*T=2 total effort = 2*g1 (analytic recovered value); T=2 run predates the
+effort_curves/onpath_summary fields.
+
+### Main Questions (plan) answered
+
+- **Q1 (effort rises toward the final stage):** YES at every T —
+  e_hat_t(0) is increasing in t within each row.
+- **Q4 (total expected effort increases with T):** YES, monotone
+  93.3 -> 108.1 -> 116.8 -> 128.0.
+- **Q3 (hump-shaped in the gap):** YES at every stage/horizon (verified in
+  the T=3 curves; same shape at T=4/5).
+- Final-stage effort e_hat_T(0) ~ 60-64 across T (near the myopic ~70, with
+  the residual mu*(kappa) smoothing). As T grows, early-stage effort FALLS
+  (T=5 stage-1 38.9 vs T=3 stage-1 43.3): more remaining stages => more
+  chance to catch up later => less early effort.
+- **Certificate degrades monotonically with T** (dReach/DW 0.006 -> 0.010
+  -> 0.016 -> 0.019); T=5 is the first horizon with a non-certifying seed.
+
+## Deliverables — status
+
+- Certificate tables per T (per seed + cross-seed) — done (in JSONs + above).
+- Per-stage effort / BR-vs-learned / Δ_t(d) curves — saved in the JSONs
+  (plotting into Figures 3-5 is a follow-up).
+- Multi-stage summary Table 4 — done (above).
 
 ## Deferred
 
+- Figure generation from the saved curves (Figs 3-5, Table 4 as a paper table).
 - Curriculum (T=1->2->3) ablation, adversarial-RL BR cross-check (plan 5.4).
-- T=4,5 benchmark extensions (plan 5.5).
