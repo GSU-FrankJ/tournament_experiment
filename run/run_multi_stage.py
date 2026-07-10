@@ -175,6 +175,40 @@ def effort_curves(
     return {"d_grid": d.tolist(), "stages": stages}
 
 
+def onpath_summary(agent: MultiStagePPO, vres, q: float, T: int, k: float) -> Dict:
+    """On-path expected total effort and cost under the learned mean policy.
+
+    Uses the verifier's on-path state distribution mu^e_t(d) (both players
+    follow e_hat, starting from d_1=0) and the learned effort function.
+    Answers the plan's Main Question 4 (does total expected effort increase
+    with T) and fills the multi-stage summary table (plan Table 4).
+
+    Args:
+        agent: Trained agent (learned effort function).
+        vres: A ``VerifierResult`` at the finest grid.
+        q: Noise half-width.
+        T: Horizon.
+        k: Cost coefficient in c(e) = k e^2.
+
+    Returns:
+        Dict with per-stage / total expected effort and cost (per player).
+    """
+    d = np.asarray(vres.d_grid)
+    per_effort: List[float] = []
+    per_cost: List[float] = []
+    for t in range(1, T + 1):
+        p = np.asarray(vres.onpath_dist_by_stage[t])  # sums to 1 on the full grid
+        e = agent.effort_function(t, d, T=T, q=q)
+        per_effort.append(float((p * e).sum()))
+        per_cost.append(float(k * (p * e * e).sum()))
+    return {
+        "per_stage_effort": per_effort,
+        "total_effort": float(sum(per_effort)),
+        "per_stage_cost": per_cost,
+        "total_cost": float(sum(per_cost)),
+    }
+
+
 def main() -> int:
     """Parse args, validate params, train, evaluate, and write results."""
     p = argparse.ArgumentParser(description="Multi-stage tournament PPO trainer")
@@ -272,6 +306,7 @@ def main() -> int:
     }
     final_snap = effort_snapshot(agent, args.q, args.T)
     curves = effort_curves(agent, vres, args.q, args.T)
+    onpath = onpath_summary(agent, vres, args.q, args.T, cfg["k"])
 
     # EXP^UCB via grid refinement (deterministic verifier: Richardson residual).
 
@@ -325,6 +360,7 @@ def main() -> int:
         "final_eval": final_eval,
         "final_effort": final_snap,
         "effort_curves": curves,
+        "onpath_summary": onpath,
         "grid_refinement": grid_refinement,
         "recovery_metrics": recovery,
         "best_checkpoint": {"update": best["update"], "eval": best["eval"]},
@@ -350,6 +386,8 @@ def main() -> int:
                   for t in range(1, args.T + 1)]
         wd = {t: round(v, 4) for t, v in final_eval["worst_delta_by_stage"].items()}
         print(f"[effort] per-stage e_hat_t(0) = {e_at_0}")
+        print(f"[onpath] total effort={onpath['total_effort']:.1f} total cost={onpath['total_cost']:.3f} "
+              f"per-stage effort={[round(x, 1) for x in onpath['per_stage_effort']]}")
         print(f"[deviation] worst Δ_t (full grid) = {wd}")
     print(f"[saved] {out_path}")
     return 0
