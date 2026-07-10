@@ -114,11 +114,18 @@ effort_curves/onpath_summary fields.
 ## Deliverables — status
 
 - Certificate tables per T (per seed + cross-seed) — done (in JSONs + above).
-- Per-stage effort / BR-vs-learned / Δ_t(d) curves — saved in the JSONs
-  (plotting into Figures 3-5 is a follow-up).
-- Multi-stage summary Table 4 — done (above).
+- Per-stage effort / BR-vs-learned / Δ_t(d) curves — saved in the JSONs.
+- **Figures + tables generated** (2026-07-09): `tools/make_multistage_figures.py`
+  and `tools/make_multistage_tables.py` produce plan Figures 1-5 and
+  Tables 1-4 into `paper/multistage/` (PDFs + .tex committed; PNGs
+  gitignored). Fig 3 (learned effort functions) is the main result; Fig 4
+  shows learned tracking BR; Fig 2 shows the verifier separating equilibrium
+  from bad policies. See `paper/multistage/README.md`.
+  - Caveat: Fig 1 / Table 4's T=2 columns are sparse/analytic (the T=2 runs
+    predate the effort_curves/onpath_summary fields); re-run one T=2 seed
+    for a dense stage-2 curve if needed for the paper.
 
 ## Deferred
 
-- Figure generation from the saved curves (Figs 3-5, Table 4 as a paper table).
 - Curriculum (T=1->2->3) ablation, adversarial-RL BR cross-check (plan 5.4).
+- Optional dense-curve re-run of T=2 for a publication-quality Figure 1.
