@@ -88,6 +88,7 @@ class VerifierResult:
     v_e_by_stage: Dict[int, np.ndarray] = field(default_factory=dict)
     onpath_dist_by_stage: Dict[int, np.ndarray] = field(default_factory=dict)
     br_reach_dist_by_stage: Dict[int, np.ndarray] = field(default_factory=dict)
+    br_effort_by_stage: Dict[int, np.ndarray] = field(default_factory=dict)
     certified: Optional[bool] = None
 
 
@@ -356,6 +357,7 @@ def verify(
         v_e_by_stage=v_e_by_stage,
         onpath_dist_by_stage=onpath,
         br_reach_dist_by_stage=br_reach,
+        br_effort_by_stage=br_effort_by_stage,
         certified=certified,
     )
 

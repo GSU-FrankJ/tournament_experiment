@@ -132,12 +132,47 @@ def evaluate(agent: MultiStagePPO, cfg: Dict, q: float, T: int) -> Dict:
 
 
 def effort_snapshot(agent: MultiStagePPO, q: float, T: int) -> Dict:
-    """Record learned vs closed-form effort at diagnostic states (T=2 only)."""
+    """Record learned effort at diagnostic states (stage-1 root + stage-2 probe)."""
     snap = {"stage1_at_0": float(agent.effort_function(1, np.array([0.0]), T=T, q=q)[0])}
     d_probe = np.array([-2 * q, -q, 0.0, q, 2 * q])
     snap["stage2_probe_d"] = d_probe.tolist()
     snap["stage2_learned"] = agent.effort_function(2, d_probe, T=T, q=q).tolist()
     return snap
+
+
+def effort_curves(
+    agent: MultiStagePPO, vres, q: float, T: int, d_range_factor: float = 4.0
+) -> Dict:
+    """Per-stage curves for the plan's Figures 3-5 (learned, BR, Δ, on-path).
+
+    Restricts the verifier grid to the economically relevant band
+    |d| <= d_range_factor * q to keep files small and plots focused. The
+    learned effort is evaluated on that grid; BR effort and Δ_t are taken
+    from the verifier arrays (already on its grid).
+
+    Args:
+        agent: Trained agent (learned effort function).
+        vres: A ``VerifierResult`` at the finest grid.
+        q: Noise half-width.
+        T: Horizon.
+        d_range_factor: Grid half-width in units of q.
+
+    Returns:
+        Dict with ``d_grid`` and per-stage ``learned``/``br``/``delta``/
+        ``onpath_dist`` arrays (keyed by stage as strings for JSON).
+    """
+    d_all = np.asarray(vres.d_grid)
+    mask = np.abs(d_all) <= d_range_factor * q
+    d = d_all[mask]
+    stages: Dict[str, Dict] = {}
+    for t in range(1, T + 1):
+        stages[str(t)] = {
+            "learned": agent.effort_function(t, d, T=T, q=q).tolist(),
+            "br": np.asarray(vres.br_effort_by_stage[t])[mask].tolist(),
+            "delta": np.asarray(vres.delta_by_stage[t])[mask].tolist(),
+            "onpath_dist": np.asarray(vres.onpath_dist_by_stage[t])[mask].tolist(),
+        }
+    return {"d_grid": d.tolist(), "stages": stages}
 
 
 def main() -> int:
@@ -214,12 +249,31 @@ def main() -> int:
         print(f"[ckpt] restored best checkpoint @u{best['update']} "
               f"(dReach={best['delta_sum_reachable']:.4f})")
 
-    final_eval = evaluate(agent, cfg, args.q, args.T)
-    final_snap = effort_snapshot(agent, args.q, args.T)
-
-    # EXP^UCB via grid refinement (deterministic verifier: Richardson residual).
+    # Final certification at the finest grid; capture the full result for curves.
     def _policy(t, d):
         return agent.effort_function(t, d, T=args.T, q=args.q)
+
+    vres = verify(
+        _policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=args.q, T=args.T,
+        e_bar=cfg["effort_range"][1],
+        d_grid_size=cfg["verifier"]["d_grid_sizes"][-1],
+        e_grid_size=cfg["verifier"]["e_grid_size"],
+        epsilon_over_dw=cfg["verifier"]["epsilon_over_dw"],
+    )
+    final_eval = {
+        "exp": vres.exp, "exp_over_dw": vres.exp_over_dw,
+        "delta_sum_reachable": vres.delta_sum_reachable,
+        "delta_sum_full": vres.delta_sum_full,
+        "delta_onpath_sum": vres.delta_onpath_sum,
+        "certified": bool(vres.certified),
+        "v_e_root": vres.v_e_root, "v_br_root": vres.v_br_root,
+        "worst_delta_by_stage": vres.worst_delta_by_stage,
+        "reachable_delta_by_stage": vres.reachable_delta_by_stage,
+    }
+    final_snap = effort_snapshot(agent, args.q, args.T)
+    curves = effort_curves(agent, vres, args.q, args.T)
+
+    # EXP^UCB via grid refinement (deterministic verifier: Richardson residual).
 
     ref = verify_grid_refinement(
         _policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=args.q, T=args.T,
@@ -270,6 +324,7 @@ def main() -> int:
         "history": history,
         "final_eval": final_eval,
         "final_effort": final_snap,
+        "effort_curves": curves,
         "grid_refinement": grid_refinement,
         "recovery_metrics": recovery,
         "best_checkpoint": {"update": best["update"], "eval": best["eval"]},
@@ -289,6 +344,13 @@ def main() -> int:
         print(f"[effort] stage1(0)={final_snap['stage1_at_0']:.2f} (g1={cf['g1']:.2f}) | "
               f"stage2 learned={[round(x, 1) for x in final_snap['stage2_learned']]} "
               f"vs CF={[round(x, 1) for x in cf['stage2_probe']]} @ d={final_snap['stage2_probe_d']}")
+    else:
+        # T>=3: no closed form; report per-stage effort at d=0 and worst Δ.
+        e_at_0 = [round(float(agent.effort_function(t, np.array([0.0]), T=args.T, q=args.q)[0]), 1)
+                  for t in range(1, args.T + 1)]
+        wd = {t: round(v, 4) for t, v in final_eval["worst_delta_by_stage"].items()}
+        print(f"[effort] per-stage e_hat_t(0) = {e_at_0}")
+        print(f"[deviation] worst Δ_t (full grid) = {wd}")
     print(f"[saved] {out_path}")
     return 0
 
