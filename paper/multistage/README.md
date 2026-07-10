@@ -33,8 +33,10 @@ PDF figures and `.tex` tables are committed; PNG previews are gitignored
 
 ## Caveats
 
-- **F1 is sparse** (5 probe points): the T=2 runs predate the
-  `effort_curves` field. Re-run one T=2 seed with the current runner for a
-  dense stage-2 curve.
-- **Table 4 T=2 total effort/cost** are analytic recovered values (same
-  reason). T=3/4/5 use the on-path summary from the saved curves.
+- **F1 uses a dense single-seed re-run** (`ms_T2_q50_seed42_densecurve`,
+  same frozen protocol) because the 5-seed gated T=2 runs predate the
+  `effort_curves` field. The stage-2 curve and the e_1(0) annotation both
+  come from that run; the 5-seed recovery robustness lives in Table 1.
+- **Table 4 T=2 total effort/cost** are analytic recovered values
+  (2*g1 and (W_H+W_L)/2 - U_eq). T=3/4/5 use the on-path summary from the
+  saved curves.

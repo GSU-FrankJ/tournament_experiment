@@ -121,11 +121,12 @@ effort_curves/onpath_summary fields.
   gitignored). Fig 3 (learned effort functions) is the main result; Fig 4
   shows learned tracking BR; Fig 2 shows the verifier separating equilibrium
   from bad policies. See `paper/multistage/README.md`.
-  - Caveat: Fig 1 / Table 4's T=2 columns are sparse/analytic (the T=2 runs
-    predate the effort_curves/onpath_summary fields); re-run one T=2 seed
-    for a dense stage-2 curve if needed for the paper.
+  - Fig 1 now uses a dense single-seed T=2 re-run
+    (`ms_T2_q50_seed42_densecurve`, same frozen protocol; dReach/DW=0.0051,
+    RE_1=0.015 — consistent with the gated seed 42). The smooth learned
+    e_2(d) tracks the closed-form triangle with the rounded peak (~61 vs 70)
+    showing the mu*(kappa) smoothing. Table 4's T=2 columns remain analytic.
 
 ## Deferred
 
 - Curriculum (T=1->2->3) ablation, adversarial-RL BR cross-check (plan 5.4).
-- Optional dense-curve re-run of T=2 for a publication-quality Figure 1.

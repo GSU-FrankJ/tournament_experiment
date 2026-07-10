@@ -87,19 +87,36 @@ def fig1_recovery() -> None:
     if not runs:
         print("  [skip Fig1] no T=2 runs")
         return
-    d_probe = np.array(runs[0]["final_effort"]["stage2_probe_d"])
-    e2 = np.array([r["final_effort"]["stage2_learned"] for r in runs])   # (seeds, 5)
-    e1 = np.array([r["final_effort"]["stage1_at_0"] for r in runs])
     g1 = g1_two_stage(Q, WH, WL, K)
     dd = np.linspace(-2 * Q, 2 * Q, 400)
     g2 = g2_two_stage(dd, Q, WH, WL, K, EBAR)
 
+    # Prefer a dense-curve re-run (has effort_curves; the gated T=2 runs predate it).
+    dense = [json.load(open(f)) for f in
+             sorted(glob.glob(os.path.join(CONV, "ms_T2_q50_seed*_densecurve_convergence.json")))]
+
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
     ax.plot(dd, g2, "--", color=C_REF, lw=2, label=r"closed form $e^*_{2,CF}(d)$")
-    ax.errorbar(d_probe, e2.mean(0), yerr=e2.std(0), fmt="o", color=C_LEARNED,
-                ms=7, capsize=3, lw=1.5, label=r"TEL-PPO $\hat{e}_2(d)$ (5 seeds)")
+    if dense:
+        # Internally-consistent single-run figure (both stages from the dense run);
+        # the 5-seed robustness lives in Table 1.
+        d, m, lo, hi = stack_curves(dense, 2, "learned")
+        msk = np.abs(d) <= 2 * Q
+        ax.plot(d[msk], m[msk], color=C_LEARNED, lw=2,
+                label=rf"TEL-PPO $\hat{{e}}_2(d)$ ({len(dense)} seed)")
+        if len(dense) > 1:
+            ax.fill_between(d[msk], lo[msk], hi[msk], color=C_LEARNED, alpha=0.15)
+        e1_note = np.mean([r["final_effort"]["stage1_at_0"] for r in dense])
+        e1_lbl = rf"$\hat{{e}}_1(0)={e1_note:.1f}$"
+    else:
+        d_probe = np.array(runs[0]["final_effort"]["stage2_probe_d"])
+        e2 = np.array([r["final_effort"]["stage2_learned"] for r in runs])
+        ax.errorbar(d_probe, e2.mean(0), yerr=e2.std(0), fmt="o", color=C_LEARNED,
+                    ms=7, capsize=3, lw=1.5, label=r"TEL-PPO $\hat{e}_2(d)$ (5 seeds, probe)")
+        e1 = np.array([r["final_effort"]["stage1_at_0"] for r in runs])
+        e1_lbl = rf"$\hat{{e}}_1(0)={e1.mean():.1f}\pm{e1.std():.1f}$"
     ax.axhline(g1, color="gray", ls=":", lw=1)
-    ax.annotate(rf"$g_1={g1:.1f}$; $\hat{{e}}_1(0)={e1.mean():.1f}\pm{e1.std():.1f}$",
+    ax.annotate(rf"$g_1={g1:.1f}$; {e1_lbl}",
                 xy=(0.02, 0.06), xycoords="axes fraction", fontsize=9,
                 bbox=dict(boxstyle="round", fc="white", ec="gray", alpha=0.8))
     ax.set_xlabel("score gap $d$")
