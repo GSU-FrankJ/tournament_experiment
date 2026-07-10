@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase05 (T=3 verified equilibrium) — setup done, gated run pending
+Current phase: phase05 (T=3 verified equilibrium) — GATE PASSED (5/5 certify)
 
 ## What's done
 
@@ -107,6 +107,21 @@ Current phase: phase05 (T=3 verified equilibrium) — setup done, gated run pend
   - Perf note: tiny 64-hidden net is CPU-bound; `--device cuda` no faster
     than CPU (act_batch torch<->numpy round trips). For T>=3, run CPU or
     optimize the rollout.
+
+- **Phase 05 (2026-07-09): T=3 verified equilibrium — GATE PASSED.**
+  - Runner generalized to T>=3 (per-stage effort_curves: learned/BR/Δ/on-path
+    for Figs 3-5); verifier exposes br_effort_by_stage. Frozen
+    `preregistration_T3.md` (same certificate threshold; no closed form).
+  - **Gated run T=3, q=50, seeds 42-46, 3000upd x 512ep, CPU (~25min/seed):
+    GATE PASS, 5/5 certify.** dReach/DW mean 0.0097 (max 0.0144), EXP/DW
+    mean 0.0027. A certified eps-approx MPE with NO closed-form benchmark
+    (the plan's main contribution).
+  - Economic patterns (cross-seed): effort increases toward the final stage
+    (e_hat_t(0)=43.3/50.9/64.8), hump-shaped in the gap at every stage,
+    leader/follower asymmetry at intermediate stages (behind exerts less;
+    legitimate for T>=3). stage-3 peak ~65 vs myopic ~70 = residual
+    smoothing.
+  - Results: `results/multi_stage/convergence/ms_T3_q50_seed{42..46}_gateT3_convergence.json`.
 
 ## Known issues / open items
 
