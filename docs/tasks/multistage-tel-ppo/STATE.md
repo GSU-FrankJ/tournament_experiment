@@ -1,7 +1,7 @@
 # multistage-tel-ppo
 
 Status: in-progress
-Current phase: phase04 step 4 (T=2 gate, PASSED) -> phase05 (T=3 verified equilibrium)
+Current phase: phase05 (T=3 verified equilibrium) — setup done, gated run pending
 
 ## What's done
 
