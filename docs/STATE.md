@@ -1,6 +1,33 @@
 # Project state
 
-Last updated: 2026-07-07
+Last updated: 2026-07-09
+
+## Multi-stage task launched: theory audit + q_crit config validation (2026-07-09)
+
+- New task `docs/tasks/multistage-tel-ppo/` for the multi-stage plan
+  (`docs/Experiments Plan_Multi-stage.md`), under **owner-decided Claim-B framing**
+  (PPO = smoothed-candidate generator; DP verifier certifies; exploring starts with
+  full approximate-MPE claim; Δ_t(d) one-step deviation gaps as the primary
+  certificate; closed-form terminal integration via F_xi).
+- **Phase 01 complete (zero GPU).** Audited the owner's two-stage closed-form
+  derivation (main `8e9433e`): g2(d), q_SOC, g1, participation algebra all confirmed
+  numerically. **One math error found and corrected**: stage-1 SOC misses the V2*
+  kink term at d=0 — correct curvature is −2k + ΔW²/(32kq⁴) (repo convention),
+  negative iff q > q_SOC, NOT unconditional. Numerically tight: at q=40 the
+  symmetric candidate is a local minimum. Full audit + Word-doc errata:
+  `docs/technical/two_stage_benchmark_audit.md`.
+- **Validity region: q_crit = 41.83** (binding: SOC) for canonical parameters
+  (w_h=6, w_l=2, k=1/3500, c=ke², ē=100). **q=35 and q=40 are INVALID.**
+  Canonical q_list = [45, 50, 55]. Targets at q=50: g1=46.67, g2(0)=70.00,
+  E[g2]=g1 exactly, U_eq=2.678.
+- New: `utils/theory_multistage.py` (closed forms + validation scan incl.
+  zero-effort deviation), `config/multi_stage_two_players.py` (canonical config,
+  supersedes `config/two_stage_two_players.py` for this task; `validate()` raises
+  on invalid q), `tools/verify_two_stage_benchmark.py` (all checks PASS).
+- Next: phase02 env rewrite (`envs/two_stage_env.py` is a different game — per-stage
+  prize flow, logit model, expected-value rewards, no gap state; reference only).
+- NOTE: main commit `8e9433e` carries a mismatched message ("Update print
+  statement…") for the plan-doc edit; noted, no history rewrite.
 
 ## Claim-A κ-continuation 5-seed run + Gate C (2026-07-07)
 

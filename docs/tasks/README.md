@@ -23,6 +23,7 @@ docs/tasks/{task-name}/
 
 | Task | Status | Description |
 |------|--------|-------------|
+| `multistage-tel-ppo` | in-progress | Multi-stage tournament (T=2..5), Claim-B framing; phase01 (theory audit + q_crit config validation) complete |
 | `component2-mode-conc-retrain` | complete | Claim-A test #1: mode-conc head + gain-triggered κ ramp (negative result) |
 | `claim-a-dev-trigger-retrain` | complete | Claim-A test #2: Phase-A zero-GPU screen; closed at Gate A (owner → branch ii) |
 | `claim-a-nonlocking-continuation` | in-progress | Claim-A test #3: kill overruled by owner → adaptive-batch κ-continuation; 1-seed pilot running |
