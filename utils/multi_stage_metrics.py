@@ -20,12 +20,47 @@ import numpy as np
 
 from utils.theory_multistage import (
     eq_utility_two_stage,
+    f_xi,
     g1_two_stage,
     g2_two_stage,
 )
 
 # Effort function: (stage t, gaps d[array]) -> efforts[array].
 EffortFn = Callable[[int, np.ndarray], np.ndarray]
+
+
+def onpath_expected_stage2_effort(effort_fn: EffortFn, *, q: float, n_half: int = 48) -> float:
+    """On-path expected stage-2 effort E[e_hat_2(d_2)] by deterministic quadrature.
+
+    Under symmetric stage-1 play both players exert e_hat_1(0), so the stage-1
+    drift cancels and the stage-2 gap is exactly d_2 = xi_1 ~ Triangular(-2q, 2q).
+    Hence the on-path recovery target is
+
+        E[e_hat_2(d_2)] = int_{-2q}^{2q} e_hat_2(delta) f_xi(delta) d(delta),
+
+    which equals g1 = DW/(6qk) for the closed-form benchmark. Computed by
+    Gauss-Legendre quadrature split at 0 (f_xi is piecewise linear), so it is
+    exact on affine effort segments and needs no simulation. This is the
+    quantity the T=2 report previously omitted (defect D1): it must be compared
+    to 46.6667, NOT the probe value e_hat_2(0) which targets DW/(4qk)=70.
+
+    Args:
+        effort_fn: Vectorized learned effort function ``e_hat(t, d_array)``.
+        q: Noise half-width.
+        n_half: Gauss-Legendre nodes per half of ``[-2q, 2q]`` (>= 32).
+
+    Returns:
+        The on-path expected stage-2 effort (float).
+    """
+    x, w = np.polynomial.legendre.leggauss(n_half)
+    nodes_list, weights_list = [], []
+    for a, b in ((-2.0 * q, 0.0), (0.0, 2.0 * q)):
+        nodes_list.append(0.5 * (b - a) * x + 0.5 * (a + b))
+        weights_list.append(0.5 * (b - a) * w)
+    nodes = np.concatenate(nodes_list)
+    weights = np.concatenate(weights_list)
+    e2 = np.asarray(effort_fn(2, nodes), dtype=float).reshape(-1)
+    return float(np.sum(weights * e2 * f_xi(nodes, q)))
 
 
 @dataclass
@@ -42,6 +77,7 @@ class RecoveryMetrics:
     pl_2_over_dw: float  # PL_2 / (w_h - w_l)
     e_hat_1_at_0: float
     g1: float
+    e2_onpath_expected: float = float("nan")  # E[e_hat_2(d_2)] (target g1=46.6667)
     d_grid: List[float] = field(default_factory=list)
     e_hat_2: List[float] = field(default_factory=list)
     g2: List[float] = field(default_factory=list)
@@ -99,10 +135,12 @@ def recovery_metrics(
     else:
         pl2 = eq_utility_two_stage(q, w_h, w_l, k) - float(v_e_root)
 
+    e2_onpath = onpath_expected_stage2_effort(effort_fn, q=q)
+
     return RecoveryMetrics(
         ae_1=ae1, re_1=re1, mae_2=mae2, rmse_2=rmse2, rpe_2=rpe2,
         rpe_2_core=rpe2_core, pl_2=pl2, pl_2_over_dw=pl2 / dw,
-        e_hat_1_at_0=e1, g1=g1,
+        e_hat_1_at_0=e1, g1=g1, e2_onpath_expected=e2_onpath,
         d_grid=d.tolist(), e_hat_2=e2.tolist(), g2=g2.tolist(),
     )
 

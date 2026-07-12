@@ -362,6 +362,86 @@ def verify(
     )
 
 
+def certify_refined(
+    policy: Policy,
+    *,
+    w_h: float,
+    w_l: float,
+    k: float,
+    q: float,
+    T: int,
+    e_bar: float = 100.0,
+    epsilon_over_dw: float = 0.03,
+    d_grid_coarse: int = 101,
+    d_grid_fine: int = 201,
+    e_grid_size: int = 201,
+    n_quad: int = 129,
+    polish: bool = True,
+) -> Dict[str, object]:
+    """Deterministic nested-grid dReach certificate with a discretization UCB.
+
+    Runs the BR-reachable Δ-sum certificate on a coarse and a fine score-gap
+    grid and forms a CONSERVATIVE deterministic upper bound
+
+        dReach_UCB = dReach_fine + |dReach_fine - dReach_coarse|,
+
+    a Richardson-style ``|fine - coarse|`` discretization-error margin on the
+    fully deterministic verifier. This is NOT a Monte-Carlo confidence interval:
+    there is no sampling anywhere in this path (closed-form terminal + triangular
+    quadrature). Certifies iff ``dReach_UCB / ΔW <= epsilon_over_dw``. The same
+    fine + |fine-coarse| construction is applied to root EXP as a reported
+    diagnostic (not gating).
+
+    Args:
+        policy: Vectorized symmetric effort function ``e_hat(t, d_array)``.
+        w_h: Winner prize.
+        w_l: Loser prize.
+        k: Cost coefficient in c(e) = k e^2.
+        q: Noise half-width.
+        T: Horizon.
+        e_bar: Effort upper bound.
+        epsilon_over_dw: Certification threshold on ``dReach_UCB / ΔW``.
+        d_grid_coarse: Coarse score-gap grid size.
+        d_grid_fine: Fine score-gap grid size (also used for returned curves).
+        e_grid_size: Effort-grid size for the BR max.
+        n_quad: Quadrature nodes over the triangular shock.
+        polish: Parabolic refinement of the BR argmax.
+
+    Returns:
+        Dict with coarse/fine/UCB dReach (raw and ΔW-normalized), the
+        certification flag, EXP diagnostics (fine + discretization UCB), and the
+        fine :class:`VerifierResult` under ``result_fine`` (for downstream
+        curves / on-path summaries).
+    """
+    dw = float(w_h) - float(w_l)
+    common = dict(w_h=w_h, w_l=w_l, k=k, q=q, T=T, e_bar=e_bar,
+                  e_grid_size=e_grid_size, n_quad=n_quad, polish=polish,
+                  epsilon_over_dw=epsilon_over_dw)
+    r_c = verify(policy, d_grid_size=d_grid_coarse, **common)
+    r_f = verify(policy, d_grid_size=d_grid_fine, **common)
+    d_reach_c = r_c.delta_sum_reachable
+    d_reach_f = r_f.delta_sum_reachable
+    d_reach_ucb = d_reach_f + abs(d_reach_f - d_reach_c)
+    exp_ucb = r_f.exp + abs(r_f.exp - r_c.exp)
+    certified = bool(d_reach_ucb / dw <= epsilon_over_dw)
+    return {
+        "d_grid_coarse": d_grid_coarse,
+        "d_grid_fine": d_grid_fine,
+        "dreach_coarse": d_reach_c,
+        "dreach_fine": d_reach_f,
+        "dreach_ucb": d_reach_ucb,
+        "dreach_coarse_over_dw": d_reach_c / dw,
+        "dreach_fine_over_dw": d_reach_f / dw,
+        "dreach_ucb_over_dw": d_reach_ucb / dw,
+        "exp_fine": r_f.exp,
+        "exp_ucb": exp_ucb,
+        "exp_ucb_over_dw": exp_ucb / dw,
+        "certified": certified,
+        "epsilon_over_dw": epsilon_over_dw,
+        "result_fine": r_f,
+    }
+
+
 def verify_grid_refinement(
     policy: Policy,
     *,

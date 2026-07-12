@@ -22,13 +22,39 @@ cannot introduce this bug by storing in the wrong order.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+def beta_mode_normalized(alpha, beta) -> np.ndarray:
+    """Normalized Beta mode with a mean fallback for non-interior shapes.
+
+    Returns ``(alpha-1)/(alpha+beta-2)`` elementwise where ``alpha > 1`` AND
+    ``beta > 1`` (the interior unimodal case), else the Beta mean
+    ``alpha/(alpha+beta)`` (the mode sits at a boundary and is not a useful
+    point estimate). Clamped to ``(0, 1)``. The MEAN remains the primary
+    reported extraction (repo invariant); this supports the mean-vs-mode
+    diagnostic only.
+
+    Args:
+        alpha: Beta alpha parameter(s), scalar or array.
+        beta: Beta beta parameter(s), scalar or array.
+
+    Returns:
+        Normalized point estimate(s) in ``(0, 1)``, broadcast to the input shape.
+    """
+    alpha = np.asarray(alpha, dtype=float)
+    beta = np.asarray(beta, dtype=float)
+    mean = alpha / (alpha + beta)
+    interior = (alpha > 1.0) & (beta > 1.0)
+    denom = np.where(interior, alpha + beta - 2.0, 1.0)
+    mode = np.where(interior, (alpha - 1.0) / denom, mean)
+    return np.clip(mode, 1e-6, 1.0 - 1e-6)
 
 
 def compute_gae_single(
@@ -482,31 +508,94 @@ class MultiStagePPO:
         a_mean = float(dist.mean.clamp(1e-6, 1 - 1e-6).item())
         return self.low + a_mean * (self.high - self.low)
 
+    def _stage_states(self, t: int, d: np.ndarray, T: int, q: float) -> torch.Tensor:
+        """Normalized states [t/T, d/(q sqrt t)] for a stage-t gap array."""
+        d = np.asarray(d, dtype=np.float32)
+        t_norm = np.full_like(d, t / T)
+        d_norm = d / (q * np.sqrt(max(t, 1)))
+        return torch.tensor(np.stack([t_norm, d_norm], axis=-1), dtype=torch.float32,
+                            device=self.device)
+
     @torch.no_grad()
-    def effort_function(self, t: int, d: np.ndarray, T: int, q: float) -> np.ndarray:
+    def beta_params(self, t: int, d: np.ndarray, T: int, q: float) -> Tuple[np.ndarray, np.ndarray]:
+        """Raw Beta ``(alpha, beta)`` of the policy at stage t over gaps d.
+
+        Feeds the mean-vs-mode diagnostic and the alpha/beta checkpoint dump
+        (so the extraction question can be revisited post-hoc without a re-run).
+
+        Args:
+            t: Stage (1-indexed).
+            d: Score gaps (array).
+            T: Horizon.
+            q: Noise half-width.
+
+        Returns:
+            ``(alpha, beta)`` arrays, same shape as ``d``.
+        """
+        states = self._stage_states(t, d, T, q)
+        alpha, beta, _ = self.net.forward(states)
+        return alpha.squeeze(-1).cpu().numpy(), beta.squeeze(-1).cpu().numpy()
+
+    @torch.no_grad()
+    def effort_function(
+        self, t: int, d: np.ndarray, T: int, q: float, extraction: str = "mean"
+    ) -> np.ndarray:
         """Vectorized learned effort function e_hat_t(d) for the verifier.
 
-        Builds the normalized state [t/T, d/(q sqrt t)] for each gap and
-        returns the Beta-mean effort. This is the object passed to
-        ``utils.dp_verifier.verify``.
+        Builds the normalized state [t/T, d/(q sqrt t)] for each gap and returns
+        the extracted effort. ``extraction="mean"`` (default, the repo invariant
+        and the object passed to ``utils.dp_verifier.verify``) uses the Beta
+        mean; ``extraction="mode"`` uses the mean-fallback Beta mode for the
+        diagnostic only.
 
         Args:
             t: Stage (1-indexed).
             d: Score gaps (array).
             T: Horizon.
             q: Noise half-width (for the state normalization).
+            extraction: ``"mean"`` (default) or ``"mode"``.
 
         Returns:
             Effort array, same shape as ``d``.
         """
-        d = np.asarray(d, dtype=np.float32)
-        t_norm = np.full_like(d, t / T)
-        d_norm = d / (q * np.sqrt(max(t, 1)))
-        states = torch.tensor(np.stack([t_norm, d_norm], axis=-1), dtype=torch.float32,
-                              device=self.device)
-        dist, _ = self.net.dist(states)
-        a_mean = dist.mean.squeeze(-1).clamp(1e-6, 1 - 1e-6).cpu().numpy()
-        return self.low + a_mean * (self.high - self.low)
+        states = self._stage_states(t, d, T, q)
+        if extraction == "mode":
+            alpha, beta, _ = self.net.forward(states)
+            a_pt = beta_mode_normalized(alpha.squeeze(-1).cpu().numpy(),
+                                        beta.squeeze(-1).cpu().numpy())
+        elif extraction == "mean":
+            dist, _ = self.net.dist(states)
+            a_pt = dist.mean.squeeze(-1).clamp(1e-6, 1 - 1e-6).cpu().numpy()
+        else:
+            raise ValueError(f"unknown extraction {extraction!r} (use 'mean' or 'mode')")
+        return self.low + a_pt * (self.high - self.low)
+
+    def save(self, path: str) -> None:
+        """Persist policy/critic weights + config + effort bounds to a .pt file.
+
+        Args:
+            path: Destination checkpoint path (parent dirs created).
+        """
+        import os
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        torch.save(
+            {"state_dict": self.net.state_dict(), "cfg": asdict(self.cfg),
+             "effort_bounds": [self.low, self.high]},
+            path,
+        )
+
+    def load(self, path: str) -> Dict:
+        """Load weights saved by :meth:`save` onto this agent's device.
+
+        Args:
+            path: Checkpoint path written by :meth:`save`.
+
+        Returns:
+            The raw checkpoint dict (state_dict / cfg / effort_bounds).
+        """
+        ckpt = torch.load(path, map_location=self.device)
+        self.net.load_state_dict(ckpt["state_dict"])
+        return ckpt
 
     def evaluate_actions(
         self, states: torch.Tensor, actions_norm: torch.Tensor
