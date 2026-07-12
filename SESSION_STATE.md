@@ -72,25 +72,38 @@ T6 rename of *existing* g→e* keys/labels. New T1/T2 outputs already use
 e-notation keys; the existing-key rename is held so figures/tables migrate in one
 coordinated step when Phase-2 regenerates the JSON schema.
 
-## Stopping point — PHASE 1 CORE COMPLETE (stopped at Phase 1→2 boundary)
-Core code (T1,T2,T7,T8,T9) implemented + tests/smoke green. **STOPPED here per
-protocol — no Phase-2 retrain / re-certify launched.** Blast radius: verifier,
-metrics, agent, runner shared with T≥3 → new fns additive, but the cert-semantics
-change (T2/T7) forces re-certifying all T=2..5 in Phase 2. One-stage code untouched.
+## Stopping point — PHASE 2 CORE TASKS COMPLETE (stopped at Phase 2 boundary)
 
-### Next (Phase 2 — needs approval to launch)
-1. **Retrain 5-seed T=2** (q=50, seeds 42–46) with the patched runner to produce
-   `.pt` + α,β + `e2_onpath_expected` + `dReach_UCB` (the gated T=2 JSONs lack all
-   of these; **retrain-required** set per decision 2). ~30 min/seed.
-2. **Re-certify T=3,4,5** from their saved `effort_curves` (rebuild ê_t(d)
-   interpolant → `certify_refined`) — **no retrain needed** for the certificate,
-   but α,β / mean-vs-mode still require a retrain if wanted for those horizons.
-3. **Phase 1b reporting** (T4 table, T5 figures, T6 key rename) against the
-   regenerated JSON schema.
-4. Write `results/two_stage_report.md` + `results/two_stage_results.json` with
-   provenance; every number from an actual Phase-2 run (MISSING otherwise).
+Phase 1 committed (`26de10d`/`77aaf9e`/`e7d278a`) + T7 full-independence folded in.
+Phase 2 tasks 1–4 done; **Phase-2 artifacts NOT yet committed** (awaiting review,
+mirroring the Phase-1 rhythm). Extended follow-ups (Phase 1b figures, T=3/4/5
+retrain) NOT started — stopped at the boundary per instruction.
 
-### Deferred within Phase 1 (unchanged): T4/T5/T6 — see note above.
+### Phase 2 — DONE (evidence)
+1. **Retrain 5-seed T=2** (tag `p2cert`, commit `e7d278a`, 2000×512, CPU ~15min/seed):
+   **5/5 certify**, dReach_UCB/DW mean 0.0064 (max 0.0072). E[ê_2(d_2)] mean 44.69
+   (target 46.667); ê_1(0) 46.38 (0.6% low); ê_2(0) 63.51 (μ*(κ) smoothing). Full
+   persistence (`.pt` + α,β + provenance + mean/mode). MEAN≈MODE (Δ~0.16%) → D6:
+   keep mean.
+2. **Re-certify T=3/4/5** (`tools/recertify_multistage.py`, extracted-policy from
+   effort curves): 5/5, 5/5, 4/5 — verdicts UNCHANGED under the UCB gate. Fine grid
+   reproduces original dReach exactly.
+3. **Reporting/tables** made schema-backward-compatible (`make_multistage_tables.py`);
+   regen on old data = byte-identical (verified).
+4. **`results/two_stage_report.md`** + **`results/two_stage_results.json`** written;
+   every number from an actual run.
+
+### Commits (Phase 2, branch `feat/multistage-phase0`)
+- `9ca4f2d` — feat: extracted-policy re-certification tool (code)
+- `41d2889` — fix: table generator backward-compatible with dReach-UCB schema (code)
+- `462630c` — results: T=2 retrain 5 seeds (p2cert convergence JSONs)
+- `bc0dbfa` — results: T=3-5 re-certification + aggregated two_stage_results.json
+- _(this docs commit)_ — docs: corrected two-stage report + session state
+- `.pt` checkpoints under `results/multi_stage/checkpoints/` are gitignored (not committed).
+
+### NOT started (extended scope — needs approval)
+- Phase 1b: figure regen (T5), falsification table (T4), g→e existing-key rename (T6).
+- Optional T=3/4/5 retrain for full stochastic-policy re-eval + α,β at those horizons.
 
 ---
 
