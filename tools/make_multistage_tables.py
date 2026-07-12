@@ -35,6 +35,25 @@ WH, WL, K, EBAR, Q = 6.0, 2.0, 1.0 / 3500.0, 100.0, 50.0
 DW = WH - WL
 
 
+# --- schema accessors (backward compatible: new dReach-UCB gate OR old single-grid) ---
+
+def _dreach_fine_over_dw(fe: dict) -> float:
+    """Fine-grid dReach/ΔW: new ``dreach_fine_over_dw`` else old single-grid."""
+    return fe.get("dreach_fine_over_dw", fe["delta_sum_reachable"] / DW)
+
+
+def _dreach_ucb_over_dw(fe: dict) -> float:
+    """dReach_UCB/ΔW (the gating quantity): new key else fall back to fine/single-grid."""
+    return fe.get("dreach_ucb_over_dw", _dreach_fine_over_dw(fe))
+
+
+def _certified(fe: dict) -> bool:
+    """Certification: prefer the stored (UCB-based) flag, else the old single-grid test."""
+    if "certified" in fe:
+        return bool(fe["certified"])
+    return _dreach_fine_over_dw(fe) <= 0.03
+
+
 def load_T(T: int) -> List[dict]:
     return [json.load(open(f)) for f in
             sorted(glob.glob(os.path.join(CONV, f"ms_T{T}_q50_seed*_gateT{T}_convergence.json")))]
@@ -103,9 +122,9 @@ def table2() -> None:
     for r in runs:
         fe = r["final_eval"]; gr = r["grid_refinement"]
         rows.append((r["params"]["seed"], fe["exp"], fe["exp_over_dw"],
-                     gr["exp_ucb_over_dw"], fe["delta_sum_reachable"] / DW,
+                     gr["exp_ucb_over_dw"], _dreach_fine_over_dw(fe),
                      fe["delta_sum_full"] / DW,
-                     "yes" if fe["delta_sum_reachable"] / DW <= 0.03 else "no"))
+                     "yes" if _certified(fe) else "no"))
     lines = [
         r"\begin{tabular}{lcccccc}", r"\toprule",
         r"seed & $EXP$ & $EXP/\Delta W$ & $EXP^{UCB}/\Delta W$ & "
@@ -151,9 +170,16 @@ def table3() -> None:
              r"\midrule", r"grid $M$ & $EXP$ & $d_{\text{reach}}/\Delta W$ \\", r"\midrule"]
     if r3:
         gr = r3[0]["grid_refinement"]
-        for M, e, dr in zip(gr["d_grid_sizes"], gr["exp"], gr["delta_sum_reachable"]):
-            lines.append(f"{M} & {e:.5f} & {dr/DW:.5f} \\\\")
-        lines.append(f"Richardson & {gr['exp_richardson']:.5f} & -- \\\\")
+        if "d_grid_sizes" in gr:  # old multi-grid Richardson schema
+            for M, e, dr in zip(gr["d_grid_sizes"], gr["exp"], gr["delta_sum_reachable"]):
+                lines.append(f"{M} & {e:.5f} & {dr/DW:.5f} \\\\")
+            lines.append(f"Richardson & {gr['exp_richardson']:.5f} & -- \\\\")
+        else:  # new deterministic coarse/fine + UCB schema
+            lines.append(f"{gr['d_grid_coarse']} & {gr.get('exp_fine', float('nan')):.5f} "
+                         f"& {gr['dreach_coarse']/DW:.5f} \\\\")
+            lines.append(f"{gr['d_grid_fine']} & {gr['exp_fine']:.5f} "
+                         f"& {gr['dreach_fine']/DW:.5f} \\\\")
+            lines.append(f"UCB & {gr['exp_ucb']:.5f} & {gr['dreach_ucb']/DW:.5f} \\\\")
     lines += [r"\midrule",
               r"\multicolumn{3}{l}{\emph{(b) Seed robustness: cross-seed std}} \\",
               r"\midrule", r"$T$ & std $EXP/\Delta W$ & std $d_{\text{reach}}/\Delta W$ \\", r"\midrule"]
@@ -161,7 +187,7 @@ def table3() -> None:
         runs = load_T(T)
         if not runs: continue
         ex = np.array([r["final_eval"]["exp_over_dw"] for r in runs])
-        dr = np.array([r["final_eval"]["delta_sum_reachable"] / DW for r in runs])
+        dr = np.array([_dreach_fine_over_dw(r["final_eval"]) for r in runs])
         lines.append(f"{T} & {ex.std(ddof=0):.4f} & {dr.std(ddof=0):.4f} \\\\")
     lines += [r"\midrule",
               r"\multicolumn{3}{l}{\emph{(c) Falsification (T=2): $EXP/\Delta W$}} \\",
@@ -188,8 +214,8 @@ def table4() -> None:
         runs = load_T(T)
         if not runs: continue
         ex = np.mean([r["final_eval"]["exp_over_dw"] for r in runs])
-        dr = np.mean([r["final_eval"]["delta_sum_reachable"] / DW for r in runs])
-        nc = sum(1 for r in runs if r["final_eval"]["delta_sum_reachable"] / DW <= 0.03)
+        dr = np.mean([_dreach_fine_over_dw(r["final_eval"]) for r in runs])
+        nc = sum(1 for r in runs if _certified(r["final_eval"]))
         if T == 2:  # analytic recovered values (run predates onpath fields)
             te = 2 * g1_two_stage(Q, WH, WL, K)
             tc = (WH + WL) / 2 - eq_utility_two_stage(Q, WH, WL, K)
