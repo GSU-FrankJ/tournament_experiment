@@ -1,3 +1,99 @@
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ACTIVE WORK (prepended 2026-07-12): Two-Stage TEL-PPO Correctness Pass.  -->
+<!-- The project-wide state from the audit-remediation effort follows below,  -->
+<!-- unchanged. This section is scoped to the T=2 correctness pass only.      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SESSION_STATE — Two-Stage TEL-PPO Correctness Pass (ACTIVE, 2026-07-12)
+
+**Branch:** `feat/multistage-phase0` · **Discipline:** investigate → test →
+minimal fix → stop at phase boundary. Phase-0 diagnosis (approved):
+[`DIAGNOSIS.md`](DIAGNOSIS.md).
+
+## Approved decisions (owner, 2026-07-12)
+
+1. **Retrain persists full checkpoint + raw Beta (α,β).** Mean stays PRIMARY
+   reported extraction; mean-vs-mode kept as a DIAGNOSTIC (not dropped).
+2. **Broader certification scope accepted** — corrected semantics apply to
+   T=2,3,4,5. Distinguish:
+   - **re-certification only** (JSON already stores the learned ê_t(d) curve):
+     **T=3, T=4, T=5** (`effort_curves` present) + the T=2 `densecurve` run.
+   - **retrain required** (no policy object / no α,β saved): the **5-seed gated
+     T=2** runs (predate `effort_curves`; only ê_1(0)+81-pt ê_2+5-pt probe).
+     No run saved α,β or a `.pt`, so **mean-vs-mode (T8) needs a retrain for
+     every horizon**.
+3. **dReach UCB = deterministic discretization bound**, NOT a Monte-Carlo CI:
+   nested score-gap grid refinement, `dReach_UCB = dReach_fine +
+   |dReach_fine − dReach_coarse|`; certify iff `dReach_UCB/ΔW ≤ 0.03`.
+4. This state section created at Phase-1 start (prepended, non-destructive).
+
+## Patch / test sequence (Phase 1) — tests first: `tools/test_phase1_correctness.py`
+
+| Task | Change | Status |
+|---|---|---|
+| **T1** | `multi_stage_metrics.onpath_expected_stage2_effort()` (GL quad over Triangular[−2q,2q]); `RecoveryMetrics.e2_onpath_expected`; runner prints vs 46.6667 + per-d CF | ✅ tested |
+| **T2** | `dp_verifier.certify_refined()` deterministic nested-grid `dReach_UCB`; runner + gate certify on it | ✅ tested |
+| **T7** | runner: select ckpt on **coarse** grid (101), certify on **fine** (201)+UCB; persist `.pt` + α,β dump | ✅ smoke |
+| **T8** | `ppo_multi_stage.beta_mode_normalized()`, `beta_params()`, `effort_function(extraction=…)`, `save()/load()` | ✅ tested |
+| **T9** | SOC verification via `validate_two_stage_params` stage-2 global scan; param condition `q_soc=√(ΔW/8k)` | ✅ tested |
+
+### Evidence (2026-07-12)
+- **Unit tests:** `tools/test_phase1_correctness.py` — **ALL PASS** (15 checks:
+  T1 E[g2]=46.6667 & constant-policy identity; T2 UCB≥fine, deterministic, CF
+  certifies / const-high fails; T8 mode(3,3)=0.5, (2,5)=0.2, α≤1→mean fallback;
+  T9 q_soc=41.833, q=50 dev2≈5.5e-17, q=35 invalid).
+- **Runner smoke** (T=2, 10 upd, CPU, 4s — pipeline check, NOT a real run;
+  artifacts deleted): all wiring fires — `E[e2(d2)]` printed vs 46.6667; the
+  `dReach_UCB/DW` gate; coarse-select + `.pt` persistence; MEAN/MODE line; JSON
+  gains `provenance` / `beta_params` / `extraction_diagnostic` /
+  `e2_onpath_expected` / `dreach_{coarse,fine,ucb}_over_dw`. Real-world guard
+  check: at 10 upd stage-1 α≈0.71<1, so MODE correctly fell back to MEAN.
+
+### Commits (Phase 1, branch `feat/multistage-phase0`)
+- `26de10d` — test: add Phase-1 correctness tests (tests-first)
+- `77aaf9e` — feat: dReach-UCB gate, on-path E[e2], mean/mode, ckpt persistence
+- _(this docs commit)_ — docs: Phase-0 diagnosis + Phase-1 session state
+- T7 full-independence follow-up (selection grid 51; certify 101/201) is folded
+  into `26de10d`/`77aaf9e` above (grid-role constants + disjointness test).
+
+### Files changed (Phase 1 core)
+- `utils/multi_stage_metrics.py` — `onpath_expected_stage2_effort()` + field (additive)
+- `utils/dp_verifier.py` — `certify_refined()` (additive)
+- `agents/ppo_multi_stage.py` — `beta_mode_normalized()`, `beta_params()`,
+  `effort_function(extraction=…)` (default mean, unchanged behavior), `save()/load()`
+- `run/run_multi_stage.py` — coarse-select/fine-certify+UCB, `.pt`+α,β persistence,
+  provenance, E[ê_2] + mean/mode reporting
+- `tools/test_phase1_correctness.py` — new self-checking test (T1,T2,T8,T9)
+- `DIAGNOSIS.md` — Phase-0 deliverable (unchanged this phase)
+
+**Deferred to Phase 1b (reporting; coupled to Phase-2 regen):** T4 falsification
+table (EXP+dReach), T5 figures (stage-1 panel, `E[ê_2]` annotation, T=2 Δ_t),
+T6 rename of *existing* g→e* keys/labels. New T1/T2 outputs already use
+e-notation keys; the existing-key rename is held so figures/tables migrate in one
+coordinated step when Phase-2 regenerates the JSON schema.
+
+## Stopping point — PHASE 1 CORE COMPLETE (stopped at Phase 1→2 boundary)
+Core code (T1,T2,T7,T8,T9) implemented + tests/smoke green. **STOPPED here per
+protocol — no Phase-2 retrain / re-certify launched.** Blast radius: verifier,
+metrics, agent, runner shared with T≥3 → new fns additive, but the cert-semantics
+change (T2/T7) forces re-certifying all T=2..5 in Phase 2. One-stage code untouched.
+
+### Next (Phase 2 — needs approval to launch)
+1. **Retrain 5-seed T=2** (q=50, seeds 42–46) with the patched runner to produce
+   `.pt` + α,β + `e2_onpath_expected` + `dReach_UCB` (the gated T=2 JSONs lack all
+   of these; **retrain-required** set per decision 2). ~30 min/seed.
+2. **Re-certify T=3,4,5** from their saved `effort_curves` (rebuild ê_t(d)
+   interpolant → `certify_refined`) — **no retrain needed** for the certificate,
+   but α,β / mean-vs-mode still require a retrain if wanted for those horizons.
+3. **Phase 1b reporting** (T4 table, T5 figures, T6 key rename) against the
+   regenerated JSON schema.
+4. Write `results/two_stage_report.md` + `results/two_stage_results.json` with
+   provenance; every number from an actual Phase-2 run (MISSING otherwise).
+
+### Deferred within Phase 1 (unchanged): T4/T5/T6 — see note above.
+
+---
+
 # SESSION_STATE.md — full project state for a fresh session (zero context loss)
 
 Last updated: 2026-06-12 · **Branch: `fix/audit-remediation`** · HEAD at time of writing:
