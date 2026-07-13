@@ -90,7 +90,7 @@ retrain) NOT started — stopped at the boundary per instruction.
    reproduces original dReach exactly.
 3. **Reporting/tables** made schema-backward-compatible (`make_multistage_tables.py`);
    regen on old data = byte-identical (verified).
-4. **`results/two_stage_report.md`** + **`results/two_stage_results.json`** written;
+4. **`docs/two_stage_report.md`** + **`results/two_stage_results.json`** written;
    every number from an actual run.
 
 ### Commits (Phase 2, branch `feat/multistage-phase0`)
