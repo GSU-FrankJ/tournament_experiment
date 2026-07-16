@@ -1,7 +1,7 @@
 # Two-Stage TEL-PPO — Corrected Certification Report
 
 **Date:** 2026-07-12 · **Branch:** `feat/multistage-phase0` · **Code commit at run time:** `e7d278a`
-**Machine-readable companion:** [`results/two_stage_results.json`](two_stage_results.json)
+**Machine-readable companion:** [`results/two_stage_results.json`](../results/two_stage_results.json)
 
 This report supersedes the certification numbers in the 2026-07-10 status report
 for the two-stage (T=2) horizon. It presents the results of the correctness pass
@@ -149,7 +149,7 @@ Applied the corrected `dReach_UCB` gate to the existing T=3/4/5 gated runs
 **without retraining**, by rebuilding ê_t(d) from the saved (mean-extraction)
 `effort_curves` and re-running the verifier. Tool:
 [`tools/recertify_multistage.py`](../tools/recertify_multistage.py) → output in
-[`results/multi_stage/recertification_T345.json`](multi_stage/recertification_T345.json).
+[`results/multi_stage/recertification_T345.json`](../results/multi_stage/recertification_T345.json).
 
 > **Scope caveat (important).** This is an **extracted-policy** certification: the
 > interpolated mean-effort curve is certified, **not** the trained stochastic
