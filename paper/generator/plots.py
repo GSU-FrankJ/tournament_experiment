@@ -117,6 +117,50 @@ def _unify_ylim(axes, margin: float = 0.05):
         ax.set_ylim(y_min - margin * span, y_max + margin * span)
 
 
+def _holdforward_seeds(
+    method_df: pd.DataFrame, value_cols: List[str]
+) -> pd.DataFrame:
+    """Extend each seed to the panel's common step grid by holding its last
+    observed value forward past its verified early-stop.
+
+    TEL-PPO runs early-stop at different updates when their exploitability
+    verification fires, so a plain step-wise average over the *union* of steps is
+    dominated in the tail by the few longest-running seeds (survivorship): the
+    cross-seed mean drifts toward whichever seed ran longest (the q=35 rebound)
+    and the CI band jumps whenever a seed drops out (the q=55 tail step). A
+    converged-and-stopped seed sits at its final effort thereafter, so holding
+    that value forward keeps every seed in each step's average — removing the
+    rebound and drop-out jumps while preserving the genuine cross-seed spread.
+
+    Args:
+        method_df: one (experiment, method, q, ablation) panel, multiple seeds.
+        value_cols: numeric columns to forward-fill (e.g. per-agent efforts).
+
+    Returns:
+        DataFrame with every seed present on the full union step grid; value_cols
+        forward-filled after each seed's last logged step.
+    """
+    all_steps = np.sort(method_df["step"].unique())
+    id_cols = [
+        c for c in ("experiment", "method", "q", "ablation", "weight_variant",
+                    "theoretical_effort")
+        if c in method_df.columns
+    ]
+    frames = []
+    for seed, g in method_df.groupby("seed"):
+        g = g.sort_values("step").drop_duplicates("step").set_index("step")
+        g = g.reindex(all_steps)
+        for c in value_cols:
+            if c in g.columns:
+                g[c] = g[c].ffill()
+        for c in id_cols:
+            if c in g.columns:
+                g[c] = g[c].ffill().bfill()
+        g["seed"] = seed
+        frames.append(g.reset_index())
+    return pd.concat(frames, ignore_index=True)
+
+
 def plot_convergence_main(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
@@ -1131,8 +1175,11 @@ def plot_distance_to_equilibrium(
     # Compute effort error
     df = compute_effort_error(df)
 
-    # Precompute convergence steps
-    conv_steps_df = get_convergence_step(df)
+    # Precompute the verified convergence update per run (Claim-B criterion: the
+    # PPO update at which the exploitability verification fired). The diagnostic
+    # effort-band detector is structurally unsatisfiable for early-stopped runs
+    # (all-NaN => no line drawn), which is why the old figure showed no marker.
+    conv_steps_df = get_verified_convergence_step(df)
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
 
@@ -1145,25 +1192,35 @@ def plot_distance_to_equilibrium(
 
         color = q_colors.get(q, "gray")
 
-        # Aggregate across seeds
+        # Aggregate across seeds. Plot the per-seed MAE  <|e_i - e*|>  — the same
+        # quantity Claim-B reports as |ē - e*| (settling at 1.87 for q=35, 0.79
+        # for q=55) — NOT |<e_i> - e*|. The latter collapses toward zero whenever
+        # the *mean* effort transits e* on its way into the basin, producing the
+        # spurious log-scale plunges the old figure showed (q=35 near 100k steps).
+        # Seeds are also held forward past their verified early-stop so the tail
+        # is not dominated by the few longest-running seeds (the q=55 dip).
         has_multi = q_df["seed"].nunique() > 1
         if has_multi:
-            agg = aggregate_seeds(q_df)
-            if "effort_error_mean" not in agg.columns:
-                agg["effort_error_mean"] = np.abs(
-                    agg["policy_mean_effort_mean"] - agg["theoretical_effort"]
-                )
-                agg["effort_error_ci95"] = agg.get("policy_mean_effort_ci95", 0)
-
-            steps = agg["step"].values
-            err_mean = agg["effort_error_mean"].values
-            err_ci = agg.get("effort_error_ci95", pd.Series([0] * len(agg))).values
+            padded = _holdforward_seeds(q_df, ["effort_error", "policy_mean_effort"])
+            stat = (
+                padded.groupby("step")["effort_error"]
+                .agg(["mean", "std", "count"])
+                .reset_index()
+                .sort_values("step")
+            )
+            steps = stat["step"].values
+            err_mean = stat["mean"].values
+            # Band = +/-1 standard error of the mean. On this log axis a linear
+            # 95% CI (1.96*SEM) dips below zero while the mean is still ~1-2 and
+            # clips to the y-floor, drawing spurious downward spikes; +/-1 SEM
+            # stays positive and is the tighter band the "too wide" note asks for.
+            err_sem = stat["std"].fillna(0.0).values / np.sqrt(stat["count"].values)
 
             ax.plot(steps, err_mean, color=color, linewidth=2, label=format_q(q))
             ax.fill_between(
                 steps,
-                np.maximum(err_mean - err_ci, 0),
-                err_mean + err_ci,
+                np.clip(err_mean - err_sem, 1e-3, None),
+                err_mean + err_sem,
                 color=color,
                 alpha=SHADE_ALPHA,
             )
@@ -1177,17 +1234,21 @@ def plot_distance_to_equilibrium(
                 label=format_q(q),
             )
 
-        # Convergence vertical line (mean across seeds for this q)
+        # Detected convergence step: mean verified convergence update across seeds
+        # (Claim-B "Conv. Update (verified)": q=35 -> 55, q=55 -> 87) mapped onto
+        # the training-step axis via the run's own steps-per-update stride.
         q_conv = conv_steps_df[conv_steps_df["q"] == q]
         if "experiment" in conv_steps_df.columns:
             q_conv = q_conv[q_conv["experiment"] == "two_players"]
         q_conv = q_conv[q_conv["ablation"] == "baseline"]
-        mean_conv = q_conv["convergence_step"].dropna().mean()
-        if not np.isnan(mean_conv):
+        mean_conv_update = q_conv["convergence_update"].dropna().mean()
+        steps_per_update = q_df["step"].drop_duplicates().sort_values().diff().median()
+        if not np.isnan(mean_conv_update) and not np.isnan(steps_per_update):
+            # No per-q label: a single proxy entry is added to the legend below so
+            # the three colored lines do not each claim a legend row.
             ax.axvline(
-                x=mean_conv, color=color, linestyle=":",
+                x=mean_conv_update * steps_per_update, color=color, linestyle=":",
                 linewidth=1.0, alpha=0.7,
-                label=f"Detected convergence step ({format_q(q)})",
             )
 
     # ε threshold horizontal line
@@ -1198,9 +1259,14 @@ def plot_distance_to_equilibrium(
     )
 
     ax.set_xlabel("Training Steps")
-    ax.set_ylabel("Equilibrium error |ē − e*|")
+    ax.set_ylabel(r"Equilibrium error  $\langle\,|e_i - e^*|\,\rangle$")
     ax.set_title("Convergence Error to the Analytical Equilibrium")
-    ax.legend(loc="best")
+    # One proxy entry for the (per-q coloured) convergence-step verticals so they
+    # occupy a single legend row instead of three, keeping the compact layout.
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(Line2D([0], [0], color="0.5", linestyle=":", linewidth=1.2))
+    labels.append("Detected convergence step")
+    ax.legend(handles, labels, loc="best", fontsize=FONT_SIZES["legend"])
     ax.set_yscale("log")
     ax.set_ylim(bottom=0.1)
     ax.xaxis.set_major_formatter(
