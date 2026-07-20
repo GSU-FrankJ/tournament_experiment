@@ -53,6 +53,7 @@ from .extract import (
     compute_effort_error,
     get_final_values,
     get_convergence_step,
+    get_verified_convergence_step,
 )
 
 
@@ -173,8 +174,16 @@ def plot_convergence_main(
         squeeze=False,
     )
 
-    # Precompute convergence steps for vertical lines
-    conv_steps_df = get_convergence_step(df)
+    # PPO rollout batch size (env steps per policy update). Trajectories are
+    # logged once per update, so update index = step / STEPS_PER_UPDATE. The
+    # x-axis is displayed in *updates* to match the Claim-B "Conv. Update" column.
+    STEPS_PER_UPDATE = 4096
+
+    # Precompute the verified convergence update per run: the PPO update at which
+    # the in-training exploitability verification fired (first update satisfying
+    # the convergence criterion). Mean across seeds reproduces the Claim-B
+    # "Conv. Update (verified)" values (two-player baseline: q35=55, q55=87).
+    verified_conv_df = get_verified_convergence_step(df)
 
     for row_idx, variant in enumerate(weight_variants):
         wv_col = "weight_variant" if "weight_variant" in df.columns else "ablation"
@@ -202,6 +211,14 @@ def plot_convergence_main(
                 ax.axhline(
                     y=e_theory, color=THEORY_LINE_COLOR, linestyle="--",
                     linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$", zorder=1,
+                )
+                # Mark the numeric equilibrium value at the right edge of the line.
+                ax.annotate(
+                    f"$e^*={e_theory:.2f}$",
+                    xy=(1.0, e_theory), xycoords=("axes fraction", "data"),
+                    xytext=(-4, 4), textcoords="offset points",
+                    ha="right", va="bottom", color=THEORY_LINE_COLOR,
+                    fontsize=FONT_SIZES["legend"], fontweight="bold", zorder=6,
                 )
 
             # Filter to PPO method
@@ -260,27 +277,33 @@ def plot_convergence_main(
                         label=label_base, zorder=3,
                     )
 
-            # Convergence vertical line (median across seeds)
-            mask = (
-                (conv_steps_df["q"] == q)
-                & (conv_steps_df["ablation"] == variant)
-                & (conv_steps_df["method"].isin(["TEL-PPO", "PPO"]))
+            # Convergence vertical line: mean verified convergence update across
+            # seeds (the first update satisfying the convergence criterion),
+            # matching the Claim-B "Conv. Update (verified)" column. Positioned in
+            # step space (update * STEPS_PER_UPDATE) since curves are plotted
+            # against cumulative steps.
+            cmask = (
+                (verified_conv_df["q"] == q)
+                & (verified_conv_df["method"].isin(["TEL-PPO", "PPO"]))
+                & (verified_conv_df["ablation"] == "baseline")
             )
-            if "experiment" in conv_steps_df.columns:
-                mask = mask & (conv_steps_df["experiment"] == "two_players")
-            conv_vals = conv_steps_df.loc[mask, "convergence_step"].dropna()
+            if "weight_variant" in verified_conv_df.columns:
+                cmask = cmask & (verified_conv_df["weight_variant"] == variant)
+            if "experiment" in verified_conv_df.columns:
+                cmask = cmask & (verified_conv_df["experiment"] == "two_players")
+            conv_vals = verified_conv_df.loc[cmask, "convergence_update"].dropna()
             if not conv_vals.empty:
-                median_conv = conv_vals.median()
+                mean_conv = conv_vals.mean()
                 ax.axvline(
-                    x=median_conv, color=CONV_VLINE_COLOR,
+                    x=mean_conv * STEPS_PER_UPDATE, color=CONV_VLINE_COLOR,
                     linestyle=CONV_VLINE_LINESTYLE,
                     linewidth=CONV_VLINE_LINEWIDTH,
-                    label="Convergence step", zorder=4,
+                    label="Convergence update", zorder=4,
                 )
 
             # Axis formatting
             if row_idx == n_rows - 1:
-                ax.set_xlabel("Training Steps")
+                ax.set_xlabel("Training Updates")
             ax.set_ylabel("Effort")
 
             # Title: "Noise Level q = {q}" on top row only
@@ -298,32 +321,49 @@ def plot_convergence_main(
                     fontweight="bold", rotation=90,
                 )
 
-            # Legend only on top-left panel (deduplicate labels)
-            if row_idx == 0 and col_idx == 0:
-                handles, labels = ax.get_legend_handles_labels()
-                seen = set()
-                deduped_h, deduped_l = [], []
-                for h, l in zip(handles, labels):
-                    if l not in seen:
-                        seen.add(l)
-                        deduped_h.append(h)
-                        deduped_l.append(l)
-                ax.legend(deduped_h, deduped_l, loc="upper left",
-                          fontsize=FONT_SIZES["legend"])
-
+            # Display the x-axis in training updates (step / STEPS_PER_UPDATE).
+            # A single figure-level legend is added after the loop.
             ax.xaxis.set_major_formatter(
                 ticker.FuncFormatter(
-                    lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
-                    else f"{x/1e3:.0f}k" if x >= 1e3
-                    else f"{x:.0f}"
+                    lambda x, p: f"{x / STEPS_PER_UPDATE:.0f}"
                 )
             )
 
     # Unify y-axis across all panels
     _unify_ylim(axes)
 
+    # Unify x-axis across all panels: extend every panel to the longest
+    # (high-noise) run so the extra updates that high noise requires are visible.
+    # Restrict to the baseline ablation that is actually plotted, so long
+    # non-baseline sweep arms (eps_*/pat_*, r5_fig7_*) do not stretch the axis.
+    ppo_mask = df["method"].isin(["TEL-PPO", "PPO"])
+    if "ablation" in df.columns:
+        ppo_mask = ppo_mask & (df["ablation"] == "baseline")
+    ppo_steps = df.loc[ppo_mask, "step"]
+    if not ppo_steps.empty:
+        x_max = float(ppo_steps.max())
+        for ax in np.asarray(axes).flat:
+            ax.set_xlim(0, x_max * 1.02)
+
     plt.tight_layout()
     plt.subplots_adjust(left=0.12)
+
+    # Single figure-level legend, placed outside the grid at the top-right.
+    legend_handles = [
+        Line2D([0], [0], color=THEORY_LINE_COLOR, linestyle="--",
+               linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$"),
+        Line2D([0], [0], color=AGENT_COLORS["agent1"], linestyle="-",
+               linewidth=2, label="Agent 1"),
+        Line2D([0], [0], color=AGENT_COLORS["agent2"], linestyle="--",
+               linewidth=2, label="Agent 2"),
+        Line2D([0], [0], color=CONV_VLINE_COLOR, linestyle=CONV_VLINE_LINESTYLE,
+               linewidth=CONV_VLINE_LINEWIDTH, label="Convergence update"),
+    ]
+    fig.legend(
+        handles=legend_handles, loc="lower right",
+        bbox_to_anchor=(1.0, 1.0), ncol=4, frameon=True,
+        fontsize=FONT_SIZES["legend"],
+    )
 
     # Save figure
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')

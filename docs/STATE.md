@@ -1,6 +1,48 @@
 # Project state
 
-Last updated: 2026-07-09
+Last updated: 2026-07-20
+
+## Convergence-main figure: Claim-B refresh (2026-07-20)
+
+- Regenerated `paper/figures/convergence_main.{png,pdf}` (2×3 grid, weight
+  variant × q) from the 5-seed `r5_sampled` two-player baseline runs — the
+  **Claim-B canonical baseline** (same runs behind
+  `results/one_stage_claimb_summary.csv`). Style/layout otherwise unchanged.
+- Changes to `plot_convergence_main` in `paper/generator/plots.py`:
+  1. **Vertical dashed convergence line** now marks the *verified* convergence
+     update (`get_verified_convergence_step` → mean `stopped_at_update` over the
+     exploitability-verified seeds), i.e. the first update satisfying the
+     criterion. Matches Claim-B "Conv. Update (verified)" exactly: two-player
+     baseline q35→55, q55→87 (was the old `get_convergence_step` effort-δ path,
+     which never fired here because `min_steps=100` > run length).
+  2. **e\* value annotated** on each panel (red `$e^*=…$` at the right edge of
+     the theory line).
+  3. **X-axis unified** across all six panels and relabeled **Training Updates**
+     (tick = step/4096). Range extends to the longest (high-noise q=55) baseline
+     run so the extra updates high noise needs are visible; x_max restricted to
+     the baseline ablation so long `eps_*/pat_*` sweep arms don't stretch it.
+  4. **Legend** moved out of the top-left panel to a single figure-level legend
+     at the top-right, outside the grid.
+- Internal plotting stays in step space, so `paper/data/convergence_main.csv` is
+  unchanged. Not committed (awaiting review). NOTE: code edit + figure regen —
+  split into two commits if committing (per repo commit rules).
+
+## KL-dynamics figure: unified x-axis (2026-07-20)
+
+- Regenerated `paper/figures/kl_dynamics.{png,pdf}` ("KL Divergence across Noise
+  Levels") with a **shared training-step x-axis** across the three q panels
+  (all 0→442368, the global max; each curve still ends at its own data extent).
+- Data source confirmed already correct: the figure draws from the 5-seed
+  `r5_sampled` two-player baseline runs — the **Claim-B canonical baseline**, the
+  same runs the claim-b summary (`results/one_stage_claimb_summary.csv`) is built
+  from. `paper/data/kl_dynamics.csv` is **byte-identical** after regen (no data
+  change) — only the axis limits changed.
+- Code: `plot_kl_dynamics` in `paper/generator/plots.py` now computes
+  `global_step_max` over positive-KL rows and applies `ax.set_xlim(0, global_step_max)`
+  to every panel. All other style (colors, fonts, layout, y-axis, legend,
+  threshold/median/band) unchanged. Regen via `python -m paper.generator plot kl_dynamics`.
+- Not committed (awaiting review). NOTE: this bundles a code edit + a figure
+  regen — split into two commits if committing (per repo commit rules).
 
 ## Multi-stage task launched: theory audit + q_crit config validation (2026-07-09)
 
