@@ -1,6 +1,111 @@
 # Project state
 
-Last updated: 2026-07-20
+Last updated: 2026-07-24
+
+## MISSING-cell evaluations + final T-A/T-C (2026-07-24)
+
+Post-hoc follow-up (zero training): filled all three MISSING items from the
+2026-07-23 session. (1) 2P q45 post-polish referee exploitability = 2.7e-5
+(`results/one_stage_ablation/ablation_results_q45.json`); (2) no_exploit-arm
+terminal exploitability via the shipped MC BR search on reconstructed
+stochastic terminal policies = 0.0109/0.0086/0.0044 for q35/45/55
+(`no_exploit_terminal_exploitability.json`; new `BetaPolicyAgent` adapter);
+(3) Set-2 (8,4) MC-BR polish, 15 profiles = 47.045/36.751/30.127
+(`polish_per_seed_set2.json`) with ★ markers added to `convergence_main` only.
+(4) 3P per-seed (a)-leg re-measured under convention C2 — reproduces the
+committed 0.0008/0.0007 exactly; the phase0 log's (a)-leg was already on the
+per-seed profiles (its "24.68" is player-1's mean, not a separate projection).
+Conventions locked: C1 err_of_mean for paper tables (4 columns appended to
+`one_stage_claimb_summary.csv`, existing cells byte-identical, README note);
+C2 per-seed player-mean 3P polish. Details: SESSION_STATE.md (2026-07-24).
+
+## Figure regen (F2/F6/F9) + table extraction for the one-stage pipeline (2026-07-23)
+
+**What was done.** Plotting + data-extraction session (zero training):
+- `paper/figures/convergence_main.{png,pdf}` — gray line re-semantized to the
+  FIRST-PASS verification update (was streak completion); new ○ raw / ★ MC-BR
+  polished endpoint markers; legend renamed ("Verification update", "Raw
+  estimate", "MC-BR polished estimate"). NEW file
+  `paper/figures/convergence_main_1x3.{png,pdf}` (Set-1 row only) via
+  `tools/regen_convergence_main_1x3.py`.
+- `paper/figures/exploitability_dynamics.{png,pdf}` — y-label "Raw profile
+  exploitability" (data source verified = in-training raw-profile MC
+  exploitability), 4-entry compact legend.
+- `paper/figures/equilibrium_recovery_dotplot.{png,pdf}` — new title/y-label,
+  visible seed markers, "Low-cost/High-cost agent" labels (mapping verified),
+  black het-cost theory lines.
+- Tables T-A (ablation), T-B (as-built config), T-C (merged results) extracted
+  from artifacts and delivered in the session reply; verified by a 6-agent
+  adversarial pass.
+
+**Key discovery.** The canonical r5_sampled PPO baselines (2P/3P/dc) trained
+under the **theory-align-v2 override**: entropy 0, LR 5e-5→2e-5, clip
+0.20→0.15, 1 epoch/update, `ActorCriticMeanConc` net. `docs/ONE_STAGE_ASBUILT.md`
+§Q4's optimizer table is wrong for these runs (flagged there and in
+SESSION_STATE.md; doc not edited). da baseline (`r5_sampled_std`) = standard arm.
+
+**Known issues / next steps.** (i) 2P q45 post-polish exploitability MISSING —
+extend the phase-1 referee to q45. (ii) `no_exploit` arm has no exploitability
+artifact (by design) — post-hoc eval would fill it. (iii) plots.py +
+__main__.py edits uncommitted; split code vs artifact commits per repo rules.
+Full detail: SESSION_STATE.md (2026-07-23 section).
+
+## Equilibrium-recovery dot plot (Figure 6): rebuilt from Claim-B polished values (2026-07-20)
+
+**What was done.** Regenerated `paper/figures/equilibrium_recovery_dotplot.{png,pdf}`
+(and backing `paper/data/equilibrium_recovery_dotplot.csv`) so the markers show the
+Claim-B MC-BR **polished** efforts (which land on e*) instead of the previous **raw**
+PPO landings (which sat below e*). The drawing style is unchanged.
+
+- `tools/one_stage_polish_per_seed.py` — reproduces `phase0_verify.py`'s per-seed
+  polish (same POL config, reading, start point, per-cell seed policy) and PERSISTS
+  the per-seed polished efforts to `results/one_stage_ablation/polish_per_seed_all.json`
+  (45 rows: 2P q35/45/55, 3P/dc/da q35/55, 5 seeds each). CPU-only, ~108 min.
+  Cross-seed means reproduce `results/phase0_verify_20260701_1941.log` exactly
+  (2P q35→44.95, 3P q35→24.68, dc q35→38.04/27.66, da q35→46.45, …). 2P q45 has no
+  log reference (outside the Claim-B set) but uses identical machinery.
+- `paper/generator/plots.py::plot_equilibrium_recovery_dotplot` — added a
+  backward-compatible `final_override` param that swaps the data source only; the
+  drawing logic is untouched.
+- `tools/regen_equilibrium_recovery_dotplot.py` — thin wrapper for a one-off regen.
+  Mean relative error on the new figure = 0.47%.
+
+**Wired into the generator.** `plots.load_polished_dotplot_final()` reads
+`polish_per_seed_all.json` and maps it to the plot's `final_override` columns.
+`generate_all_figures` (→ `make_all`) and `python -m paper.generator plot
+equilibrium_recovery_dotplot` now use it by default, so the canonical figure is the
+polished one. If the polished JSON is absent, both fall back to the raw PPO landings
+with a printed note (no crash). The regen tool now reuses the same loader.
+
+## Ablation figure (Figure 7): full rebuild from Claim-B data (2026-07-20)
+
+- Rewrote `plot_ablation_comparison` in `paper/generator/plots.py` and regenerated
+  `paper/figures/ablation_comparison.{png,pdf}` + `paper/data/ablation_comparison.csv`.
+  Implements the phase08 spec (`docs/tasks/paper-figures-tables-revision/phase08.md`)
+  items a–h plus the owner's additions i (summary table) and j (no-polish comparison).
+- **Root cause fixed**: the old figure rendered **only TEL-PPO** — the ablation arms
+  live on disk as `r5_fig7_no_stability` / `r5_fig7_no_exploit`, which never matched the
+  hardcoded filter keys `no_cheap_gate` / `no_exploitability`. Phase08 was marked
+  "complete" but the arms were silently absent. New code remaps disk tags → canonical
+  keys (`_ABL_DISK_TO_CANON`).
+- **Design** (owner-approved draft): 3 stacked q-panels (q = 35/45/55) with a **broken
+  x-axis** — left = convergence detail (0→0.55×10⁶), right = the non-terminating
+  `no_exploit` tail (→6.25×10⁶). Per-seed traces + 95% CI bands, prominent red theory
+  line (lw 3.0), TEL-PPO thick / ablations thin, unified y-axis, x in ×10⁶, titles
+  without `.0`. TEL-PPO endpoint carries a **no-polish (○ raw) vs MC-BR-polished
+  (★ Claim-B)** fork. Bottom **summary table**: terminal |ē−e*|, final exploitability,
+  NC (non-convergence) rate, time-to-verification per arm.
+- **q note**: data exists at q = 35/**45**/55 (not 40 as the phase08 text says — no q=40
+  runs exist anywhere). Owner confirmed 45. The reshared reference image (q=25/40/55,
+  effort ~50–100) is a *style* template from a different/older parameterization, not data.
+- **Key numbers** (all from `results/`): terminal |ē−e*| TEL-PPO polished 0.51/0.11/0.17,
+  no_stability 2.57/0.24/1.30, no_exploit 0.85/3.31/0.58; NC rate 0/0/100%;
+  `no_exploit` runs to 1500 updates (never verifies) and at q=45 drifts *away* from e*
+  (35.5→32.0). Polished landings from `results/one_stage_ablation/ablation_results.json`
+  (q35 44.95, q55 28.76; q45 not run → ★ omitted, table shows raw).
+- **Not committed** (awaiting review). NOTE per repo commit rules: this bundles a **code
+  edit** (`plots.py`) + **figure/data regen** — split into two commits. Also `plots.py`
+  already carried unrelated uncommitted effort_drift/kl_dynamics edits from prior work.
 
 ## Convergence-main figure: Claim-B refresh (2026-07-20)
 
