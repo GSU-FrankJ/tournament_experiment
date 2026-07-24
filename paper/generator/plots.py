@@ -8,6 +8,7 @@ Implements:
 - Ablation comparison
 """
 
+import json
 import os
 from typing import List, Optional, Tuple, Dict
 from pathlib import Path
@@ -16,12 +17,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplotlib.gridspec as gridspec
+from matplotlib.colors import to_rgba
 from matplotlib.lines import Line2D
 from scipy.stats import beta as beta_dist
 
 from .config import (
     FIGURES_DIR,
     DATA_DIR,
+    RESULTS_DIR,
+    CONVERGENCE_DIR,
     OUTPUT_DPI,
     METHOD_COLORS,
     METHOD_LINESTYLES,
@@ -161,12 +166,80 @@ def _holdforward_seeds(
     return pd.concat(frames, ignore_index=True)
 
 
+def _first_pass_updates(df: pd.DataFrame, steps_per_update: int = 4096) -> pd.DataFrame:
+    """Per-run FIRST-PASS verification update: the first in-training
+    exploitability check the raw self-play profile passes
+    (exploitability < eps_eq), before the patience streak completes.
+
+    Reported in the same 1-based update convention as ``stopped_at_update``
+    (a verified run's 5th consecutive passing check sits exactly at
+    ``stopped_at_update``; series row i corresponds to update i+1).
+
+    Returns one row per run with columns:
+        experiment, method, q, seed, ablation [, weight_variant],
+        first_pass_update (NaN if no check ever passed)
+    """
+    eps = CONVERGENCE_CONFIG["exploit_threshold"]
+    group_cols = ["method", "q", "seed", "ablation"]
+    if "weight_variant" in df.columns:
+        group_cols.append("weight_variant")
+    if "experiment" in df.columns:
+        group_cols = ["experiment"] + group_cols
+
+    records = []
+    for key, grp in df.groupby(group_cols):
+        grp = grp.sort_values("step")
+        fp = np.nan
+        if "exploitability" in grp.columns and "exploitability_is_valid" in grp.columns:
+            passed = grp[
+                (grp["exploitability_is_valid"] == True)  # noqa: E712
+                & grp["exploitability"].notna()
+                & (grp["exploitability"] < eps)
+            ]
+            if not passed.empty:
+                fp = float(passed["step"].iloc[0]) / steps_per_update + 1.0
+        rec = dict(zip(group_cols, key if isinstance(key, tuple) else (key,)))
+        rec["first_pass_update"] = fp
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
+def _polished_two_player_means() -> Dict[Tuple[str, float], float]:
+    """Cross-seed mean MC-BR polished effort per (weight_variant, q) for the
+    two-player cells. Set 1 ("baseline") comes from the per-seed polish
+    artifact (``results/one_stage_ablation/polish_per_seed_all.json``); Set 2
+    ("wh8_wl4") from the sibling artifact ``polish_per_seed_set2.json``.
+    A missing artifact contributes no keys (its panels then get no star)."""
+    out: Dict[Tuple[str, float], float] = {}
+    dfp = load_polished_dotplot_final()
+    if dfp is not None and "experiment" in dfp.columns:
+        sub = dfp[dfp["experiment"] == "two_players"]
+        for q, g in sub.groupby("q"):
+            out[("baseline", float(q))] = float(g["policy_mean_effort"].mean())
+    set2_path = os.path.join(
+        RESULTS_DIR, "one_stage_ablation", "polish_per_seed_set2.json")
+    if os.path.exists(set2_path):
+        try:
+            rows = json.load(open(set2_path)).get("rows", [])
+        except Exception:
+            rows = []
+        by_q: Dict[float, List[float]] = {}
+        for r in rows:
+            if r.get("experiment") == "two_players_set2":
+                by_q.setdefault(float(r["q"]), []).append(float(r["single_value"]))
+        for q, vals in by_q.items():
+            out[("wh8_wl4", q)] = float(np.mean(vals))
+    return out
+
+
 def plot_convergence_main(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
     weight_variants: List[str] = None,
     output_path: str = None,
     save_data: bool = True,
+    figsize: Tuple[float, float] = None,
 ) -> Tuple[plt.Figure, str]:
     """
     Generate main convergence figure: 2x3 grid faceted by q and weight variant.
@@ -214,7 +287,7 @@ def plot_convergence_main(
     n_cols = len(q_values)
 
     fig, axes = plt.subplots(
-        n_rows, n_cols, figsize=FIGURE_SIZES["convergence_main"],
+        n_rows, n_cols, figsize=figsize or FIGURE_SIZES["convergence_main"],
         squeeze=False,
     )
 
@@ -223,11 +296,23 @@ def plot_convergence_main(
     # x-axis is displayed in *updates* to match the Claim-B "Conv. Update" column.
     STEPS_PER_UPDATE = 4096
 
-    # Precompute the verified convergence update per run: the PPO update at which
-    # the in-training exploitability verification fired (first update satisfying
-    # the convergence criterion). Mean across seeds reproduces the Claim-B
-    # "Conv. Update (verified)" values (two-player baseline: q35=55, q55=87).
+    # Gray vertical line = VERIFIED stop (mean ``stopped_at_update`` across
+    # seeds: the 5th consecutive passing exploitability check, where training
+    # stops and the raw estimate is read out — the Claim-B "Conv. Update
+    # (verified)" column). First-pass updates are computed alongside and
+    # printed for reference only (see the per-panel comment below).
     verified_conv_df = get_verified_convergence_step(df)
+    first_pass_df = _first_pass_updates(df, STEPS_PER_UPDATE)
+
+    # MC-BR polished endpoint (star marker) exists only for the Set-1
+    # two-player cell; Set 2 has no polish artifact and gets no star.
+    polished_means = _polished_two_player_means()
+
+    # Global x-extent of the baseline runs (used to offset the star marker).
+    _ppo_mask = df["method"].isin(["TEL-PPO", "PPO"])
+    if "ablation" in df.columns:
+        _ppo_mask = _ppo_mask & (df["ablation"] == "baseline")
+    _gx_max = float(df.loc[_ppo_mask, "step"].max()) if _ppo_mask.any() else 0.0
 
     for row_idx, variant in enumerate(weight_variants):
         wv_col = "weight_variant" if "weight_variant" in df.columns else "ablation"
@@ -321,28 +406,79 @@ def plot_convergence_main(
                         label=label_base, zorder=3,
                     )
 
-            # Convergence vertical line: mean verified convergence update across
-            # seeds (the first update satisfying the convergence criterion),
-            # matching the Claim-B "Conv. Update (verified)" column. Positioned in
+            # Endpoint markers at the end of the mean trajectory:
+            #   open circle = raw final estimate (cross-seed mean of each
+            #                 seed's final policy-mean effort, no polish)
+            #   filled star = MC-BR polished estimate (cross-seed mean of the
+            #                 per-seed polished efforts; Set-1 cell only)
+            # Star is offset slightly in x so the two markers never overlap.
+            if not method_df.empty and "policy_mean_effort" in method_df.columns:
+                seed_final = (
+                    method_df.sort_values("step")
+                    .groupby("seed")["policy_mean_effort"].last()
+                )
+                raw_final = float(seed_final.mean())
+                x_end = float(method_df["step"].max())
+                ax.plot(
+                    [x_end], [raw_final], marker="o", ms=8, mfc="white",
+                    mec="#333333", mew=1.8, linestyle="none", zorder=6,
+                )
+                pol_val = polished_means.get((variant, float(q)))
+                if pol_val is not None:
+                    x_star = x_end + 0.015 * (_gx_max if _gx_max > 0 else x_end)
+                    ax.plot(
+                        [x_star], [pol_val], marker="*",
+                        ms=15, color="#d62728", mec="k", mew=0.5,
+                        linestyle="none", zorder=7,
+                    )
+
+            # Gray vertical line: FIRST-PASS verification update (mean across
+            # seeds of the first passing exploitability check). Positioned in
             # step space (update * STEPS_PER_UPDATE) since curves are plotted
-            # against cumulative steps.
-            cmask = (
-                (verified_conv_df["q"] == q)
-                & (verified_conv_df["method"].isin(["TEL-PPO", "PPO"]))
-                & (verified_conv_df["ablation"] == "baseline")
-            )
-            if "weight_variant" in verified_conv_df.columns:
-                cmask = cmask & (verified_conv_df["weight_variant"] == variant)
-            if "experiment" in verified_conv_df.columns:
-                cmask = cmask & (verified_conv_df["experiment"] == "two_players")
-            conv_vals = verified_conv_df.loc[cmask, "convergence_update"].dropna()
+            # against cumulative steps. Streak completion (stopped_at_update)
+            # is printed alongside for reference.
+            def _panel_mask(frame):
+                m = (
+                    (frame["q"] == q)
+                    & (frame["method"].isin(["TEL-PPO", "PPO"]))
+                    & (frame["ablation"] == "baseline")
+                )
+                if "weight_variant" in frame.columns:
+                    m = m & (frame["weight_variant"] == variant)
+                if "experiment" in frame.columns:
+                    m = m & (frame["experiment"] == "two_players")
+                return m
+
+            # Line position = VERIFIED stop: the update at which the 5-check
+            # exploitability streak completes, training stops, and the raw
+            # estimate (final.effort) is read out — mean stopped_at_update
+            # across seeds (the Claim-B "Conv. Update (verified)" column).
+            # The FIRST-PASS update (first single passing check) is computed
+            # and printed for reference only: the asymmetric exploration
+            # warm-up keeps the plotted rollout curves far apart while the
+            # near-e* initialized policy can already pass one loose
+            # (eps_eq=0.03 absolute) check as early as update ~9, so marking
+            # first-pass misreads as premature verification.
+            fp_vals = first_pass_df.loc[
+                _panel_mask(first_pass_df), "first_pass_update"
+            ].dropna()
+            conv_vals = verified_conv_df.loc[
+                _panel_mask(verified_conv_df), "convergence_update"
+            ].dropna()
             if not conv_vals.empty:
                 mean_conv = conv_vals.mean()
                 ax.axvline(
                     x=mean_conv * STEPS_PER_UPDATE, color=CONV_VLINE_COLOR,
                     linestyle=CONV_VLINE_LINESTYLE,
                     linewidth=CONV_VLINE_LINEWIDTH,
-                    label="Convergence update", zorder=4,
+                    label="Verification update", zorder=4,
+                )
+                print(
+                    f"[plots] convergence_main [{variant} q={q}]: line at "
+                    f"verified stop, mean update {mean_conv:.1f} (per-seed "
+                    f"{sorted(conv_vals.astype(int).tolist())}); first-pass "
+                    f"reference {fp_vals.mean():.1f} (per-seed "
+                    f"{sorted(fp_vals.astype(int).tolist())})"
                 )
 
             # Axis formatting
@@ -401,11 +537,16 @@ def plot_convergence_main(
         Line2D([0], [0], color=AGENT_COLORS["agent2"], linestyle="--",
                linewidth=2, label="Agent 2"),
         Line2D([0], [0], color=CONV_VLINE_COLOR, linestyle=CONV_VLINE_LINESTYLE,
-               linewidth=CONV_VLINE_LINEWIDTH, label="Convergence update"),
+               linewidth=CONV_VLINE_LINEWIDTH, label="Verification update"),
+        Line2D([0], [0], marker="o", linestyle="none", mfc="white",
+               mec="#333333", mew=1.8, markersize=8, label="Raw estimate"),
+        Line2D([0], [0], marker="*", linestyle="none", color="#d62728",
+               mec="k", mew=0.5, markersize=15,
+               label="MC-BR polished estimate"),
     ]
     fig.legend(
         handles=legend_handles, loc="lower right",
-        bbox_to_anchor=(1.0, 1.0), ncol=4, frameon=True,
+        bbox_to_anchor=(1.0, 1.0), ncol=3, frameon=True,
         fontsize=FONT_SIZES["legend"],
     )
 
@@ -427,6 +568,28 @@ def plot_convergence_main(
     print(f"[plots] Saved figure to {pdf_path}")
 
     return fig, output_path
+
+
+def plot_convergence_main_1x3(
+    df: pd.DataFrame = None,
+    q_values: List[float] = None,
+    output_path: str = None,
+) -> Tuple[plt.Figure, str]:
+    """1x3 companion of the convergence-main figure: only the Set-1
+    (w_H, w_L) = (6.5, 3.0) row across q = 35/45/55, same styling and legend,
+    sized like the exploitability-dynamics 1x3 layout. Written to a NEW file
+    (``convergence_main_1x3``); never overwrites the 3-row figure and does not
+    rewrite the shared convergence_main.csv."""
+    if output_path is None:
+        output_path = os.path.join(FIGURES_DIR, "convergence_main_1x3.png")
+    return plot_convergence_main(
+        df=df,
+        q_values=q_values,
+        weight_variants=["baseline"],
+        output_path=output_path,
+        save_data=False,
+        figsize=FIGURE_SIZES["exploitability_dynamics"],
+    )
 
 
 def plot_kl_dynamics(
@@ -459,7 +622,11 @@ def plot_kl_dynamics(
     if df.empty or "approx_kl" not in df.columns:
         print("[plots] Warning: No KL data available for kl_dynamics plot")
         return None, None
-    
+
+    # Unified x-axis: share one training-step range across all q panels
+    _pos_kl = df[df["approx_kl"].notna() & (df["approx_kl"] > 0)]
+    global_step_max = _pos_kl["step"].max() if not _pos_kl.empty else None
+
     # Colorblind-safe palette
     CB_BLUE = "#0072B2"
     CB_CYAN = "#56B4E9"
@@ -524,6 +691,8 @@ def plot_kl_dynamics(
         ax.set_title(format_q(q))
         ax.set_yscale("log")
         ax.set_ylim(1e-4, 2e-1)
+        if global_step_max is not None:
+            ax.set_xlim(0, global_step_max)
         ax.xaxis.set_major_formatter(x_formatter)
         if idx == 0:
             ax.set_ylabel("KL Divergence")
@@ -576,18 +745,30 @@ def plot_exploitability_dynamics(
     if df.empty or "exploitability" not in df.columns:
         print("[plots] Warning: No exploitability data available")
         return None, None
-    
-    # Forward-fill exploitability
+
+    # Forward-fill exploitability (within each seed, across its own logged steps)
     df = forward_fill_exploitability(df)
 
-    # Precompute cheap gate steps and Nash convergence steps
-    from .extract import get_cheap_gate_step, get_nash_convergence_step
+    # PPO rollout batch size (env steps per policy update). The x-axis is shown in
+    # *updates* to match the Claim-B "Conv. Update (verified)" column and the
+    # convergence-main figure.
+    STEPS_PER_UPDATE = 4096
+
+    # Precompute the stability-screen (cheap-gate) step and the Claim-B verified
+    # ε-equilibrium convergence update. The green marker uses the method's OWN
+    # verified stop (stability + exploitability streak) — i.e. the Claim-B
+    # "Conv. Update (verified)" value (two-player baseline: q35=55, q55=87) — so
+    # the figure and the reported table agree.
+    from .extract import get_cheap_gate_step
     gate_steps_df = get_cheap_gate_step(df)
-    nash_steps_df = get_nash_convergence_step(df)
+    verified_conv_df = get_verified_convergence_step(df)
 
     fig, axes = plt.subplots(1, len(q_values), figsize=FIGURE_SIZES["exploitability_dynamics"])
     if len(q_values) == 1:
         axes = [axes]
+
+    # Smoothing window for rolling mean (dense per-update grid, so window << grid).
+    smooth_window = 15
 
     for ax, q in zip(axes, q_values):
         q_df = df[df["q"] == q].sort_values("step")
@@ -598,12 +779,19 @@ def plot_exploitability_dynamics(
 
         seeds = sorted(q_df["seed"].unique())
 
-        # Smoothing window for rolling mean
-        smooth_window = 15
+        # Hold each seed's exploitability forward past its verified early-stop onto
+        # the panel's common step grid, so every seed contributes at every step.
+        # A plain step-wise mean over the union of steps is dominated in the tail
+        # by the few longest-running seeds (survivorship); more importantly, the
+        # cross-seed mean has only ~7-11 support points (one per sparse evaluation)
+        # and a window-15 rolling mean over so few points collapses it to a flat
+        # line. Holding forward yields a dense per-update grid over which the mean
+        # is a genuine, smoothly declining cross-seed average.
+        panel_df = _holdforward_seeds(q_df, ["exploitability_ffill"])
 
         # Per-seed thin lines (smoothed)
         for seed in seeds:
-            sdf = q_df[q_df["seed"] == seed].sort_values("step")
+            sdf = panel_df[panel_df["seed"] == seed].sort_values("step")
             valid = sdf[~sdf["exploitability_ffill"].isna()]
             if not valid.empty:
                 smoothed = valid["exploitability_ffill"].rolling(
@@ -614,43 +802,30 @@ def plot_exploitability_dynamics(
                     color="#1f77b4", alpha=0.3, linewidth=0.8,
                 )
 
-        # Bold mean across seeds (smoothed)
-        if len(seeds) > 1:
-            agg = aggregate_seeds(q_df)
-            if "exploitability_ffill" not in agg.columns:
-                col = "exploitability_mean" if "exploitability_mean" in agg.columns else None
-            else:
-                col = "exploitability_ffill"
-            if col is None and "exploitability_mean" in agg.columns:
-                col = "exploitability_mean"
-            if col and col in agg.columns:
-                valid = agg[~agg[col].isna()]
-                smoothed = valid[col].rolling(
-                    window=smooth_window, min_periods=1, center=True,
-                ).mean()
-                ax.plot(
-                    valid["step"].values, smoothed.values,
-                    color="#1f77b4", linewidth=2, label="Exploitability",
-                )
-        else:
-            valid = q_df[~q_df["exploitability_ffill"].isna()]
-            if not valid.empty:
-                smoothed = valid["exploitability_ffill"].rolling(
-                    window=smooth_window, min_periods=1, center=True,
-                ).mean()
-                ax.plot(
-                    valid["step"].values, smoothed.values,
-                    color="#1f77b4", linewidth=2, label="Exploitability",
-                )
+        # Bold mean across seeds (smoothed) — cross-seed average of the held-forward
+        # exploitability at each step.
+        mean_series = (
+            panel_df.groupby("step")["exploitability_ffill"].mean().dropna()
+        )
+        if not mean_series.empty:
+            smoothed = mean_series.rolling(
+                window=smooth_window, min_periods=1, center=True,
+            ).mean()
+            ax.plot(
+                mean_series.index.values, smoothed.values,
+                color="#1f77b4", linewidth=2, label="Mean Exploit.",
+            )
 
         # Threshold line → bolder
         exploit_thresh = CONVERGENCE_CONFIG["exploit_threshold"]
         ax.axhline(
             y=exploit_thresh, color="red", linestyle="--",
-            linewidth=2.5, alpha=0.8, label=f"Tolerance threshold ({exploit_thresh})",
+            linewidth=2.5, alpha=0.8,
+            label=f"Tolerance $\\varepsilon_{{eq}} = {exploit_thresh}$",
         )
 
-        # Cheap gate: median across seeds → single orange line
+        # Stability screen: first step the cheap gate passed (median across seeds)
+        # → single orange line.
         gate_match = gate_steps_df[
             (gate_steps_df["q"] == q) & (gate_steps_df["ablation"] == "baseline")
         ]
@@ -660,28 +835,47 @@ def plot_exploitability_dynamics(
         if not gate_vals.empty:
             ax.axvline(
                 x=gate_vals.median(), color="orange", linestyle=":",
-                linewidth=1.5, alpha=0.8, label="Stability screening passed",
+                linewidth=1.5, alpha=0.8, label="Stability passed",
             )
 
-        # Nash convergence: max across seeds → single green line (conservative: all seeds converged)
-        nash_match = nash_steps_df[
-            (nash_steps_df["q"] == q) & (nash_steps_df["ablation"] == "baseline")
+        # Verified ε-equilibrium: mean verified convergence update across seeds
+        # (the method's own stability + exploitability stop = Claim-B "Conv. Update
+        # (verified)") → single green line, positioned in step space.
+        conv_match = verified_conv_df[
+            (verified_conv_df["q"] == q) & (verified_conv_df["ablation"] == "baseline")
         ]
-        if "experiment" in nash_steps_df.columns:
-            nash_match = nash_match[nash_match["experiment"] == "two_players"]
-        nash_vals = nash_match["nash_step"].dropna()
-        if not nash_vals.empty:
+        if "experiment" in verified_conv_df.columns:
+            conv_match = conv_match[conv_match["experiment"] == "two_players"]
+        conv_vals = conv_match["convergence_update"].dropna()
+        if not conv_vals.empty:
             ax.axvline(
-                x=nash_vals.max(), color="green", linestyle="-.",
-                linewidth=1.5, alpha=0.8, label="Approx. Nash verified",
+                x=conv_vals.mean() * STEPS_PER_UPDATE, color="green", linestyle="-.",
+                linewidth=1.5, alpha=0.8, label="Verified",
             )
 
-        ax.set_xlabel("Training Steps")
+        ax.set_xlabel("Training Updates")
         if ax == axes[0]:
-            ax.set_ylabel("Exploitability")
+            # The plotted series is the exploitability of the RAW self-play
+            # profile evaluated at the periodic in-training verification
+            # checks (run_two_players.eval_exploitability on the current
+            # policy) — the quantity that drives the streak stop criterion,
+            # NOT the post-polish exploitability.
+            ax.set_ylabel("Raw profile exploitability")
         ax.set_title(format_q(q))
         ax.set_yscale("log")
         ax.set_ylim(0.005, 2)
+        # Display the x-axis in training updates (step / STEPS_PER_UPDATE).
+        ax.xaxis.set_major_formatter(
+            ticker.FuncFormatter(lambda x, p: f"{x / STEPS_PER_UPDATE:.0f}")
+        )
+
+    # Unify the x-axis across panels: extend every panel to the longest (high-noise)
+    # baseline run so the three noise levels are compared on a common scale.
+    ppo_steps = df["step"]
+    if not ppo_steps.empty:
+        x_max = float(ppo_steps.max())
+        for ax in axes:
+            ax.set_xlim(0, x_max * 1.02)
 
     # Single shared legend at the top — collect from all panels
     all_handles, all_labels = [], []
@@ -697,14 +891,17 @@ def plot_exploitability_dynamics(
             seen.add(l)
             unique_handles.append(h)
             unique_labels.append(l)
+    # Compact single-row legend fully above the axes region: the four short
+    # entries no longer squeeze the panels (tight_layout uses the full canvas
+    # and bbox_inches='tight' grows the saved figure around the legend).
     fig.legend(
         unique_handles, unique_labels,
-        loc="upper center", ncol=len(unique_labels),
+        loc="lower center", ncol=len(unique_labels),
         fontsize=8, frameon=True,
-        bbox_to_anchor=(0.5, 1.02),
+        bbox_to_anchor=(0.5, 1.0),
     )
 
-    plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.tight_layout()
     
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
     pdf_path = output_path.replace(".png", ".pdf")
@@ -843,132 +1040,291 @@ def plot_beta_evolution(
     return fig, output_path
 
 
+# --- ablation figure constants -----------------------------------------------
+# Component ablation of TEL-PPO (two-player). On-disk ablation tags are mapped
+# to the canonical keys used by ABLATION_COLORS/LABELS/LINEWIDTHS.
+_ABL_DISK_TO_CANON: Dict[str, str] = {
+    "baseline": "baseline",
+    "r5_sampled": "baseline",
+    "r5_fig7_no_stability": "no_cheap_gate",
+    "r5_fig7_no_exploitability": "no_exploitability",
+    "r5_fig7_no_exploit": "no_exploitability",
+}
+_ABL_CANON_TO_DISK: Dict[str, str] = {
+    "baseline": "r5_sampled",
+    "no_cheap_gate": "r5_fig7_no_stability",
+    "no_exploitability": "r5_fig7_no_exploit",
+}
+_ABL_ORDER = ["baseline", "no_cheap_gate", "no_exploitability"]
+_ABL_THEORY_LW = 3.0          # item b: theory line more prominent than default
+_ABL_NOPOLISH_COLOR = "#9467bd"
+_ABL_X_BREAK = 0.55e6         # split: convergence detail | non-terminating tail
+_ABL_X_MAX = 6.25e6
+_ABL_STEP_PER_UPDATE = 4096
+_ABL_MIN_STEP = 8192          # drop first 1-2 evals (random-init smear)
+
+
+def _ablation_polished_landings() -> Dict[float, float]:
+    """Claim-B MC-BR polished landing (per q) from the one-stage ablation JSON."""
+    path = os.path.join(RESULTS_DIR, "one_stage_ablation", "ablation_results.json")
+    out: Dict[float, float] = {}
+    if not os.path.exists(path):
+        return out
+    try:
+        cells = json.load(open(path)).get("cells", {})
+        for k, cell in cells.items():
+            if "polish_mean" in cell:
+                out[float(k)] = float(cell["polish_mean"])
+    except Exception:
+        pass
+    return out
+
+
+def _ablation_arm_metrics(q: float, canon: str, seeds: List[int]) -> Dict:
+    """Per-seed summary metrics for one (q, arm): terminal effort, exploitability,
+    non-convergence rate, and time-to-verification (mean over verified seeds)."""
+    tag = _ABL_CANON_TO_DISK[canon]
+    terms, expl, ncs, upds = [], [], [], []
+    for s in seeds:
+        f = os.path.join(CONVERGENCE_DIR, f"ppo_q{q}_seed{s}_{tag}_convergence.json")
+        if not os.path.exists(f):
+            continue
+        d = json.load(open(f))
+        terms.append(d["policy_mean_effort"][-1])
+        e = d.get("final_exploit_max")
+        if e is not None and not (isinstance(e, float) and np.isnan(e)):
+            expl.append(e)
+        nc = d.get("stop_reason") == "max_updates"
+        ncs.append(nc)
+        if not nc and d.get("stopped_at_update") is not None:
+            upds.append(d["stopped_at_update"])
+    return dict(
+        term_raw=(float(np.mean(terms)) if terms else None),
+        exploit=(float(np.mean(expl)) if expl else None),
+        nc=(float(np.mean(ncs)) if ncs else None),
+        verify_M=(float(np.mean(upds)) * _ABL_STEP_PER_UPDATE / 1e6 if upds else None),
+    )
+
+
+def _ablation_aggregate(sub: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Mean + 95% CI over seeds, keyed by step."""
+    g = (sub.groupby("step")["policy_mean_effort"]
+         .agg(["mean", "std", "count"]).reset_index().sort_values("step"))
+    ci = 1.96 * g["std"].fillna(0.0) / np.sqrt(g["count"].clip(lower=1))
+    return g["step"].values, g["mean"].values, ci.values
+
+
 def plot_ablation_comparison(
     df: pd.DataFrame = None,
     q_values: List[float] = None,
     output_path: str = None,
     save_data: bool = True,
 ) -> Tuple[plt.Figure, str]:
-    """
-    Plot comparison of ablation conditions.
-    
-    Shows convergence curves for baseline, no_cheap_gate, no_exploitability.
+    """Component ablation of TEL-PPO (Figure 7).
+
+    Per-q panels (broken x-axis: convergence detail | non-terminating tail) show
+    the raw-PPO training traces of three arms — TEL-PPO (baseline), No stability
+    screening, No exploitability verification — with per-seed traces + 95% CI
+    bands and a prominent Theory e* line. The TEL-PPO endpoint carries a
+    no-polish (raw) vs MC-BR-polished (Claim-B) fork. A summary table reports
+    terminal |e-e*|, final exploitability, non-convergence rate, and
+    time-to-verification per arm.
     """
     setup_matplotlib_style()
     ensure_output_dirs()
-    
+
     if df is None:
         df = load_all_convergence_data()
     if q_values is None:
         q_values = Q_VALUES
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "ablation_comparison.png")
-    
+
     df = df[(df["q"].isin(q_values)) & (df["method"].isin(["TEL-PPO", "PPO"]))]
     if "experiment" in df.columns:
         df = df[df["experiment"] == "two_players"]
     df = _baseline_only(df)
 
+    # Map on-disk ablation tags to canonical arm keys, keep the 3 main arms.
+    df = df.copy()
+    df["ablation"] = df["ablation"].map(lambda a: _ABL_DISK_TO_CANON.get(a, a))
+    df = df[df["ablation"].isin(_ABL_ORDER)]
+    df = df[df["step"] >= _ABL_MIN_STEP]
+
     if df.empty:
         print("[plots] Warning: No data for ablation comparison")
         return None, None
 
-    # Keep only the 3 key ablations for the main paper figure
-    df = df[df["ablation"].isin(["baseline", "no_cheap_gate", "no_exploitability"])]
+    polished = _ablation_polished_landings()
 
-    # Get unique ablations
-    ablations = df["ablation"].unique()
-    
-    fig, axes = plt.subplots(len(q_values), 1, figsize=FIGURE_SIZES["ablation_comparison"])
-    if len(q_values) == 1:
-        axes = [axes]
-    
-    x_formatter = ticker.FuncFormatter(
-        lambda x, p: f"{x/1e6:.1f}M" if x >= 1e6
-        else f"{x/1e3:.0f}k" if x >= 1e3
-        else f"{x:.0f}"
+    # ---- pre-compute aggregates + unified y-range ----
+    agg_cache: Dict[Tuple[float, str], Tuple] = {}
+    y_min, y_max = float("inf"), float("-inf")
+    for q in q_values:
+        for arm in _ABL_ORDER:
+            sub = df[(df["q"] == q) & (df["ablation"] == arm)]
+            if sub.empty:
+                continue
+            st, mn, ci = _ablation_aggregate(sub)
+            agg_cache[(q, arm)] = (st, mn, ci)
+            y_min = min(y_min, np.nanmin(mn - ci))
+            y_max = max(y_max, np.nanmax(mn + ci))
+    y_min = min(y_min, min(e_star(q, **THEORY_PARAMS) for q in q_values))
+    pad = (y_max - y_min) * 0.08
+    ylim = (y_min - pad, y_max + pad)
+
+    # ---- layout: q panels (broken x) + spacer (x label) + summary table ----
+    n = len(q_values)
+    fig = plt.figure(figsize=(11, 3.0 * n + 0.7))
+    gs = gridspec.GridSpec(
+        n + 2, 2, width_ratios=[3.0, 1.7],
+        height_ratios=[1] * n + [0.16, 0.60], hspace=0.42, wspace=0.04,
     )
+    tail_fmt = ticker.FuncFormatter(lambda x, p: f"{x/1e6:.0f}")
+    detail_fmt = ticker.FuncFormatter(lambda x, p: f"{x/1e6:.1f}")
 
-    # First pass: collect y-range across all panels for unified axis
-    y_min_global, y_max_global = float("inf"), float("-inf")
-
-    for ax, q in zip(axes, q_values):
-        q_df = df[df["q"] == q]
+    axL_list = []
+    for i, q in enumerate(q_values):
+        axL = fig.add_subplot(gs[i, 0])
+        axR = fig.add_subplot(gs[i, 1], sharey=axL)
+        axL_list.append(axL)
         e_theory = e_star(q, **THEORY_PARAMS)
 
-        # Theory line — prominent
-        ax.axhline(
-            y=e_theory, color=THEORY_LINE_COLOR, linestyle="--",
-            linewidth=THEORY_LINE_WIDTH, label="Theory", zorder=4,
-        )
+        for ax in (axL, axR):
+            ax.axhline(e_theory, color=THEORY_LINE_COLOR, linestyle="--",
+                       linewidth=_ABL_THEORY_LW, zorder=5,
+                       label="Theory $e^*$" if ax is axL else None)
+            for arm in _ABL_ORDER:
+                sub = df[(df["q"] == q) & (df["ablation"] == arm)]
+                if sub.empty:
+                    continue
+                color = ABLATION_COLORS.get(arm, "gray")
+                for _, sd in sub.groupby("seed"):
+                    sd = sd.sort_values("step")
+                    ax.plot(sd["step"], sd["policy_mean_effort"], color=color,
+                            alpha=0.13, linewidth=0.7, zorder=1)
+                st, mn, ci = agg_cache[(q, arm)]
+                ax.plot(st, mn, color=color, linewidth=ABLATION_LINEWIDTHS.get(arm, 1.5),
+                        zorder=3, label=ABLATION_LABELS.get(arm, arm) if ax is axL else None)
+                ax.fill_between(st, mn - ci, mn + ci, color=color,
+                                alpha=SHADE_ALPHA, zorder=2)
 
-        # Plot each ablation with per-seed traces + aggregate mean + CI
-        for ablation in sorted(ablations):
-            abl_df = q_df[q_df["ablation"] == ablation]
-            if abl_df.empty:
-                continue
+        # no-polish (raw) vs MC-BR-polished (Claim-B) fork at TEL-PPO endpoint
+        if (q, "baseline") in agg_cache:
+            st_b, mn_b, _ = agg_cache[(q, "baseline")]
+            x_end, raw = st_b[-1], mn_b[-1]
+            axL.plot([x_end], [raw], marker="o", ms=8, mfc="white",
+                     mec=_ABL_NOPOLISH_COLOR, mew=1.8, zorder=6,
+                     label="No polish (raw PPO)" if i == 0 else None)
+            if q in polished:
+                axL.annotate("", xy=(x_end, polished[q]), xytext=(x_end, raw),
+                             arrowprops=dict(arrowstyle="->", color="#444", lw=1.3),
+                             zorder=6)
+                axL.plot([x_end], [polished[q]], marker="*", ms=15,
+                         color=ABLATION_COLORS["baseline"], mec="k", mew=0.5, zorder=7,
+                         label="TEL-PPO + MC-BR polish" if i == 0 else None)
 
-            color = ABLATION_COLORS.get(ablation, "gray")
-            label = ABLATION_LABELS.get(ablation, ablation)
-            lw = ABLATION_LINEWIDTHS.get(ablation, 1.5)
-            seeds = sorted(abl_df["seed"].unique())
-            has_multi = len(seeds) > 1
+        # broken-axis cosmetics
+        axL.set_xlim(0, _ABL_X_BREAK)
+        axR.set_xlim(_ABL_X_BREAK, _ABL_X_MAX)
+        axL.set_ylim(*ylim)
+        axL.spines["right"].set_visible(False)
+        axR.spines["left"].set_visible(False)
+        axR.tick_params(labelleft=False, left=False)
+        d = 0.012
+        kw = dict(transform=axL.transAxes, color="k", clip_on=False, lw=1)
+        axL.plot((1 - d, 1 + d), (-d, d), **kw)
+        axL.plot((1 - d, 1 + d), (1 - d, 1 + d), **kw)
+        dr = d * 3.0 / 1.7
+        kw2 = dict(transform=axR.transAxes, color="k", clip_on=False, lw=1)
+        axR.plot((-dr, dr), (-d, d), **kw2)
+        axR.plot((-dr, dr), (1 - d, 1 + d), **kw2)
+        axL.xaxis.set_major_formatter(detail_fmt)
+        axR.xaxis.set_major_formatter(tail_fmt)
+        axR.set_xticks([2e6, 4e6, 6e6])
+        axL.set_ylabel("Effort")
+        axL.set_title(format_q(q), loc="left", x=0.02, fontsize=FONT_SIZES["title"])
+        axL.grid(alpha=0.25)
+        axR.grid(alpha=0.25)
+        axR.annotate("no verification →\nnever terminates", xy=(0.5, 0.06),
+                     xycoords="axes fraction", ha="center",
+                     fontsize=FONT_SIZES["annotation"],
+                     color=ABLATION_COLORS["no_exploitability"])
 
-            if has_multi:
-                # Per-seed thin traces
-                for seed in seeds:
-                    seed_df = abl_df[abl_df["seed"] == seed].sort_values("step")
-                    ax.plot(seed_df["step"], seed_df["policy_mean_effort"],
-                            color=color, alpha=0.2, linewidth=0.8, zorder=1)
+    # shared x label in the spacer row
+    p_spacer = gs[n, :].get_position(fig)
+    fig.text(0.5, p_spacer.y0 + p_spacer.height * 0.35,
+             r"Training Steps ($\times 10^6$)", ha="center", va="center",
+             fontsize=FONT_SIZES["axis_label"])
 
-                # Aggregate mean + 95% CI band
-                agg = aggregate_seeds(abl_df)
-                if "policy_mean_effort_mean" in agg.columns:
-                    steps = agg["step"].values
-                    mean = agg["policy_mean_effort_mean"].values
-                    ci = agg["policy_mean_effort_ci95"].values if "policy_mean_effort_ci95" in agg.columns else np.zeros_like(mean)
-                    ax.plot(steps, mean, color=color, linewidth=lw,
-                            label=label, zorder=3)
-                    ax.fill_between(steps, mean - ci, mean + ci,
-                                    color=color, alpha=SHADE_ALPHA, zorder=2)
-                    y_min_global = min(y_min_global, np.nanmin(mean - ci))
-                    y_max_global = max(y_max_global, np.nanmax(mean + ci))
-            else:
-                single = abl_df.sort_values("step")
-                ax.plot(single["step"], single["policy_mean_effort"],
-                        color=color, linewidth=lw, label=label, zorder=3)
-                y_min_global = min(y_min_global, single["policy_mean_effort"].min())
-                y_max_global = max(y_max_global, single["policy_mean_effort"].max())
+    # shared legend at top
+    handles, labels = axL_list[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False,
+               fontsize=FONT_SIZES["legend"], bbox_to_anchor=(0.5, 1.005))
 
-        ax.set_xlabel("Training Steps")
-        ax.set_ylabel("Effort")
-        ax.set_title(format_q(q))
-        ax.xaxis.set_major_formatter(x_formatter)
+    # ---- summary table ----
+    seeds_by_arm = {arm: sorted(df[df["ablation"] == arm]["seed"].unique().tolist())
+                    for arm in _ABL_ORDER}
+    met = {arm: {q: _ablation_arm_metrics(q, arm, seeds_by_arm[arm])
+                 for q in q_values} for arm in _ABL_ORDER}
 
-    # Unify y-axis across all panels
-    if y_min_global < float("inf"):
-        margin = (y_max_global - y_min_global) * 0.05
-        for ax in axes:
-            ax.set_ylim(y_min_global - margin, y_max_global + margin)
+    def _err(arm, q, use_polish=False):
+        if use_polish and q in polished:
+            return abs(polished[q] - e_star(q, **THEORY_PARAMS))
+        t = met[arm][q]["term_raw"]
+        return None if t is None else abs(t - e_star(q, **THEORY_PARAMS))
 
-    plt.tight_layout()
+    def _join(vals, fmt):
+        return "/".join("—" if v is None else fmt(v) for v in vals)
 
-    # Single legend at top of figure, outside all axes
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(
-        handles, labels, loc="upper center",
-        ncol=len(labels), fontsize=FONT_SIZES["legend"], frameon=False,
-        bbox_to_anchor=(0.5, 1.03),
-    )
-    
-    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
+    qs = q_values
+    e2 = lambda v: f"{v:.2f}"
+    e3 = lambda v: f"{v:.3f}"
+    qlab = "/".join(f"q{int(q)}" for q in qs)
+    rows = [
+        ["TEL-PPO (polished)",
+         _join([_err("baseline", q, True) for q in qs], e2),
+         _join([met["baseline"][q]["exploit"] for q in qs], e3),
+         "0%",
+         _join([met["baseline"][q]["verify_M"] for q in qs], e2)],
+        ["  · No polish (raw)",
+         _join([_err("baseline", q) for q in qs], e2), "—", "—", "—"],
+        ["No stability screening",
+         _join([_err("no_cheap_gate", q) for q in qs], e2),
+         _join([met["no_cheap_gate"][q]["exploit"] for q in qs], e3),
+         "0%",
+         _join([met["no_cheap_gate"][q]["verify_M"] for q in qs], e2)],
+        ["No exploitability verif.",
+         _join([_err("no_exploitability", q) for q in qs], e2),
+         "—", "100%", "never"],
+    ]
+    cols = ["Arm", f"Terminal |ē−e*|\n({qlab})", "Final\nexploit.",
+            "NC\nrate", "Time-to-verify\n(×10⁶ steps)"]
+
+    axT = fig.add_subplot(gs[n + 1, :])
+    axT.axis("off")
+    tbl = axT.table(cellText=rows, colLabels=cols, cellLoc="center", loc="center")
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(FONT_SIZES["tick_label"])
+    tbl.scale(1, 1.9)
+    for (r, c), cell in tbl.get_celld().items():
+        if r == 0:
+            cell.set_facecolor("#eeeeee")
+            cell.set_text_props(weight="bold")
+        elif c == 0:
+            cell.get_text().set_ha("left")
+
+    fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
     pdf_path = output_path.replace(".png", ".pdf")
-    fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
-    
+    fig.savefig(pdf_path, format="pdf", bbox_inches="tight")
+
     if save_data:
         data_path = os.path.join(DATA_DIR, "ablation_comparison.csv")
-        df[["step", "method", "q", "seed", "ablation", "policy_mean_effort", "theoretical_effort"]].to_csv(data_path, index=False)
-    
+        keep = ["step", "method", "q", "seed", "ablation", "policy_mean_effort"]
+        if "theoretical_effort" in df.columns:
+            keep.append("theoretical_effort")
+        df[keep].to_csv(data_path, index=False)
+
     print(f"[plots] Saved figure to {output_path}")
     return fig, output_path
 
@@ -1335,7 +1691,10 @@ def plot_effort_drift(
     if len(q_values) == 1:
         axes = [axes]
 
-    conv_steps_df = get_convergence_step(df)
+    # Use the method's OWN verified stop (Claim B: mean stopped_at_update from the
+    # exploitability streak) rather than the diagnostic effort-band detector, which
+    # is structurally unsatisfiable for early-stopped runs (all-NaN => no line).
+    conv_steps_df = get_verified_convergence_step(df)
 
     for i, (ax, q) in enumerate(zip(axes, q_values)):
         q_df = df[df["q"] == q].sort_values("step")
@@ -1380,13 +1739,17 @@ def plot_effort_drift(
             linewidth=2.5, label=f"Drift threshold ({drift_thresh})",
         )
 
-        # Convergence step vertical line
+        # Verified convergence step vertical line: mean stopped_at_update (in PPO
+        # updates) mapped onto the training-step axis via steps-per-update, derived
+        # from the run's own step grid (no hard-coded constant).
         q_conv = conv_steps_df[conv_steps_df["q"] == q]
         if "experiment" in conv_steps_df.columns:
             q_conv = q_conv[q_conv["experiment"] == "two_players"]
         q_conv = q_conv[q_conv["ablation"] == "baseline"]
-        mean_conv = q_conv["convergence_step"].dropna().mean()
-        if not np.isnan(mean_conv):
+        mean_conv_update = q_conv["convergence_update"].dropna().mean()
+        steps_per_update = q_df["step"].drop_duplicates().sort_values().diff().median()
+        if not np.isnan(mean_conv_update) and not np.isnan(steps_per_update):
+            mean_conv = mean_conv_update * steps_per_update
             ax.axvline(
                 x=mean_conv, color="#009E73", linestyle=":",
                 linewidth=1.5, alpha=0.8, label="Detected convergence step",
@@ -1425,44 +1788,132 @@ def plot_effort_drift(
     return fig, output_path
 
 
+# Claim-B MC-BR polished per-seed efforts (produced by
+# tools/one_stage_polish_per_seed.py). When present, this is the canonical source
+# for the equilibrium-recovery dot plot — it shows the *polished* (verified,
+# ~e*) efforts rather than the raw PPO basin landings.
+POLISH_PER_SEED_JSON = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "results", "one_stage_ablation", "polish_per_seed_all.json",
+)
+
+
+def load_polished_dotplot_final(json_path: str = None) -> Optional[pd.DataFrame]:
+    """Load Claim-B polished per-seed efforts as a final-values DataFrame.
+
+    Maps ``polish_per_seed_all.json`` into exactly the columns
+    ``plot_equilibrium_recovery_dotplot`` reads via ``final_override``. Returns
+    ``None`` when the polished artifact is absent, so callers can fall back to the
+    raw convergence extraction.
+
+    Args:
+        json_path: Path to the polished per-seed JSON (defaults to
+            ``POLISH_PER_SEED_JSON``).
+
+    Returns:
+        One row per experiment/q/seed with polished efforts, or ``None`` if the
+        artifact does not exist.
+    """
+    if json_path is None:
+        json_path = POLISH_PER_SEED_JSON
+    if not os.path.exists(json_path):
+        return None
+
+    with open(json_path) as fh:
+        rows = json.load(fh)["rows"]
+
+    records = []
+    for r in rows:
+        exp = r["experiment"]
+        e_pol = r["e_polished_per_player"]
+        e_star = r["e_star_per_player"]
+        rec = {
+            "experiment": exp,
+            "method": "TEL-PPO",
+            "q": float(r["q"]),
+            "seed": int(r["seed"]),
+            "ablation": "baseline",
+        }
+        if exp == "different_cost":
+            # Per-agent markers + per-agent theory lines.
+            rec["agent1_effort"] = e_pol[0]
+            rec["agent2_effort"] = e_pol[1]
+            rec["theoretical_effort1"] = e_star[0]
+            rec["theoretical_effort2"] = e_star[1]
+            rec["theoretical_effort"] = sum(e_star) / len(e_star)
+            rec["policy_mean_effort"] = sum(e_pol) / len(e_pol)
+        else:
+            # Single-marker (symmetric) cells.
+            val = r["single_value"]
+            rec["policy_mean_effort"] = val
+            rec["agent1_effort"] = val
+            rec["agent2_effort"] = val
+            rec["theoretical_effort"] = e_star[0]
+            rec["theoretical_effort1"] = e_star[0]
+            rec["theoretical_effort2"] = e_star[0]
+        records.append(rec)
+
+    return pd.DataFrame(records)
+
+
 def plot_equilibrium_recovery_dotplot(
     df: pd.DataFrame = None,
     output_path: str = None,
     save_data: bool = True,
+    final_override: pd.DataFrame = None,
 ) -> Tuple[plt.Figure, str]:
     """
     Plot equilibrium recovery dot plot across scenarios (Figure 6).
 
     Shows learned equilibrium effort vs theoretical for each experiment type.
     x-axis: scenario, y-axis: effort, dots for learned, lines for theoretical.
+
+    Args:
+        df: Convergence DataFrame (loaded automatically if None). Ignored when
+            ``final_override`` is provided.
+        output_path: Destination PNG (a sibling PDF is also written).
+        save_data: Whether to dump the backing per-seed CSV.
+        final_override: Pre-computed per-run final values (one row per
+            experiment/method/q/seed/ablation) to plot INSTEAD of extracting them
+            from the convergence JSONs. Used to render Claim-B MC-BR *polished*
+            efforts while keeping the drawing style unchanged. Must carry the same
+            columns the drawing reads: ``experiment, method, q, seed, ablation,
+            policy_mean_effort, agent1_effort, agent2_effort, theoretical_effort``
+            (plus ``theoretical_effort1/2`` for heterogeneous-cost).
     """
     setup_matplotlib_style()
     ensure_output_dirs()
 
-    if df is None:
-        df = load_all_convergence_data()
     if output_path is None:
         output_path = os.path.join(FIGURES_DIR, "equilibrium_recovery_dotplot.png")
 
-    # Only use baseline TEL-PPO runs
-    ppo_df = df[
-        (df["method"].isin(["TEL-PPO", "PPO"]))
-        & (df["ablation"] == "baseline")
-    ]
-    ppo_df = _baseline_only(ppo_df)
+    if final_override is not None:
+        # Injected per-run final values (e.g. Claim-B MC-BR polished efforts).
+        # Bypasses convergence-JSON extraction; the drawing logic below is unchanged.
+        final = final_override.copy()
+    else:
+        if df is None:
+            df = load_all_convergence_data()
 
-    if ppo_df.empty:
-        print("[plots] Warning: No data for equilibrium recovery dotplot")
-        return None, None
+        # Only use baseline TEL-PPO runs
+        ppo_df = df[
+            (df["method"].isin(["TEL-PPO", "PPO"]))
+            & (df["ablation"] == "baseline")
+        ]
+        ppo_df = _baseline_only(ppo_df)
 
-    # Get final values per run
-    final = get_final_values(ppo_df)
-    if "experiment" not in final.columns:
-        # Merge experiment from original df
-        exp_map = ppo_df.groupby(["method", "q", "seed", "ablation"])["experiment"].first()
-        final = final.merge(
-            exp_map.reset_index(), on=["method", "q", "seed", "ablation"], how="left"
-        )
+        if ppo_df.empty:
+            print("[plots] Warning: No data for equilibrium recovery dotplot")
+            return None, None
+
+        # Get final values per run
+        final = get_final_values(ppo_df)
+        if "experiment" not in final.columns:
+            # Merge experiment from original df
+            exp_map = ppo_df.groupby(["method", "q", "seed", "ablation"])["experiment"].first()
+            final = final.merge(
+                exp_map.reset_index(), on=["method", "q", "seed", "ablation"], how="left"
+            )
 
     experiments = ["two_players", "three_players", "different_cost", "different_ability"]
     exp_labels = {
@@ -1496,9 +1947,16 @@ def plot_equilibrium_recovery_dotplot(
 
             if is_heterogeneous_cost:
                 # --- Per-agent markers with separate theory lines ---
-                for agent_key, effort_col, theory_col, agent_label in [
-                    ("agent1", "agent1_effort", "theoretical_effort1", "Agent 1 (low-cost)"),
-                    ("agent2", "agent2_effort", "theoretical_effort2", "Agent 2 (high-cost)"),
+                # Agent mapping verified against the run config + theory:
+                # k1 = 0.0004 < k2 = 0.00055, so agent 1 is the LOW-cost agent
+                # and carries the higher equilibrium effort (e1* > e2*).
+                # Both per-agent theory lines are BLACK, kept distinguishable
+                # by line style: solid = low-cost, dashed = high-cost.
+                for agent_key, effort_col, theory_col, agent_label, theory_ls in [
+                    ("agent1", "agent1_effort", "theoretical_effort1",
+                     "Low-cost agent", "-"),
+                    ("agent2", "agent2_effort", "theoretical_effort2",
+                     "High-cost agent", "--"),
                 ]:
                     color = AGENT_COLORS[agent_key]
                     marker = AGENT_MARKERS[agent_key]
@@ -1510,17 +1968,20 @@ def plot_equilibrium_recovery_dotplot(
                             ax.hlines(
                                 e_theory_agent.iloc[0],
                                 x_pos - 0.3, x_pos + 0.3,
-                                colors=color, linestyles="--", linewidth=2, zorder=2,
+                                colors="black", linestyles=theory_ls,
+                                linewidth=2, zorder=2,
                             )
 
-                    # Per-seed scatter
+                    # Per-seed scatter: semi-transparent, BEHIND the mean
+                    # diamonds (zorder 3 < 4) so the means carry the panel.
                     if effort_col in q_final.columns:
                         efforts = q_final[effort_col].values
                         jitter = rng.uniform(-0.12, 0.12, len(efforts))
                         ax.scatter(
                             x_pos + jitter, efforts,
-                            color=color, marker=marker, s=40, zorder=3,
-                            alpha=0.5, edgecolors="white", linewidth=0.5,
+                            facecolors=to_rgba(color, 0.35), marker=marker,
+                            s=55, zorder=3,
+                            edgecolors=to_rgba("black", 0.45), linewidth=0.8,
                             label=agent_label if not _legend_added[agent_key] else None,
                         )
                         _legend_added[agent_key] = True
@@ -1530,7 +1991,7 @@ def plot_equilibrium_recovery_dotplot(
                         if len(valid_efforts) > 0:
                             ax.scatter(
                                 x_pos, valid_efforts.mean(),
-                                color=color, marker="D", s=100, zorder=4,
+                                color=color, marker="D", s=130, zorder=4,
                                 edgecolors="black", linewidth=1,
                             )
 
@@ -1547,9 +2008,9 @@ def plot_equilibrium_recovery_dotplot(
                 jitter = rng.uniform(-0.15, 0.15, len(efforts))
                 ax.scatter(
                     x_pos + jitter, efforts,
-                    color="#ff7f0e", s=40, zorder=3, alpha=0.5,
-                    edgecolors="white", linewidth=0.5,
-                    label="Per-seed estimate" if not _legend_added["single"] else None,
+                    facecolors=to_rgba("#ff7f0e", 0.35), s=55, zorder=3,
+                    edgecolors=to_rgba("black", 0.45), linewidth=0.8,
+                    label="Seed-level estimates" if not _legend_added["single"] else None,
                 )
                 _legend_added["single"] = True
 
@@ -1557,7 +2018,7 @@ def plot_equilibrium_recovery_dotplot(
                 mean_effort = efforts.mean()
                 ax.scatter(
                     x_pos, mean_effort,
-                    color="#d62728", marker="D", s=100, zorder=4,
+                    color="#d62728", marker="D", s=130, zorder=4,
                     edgecolors="black", linewidth=1,
                     label="Across-seed mean" if not _legend_added["mean"] else None,
                 )
@@ -1574,8 +2035,12 @@ def plot_equilibrium_recovery_dotplot(
 
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_labels, fontsize=FONT_SIZES["tick_label"])
-    ax.set_ylabel("Equilibrium Effort")
-    ax.set_title("Equilibrium Recovery Across Scenarios and Noise Levels", pad=30)
+    ax.set_ylabel("Effort Level")
+    # pad clears the two-row legend that sits between the axes and the title.
+    ax.set_title(
+        "Equilibrium Effort Recovery Across Tournament Variants and Noise Levels",
+        pad=52,
+    )
 
     # Add experiment group labels
     group_starts = []
@@ -1615,10 +2080,19 @@ def plot_equilibrium_recovery_dotplot(
     legend_elements = [
         Line2D([0], [0], color="#333333", linestyle="--", linewidth=3, label="Theory e*"),
     ]
+    if _legend_added["agent1"]:
+        # Heterogeneous-cost theory lines are black; solid marks the
+        # low-cost agent (dashed = high-cost, covered by "Theory e*").
+        legend_elements.append(Line2D(
+            [0], [0], color="black", linestyle="-", linewidth=2,
+            label="Theory e* (low-cost)",
+        ))
     if _legend_added["single"]:
         legend_elements.append(Line2D(
-            [0], [0], marker="o", color="w", markerfacecolor="#ff7f0e",
-            markersize=7, alpha=0.5, label="Per-seed estimate",
+            [0], [0], marker="o", color="w",
+            markerfacecolor=to_rgba("#ff7f0e", 0.35),
+            markeredgecolor=to_rgba("black", 0.45), markersize=7,
+            label="Seed-level estimates",
         ))
     if _legend_added["mean"]:
         legend_elements.append(Line2D(
@@ -1628,20 +2102,24 @@ def plot_equilibrium_recovery_dotplot(
     if _legend_added["agent1"]:
         legend_elements.append(Line2D(
             [0], [0], marker=AGENT_MARKERS["agent1"], color="w",
-            markerfacecolor=AGENT_COLORS["agent1"], markersize=8,
-            label="Agent 1 (low-cost)",
+            markerfacecolor=to_rgba(AGENT_COLORS["agent1"], 0.35),
+            markeredgecolor=to_rgba("black", 0.45), markersize=7,
+            label="Low-cost agent",
         ))
     if _legend_added["agent2"]:
         legend_elements.append(Line2D(
             [0], [0], marker=AGENT_MARKERS["agent2"], color="w",
-            markerfacecolor=AGENT_COLORS["agent2"], markersize=8,
-            label="Agent 2 (high-cost)",
+            markerfacecolor=to_rgba(AGENT_COLORS["agent2"], 0.35),
+            markeredgecolor=to_rgba("black", 0.45), markersize=7,
+            label="High-cost agent",
         ))
+    # Two-row legend (3 columns for the 6 entries) — a single row runs the
+    # full figure width and crowds the title.
     ax.legend(
         handles=legend_elements,
         loc="lower center",
         bbox_to_anchor=(0.5, 1.02),
-        ncol=len(legend_elements),
+        ncol=max(1, (len(legend_elements) + 1) // 2),
         frameon=False,
         fontsize=FONT_SIZES["legend"],
     )
@@ -1744,8 +2222,15 @@ def generate_all_figures(
     if path:
         results["effort_drift"] = path
 
-    # Equilibrium recovery dotplot (Fig 6)
-    fig, path = plot_equilibrium_recovery_dotplot(df)
+    # Equilibrium recovery dotplot (Fig 6) — prefer Claim-B polished efforts.
+    polished_final = load_polished_dotplot_final()
+    if polished_final is not None:
+        print("[plots] equilibrium_recovery_dotplot: using Claim-B polished efforts "
+              f"({POLISH_PER_SEED_JSON})")
+    else:
+        print("[plots] equilibrium_recovery_dotplot: polished artifact missing, "
+              "falling back to raw PPO landings")
+    fig, path = plot_equilibrium_recovery_dotplot(df, final_override=polished_final)
     if path:
         results["equilibrium_recovery_dotplot"] = path
 

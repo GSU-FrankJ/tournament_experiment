@@ -48,6 +48,7 @@ from .plots import (
     plot_distance_to_equilibrium,
     plot_effort_drift,
     plot_equilibrium_recovery_dotplot,
+    load_polished_dotplot_final,
 )
 from .tables import (
     generate_all_tables,
@@ -207,14 +208,14 @@ def cmd_plot(args: argparse.Namespace) -> int:
     os.makedirs(output_dir, exist_ok=True)
     
     plot_funcs = {
-        "convergence_main": lambda: plot_convergence_main(df, q_values, os.path.join(output_dir, "convergence_main.png")),
+        "convergence_main": lambda: plot_convergence_main(df, q_values, output_path=os.path.join(output_dir, "convergence_main.png")),
         "kl_dynamics": lambda: plot_kl_dynamics(df, q_values, os.path.join(output_dir, "kl_dynamics.png")),
         "exploitability_dynamics": lambda: plot_exploitability_dynamics(df, q_values, os.path.join(output_dir, "exploitability_dynamics.png")),
         "beta_evolution": lambda: plot_beta_evolution(df, q_values, os.path.join(output_dir, "beta_evolution.png")),
         "ablation_comparison": lambda: plot_ablation_comparison(df, q_values, os.path.join(output_dir, "ablation_comparison.png")),
         "distance_to_equilibrium": lambda: plot_distance_to_equilibrium(df, q_values, os.path.join(output_dir, "distance_to_equilibrium.png")),
         "effort_drift": lambda: plot_effort_drift(df, q_values, os.path.join(output_dir, "effort_drift.png")),
-        "equilibrium_recovery_dotplot": lambda: plot_equilibrium_recovery_dotplot(df, os.path.join(output_dir, "equilibrium_recovery_dotplot.png")),
+        "equilibrium_recovery_dotplot": lambda: plot_equilibrium_recovery_dotplot(df, os.path.join(output_dir, "equilibrium_recovery_dotplot.png"), final_override=load_polished_dotplot_final()),
     }
     
     fig, path = plot_funcs[plot_type]()
