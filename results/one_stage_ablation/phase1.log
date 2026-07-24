@@ -1,0 +1,24 @@
+[saved] results/one_stage_ablation/ablation_results.json
+[saved] results/one_stage_ablation/figures/F1_landing_map.png, F2_exp_bars.png, F3_slopegraph.png
+
+====================================================================================================
+q=35   e*=45.4545
+====================================================================================================
+  raw   mean=43.5798 sd=1.2471   EXP_det/DW@mean=3.349e-04
+  polish mean=44.9470 sd=0.0238  e_fp=44.9453 sd=0.0201 offset=-0.5092 spread(all 7)=0.0611
+  EXP_det/DW@e_fp=2.471e-05
+  legacy MC (shipped, R=5) /DW:  e*=+1.552e-03±1.7e-03  raw=+1.529e-03±1.0e-03  e_fp=+1.443e-03±1.3e-03
+  GATES: C1 4/5 -> PASS | C2 4/5 median_ratio=18.0x -> PASS | C4 ref_ratio=13.6x sep=True, |dMC|=3.01e-04 vs 2sd=9.20e-03 mc_cannot_sep=True -> PASS
+  seeds better than solver floor (0.509): [45] (1/5)
+  A5/P11 analytic-BR damped iteration -> start 43.58: land 45.454544 (|land-e*|=1.32e-06), start 0.00: land 45.454545 (|land-e*|=8.66e-07), start 50.00: land 45.454544 (|land-e*|=1.37e-06)
+
+====================================================================================================
+q=55   e*=28.9256
+====================================================================================================
+  raw   mean=29.6543 sd=0.7611   EXP_det/DW@mean=1.132e-04
+  polish mean=28.7575 sd=0.0192  e_fp=28.7645 sd=0.0205 offset=-0.1611 spread(all 7)=0.0574
+  EXP_det/DW@e_fp=3.231e-06
+  legacy MC (shipped, R=5) /DW:  e*=+8.282e-04±5.3e-04  raw=+8.211e-04±7.3e-04  e_fp=+9.996e-04±3.5e-04
+  GATES: C1 4/5 -> PASS | C2 4/5 median_ratio=10.9x -> PASS | C4 ref_ratio=35.0x sep=True, |dMC|=6.25e-04 vs 2sd=5.14e-03 mc_cannot_sep=True -> PASS
+  seeds better than solver floor (0.161): [43] (1/5)
+  A5/P11 analytic-BR damped iteration -> start 29.65: land 28.925620 (|land-e*|=2.55e-07), start 0.00: land 28.925619 (|land-e*|=7.13e-07), start 50.00: land 28.925620 (|land-e*|=1.47e-07)
