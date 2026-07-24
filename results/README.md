@@ -139,3 +139,18 @@ Compact per-experiment summary with key metrics for quick aggregation. Present i
 | 2026-03-18 | Updated README to reflect current structure: removed deleted legacy dirs (convergence_history, convergence_plots, plots, archive), removed top-level CSVs/PNGs, updated file counts |
 | 2026-02-09 | Updated README to reflect full directory structure with all experiment tracks, ablation studies, and current file counts |
 | 2026-02-03 | Added README.md; moved plot scripts to tools/ |
+
+## one_stage_claimb_summary.csv — error-column conventions (2026-07-24)
+
+The original `|ē−e*|` / `Polished |ē−e*|` columns mix two conventions (raw rows
+= MAE across seeds; polished rows = deviation of the cross-seed mean). Four
+explicitly named columns were APPENDED (existing cells byte-identical, CRLF
+endings preserved) by `tools/extend_claimb_summary_err_columns.py`:
+`raw_err_of_mean`, `raw_mae_across_seeds`, `polished_err_of_mean`,
+`polished_mae_across_seeds`. **The paper tables use the `*_err_of_mean`
+convention (locked C1, 2026-07-24 session).** Heterogeneous-cost rows are the
+agent-combined scalar (a1+a2)/2 vs the combined e*. The polished columns use
+convention C2 for 3P (per-seed player-mean landings from
+`one_stage_ablation/polish_per_seed_all.json`, cross-seed mean 24.75/15.84);
+the historical `Polished` column (player-1 mean 24.68/15.82 parsed from the
+phase0-verify log) is untouched.
