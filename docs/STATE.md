@@ -480,3 +480,100 @@ All attributes match 1:1. The ramp code is an exact copy.
 3. Two-player Set 2 via CLI flags: `--k 0.0006 --w_h 8 --w_l 4`
 4. Regenerate paper artifacts after results are collected
 5. Build two-stage runner (separate task)
+
+## Figure fix: e* label placement in convergence_main (2026-07-29)
+
+Review comment on `docs/Figures&Tables07272026.docx` (Figure 2): the `e* = 28.93`
+label in the q=55 panel sat on top of the agent trajectories.
+
+Cause: `plot_convergence_main` pinned the label to the right edge just above the
+theory line. All panels share the longest run's x-limit, so that slot is only
+empty for panels whose run ends well short of the right margin. q=55 IS the
+longest run and is still descending toward e* at the margin, so its label landed
+on the curve; q=35/45 end early enough that their right edge is blank.
+
+Fix (`paper/generator/plots.py`): the annotation moved after the trajectories are
+drawn and now picks its slot from the panel's curve extent — panels reaching
+>= 85% of the global x-max put the label below the theory line at mid-panel
+(the band under e* is free, since curves approach the equilibrium from above),
+all others keep the original right-edge slot.
+
+Regenerated in place: `convergence_main.{png,pdf}`, `convergence_main_1x3.{png,pdf}`.
+Only the two q=55 panels changed; the other four are pixel-identical in layout.
+
+## Figure fix: dotplot legend order (2026-07-29)
+
+Review comment on the same doc: swap "Seed-level estimates" and "High-cost
+agent" in the `equilibrium_recovery_dotplot` legend.
+
+The handles were appended in construction order and matplotlib fills legend
+columns top-to-bottom, so with ncol=3 the low-/high-cost pair was split across
+both the row and column axes. `plot_equilibrium_recovery_dotplot` now sorts the
+handles through an explicit `_legend_order` before `ax.legend`, giving
+
+    row 1: Theory e*        | Across-seed mean | Seed-level estimates
+    row 2: High-cost agent  | Low-cost agent
+
+Regenerated in place: `equilibrium_recovery_dotplot.{png,pdf}` (via
+`load_polished_dotplot_final()`, the same Claim-B polished override `make_all`
+uses — not the raw-landing fallback). Legend only; no marker or datum moved.
+
+### Known issues / next steps
+1. Estimator unification (Tables 3 & 4) is the blocking item — see the review
+   doc. `det`/`in`/`mc`/`a` are mixed within single columns; the ask is to move
+   everything to independent MC with fresh draws
+   (`utils/mc_br_polish.py:211 exploitability_frozen_profile`). Expect TEL-PPO's
+   exploitability to rise from ~1e-5 into the MC noise floor (~1e-3), which will
+   shrink or erase the "two orders of magnitude" claim.
+2. Calibration check not yet run: feed the analytic e* to
+   `exploitability_frozen_profile` (true EXP = 0) to measure the estimator's
+   noise floor before rewriting the tables.
+3. Remaining review comments unaddressed: Table 3 column split (Final Effort
+   mean±SD vs separate Absolute Bias), Verification Update ± SD, Table 2
+   metadata/entropy confirmations, Table 4 exploitability formatting as mean±SD.
+   Both figure comments (q=55 e* label, dotplot legend order) are done.
+
+## Estimator unification for Tables 3 & 4 (2026-07-29)
+
+Acted on the review's request to drop the mixed det/in/mc/a reporting and use one
+independent MC estimator everywhere.
+
+New tools (both CPU-only, run in tmux):
+- `tools/exploit_noise_floor.py` -> `results/one_stage_ablation/exploit_noise_floor.json`
+  Evaluates `exploitability_frozen_profile` at the analytic e*, where true EXP is
+  exactly 0, so the return value is the estimator's own error. Also sweeps M on
+  the two-player q=35 cell.
+- `tools/unified_exploitability_tables.py` -> `results/one_stage_ablation/unified_exploitability_tables.json`
+  Recomputes every Table 3 and Table 4 row per seed under that one estimator
+  (M=200000, grid 0.25, fresh seeds, CRN shared across the four Table-3 arms).
+
+Clean tables written to `docs/tables34_unified.md`.
+
+### Findings
+
+- Noise floor is 2.8e-04 to 1.5e-03 across cells at M=200000, and decays like
+  1/sqrt(M): M=800000 only reaches ~7.8e-04. The old TEL-PPO numbers
+  (8.6e-05 / 2.8e-05 / 1.2e-05, deterministic referee) sit 5-70x BELOW the floor,
+  so they were never comparable to the MC rows they were tabulated against.
+- Under the unified estimator TEL-PPO reads 1.09e-03 / 1.02e-03 / 0.87e-03,
+  i.e. 0.90x / 1.37x / 1.44x the floor. The "two orders of magnitude" claim does
+  not survive; TEL-PPO is at the floor, which is a ceiling on what the instrument
+  can resolve, not a measured gap.
+- Arm ordering survives (monotone at q=35 and q=55) but separations are 2-8x with
+  comparable per-seed SDs.
+- The effort columns are estimator-independent and DO separate the arms:
+  TEL-PPO's cross-seed SD is 0.02-0.03 vs 0.60-3.53 for every ablation (40-100x
+  tighter). That is what the ablation actually establishes.
+- Corrected a reporting error in the old Table 3: the "Final Effort" cell for
+  `w/o stability screening` and `w/o exploitability verification` held the BIAS
+  (2.57/0.24/1.30 and 0.85/3.31/0.58), not the effort. Actual efforts are
+  42.88/35.11/30.22 and 44.60/32.05/29.51.
+- Added Verification Update mean +/- SD (was mean only); the
+  `w/o exploitability verification` arm has none - all 5 seeds hit the
+  1500-update budget (`stop_reason = max_updates`).
+
+### Next steps
+1. Decide how the paper frames the ablation now that exploitability is at the
+   floor - recommend leading with the effort-SD result.
+2. Remaining review items: Table 2 metadata/entropy corrections (see
+   `docs/table2_metadata_audit.md`), Table 2 row splits for het-ability.
