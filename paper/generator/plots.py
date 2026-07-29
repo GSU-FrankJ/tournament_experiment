@@ -341,14 +341,8 @@ def plot_convergence_main(
                     y=e_theory, color=THEORY_LINE_COLOR, linestyle="--",
                     linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$", zorder=1,
                 )
-                # Mark the numeric equilibrium value at the right edge of the line.
-                ax.annotate(
-                    f"$e^*={e_theory:.2f}$",
-                    xy=(1.0, e_theory), xycoords=("axes fraction", "data"),
-                    xytext=(-4, 4), textcoords="offset points",
-                    ha="right", va="bottom", color=THEORY_LINE_COLOR,
-                    fontsize=FONT_SIZES["legend"], fontweight="bold", zorder=6,
-                )
+                # The numeric e* label is placed after the trajectories are
+                # drawn, so its slot can be chosen against the curve extent.
 
             # Filter to PPO method
             method_df = q_df[q_df["method"].isin(["TEL-PPO", "PPO"])]
@@ -422,6 +416,7 @@ def plot_convergence_main(
                 ax.plot(
                     [x_end], [raw_final], marker="o", ms=8, mfc="white",
                     mec="#333333", mew=1.8, linestyle="none", zorder=6,
+                    clip_on=False,
                 )
                 pol_val = polished_means.get((variant, float(q)))
                 if pol_val is not None:
@@ -429,8 +424,31 @@ def plot_convergence_main(
                     ax.plot(
                         [x_star], [pol_val], marker="*",
                         ms=15, color="#d62728", mec="k", mew=0.5,
-                        linestyle="none", zorder=7,
+                        linestyle="none", zorder=7, clip_on=False,
                     )
+
+            # Numeric e* label. Default slot is the right edge just above the
+            # theory line. Every panel shares the longest run's x-limit, so that
+            # slot is empty only for panels whose run ends well short of the
+            # right margin. The longest run (q=55) is still descending toward
+            # e* when it reaches that margin, and its label would sit on the
+            # trajectory; drop it below the line at mid-panel instead. The band
+            # under e* is free everywhere except the polished star at the far
+            # right, because the curves approach the equilibrium from above.
+            if np.isfinite(e_theory):
+                x_end_panel = float(method_df["step"].max())
+                crowded = _gx_max > 0 and x_end_panel >= 0.85 * _gx_max
+                ax.annotate(
+                    f"$e^*={e_theory:.2f}$",
+                    xy=(0.5 if crowded else 1.0, e_theory),
+                    xycoords=("axes fraction", "data"),
+                    xytext=(0, -6) if crowded else (-4, 4),
+                    textcoords="offset points",
+                    ha="center" if crowded else "right",
+                    va="top" if crowded else "bottom",
+                    color=THEORY_LINE_COLOR,
+                    fontsize=FONT_SIZES["legend"], fontweight="bold", zorder=6,
+                )
 
             # Gray vertical line: FIRST-PASS verification update (mean across
             # seeds of the first passing exploitability check). Positioned in
@@ -471,7 +489,7 @@ def plot_convergence_main(
                     x=mean_conv * STEPS_PER_UPDATE, color=CONV_VLINE_COLOR,
                     linestyle=CONV_VLINE_LINESTYLE,
                     linewidth=CONV_VLINE_LINEWIDTH,
-                    label="Verification update", zorder=4,
+                    label="First verification update", zorder=4,
                 )
                 print(
                     f"[plots] convergence_main [{variant} q={q}]: line at "
@@ -523,21 +541,28 @@ def plot_convergence_main(
     if not ppo_steps.empty:
         x_max = float(ppo_steps.max())
         for ax in np.asarray(axes).flat:
-            ax.set_xlim(0, x_max * 1.02)
+            # Extra right headroom so the x-offset polished star at the longest
+            # (q=55) run's endpoint is fully inside the frame, not clipped.
+            ax.set_xlim(0, x_max * 1.05)
 
     plt.tight_layout()
     plt.subplots_adjust(left=0.12)
 
     # Single figure-level legend, placed outside the grid at the top-right.
+    # Order matters: matplotlib fills columns top-to-bottom, so with ncol=3 and
+    # two rows this lays out
+    #   col 1: Theory / First verification update
+    #   col 2: Agent 1 / Agent 2
+    #   col 3: Raw estimate / MC-BR polished estimate
     legend_handles = [
         Line2D([0], [0], color=THEORY_LINE_COLOR, linestyle="--",
                linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$"),
+        Line2D([0], [0], color=CONV_VLINE_COLOR, linestyle=CONV_VLINE_LINESTYLE,
+               linewidth=CONV_VLINE_LINEWIDTH, label="First verification update"),
         Line2D([0], [0], color=AGENT_COLORS["agent1"], linestyle="-",
                linewidth=2, label="Agent 1"),
         Line2D([0], [0], color=AGENT_COLORS["agent2"], linestyle="--",
                linewidth=2, label="Agent 2"),
-        Line2D([0], [0], color=CONV_VLINE_COLOR, linestyle=CONV_VLINE_LINESTYLE,
-               linewidth=CONV_VLINE_LINEWIDTH, label="Verification update"),
         Line2D([0], [0], marker="o", linestyle="none", mfc="white",
                mec="#333333", mew=1.8, markersize=8, label="Raw estimate"),
         Line2D([0], [0], marker="*", linestyle="none", color="#d62728",
@@ -1946,17 +1971,19 @@ def plot_equilibrium_recovery_dotplot(
             rng = np.random.RandomState(42 + int(x_pos * 100))
 
             if is_heterogeneous_cost:
-                # --- Per-agent markers with separate theory lines ---
+                # --- Per-agent markers with a single shared theory style ---
                 # Agent mapping verified against the run config + theory:
                 # k1 = 0.0004 < k2 = 0.00055, so agent 1 is the LOW-cost agent
                 # and carries the higher equilibrium effort (e1* > e2*).
-                # Both per-agent theory lines are BLACK, kept distinguishable
-                # by line style: solid = low-cost, dashed = high-cost.
-                for agent_key, effort_col, theory_col, agent_label, theory_ls in [
+                # Both per-agent theory lines use the SAME "Theory e*" style
+                # (dashed, #333333) as every other panel, so the legend keeps a
+                # single "Theory e*" entry (no per-agent line-style split). The
+                # two agents remain distinguishable by their colored markers.
+                for agent_key, effort_col, theory_col, agent_label in [
                     ("agent1", "agent1_effort", "theoretical_effort1",
-                     "Low-cost agent", "-"),
+                     "Low-cost agent"),
                     ("agent2", "agent2_effort", "theoretical_effort2",
-                     "High-cost agent", "--"),
+                     "High-cost agent"),
                 ]:
                     color = AGENT_COLORS[agent_key]
                     marker = AGENT_MARKERS[agent_key]
@@ -1968,8 +1995,8 @@ def plot_equilibrium_recovery_dotplot(
                             ax.hlines(
                                 e_theory_agent.iloc[0],
                                 x_pos - 0.3, x_pos + 0.3,
-                                colors="black", linestyles=theory_ls,
-                                linewidth=2, zorder=2,
+                                colors="#333333", linestyles="--",
+                                linewidth=3, zorder=2,
                             )
 
                     # Per-seed scatter: semi-transparent, BEHIND the mean
@@ -2076,17 +2103,11 @@ def plot_equilibrium_recovery_dotplot(
             fontweight="bold",
         )
 
-    # Legend
+    # Legend — a single "Theory e*" entry covers every panel (all theory
+    # lines share one dashed #333333 style, including heterogeneous cost).
     legend_elements = [
         Line2D([0], [0], color="#333333", linestyle="--", linewidth=3, label="Theory e*"),
     ]
-    if _legend_added["agent1"]:
-        # Heterogeneous-cost theory lines are black; solid marks the
-        # low-cost agent (dashed = high-cost, covered by "Theory e*").
-        legend_elements.append(Line2D(
-            [0], [0], color="black", linestyle="-", linewidth=2,
-            label="Theory e* (low-cost)",
-        ))
     if _legend_added["single"]:
         legend_elements.append(Line2D(
             [0], [0], marker="o", color="w",
@@ -2113,6 +2134,22 @@ def plot_equilibrium_recovery_dotplot(
             markeredgecolor=to_rgba("black", 0.45), markersize=7,
             label="High-cost agent",
         ))
+    # Display order. matplotlib fills legend columns top-to-bottom, so with
+    # ncol=3 this lays out
+    #   col 1: Theory e*        / High-cost agent
+    #   col 2: Across-seed mean / Low-cost agent
+    #   col 3: Seed-level estimates
+    # keeping the low-/high-cost pair together in one column instead of
+    # splitting it across the grid.
+    _legend_order = [
+        "Theory e*", "High-cost agent", "Across-seed mean",
+        "Low-cost agent", "Seed-level estimates",
+    ]
+    legend_elements.sort(
+        key=lambda h: _legend_order.index(h.get_label())
+        if h.get_label() in _legend_order else len(_legend_order)
+    )
+
     # Two-row legend (3 columns for the 6 entries) — a single row runs the
     # full figure width and crowds the title.
     ax.legend(
