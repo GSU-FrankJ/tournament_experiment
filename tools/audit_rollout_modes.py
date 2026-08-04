@@ -40,7 +40,7 @@ def audit_risk_point_1_selfplay(num_steps: int = 200) -> Dict:
 
     ppo_cfg = PPOConfig(
         steps_per_update=4096,
-        state_dim=3,
+        state_dim=4,
         hidden=128,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
@@ -158,7 +158,7 @@ def audit_risk_point_3_value_handling(num_steps: int = 200) -> Dict:
 
     ppo_cfg = PPOConfig(
         steps_per_update=4096,
-        state_dim=3,
+        state_dim=4,
         hidden=128,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
@@ -234,7 +234,7 @@ def audit_risk_point_5_batch_size(num_steps: int = 200) -> Dict:
 
     ppo_cfg = PPOConfig(
         steps_per_update=num_steps,  # Use num_steps for this test
-        state_dim=3,
+        state_dim=4,
         hidden=128,
     )
     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)

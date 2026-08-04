@@ -77,9 +77,11 @@ class BetaPolicyAgent:
         self._beta = torch.full((1, 1), float(beta), dtype=torch.float32,
                                 device=self.device)
 
-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
-        """Mirror the real agent's 3-feature normalized state (value is irrelevant here)."""
-        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0],
+    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float,
+                          l_gap: float = 0.0) -> torch.Tensor:
+        """Mirror the real agent's 4-feature normalized state (value is irrelevant here)."""
+        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0,
+                          float(l_gap) / 10.0],
                          dtype=torch.float32, device=self.device)
         return s.unsqueeze(0)
 
@@ -108,9 +110,11 @@ class PointPolicyAgent:
         self._a = min(max(a, 1e-9), 1.0 - 1e-9)
         self.effort = float(effort)
 
-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
-        """Mirror the real agent's 3-feature normalized state (value is irrelevant here)."""
-        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0],
+    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float,
+                          l_gap: float = 0.0) -> torch.Tensor:
+        """Mirror the real agent's 4-feature normalized state (value is irrelevant here)."""
+        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0,
+                          float(l_gap) / 10.0],
                          dtype=torch.float32, device=self.device)
         return s.unsqueeze(0)
 

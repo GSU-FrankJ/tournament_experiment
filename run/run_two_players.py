@@ -238,6 +238,14 @@ def _sample_policy_efforts(agent, q: float, effort_bounds: tuple[float, float], 
                     torch.manual_seed(seed_value)
                     samples = dist.sample((M,))
         samples = samples.squeeze(-1).clamp(0.0, 1.0)
+        if M > 16384:
+            # Large-M path: flatten to (M,) so eval_exploitability's payoff
+            # math stays elementwise. The legacy (M,1) shape silently
+            # broadcasts against the (M,) CRN/candidate tensors to an (M,M)
+            # matrix (~34 GB int64 winners at M=65536 -> OOM; ~6 GB transients
+            # at 16384, absorbed by the V100s through r5-r7). Legacy shape is
+            # kept for M<=16384 so prior generations stay bit-reproducible.
+            samples = samples.reshape(-1)
     low, high = effort_bounds
     return (low + samples * (high - low)).to(device)
 
@@ -680,7 +688,7 @@ def run_ppo(
         steps_per_update=int(cfg.get("steps_per_update", 4096)),
         epochs=int(cfg.get("update_epochs", 6)),
         minibatch_size=int(cfg.get("minibatch_size", 1024)),
-        state_dim=3,
+        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
         hidden=128,
         opponent_mode=cfg.get("opponent_mode", "periodic"),
         opponent_sync_interval=int(cfg.get("opponent_sync_interval", 2)),

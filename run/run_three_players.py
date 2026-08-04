@@ -660,7 +660,7 @@ def run_ppo(
         steps_per_update=int(cfg.get("steps_per_update", 4096)),
         epochs=int(cfg.get("update_epochs", 6)),
         minibatch_size=int(cfg.get("minibatch_size", 1024)),
-        state_dim=3,  # [q_norm, k_norm, wgap_norm]
+        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
         hidden=int(cfg.get("hidden_size", 128)),
         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
         lr=float(cfg.get("lr_start", 3e-4)),
