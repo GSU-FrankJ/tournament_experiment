@@ -48,7 +48,8 @@ The two design choices this fixes, and why they were resolved this way:
 | Diagnostics | Effort-drift threshold | 8.0 (patience 1) |
 | Verifier (in-training) | Payoff evaluation | 65,536 MC samples, common random numbers (r9; was 16,384 in r7/r8) |
 | Verifier (in-training) | Search grid | coarse-to-fine 5.0 / 1.0 / 0.25 |
-| Verifier (in-training) | Tolerance / patience / cadence | ε=0.01 / 5 consecutive checks / gate-triggered or every 10 updates (r9; was ε=0.03) |
+| Verifier (in-training) | Tolerance / patience | ε=0.01 / **5** consecutive checks (r9; was ε=0.03) |
+| Verifier (in-training) | Evaluation checkpoint interval | at most every **10** PPO updates; the stability gate can trigger a check earlier (`exploit_every_updates=10`, recorded in every run's `exploit_config`) |
 | Stopping | Principle | Stop at the 5th consecutive verifier pass; NO minimum-update floor; 1500-update budget cap |
 | Final check | Independent MC exploitability | M=200000, uniform grid 0.25, fresh seeds 700000+q·1000+si·7 (unchanged) |
 
@@ -60,20 +61,25 @@ old per-scenario table of differing conc/var values.
 
 ## Realized values at stop (fill per generation)
 
+r9 generation (ε=0.01, M=65,536):
+
 | Scenario | Runs | Stop updates | Realized conc_min / var_coef at stop | Entropy |
 |---|---|---|---|---|
-| Two-player S1 | r7_state4 | 49–99 (pre-ramp) | 100 / 0 | 0 |
-| Two-player S2 | wh8_wl4_r7_state4 | 49–119 (pre-ramp) | 100 / 0 | 0 |
-| Three-player | r8_unified | 43–88 (pre-ramp) | 100 / 0 | 0 |
-| Het. cost | r8_unified | 89–129 (pre-ramp) | 100 / 0 | 0 |
-| Het. ability | r8_unified | 22–93 (pre-ramp) | 100 / 0 | 0 |
+| Two-player S1 | r9_cert001 | 49–139 (pre-ramp) | 100 / 0 | 0 |
+| Two-player S2 | wh8_wl4_r9_cert001 | 89–**209** | 100 / 0, except one seed (see below) | 0 |
+| Three-player q35 | r9_cert001 | 44–52 (pre-ramp) | 100 / 0 | 0 |
+| Three-player q55 | r8_sens_eps001 | 88–123 (pre-ramp) | 100 / 0 | 0 |
+| Het. cost | r9_cert001 | 96–145 (pre-ramp) | 100 / 0 | 0 |
+| Het. ability q35 | r9_cert001 | 100–160 (pre-ramp) | 100 / 0 | 0 |
+| Het. ability q55 | r8_sens_eps001 | 81–120 (pre-ramp) | 100 / 0 | 0 |
 
-**Simplification discovered by r8:** under the unified no-floor rule, EVERY
-scenario verifies before the 200-update ramp warm-up. The realized
-configuration is therefore identical everywhere AND constant through training:
-conc_min=100, conc_scale=100, var_coef=0, entropy=0. The late part of the
-conc/var schedule is inert in this generation — Table 2 can state the realized
-values directly instead of the schedule footnote.
+**Realized configuration is constant in 74 of the 75 shipped runs:**
+conc_min=100, conc_scale=100, var_coef=0, entropy=0 throughout, because
+verification fires before the 200-update ramp warm-up. The single exception is
+Set 2, q=35, seed 45, which stops at update 209 and therefore spends its last
+9 updates inside the ramp (ramp_t=0.2 → conc_min≈280, var_coef≈0.01). Under
+ε=0.03 (r7/r8) no run reached the ramp at all; the tighter certificate trains
+long enough that the schedule is no longer strictly inert.
 
 ## Where every reviewed figure/table gets its data (this generation)
 
