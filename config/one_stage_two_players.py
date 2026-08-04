@@ -107,7 +107,7 @@ config = {
         "exploit": {
             "exploit_eps": 0.03,       # matches actual training runs (0.03, not 0.05)
             "patience_exploit": 5,
-            "M": 8192,                 # matches actual training runs (8192, not 16384)
+            "M": 16384,                # unified with the other three scenarios (r7 wave; was 8192 for r5)
             "grid": {
                 "stage_a_step": 5.0,
                 "stage_b_radius": 15.0,
