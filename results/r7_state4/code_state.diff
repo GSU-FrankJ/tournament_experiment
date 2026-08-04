@@ -1,0 +1,545 @@
+diff --git a/agents/ppo_three_players.py b/agents/ppo_three_players.py
+index 58a1686..6fb327c 100644
+--- a/agents/ppo_three_players.py
++++ b/agents/ppo_three_players.py
+@@ -208,7 +208,7 @@ class PPOConfig:
+     minibatch_size: int = 256
+     
+     # Network architecture
+-    state_dim: int = 3  # [q_norm, k_norm, wgap_norm]
++    state_dim: int = 4  # [q_norm, k_norm, wgap_norm, lgap_norm]
+     hidden: int = 64
+     
+     # Early-stop settings (default OFF)
+@@ -822,11 +822,20 @@ class PPOThreePlayersBandit:
+         return metrics
+ 
+     # ---- Utility methods ----
+-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
+-        """Construct normalized state tensor from game parameters."""
++    def state_from_params(
++        self, *, q: float, k: float, w_h: float, w_l: float, l_gap: float = 0.0
++    ) -> torch.Tensor:
++        """Construct the normalized 4-dim state from game parameters.
++
++        s_i = [q/60, k_i/1e-3, Δw/10, (l_i − l̄_{−i})/10]; l_gap is 0 for the
++        symmetric three-player scenario (no ability heterogeneity).
++        """
+         # Normalize features to roughly [0,1]
+         q_norm = float(q) / 60.0      # assumes q up to ~60
+         k_norm = float(k) / 1e-3      # k around 4e-4 => ~0.4
+         wgap_norm = float(w_h - w_l) / 10.0  # prize gap scaled by 10
+-        s = torch.tensor([q_norm, k_norm, wgap_norm], dtype=torch.float32, device=self.device)
++        lgap_norm = float(l_gap) / 10.0      # ability gap scaled by 10 (0 here)
++        s = torch.tensor(
++            [q_norm, k_norm, wgap_norm, lgap_norm], dtype=torch.float32, device=self.device
++        )
+         return s.unsqueeze(0)
+diff --git a/agents/ppo_two_players_clean.py b/agents/ppo_two_players_clean.py
+index 06eaff8..93f3bbd 100644
+--- a/agents/ppo_two_players_clean.py
++++ b/agents/ppo_two_players_clean.py
+@@ -123,7 +123,7 @@ class PPOConfig:
+     steps_per_update: int = 2048
+     epochs: int = 15
+     minibatch_size: int = 256
+-    state_dim: int = 3  # [q_norm, k_norm, wgap_norm]
++    state_dim: int = 4  # [q_norm, k_norm, wgap_norm, lgap_norm]
+     hidden: int = 64
+     # Opponent policy lag (self-play stabilization)
+     opponent_mode: str = "ema"  # ["ema", "periodic", "snapshot"]
+@@ -672,10 +672,29 @@ class PPOTwoPlayersBandit:
+         return metrics
+ 
+     # ---- utility ----
+-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
++    def state_from_params(
++        self, *, q: float, k: float, w_h: float, w_l: float, l_gap: float = 0.0
++    ) -> torch.Tensor:
++        """Build the normalized 4-dim state s_i = [q/60, k_i/1e-3, Δw/10, (l_i − l̄_{−i})/10].
++
++        Args:
++            q: Noise half-width.
++            k: This player's cost coefficient k_i.
++            w_h: High prize.
++            w_l: Low prize.
++            l_gap: Ability gap l_i − l̄_{−i} (mean over opponents). 0 for all
++                scenarios except heterogeneous ability, where player 1 passes
++                l1 − l2 and player 2 passes l2 − l1.
++
++        Returns:
++            State tensor of shape (1, 4).
++        """
+         # Normalize features to roughly [0,1]
+         q_norm = float(q) / 60.0  # assumes q up to ~60
+         k_norm = float(k) / 1e-3  # k around 4e-4 => ~0.4
+         wgap_norm = float(w_h - w_l) / 10.0  # prize gap scaled by 10
+-        s = torch.tensor([q_norm, k_norm, wgap_norm], dtype=torch.float32, device=self.device)
++        lgap_norm = float(l_gap) / 10.0  # ability gap scaled by 10 (0 unless het-ability)
++        s = torch.tensor(
++            [q_norm, k_norm, wgap_norm, lgap_norm], dtype=torch.float32, device=self.device
++        )
+         return s.unsqueeze(0)
+diff --git a/config/one_stage_two_players.py b/config/one_stage_two_players.py
+index e242243..5616155 100644
+--- a/config/one_stage_two_players.py
++++ b/config/one_stage_two_players.py
+@@ -107,7 +107,7 @@ config = {
+         "exploit": {
+             "exploit_eps": 0.03,       # matches actual training runs (0.03, not 0.05)
+             "patience_exploit": 5,
+-            "M": 8192,                 # matches actual training runs (8192, not 16384)
++            "M": 16384,                # unified with the other three scenarios (r7 wave; was 8192 for r5)
+             "grid": {
+                 "stage_a_step": 5.0,
+                 "stage_b_radius": 15.0,
+diff --git a/docs/Figures&Tables07252026.docx b/docs/Figures&Tables07252026.docx
+index 192c76a..45fa70f 100644
+Binary files a/docs/Figures&Tables07252026.docx and b/docs/Figures&Tables07252026.docx differ
+diff --git a/docs/table2_metadata_audit.md b/docs/table2_metadata_audit.md
+index 06a13f4..a062721 100644
+--- a/docs/table2_metadata_audit.md
++++ b/docs/table2_metadata_audit.md
+@@ -196,13 +196,22 @@ what the runs used. The runs used 8.0.
+ |---|---|---|---|---|
+ | Training verifier (in-loop) | **8192** two-player, **16384** other three | coarse-to-fine 5.0 -> 1.0 -> 0.25 | CRN within a call | `run_*.eval_exploitability`, `exploit_config.exploit_M` in each convergence JSON |
+ | MC-BR polishing | **150000** | damped BR iteration, eta=0.4, 320 rounds, n_avg=200, bias-corrected | polish seed per run | `results/one_stage_ablation/polish_per_seed_all.json` -> `pol_config` |
+-| Final independent check | **200000** | uniform grid, step 0.25 | fresh seed 99991, CRN across the grid | `utils/mc_br_polish.py:211 exploitability_frozen_profile` |
++| Final independent check | **200000** | uniform grid, step 0.25 | fresh seed `700000 + int(q)*1000 + si*7`, shared across the four Table-3 arms within a (q, seed-index) cell (CRN across arms and across the grid) | `utils/mc_br_polish.py:211 exploitability_frozen_profile`, called from `tools/unified_exploitability_tables.py:62 eval_seed` |
+ 
+ So the final check draws 24x the two-player training verifier and 12x the
+ three-player / heterogeneous one, and is not the same as the polish budget
+ either. Table 2's "8192 MC samples with common random numbers" is correct only
+ for the two-player scenario.
+ 
++Note on the final-check seed: `exploitability_frozen_profile` declares
++`seed: int = 99_991` as a parameter default, but every Table-3 and Table-4 row
++is produced with that default OVERRIDDEN by `eval_seed(q, si)` above. 99991 is
++never used for any reported number. The eval seeds are disjoint from the
++MC-BR polishing seeds (2000/4000 + si), which is what the "fresh draws"
++requirement asks for; sharing a seed across the four arms of a cell is
++deliberate, so common random numbers cancel most of the estimator noise in
++the arm-to-arm DIFFERENCE.
++
+ ## Corrections Table 2 needs
+ 
+ 1. **Entropy coefficient** — "0 for the entire run" holds for two-player,
+diff --git a/paper/figures/convergence_main.pdf b/paper/figures/convergence_main.pdf
+index 6714ac7..32e19ce 100644
+Binary files a/paper/figures/convergence_main.pdf and b/paper/figures/convergence_main.pdf differ
+diff --git a/paper/figures/convergence_main.png b/paper/figures/convergence_main.png
+index 089cbc9..110320e 100644
+Binary files a/paper/figures/convergence_main.png and b/paper/figures/convergence_main.png differ
+diff --git a/paper/figures/convergence_main_1x3.pdf b/paper/figures/convergence_main_1x3.pdf
+index 0d24d89..67bd3a4 100644
+Binary files a/paper/figures/convergence_main_1x3.pdf and b/paper/figures/convergence_main_1x3.pdf differ
+diff --git a/paper/figures/convergence_main_1x3.png b/paper/figures/convergence_main_1x3.png
+index a0efbfd..eb23cc9 100644
+Binary files a/paper/figures/convergence_main_1x3.png and b/paper/figures/convergence_main_1x3.png differ
+diff --git a/paper/generator/plots.py b/paper/generator/plots.py
+index 103e52f..b081324 100644
+--- a/paper/generator/plots.py
++++ b/paper/generator/plots.py
+@@ -489,7 +489,7 @@ def plot_convergence_main(
+                     x=mean_conv * STEPS_PER_UPDATE, color=CONV_VLINE_COLOR,
+                     linestyle=CONV_VLINE_LINESTYLE,
+                     linewidth=CONV_VLINE_LINEWIDTH,
+-                    label="First verification update", zorder=4,
++                    label="Verification update", zorder=4,
+                 )
+                 print(
+                     f"[plots] convergence_main [{variant} q={q}]: line at "
+@@ -551,14 +551,14 @@ def plot_convergence_main(
+     # Single figure-level legend, placed outside the grid at the top-right.
+     # Order matters: matplotlib fills columns top-to-bottom, so with ncol=3 and
+     # two rows this lays out
+-    #   col 1: Theory / First verification update
++    #   col 1: Theory / Verification update
+     #   col 2: Agent 1 / Agent 2
+     #   col 3: Raw estimate / MC-BR polished estimate
+     legend_handles = [
+         Line2D([0], [0], color=THEORY_LINE_COLOR, linestyle="--",
+                linewidth=THEORY_LINE_WIDTH, label="Theory $e^*$"),
+         Line2D([0], [0], color=CONV_VLINE_COLOR, linestyle=CONV_VLINE_LINESTYLE,
+-               linewidth=CONV_VLINE_LINEWIDTH, label="First verification update"),
++               linewidth=CONV_VLINE_LINEWIDTH, label="Verification update"),
+         Line2D([0], [0], color=AGENT_COLORS["agent1"], linestyle="-",
+                linewidth=2, label="Agent 1"),
+         Line2D([0], [0], color=AGENT_COLORS["agent2"], linestyle="--",
+diff --git a/results/different_ability/summary.csv b/results/different_ability/summary.csv
+index b401bbc..e1ac7da 100644
+--- a/results/different_ability/summary.csv
++++ b/results/different_ability/summary.csv
+@@ -57,3 +57,5 @@ q,k,l1,l2,w_h,w_l,seed,theoretical_effort,final_effort,gap,p1_win,method,episode
+ 55.0,0.0005,10.0,5.0,6.5,3.0,45,30.371900826446282,29.464006423950195,0.9078944024960869,0.5444214876033058,ppo,6144000,True
+ 55.0,0.0005,10.0,5.0,6.5,3.0,46,30.371900826446282,31.577810645103455,1.2059098186571724,0.5444214876033058,ppo,6144000,True
+ 55.0,0.0005,10.0,5.0,6.5,3.0,46,30.371900826446282,29.590240120887756,0.7816607055585258,0.5444214876033058,ppo,6144000,True
++35.0,0.0005,10.0,5.0,6.5,3.0,999,46.42857142857142,40.96495062112808,5.463620807443341,0.5624888553554153,ppo,122880,False
++35.0,0.0005,10.0,5.0,6.5,3.0,999,46.42857142857142,48.76198023557663,2.333408807005206,0.5731230470305047,ppo,122880,True
+diff --git a/results/different_cost/summary.csv b/results/different_cost/summary.csv
+index 54e5720..4732e0d 100644
+--- a/results/different_cost/summary.csv
++++ b/results/different_cost/summary.csv
+@@ -47,3 +47,4 @@ q,k1,k2,w_h,w_l,seed,theoretical_effort1,theoretical_effort2,final_effort1,final
+ 55.0,0.0004,0.00055,8.0,5.5,44,26.539743814704334,19.301631865239514,26.850268244743347,17.948424816131592,0.3105244300390133,1.3532070491079224,1.3532070491079224,ppo,6144000,True
+ 55.0,0.0004,0.00055,8.0,5.5,45,26.539743814704334,19.301631865239514,25.660419464111328,16.01278781890869,0.8793243505930057,3.288844046330823,3.288844046330823,ppo,6144000,False
+ 55.0,0.0004,0.00055,8.0,5.5,46,26.539743814704334,19.301631865239514,25.75516700744629,18.87887567281723,0.7845768072580448,0.422756192422284,0.7845768072580448,ppo,6144000,True
++35.0,0.0004,0.00055,8.0,5.5,999,38.02844725404978,27.657052548399843,47.504764795303345,41.232022643089294,9.476317541253565,13.574970094689451,13.574970094689451,ppo,81920,False
+diff --git a/results/two_players/summary.csv b/results/two_players/summary.csv
+index 8fe8f38..76ec384 100644
+--- a/results/two_players/summary.csv
++++ b/results/two_players/summary.csv
+@@ -349,3 +349,4 @@ r5_sensitivity,baseline,3.0,6.5,0.00055,0.00055,none,0.0,28.92561983471074,ppo,0
+ r5_sensitivity,baseline,3.0,6.5,0.00055,0.00055,none,0.0,28.92561983471074,ppo,0.0,30.144301056861877,195.9379568696022,Poor,6144000,7.921427943982394,1.2186812221511367,1.2186812221511367,,,,periodic,0,0.0,0,-1,0.0056544020771980286,-2.059326171875,66.37834167480469,153.82362365722656,0.013014590367674828,0.0069027802455821075,1.7019919157028198,1.0012484043836594,0.2080078125,0.1009521484375,0.016671955585479736,0.001671711355447769,0.0013269603234976853,3.4271568059921265,0.006517887115478516,29.0,0.04513476789000137,3,3,1,,,,,
+ r5_sensitivity,baseline,3.0,6.5,0.00055,0.00055,none,0.0,28.92561983471074,ppo,0.0,28.74915301799774,186.86949461698532,Fair,6144000,1.1470343086344883,0.17646681671299902,0.17646681671299902,,,,periodic,0,0.0,0,-1,-0.0002031177282333374,-2.10821533203125,67.83049011230469,168.1085968017578,0.0004790729144588113,0.00012239894567755982,1.0995595455169678,1.0003255158662796,0.0,0.0,0.0005245208740234375,0.0014395520091056823,0.0020794731148175622,0.9549558162689209,0.005690574645996094,28.25,0.010405993089147358,5,5,1,,,,,
+ r5_sensitivity,baseline,3.0,6.5,0.00055,0.00055,none,0.0,28.92561983471074,ppo,0.0,28.588998317718506,185.8284890651703,Fair,6144000,2.1880398604495213,0.33662151699223486,0.33662151699223486,,,,periodic,0,0.0,0,-1,0.00014311820268630981,-2.14324951171875,72.22010040283203,180.39491271972656,0.0006872546509839594,0.00020270908862585202,1.1239871978759766,1.0000595599412918,0.0,0.0,0.0005033016204833984,0.0015741594135761261,0.0017282126077022362,0.39550960063934326,0.004177093505859375,28.0,0.13137482618918028,10,10,1,,,,,
++20260731_173244,baseline,3.0,6.5,0.00055,0.00055,none,0.0,45.45454545454545,ppo,0.0,48.50703477859497,315.2957260608673,Poor,81920,19.84118060632187,3.0524893240495174,3.0524893240495174,,,,periodic,0,0.0,0,-1,0.0017032548785209656,-1.9097747802734375,94.1196517944336,99.91333770751953,0.004245988093316555,0.001551214576466009,1.3516560792922974,0.9998479336500168,0.103515625,0.022216796875,0.00696253776550293,,,,0.02318739891052246,40.25,2.9839584715664316,0,1,0,,,,,
+diff --git a/run/run_different_ability.py b/run/run_different_ability.py
+index 12419ff..8a130b4 100755
+--- a/run/run_different_ability.py
++++ b/run/run_different_ability.py
+@@ -564,7 +564,7 @@ def run_ppo_different_ability(
+         steps_per_update=int(cfg.get("steps_per_update", 4096)),
+         epochs=int(cfg.get("update_epochs", 6)),
+         minibatch_size=int(cfg.get("minibatch_size", 1024)),
+-        state_dim=3,  # [q_norm, k_norm, wgap_norm]
++        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
+         hidden=128,
+         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
+         lr=float(cfg.get("lr_start", 3e-4)),
+@@ -663,9 +663,13 @@ def run_ppo_different_ability(
+     env = DifferentAbilityEnv(env_config)
+     
+     # Convergence history for plotting
++    # effort = mean of the two per-player policy means (backward-compatible);
++    # effort1/effort2 = per-player policy means at the ability-gap states
+     convergence_history: Dict[str, Any] = {
+         "steps": [],
+         "effort": [],
++        "effort1": [],
++        "effort2": [],
+         "gap": [],
+         "approx_kl": [],
+         "batch_entropy": [],
+@@ -746,34 +750,41 @@ def run_ppo_different_ability(
+             q = float(rng.choice(train_qs))
+             env.q = q
+             
+-            # Generate state (same for both players since symmetric policy)
+-            state = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
+-            
++            # Per-player states: shared network, but the 4th component carries
++            # each player's ability gap (l_i − l_{−i})/10, so the policy MAY
++            # output different efforts per player (symmetry becomes a learned
++            # outcome rather than an architectural constraint).
++            s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
++            s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
++
+             # Sample actions from shared policy (both players use same agent)
+-            a1_norm, e1, logp1, v1 = agent.act(state)
+-            a2_norm, e2, logp2, v2 = agent.act(state)
+-            
++            a1_norm, e1, logp1, v1 = agent.act(s1)
++            a2_norm, e2, logp2, v2 = agent.act(s2)
++
+             # Execute environment step
+             actions = [
+                 torch.tensor([float(e1.item())]),
+                 torch.tensor([float(e2.item())]),
+             ]
+             _, rewards, _, done, _ = env.step(actions)
+-            
+-            # Store transitions (train on both players' experiences)
+-            agent.store(state, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+-            agent.store(state, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
++
++            # Store transitions (train on both players' experiences, each with its own state)
++            agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
++            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+             
+             steps_done += 1
+         
+         # PPO update
+         metrics = agent.update()
+         
+-        # Compute policy mean effort at test q
++        # Compute per-player policy mean efforts at test q (states differ in l_gap)
+         test_q = float(train_qs[0])
+-        test_state = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l)
+-        policy_mean = agent.mean_effort(test_state)
+-        
++        test_s1 = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
++        test_s2 = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
++        policy_mean_1 = agent.mean_effort(test_s1)
++        policy_mean_2 = agent.mean_effort(test_s2)
++        policy_mean = 0.5 * (policy_mean_1 + policy_mean_2)
++
+         # Get theoretical effort
+         e_star = e_star_two_players_different_ability(test_q, w_h, w_l, k, l1, l2)
+         gap = abs(policy_mean - e_star)
+@@ -785,6 +796,8 @@ def run_ppo_different_ability(
+         # Record convergence history
+         convergence_history["steps"].append(steps_done)
+         convergence_history["effort"].append(policy_mean)
++        convergence_history["effort1"].append(policy_mean_1)
++        convergence_history["effort2"].append(policy_mean_2)
+         convergence_history["gap"].append(gap)
+         convergence_history["approx_kl"].append(metrics.get("approx_kl", 0.0))
+         convergence_history["batch_entropy"].append(metrics.get("batch_entropy", 0.0))
+@@ -793,7 +806,8 @@ def run_ppo_different_ability(
+         if update_idx % 20 == 0 or update_idx == total_updates - 1:
+             print(
+                 f"[PPO-diff-ability] update={update_idx:04d} steps={steps_done:08d} "
+-                f"e={policy_mean:.4f} (theory={e_star:.4f}, gap={gap:.4f}) "
++                f"e={policy_mean:.4f} (e1={policy_mean_1:.4f}, e2={policy_mean_2:.4f}, "
++                f"theory={e_star:.4f}, gap={gap:.4f}) "
+                 f"entropy={agent.cfg.entropy_coef:.4f}",
+                 flush=True,
+             )
+@@ -914,17 +928,21 @@ def run_ppo_different_ability(
+     # Final evaluation
+     results = []
+     for q in train_qs:
+-        test_state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
+-        policy_mean = agent.mean_effort(test_state)
++        test_s1 = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
++        test_s2 = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
++        policy_mean_1 = agent.mean_effort(test_s1)
++        policy_mean_2 = agent.mean_effort(test_s2)
++        policy_mean = 0.5 * (policy_mean_1 + policy_mean_2)
+         e_star = e_star_two_players_different_ability(float(q), w_h, w_l, k, l1, l2)
+         gap = abs(policy_mean - e_star)
+-        
+-        # Win probability at policy mean (symmetric)
+-        p1_win = p_win_different_ability(policy_mean, policy_mean, l1, l2, q)
+-        
++
++        # Win probability at the per-player policy means
++        p1_win = p_win_different_ability(policy_mean_1, policy_mean_2, l1, l2, q)
++
+         print(
+             f"[PPO-diff-ability] Final q={q:.1f}: "
+-            f"e={policy_mean:.4f} (theory={e_star:.4f}, gap={gap:.4f}) "
++            f"e={policy_mean:.4f} (e1={policy_mean_1:.4f}, e2={policy_mean_2:.4f}, "
++            f"theory={e_star:.4f}, gap={gap:.4f}) "
+             f"P(p1 wins)={p1_win:.4f}"
+         )
+         
+@@ -940,6 +958,8 @@ def run_ppo_different_ability(
+             "w_l": float(w_l),
+             "theoretical_effort": float(e_star),
+             "final_effort": float(policy_mean),
++            "final_effort1": float(policy_mean_1),
++            "final_effort2": float(policy_mean_2),
+             "gap": float(gap),
+             "p1_win": float(p1_win),
+             "episodes": int(episodes),
+@@ -979,6 +999,8 @@ def run_ppo_different_ability(
+             "exploit_history": exploit_history,
+             "final": {
+                 "effort": float(policy_mean),
++                "effort1": float(policy_mean_1),
++                "effort2": float(policy_mean_2),
+                 "gap": float(gap),
+                 "p1_win": float(p1_win),
+             },
+diff --git a/run/run_different_cost.py b/run/run_different_cost.py
+index 79dca7a..acce33e 100644
+--- a/run/run_different_cost.py
++++ b/run/run_different_cost.py
+@@ -556,7 +556,7 @@ def run_ppo_different_cost(
+         steps_per_update=int(cfg.get("steps_per_update", 4096)),
+         epochs=int(cfg.get("update_epochs", 6)),
+         minibatch_size=int(cfg.get("minibatch_size", 1024)),
+-        state_dim=3,  # [q_norm, k_norm, wgap_norm]
++        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
+         hidden=128,
+         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
+         lr=float(cfg.get("lr_start", 3e-4)),
+diff --git a/run/run_three_players.py b/run/run_three_players.py
+index d1c99c9..af83394 100644
+--- a/run/run_three_players.py
++++ b/run/run_three_players.py
+@@ -660,7 +660,7 @@ def run_ppo(
+         steps_per_update=int(cfg.get("steps_per_update", 4096)),
+         epochs=int(cfg.get("update_epochs", 6)),
+         minibatch_size=int(cfg.get("minibatch_size", 1024)),
+-        state_dim=3,  # [q_norm, k_norm, wgap_norm]
++        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
+         hidden=int(cfg.get("hidden_size", 128)),
+         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
+         lr=float(cfg.get("lr_start", 3e-4)),
+diff --git a/run/run_two_players.py b/run/run_two_players.py
+index 731d9ab..20ab69d 100644
+--- a/run/run_two_players.py
++++ b/run/run_two_players.py
+@@ -680,7 +680,7 @@ def run_ppo(
+         steps_per_update=int(cfg.get("steps_per_update", 4096)),
+         epochs=int(cfg.get("update_epochs", 6)),
+         minibatch_size=int(cfg.get("minibatch_size", 1024)),
+-        state_dim=3,
++        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
+         hidden=128,
+         opponent_mode=cfg.get("opponent_mode", "periodic"),
+         opponent_sync_interval=int(cfg.get("opponent_sync_interval", 2)),
+diff --git a/tools/audit_rollout_modes.py b/tools/audit_rollout_modes.py
+index ad3a20a..1842cf0 100644
+--- a/tools/audit_rollout_modes.py
++++ b/tools/audit_rollout_modes.py
+@@ -40,7 +40,7 @@ def audit_risk_point_1_selfplay(num_steps: int = 200) -> Dict:
+ 
+     ppo_cfg = PPOConfig(
+         steps_per_update=4096,
+-        state_dim=3,
++        state_dim=4,
+         hidden=128,
+     )
+     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
+@@ -158,7 +158,7 @@ def audit_risk_point_3_value_handling(num_steps: int = 200) -> Dict:
+ 
+     ppo_cfg = PPOConfig(
+         steps_per_update=4096,
+-        state_dim=3,
++        state_dim=4,
+         hidden=128,
+     )
+     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
+@@ -234,7 +234,7 @@ def audit_risk_point_5_batch_size(num_steps: int = 200) -> Dict:
+ 
+     ppo_cfg = PPOConfig(
+         steps_per_update=num_steps,  # Use num_steps for this test
+-        state_dim=3,
++        state_dim=4,
+         hidden=128,
+     )
+     agent = PPOTwoPlayersBandit(effort_bounds=effort_bounds, cfg=ppo_cfg)
+diff --git a/tools/diagnose_data_provenance.py b/tools/diagnose_data_provenance.py
+index eb40e65..86246df 100644
+--- a/tools/diagnose_data_provenance.py
++++ b/tools/diagnose_data_provenance.py
+@@ -38,7 +38,7 @@ def diagnose_data_provenance(num_steps: int = 200, use_opponent_prob: float = 0.
+         steps_per_update=4096,
+         epochs=6,
+         minibatch_size=1024,
+-        state_dim=3,
++        state_dim=4,
+         hidden=128,
+         opponent_mode="periodic",
+         opponent_sync_interval=2,
+diff --git a/tools/one_stage_mc_adapter.py b/tools/one_stage_mc_adapter.py
+index 1bc6a0e..35a0e83 100644
+--- a/tools/one_stage_mc_adapter.py
++++ b/tools/one_stage_mc_adapter.py
+@@ -77,9 +77,11 @@ class BetaPolicyAgent:
+         self._beta = torch.full((1, 1), float(beta), dtype=torch.float32,
+                                 device=self.device)
+ 
+-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
+-        """Mirror the real agent's 3-feature normalized state (value is irrelevant here)."""
+-        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0],
++    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float,
++                          l_gap: float = 0.0) -> torch.Tensor:
++        """Mirror the real agent's 4-feature normalized state (value is irrelevant here)."""
++        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0,
++                          float(l_gap) / 10.0],
+                          dtype=torch.float32, device=self.device)
+         return s.unsqueeze(0)
+ 
+@@ -108,9 +110,11 @@ class PointPolicyAgent:
+         self._a = min(max(a, 1e-9), 1.0 - 1e-9)
+         self.effort = float(effort)
+ 
+-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
+-        """Mirror the real agent's 3-feature normalized state (value is irrelevant here)."""
+-        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0],
++    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float,
++                          l_gap: float = 0.0) -> torch.Tensor:
++        """Mirror the real agent's 4-feature normalized state (value is irrelevant here)."""
++        s = torch.tensor([float(q) / 60.0, float(k) / 1e-3, (float(w_h) - float(w_l)) / 10.0,
++                          float(l_gap) / 10.0],
+                          dtype=torch.float32, device=self.device)
+         return s.unsqueeze(0)
+ 
+diff --git a/tools/verify_rollout_modes.py b/tools/verify_rollout_modes.py
+index cf2c7f5..02c3900 100644
+--- a/tools/verify_rollout_modes.py
++++ b/tools/verify_rollout_modes.py
+@@ -44,7 +44,7 @@ def test_selfplay_mode(num_steps: int = 100) -> Dict[str, int]:
+         steps_per_update=4096,
+         epochs=6,
+         minibatch_size=1024,
+-        state_dim=3,
++        state_dim=4,
+         hidden=128,
+         opponent_mode="periodic",
+         opponent_sync_interval=2,
+diff --git a/utils/exploit_asymmetric.py b/utils/exploit_asymmetric.py
+index 930be59..528858d 100644
+--- a/utils/exploit_asymmetric.py
++++ b/utils/exploit_asymmetric.py
+@@ -35,12 +35,13 @@ def _sample_policy_efforts(
+     k: float,
+     w_h: float,
+     w_l: float,
++    l_gap: float = 0.0,
+ ) -> torch.Tensor:
+     """
+-    Sample M efforts from the agent's policy at state (q, k, w_h, w_l).
+-    
++    Sample M efforts from the agent's policy at state (q, k, w_h, w_l, l_gap).
++
+     Uses a deterministic generator keyed by (q, seed) for reproducibility.
+-    
++
+     Args:
+         agent: PPO agent with state_from_params() and dist() methods
+         q: Noise parameter
+@@ -50,7 +51,8 @@ def _sample_policy_efforts(
+         k: Cost parameter for state encoding
+         w_h: High prize
+         w_l: Low prize
+-        
++        l_gap: Ability gap l_i − l_{−i} for state encoding (0 unless het-ability)
++
+     Returns:
+         Tensor of shape (M,) with sampled efforts
+     """
+@@ -70,7 +72,7 @@ def _sample_policy_efforts(
+         gen_map[gen_key] = generator
+     
+     # Get state and sample from policy distribution
+-    state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
++    state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l, l_gap=l_gap)
+     with torch.no_grad():
+         dist, _ = agent.dist(state)
+         try:
+@@ -246,13 +248,16 @@ def eval_exploitability_asymmetric(
+                 tie_breaks = torch.randint(0, 2, (M,), device=device)
+         
+         # === Sample policy efforts for both players ===
+-        # Player 1's policy (uses k1 for state encoding)
++        # Each player's state carries its own cost (k_i) and ability gap
++        # (l_i − l_{−i}); the gaps are 0 unless the game has ability
++        # heterogeneity, so this is a no-op for different_cost/symmetric.
+         efforts_policy_1 = _sample_policy_efforts(
+-            agent1, q, effort_bounds, M, seed=seed, k=k1, w_h=w_h, w_l=w_l
++            agent1, q, effort_bounds, M, seed=seed, k=k1, w_h=w_h, w_l=w_l,
++            l_gap=l1 - l2,
+         )
+-        # Player 2's policy (uses k2 for state encoding)
+         efforts_policy_2 = _sample_policy_efforts(
+-            agent2, q, effort_bounds, M, seed=seed + 17, k=k2, w_h=w_h, w_l=w_l
++            agent2, q, effort_bounds, M, seed=seed + 17, k=k2, w_h=w_h, w_l=w_l,
++            l_gap=l2 - l1,
+         )
+         
+         # === Compute utility under current policy pair ===
+@@ -505,7 +510,7 @@ def validate_exploitability_at_equilibrium(
+             self.net.to(device)
+             
+         def state_from_params(self, **kwargs):
+-            return torch.zeros(1, 3, device=self._device)
++            return torch.zeros(1, 4, device=self._device)
+         
+         def dist(self, state):
+             # Return a Dirac distribution at the fixed effort

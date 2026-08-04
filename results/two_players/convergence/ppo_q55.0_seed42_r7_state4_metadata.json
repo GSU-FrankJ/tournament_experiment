@@ -1,0 +1,12 @@
+{
+  "run_id": "20260801_155915",
+  "method": "ppo",
+  "q": 55.0,
+  "seed": 42,
+  "ablation_name": "r7_state4",
+  "git_sha": "8c5c8c044273",
+  "cmdline": "run/run_two_players.py --method ppo --q 55 --seed 42 --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r7_state4",
+  "timestamp": "2026-08-01T16:23:47.893887",
+  "convergence_file": "ppo_q55.0_seed42_r7_state4_convergence.json",
+  "variant_name": "baseline"
+}

@@ -1,0 +1,2265 @@
+{
+  "pol_config": {
+    "eta": 0.4,
+    "M": 150000,
+    "min_rounds": 999,
+    "max_rounds": 320,
+    "n_avg": 200,
+    "tau_e": 0.0,
+    "bias_correct": true
+  },
+  "bounds": [
+    0.0,
+    100.0
+  ],
+  "design": "polish-only from uninformed starts; no training anywhere",
+  "arms": {
+    "mc_br_only_mid50": "start 50 (PPO init mean), 5 polish seeds (CRN with TEL-PPO polish rows)",
+    "mc_br_only_ladder": "starts 10/30/70/90, seeds base+si"
+  },
+  "note": "POL runs a fixed 320 rounds (no early stop): polish cost is start-independent by design; 'seed' field = repeat index.",
+  "source": "tools/mc_br_only_baseline.py",
+  "rows": [
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        44.97430201111196,
+        44.892743214731624
+      ],
+      "single_value": 44.93352261292179,
+      "agent1_effort": 44.97430201111196,
+      "agent2_effort": 44.892743214731624,
+      "drift": 0.14570268468204262,
+      "rounds": 320,
+      "sec": 116.11,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        44.97113041785282,
+        44.877290179299095
+      ],
+      "single_value": 44.92421029857596,
+      "agent1_effort": 44.97113041785282,
+      "agent2_effort": 44.877290179299095,
+      "drift": 0.13956619756100253,
+      "rounds": 320,
+      "sec": 116.43,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        44.91374931884667,
+        44.89572185820563
+      ],
+      "single_value": 44.90473558852615,
+      "agent1_effort": 44.91374931884667,
+      "agent2_effort": 44.89572185820563,
+      "drift": 0.14771817304706047,
+      "rounds": 320,
+      "sec": 116.93,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        44.99073749672925,
+        44.92734983960145
+      ],
+      "single_value": 44.95904366816535,
+      "agent1_effort": 44.99073749672925,
+      "agent2_effort": 44.92734983960145,
+      "drift": 0.050705804461145476,
+      "rounds": 320,
+      "sec": 116.65,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 4004,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        44.87961808926657,
+        45.04347679592902
+      ],
+      "single_value": 44.96154744259779,
+      "agent1_effort": 44.87961808926657,
+      "agent2_effort": 45.04347679592902,
+      "drift": 0.12791199081988935,
+      "rounds": 320,
+      "sec": 116.36,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        44.97841072064824,
+        44.90693958059708
+      ],
+      "single_value": 44.94267515062266,
+      "agent1_effort": 44.97841072064824,
+      "agent2_effort": 44.90693958059708,
+      "drift": 0.13386458625807762,
+      "rounds": 320,
+      "sec": 116.29,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        44.97058487157801,
+        44.88035742424774
+      ],
+      "single_value": 44.92547114791287,
+      "agent1_effort": 44.97058487157801,
+      "agent2_effort": 44.88035742424774,
+      "drift": 0.1146557805601347,
+      "rounds": 320,
+      "sec": 116.86,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        44.937613006319005,
+        44.89328314111448
+      ],
+      "single_value": 44.915448073716746,
+      "agent1_effort": 44.937613006319005,
+      "agent2_effort": 44.89328314111448,
+      "drift": 0.15631320860758535,
+      "rounds": 320,
+      "sec": 116.57,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        45.45454545454545,
+        45.45454545454545
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        45.01588394395092,
+        44.93650187036267
+      ],
+      "single_value": 44.97619290715679,
+      "agent1_effort": 45.01588394395092,
+      "agent2_effort": 44.93650187036267,
+      "drift": 0.10079296022413331,
+      "rounds": 320,
+      "sec": 116.46,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        35.10739720414452,
+        35.11382656935376
+      ],
+      "single_value": 35.11061188674914,
+      "agent1_effort": 35.10739720414452,
+      "agent2_effort": 35.11382656935376,
+      "drift": 0.06259741813144615,
+      "rounds": 320,
+      "sec": 116.76,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        35.068430622385776,
+        35.08002595787886
+      ],
+      "single_value": 35.07422829013232,
+      "agent1_effort": 35.068430622385776,
+      "agent2_effort": 35.08002595787886,
+      "drift": 0.09662880457161549,
+      "rounds": 320,
+      "sec": 117.03,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        35.09200323190536,
+        34.992189184307165
+      ],
+      "single_value": 35.04209620810626,
+      "agent1_effort": 35.09200323190536,
+      "agent2_effort": 34.992189184307165,
+      "drift": 0.13142552812434616,
+      "rounds": 320,
+      "sec": 117.07,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        35.078255174254224,
+        35.13047858750978
+      ],
+      "single_value": 35.104366880882,
+      "agent1_effort": 35.078255174254224,
+      "agent2_effort": 35.13047858750978,
+      "drift": 0.04927775153841196,
+      "rounds": 320,
+      "sec": 117.18,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 4004,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        35.08860780323006,
+        35.133744132965965
+      ],
+      "single_value": 35.11117596809801,
+      "agent1_effort": 35.08860780323006,
+      "agent2_effort": 35.133744132965965,
+      "drift": 0.0930037343231902,
+      "rounds": 320,
+      "sec": 116.19,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        35.09118450595887,
+        35.11944256801187
+      ],
+      "single_value": 35.10531353698537,
+      "agent1_effort": 35.09118450595887,
+      "agent2_effort": 35.11944256801187,
+      "drift": 0.09914803125539606,
+      "rounds": 320,
+      "sec": 115.48,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        35.04664260820124,
+        35.05525673617598
+      ],
+      "single_value": 35.05094967218861,
+      "agent1_effort": 35.04664260820124,
+      "agent2_effort": 35.05525673617598,
+      "drift": 0.07753897949680066,
+      "rounds": 320,
+      "sec": 115.98,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        35.07471511916694,
+        34.96704757728864
+      ],
+      "single_value": 35.02088134822779,
+      "agent1_effort": 35.07471511916694,
+      "agent2_effort": 34.96704757728864,
+      "drift": 0.08489449896477197,
+      "rounds": 320,
+      "sec": 115.61,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 45.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        35.35353535353535,
+        35.35353535353535
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        35.0881831423819,
+        35.11033025019255
+      ],
+      "single_value": 35.09925669628723,
+      "agent1_effort": 35.0881831423819,
+      "agent2_effort": 35.11033025019255,
+      "drift": 0.10831804725408034,
+      "rounds": 320,
+      "sec": 115.64,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        28.784706346618595,
+        28.79879232125525
+      ],
+      "single_value": 28.79174933393692,
+      "agent1_effort": 28.784706346618595,
+      "agent2_effort": 28.79879232125525,
+      "drift": 0.095045542805682,
+      "rounds": 320,
+      "sec": 115.81,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        28.758816241931026,
+        28.78282010598376
+      ],
+      "single_value": 28.770818173957394,
+      "agent1_effort": 28.758816241931026,
+      "agent2_effort": 28.78282010598376,
+      "drift": 0.04039965810850532,
+      "rounds": 320,
+      "sec": 116.12,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        28.761660983107028,
+        28.711386924261404
+      ],
+      "single_value": 28.736523953684216,
+      "agent1_effort": 28.761660983107028,
+      "agent2_effort": 28.711386924261404,
+      "drift": 0.07013757075199223,
+      "rounds": 320,
+      "sec": 116.29,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        28.76118651870951,
+        28.751316755619555
+      ],
+      "single_value": 28.75625163716453,
+      "agent1_effort": 28.76118651870951,
+      "agent2_effort": 28.751316755619555,
+      "drift": 0.09251260421187979,
+      "rounds": 320,
+      "sec": 116.29,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 4004,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        28.79421599158115,
+        28.810395875210446
+      ],
+      "single_value": 28.8023059333958,
+      "agent1_effort": 28.79421599158115,
+      "agent2_effort": 28.810395875210446,
+      "drift": 0.16129619907587767,
+      "rounds": 320,
+      "sec": 116.02,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 4000,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        28.803763829253274,
+        28.803169214566214
+      ],
+      "single_value": 28.803466521909744,
+      "agent1_effort": 28.803763829253274,
+      "agent2_effort": 28.803169214566214,
+      "drift": 0.07924659749154372,
+      "rounds": 320,
+      "sec": 116.27,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 4001,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        28.735152655113776,
+        28.72677795119725
+      ],
+      "single_value": 28.730965303155514,
+      "agent1_effort": 28.735152655113776,
+      "agent2_effort": 28.72677795119725,
+      "drift": 0.0633542011132242,
+      "rounds": 320,
+      "sec": 116.06,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 4002,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        28.72043330637007,
+        28.706809568839684
+      ],
+      "single_value": 28.71362143760488,
+      "agent1_effort": 28.72043330637007,
+      "agent2_effort": 28.706809568839684,
+      "drift": 0.07171376599350765,
+      "rounds": 320,
+      "sec": 116.44,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "two_players",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 4003,
+      "e_star_per_player": [
+        28.92561983471074,
+        28.92561983471074
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        28.748918260447663,
+        28.77113181604584
+      ],
+      "single_value": 28.760025038246752,
+      "agent1_effort": 28.748918260447663,
+      "agent2_effort": 28.77113181604584,
+      "drift": 0.11945974947695248,
+      "rounds": 320,
+      "sec": 116.49,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        24.781581882776162,
+        24.69764155081344,
+        24.803396856424794
+      ],
+      "single_value": 24.760873430004796,
+      "agent1_effort": 24.781581882776162,
+      "agent2_effort": 24.803396856424794,
+      "drift": 0.19958662723766452,
+      "rounds": 320,
+      "sec": 176.45,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        24.63260850152351,
+        24.812424944008338,
+        24.755401281114793
+      ],
+      "single_value": 24.73347824221555,
+      "agent1_effort": 24.63260850152351,
+      "agent2_effort": 24.755401281114793,
+      "drift": 0.14382591408614687,
+      "rounds": 320,
+      "sec": 176.16,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        24.614421796062842,
+        24.702258077059764,
+        24.883979284866815
+      ],
+      "single_value": 24.73355305266314,
+      "agent1_effort": 24.614421796062842,
+      "agent2_effort": 24.883979284866815,
+      "drift": 0.2701652874410172,
+      "rounds": 320,
+      "sec": 171.92,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        24.722243363532357,
+        24.709988375820174,
+        24.85571929608686
+      ],
+      "single_value": 24.762650345146465,
+      "agent1_effort": 24.722243363532357,
+      "agent2_effort": 24.85571929608686,
+      "drift": 0.22825362575604657,
+      "rounds": 320,
+      "sec": 172.13,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        24.777301159839794,
+        24.693686204106985,
+        24.81451932434901
+      ],
+      "single_value": 24.76183556276526,
+      "agent1_effort": 24.777301159839794,
+      "agent2_effort": 24.81451932434901,
+      "drift": 0.279946150008886,
+      "rounds": 320,
+      "sec": 172.54,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        24.78842013145156,
+        24.64349195072191,
+        24.85105747696449
+      ],
+      "single_value": 24.760989853045984,
+      "agent1_effort": 24.78842013145156,
+      "agent2_effort": 24.85105747696449,
+      "drift": 0.07246567786081926,
+      "rounds": 320,
+      "sec": 170.13,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        24.622615224059277,
+        24.81454851600324,
+        24.796930650535316
+      ],
+      "single_value": 24.74469813019928,
+      "agent1_effort": 24.622615224059277,
+      "agent2_effort": 24.796930650535316,
+      "drift": 0.08556703295062107,
+      "rounds": 320,
+      "sec": 169.27,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        24.62597560557595,
+        24.75179324036217,
+        24.803131465388134
+      ],
+      "single_value": 24.726966770442086,
+      "agent1_effort": 24.62597560557595,
+      "agent2_effort": 24.803131465388134,
+      "drift": 0.1845482565088723,
+      "rounds": 320,
+      "sec": 169.76,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        24.999999999999996,
+        24.999999999999996,
+        24.999999999999996
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        24.74645412196295,
+        24.649915515025846,
+        24.867454784136516
+      ],
+      "single_value": 24.7546081403751,
+      "agent1_effort": 24.74645412196295,
+      "agent2_effort": 24.867454784136516,
+      "drift": 0.16215057711123748,
+      "rounds": 320,
+      "sec": 169.58,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        15.869394989692832,
+        15.793915489286366,
+        15.844511094092013
+      ],
+      "single_value": 15.83594052435707,
+      "agent1_effort": 15.869394989692832,
+      "agent2_effort": 15.844511094092013,
+      "drift": 0.09003343757694005,
+      "rounds": 320,
+      "sec": 169.92,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        15.804974752620481,
+        15.844431818141011,
+        15.848253623430985
+      ],
+      "single_value": 15.832553398064158,
+      "agent1_effort": 15.804974752620481,
+      "agent2_effort": 15.848253623430985,
+      "drift": 0.05187693586781528,
+      "rounds": 320,
+      "sec": 169.7,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        15.82386288992755,
+        15.849583998436858,
+        15.842673483790948
+      ],
+      "single_value": 15.838706790718453,
+      "agent1_effort": 15.82386288992755,
+      "agent2_effort": 15.842673483790948,
+      "drift": 0.04575494457560225,
+      "rounds": 320,
+      "sec": 169.72,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        15.826999675412457,
+        15.820428528762301,
+        15.871837911821283
+      ],
+      "single_value": 15.83975537199868,
+      "agent1_effort": 15.826999675412457,
+      "agent2_effort": 15.871837911821283,
+      "drift": 0.08740948379065827,
+      "rounds": 320,
+      "sec": 170.02,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        15.834642667443827,
+        15.879444661565783,
+        15.845444037795811
+      ],
+      "single_value": 15.853177122268471,
+      "agent1_effort": 15.834642667443827,
+      "agent2_effort": 15.845444037795811,
+      "drift": 0.187298180053471,
+      "rounds": 320,
+      "sec": 170.59,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        15.862650842376706,
+        15.793187668011544,
+        15.874296342714956
+      ],
+      "single_value": 15.843378284367736,
+      "agent1_effort": 15.862650842376706,
+      "agent2_effort": 15.874296342714956,
+      "drift": 0.11337208439205249,
+      "rounds": 320,
+      "sec": 172.61,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        15.800006243184109,
+        15.843957189537875,
+        15.838081516982152
+      ],
+      "single_value": 15.827348316568044,
+      "agent1_effort": 15.800006243184109,
+      "agent2_effort": 15.838081516982152,
+      "drift": 0.007048549490177081,
+      "rounds": 320,
+      "sec": 170.74,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        15.81745984962247,
+        15.85970259041326,
+        15.854944676038306
+      ],
+      "single_value": 15.844035705358012,
+      "agent1_effort": 15.81745984962247,
+      "agent2_effort": 15.854944676038306,
+      "drift": 0.07064127366032658,
+      "rounds": 320,
+      "sec": 170.14,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "three_players",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        15.909090909090908,
+        15.909090909090908,
+        15.909090909090908
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        15.816247794078203,
+        15.822957162577985,
+        15.861868894012844
+      ],
+      "single_value": 15.833691283556343,
+      "agent1_effort": 15.816247794078203,
+      "agent2_effort": 15.861868894012844,
+      "drift": 0.09146363322328455,
+      "rounds": 320,
+      "sec": 169.55,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        38.02609516221191,
+        27.595270220058723
+      ],
+      "single_value": 32.81068269113531,
+      "agent1_effort": 38.02609516221191,
+      "agent2_effort": 27.595270220058723,
+      "drift": 0.06509828475118695,
+      "rounds": 320,
+      "sec": 107.02,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        38.09492253400504,
+        27.74876920707551
+      ],
+      "single_value": 32.92184587054028,
+      "agent1_effort": 38.09492253400504,
+      "agent2_effort": 27.74876920707551,
+      "drift": 0.09067802190745411,
+      "rounds": 320,
+      "sec": 107.28,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        38.02927877070626,
+        27.625582067737305
+      ],
+      "single_value": 32.827430419221784,
+      "agent1_effort": 38.02927877070626,
+      "agent2_effort": 27.625582067737305,
+      "drift": 0.08868515605136906,
+      "rounds": 320,
+      "sec": 106.7,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        38.03031202761562,
+        27.71396492402747
+      ],
+      "single_value": 32.872138475821544,
+      "agent1_effort": 38.03031202761562,
+      "agent2_effort": 27.71396492402747,
+      "drift": 0.01069434950922954,
+      "rounds": 320,
+      "sec": 110.22,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        38.01993031554709,
+        27.68785841790128
+      ],
+      "single_value": 32.853894366724184,
+      "agent1_effort": 38.01993031554709,
+      "agent2_effort": 27.68785841790128,
+      "drift": 0.11353978136548193,
+      "rounds": 320,
+      "sec": 110.06,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        38.02984335386229,
+        27.569457874434878
+      ],
+      "single_value": 32.79965061414858,
+      "agent1_effort": 38.02984335386229,
+      "agent2_effort": 27.569457874434878,
+      "drift": 0.132252257181392,
+      "rounds": 320,
+      "sec": 110.0,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        38.07808658636693,
+        27.729469040445384
+      ],
+      "single_value": 32.90377781340616,
+      "agent1_effort": 38.07808658636693,
+      "agent2_effort": 27.729469040445384,
+      "drift": 0.046275393383950814,
+      "rounds": 320,
+      "sec": 110.93,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        38.007732342634796,
+        27.597857904530333
+      ],
+      "single_value": 32.80279512358256,
+      "agent1_effort": 38.007732342634796,
+      "agent2_effort": 27.597857904530333,
+      "drift": 0.06046443868581264,
+      "rounds": 320,
+      "sec": 110.79,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        38.02844725404978,
+        27.657052548399843
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        38.02419757741587,
+        27.70352989459664
+      ],
+      "single_value": 32.86386373600625,
+      "agent1_effort": 38.02419757741587,
+      "agent2_effort": 27.70352989459664,
+      "drift": 0.0511393964146869,
+      "rounds": 320,
+      "sec": 111.02,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        26.55499937800158,
+        19.34597088231428
+      ],
+      "single_value": 22.95048513015793,
+      "agent1_effort": 26.55499937800158,
+      "agent2_effort": 19.34597088231428,
+      "drift": 0.01615799264144968,
+      "rounds": 320,
+      "sec": 113.34,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        26.527653687830647,
+        19.291208256747023
+      ],
+      "single_value": 22.909430972288835,
+      "agent1_effort": 26.527653687830647,
+      "agent2_effort": 19.291208256747023,
+      "drift": 0.07830645138293235,
+      "rounds": 320,
+      "sec": 113.82,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        26.580544127997438,
+        19.294556596600852
+      ],
+      "single_value": 22.937550362299145,
+      "agent1_effort": 26.580544127997438,
+      "agent2_effort": 19.294556596600852,
+      "drift": 0.06903715197799443,
+      "rounds": 320,
+      "sec": 113.6,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        26.525568613807422,
+        19.21692852517152
+      ],
+      "single_value": 22.871248569489474,
+      "agent1_effort": 26.525568613807422,
+      "agent2_effort": 19.21692852517152,
+      "drift": 0.035279773109138546,
+      "rounds": 320,
+      "sec": 113.12,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        26.587531567263312,
+        19.28817049828994
+      ],
+      "single_value": 22.937851032776628,
+      "agent1_effort": 26.587531567263312,
+      "agent2_effort": 19.28817049828994,
+      "drift": 0.10009694506137023,
+      "rounds": 320,
+      "sec": 113.36,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        26.54691883302089,
+        19.348649017485748
+      ],
+      "single_value": 22.94778392525332,
+      "agent1_effort": 26.54691883302089,
+      "agent2_effort": 19.348649017485748,
+      "drift": 0.029416666142694226,
+      "rounds": 320,
+      "sec": 113.11,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        26.5482324619667,
+        19.28892555332501
+      ],
+      "single_value": 22.918579007645853,
+      "agent1_effort": 26.5482324619667,
+      "agent2_effort": 19.28892555332501,
+      "drift": 0.04540703502807375,
+      "rounds": 320,
+      "sec": 114.03,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        26.581660432454477,
+        19.309692792070358
+      ],
+      "single_value": 22.945676612262417,
+      "agent1_effort": 26.581660432454477,
+      "agent2_effort": 19.309692792070358,
+      "drift": 0.05276911578096488,
+      "rounds": 320,
+      "sec": 113.53,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "different_cost",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        26.539743814704334,
+        19.301631865239514
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        26.538281177949465,
+        19.237698627530218
+      ],
+      "single_value": 22.88798990273984,
+      "agent1_effort": 26.538281177949465,
+      "agent2_effort": 19.237698627530218,
+      "drift": 0.04368678984354446,
+      "rounds": 320,
+      "sec": 113.84,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        46.468842178763325,
+        46.544827066829214
+      ],
+      "single_value": 46.50683462279627,
+      "agent1_effort": 46.468842178763325,
+      "agent2_effort": 46.544827066829214,
+      "drift": 0.07364067260481022,
+      "rounds": 320,
+      "sec": 113.06,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        46.39892614520008,
+        46.39487917065041
+      ],
+      "single_value": 46.396902657925246,
+      "agent1_effort": 46.39892614520008,
+      "agent2_effort": 46.39487917065041,
+      "drift": 0.17641879714733477,
+      "rounds": 320,
+      "sec": 112.34,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        46.483578854888755,
+        46.398344263843654
+      ],
+      "single_value": 46.4409615593662,
+      "agent1_effort": 46.483578854888755,
+      "agent2_effort": 46.398344263843654,
+      "drift": 0.09459182327640292,
+      "rounds": 320,
+      "sec": 112.45,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        46.437996745335205,
+        46.510833283966676
+      ],
+      "single_value": 46.474415014650944,
+      "agent1_effort": 46.437996745335205,
+      "agent2_effort": 46.510833283966676,
+      "drift": 0.1255507316773432,
+      "rounds": 320,
+      "sec": 112.4,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        46.475380176673326,
+        46.49697576919019
+      ],
+      "single_value": 46.486177972931756,
+      "agent1_effort": 46.475380176673326,
+      "agent2_effort": 46.49697576919019,
+      "drift": 0.30200018095760583,
+      "rounds": 320,
+      "sec": 112.22,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        46.46578004659211,
+        46.53124879615728
+      ],
+      "single_value": 46.49851442137469,
+      "agent1_effort": 46.46578004659211,
+      "agent2_effort": 46.53124879615728,
+      "drift": 0.11092432356029036,
+      "rounds": 320,
+      "sec": 112.47,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        46.393673180227,
+        46.34987216455859
+      ],
+      "single_value": 46.371772672392794,
+      "agent1_effort": 46.393673180227,
+      "agent2_effort": 46.34987216455859,
+      "drift": 0.04556491579557331,
+      "rounds": 320,
+      "sec": 112.72,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        46.48272861809489,
+        46.41111771673692
+      ],
+      "single_value": 46.4469231674159,
+      "agent1_effort": 46.48272861809489,
+      "agent2_effort": 46.41111771673692,
+      "drift": 0.06786933814258589,
+      "rounds": 320,
+      "sec": 112.65,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 35.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        46.42857142857142,
+        46.42857142857142
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        46.44034580402947,
+        46.436307255479306
+      ],
+      "single_value": 46.43832652975439,
+      "agent1_effort": 46.44034580402947,
+      "agent2_effort": 46.436307255479306,
+      "drift": 0.09584557580662079,
+      "rounds": 320,
+      "sec": 112.83,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        30.349324596836333,
+        30.337298674678
+      ],
+      "single_value": 30.343311635757168,
+      "agent1_effort": 30.349324596836333,
+      "agent2_effort": 30.337298674678,
+      "drift": 0.09345993124726704,
+      "rounds": 320,
+      "sec": 113.79,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        30.416388928728892,
+        30.31972487344381
+      ],
+      "single_value": 30.36805690108635,
+      "agent1_effort": 30.416388928728892,
+      "agent2_effort": 30.31972487344381,
+      "drift": 0.18973064941379647,
+      "rounds": 320,
+      "sec": 113.77,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        30.35435062799632,
+        30.376453502824173
+      ],
+      "single_value": 30.365402065410244,
+      "agent1_effort": 30.35435062799632,
+      "agent2_effort": 30.376453502824173,
+      "drift": 0.046695878700145244,
+      "rounds": 320,
+      "sec": 112.94,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        30.342539832124388,
+        30.34240759122898
+      ],
+      "single_value": 30.342473711676682,
+      "agent1_effort": 30.342539832124388,
+      "agent2_effort": 30.34240759122898,
+      "drift": 0.1352117036167364,
+      "rounds": 320,
+      "sec": 112.65,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 4,
+      "si": 4,
+      "polish_seed": 2004,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        50.0,
+        50.0
+      ],
+      "e_polished_per_player": [
+        30.31963589716587,
+        30.451274367291912
+      ],
+      "single_value": 30.38545513222889,
+      "agent1_effort": 30.31963589716587,
+      "agent2_effort": 30.451274367291912,
+      "drift": 0.09828568062924603,
+      "rounds": 320,
+      "sec": 113.48,
+      "arm": "mc_br_only_mid50",
+      "start_value": 50.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 0,
+      "si": 0,
+      "polish_seed": 2000,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        10.0,
+        10.0
+      ],
+      "e_polished_per_player": [
+        30.36955664837757,
+        30.377204724793305
+      ],
+      "single_value": 30.37338068658544,
+      "agent1_effort": 30.36955664837757,
+      "agent2_effort": 30.377204724793305,
+      "drift": 0.1361384894552522,
+      "rounds": 320,
+      "sec": 113.21,
+      "arm": "mc_br_only_ladder",
+      "start_value": 10.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 1,
+      "si": 1,
+      "polish_seed": 2001,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        30.0,
+        30.0
+      ],
+      "e_polished_per_player": [
+        30.413830687611554,
+        30.348674114448883
+      ],
+      "single_value": 30.381252401030217,
+      "agent1_effort": 30.413830687611554,
+      "agent2_effort": 30.348674114448883,
+      "drift": 0.19760274099289177,
+      "rounds": 320,
+      "sec": 113.66,
+      "arm": "mc_br_only_ladder",
+      "start_value": 30.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 2,
+      "si": 2,
+      "polish_seed": 2002,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        70.0,
+        70.0
+      ],
+      "e_polished_per_player": [
+        30.366344975567287,
+        30.41341792466177
+      ],
+      "single_value": 30.38988145011453,
+      "agent1_effort": 30.366344975567287,
+      "agent2_effort": 30.41341792466177,
+      "drift": 0.05393933010186558,
+      "rounds": 320,
+      "sec": 113.14,
+      "arm": "mc_br_only_ladder",
+      "start_value": 70.0
+    },
+    {
+      "experiment": "different_ability",
+      "q": 55.0,
+      "seed": 3,
+      "si": 3,
+      "polish_seed": 2003,
+      "e_star_per_player": [
+        30.371900826446282,
+        30.371900826446282
+      ],
+      "start_raw_per_player": [
+        90.0,
+        90.0
+      ],
+      "e_polished_per_player": [
+        30.34500259716292,
+        30.27701468915403
+      ],
+      "single_value": 30.311008643158473,
+      "agent1_effort": 30.34500259716292,
+      "agent2_effort": 30.27701468915403,
+      "drift": 0.07400083017440195,
+      "rounds": 320,
+      "sec": 113.57,
+      "arm": "mc_br_only_ladder",
+      "start_value": 90.0
+    }
+  ]
+}

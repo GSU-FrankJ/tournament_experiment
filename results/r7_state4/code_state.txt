@@ -1,0 +1,39 @@
+8c5c8c04427338a73840e9d2621fc522ecc9edc0
+ M agents/ppo_three_players.py
+ M agents/ppo_two_players_clean.py
+ M config/one_stage_two_players.py
+AM docs/Figures&Tables07252026.docx
+A  docs/Figures&Tables07292026.docx
+A  docs/Figures&Tables073026.docx
+ M docs/table2_metadata_audit.md
+ M paper/figures/convergence_main.pdf
+ M paper/figures/convergence_main.png
+ M paper/figures/convergence_main_1x3.pdf
+ M paper/figures/convergence_main_1x3.png
+ M paper/generator/plots.py
+ M results/different_ability/summary.csv
+ M results/different_cost/summary.csv
+ M results/two_players/summary.csv
+ M run/run_different_ability.py
+ M run/run_different_cost.py
+ M run/run_three_players.py
+ M run/run_two_players.py
+ M tools/audit_rollout_modes.py
+ M tools/diagnose_data_provenance.py
+ M tools/one_stage_mc_adapter.py
+ M tools/verify_rollout_modes.py
+ M utils/exploit_asymmetric.py
+?? docs/mu_star_screen.json
+?? docs/table2_da_std_vs_v2.md
+?? docs/tasks/r7-state4-wave/
+?? docs/two_stage_figure_spec.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed999_r7smoke_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed999_r7smoke_v2_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed999_r7smoke_convergence.json
+?? results/r7_state4/
+?? results/three_players/convergence/ppo_3p_q35.0_seed999_r7smoke_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r7smoke_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r7smoke_metadata.json
+?? run/r6_floor_ablation.sh
+?? run/r7_state4_wave.sh
+?? tools/mu_star_screen.py
