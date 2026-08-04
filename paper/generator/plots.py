@@ -2002,26 +2002,26 @@ def plot_equilibrium_recovery_dotplot(
                                 linewidth=3, zorder=2,
                             )
 
-                    # Owner marker scheme: SHAPE = statistic (small open circle
-                    # = seed-level, large open diamond = mean); COLOR = profile
-                    # (blue = low-cost agent, orange = high-cost agent).
+                    # Owner marker scheme: SHAPE/FILL = statistic (small
+                    # translucent circle = seed-level, large solid diamond =
+                    # mean); COLOR = profile (blue low-cost, orange high-cost).
                     if effort_col in q_final.columns:
                         efforts = q_final[effort_col].values
                         jitter = rng.uniform(-0.12, 0.12, len(efforts))
                         ax.scatter(
                             x_pos + jitter, efforts,
-                            facecolors="none", marker="o",
-                            s=38, zorder=3,
-                            edgecolors=color, linewidth=1.3,
+                            facecolors=to_rgba(color, 0.35), marker="o",
+                            s=55, zorder=3,
+                            edgecolors=to_rgba("black", 0.45), linewidth=0.8,
                         )
 
-                        # Per-agent mean marker: large open diamond
+                        # Per-agent mean marker: large solid diamond
                         valid_efforts = efforts[~np.isnan(efforts)]
                         if len(valid_efforts) > 0:
                             ax.scatter(
                                 x_pos, valid_efforts.mean(),
-                                facecolors="none", marker="D", s=150, zorder=4,
-                                edgecolors=color, linewidth=1.8,
+                                color=color, marker="D", s=150, zorder=4,
+                                edgecolors="black", linewidth=1.2,
                             )
 
             else:
@@ -2037,17 +2037,18 @@ def plot_equilibrium_recovery_dotplot(
                 jitter = rng.uniform(-0.15, 0.15, len(efforts))
                 ax.scatter(
                     x_pos + jitter, efforts,
-                    facecolors="none", marker="o", s=38, zorder=3,
-                    edgecolors="#d62728", linewidth=1.3,
+                    facecolors=to_rgba("#d62728", 0.35), marker="o", s=55,
+                    zorder=3,
+                    edgecolors=to_rgba("black", 0.45), linewidth=0.8,
                 )
                 _legend_added["single"] = True
 
-                # Mean marker: large open red diamond
+                # Mean marker: large solid red diamond
                 mean_effort = efforts.mean()
                 ax.scatter(
                     x_pos, mean_effort,
-                    facecolors="none", marker="D", s=150, zorder=4,
-                    edgecolors="#d62728", linewidth=1.8,
+                    color="#d62728", marker="D", s=150, zorder=4,
+                    edgecolors="black", linewidth=1.2,
                 )
                 _legend_added["mean"] = True
 
@@ -2065,7 +2066,7 @@ def plot_equilibrium_recovery_dotplot(
     ax.set_ylabel("Effort Level")
     # pad clears the two-row legend that sits between the axes and the title.
     ax.set_title(
-        "Verified TEL-PPO Effort Estimate Relative to Analytical Benchmarks",
+        "Verified TEL-PPO Effort Estimates Relative to Analytical Benchmarks",
         pad=52,
     )
 
@@ -2114,15 +2115,16 @@ def plot_equilibrium_recovery_dotplot(
         Line2D([0], [0], marker="s", color="w", markerfacecolor="#d62728",
                markeredgecolor="#d62728", markersize=7,
                label="Red: Common-effort profile"),
-        Line2D([0], [0], marker="D", color="w", markerfacecolor="none",
-               markeredgecolor="black", markeredgewidth=1.8, markersize=10,
+        Line2D([0], [0], marker="D", color="w", markerfacecolor="#555555",
+               markeredgecolor="black", markeredgewidth=1.2, markersize=10,
                label="Across-seed mean"),
         Line2D([0], [0], marker="s", color="w",
                markerfacecolor=AGENT_COLORS["agent1"],
                markeredgecolor=AGENT_COLORS["agent1"], markersize=7,
                label="Blue: Low-cost agent"),
-        Line2D([0], [0], marker="o", color="w", markerfacecolor="none",
-               markeredgecolor="black", markeredgewidth=1.3, markersize=6,
+        Line2D([0], [0], marker="o", color="w",
+               markerfacecolor=to_rgba("#555555", 0.35),
+               markeredgecolor=to_rgba("black", 0.45), markersize=7,
                label="Seed-level TEL-PPO output"),
         Line2D([0], [0], marker="s", color="w",
                markerfacecolor=AGENT_COLORS["agent2"],
