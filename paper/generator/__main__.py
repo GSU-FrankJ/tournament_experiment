@@ -215,7 +215,7 @@ def cmd_plot(args: argparse.Namespace) -> int:
         "ablation_comparison": lambda: plot_ablation_comparison(df, q_values, os.path.join(output_dir, "ablation_comparison.png")),
         "distance_to_equilibrium": lambda: plot_distance_to_equilibrium(df, q_values, os.path.join(output_dir, "distance_to_equilibrium.png")),
         "effort_drift": lambda: plot_effort_drift(df, q_values, os.path.join(output_dir, "effort_drift.png")),
-        "equilibrium_recovery_dotplot": lambda: plot_equilibrium_recovery_dotplot(df, os.path.join(output_dir, "equilibrium_recovery_dotplot.png"), final_override=load_polished_dotplot_final()),
+        "equilibrium_recovery_dotplot": lambda: plot_equilibrium_recovery_dotplot(df, os.path.join(output_dir, "equilibrium_recovery_dotplot.png")),
     }
     
     fig, path = plot_funcs[plot_type]()

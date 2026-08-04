@@ -155,16 +155,27 @@ def get_q_values(experiment: str = None) -> List[float]:
 # - Interim closed-form-era picks (round3_baseline / r4_dc_final / r4_h1_long,
 #   2026-06-10) are superseded and remain on disk under their own tags;
 #   history in FIX_CHANGELOG.md §13-§16.
+# 2026-08-03 owner decision (docs/Figures&Tables080226.docx + follow-up): the
+# shipped generation is the UNIFIED configuration — r7_state4 for the
+# two-player families, r8_unified for 3P/dc/da (4-dim state, mean×conc head,
+# entropy 0, verifier M=16384, verification-triggered stop, no floor). The r5
+# tags stay on disk as the pre-unification comparison arms.
+# NOTE: gradient (MC-FD) baselines were not rerun (state-independent); their
+# runs still carry r5-era tags and are NOT promoted here — figures/tables
+# that need a gradient baseline require a method-aware promotion first.
+# 2026-08-03 (later): certificate tightened to eps=0.01 / M=65536 for the
+# whole matrix (owner decision after the sensitivity result). 3P/da q55 come
+# from the r8_sens_eps001 probe runs, which ARE this configuration.
 BASELINE_OVERRIDES: Dict[Tuple[str, float], Tuple[str, ...]] = {
-    ("two_players", 35.0): ("r5_sampled",),
-    ("two_players", 45.0): ("r5_sampled",),
-    ("two_players", 55.0): ("r5_sampled",),
-    ("three_players", 35.0): ("r5_sampled",),
-    ("three_players", 55.0): ("r5_sampled",),
-    ("different_cost", 35.0): ("r5_sampled",),
-    ("different_cost", 55.0): ("r5_sampled",),
-    ("different_ability", 35.0): ("r5_sampled_std", "r5_sampled"),
-    ("different_ability", 55.0): ("r5_sampled_std", "r5_sampled"),
+    ("two_players", 35.0): ("r9_cert001",),
+    ("two_players", 45.0): ("r9_cert001",),
+    ("two_players", 55.0): ("r9_cert001",),
+    ("three_players", 35.0): ("r9_cert001",),
+    ("three_players", 55.0): ("r8_sens_eps001",),
+    ("different_cost", 35.0): ("r9_cert001",),
+    ("different_cost", 55.0): ("r9_cert001",),
+    ("different_ability", 35.0): ("r9_cert001",),
+    ("different_ability", 55.0): ("r8_sens_eps001",),
 }
 
 
@@ -184,7 +195,7 @@ CONVERGENCE_CONFIG: Dict[str, float] = {
     
     # Exploitability convergence: < threshold for patience consecutive evals
     # (unified eps_eq = 0.03 across all scenarios, matching the runner gates)
-    "exploit_threshold": 0.03,
+    "exploit_threshold": 0.01,  # r9 certificate (eps=0.01, M=65536); was 0.03 through r8
     "exploit_patience": 5,
     
     # Minimum steps before declaring convergence
@@ -306,8 +317,8 @@ AGENT_MARKERS: Dict[str, str] = {
 
 # Weight-variant labels for convergence figure rows (include k value)
 WEIGHT_VARIANT_LABELS: Dict[str, str] = {
-    "baseline": r"$w_H=6.5,\; w_L=3.0,\; k=0.00055$",
-    "wh8_wl4": r"$w_H=8,\; w_L=4,\; k=0.0006$",
+    "baseline": r"$w_H=6.5,\; w_L=3.0,\; k=5.5\times10^{-4}$",
+    "wh8_wl4": r"$w_H=8,\; w_L=4,\; k=6\times10^{-4}$",
 }
 
 # DPI for raster output
