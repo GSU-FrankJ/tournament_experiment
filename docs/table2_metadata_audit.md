@@ -196,12 +196,21 @@ what the runs used. The runs used 8.0.
 |---|---|---|---|---|
 | Training verifier (in-loop) | **8192** two-player, **16384** other three | coarse-to-fine 5.0 -> 1.0 -> 0.25 | CRN within a call | `run_*.eval_exploitability`, `exploit_config.exploit_M` in each convergence JSON |
 | MC-BR polishing | **150000** | damped BR iteration, eta=0.4, 320 rounds, n_avg=200, bias-corrected | polish seed per run | `results/one_stage_ablation/polish_per_seed_all.json` -> `pol_config` |
-| Final independent check | **200000** | uniform grid, step 0.25 | fresh seed 99991, CRN across the grid | `utils/mc_br_polish.py:211 exploitability_frozen_profile` |
+| Final independent check | **200000** | uniform grid, step 0.25 | fresh seed `700000 + int(q)*1000 + si*7`, shared across the four Table-3 arms within a (q, seed-index) cell (CRN across arms and across the grid) | `utils/mc_br_polish.py:211 exploitability_frozen_profile`, called from `tools/unified_exploitability_tables.py:62 eval_seed` |
 
 So the final check draws 24x the two-player training verifier and 12x the
 three-player / heterogeneous one, and is not the same as the polish budget
 either. Table 2's "8192 MC samples with common random numbers" is correct only
 for the two-player scenario.
+
+Note on the final-check seed: `exploitability_frozen_profile` declares
+`seed: int = 99_991` as a parameter default, but every Table-3 and Table-4 row
+is produced with that default OVERRIDDEN by `eval_seed(q, si)` above. 99991 is
+never used for any reported number. The eval seeds are disjoint from the
+MC-BR polishing seeds (2000/4000 + si), which is what the "fresh draws"
+requirement asks for; sharing a seed across the four arms of a cell is
+deliberate, so common random numbers cancel most of the estimator noise in
+the arm-to-arm DIFFERENCE.
 
 ## Corrections Table 2 needs
 

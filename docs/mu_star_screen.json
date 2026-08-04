@@ -1,0 +1,110 @@
+[
+  {
+    "condition": "two_players q35",
+    "e_star": 45.45,
+    "raw_ppo": 43.58,
+    "mu_star": {
+      "20.0": 39.3,
+      "60.0": 41.96,
+      "200.0": 43.3,
+      "det": 45.34
+    },
+    "verdict": "CONSISTENT (smoothing gap +6.16; raw in band)"
+  },
+  {
+    "condition": "two_players q45",
+    "e_star": 35.35,
+    "raw_ppo": 35.46,
+    "mu_star": {
+      "20.0": 32.02,
+      "60.0": 33.78,
+      "200.0": 33.83,
+      "det": 35.48
+    },
+    "verdict": "CONSISTENT (smoothing gap +3.33; raw in band)"
+  },
+  {
+    "condition": "two_players q55",
+    "e_star": 28.93,
+    "raw_ppo": 29.65,
+    "mu_star": {
+      "20.0": 28.81,
+      "60.0": 27.23,
+      "200.0": 28.46,
+      "det": 28.23
+    },
+    "verdict": "CLEAN (mu*~e*, gap +0.11; raw OUT)"
+  },
+  {
+    "condition": "three_players q35",
+    "e_star": 25.0,
+    "raw_ppo": 22.99,
+    "mu_star": {
+      "20.0": 23.13,
+      "60.0": 23.58,
+      "200.0": 23.89,
+      "det": 25.02
+    },
+    "verdict": "CONSISTENT (smoothing gap +1.87; raw in band)"
+  },
+  {
+    "condition": "three_players q55",
+    "e_star": 15.91,
+    "raw_ppo": 15.31,
+    "mu_star": {
+      "20.0": 15.3,
+      "60.0": 15.7,
+      "200.0": 15.47,
+      "det": 15.98
+    },
+    "verdict": "CONSISTENT (smoothing gap +0.60; raw in band)"
+  },
+  {
+    "condition": "different_cost q35",
+    "e_star": 32.84,
+    "raw_ppo": 32.47,
+    "mu_star": {
+      "20.0": 31.98,
+      "60.0": 32.24,
+      "200.0": 32.81,
+      "det": 32.94
+    },
+    "verdict": "CONSISTENT (smoothing gap +0.86; raw in band)"
+  },
+  {
+    "condition": "different_cost q55",
+    "e_star": 22.92,
+    "raw_ppo": 22.71,
+    "mu_star": {
+      "20.0": 22.28,
+      "60.0": 22.99,
+      "200.0": 22.86,
+      "det": 22.8
+    },
+    "verdict": "CONSISTENT (smoothing gap +0.64; raw in band)"
+  },
+  {
+    "condition": "different_ability q35",
+    "e_star": 46.43,
+    "raw_ppo": 43.99,
+    "mu_star": {
+      "20.0": 43.78,
+      "60.0": 45.07,
+      "200.0": 45.8,
+      "det": 45.75
+    },
+    "verdict": "CONSISTENT (smoothing gap +2.64; raw in band)"
+  },
+  {
+    "condition": "different_ability q55",
+    "e_star": 30.37,
+    "raw_ppo": 29.7,
+    "mu_star": {
+      "20.0": 29.18,
+      "60.0": 30.03,
+      "200.0": 29.76,
+      "det": 29.73
+    },
+    "verdict": "CONSISTENT (smoothing gap +1.19; raw in band)"
+  }
+]
