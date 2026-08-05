@@ -1,0 +1,629 @@
+{
+  "provenance": {
+    "server": "vector2",
+    "branch": "feat/multistage-phase0",
+    "head_commit_at_start": "d3eeea9490514aaaf1b6f036af2ab72945ac8a35",
+    "head_commit_at_end": "d3eeea9490514aaaf1b6f036af2ab72945ac8a35",
+    "canonical_variant": "MultiStagePPO (MultiStageActorCritic, mean-conc Beta) + MultiStageEnv (sampled terminal-reward MDP), config/multi_stage_two_players.py, T=2 q=50 tag p2cert; certified by utils.dp_verifier.certify_refined",
+    "competing_variants": [
+      {"path": "config/two_stage_two_players.py", "status": "deprecated (self-declared SUPERSEDED: different game - per-stage prize flow, logit win model, stage weights)", "importers": 0},
+      {"path": "envs/two_stage_env.py", "status": "legacy (from-scratch-rewrite predecessor; referenced only in a docstring comment, never imported)", "importers": 0},
+      {"path": "results/multi_stage/convergence/ms_T2_q50_seed4X_gateT2_convergence.json", "status": "superseded (pre-fix gated runs; no alpha/beta, no E[e2] field; replaced by p2cert retrain)", "importers": 0},
+      {"path": "results/multi_stage/convergence/ms_T2_q50_seed42_densecurve_convergence.json", "status": "auxiliary (dense-curve single-seed run for Figure 1 shape)", "importers": 0}
+    ],
+    "checkpoint": {
+      "exists": true,
+      "path": "results/multi_stage/checkpoints/ms_T2_q50_seed{42,43,44,45,46}_p2cert.pt",
+      "seeds": [42, 43, 44, 45, 46],
+      "training_provenance": "q=50, T=2, 2000 updates x 512 episodes, entropy 0.005, gamma=1, gae_lambda=1, CPU, git e7d278a; .pt gitignored (state_dict+cfg+effort_bounds); 5/5 certify"
+    },
+    "fix_status": [
+      {"item": "D1 report E[e_hat_2(d_2)] not probe values", "state": "applied", "evidence": "utils/multi_stage_metrics.py:32 (onpath_expected_stage2_effort, GL quadrature); populated at run/run_multi_stage.py:372 and printed :461"},
+      {"item": "D2 figures (both stages, stage-1 panel, E[e2] annotation, dReach bars)", "state": "not_applied", "evidence": "tools/make_multistage_figures.py:119 still stage-2-only + text annotation; Phase-1b deferred per SESSION_STATE.md"},
+      {"item": "D3 dReach gate replacing EXP^UCB(MC)", "state": "applied", "evidence": "utils/dp_verifier.py:365 certify_refined -> dReach_UCB=fine+|fine-coarse|, gate :426; wired at run/run_multi_stage.py:331; deterministic (no MC/1.96)"},
+      {"item": "D4 e-notation rename (g -> e*, e_hat)", "state": "not_applied", "evidence": "tools/make_multistage_figures.py:119 emits $g_1$; JSON keys still 'g1'/'g2' (run/run_multi_stage.py:392-397, closed_form.g1); internal g*_two_stage names kept by design"},
+      {"item": "D5 checkpoint rule (selection disjoint from certifier grid)", "state": "applied", "evidence": "run/run_multi_stage.py:70-72 grid-role constants; selection on grid 51 (:295), certification on 101/201 (:331); D5 gap closed"},
+      {"item": "D6 mean-vs-mode extraction", "state": "applied", "evidence": "agents/ppo_multi_stage.py:34 beta_mode_normalized (alpha>1&beta>1 guard else mean), :540 effort_function(extraction=); run/run_multi_stage.py:378 extraction_diagnostic; alpha,beta dumped :383-386"},
+      {"item": "T9 SOC / validity screen (q_soc=sqrt(DW/8k))", "state": "applied", "evidence": "utils/theory_multistage.py:316 validate_two_stage_params (analytic screens + global-deviation scan); enforced pre-training at run/run_multi_stage.py:267"}
+    ],
+    "audit_date": "2026-07-16"
+  },
+  "params": {
+    "source": "config/multi_stage_two_players.py:34-90",
+    "T": 2,
+    "w_H": 6.0,
+    "w_L": 2.0,
+    "delta_W": 4.0,
+    "k": 0.0002857142857142857,
+    "q_values": [45.0, 50.0, 55.0],
+    "e_bounds": [0.0, 100.0],
+    "gamma": 1.0,
+    "lam": 1.0,
+    "differs_from_one_stage": true,
+    "difference_note": "LOUD: two-stage uses w_H=6, w_L=2 (DW=4), k=1/3500=2.857e-4, canonical q=50 (q_list 45/50/55, all > q_crit=41.83). One-stage uses w_H=6.5, w_L=3.0 (DW=3.5), k=5.5e-4, q in {35,45,55}. gamma=1 & lambda=1 (multi-step return) vs one-stage gamma=0.99 (inert under single-step). State drops all prize/cost params (per-cell training)."
+  },
+  "closed_form": {
+    "e1_star_formula": "e*_1,CF(0) = DW/(6 q k)",
+    "e1_star_value": 46.6667,
+    "e2_star_formula": "e*_2,CF(d) = DW * f_xi(d) / (2k); peak DW/(4qk) at d=0, linear to 0 at |d|=2q; even in d",
+    "e2_star_at_zero": 70.0,
+    "E_e2_star_onpath": 46.6667,
+    "implemented": true,
+    "code": [
+      {"file": "utils/theory_multistage.py", "lines": "125-139", "symbol": "g1_two_stage"},
+      {"file": "utils/theory_multistage.py", "lines": "100-122", "symbol": "g2_two_stage"},
+      {"file": "utils/theory_multistage.py", "lines": "54-93", "symbol": "f_xi, F_xi (triangular xi on [-2q,2q])"},
+      {"file": "config/multi_stage_two_players.py", "lines": "93-106", "symbol": "theoretical_efforts"}
+    ]
+  },
+  "modules": [
+    {
+      "id": "state",
+      "zone": "input",
+      "inside_training_pipeline": true,
+      "title": "State s_t = [t/T, d_t/(q sqrt t)]",
+      "lines": [
+        "Two features: normalized stage t/T and normalized score gap d_t/(q*sqrt(t)).",
+        "Prize/cost params (w_H, w_L, k, q) are NOT in the state (per-cell training).",
+        "Player i sees d_t; opponent j sees -d_t (symmetric)."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "511-517", "symbol": "_stage_states"},
+        {"file": "envs/multi_stage_env.py", "lines": "110-121", "symbol": "_obs_vector"},
+        {"file": "envs/multi_stage_env.py", "lines": "295-312", "symbol": "obs_batch"}
+      ],
+      "status": "NEW",
+      "status_note": "Two-stage adds stage index t and score gap d_t; drops the parameter features one-stage kept.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": {"plan_says": "s_t = [t/T, d_t/(q sqrt t), w_H, w_L, k, q]", "code_does": "s_t = [t/T, d_t/(q sqrt t)] only", "source": "Plan section 3.1"}
+    },
+    {
+      "id": "config_validation",
+      "zone": "input",
+      "inside_training_pipeline": true,
+      "title": "Pre-training validity gate (q_crit / SOC)",
+      "lines": [
+        "validate() runs before any training minute; raises if q <= q_crit.",
+        "q_crit = max(q_soc, q_bound1, q_bound2, q_pc); q_soc = sqrt(DW/8k) = 41.83.",
+        "Analytic screens + numerical global-deviation scan (give-up deviations)."
+      ],
+      "code": [
+        {"file": "config/multi_stage_two_players.py", "lines": "109-145", "symbol": "validate"},
+        {"file": "utils/theory_multistage.py", "lines": "316-410", "symbol": "validate_two_stage_params"},
+        {"file": "run/run_multi_stage.py", "lines": "264-267", "symbol": "validate_config(strict=True)"}
+      ],
+      "status": "NEW",
+      "status_note": "T9 SOC screen; q=50 passes (q_crit=41.83); q<=40 rejected before training.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": {"plan_says": "stage-1 SOC unconditional", "code_does": "stage-1 SOC holds only for q>q_soc (kink-corrected curvature)", "source": "utils/theory_multistage.py:178-196 note"}
+    },
+    {
+      "id": "policy_net",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "Shared symmetric Beta policy (mean-conc)",
+      "lines": [
+        "One network for both players AND both stages, keyed on (t, d).",
+        "mean = sigmoid(head); conc = softplus(head)*scale + conc_min.",
+        "alpha = mean*conc, beta = (1-mean)*conc  (NOT softplus+1)."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "309-382", "symbol": "MultiStageActorCritic"}
+      ],
+      "status": "CHANGED",
+      "status_note": "Mean-conc parameterization (like one-stage's rejected v2 head), so alpha,beta>1 is NOT structurally guaranteed; mode needs a guard.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "exploring_starts",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "Exploring starts over (t, d)",
+      "lines": [
+        "Each episode resets from a random (t, d) so off-path states get gradient.",
+        "rho = es_on_path_fraction = 0.5 start on-path at (t=1, d=0).",
+        "Supports the full approximate-MPE claim (best response at ALL states)."
+      ],
+      "code": [
+        {"file": "envs/multi_stage_env.py", "lines": "160-193", "symbol": "sample_exploring_start / reset_exploring"},
+        {"file": "envs/multi_stage_env.py", "lines": "375-411", "symbol": "sample_exploring_starts_batch"},
+        {"file": "config/multi_stage_two_players.py", "lines": "61-68", "symbol": "exploring_starts config"}
+      ],
+      "status": "NEW",
+      "status_note": "No analogue in one-stage (single fixed state).",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "env_mdp",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "2-step MDP: d_{t+1}=d_t+(e_i-e_j)+xi_t",
+      "lines": [
+        "True 2-step episode; done only after stage T (not stitched bandits).",
+        "xi_t = eps_i - eps_j sampled as TWO Uniform(-q,q) draws (triangular in law).",
+        "y_i,t = e_i,t + eps_i,t; gap accumulates across stages."
+      ],
+      "code": [
+        {"file": "envs/multi_stage_env.py", "lines": "214-274", "symbol": "step"},
+        {"file": "envs/multi_stage_env.py", "lines": "314-373", "symbol": "step_batch"},
+        {"file": "envs/multi_stage_env.py", "lines": "198-212", "symbol": "draw_shock_diff"}
+      ],
+      "status": "NEW",
+      "status_note": "One-stage is a single-shot bandit; two-stage is a genuine dynamic MDP with an accumulating gap.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "reward",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "Sampled reward: -k e^2 then terminal prize",
+      "lines": [
+        "Intermediate stages (t<T): r_t = -k e_t^2 (cost only).",
+        "Terminal (t=T): winner of ACCUMULATED gap gets w_H, loser w_L, minus k e_T^2.",
+        "Closed-form win prob never enters the step reward (sampled-only invariant)."
+      ],
+      "code": [
+        {"file": "envs/multi_stage_env.py", "lines": "252-266", "symbol": "step terminal/intermediate reward"}
+      ],
+      "status": "MATCH",
+      "status_note": "Sampled-reward invariant shared with one-stage; terminal-only prize + per-stage cost is the two-stage specialization.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "rollout",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "Vectorized self-play rollout",
+      "lines": [
+        "Batched episodes; each env's two players stored as two separate trajectories.",
+        "Both players act from the one shared net (i on d, j on -d).",
+        "Trajectory-aware buffer so storage order is irrelevant to GAE."
+      ],
+      "code": [
+        {"file": "run/run_multi_stage.py", "lines": "75-122", "symbol": "collect_rollout"},
+        {"file": "agents/ppo_multi_stage.py", "lines": "159-266", "symbol": "MultiStageRolloutBuffer"}
+      ],
+      "status": "CHANGED",
+      "status_note": "Same pure self-play spirit as one-stage, but trajectory-structured for multi-step episodes.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "advantage",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "GAE, gamma=1, lambda=1 (multi-step)",
+      "lines": [
+        "Trajectory GAE with gamma=1 (finite-horizon economic payoff), lambda=1.",
+        "With a genuine 2-step episode the advantage does NOT collapse to r - V.",
+        "lambda=1 => Monte-Carlo return advantage A = G - V(s)."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "60-148", "symbol": "compute_gae_single / compute_gae_trajectories"},
+        {"file": "agents/ppo_multi_stage.py", "lines": "267-308", "symbol": "buffer.compute"},
+        {"file": "config/multi_stage_two_players.py", "lines": "52-55", "symbol": "gamma/gae_lambda"}
+      ],
+      "status": "CHANGED",
+      "status_note": "One-stage's single-step bandit collapsed GAE to r-V; two-stage is genuinely multi-step.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "ppo_update",
+      "zone": "training",
+      "inside_training_pipeline": true,
+      "title": "PPO clipped-surrogate update",
+      "lines": [
+        "Clipped surrogate + value MSE - entropy bonus; advantage normalization.",
+        "lr=3e-4, entropy_coef=0.005 (p2cert), clip_eps default, minibatch epochs.",
+        "No KL/exploitability early stop inside the update."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "618-692", "symbol": "MultiStagePPO.update"}
+      ],
+      "status": "MATCH",
+      "status_note": "Standard PPO core, same family as one-stage.",
+      "vs_one_stage": "INHERITED_UNCHANGED",
+      "plan_divergence": null
+    },
+    {
+      "id": "fixed_budget",
+      "zone": "training_stop",
+      "inside_training_pipeline": true,
+      "title": "Fixed-budget training (no early stop)",
+      "lines": [
+        "Training runs a fixed number of PPO updates (p2cert: 2000).",
+        "No KL gate, no exploitability streak, no convergence stop.",
+        "Verifier runs every eval-every only to SELECT a checkpoint (see below)."
+      ],
+      "code": [
+        {"file": "run/run_multi_stage.py", "lines": "288-309", "symbol": "training loop (no stop_reason)"}
+      ],
+      "status": "CHANGED",
+      "status_note": "Structural break from one-stage, whose stop was an exploitability streak (patience 5). Here training is a fixed budget.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "checkpoint_selection",
+      "zone": "training_stop",
+      "inside_training_pipeline": true,
+      "title": "Best checkpoint by coarse-grid dReach",
+      "lines": [
+        "Every eval-every updates, verify on the COARSE grid (51) for selection.",
+        "Keep the lowest delta_sum_reachable checkpoint; restore it at the end.",
+        "Selection grid (51) is DISJOINT from the certification grids (101/201) [D5]."
+      ],
+      "code": [
+        {"file": "run/run_multi_stage.py", "lines": "125-162", "symbol": "evaluate (selection verify)"},
+        {"file": "run/run_multi_stage.py", "lines": "292-319", "symbol": "best-checkpoint track + restore"},
+        {"file": "run/run_multi_stage.py", "lines": "65-72", "symbol": "grid-role constants"}
+      ],
+      "status": "NEW",
+      "status_note": "Selects the REPORTED policy, so it is inside the pipeline. D5 fix keeps it off the certifier grid; residual: selection metric is still the same verifier family.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "mean_extraction",
+      "zone": "extraction",
+      "inside_training_pipeline": true,
+      "title": "Reported effort = Beta mean e_hat_t(d)",
+      "lines": [
+        "e_hat_t(d) = e_min + (e_max-e_min) * alpha/(alpha+beta): a CURVE over d.",
+        "Mean is the reported extraction and the object handed to the verifier.",
+        "Probed at d in {-2q,-q,0,q,2q}; stage-1 reported at d=0."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "540-571", "symbol": "effort_function(extraction='mean')"},
+        {"file": "agents/ppo_multi_stage.py", "lines": "497-509", "symbol": "mean_effort"},
+        {"file": "run/run_multi_stage.py", "lines": "165-171", "symbol": "effort_snapshot (probe grid)"}
+      ],
+      "status": "MATCH",
+      "status_note": "Beta-mean extraction inherited from one-stage; two-stage reports a full curve over d instead of a scalar.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "onpath_E_e2",
+      "zone": "extraction",
+      "inside_training_pipeline": true,
+      "title": "On-path E[e_hat_2(d_2)] by quadrature",
+      "lines": [
+        "E[e_hat_2(d_2)] = integral e_hat_2(delta) f_xi(delta) ddelta (Gauss-Legendre).",
+        "On-path d_2 = xi_1 ~ Triangular(-2q,2q); target = g1 = 46.6667 (NOT 70).",
+        "This is the D1 quantity previously omitted from the T=2 report."
+      ],
+      "code": [
+        {"file": "utils/multi_stage_metrics.py", "lines": "32-63", "symbol": "onpath_expected_stage2_effort"},
+        {"file": "run/run_multi_stage.py", "lines": "366-376", "symbol": "_extract -> e2_onpath_expected"}
+      ],
+      "status": "NEW",
+      "status_note": "D1 fix; deterministic quadrature, exact on affine effort segments.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "mode_diagnostic",
+      "zone": "extraction",
+      "inside_training_pipeline": true,
+      "title": "Mode extraction (diagnostic only)",
+      "lines": [
+        "mode_norm = (alpha-1)/(alpha+beta-2) when alpha>1 AND beta>1, else mean.",
+        "Reported alongside mean; MEAN stays primary (repo invariant).",
+        "Measured mean-minus-mode E[e2] = 0.074 (negligible)."
+      ],
+      "code": [
+        {"file": "agents/ppo_multi_stage.py", "lines": "34-57", "symbol": "beta_mode_normalized"},
+        {"file": "agents/ppo_multi_stage.py", "lines": "562-565", "symbol": "effort_function(extraction='mode')"},
+        {"file": "run/run_multi_stage.py", "lines": "365-378", "symbol": "extraction_diagnostic"}
+      ],
+      "status": "NEW",
+      "status_note": "D6 fix; mode is a diagnostic column, not the reported number.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "no_polish",
+      "zone": "post_training",
+      "inside_training_pipeline": false,
+      "title": "No post-training effort polish",
+      "lines": [
+        "There is NO MC-BR polish (or any post-training solver) in the two-stage path.",
+        "One-stage's external utils/mc_br_polish.py has no two-stage analogue.",
+        "Reported effort is the raw PPO Beta-mean curve; draw no polish box."
+      ],
+      "code": [],
+      "status": "NOT_IMPLEMENTED",
+      "status_note": "ABSENCE marker (verified: no polish/mc_br reference in any two-stage module). Boundary is clean: the reported number is raw PPO, certified in place.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "verify_dp",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "Independent DP backward-induction verifier",
+      "lines": [
+        "Backward induction over a score-gap grid; best response by effort-grid argmax.",
+        "One-step deviation gap Delta_t(d) against the LEARNED continuation.",
+        "D_max = T(e_bar+2q)+50; e-grid 201; parabolic sub-grid argmax refinement."
+      ],
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "218-362", "symbol": "verify"},
+        {"file": "utils/dp_verifier.py", "lines": "307-315", "symbol": "Delta_t(d) one-step deviation gap"}
+      ],
+      "status": "NEW",
+      "status_note": "Independent of PPO; does not modify the effort. This is the certification, not a polish.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "quadrature",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "Deterministic triangular quadrature",
+      "lines": [
+        "Continuation E_xi via n_quad=129 nodes weighted by f_xi on [-2q,2q].",
+        "No Monte Carlo anywhere in the verify/cert path.",
+        "Smoothed continuation = sum w * interp(landing + xi)."
+      ],
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "95-114", "symbol": "_quadrature_nodes"},
+        {"file": "utils/dp_verifier.py", "lines": "117-140", "symbol": "_smoothed_continuation"}
+      ],
+      "status": "MATCH",
+      "status_note": "D2/D3 spec's deterministic quadrature (the retired MC/1.96/EXP^UCB rule is absent).",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "terminal_closed_form",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "Closed-form terminal integration",
+      "lines": [
+        "terminal_W(y) = w_L + DW * F_xi(y), exact (never interpolates step reward R).",
+        "F_xi is the triangular CDF of xi = eps_i - eps_j.",
+        "Matches the closed-form ground truth at the terminal step."
+      ],
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "266-268", "symbol": "terminal_W"},
+        {"file": "utils/theory_multistage.py", "lines": "68-93", "symbol": "F_xi"}
+      ],
+      "status": "MATCH",
+      "status_note": "Exact terminal integration, no interpolation near the reward discontinuity.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "reachable_set",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "BR-reachable support R_t",
+      "lines": [
+        "Forward-propagate unit mass at d=0 through the BR drift to get mu^BR_t(d).",
+        "dReach = sum_t max over cells with mass>1e-9 of Delta_t(d).",
+        "delta_sum_full (full-grid max) is a SEPARATE robustness diagnostic."
+      ],
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "174-215", "symbol": "_forward_distribution"},
+        {"file": "utils/dp_verifier.py", "lines": "320-339", "symbol": "br_reach + delta_sum_reachable"}
+      ],
+      "status": "NEW",
+      "status_note": "R_t is genuinely computed (not a full-grid max in disguise); the full-grid max is reported separately as delta_sum_full.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "certify_gate",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "dReach_UCB gate: dReach_UCB/DW <= 0.03",
+      "lines": [
+        "dReach_UCB = dReach_fine + |dReach_fine - dReach_coarse| (coarse 101, fine 201).",
+        "Deterministic discretization margin (NOT a Monte-Carlo CI).",
+        "Certify iff dReach_UCB/DW <= 0.03; >= 4/5 seeds required for the gate."
+      ],
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "365-442", "symbol": "certify_refined"},
+        {"file": "utils/multi_stage_metrics.py", "lines": "193-248", "symbol": "evaluate_gate"},
+        {"file": "run/run_multi_stage.py", "lines": "331-347", "symbol": "final certification"}
+      ],
+      "status": "NEW",
+      "status_note": "D3 fix. exp_ucb is also formed but is a reported diagnostic, not the gate.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": {"plan_says": "EXP^UCB = EXP + 1.96*SE (Monte-Carlo)", "code_does": "dReach_UCB = dReach_fine + |fine-coarse|, deterministic; EXP^UCB kept only as a reported diagnostic", "source": "fix prompt D3 / T2"}
+    },
+    {
+      "id": "cf_calibration",
+      "zone": "certification",
+      "inside_training_pipeline": false,
+      "title": "CF-vs-verifier calibration (error floor)",
+      "lines": [
+        "Checks EXP(e*_CF) ~ 0 (error floor) and EXP(bad policy) >> EXP(e*_CF).",
+        "Confirms dReach >= EXP (true upper bound) and Richardson consistency.",
+        "CF policy certifies (UCB/DW << 0.03); constant-high policy fails."
+      ],
+      "code": [
+        {"file": "tools/calibrate_verifier.py", "lines": "1-93", "symbol": "calibrate_verifier"},
+        {"file": "tools/test_phase1_correctness.py", "lines": "87-110", "symbol": "T2 CF-certifies + falsification"}
+      ],
+      "status": "MATCH",
+      "status_note": "Calibration implemented and passing; standalone artifact is the F2 calibration figure. No committed calibration JSON.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "json_output",
+      "zone": "output",
+      "inside_training_pipeline": false,
+      "title": "Convergence JSON",
+      "lines": [
+        "Keys: params, final_eval (dReach coarse/fine/ucb, certified), final_effort probes,",
+        "effort_curves, beta_params (alpha,beta dump), extraction_diagnostic (mean/mode),",
+        "onpath_summary, grid_refinement, recovery_metrics, best_checkpoint, closed_form."
+      ],
+      "code": [
+        {"file": "run/run_multi_stage.py", "lines": "429-454", "symbol": "result dict + json.dump"}
+      ],
+      "status": "MATCH",
+      "status_note": "Written per run under results/multi_stage/convergence/.",
+      "vs_one_stage": "INHERITED_MODIFIED",
+      "plan_divergence": null
+    },
+    {
+      "id": "checkpoint_pt",
+      "zone": "output",
+      "inside_training_pipeline": false,
+      "title": ".pt checkpoint persistence",
+      "lines": [
+        "Saves state_dict + cfg + effort_bounds so the policy can be re-certified post-hoc.",
+        "results/multi_stage/checkpoints/ms_T2_q50_seed*_p2cert.pt (gitignored).",
+        "One-stage never persisted a policy checkpoint."
+      ],
+      "code": [
+        {"file": "run/run_multi_stage.py", "lines": "410-414", "symbol": "agent.save"},
+        {"file": "agents/ppo_multi_stage.py", "lines": "573-598", "symbol": "save / load"}
+      ],
+      "status": "NEW",
+      "status_note": "D5/T7 persistence; enables mean-vs-mode and re-certification without a retrain.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "recovery_metrics",
+      "zone": "output",
+      "inside_training_pipeline": false,
+      "title": "Recovery metrics vs closed form",
+      "lines": [
+        "RE_1, MAE_2, RMSE_2, RPE_2(core), PL_2, and E[e_hat_2(d_2)].",
+        "Secondary/reported diagnostics; misses are smoothing-explained, not gating.",
+        "Primary acceptance is the dReach certificate, not these bands."
+      ],
+      "code": [
+        {"file": "utils/multi_stage_metrics.py", "lines": "86-145", "symbol": "recovery_metrics"},
+        {"file": "run/run_multi_stage.py", "lines": "388-403", "symbol": "recovery block"}
+      ],
+      "status": "MATCH",
+      "status_note": "Experiment-1 metrics (T3); E[e2] field added by D1.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    },
+    {
+      "id": "figures",
+      "zone": "output",
+      "inside_training_pipeline": false,
+      "title": "Figures (F1-F5) - stale notation",
+      "lines": [
+        "F1 recovery, F2 verifier calibration, F3-F5 three-stage panels exist.",
+        "Still stage-2-only comparison with $g_1$ text annotation, EXP bars (not dReach).",
+        "No stage-1 comparison panel; E[e2] vs 46.67 not annotated."
+      ],
+      "code": [
+        {"file": "tools/make_multistage_figures.py", "lines": "85-131", "symbol": "fig1_recovery"},
+        {"file": "tools/make_multistage_figures.py", "lines": "133-177", "symbol": "fig2_calibration"}
+      ],
+      "status": "STALE",
+      "status_note": "Runs and produces figures, but implements the pre-fix figure spec (D2 incomplete, D4 g-notation).",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": {"plan_says": "both-stage panels, stage-1 comparison, E[e2] annotation, dReach calibration bars, e-notation", "code_does": "stage-2-only + $g_1$ annotation + EXP bars", "source": "fix prompt D2/D4 (T5/T6)"}
+    },
+    {
+      "id": "tables",
+      "zone": "output",
+      "inside_training_pipeline": false,
+      "title": "Tables (dReach-UCB schema)",
+      "lines": [
+        "Multi-stage summary tables, backward-compatible with the dReach-UCB schema.",
+        "Consume the convergence JSONs; keys still carry benchmark 'g' names.",
+        "Falsification table (EXP + dReach bad-policy suite) not yet added [T4]."
+      ],
+      "code": [
+        {"file": "tools/make_multistage_tables.py", "lines": "1-40", "symbol": "make_multistage_tables"}
+      ],
+      "status": "MATCH",
+      "status_note": "Regenerates byte-identical on old data; T4 falsification table still open.",
+      "vs_one_stage": "TWO_STAGE_ONLY",
+      "plan_divergence": null
+    }
+  ],
+  "edges": [
+    {"from": "config_validation", "to": "state", "kind": "flow", "label": "q>q_crit gate before training"},
+    {"from": "state", "to": "policy_net", "kind": "flow", "label": "s_t=[t/T, d/(q sqrt t)]"},
+    {"from": "exploring_starts", "to": "env_mdp", "kind": "flow", "label": "random (t,d) start"},
+    {"from": "policy_net", "to": "env_mdp", "kind": "flow", "label": "e_i ~ Beta, e = e_min+a(e_max-e_min)"},
+    {"from": "env_mdp", "to": "reward", "kind": "flow", "label": "-k e^2 / terminal prize"},
+    {"from": "env_mdp", "to": "rollout", "kind": "flow", "label": "d_{t+1}=d_t+(e_i-e_j)+xi"},
+    {"from": "reward", "to": "rollout", "kind": "flow", "label": "per-player trajectories"},
+    {"from": "rollout", "to": "advantage", "kind": "flow", "label": "trajectory GAE"},
+    {"from": "advantage", "to": "ppo_update", "kind": "flow", "label": "A=G-V (gamma=lambda=1)"},
+    {"from": "ppo_update", "to": "policy_net", "kind": "loop", "label": "next update (fixed budget)"},
+    {"from": "ppo_update", "to": "fixed_budget", "kind": "flow", "label": "u < updates?"},
+    {"from": "fixed_budget", "to": "checkpoint_selection", "kind": "conditional", "label": "every eval-every: verify(51)"},
+    {"from": "checkpoint_selection", "to": "policy_net", "kind": "loop", "label": "track best; continue"},
+    {"from": "checkpoint_selection", "to": "mean_extraction", "kind": "flow", "label": "restore best checkpoint"},
+    {"from": "mean_extraction", "to": "onpath_E_e2", "kind": "flow", "label": "e_hat_2(d) curve"},
+    {"from": "mean_extraction", "to": "mode_diagnostic", "kind": "flow", "label": "alpha,beta diagnostic"},
+    {"from": "mean_extraction", "to": "no_polish", "kind": "flow", "label": "raw mean (no polish)"},
+    {"from": "no_polish", "to": "verify_dp", "kind": "flow", "label": "certify raw policy"},
+    {"from": "mean_extraction", "to": "verify_dp", "kind": "flow", "label": "e_hat_t(d) -> verifier"},
+    {"from": "verify_dp", "to": "quadrature", "kind": "flow", "label": "E_xi continuation"},
+    {"from": "verify_dp", "to": "terminal_closed_form", "kind": "flow", "label": "terminal W(y)"},
+    {"from": "verify_dp", "to": "reachable_set", "kind": "flow", "label": "Delta_t over R_t"},
+    {"from": "reachable_set", "to": "certify_gate", "kind": "flow", "label": "dReach coarse+fine"},
+    {"from": "certify_gate", "to": "cf_calibration", "kind": "flow", "label": "error-floor check"},
+    {"from": "certify_gate", "to": "json_output", "kind": "flow", "label": "certified?"},
+    {"from": "onpath_E_e2", "to": "recovery_metrics", "kind": "flow", "label": "E[e2] vs g1"},
+    {"from": "mean_extraction", "to": "json_output", "kind": "flow", "label": "probes + curves"},
+    {"from": "checkpoint_selection", "to": "checkpoint_pt", "kind": "flow", "label": "save .pt"},
+    {"from": "json_output", "to": "figures", "kind": "flow", "label": "plots"},
+    {"from": "json_output", "to": "tables", "kind": "flow", "label": "tables"}
+  ],
+  "results": {
+    "reported_by_pipeline": {
+      "e1_hat_at_0": 46.376,
+      "e2_hat_probes": [
+        {"d": -100, "value": 7.10},
+        {"d": -50, "value": 27.94},
+        {"d": 0, "value": 63.507},
+        {"d": 50, "value": 37.38},
+        {"d": 100, "value": 9.04}
+      ],
+      "E_e2_hat_onpath": 44.690,
+      "status": "OK"
+    },
+    "polished": {"exists": false, "values": null, "code": []},
+    "gate": {
+      "metric_name": "dReach_UCB / DW (>= 4/5 seeds must be <= threshold)",
+      "value": 0.00639,
+      "threshold": 0.03,
+      "passed": true,
+      "code": [
+        {"file": "utils/dp_verifier.py", "lines": "424-426"},
+        {"file": "utils/multi_stage_metrics.py", "lines": "206-214"}
+      ]
+    },
+    "measured_by_audit": {
+      "note": "Pipeline values above are read from committed artifacts (results/two_stage_results.json T2_summary, 5-seed p2cert; e1_hat_at_0/E_e2 are 5-seed means, e2 probe d=0 is the 5-seed mean 63.507+/-2.0, off-zero probes are seed42 representative since no 5-seed aggregate is stored for them). Independent CF recompute this session: g1=DW/(6qk)=46.6667, g2(0)=DW/(4qk)=70.0, E[g2]=46.6667, q_soc=sqrt(DW/8k)=41.833, q_bound2=35.0, q_bound1=23.33 -> all reproduce config/theory exactly.",
+      "e1_hat_at_0_std": 1.181,
+      "E_e2_hat_onpath_std": 1.776,
+      "dreach_ucb_over_dw_mean": 0.00639,
+      "dreach_ucb_over_dw_max": 0.00723,
+      "n_certified": "5/5",
+      "mean_minus_mode_E_e2": 0.074,
+      "cf_calibration_run": "yes (tools/calibrate_verifier.py + test_phase1_correctness.py: EXP(e*_CF)~0, CF certifies, const-high fails)"
+    }
+  },
+  "gaps": [
+    {"what": "State omits (w_H,w_L,k,q) that the plan's state vector includes", "why_it_matters": "The figure must not draw a 6-feature state; per-cell training means params are fixed context, not inputs", "evidence": "agents/ppo_multi_stage.py:511-517 vs Plan section 3.1", "blocks": "state box copy in the figure"},
+    {"what": "Figures are stale (stage-2-only, $g_1$ notation, EXP bars)", "why_it_matters": "D2/D4 not applied; the two-stage framework figure and the recovery/calibration figures disagree on notation and content", "evidence": "tools/make_multistage_figures.py:119", "blocks": "publishing figures as-is; e-notation consistency with the one-stage figure"},
+    {"what": "Off-zero stage-2 probe values have no 5-seed aggregate", "why_it_matters": "Only e2(0) is aggregated across seeds; the full e_hat_2(d) curve is per-seed (or the densecurve run)", "evidence": "results/two_stage_results.json T2_summary has only e2_at_0", "blocks": "a 5-seed-mean stage-2 curve in the figure without recomputation"},
+    {"what": "Reported effort recovers e* only approximately (E[e2]=44.69 vs 46.67, ~4.2% low; e2(0)=63.5 vs 70, ~9.3% low)", "why_it_matters": "The two-stage claim is 'certified epsilon-equilibrium', NOT 'recovers e* exactly'; the figure must frame the output as a certified candidate, not an exact match", "evidence": "results/two_stage_results.json T2_summary", "blocks": "how the output box is labeled (Claim B, certificate-based)"},
+    {"what": "T4 falsification table (EXP + dReach bad-policy suite) not implemented", "why_it_matters": "The calibration/falsification evidence lives only in a figure and a self-test, not a paper table", "evidence": "DIAGNOSIS.md T4; tools/make_multistage_tables.py has no bad-policy rows", "blocks": "a Table-1 calibration deliverable"}
+  ]
+}

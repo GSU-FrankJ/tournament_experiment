@@ -564,7 +564,7 @@ def run_ppo_different_ability(
         steps_per_update=int(cfg.get("steps_per_update", 4096)),
         epochs=int(cfg.get("update_epochs", 6)),
         minibatch_size=int(cfg.get("minibatch_size", 1024)),
-        state_dim=3,  # [q_norm, k_norm, wgap_norm]
+        state_dim=4,  # [q_norm, k_norm, wgap_norm, lgap_norm]
         hidden=128,
         entropy_coef=float(cfg.get("entropy_coef_start", 0.03)),
         lr=float(cfg.get("lr_start", 3e-4)),
@@ -663,9 +663,13 @@ def run_ppo_different_ability(
     env = DifferentAbilityEnv(env_config)
     
     # Convergence history for plotting
+    # effort = mean of the two per-player policy means (backward-compatible);
+    # effort1/effort2 = per-player policy means at the ability-gap states
     convergence_history: Dict[str, Any] = {
         "steps": [],
         "effort": [],
+        "effort1": [],
+        "effort2": [],
         "gap": [],
         "approx_kl": [],
         "batch_entropy": [],
@@ -746,34 +750,41 @@ def run_ppo_different_ability(
             q = float(rng.choice(train_qs))
             env.q = q
             
-            # Generate state (same for both players since symmetric policy)
-            state = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l)
-            
+            # Per-player states: shared network, but the 4th component carries
+            # each player's ability gap (l_i − l_{−i})/10, so the policy MAY
+            # output different efforts per player (symmetry becomes a learned
+            # outcome rather than an architectural constraint).
+            s1 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
+            s2 = agent.state_from_params(q=q, k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
+
             # Sample actions from shared policy (both players use same agent)
-            a1_norm, e1, logp1, v1 = agent.act(state)
-            a2_norm, e2, logp2, v2 = agent.act(state)
-            
+            a1_norm, e1, logp1, v1 = agent.act(s1)
+            a2_norm, e2, logp2, v2 = agent.act(s2)
+
             # Execute environment step
             actions = [
                 torch.tensor([float(e1.item())]),
                 torch.tensor([float(e2.item())]),
             ]
             _, rewards, _, done, _ = env.step(actions)
-            
-            # Store transitions (train on both players' experiences)
-            agent.store(state, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
-            agent.store(state, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
+
+            # Store transitions (train on both players' experiences, each with its own state)
+            agent.store(s1, a1_norm, logp1, float(rewards[0].item()), v1, bool(done))
+            agent.store(s2, a2_norm, logp2, float(rewards[1].item()), v2, bool(done))
             
             steps_done += 1
         
         # PPO update
         metrics = agent.update()
         
-        # Compute policy mean effort at test q
+        # Compute per-player policy mean efforts at test q (states differ in l_gap)
         test_q = float(train_qs[0])
-        test_state = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l)
-        policy_mean = agent.mean_effort(test_state)
-        
+        test_s1 = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
+        test_s2 = agent.state_from_params(q=test_q, k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
+        policy_mean_1 = agent.mean_effort(test_s1)
+        policy_mean_2 = agent.mean_effort(test_s2)
+        policy_mean = 0.5 * (policy_mean_1 + policy_mean_2)
+
         # Get theoretical effort
         e_star = e_star_two_players_different_ability(test_q, w_h, w_l, k, l1, l2)
         gap = abs(policy_mean - e_star)
@@ -785,6 +796,8 @@ def run_ppo_different_ability(
         # Record convergence history
         convergence_history["steps"].append(steps_done)
         convergence_history["effort"].append(policy_mean)
+        convergence_history["effort1"].append(policy_mean_1)
+        convergence_history["effort2"].append(policy_mean_2)
         convergence_history["gap"].append(gap)
         convergence_history["approx_kl"].append(metrics.get("approx_kl", 0.0))
         convergence_history["batch_entropy"].append(metrics.get("batch_entropy", 0.0))
@@ -793,7 +806,8 @@ def run_ppo_different_ability(
         if update_idx % 20 == 0 or update_idx == total_updates - 1:
             print(
                 f"[PPO-diff-ability] update={update_idx:04d} steps={steps_done:08d} "
-                f"e={policy_mean:.4f} (theory={e_star:.4f}, gap={gap:.4f}) "
+                f"e={policy_mean:.4f} (e1={policy_mean_1:.4f}, e2={policy_mean_2:.4f}, "
+                f"theory={e_star:.4f}, gap={gap:.4f}) "
                 f"entropy={agent.cfg.entropy_coef:.4f}",
                 flush=True,
             )
@@ -914,17 +928,21 @@ def run_ppo_different_ability(
     # Final evaluation
     results = []
     for q in train_qs:
-        test_state = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l)
-        policy_mean = agent.mean_effort(test_state)
+        test_s1 = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l, l_gap=l1 - l2)
+        test_s2 = agent.state_from_params(q=float(q), k=k, w_h=w_h, w_l=w_l, l_gap=l2 - l1)
+        policy_mean_1 = agent.mean_effort(test_s1)
+        policy_mean_2 = agent.mean_effort(test_s2)
+        policy_mean = 0.5 * (policy_mean_1 + policy_mean_2)
         e_star = e_star_two_players_different_ability(float(q), w_h, w_l, k, l1, l2)
         gap = abs(policy_mean - e_star)
-        
-        # Win probability at policy mean (symmetric)
-        p1_win = p_win_different_ability(policy_mean, policy_mean, l1, l2, q)
-        
+
+        # Win probability at the per-player policy means
+        p1_win = p_win_different_ability(policy_mean_1, policy_mean_2, l1, l2, q)
+
         print(
             f"[PPO-diff-ability] Final q={q:.1f}: "
-            f"e={policy_mean:.4f} (theory={e_star:.4f}, gap={gap:.4f}) "
+            f"e={policy_mean:.4f} (e1={policy_mean_1:.4f}, e2={policy_mean_2:.4f}, "
+            f"theory={e_star:.4f}, gap={gap:.4f}) "
             f"P(p1 wins)={p1_win:.4f}"
         )
         
@@ -940,6 +958,8 @@ def run_ppo_different_ability(
             "w_l": float(w_l),
             "theoretical_effort": float(e_star),
             "final_effort": float(policy_mean),
+            "final_effort1": float(policy_mean_1),
+            "final_effort2": float(policy_mean_2),
             "gap": float(gap),
             "p1_win": float(p1_win),
             "episodes": int(episodes),
@@ -979,6 +999,8 @@ def run_ppo_different_ability(
             "exploit_history": exploit_history,
             "final": {
                 "effort": float(policy_mean),
+                "effort1": float(policy_mean_1),
+                "effort2": float(policy_mean_2),
                 "gap": float(gap),
                 "p1_win": float(p1_win),
             },

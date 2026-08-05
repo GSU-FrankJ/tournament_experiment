@@ -1,0 +1,271 @@
+8c5c8c04427338a73840e9d2621fc522ecc9edc0
+ M agents/ppo_three_players.py
+ M agents/ppo_two_players_clean.py
+ M config/one_stage_two_players.py
+AM docs/Figures&Tables07252026.docx
+A  docs/Figures&Tables07292026.docx
+A  docs/Figures&Tables073026.docx
+A  docs/Figures&Tables080226.docx
+ M docs/STATE.md
+ M docs/table2_metadata_audit.md
+ M paper/data/convergence_main.csv
+ M paper/data/equilibrium_recovery_dotplot.csv
+ M paper/data/exploitability_dynamics.csv
+ M paper/figures/convergence_main.pdf
+ M paper/figures/convergence_main.png
+ M paper/figures/convergence_main_1x3.pdf
+ M paper/figures/convergence_main_1x3.png
+ M paper/figures/equilibrium_recovery_dotplot.pdf
+ M paper/figures/equilibrium_recovery_dotplot.png
+ M paper/figures/exploitability_dynamics.pdf
+ M paper/figures/exploitability_dynamics.png
+ M paper/generator/__main__.py
+ M paper/generator/config.py
+ M paper/generator/plots.py
+ M results/different_ability/summary.csv
+ M results/different_cost/summary.csv
+ M results/two_players/summary.csv
+ M run/run_different_ability.py
+ M run/run_different_cost.py
+ M run/run_three_players.py
+ M run/run_two_players.py
+ M tools/audit_rollout_modes.py
+ M tools/diagnose_data_provenance.py
+ M tools/one_stage_mc_adapter.py
+ M tools/verify_rollout_modes.py
+ M utils/exploit_asymmetric.py
+?? docs/Figures&Tables080326.docx
+?? docs/ablation_narrative_preregistered.md
+?? docs/mu_star_screen.json
+?? docs/r7_unified_2p_results.md
+?? docs/table2_da_std_vs_v2.md
+?? docs/table2_unified_config.md
+?? docs/tables34_raw_r7r8.md
+?? docs/tasks/r7-state4-wave/
+?? docs/two_stage_figure_spec.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed42_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed42_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed42_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed43_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed43_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed43_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed44_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed44_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed44_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed45_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed45_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed45_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed46_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed46_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed46_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed999_r7smoke_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q35.0_seed999_r7smoke_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed42_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed42_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed42_r8_sens_eps001_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed42_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed43_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed43_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed43_r8_sens_eps001_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed43_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed44_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed44_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed44_r8_sens_eps001_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed44_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed45_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed45_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed45_r8_sens_eps001_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed45_r8_unified_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed46_r7_state4_std_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed46_r7_state4_v2_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed46_r8_sens_eps001_convergence.json
+?? results/different_ability/convergence/different_ability_ppo_q55.0_seed46_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed42_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed42_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed43_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed43_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed44_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed44_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed45_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed45_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed46_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed46_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q35.0_seed999_r7smoke_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed42_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed42_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed43_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed43_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed44_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed44_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed45_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed45_r8_unified_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed46_r7_state4_convergence.json
+?? results/different_cost/convergence/different_cost_ppo_q55.0_seed46_r8_unified_convergence.json
+?? results/one_stage_ablation/final_exploit_r7r8.json
+?? results/one_stage_ablation/mc_br_only.json
+?? results/one_stage_ablation/polish_per_seed_r7.json
+?? results/r7_state4/
+?? results/r8_sens_eps001/
+?? results/r8_sens_eps001_da/
+?? results/r8_unified/
+?? results/r9_cert001/
+?? results/three_players/convergence/ppo_3p_q35.0_seed42_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed42_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed43_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed43_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed44_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed44_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed45_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed45_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed46_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed46_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q35.0_seed999_r7smoke_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed42_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed42_r8_sens_eps001_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed42_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed43_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed43_r8_sens_eps001_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed43_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed44_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed44_r8_sens_eps001_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed44_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed45_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed45_r8_sens_eps001_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed45_r8_unified_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed46_r7_state4_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed46_r8_sens_eps001_convergence.json
+?? results/three_players/convergence/ppo_3p_q55.0_seed46_r8_unified_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed42_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed42_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed42_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed43_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed43_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed43_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed44_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed44_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed44_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed45_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed45_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed45_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed46_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed46_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed46_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r7smoke_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r7smoke_metadata.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r9smoke_convergence.json
+?? results/two_players/convergence/ppo_q35.0_seed999_r9smoke_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed42_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed42_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed42_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed43_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed43_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed43_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed44_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed44_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed44_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed45_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed45_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed45_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed46_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q45.0_seed46_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q45.0_seed46_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed42_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed42_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed42_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed43_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed43_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed43_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed44_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed44_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed44_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed45_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed45_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed45_wh8_wl4_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_fig7_no_exploit_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_fig7_no_exploit_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_fig7_no_stability_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_fig7_no_stability_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed46_r7_state4_metadata.json
+?? results/two_players/convergence/ppo_q55.0_seed46_wh8_wl4_r7_state4_convergence.json
+?? results/two_players/convergence/ppo_q55.0_seed46_wh8_wl4_r7_state4_metadata.json
+?? run/r6_floor_ablation.sh
+?? run/r7_state4_wave.sh
+?? run/r8_sens_da_retry.sh
+?? run/r8_sens_eps001_wave.sh
+?? run/r8_unified_wave.sh
+?? run/r9_cert001_wave.sh
+?? tools/final_exploit_r7r8.py
+?? tools/mc_br_only_baseline.py
+?? tools/mu_star_screen.py
+?? tools/one_stage_polish_per_seed_r7.py

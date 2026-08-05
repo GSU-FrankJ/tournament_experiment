@@ -1,0 +1,209 @@
+{
+  "phase": 0,
+  "params": {
+    "w_h": 6.5,
+    "w_l": 3.0,
+    "dw": 3.5,
+    "k": 0.00055,
+    "bounds": [
+      0.0,
+      100.0
+    ]
+  },
+  "reconstruction": {
+    "35.0": {
+      "mean": 43.57976152740845,
+      "std": 1.1154457330206349,
+      "max_bitcheck_delta": 7.105427357601002e-15,
+      "rows": [
+        {
+          "seed": 42,
+          "path": "results/two_players/convergence/ppo_q35.0_seed42_r5_sampled_convergence.json",
+          "alpha": 79.80177307128906,
+          "beta": 104.25659942626953,
+          "e_raw": 43.35677426048499,
+          "final_effort": 43.35677426048499,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 49
+        },
+        {
+          "seed": 43,
+          "path": "results/two_players/convergence/ppo_q35.0_seed43_r5_sampled_convergence.json",
+          "alpha": 102.57537841796875,
+          "beta": 135.97369384765625,
+          "e_raw": 42.99969706180656,
+          "final_effort": 42.99969706180656,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 59
+        },
+        {
+          "seed": 44,
+          "path": "results/two_players/convergence/ppo_q35.0_seed44_r5_sampled_convergence.json",
+          "alpha": 94.5564193725586,
+          "beta": 130.74920654296875,
+          "e_raw": 41.96806847957278,
+          "final_effort": 41.96806847957278,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 49
+        },
+        {
+          "seed": 45,
+          "path": "results/two_players/convergence/ppo_q35.0_seed45_r5_sampled_convergence.json",
+          "alpha": 102.54637908935547,
+          "beta": 124.38494873046875,
+          "e_raw": 45.18828672732828,
+          "final_effort": 45.18828672732829,
+          "delta": 7.105427357601002e-15,
+          "stop": "exploitability",
+          "upd": 69
+        },
+        {
+          "seed": 46,
+          "path": "results/two_players/convergence/ppo_q35.0_seed46_r5_sampled_convergence.json",
+          "alpha": 98.7506332397461,
+          "beta": 123.73094940185547,
+          "e_raw": 44.38598110784962,
+          "final_effort": 44.38598110784962,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 49
+        }
+      ]
+    },
+    "55.0": {
+      "mean": 29.654295668978186,
+      "std": 0.6807481324682728,
+      "max_bitcheck_delta": 3.552713678800501e-15,
+      "rows": [
+        {
+          "seed": 42,
+          "path": "results/two_players/convergence/ppo_q55.0_seed42_r5_sampled_convergence.json",
+          "alpha": 78.91641235351562,
+          "beta": 190.44540405273438,
+          "e_raw": 29.297549818454716,
+          "final_effort": 29.297549818454716,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 109
+        },
+        {
+          "seed": 43,
+          "path": "results/two_players/convergence/ppo_q55.0_seed43_r5_sampled_convergence.json",
+          "alpha": 64.83088684082031,
+          "beta": 160.55006408691406,
+          "e_raw": 28.765024982793484,
+          "final_effort": 28.76502498279348,
+          "delta": 3.552713678800501e-15,
+          "stop": "exploitability",
+          "upd": 79
+        },
+        {
+          "seed": 44,
+          "path": "results/two_players/convergence/ppo_q55.0_seed44_r5_sampled_convergence.json",
+          "alpha": 73.29391479492188,
+          "beta": 167.07078552246094,
+          "e_raw": 30.49279478148954,
+          "final_effort": 30.49279478148954,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 69
+        },
+        {
+          "seed": 45,
+          "path": "results/two_players/convergence/ppo_q55.0_seed45_r5_sampled_convergence.json",
+          "alpha": 78.27685546875,
+          "beta": 188.8388671875,
+          "e_raw": 29.30447324116676,
+          "final_effort": 29.30447324116676,
+          "delta": 0.0,
+          "stop": "exploitability",
+          "upd": 79
+        },
+        {
+          "seed": 46,
+          "path": "results/two_players/convergence/ppo_q55.0_seed46_r5_sampled_convergence.json",
+          "alpha": 76.99343872070312,
+          "beta": 176.17755126953125,
+          "e_raw": 30.411635520986433,
+          "final_effort": 30.411635520986437,
+          "delta": 3.552713678800501e-15,
+          "stop": "exploitability",
+          "upd": 99
+        }
+      ]
+    }
+  },
+  "tripwire": {
+    "35.0": {
+      "e_star": 45.45454545454545,
+      "raw": 43.57976152740845,
+      "pol": 44.95,
+      "P1": 0.001172066186264864,
+      "P2": 8.488877952750329e-05,
+      "P3": 13.807080191147334,
+      "P4": 44.7164415462238,
+      "P5": 0.23355845377620454,
+      "P6": 27.559055118110233,
+      "P7": 37.03703703703703,
+      "P7_err_before": 4.545454545454547,
+      "P7_err_after": 8.417508417508422,
+      "P8": {
+        "mean": 0.006660263913434328,
+        "sd": 0.001643544689163928,
+        "vals": [
+          0.005078388913434484,
+          0.0077071975071842935,
+          0.007544111569684375,
+          0.008269697507184315,
+          0.004701924069684171
+        ]
+      },
+      "exp_ucb_raw": 0.0011720661862653081,
+      "exp_ucb_pol": 8.488877952750329e-05,
+      "br_disagree_raw": 4.3804959659610176e-11,
+      "br_disagree_pol": 6.109956984801101e-11
+    },
+    "55.0": {
+      "e_star": 28.92561983471074,
+      "raw": 29.654295668978186,
+      "pol": 28.76,
+      "P1": 0.00039622372020620134,
+      "P2": 1.1945318264316995e-05,
+      "P3": 33.16979183298943,
+      "P4": 28.665643747051615,
+      "P5": 0.09435625294838701,
+      "P6": 22.903033908387865,
+      "P7": 21.406727828746178,
+      "P7_err_before": 21.07438016528926,
+      "P7_err_after": 7.518892005964563,
+      "P8": {
+        "mean": 0.0071468829239982766,
+        "sd": 0.0033627459536082586,
+        "vals": [
+          0.008743621205248076,
+          0.010587371205247997,
+          0.003813543080248394,
+          0.009318425892748117,
+          0.0032714532364988003
+        ]
+      },
+      "exp_ucb_raw": 0.00039622372020531316,
+      "exp_ucb_pol": 1.1945318266093352e-05,
+      "br_disagree_raw": 6.52740084206016e-11,
+      "br_disagree_pol": 7.906564292170515e-11
+    }
+  },
+  "csv_crosscheck": {
+    "raw": {
+      "35.0": 43.58,
+      "55.0": 29.65
+    },
+    "polished": {
+      "35.0": 44.95,
+      "55.0": 28.76
+    }
+  }
+}

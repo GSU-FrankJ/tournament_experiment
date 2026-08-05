@@ -38,7 +38,7 @@ def diagnose_data_provenance(num_steps: int = 200, use_opponent_prob: float = 0.
         steps_per_update=4096,
         epochs=6,
         minibatch_size=1024,
-        state_dim=3,
+        state_dim=4,
         hidden=128,
         opponent_mode="periodic",
         opponent_sync_interval=2,

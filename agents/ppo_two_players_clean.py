@@ -123,7 +123,7 @@ class PPOConfig:
     steps_per_update: int = 2048
     epochs: int = 15
     minibatch_size: int = 256
-    state_dim: int = 3  # [q_norm, k_norm, wgap_norm]
+    state_dim: int = 4  # [q_norm, k_norm, wgap_norm, lgap_norm]
     hidden: int = 64
     # Opponent policy lag (self-play stabilization)
     opponent_mode: str = "ema"  # ["ema", "periodic", "snapshot"]
@@ -672,10 +672,29 @@ class PPOTwoPlayersBandit:
         return metrics
 
     # ---- utility ----
-    def state_from_params(self, *, q: float, k: float, w_h: float, w_l: float) -> torch.Tensor:
+    def state_from_params(
+        self, *, q: float, k: float, w_h: float, w_l: float, l_gap: float = 0.0
+    ) -> torch.Tensor:
+        """Build the normalized 4-dim state s_i = [q/60, k_i/1e-3, Δw/10, (l_i − l̄_{−i})/10].
+
+        Args:
+            q: Noise half-width.
+            k: This player's cost coefficient k_i.
+            w_h: High prize.
+            w_l: Low prize.
+            l_gap: Ability gap l_i − l̄_{−i} (mean over opponents). 0 for all
+                scenarios except heterogeneous ability, where player 1 passes
+                l1 − l2 and player 2 passes l2 − l1.
+
+        Returns:
+            State tensor of shape (1, 4).
+        """
         # Normalize features to roughly [0,1]
         q_norm = float(q) / 60.0  # assumes q up to ~60
         k_norm = float(k) / 1e-3  # k around 4e-4 => ~0.4
         wgap_norm = float(w_h - w_l) / 10.0  # prize gap scaled by 10
-        s = torch.tensor([q_norm, k_norm, wgap_norm], dtype=torch.float32, device=self.device)
+        lgap_norm = float(l_gap) / 10.0  # ability gap scaled by 10 (0 unless het-ability)
+        s = torch.tensor(
+            [q_norm, k_norm, wgap_norm, lgap_norm], dtype=torch.float32, device=self.device
+        )
         return s.unsqueeze(0)

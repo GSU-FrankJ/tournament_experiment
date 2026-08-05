@@ -1,0 +1,12 @@
+{
+  "run_id": "20260801_154750",
+  "method": "ppo",
+  "q": 45.0,
+  "seed": 45,
+  "ablation_name": "r7_fig7_no_stability",
+  "git_sha": "8c5c8c044273",
+  "cmdline": "run/run_two_players.py --method ppo --q 45 --seed 45 --disable-cheap-gate --override-conc-ramp-warmup 200 --episodes 6144000 --ablation-name r7_fig7_no_stability",
+  "timestamp": "2026-08-01T16:05:16.843098",
+  "convergence_file": "ppo_q45.0_seed45_r7_fig7_no_stability_convergence.json",
+  "variant_name": "baseline"
+}

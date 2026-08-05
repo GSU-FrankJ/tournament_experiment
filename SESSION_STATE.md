@@ -1,3 +1,425 @@
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ACTIVE WORK (prepended 2026-07-24): MISSING-cell evaluations + final    -->
+<!-- T-A/T-C (follow-up to the 2026-07-23 session below).                    -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SESSION_STATE — MISSING evaluations + finalized tables (2026-07-24)
+
+**Branch:** `feat/multistage-phase0` · Post-hoc evaluation + MC-BR polish on
+frozen profiles only; zero PPO training. **Locked conventions:** C1 = paper
+error metric is `err_of_mean` = |ē − e*| (MAE kept on record as separate CSV
+columns); C2 = 3P polished convention is the per-seed per-player aggregation
+(24.75 / 15.84 from `polish_per_seed_all.json`).
+
+## Tasks run (artifact → filled cell)
+
+1. **2P q45 post-polish exploitability** — `tools/one_stage_ablation_q45.py`
+   (new) mirrors phase 1's referee procedure; evaluated objects = the 5
+   per-seed q45 polish landings + their cross-seed mean 35.0902 (phase 1's
+   `e_fp` also averaged 2 probe controls, which don't exist at q45 — stated).
+   → `results/one_stage_ablation/ablation_results_q45.{json,log}` (sibling
+   file; committed `ablation_results.json` untouched).
+   **EXP_det@polished-mean = 2.738e-5 abs** (per-seed 1.97–3.59e-5);
+   EXP_det@raw-mean = 1.057e-5 (raw q45 sits closer to e* than the polish
+   fixed point — mirrors err_of_mean 0.11 raw vs 0.26 polished); legacy-MC
+   floor ≈ 4e-3 (cannot separate). Fills T-A full-arm q45 + T-C 2P q45.
+2. **no_exploit arm terminal exploitability** —
+   `tools/no_exploit_terminal_exploitability.py` (new) +
+   **`BetaPolicyAgent` added to `tools/one_stage_mc_adapter.py`** (additive):
+   reconstructs each run's stochastic terminal Beta(α,β) policy and runs the
+   SHIPPED `eval_exploitability` (M=8192, CRN, 5.0/1.0/0.25) — the identical
+   code path behind the verified arms' `final_exploit_max`. R=5 fresh seeds
+   (100+7r), per-profile rep-mean, cell = mean±std across seeds.
+   → `results/one_stage_ablation/no_exploit_terminal_exploitability.{json,log}`.
+   **MC: q35 0.0109±0.0071, q45 0.0086±0.0055, q55 0.0044±0.0031** (abs);
+   secondary referee EXP_det 5.5e-3 / 4.9e-3 / 1.9e-3 — 5×/465×/5× the
+   baseline raw-mean EXP_det. Fills T-A row 4.
+3. **Set-2 (8,4) MC-BR polish** — `tools/one_stage_polish_per_seed_set2.py`
+   (new; reuses `_polish_row`/`POL` from the canonical per-seed polish tool;
+   identical solver settings, start = final Beta mean, polish_seed = 4000+si)
+   → `results/one_stage_ablation/polish_per_seed_set2.{json,log}` (sibling;
+   `polish_per_seed_all.json` untouched), 15 rows, 1903 s tmux.
+   **Landings: q35 47.045±0.032 (e* 47.6190, err 0.574), q45 36.751±0.042
+   (37.0370, 0.286), q55 30.127±0.025 (30.3030, 0.177)** — same undershoot
+   pattern as Set 1. `paper/figures/convergence_main.{png,pdf}` re-rendered
+   (ONLY this figure; mtime-verified) — Set-2 row now carries ★ markers via
+   variant-keyed `_polished_two_player_means()` in `paper/generator/plots.py`.
+   `convergence_main_1x3` (Set-1 only) and all other figures untouched.
+4. **3P per-seed (a)-leg under C2** —
+   `tools/threep_postpolish_exploit_per_seed.py` (new): identical
+   `exploitability_frozen_profile` call (M=200k, seeds 600000+cid*100+si) on
+   each seed's polished per-player profile.
+   → `results/one_stage_ablation/threep_postpolish_exploit_per_seed.{json,log}`.
+   **q35 0.000816±0.000519, q55 0.000651±0.000212 — REPRODUCES the committed
+   log's (a)EXP=0.0008/0.0007.** Key correction to the 2026-07-23 note: the
+   committed (a)-leg was ALREADY measured per-seed on the C2 profiles
+   (phase0_verify polishes per seed; identical inputs/seeds as
+   polish_per_seed_all); the log's "24.68" is merely PLAYER 1's cross-seed
+   mean (`labels=["P(sym)"]` prints only p=0) — there is no separate
+   symmetric-projection object. T-C 3P exploitability cells therefore stay
+   0.0008/0.0007, now with persisted per-seed values and ±std.
+
+## Gray-line semantics REVERTED to verified stop (owner request, 2026-07-24)
+
+Owner review flagged the first-pass gray line as misleading (q35: line at
+update ~11 while the plotted curves are still far apart). Investigation
+confirmed the data call was CORRECT but the first-pass definition misreads:
+the plotted Agent-1/2 curves carry the asymmetric exploration warm-up bias
+(`run_two_players.py:960-969`, 20 updates), while the exploitability check
+evaluates the near-e*-initialized POLICY (policy_mean_effort[0]≈48.35;
+update-8 check = 0.0183 < 0.03 legitimately passes). Line switched back to
+the VERIFIED stop (mean stopped_at_update = where training stops and the raw
+estimate is read out): Set-1 55/75/87, Set-2 51/71/97. First-pass values
+remain computed + printed for reference. Both `convergence_main.{png,pdf}`
+(2x3) and `convergence_main_1x3.{png,pdf}` re-rendered; sizes for layout
+choice: 2x3 aspect ≈ 1.34:1, 1x3 ≈ 2.13:1 at \linewidth.
+
+## F9 dotplot polish (owner request, 2026-07-24)
+
+`equilibrium_recovery_dotplot.{png,pdf}` re-rendered: legend folded to two
+rows (ncol=3, title pad 30→52 to clear it); seed markers de-emphasized —
+semi-transparent (face alpha 0.35, edge alpha 0.45), s 70→55, zorder 5→3 so
+the across-seed mean diamonds sit on top. Legend swatches match. Data
+unchanged (Claim-B polished override).
+
+## q45 "polish raises Final Error" — diagnosed NOT a bug (owner query, 2026-07-24)
+
+T-A shows raw err_of_mean 0.108 < polished 0.263 at q45. Root cause = two
+documented mechanisms colliding: (i) the raw 0.108 is a SIGN-CANCELLATION
+artifact — per-seed signed errors are −0.49/+0.42/+0.66/+0.55/−0.60 (3 above,
+2 below e*; per-seed MAE 0.544); (ii) the polish collapses all seeds to the
+solver's sampled fixed point (sd 0.60→0.034, 18×), which carries the
+systematic offset e_fp − e* ≈ −0.26 (monotone across q: −0.51/−0.26/−0.17,
+exactly the Phase-0 decomposition err_pol ≈ fixed-point offset + ~0.02
+solver noise). New artifact `results/one_stage_ablation/q45_polish_probe.json`
+(+`.log`, tools/one_stage_polish_probe_q45.py): starts {raw mean, 0, 50} land
+{35.0907, 35.0993, 35.1106}, spread 0.0199 ⇒ init-independent fixed point,
+same as the q35/55 Phase-0 probe. Under per-seed MAE the polish still HALVES
+the q45 error (0.544→0.263); only the err-of-mean column shows a regression,
+because the raw mean is accidentally accurate. Consistent exploitability
+picture: EXP_det@raw_mean 1.06e-5 < EXP_det@polish 2.74e-5, both ≪ eps_eq.
+
+## CSV / README (convention C1)
+
+- `results/one_stage_claimb_summary.csv`: 4 columns APPENDED by
+  `tools/extend_claimb_summary_err_columns.py` (new): `raw_err_of_mean`,
+  `raw_mae_across_seeds`, `polished_err_of_mean`, `polished_mae_across_seeds`.
+  Existing cells byte-identical (CRLF line endings preserved; verified every
+  original line is a byte-prefix of its extended line). New MAE column
+  reproduces the historical `|ē−e*|` raw values (0.79/1.05/0.94/1.07/0.99),
+  confirming the old column's mixed semantics.
+- `results/README.md`: appended section documenting both conventions and that
+  paper tables use `err_of_mean` (C1), plus the 3P C2 note.
+
+## Final table state
+
+- T-A: both previously-MISSING exploitability cells filled (full-arm q45 =
+  2.7e-5 det; no_exploit row = MC 0.0109/0.0086/0.0044). No other cell changed.
+- T-C: 2P q45 post-polish cell = 2.7e-5 det; 3P cells unchanged in value,
+  footnote corrected (per-seed C2 measurement, ±std now on record).
+
+## MISSING v2
+
+- dc/da per-seed (a)-leg dispersion (cell means 0.0006/0.0002/0.0010/0.0005
+  committed; per-seed values still unpersisted) — extend
+  `tools/threep_postpolish_exploit_per_seed.py` to cell_ids 2–5.
+- Set-2 post-polish independent exploitability at the new landings — referee
+  run with Set-2 params (w=8/4, k=0.0006; the referee module's constants are
+  Set-1, needs parameterization).
+- (8,5.5) symmetric 2P cell — new training, out of scope.
+
+## Commit note
+
+Split per repo rules: (i) code (5 new tools + additive adapter class +
+plots.py variant-keyed star map), (ii) new evaluation artifacts under
+results/one_stage_ablation/, (iii) CSV/README extension, (iv) figure regen
+(convergence_main + convergence_main.csv). plots.py still carries earlier
+uncommitted edits (2026-07-20/23).
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ACTIVE WORK (prepended 2026-07-23): Figure regeneration (F2/F6/F9) +    -->
+<!-- table data extraction (T-A/T-B/T-C) for the one-stage pipeline.         -->
+<!-- Sections below are unchanged prior state.                               -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SESSION_STATE — Figure regen + table extraction (one-stage, 2026-07-23)
+
+**Branch:** `feat/multistage-phase0` · **Zero training, zero GPU.** Plotting +
+data extraction only; nothing under `results/*/convergence/` touched. All
+extracted numbers were adversarially re-verified by an independent 6-agent
+pass against the raw artifacts (0 numeric refutations on T-A/T-C).
+
+## Figures regenerated (overwritten in place, `paper/figures/`)
+
+1. **`convergence_main.{png,pdf}`** (manuscript Fig. 2) — `plot_convergence_main`:
+   - Gray vertical line now marks the **FIRST-PASS verification update** (first
+     in-training exploitability check the raw profile passes, < ε_eq=0.03),
+     mean across 5 seeds — previously it marked **streak completion**
+     (`stopped_at_update` = 5th consecutive passing check). New helper
+     `_first_pass_updates()`; 1-based convention matches `stopped_at_update`
+     (verified: last passing index+1 == stopped_at_update in all 30 runs).
+     First-pass vs streak (mean): Set 1 q35 11/55, q45 35/75, q55 47/87;
+     Set 2 (8,4) 11/51, 31/71, 57/97.
+   - New endpoint markers: ○ raw final estimate (cross-seed mean of final
+     policy-mean efforts) on every panel; ★ MC-BR polished estimate
+     (cross-seed mean of `polish_per_seed_all.json` landings: 44.947 / 35.090 /
+     28.757) on the Set-1 row only — **no polish artifact exists for Set 2**,
+     so no star there. Star x-offset so markers never overlap.
+   - Legend: "Convergence update" → "Verification update"; added "Raw
+     estimate" (○), "MC-BR polished estimate" (★).
+   - Known cosmetic carry-over: the e*-value annotation still overlaps the
+     trajectory tail in q=55 panels (pre-existing placement, unchanged).
+2. **`convergence_main_1x3.{png,pdf}` (NEW FILE)** — 1×3 companion, Set-1 row
+   only, sized like exploitability_dynamics (figsize 10×4);
+   `plot_convergence_main_1x3()` + `tools/regen_convergence_main_1x3.py`.
+   Does not overwrite the 2×3 figure or convergence_main.csv.
+3. **`exploitability_dynamics.{png,pdf}`** (manuscript Fig. 6) — y-label →
+   **"Raw profile exploitability"** (data source confirmed in code: in-loop
+   `eval_exploitability` on the current self-play policy,
+   `run/run_two_players.py:1385-1417` — the streak-stop quantity, NOT
+   post-polish). Legend compressed to exactly 4 entries: "Mean Exploit.",
+   "Tolerance $\varepsilon_{eq} = 0.03$", "Stability passed", "Verified";
+   moved fully above the axes (panels no longer squeezed). Log scale/data
+   unchanged. (No ±1 std band ever existed here — per-seed thin curves kept.)
+4. **`equilibrium_recovery_dotplot.{png,pdf}`** (manuscript Fig. 8) — title →
+   "Equilibrium Effort Recovery Across Tournament Variants and Noise Levels";
+   y-label → "Effort Level"; seed markers enlarged (s 40→70), light face +
+   black edge, zorder above the mean diamonds (diamonds 100→130 so both
+   layers read); "Per-seed estimate" → "Seed-level estimates"; het-cost
+   labels → "Low-cost agent"/"High-cost agent" (mapping verified: k1=4e-4 <
+   k2=5.5e-4, e1*=38.03>e2*=27.66, learned effort1>effort2 in all 10 runs);
+   het-cost theory lines → BLACK (solid=low-cost, dashed=high-cost) with new
+   legend entry "Theory e* (low-cost)". Data unchanged (Claim-B polished
+   per-seed override). Note: het-cost mean diamonds remain agent-colored
+   (pre-existing) while the legend swatch is red.
+
+**Retired figure `ablation_comparison.{png,pdf}` untouched** (verified mtime
+2026-07-20; replaced by table T-A delivered in the session reply).
+
+## ⚠️ As-built discovery (affects Table 2 / ONE_STAGE_ASBUILT.md)
+
+The canonical `r5_sampled` PPO baselines for **2P (CLI default), 3P and dc
+(explicit `--theory-align-v2` in manifest cmdlines)** trained under the
+**theory-align-v2 override block** (`run/run_two_players.py:1764-1767,
+1856-1892`): entropy coef **0** for the whole run (not 0.03→0.005), LR
+**5e-5 → 2e-5** (not 3e-4→2e-4), clip **0.20 → 0.15** (not 0.50→0.35 nor
+0.30→0.15), **1 PPO epoch/update** (not 6), target_kl 0.06, and the policy
+net is **`ActorCriticMeanConc`** (sigmoid mean × softplus concentration,
+α=mean·conc — not ActorCritic's softplus+1 α/β heads). Runtime signature
+confirms: α+β ≈ 169 at update 1 (conc ramp start 100), impossible for
+ActorCritic init. The v2 writes of γ/λ/value_coef/max_grad_norm into cfg are
+**dead code** (PPOConfig never reads them) → effective γ=0.99, λ=0.95 (both
+inert, single-step), value_coef=0.5, max_grad_norm=0.5. Only the **da**
+baseline (`r5_sampled_std`) is the standard arm.
+⇒ `docs/ONE_STAGE_ASBUILT.md` §1 ("canonical = ActorCritic softplus+1,
+theory_align_v2=False") and its §Q4 lr/entropy/clip/epochs rows are **wrong
+for the as-run baselines** — flagged, not edited. Manuscript Table 2's
+"Theory-align-v2" column values for epochs (1), clip (0.2→0.15), entropy (0)
+match as-built; its v2 claims γ=λ=1.0 and value-loss 1.0 do NOT (dead code).
+
+## Code changes (uncommitted, on top of prior uncommitted plots.py edits)
+
+- `paper/generator/plots.py`: `_first_pass_updates()`,
+  `_polished_two_player_means()`, `plot_convergence_main` (line semantics,
+  endpoint markers, legend, figsize param), `plot_convergence_main_1x3()`,
+  F6 label/legend edits, F9 edits.
+- `paper/generator/__main__.py`: fixed pre-existing crash — `cmd_plot` passed
+  the output path positionally into `plot_convergence_main`'s
+  `weight_variants` slot.
+- `tools/regen_convergence_main_1x3.py` (new).
+- Regenerated `paper/data/{convergence_main,exploitability_dynamics,equilibrium_recovery_dotplot}.csv`.
+- COMMIT NOTE: split code edits vs figure/data regen (repo rule); plots.py
+  still carries earlier uncommitted edits from 2026-07-20.
+
+## Open issues / MISSING
+
+- Post-polish independent exploitability for 2P **q45**: no artifact
+  (phase0/phase1 referee ran q35/q55 only). Producing run: extend
+  `tools/one_stage_ablation_phase1.py` / `tools/one_stage_referee.py` to q45.
+- Final exploitability for the `no_exploit` ablation arm: never evaluated
+  in-run (by design; `final_exploit_max` null in all 15 JSONs). Producing
+  run: post-hoc referee/legacy-MC eval at the terminal efforts.
+- Set 2 (wh8_wl4): no MC-BR polish artifact → no ★ markers, no polished row.
+- 3P polished value has two committed conventions: per-seed per-player polish
+  aggregation 24.75±0.02 / 15.84±0.01 (`polish_per_seed_all.json`, what F9
+  plots) vs phase0_verify symmetric-projection 24.68 / 15.82 (claimb CSV,
+  what the (a)-leg exploitability was measured on). Flagged, not reconciled.
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ACTIVE WORK (prepended 2026-07-16): One-Stage Ablation (raw vs MC-BR    -->
+<!-- polish), Phase 0 COMPLETE — STOPPED for owner review. Sections below    -->
+<!-- are unchanged prior state.                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SESSION_STATE — One-Stage Ablation: raw PPO vs MC-BR polish (Phase 0 done, 2026-07-16)
+
+**Branch:** `feat/multistage-phase0` · **HEAD:** `d3eeea9` · **Zero training, zero GPU.**
+Phase-0 note: [`docs/ONE_STAGE_ABLATION_PHASE0.md`](docs/ONE_STAGE_ABLATION_PHASE0.md).
+
+## Phase 0 result: 1 design-critical assumption FALSIFIED, everything else confirms
+
+1. **STOP-FLAG — `utils/mc_br_polish.py` is a damped FIXED-POINT solver, not a single BR step.**
+   Canonical `POL` (`tools/phase0_verify.py:30`): η=0.4, M=150k, **always 320 rounds**
+   (`min_rounds=999 > max_rounds=320` ⇒ early-stop never fires), Polyak avg over last 200,
+   **local ±10 BR window**. Proven twice — by code and by experiment: polish from starts
+   {raw, 0, 50} lands within **0.015 (q35) / 0.020 (q55)** of the same point ⇒ **init-independent**.
+   Landings 44.94 (q35) / 28.78 (q55) reproduce the committed 44.95 / 28.76. ✅
+   ⇒ The prompt's P4/P5 decomposition ("BR truncation + solver noise") is invalid, and P6/P7's
+   control predictions are **falsified for the polish arm** (P7's "q35 c=50 → 8.42 worse" is FALSE:
+   it lands at 44.93, error 0.52 = **better**). Damping neutralizes the q35 expansive regime:
+   iteration slope `0.6+0.4(−1.8519) = −0.141`, |·|<1 ⇒ contractive.
+   **Proposed replacement:** `err_pol = (e_fp − e*) + (e_pol − e_fp)` = sampled-fixed-point offset
+   (**−0.51 q35 / −0.14 q55**) + solver noise (**≈0.015–0.02**). Nearly all residual error is the
+   offset, not solver noise.
+2. **STOP-FLAG — legacy MC estimator consumes a policy object, not an effort**
+   (`run/run_two_players.py:266`; needs `agent.net/state_from_params/dist/dist.sample`).
+   Needs a degenerate point-policy adapter; running it on the raw *agent* measures a different
+   (stochastic-policy) quantity. `utils/mc_br_polish.exploitability_frozen_profile:211` is the
+   no-adapter alternative (used for P8 here).
+3. **STOP-FLAG — one-stage ε=0.03 is ABSOLUTE payoff units** (`run/run_two_players.py:1425` vs
+   `:356`) = **0.00857 /ΔW**; two-stage's `epsilon_over_dw=0.03` is **normalized**. Same numeral,
+   different units.
+
+## Built + validated (new files only; nothing existing modified)
+
+- `tools/one_stage_referee.py` — deterministic closed-form referee (zero MC). **21/21 tests pass**:
+  BR(e*)==e* exactly, **EXP(e*)=0.000e+00**, two independent BR paths agree to **≤6.5e-11**,
+  F_ξ==∫f_ξ. BR-map structure reproduced: slope_above **−1.8519** (q35, expansive) / −0.3568 (q55),
+  `q_expansive=√(ΔW/4k)=39.886`.
+- `tools/one_stage_ablation_phase0.py` — reconstruction + tripwire →
+  `results/one_stage_ablation/phase0_tripwire.json`.
+- `tools/one_stage_polish_probe.py` — init-independence probe →
+  `results/one_stage_ablation/phase0_polish_probe.json`.
+
+## Key numbers (all recomputed this session)
+
+- ê_raw 5-seed mean: **43.5798** (q35, sd 1.115) / **29.6543** (q55, sd 0.681); bit-check vs
+  `final.effort` exact to **7e-15**; matches committed CSV 43.58 / 29.65. ✅
+- Tripwire P1/P2/P3 **agree**: EXP_det(raw)=1.172e-3 / 3.962e-4; EXP_det(pol)=8.49e-5 / 1.19e-5;
+  ratio **13.81× / 33.17×**. P9 crossing confirmed (mechanism re-attributed to the fp offset).
+- **Legacy-MC floor ≈ 6.7e-3 (q35) / 7.2e-3 (q55)**, rep-sd 1.6e-3 / 3.4e-3 — an *upward-biased
+  level* (max over noisy grid), which **exceeds both arms' true EXP** ⇒ legacy MC cannot separate
+  the arms (C4 premise confirmed). Explains committed `final_exploit_max` ≈ 0.004–0.010 = the floor.
+- Per-seed polished values were **never persisted** ⇒ A2 needs a re-run: start = per-seed raw mean,
+  `seed=4000+si`, si=0..4 over seeds 42..46 (`tools/phase0_verify.py:117`). ≈19 min CPU in tmux.
+
+## NEXT — blocked on owner decisions (5 items in the note §7)
+
+Re-specify P4–P7 + decomposition; legacy-MC choice (adapter vs frozen-profile); P8 level-vs-SE;
+deliverable path (prose → `docs/` vs the prompt's `results/`); C1 sign-count framing given the
+polished arm is ~constant across seeds. **No Phase-1 work started.**
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ACTIVE WORK (prepended 2026-07-12): Two-Stage TEL-PPO Correctness Pass.  -->
+<!-- The project-wide state from the audit-remediation effort follows below,  -->
+<!-- unchanged. This section is scoped to the T=2 correctness pass only.      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SESSION_STATE — Two-Stage TEL-PPO Correctness Pass (ACTIVE, 2026-07-12)
+
+**Branch:** `feat/multistage-phase0` · **Discipline:** investigate → test →
+minimal fix → stop at phase boundary. Phase-0 diagnosis (approved):
+[`DIAGNOSIS.md`](DIAGNOSIS.md).
+
+## Approved decisions (owner, 2026-07-12)
+
+1. **Retrain persists full checkpoint + raw Beta (α,β).** Mean stays PRIMARY
+   reported extraction; mean-vs-mode kept as a DIAGNOSTIC (not dropped).
+2. **Broader certification scope accepted** — corrected semantics apply to
+   T=2,3,4,5. Distinguish:
+   - **re-certification only** (JSON already stores the learned ê_t(d) curve):
+     **T=3, T=4, T=5** (`effort_curves` present) + the T=2 `densecurve` run.
+   - **retrain required** (no policy object / no α,β saved): the **5-seed gated
+     T=2** runs (predate `effort_curves`; only ê_1(0)+81-pt ê_2+5-pt probe).
+     No run saved α,β or a `.pt`, so **mean-vs-mode (T8) needs a retrain for
+     every horizon**.
+3. **dReach UCB = deterministic discretization bound**, NOT a Monte-Carlo CI:
+   nested score-gap grid refinement, `dReach_UCB = dReach_fine +
+   |dReach_fine − dReach_coarse|`; certify iff `dReach_UCB/ΔW ≤ 0.03`.
+4. This state section created at Phase-1 start (prepended, non-destructive).
+
+## Patch / test sequence (Phase 1) — tests first: `tools/test_phase1_correctness.py`
+
+| Task | Change | Status |
+|---|---|---|
+| **T1** | `multi_stage_metrics.onpath_expected_stage2_effort()` (GL quad over Triangular[−2q,2q]); `RecoveryMetrics.e2_onpath_expected`; runner prints vs 46.6667 + per-d CF | ✅ tested |
+| **T2** | `dp_verifier.certify_refined()` deterministic nested-grid `dReach_UCB`; runner + gate certify on it | ✅ tested |
+| **T7** | runner: select ckpt on **coarse** grid (101), certify on **fine** (201)+UCB; persist `.pt` + α,β dump | ✅ smoke |
+| **T8** | `ppo_multi_stage.beta_mode_normalized()`, `beta_params()`, `effort_function(extraction=…)`, `save()/load()` | ✅ tested |
+| **T9** | SOC verification via `validate_two_stage_params` stage-2 global scan; param condition `q_soc=√(ΔW/8k)` | ✅ tested |
+
+### Evidence (2026-07-12)
+- **Unit tests:** `tools/test_phase1_correctness.py` — **ALL PASS** (15 checks:
+  T1 E[g2]=46.6667 & constant-policy identity; T2 UCB≥fine, deterministic, CF
+  certifies / const-high fails; T8 mode(3,3)=0.5, (2,5)=0.2, α≤1→mean fallback;
+  T9 q_soc=41.833, q=50 dev2≈5.5e-17, q=35 invalid).
+- **Runner smoke** (T=2, 10 upd, CPU, 4s — pipeline check, NOT a real run;
+  artifacts deleted): all wiring fires — `E[e2(d2)]` printed vs 46.6667; the
+  `dReach_UCB/DW` gate; coarse-select + `.pt` persistence; MEAN/MODE line; JSON
+  gains `provenance` / `beta_params` / `extraction_diagnostic` /
+  `e2_onpath_expected` / `dreach_{coarse,fine,ucb}_over_dw`. Real-world guard
+  check: at 10 upd stage-1 α≈0.71<1, so MODE correctly fell back to MEAN.
+
+### Commits (Phase 1, branch `feat/multistage-phase0`)
+- `26de10d` — test: add Phase-1 correctness tests (tests-first)
+- `77aaf9e` — feat: dReach-UCB gate, on-path E[e2], mean/mode, ckpt persistence
+- _(this docs commit)_ — docs: Phase-0 diagnosis + Phase-1 session state
+- T7 full-independence follow-up (selection grid 51; certify 101/201) is folded
+  into `26de10d`/`77aaf9e` above (grid-role constants + disjointness test).
+
+### Files changed (Phase 1 core)
+- `utils/multi_stage_metrics.py` — `onpath_expected_stage2_effort()` + field (additive)
+- `utils/dp_verifier.py` — `certify_refined()` (additive)
+- `agents/ppo_multi_stage.py` — `beta_mode_normalized()`, `beta_params()`,
+  `effort_function(extraction=…)` (default mean, unchanged behavior), `save()/load()`
+- `run/run_multi_stage.py` — coarse-select/fine-certify+UCB, `.pt`+α,β persistence,
+  provenance, E[ê_2] + mean/mode reporting
+- `tools/test_phase1_correctness.py` — new self-checking test (T1,T2,T8,T9)
+- `DIAGNOSIS.md` — Phase-0 deliverable (unchanged this phase)
+
+**Deferred to Phase 1b (reporting; coupled to Phase-2 regen):** T4 falsification
+table (EXP+dReach), T5 figures (stage-1 panel, `E[ê_2]` annotation, T=2 Δ_t),
+T6 rename of *existing* g→e* keys/labels. New T1/T2 outputs already use
+e-notation keys; the existing-key rename is held so figures/tables migrate in one
+coordinated step when Phase-2 regenerates the JSON schema.
+
+## Stopping point — PHASE 2 CORE TASKS COMPLETE (stopped at Phase 2 boundary)
+
+Phase 1 committed (`26de10d`/`77aaf9e`/`e7d278a`) + T7 full-independence folded in.
+Phase 2 tasks 1–4 done; **Phase-2 artifacts NOT yet committed** (awaiting review,
+mirroring the Phase-1 rhythm). Extended follow-ups (Phase 1b figures, T=3/4/5
+retrain) NOT started — stopped at the boundary per instruction.
+
+### Phase 2 — DONE (evidence)
+1. **Retrain 5-seed T=2** (tag `p2cert`, commit `e7d278a`, 2000×512, CPU ~15min/seed):
+   **5/5 certify**, dReach_UCB/DW mean 0.0064 (max 0.0072). E[ê_2(d_2)] mean 44.69
+   (target 46.667); ê_1(0) 46.38 (0.6% low); ê_2(0) 63.51 (μ*(κ) smoothing). Full
+   persistence (`.pt` + α,β + provenance + mean/mode). MEAN≈MODE (Δ~0.16%) → D6:
+   keep mean.
+2. **Re-certify T=3/4/5** (`tools/recertify_multistage.py`, extracted-policy from
+   effort curves): 5/5, 5/5, 4/5 — verdicts UNCHANGED under the UCB gate. Fine grid
+   reproduces original dReach exactly.
+3. **Reporting/tables** made schema-backward-compatible (`make_multistage_tables.py`);
+   regen on old data = byte-identical (verified).
+4. **`docs/two_stage_report.md`** + **`results/two_stage_results.json`** written;
+   every number from an actual run.
+
+### Commits (Phase 2, branch `feat/multistage-phase0`)
+- `9ca4f2d` — feat: extracted-policy re-certification tool (code)
+- `41d2889` — fix: table generator backward-compatible with dReach-UCB schema (code)
+- `462630c` — results: T=2 retrain 5 seeds (p2cert convergence JSONs)
+- `bc0dbfa` — results: T=3-5 re-certification + aggregated two_stage_results.json
+- _(this docs commit)_ — docs: corrected two-stage report + session state
+- `.pt` checkpoints under `results/multi_stage/checkpoints/` are gitignored (not committed).
+
+### NOT started (extended scope — needs approval)
+- Phase 1b: figure regen (T5), falsification table (T4), g→e existing-key rename (T6).
+- Optional T=3/4/5 retrain for full stochastic-policy re-eval + α,β at those horizons.
+
+---
+
 # SESSION_STATE.md — full project state for a fresh session (zero context loss)
 
 Last updated: 2026-06-12 · **Branch: `fix/audit-remediation`** · HEAD at time of writing:

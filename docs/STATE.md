@@ -1,6 +1,329 @@
 # Project state
 
-Last updated: 2026-07-09
+Last updated: 2026-08-03
+
+## r9_cert001 wave LAUNCHED: eps=0.01 / M=65536 adopted as THE config (2026-08-03)
+
+Owner decision after the sensitivity result: adopt the tightened certificate
+for the whole matrix (combined, no eps-vs-M decomposition for now; mechanism
+note: M-up alone provably does not improve accuracy -- r7 2P q35 showed M
+8192->16384 worsened err 1.87->2.75 via earlier stops; M-up is the ENABLER
+that keeps the verifier floor (~2.5e-3 at 65536) clear of the 0.01 gate).
+
+- PRE-FLIGHT FIX: run_two_players.py _sample_policy_efforts had the same
+  latent (M,1)x(M,) -> (M,M) broadcast as exploit_asymmetric (34 GB int64
+  winners at M=65536). Fixed with an M>16384 flatten branch; legacy M<=16384
+  path bit-identical. Unit test: 0.04 s/call at 65536 (50x faster than the
+  quadratic 16384 path); runner smoke rc=0 with exploit_config recording
+  eps=0.01/M=65536. 3P evaluator proven flat at 65536 by the sens wave;
+  dc/da use the exploit_asymmetric CPU branch.
+- WAVE: 65 runs, tags r9_cert001 / r9_fig7_no_stability
+  (run/r9_cert001_wave.sh, results/r9_cert001/). ~29 GPU-h ~= 4 h on 8 V100s.
+- REUSED (no rerun): 3P q55 + da q55 = r8_sens_eps001 (they ARE this config);
+  no_exploit arm = r7_fig7_no_exploit (verifier disabled -> eps/M never enter
+  training).
+- COMPLETE (2026-08-03): 65/65 rc=0, ~4 h; ALL 65 verification-triggered.
+  Referee re-run on true r9 profiles (first pass accidentally aggregated stale
+  r8 profiles for 3P/dc/da -- sed-generated tool kept r8_unified globs;
+  caught because old values reproduced verbatim; fixed with asserts):
+  EVERY seed passes eps=0.01 independently (max 5.0e-3 TEL-PPO / 7.3e-3 incl
+  no_stability); cells sit 1.5-6.4x above floor (was 1.4-26.5x). Matrix mean
+  |err| 1.33 -> 0.91; worst cell 3.42 -> 2.29; former problem cells all fixed
+  (3P q35 0.39, da q35 0.57, q55 pair 1.12/0.71); q45-type on-e* cells wobble
+  within the narrower band. 2P S1 q35 SD 1.78 -> 0.34.
+  BASELINE_OVERRIDES -> r9 (3P/da q55 = r8_sens_eps001); F2/F3/F4 + 1x3
+  regenerated (dotplot mean rel err 3.47%); table2_unified_config.md updated
+  (eps=0.01/M=65536, polish row retired). Deliverable:
+  docs/tables34_r9_final.md + figures (sent). Referee artifact:
+  results/one_stage_ablation/final_exploit_r9.json (n_calls incl 3P mask).
+
+## Figures F2/F3/F4 regenerated on r7/r8 with new labels (2026-08-03)
+
+Per docs/Figures&Tables080226.docx figure items:
+- BASELINE_OVERRIDES promoted to the unified generation (paper/generator/
+  config.py): two_players -> r7_state4, 3P/dc/da -> r8_unified. NOTE: gradient
+  (MC-FD) runs still carry r5 tags and are NOT promoted (method-agnostic
+  promote_preferred_ablations would mix PPO generations) -- figures/tables
+  needing a gradient baseline require a method-aware promotion first.
+- F2 convergence_main (+_1x3): MC-BR polished star REMOVED; the open circle
+  (now "Verified TEL-PPO Estimate") sits ON the stopping line (x = mean
+  stopped_at_update); vline renamed "Verification-triggered stopping update".
+- F3 exploitability_dynamics: y-label "Estimated Exploitability"; legend
+  "Stability pass" / "Verification-triggered stop".
+- F4 equilibrium_recovery_dotplot: title "Verified TEL-PPO Effort Estimate
+  Relative to Analytical Benchmarks"; "Seed-Level TEL-PPO outputs"; polished
+  final_override RETIRED in plots.py generate_all + __main__ -- the figure now
+  shows RAW verified landings (mean rel err 6.81%, honest raw picture; the
+  3P/da q55 certificate-width gaps are visible, matching Table 4).
+- Only these four figure files regenerated; ALL OTHER paper/figures/* remain
+  r5-based and stale until a full make_all after the gradient-promotion
+  decision. plots.py helpers load_polished_dotplot_final /
+  _polished_two_player_means retained but unused by the canonical paths.
+
+## Sensitivity wave (eps=0.01, M=65536) + quadratic-broadcast fix (2026-08-03)
+
+Owner red item: 3P q55 & da q55 rerun at eps=0.01, M=65536 (tag
+r8_sens_eps001; cmdlines = r8_unified + --exploit-eps 0.01 --exploit-M 65536).
+
+- First launch: all 5 da jobs crashed at the first exploit call; 3P unaffected.
+  ROOT CAUSE (latent since r5): utils/exploit_asymmetric.py samples policies
+  as (M,1) while BR candidates are (M,), so _payoff_player broadcasts to an
+  (M,M) matrix — ~1 GB/candidate at M=16384 (silently absorbed by 32 GB
+  V100s in ALL r5/r7/r8 da+dc training verifier calls), 17 GB at M=65536 →
+  OOM surfacing as an NVML assert on this broken-NVML host.
+- FIX: eval_on_cpu branch for M>16384 in eval_exploitability_asymmetric +
+  flat-(M,) CPU sampler — linear memory, 0.3 s/eval (~50x faster than the
+  quadratic GPU path), deterministic; M<=16384 legacy path untouched
+  bit-for-bit (r7/r8 reproducibility preserved).
+- PAPER FOOTNOTE: in r5-r8, the da/dc TRAINING verifier's BR-candidate means
+  were effectively over M^2 sample pairs while u_policy used M pairs
+  (unbiased either way; asymmetric sample sizes; independent final referee
+  in numpy unaffected).
+- COMPLETE (2026-08-03): all 10 runs verification-triggered (streak=5).
+  Certificate-width mechanism confirmed: err 3.22->1.12 (3P q55) and
+  3.42->0.71 (da q55); independent referee (17.1->3.1)e-3 and (8.8->1.3)e-3
+  (da lands AT the evaluator floor 0.85e-3); cost ~30-35 extra updates; SD
+  tightens in both cells. Sensitivity section appended to
+  docs/tables34_raw_r7r8.md (sent to owner).
+
+## Independent final exploitability on r7/r8 raw profiles — COMPLETE (2026-08-03)
+
+Owner review docs/Figures&Tables080226.docx removes MC-BR polishing from the
+framework; owner fixed the generation to r7 (2P) + r8_unified (3P/dc/da) RAW.
+New `tools/final_exploit_r7r8.py` evaluated all 75 reported raw profiles under
+the independent referee (M=200,000, grid 0.25, seeds 700000+q*1000+si*7) ->
+`results/one_stage_ablation/final_exploit_r7r8.json`; e* floor reused from
+exploit_noise_floor.json.
+
+Key numbers: every seed passes eps=0.03 under the referee (max 0.0218, 3P
+q55); raw profiles sit 1.4x-26.5x above the floor (polished used to sit AT
+it); the two wide-certificate cells (3P/da q55) read 17.1/8.8 e-3.
+Deliverable sent: docs/tables34_raw_r7r8.md (new-format Tables 3 & 4, incl.
+the Number-of-Exploitability-Calls column; 3P n_calls counted via the
+exploitability_is_valid mask).
+
+Remaining red items: sensitivity runs (3P q55 & da q55, eps=0.01 M=65536,
+20 runs, NOT launched); figure regen per new labels (F2 no-star + circle on
+the line, F3/F4 relabels); Table 1/2 text cells to fill in the docx.
+## r8_unified + dual-endpoint polish + MC-BR-only — ALL COMPLETE (2026-08-03)
+
+Owner directive (one configuration, no per-scenario selection) fully executed:
+
+- **r8_unified wave** (30 runs, 0 failures): 3P/dc/da under the unified config
+  (mean×conc head, entropy 0, no floor, M=16384, 4-dim state). ALL runs are
+  true verification stops (streak=5). Finding: the eps=0.03 certificate is wide
+  in effort space where payoffs are flat (band ~ sqrt(0.03/k)); q55 raw errs hit
+  3.2-3.4 INSIDE the certificate band -- the old floors had been compensating.
+  Realized config is constant everywhere (conc=100, var=0): every scenario
+  verifies before the 200-update ramp, so the late schedule is inert.
+- **Dual-endpoint polish** (stages A+B, 90 rows,
+  results/one_stage_ablation/polish_per_seed_r7.json): pre-registered
+  prediction CONFIRMED -- polished column collapses across all Table-3 arms
+  (spread 0.001-0.012); q55 blowups polish to 0.07/0.00. Set-1 polished values
+  match r5 to 0.01.
+- **MC-BR-only baseline** (81 rows, mc_br_only.json): polish from ANY start
+  (50 or ladder 10-90) reproduces the polished column exactly, incl. the
+  asymmetric dc NE from a symmetric start. "Polished Err." = the instrument's
+  own bias. TEL-PPO's evidence = raw column + certified stopping + policy
+  object (see docs/ablation_narrative_preregistered.md, branch A).
+- **Deliverables**: docs/r7_unified_2p_results.md (final Table 3 five-row
+  dual-endpoint + Table 4 all-scenario, sent to owner),
+  docs/table2_unified_config.md (unified Table 2 + realized values + data
+  registry), docs/ablation_narrative_preregistered.md.
+- **Open methodology decision for owner**: tighten eps uniformly (needs
+  M~65536) vs uniform burn-in vs clean-rule+polish (option 3, now fully
+  evidenced). Also pending: independent M=200000 final exploitability check
+  for r7/r8; generator promotion; code commits (3-way split, snapshots in
+  results/{r7_state4,r8_unified}/code_state.diff); r7smoke cleanup.
+
+## r7_state4 wave: 4-dim state + unified verifier M — COMPLETE (2026-08-01)
+
+Wave finished 2026-08-01 16:45 UTC: 23.1 h, 100/100 jobs, rc=0 everywhere.
+**Red item 2 verdict: no systematic accuracy degradation under the 4-dim state**
+(10 of 14 baseline cells improved; worst move +0.88 ≈ 1.1 SE at 2P S1 q35, likely
+an M=16384 earlier-stop effect, not a state effect). da learned symmetry:
+|e1−e2| ≈ cross-seed SD (1–2% of e*). Full per-cell table + mechanisms:
+`docs/tasks/r7-state4-wave/STATE.md`. Polish + unified tables pending
+(polish tool needs r7 output path first — it would overwrite the r5 rows).
+
+Owner request (docs/Figures&Tables073026.docx red items 1/3/4): state becomes
+`s_i = [q/60, k_i/1e-3, Δw/10, (l_i − l̄_{−i})/10]` for ALL scenarios; ablation
+arms redone; training verifier unified at M=16384 (two-player was the only 8192,
+`config/one_stage_two_players.py:110`).
+
+- **Code**: `state_dim=4` in both agents + all four runners (3P's hardcoded
+  `state_dim=3` at run_three_players.py:663 included); het-ability now feeds
+  per-player states (l_gap ±5 → 4th comp ±0.5) to the shared agent, stores
+  per-player transitions, and reports `effort1`/`effort2` in history/final —
+  effort symmetry is now a LEARNED outcome, not architectural.
+  `utils/exploit_asymmetric.py` samples each player's policy at its own l_gap
+  (computed from l1/l2 internally; 0 for dc/symmetric). MC adapters + 3
+  diagnostic tools updated to 4-dim. All uncommitted at launch; snapshot in
+  `results/r7_state4/code_state.{txt,diff}`; suggested commit split in
+  `docs/tasks/r7-state4-wave/STATE.md`.
+- **Verification**: py_compile + CPU sanity + 5-path GPU smoke (tag `r7smoke*`,
+  seed 999, files left in results/*/convergence/) all passed; da smoke shows
+  per-player means (|e1−e2| ≈ 0.3–0.5 after 30 updates); 2P smoke confirms
+  exploit_M=16384.
+- **Wave**: 100 runs (2P Set1/Set2/no_stab/no_exploit ×15 each, 3P ×10, dc ×10,
+  da std ×10, da v2 ×10; seeds 42–46), cmdlines byte-identical to r5 templates
+  except tags `r7_state4[_std|_v2]` / `r7_fig7_no_{stability,exploit}`.
+  ~182 GPU-h ≈ 24 h. tmux `r7w_gpu0..7`, flock queue; status in
+  `results/r7_state4/manifest.csv`, logs in `results/r7_state4/logs/`.
+  **r5 results untouched** — they are the 3-dim comparison arm for red item 2
+  (fall back to 3-dim everywhere but het-ability if accuracy degrades).
+- **Next after completion**: per-cell readout vs r5 (|mean−e*|, cross-seed SD,
+  stop updates; da |e1−e2|); owner decision on red item 2; MC-BR polish for
+  baselines AND both fig7 arms (dual-endpoint Table 3); rerun
+  `tools/unified_exploitability_tables.py`. Task folder:
+  `docs/tasks/r7-state4-wave/`.
+
+## MISSING-cell evaluations + final T-A/T-C (2026-07-24)
+
+Post-hoc follow-up (zero training): filled all three MISSING items from the
+2026-07-23 session. (1) 2P q45 post-polish referee exploitability = 2.7e-5
+(`results/one_stage_ablation/ablation_results_q45.json`); (2) no_exploit-arm
+terminal exploitability via the shipped MC BR search on reconstructed
+stochastic terminal policies = 0.0109/0.0086/0.0044 for q35/45/55
+(`no_exploit_terminal_exploitability.json`; new `BetaPolicyAgent` adapter);
+(3) Set-2 (8,4) MC-BR polish, 15 profiles = 47.045/36.751/30.127
+(`polish_per_seed_set2.json`) with ★ markers added to `convergence_main` only.
+(4) 3P per-seed (a)-leg re-measured under convention C2 — reproduces the
+committed 0.0008/0.0007 exactly; the phase0 log's (a)-leg was already on the
+per-seed profiles (its "24.68" is player-1's mean, not a separate projection).
+Conventions locked: C1 err_of_mean for paper tables (4 columns appended to
+`one_stage_claimb_summary.csv`, existing cells byte-identical, README note);
+C2 per-seed player-mean 3P polish. Details: SESSION_STATE.md (2026-07-24).
+
+## Figure regen (F2/F6/F9) + table extraction for the one-stage pipeline (2026-07-23)
+
+**What was done.** Plotting + data-extraction session (zero training):
+- `paper/figures/convergence_main.{png,pdf}` — gray line re-semantized to the
+  FIRST-PASS verification update (was streak completion); new ○ raw / ★ MC-BR
+  polished endpoint markers; legend renamed ("Verification update", "Raw
+  estimate", "MC-BR polished estimate"). NEW file
+  `paper/figures/convergence_main_1x3.{png,pdf}` (Set-1 row only) via
+  `tools/regen_convergence_main_1x3.py`.
+- `paper/figures/exploitability_dynamics.{png,pdf}` — y-label "Raw profile
+  exploitability" (data source verified = in-training raw-profile MC
+  exploitability), 4-entry compact legend.
+- `paper/figures/equilibrium_recovery_dotplot.{png,pdf}` — new title/y-label,
+  visible seed markers, "Low-cost/High-cost agent" labels (mapping verified),
+  black het-cost theory lines.
+- Tables T-A (ablation), T-B (as-built config), T-C (merged results) extracted
+  from artifacts and delivered in the session reply; verified by a 6-agent
+  adversarial pass.
+
+**Key discovery.** The canonical r5_sampled PPO baselines (2P/3P/dc) trained
+under the **theory-align-v2 override**: entropy 0, LR 5e-5→2e-5, clip
+0.20→0.15, 1 epoch/update, `ActorCriticMeanConc` net. `docs/ONE_STAGE_ASBUILT.md`
+§Q4's optimizer table is wrong for these runs (flagged there and in
+SESSION_STATE.md; doc not edited). da baseline (`r5_sampled_std`) = standard arm.
+
+**Known issues / next steps.** (i) 2P q45 post-polish exploitability MISSING —
+extend the phase-1 referee to q45. (ii) `no_exploit` arm has no exploitability
+artifact (by design) — post-hoc eval would fill it. (iii) plots.py +
+__main__.py edits uncommitted; split code vs artifact commits per repo rules.
+Full detail: SESSION_STATE.md (2026-07-23 section).
+
+## Equilibrium-recovery dot plot (Figure 6): rebuilt from Claim-B polished values (2026-07-20)
+
+**What was done.** Regenerated `paper/figures/equilibrium_recovery_dotplot.{png,pdf}`
+(and backing `paper/data/equilibrium_recovery_dotplot.csv`) so the markers show the
+Claim-B MC-BR **polished** efforts (which land on e*) instead of the previous **raw**
+PPO landings (which sat below e*). The drawing style is unchanged.
+
+- `tools/one_stage_polish_per_seed.py` — reproduces `phase0_verify.py`'s per-seed
+  polish (same POL config, reading, start point, per-cell seed policy) and PERSISTS
+  the per-seed polished efforts to `results/one_stage_ablation/polish_per_seed_all.json`
+  (45 rows: 2P q35/45/55, 3P/dc/da q35/55, 5 seeds each). CPU-only, ~108 min.
+  Cross-seed means reproduce `results/phase0_verify_20260701_1941.log` exactly
+  (2P q35→44.95, 3P q35→24.68, dc q35→38.04/27.66, da q35→46.45, …). 2P q45 has no
+  log reference (outside the Claim-B set) but uses identical machinery.
+- `paper/generator/plots.py::plot_equilibrium_recovery_dotplot` — added a
+  backward-compatible `final_override` param that swaps the data source only; the
+  drawing logic is untouched.
+- `tools/regen_equilibrium_recovery_dotplot.py` — thin wrapper for a one-off regen.
+  Mean relative error on the new figure = 0.47%.
+
+**Wired into the generator.** `plots.load_polished_dotplot_final()` reads
+`polish_per_seed_all.json` and maps it to the plot's `final_override` columns.
+`generate_all_figures` (→ `make_all`) and `python -m paper.generator plot
+equilibrium_recovery_dotplot` now use it by default, so the canonical figure is the
+polished one. If the polished JSON is absent, both fall back to the raw PPO landings
+with a printed note (no crash). The regen tool now reuses the same loader.
+
+## Ablation figure (Figure 7): full rebuild from Claim-B data (2026-07-20)
+
+- Rewrote `plot_ablation_comparison` in `paper/generator/plots.py` and regenerated
+  `paper/figures/ablation_comparison.{png,pdf}` + `paper/data/ablation_comparison.csv`.
+  Implements the phase08 spec (`docs/tasks/paper-figures-tables-revision/phase08.md`)
+  items a–h plus the owner's additions i (summary table) and j (no-polish comparison).
+- **Root cause fixed**: the old figure rendered **only TEL-PPO** — the ablation arms
+  live on disk as `r5_fig7_no_stability` / `r5_fig7_no_exploit`, which never matched the
+  hardcoded filter keys `no_cheap_gate` / `no_exploitability`. Phase08 was marked
+  "complete" but the arms were silently absent. New code remaps disk tags → canonical
+  keys (`_ABL_DISK_TO_CANON`).
+- **Design** (owner-approved draft): 3 stacked q-panels (q = 35/45/55) with a **broken
+  x-axis** — left = convergence detail (0→0.55×10⁶), right = the non-terminating
+  `no_exploit` tail (→6.25×10⁶). Per-seed traces + 95% CI bands, prominent red theory
+  line (lw 3.0), TEL-PPO thick / ablations thin, unified y-axis, x in ×10⁶, titles
+  without `.0`. TEL-PPO endpoint carries a **no-polish (○ raw) vs MC-BR-polished
+  (★ Claim-B)** fork. Bottom **summary table**: terminal |ē−e*|, final exploitability,
+  NC (non-convergence) rate, time-to-verification per arm.
+- **q note**: data exists at q = 35/**45**/55 (not 40 as the phase08 text says — no q=40
+  runs exist anywhere). Owner confirmed 45. The reshared reference image (q=25/40/55,
+  effort ~50–100) is a *style* template from a different/older parameterization, not data.
+- **Key numbers** (all from `results/`): terminal |ē−e*| TEL-PPO polished 0.51/0.11/0.17,
+  no_stability 2.57/0.24/1.30, no_exploit 0.85/3.31/0.58; NC rate 0/0/100%;
+  `no_exploit` runs to 1500 updates (never verifies) and at q=45 drifts *away* from e*
+  (35.5→32.0). Polished landings from `results/one_stage_ablation/ablation_results.json`
+  (q35 44.95, q55 28.76; q45 not run → ★ omitted, table shows raw).
+- **Not committed** (awaiting review). NOTE per repo commit rules: this bundles a **code
+  edit** (`plots.py`) + **figure/data regen** — split into two commits. Also `plots.py`
+  already carried unrelated uncommitted effort_drift/kl_dynamics edits from prior work.
+
+## Convergence-main figure: Claim-B refresh (2026-07-20)
+
+- Regenerated `paper/figures/convergence_main.{png,pdf}` (2×3 grid, weight
+  variant × q) from the 5-seed `r5_sampled` two-player baseline runs — the
+  **Claim-B canonical baseline** (same runs behind
+  `results/one_stage_claimb_summary.csv`). Style/layout otherwise unchanged.
+- Changes to `plot_convergence_main` in `paper/generator/plots.py`:
+  1. **Vertical dashed convergence line** now marks the *verified* convergence
+     update (`get_verified_convergence_step` → mean `stopped_at_update` over the
+     exploitability-verified seeds), i.e. the first update satisfying the
+     criterion. Matches Claim-B "Conv. Update (verified)" exactly: two-player
+     baseline q35→55, q55→87 (was the old `get_convergence_step` effort-δ path,
+     which never fired here because `min_steps=100` > run length).
+  2. **e\* value annotated** on each panel (red `$e^*=…$` at the right edge of
+     the theory line).
+  3. **X-axis unified** across all six panels and relabeled **Training Updates**
+     (tick = step/4096). Range extends to the longest (high-noise q=55) baseline
+     run so the extra updates high noise needs are visible; x_max restricted to
+     the baseline ablation so long `eps_*/pat_*` sweep arms don't stretch it.
+  4. **Legend** moved out of the top-left panel to a single figure-level legend
+     at the top-right, outside the grid.
+- Internal plotting stays in step space, so `paper/data/convergence_main.csv` is
+  unchanged. Not committed (awaiting review). NOTE: code edit + figure regen —
+  split into two commits if committing (per repo commit rules).
+
+## KL-dynamics figure: unified x-axis (2026-07-20)
+
+- Regenerated `paper/figures/kl_dynamics.{png,pdf}` ("KL Divergence across Noise
+  Levels") with a **shared training-step x-axis** across the three q panels
+  (all 0→442368, the global max; each curve still ends at its own data extent).
+- Data source confirmed already correct: the figure draws from the 5-seed
+  `r5_sampled` two-player baseline runs — the **Claim-B canonical baseline**, the
+  same runs the claim-b summary (`results/one_stage_claimb_summary.csv`) is built
+  from. `paper/data/kl_dynamics.csv` is **byte-identical** after regen (no data
+  change) — only the axis limits changed.
+- Code: `plot_kl_dynamics` in `paper/generator/plots.py` now computes
+  `global_step_max` over positive-KL rows and applies `ax.set_xlim(0, global_step_max)`
+  to every panel. All other style (colors, fonts, layout, y-axis, legend,
+  threshold/median/band) unchanged. Regen via `python -m paper.generator plot kl_dynamics`.
+- Not committed (awaiting review). NOTE: this bundles a code edit + a figure
+  regen — split into two commits if committing (per repo commit rules).
 
 ## Multi-stage task launched: theory audit + q_crit config validation (2026-07-09)
 
@@ -333,3 +656,100 @@ All attributes match 1:1. The ramp code is an exact copy.
 3. Two-player Set 2 via CLI flags: `--k 0.0006 --w_h 8 --w_l 4`
 4. Regenerate paper artifacts after results are collected
 5. Build two-stage runner (separate task)
+
+## Figure fix: e* label placement in convergence_main (2026-07-29)
+
+Review comment on `docs/Figures&Tables07272026.docx` (Figure 2): the `e* = 28.93`
+label in the q=55 panel sat on top of the agent trajectories.
+
+Cause: `plot_convergence_main` pinned the label to the right edge just above the
+theory line. All panels share the longest run's x-limit, so that slot is only
+empty for panels whose run ends well short of the right margin. q=55 IS the
+longest run and is still descending toward e* at the margin, so its label landed
+on the curve; q=35/45 end early enough that their right edge is blank.
+
+Fix (`paper/generator/plots.py`): the annotation moved after the trajectories are
+drawn and now picks its slot from the panel's curve extent — panels reaching
+>= 85% of the global x-max put the label below the theory line at mid-panel
+(the band under e* is free, since curves approach the equilibrium from above),
+all others keep the original right-edge slot.
+
+Regenerated in place: `convergence_main.{png,pdf}`, `convergence_main_1x3.{png,pdf}`.
+Only the two q=55 panels changed; the other four are pixel-identical in layout.
+
+## Figure fix: dotplot legend order (2026-07-29)
+
+Review comment on the same doc: swap "Seed-level estimates" and "High-cost
+agent" in the `equilibrium_recovery_dotplot` legend.
+
+The handles were appended in construction order and matplotlib fills legend
+columns top-to-bottom, so with ncol=3 the low-/high-cost pair was split across
+both the row and column axes. `plot_equilibrium_recovery_dotplot` now sorts the
+handles through an explicit `_legend_order` before `ax.legend`, giving
+
+    row 1: Theory e*        | Across-seed mean | Seed-level estimates
+    row 2: High-cost agent  | Low-cost agent
+
+Regenerated in place: `equilibrium_recovery_dotplot.{png,pdf}` (via
+`load_polished_dotplot_final()`, the same Claim-B polished override `make_all`
+uses — not the raw-landing fallback). Legend only; no marker or datum moved.
+
+### Known issues / next steps
+1. Estimator unification (Tables 3 & 4) is the blocking item — see the review
+   doc. `det`/`in`/`mc`/`a` are mixed within single columns; the ask is to move
+   everything to independent MC with fresh draws
+   (`utils/mc_br_polish.py:211 exploitability_frozen_profile`). Expect TEL-PPO's
+   exploitability to rise from ~1e-5 into the MC noise floor (~1e-3), which will
+   shrink or erase the "two orders of magnitude" claim.
+2. Calibration check not yet run: feed the analytic e* to
+   `exploitability_frozen_profile` (true EXP = 0) to measure the estimator's
+   noise floor before rewriting the tables.
+3. Remaining review comments unaddressed: Table 3 column split (Final Effort
+   mean±SD vs separate Absolute Bias), Verification Update ± SD, Table 2
+   metadata/entropy confirmations, Table 4 exploitability formatting as mean±SD.
+   Both figure comments (q=55 e* label, dotplot legend order) are done.
+
+## Estimator unification for Tables 3 & 4 (2026-07-29)
+
+Acted on the review's request to drop the mixed det/in/mc/a reporting and use one
+independent MC estimator everywhere.
+
+New tools (both CPU-only, run in tmux):
+- `tools/exploit_noise_floor.py` -> `results/one_stage_ablation/exploit_noise_floor.json`
+  Evaluates `exploitability_frozen_profile` at the analytic e*, where true EXP is
+  exactly 0, so the return value is the estimator's own error. Also sweeps M on
+  the two-player q=35 cell.
+- `tools/unified_exploitability_tables.py` -> `results/one_stage_ablation/unified_exploitability_tables.json`
+  Recomputes every Table 3 and Table 4 row per seed under that one estimator
+  (M=200000, grid 0.25, fresh seeds, CRN shared across the four Table-3 arms).
+
+Clean tables written to `docs/tables34_unified.md`.
+
+### Findings
+
+- Noise floor is 2.8e-04 to 1.5e-03 across cells at M=200000, and decays like
+  1/sqrt(M): M=800000 only reaches ~7.8e-04. The old TEL-PPO numbers
+  (8.6e-05 / 2.8e-05 / 1.2e-05, deterministic referee) sit 5-70x BELOW the floor,
+  so they were never comparable to the MC rows they were tabulated against.
+- Under the unified estimator TEL-PPO reads 1.09e-03 / 1.02e-03 / 0.87e-03,
+  i.e. 0.90x / 1.37x / 1.44x the floor. The "two orders of magnitude" claim does
+  not survive; TEL-PPO is at the floor, which is a ceiling on what the instrument
+  can resolve, not a measured gap.
+- Arm ordering survives (monotone at q=35 and q=55) but separations are 2-8x with
+  comparable per-seed SDs.
+- The effort columns are estimator-independent and DO separate the arms:
+  TEL-PPO's cross-seed SD is 0.02-0.03 vs 0.60-3.53 for every ablation (40-100x
+  tighter). That is what the ablation actually establishes.
+- Corrected a reporting error in the old Table 3: the "Final Effort" cell for
+  `w/o stability screening` and `w/o exploitability verification` held the BIAS
+  (2.57/0.24/1.30 and 0.85/3.31/0.58), not the effort. Actual efforts are
+  42.88/35.11/30.22 and 44.60/32.05/29.51.
+- Added Verification Update mean +/- SD (was mean only); the
+  `w/o exploitability verification` arm has none - all 5 seeds hit the
+  1500-update budget (`stop_reason = max_updates`).
+
+### Next steps
+1. Decide how the paper frames the ablation now that exploitability is at the
+   floor - recommend leading with the effort-SD result.
+2. Remaining review items: Table 2 metadata/entropy corrections (see
+   `docs/table2_metadata_audit.md`), Table 2 row splits for het-ability.

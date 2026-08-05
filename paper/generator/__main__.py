@@ -48,6 +48,7 @@ from .plots import (
     plot_distance_to_equilibrium,
     plot_effort_drift,
     plot_equilibrium_recovery_dotplot,
+    load_polished_dotplot_final,
 )
 from .tables import (
     generate_all_tables,
@@ -207,7 +208,7 @@ def cmd_plot(args: argparse.Namespace) -> int:
     os.makedirs(output_dir, exist_ok=True)
     
     plot_funcs = {
-        "convergence_main": lambda: plot_convergence_main(df, q_values, os.path.join(output_dir, "convergence_main.png")),
+        "convergence_main": lambda: plot_convergence_main(df, q_values, output_path=os.path.join(output_dir, "convergence_main.png")),
         "kl_dynamics": lambda: plot_kl_dynamics(df, q_values, os.path.join(output_dir, "kl_dynamics.png")),
         "exploitability_dynamics": lambda: plot_exploitability_dynamics(df, q_values, os.path.join(output_dir, "exploitability_dynamics.png")),
         "beta_evolution": lambda: plot_beta_evolution(df, q_values, os.path.join(output_dir, "beta_evolution.png")),

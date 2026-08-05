@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import time
 from dataclasses import asdict
@@ -42,9 +43,33 @@ from config.multi_stage_two_players import config as base_config  # noqa: E402
 from config.multi_stage_two_players import validate as validate_config  # noqa: E402
 from dataclasses import asdict as _asdict  # noqa: E402
 from envs.multi_stage_env import MultiStageEnv  # noqa: E402
-from utils.dp_verifier import verify, verify_grid_refinement  # noqa: E402
-from utils.multi_stage_metrics import recovery_metrics  # noqa: E402
+from utils.dp_verifier import certify_refined, verify  # noqa: E402
+from utils.multi_stage_metrics import (  # noqa: E402
+    onpath_expected_stage2_effort,
+    recovery_metrics,
+)
 from utils.theory_multistage import g1_two_stage, g2_two_stage  # noqa: E402
+
+
+def _git_commit() -> str:
+    """Return the current short git commit hash for run provenance ('unknown' on failure)."""
+    try:
+        root = str(Path(__file__).resolve().parent.parent)
+        out = subprocess.check_output(["git", "-C", root, "rev-parse", "--short", "HEAD"],
+                                      stderr=subprocess.DEVNULL)
+        return out.decode().strip()
+    except Exception:
+        return "unknown"
+
+
+# Grid roles into cfg["verifier"]["d_grid_sizes"] (default [51, 101, 201]).
+# T7 full independence: best-checkpoint SELECTION uses a grid DISJOINT from the
+# two CERTIFICATION grids, so selection can never peek at the certifier — not
+# even through the discretization UCB's coarse term. Certification refinement
+# uses CERT_COARSE (101) and CERT_FINE (201); the UCB is fine + |fine - coarse|.
+SELECTION_GRID_INDEX = 0     # coarsest grid (51), reserved for selection only
+CERT_COARSE_GRID_INDEX = 1   # 101, certification refinement coarse leg
+CERT_FINE_GRID_INDEX = -1    # 201, certification fine grid + reported curves
 
 
 def collect_rollout(env: MultiStageEnv, agent: MultiStagePPO, n_episodes: int) -> int:
@@ -97,14 +122,20 @@ def collect_rollout(env: MultiStageEnv, agent: MultiStagePPO, n_episodes: int) -
     return n_stored
 
 
-def evaluate(agent: MultiStagePPO, cfg: Dict, q: float, T: int) -> Dict:
-    """Run the DP verifier on the current learned policy.
+def evaluate(agent: MultiStagePPO, cfg: Dict, q: float, T: int, d_grid_size: int) -> Dict:
+    """Run the DP verifier on the current learned policy (checkpoint selection).
+
+    Uses the COARSE score-gap grid for the in-loop selection signal so that
+    best-checkpoint selection is on a different grid than the final fine-grid
+    certification (removes the D5 "selection peeks at the certification
+    verifier" gap).
 
     Args:
         agent: The trained agent.
         cfg: Config dict (prizes, cost, bounds, verifier settings).
         q: Noise half-width.
         T: Horizon.
+        d_grid_size: Score-gap grid size for this (selection) evaluation.
 
     Returns:
         Verifier summary (EXP, EXP/DW, dReach, dFull, on-path, certified).
@@ -115,7 +146,7 @@ def evaluate(agent: MultiStagePPO, cfg: Dict, q: float, T: int) -> Dict:
     r = verify(
         policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=q, T=T,
         e_bar=cfg["effort_range"][1],
-        d_grid_size=cfg["verifier"]["d_grid_sizes"][-1],
+        d_grid_size=d_grid_size,
         e_grid_size=cfg["verifier"]["e_grid_size"],
         epsilon_over_dw=cfg["verifier"]["epsilon_over_dw"],
     )
@@ -259,7 +290,10 @@ def main() -> int:
         diag = agent.update()
 
         if u % args.eval_every == 0 or u == args.updates:
-            ev = evaluate(agent, cfg, args.q, args.T)
+            # Selection on the coarsest grid (51), DISJOINT from the 101/201
+            # certification grids -> final certification stays independent.
+            ev = evaluate(agent, cfg, args.q, args.T,
+                          d_grid_size=cfg["verifier"]["d_grid_sizes"][SELECTION_GRID_INDEX])
             rec = {"update": u, **diag, **{f"eval_{k}": v for k, v in ev.items()}}
             history.append(rec)
             if ev["delta_sum_reachable"] < best["delta_sum_reachable"]:
@@ -276,30 +310,41 @@ def main() -> int:
 
     elapsed = time.time() - t_start
 
-    # Pre-registered checkpoint rule: select the lowest-validation-dReach
-    # checkpoint (NOT the final policy, NOT a visual fit).
+    # Checkpoint rule (D5 fix): select the lowest-dReach checkpoint on the
+    # COARSE grid during training; certify below on the FINE grid + UCB, so
+    # selection and certification never share the same verifier grid.
     if best["state_dict"] is not None:
         agent.net.load_state_dict(best["state_dict"])
         print(f"[ckpt] restored best checkpoint @u{best['update']} "
-              f"(dReach={best['delta_sum_reachable']:.4f})")
+              f"(coarse dReach={best['delta_sum_reachable']:.4f})")
 
-    # Final certification at the finest grid; capture the full result for curves.
     def _policy(t, d):
         return agent.effort_function(t, d, T=args.T, q=args.q)
 
-    vres = verify(
+    # Final certification: deterministic nested-grid dReach with a discretization
+    # UCB = dReach_fine + |dReach_fine - dReach_coarse| (NOT a Monte-Carlo CI).
+    # Certification grids (101/201) are disjoint from the selection grid (51).
+    dgs = cfg["verifier"]["d_grid_sizes"]
+    d_cert_coarse = dgs[CERT_COARSE_GRID_INDEX]
+    d_cert_fine = dgs[CERT_FINE_GRID_INDEX]
+    dw = cfg["w_h"] - cfg["w_l"]
+    cert = certify_refined(
         _policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=args.q, T=args.T,
-        e_bar=cfg["effort_range"][1],
-        d_grid_size=cfg["verifier"]["d_grid_sizes"][-1],
+        e_bar=cfg["effort_range"][1], epsilon_over_dw=cfg["verifier"]["epsilon_over_dw"],
+        d_grid_coarse=d_cert_coarse, d_grid_fine=d_cert_fine,
         e_grid_size=cfg["verifier"]["e_grid_size"],
-        epsilon_over_dw=cfg["verifier"]["epsilon_over_dw"],
     )
+    vres = cert["result_fine"]
     final_eval = {
         "exp": vres.exp, "exp_over_dw": vres.exp_over_dw,
+        "exp_ucb": cert["exp_ucb"], "exp_ucb_over_dw": cert["exp_ucb_over_dw"],
         "delta_sum_reachable": vres.delta_sum_reachable,
         "delta_sum_full": vres.delta_sum_full,
         "delta_onpath_sum": vres.delta_onpath_sum,
-        "certified": bool(vres.certified),
+        "dreach_coarse_over_dw": cert["dreach_coarse_over_dw"],
+        "dreach_fine_over_dw": cert["dreach_fine_over_dw"],
+        "dreach_ucb_over_dw": cert["dreach_ucb_over_dw"],
+        "certified": bool(cert["certified"]),  # gated on dReach_UCB/DW <= eps
         "v_e_root": vres.v_e_root, "v_br_root": vres.v_br_root,
         "worst_delta_by_stage": vres.worst_delta_by_stage,
         "reachable_delta_by_stage": vres.reachable_delta_by_stage,
@@ -308,23 +353,37 @@ def main() -> int:
     curves = effort_curves(agent, vres, args.q, args.T)
     onpath = onpath_summary(agent, vres, args.q, args.T, cfg["k"])
 
-    # EXP^UCB via grid refinement (deterministic verifier: Richardson residual).
-
-    ref = verify_grid_refinement(
-        _policy, w_h=cfg["w_h"], w_l=cfg["w_l"], k=cfg["k"], q=args.q, T=args.T,
-        e_bar=cfg["effort_range"][1], d_grid_sizes=cfg["verifier"]["d_grid_sizes"],
-    )
-    exp_seq = ref["exp"]
-    exp_ucb = exp_seq[-1] + (abs(exp_seq[-1] - exp_seq[-2]) if len(exp_seq) >= 2 else 0.0)
-    dw = cfg["w_h"] - cfg["w_l"]
     grid_refinement = {
-        "d_grid_sizes": ref["d_grid_sizes"],
-        "exp": exp_seq,
-        "delta_sum_reachable": ref["delta_sum_reachable"],
-        "exp_richardson": ref["exp_richardson"],
-        "exp_ucb": exp_ucb,
-        "exp_ucb_over_dw": exp_ucb / dw,
+        "selection_grid": dgs[SELECTION_GRID_INDEX],
+        "d_grid_coarse": d_cert_coarse, "d_grid_fine": d_cert_fine,
+        "dreach_coarse": cert["dreach_coarse"], "dreach_fine": cert["dreach_fine"],
+        "dreach_ucb": cert["dreach_ucb"], "dreach_ucb_over_dw": cert["dreach_ucb_over_dw"],
+        "exp_fine": cert["exp_fine"], "exp_ucb": cert["exp_ucb"],
+        "exp_ucb_over_dw": cert["exp_ucb_over_dw"],
     }
+
+    # Mean-vs-mode extraction diagnostic (T8; MEAN stays primary/reported).
+    def _extract(extraction: str) -> Dict:
+        row = {"e_hat_t_at_0": [
+            float(agent.effort_function(t, np.array([0.0]), T=args.T, q=args.q,
+                                        extraction=extraction)[0])
+            for t in range(1, args.T + 1)]}
+        if args.T == 2:
+            row["e2_onpath_expected"] = onpath_expected_stage2_effort(
+                lambda t, d: agent.effort_function(t, d, T=args.T, q=args.q,
+                                                   extraction=extraction),
+                q=args.q)
+        return row
+
+    extraction_diag = {"mean": _extract("mean"), "mode": _extract("mode")}
+
+    # Raw Beta (alpha, beta) dump on the curve grid (so mean-vs-mode can be
+    # revisited post-hoc without a re-run; decision 1).
+    d_curve = np.asarray(curves["d_grid"])
+    alpha_beta = {}
+    for t in range(1, args.T + 1):
+        a, b = agent.beta_params(t, d_curve, args.T, args.q)
+        alpha_beta[str(t)] = {"alpha": a.tolist(), "beta": b.tolist()}
 
     # Closed-form targets + recovery metrics for T=2 reporting.
     cf = None
@@ -346,7 +405,28 @@ def main() -> int:
     out_dir = os.path.join("results", "multi_stage", "convergence")
     os.makedirs(out_dir, exist_ok=True)
     tag = f"_{args.tag}" if args.tag else ""
-    fname = f"ms_T{args.T}_q{args.q:g}_seed{args.seed}{tag}_convergence.json"
+    stem = f"ms_T{args.T}_q{args.q:g}_seed{args.seed}{tag}"
+
+    # Persist the restored best checkpoint (.pt; gitignored) so the policy can
+    # be re-certified / re-extracted post-hoc without a re-run (decision 1).
+    ckpt_dir = os.path.join("results", "multi_stage", "checkpoints")
+    ckpt_path = os.path.join(ckpt_dir, f"{stem}.pt")
+    agent.save(ckpt_path)
+
+    provenance = {
+        "checkpoint_path": ckpt_path,
+        "git_commit": _git_commit(),
+        "seed": args.seed,
+        "grid": {"d_grid_sizes": cfg["verifier"]["d_grid_sizes"],
+                 "selection_grid": dgs[SELECTION_GRID_INDEX],
+                 "d_grid_coarse": d_cert_coarse, "d_grid_fine": d_cert_fine,
+                 "e_grid_size": cfg["verifier"]["e_grid_size"]},
+        "quadrature": {"n_quad": 129, "terminal": "closed_form F_xi"},
+        "epsilon_over_dw": cfg["verifier"]["epsilon_over_dw"],
+        "certificate": "dReach_UCB = dReach_fine + |dReach_fine - dReach_coarse|",
+    }
+
+    fname = f"{stem}_convergence.json"
     result = {
         "params": {"q": args.q, "T": args.T, "seed": args.seed,
                    "w_h": cfg["w_h"], "w_l": cfg["w_l"], "k": cfg["k"],
@@ -355,11 +435,14 @@ def main() -> int:
                    "es_on_path_fraction": args.es_on_path_fraction,
                    "updates": args.updates, "episodes_per_update": args.episodes},
         "ppo_config": asdict(agent.cfg),
+        "provenance": provenance,
         "elapsed_sec": elapsed,
         "history": history,
         "final_eval": final_eval,
         "final_effort": final_snap,
         "effort_curves": curves,
+        "beta_params": alpha_beta,
+        "extraction_diagnostic": extraction_diag,
         "onpath_summary": onpath,
         "grid_refinement": grid_refinement,
         "recovery_metrics": recovery,
@@ -371,15 +454,23 @@ def main() -> int:
         json.dump(result, f, indent=2)
 
     print(f"[done] {elapsed:.1f}s | ckpt EXP={final_eval['exp']:.4f} "
-          f"EXP^UCB/DW={grid_refinement['exp_ucb_over_dw']:.4f} "
-          f"dReach/DW={final_eval['delta_sum_reachable'] / dw:.4f} "
-          f"cert={final_eval['certified']} @u{best['update']}")
+          f"dReach_fine/DW={final_eval['dreach_fine_over_dw']:.4f} "
+          f"dReach_UCB/DW={final_eval['dreach_ucb_over_dw']:.4f} "
+          f"cert={final_eval['certified']} @u{best['update']} -> {ckpt_path}")
     if recovery is not None:
+        print(f"[recovery] E[e2(d2)]={recovery['e2_onpath_expected']:.2f} "
+              f"(target g1={cf['g1']:.4f}) | e_hat_1(0)={recovery['e_hat_1_at_0']:.2f} "
+              f"(target g1={cf['g1']:.4f}) | e_hat_2(0)~{final_snap['stage2_learned'][2]:.1f} "
+              f"(target g2(0)={cf['stage2_probe'][2]:.1f})")
         print(f"[recovery] RE_1={recovery['re_1']:.3f} RPE_2_core={recovery['rpe_2_core']:.3f} "
               f"RPE_2={recovery['rpe_2']:.3f} PL_2/DW={recovery['pl_2_over_dw']:.3f}")
-        print(f"[effort] stage1(0)={final_snap['stage1_at_0']:.2f} (g1={cf['g1']:.2f}) | "
-              f"stage2 learned={[round(x, 1) for x in final_snap['stage2_learned']]} "
+        print(f"[effort] stage2 learned={[round(x, 1) for x in final_snap['stage2_learned']]} "
               f"vs CF={[round(x, 1) for x in cf['stage2_probe']]} @ d={final_snap['stage2_probe_d']}")
+        md = extraction_diag
+        print(f"[extract] MEAN e_t(0)={[round(x, 1) for x in md['mean']['e_hat_t_at_0']]} "
+              f"E[e2]={md['mean']['e2_onpath_expected']:.2f} | "
+              f"MODE e_t(0)={[round(x, 1) for x in md['mode']['e_hat_t_at_0']]} "
+              f"E[e2]={md['mode']['e2_onpath_expected']:.2f} (mean is primary)")
     else:
         # T>=3: no closed form; report per-stage effort at d=0 and worst Δ.
         e_at_0 = [round(float(agent.effort_function(t, np.array([0.0]), T=args.T, q=args.q)[0]), 1)
@@ -389,6 +480,9 @@ def main() -> int:
         print(f"[onpath] total effort={onpath['total_effort']:.1f} total cost={onpath['total_cost']:.3f} "
               f"per-stage effort={[round(x, 1) for x in onpath['per_stage_effort']]}")
         print(f"[deviation] worst Δ_t (full grid) = {wd}")
+        md = extraction_diag
+        print(f"[extract] MEAN e_t(0)={[round(x, 1) for x in md['mean']['e_hat_t_at_0']]} | "
+              f"MODE e_t(0)={[round(x, 1) for x in md['mode']['e_hat_t_at_0']]} (mean is primary)")
     print(f"[saved] {out_path}")
     return 0
 
