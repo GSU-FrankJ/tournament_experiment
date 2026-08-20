@@ -1,6 +1,67 @@
 # Project state
 
-Last updated: 2026-08-03
+Last updated: 2026-08-19
+
+## F2/F3/F4 enlarged for print; F4 title and F2 row label dropped (2026-08-19)
+
+Owner report: the three figures were too small to read in print. Text size and
+two label removals only -- no data, no code path, no figure geometry changed.
+
+- paper/generator/plots.py: PRINT_FONT_SCALE = 1.45 multiplies the FONT_SIZES
+  rcParams (tick 10->14, axis label 12->17, panel title 14->20, legend 10->14)
+  via a new font_scale arg on plot_convergence_main /
+  plot_exploitability_dynamics / plot_equilibrium_recovery_dotplot. At 10in wide
+  reproduced in a ~6.5in text block the old 10pt defaults landed near 6.5pt on
+  paper.
+- SIZE ONLY, NO ADDED WEIGHT. The first cut also bolded axis labels, panel
+  titles and tick labels and scaled the spine/tick widths; owner: "字体过重,
+  线条显得不突出" -- the chrome outweighed the curves. Reverted to default
+  weights and default 0.8 line widths. Weights that were already bold before
+  this change (F2 e* annotation, F4 scenario group labels) are untouched.
+- F4 (dotplot) runs at DOTPLOT_FONT_SCALE = 1.30, not 1.45: nine "q=35" ticks
+  plus four two-line scenario labels share one 10in axis, and at 14pt
+  "Heterogeneous Cost" collides with "Heterogeneous Ability". Measured, not
+  guessed -- 1.30 leaves 0.23in between ticks and 0.23in between group labels;
+  1.35 is already negative. (The group labels are bold independently of this
+  change, so lightening the tick weight did not raise the cap.)
+- F4 in-figure title "Verified TEL-PPO Effort Estimates Relative to Analytical
+  Benchmarks" REMOVED (owner: match F2/F3, which carry none; the LaTeX caption
+  carries it).
+- F2 rotated row label "$w_H=6.5, w_L=3.0, k=5.5e-4$" REMOVED (owner: it existed
+  to tell the two weight-variant ROWS apart, and the 1x3 shows only one set,
+  which the paper text states). Implemented as `col_idx == 0 and n_rows > 1`, so
+  the 2x3 convergence_main keeps it.
+- LEGENDS ALIGNED TO THE PLOT AREA (owner: "legend和图对齐"). All three legends
+  were WIDER than the panels they sat above (F2 by 1.70in, F3 by 2.11in, F4 by
+  0.84in) and anchored to the figure, so bbox_inches='tight' turned the overhang
+  into the saved margin and the panels read as inset -- F2's legend alone pushed
+  the left edge out 1.59in. New _axes_span / _fit_legend helpers anchor each
+  legend to the panels' span and step the legend font down until it fits
+  (floor 60% of the requested size). Result: F2/F3 legends 14pt -> 12pt, F4
+  stays 13pt; all three now inset 0.09-0.33in inside the plot area. Legend
+  spacing also tightened (_LEGEND_TIGHT: handlelength 1.6, handletextpad 0.5,
+  columnspacing 1.0), which bought ~8% of the width before any font reduction.
+  ncol is UNCHANGED everywhere -- F2's 3-column and F4's column-major layouts
+  encode meaning (see the comments at each call site). F3 and F4 now build their
+  legend AFTER tight_layout/subplots_adjust, since those move the axes the
+  legend is anchored to. Saved widths dropped: F2 10.35->9.38in, F3
+  10.84->9.58in, i.e. the panels themselves get more of the printed width.
+- F2 x ticks thinned to every 50 updates when font_scale >= 1.3. Re-measured
+  after the row label came off: 25-spacing would leave 0.011in between "100"
+  and "125", so 50 stays.
+- setup_matplotlib_style() now restates every rcParam _apply_font_scale can
+  set, so print styling cannot leak into the next figure in the same process.
+  plot_convergence_main at font_scale=1.0 skips the scaling AND the legend
+  re-anchoring entirely, so the 2x3 convergence_main stays byte-identical.
+- VERIFIED: pre-patch renders of all three reproduce the committed PNGs
+  byte-for-byte (so styling is the only delta); post-patch convergence_main
+  (2x3), kl_dynamics and distance_to_equilibrium are byte-identical to what the
+  unpatched code produces (no leak). Dotplot still prints mean rel err 3.47% and
+  its backing CSV regenerates unchanged -- same r9 raw landings as before.
+- CAUTION: tools/regen_equilibrium_recovery_dotplot.py still calls the RETIRED
+  load_polished_dotplot_final override and would silently swap F4 to polished
+  values (two-player q35 mean 44.95 instead of the raw 43.5). Use
+  plot_equilibrium_recovery_dotplot(df) / make_all instead. Script not touched.
 
 ## r9_cert001 wave LAUNCHED: eps=0.01 / M=65536 adopted as THE config (2026-08-03)
 

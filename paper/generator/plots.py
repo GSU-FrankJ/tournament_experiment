@@ -70,12 +70,24 @@ def _baseline_only(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def setup_matplotlib_style():
-    """Configure matplotlib for publication-quality figures."""
+    """Configure matplotlib for publication-quality figures.
+
+    Restates every text rcParam :func:`_apply_font_scale` can override, so a
+    print-scaled figure cannot leak its styling into the next figure generated
+    in the same process.
+    """
     plt.rcParams.update({
         'font.size': FONT_SIZES['tick_label'],
         'axes.titlesize': FONT_SIZES['title'],
         'axes.labelsize': FONT_SIZES['axis_label'],
         'legend.fontsize': FONT_SIZES['legend'],
+        'xtick.labelsize': FONT_SIZES['tick_label'],
+        'ytick.labelsize': FONT_SIZES['tick_label'],
+        'axes.labelweight': 'normal',
+        'axes.titleweight': 'normal',
+        'axes.linewidth': 0.8,
+        'xtick.major.width': 0.8,
+        'ytick.major.width': 0.8,
         'figure.dpi': 100,
         'savefig.dpi': OUTPUT_DPI,
         'figure.facecolor': 'white',
@@ -85,6 +97,112 @@ def setup_matplotlib_style():
         'axes.spines.top': False,
         'axes.spines.right': False,
     })
+
+
+# Print-legibility scale for the three \linewidth paper figures (convergence
+# 1x3, exploitability dynamics, equilibrium recovery dot plot). Those are drawn
+# 10in wide and reproduced in a ~6.5in text block, so the 10pt rcParam defaults
+# land near 6.5pt on paper. 1.45x puts tick labels back near 9pt and axis labels
+# near 11pt, which is what stays readable in print.
+PRINT_FONT_SCALE: float = 1.45
+
+# The recovery dot plot is capped below that: one 10in axis carries nine
+# "q=35"-style ticks plus four two-line scenario labels, and at a 14pt tick size
+# "Heterogeneous Cost" runs into "Heterogeneous Ability". 1.30 (13pt ticks) is
+# the largest scale whose labels still clear each other.
+DOTPLOT_FONT_SCALE: float = 1.30
+
+
+def _scaled_fonts(scale: float) -> Dict[str, int]:
+    """Return FONT_SIZES multiplied by ``scale`` (rounded, floor 1pt).
+
+    Args:
+        scale: Multiplier applied to every entry of FONT_SIZES.
+
+    Returns:
+        Dict with the same keys as FONT_SIZES and scaled point sizes.
+    """
+    return {k: max(1, int(round(v * scale))) for k, v in FONT_SIZES.items()}
+
+
+def _apply_font_scale(scale: float) -> Dict[str, int]:
+    """Scale the text rcParams on top of :func:`setup_matplotlib_style`.
+
+    Size only -- font weights, spine widths and tick widths are left at their
+    defaults. Bolding the labels and thickening the frame made the chrome
+    compete with the plotted curves (owner, 2026-08-19). Call after
+    ``setup_matplotlib_style()`` and before creating the figure.
+
+    Args:
+        scale: Multiplier applied to the font-size rcParams.
+
+    Returns:
+        The scaled size table, so callers can size inline annotations to match.
+    """
+    fs = _scaled_fonts(scale)
+    plt.rcParams.update({
+        'font.size': fs['tick_label'],
+        'axes.titlesize': fs['title'],
+        'axes.labelsize': fs['axis_label'],
+        'legend.fontsize': fs['legend'],
+        'xtick.labelsize': fs['tick_label'],
+        'ytick.labelsize': fs['tick_label'],
+    })
+    return fs
+
+
+# Legend spacing pulled in from the matplotlib defaults. Recovers ~8% of the
+# legend's width, which is width that does not have to come out of the font.
+_LEGEND_TIGHT = dict(handlelength=1.6, handletextpad=0.5, columnspacing=1.0,
+                     borderpad=0.4)
+
+
+def _axes_span(fig) -> Tuple[float, float, float]:
+    """Horizontal extent of the plotted area.
+
+    Args:
+        fig: Figure whose axes to span. Read AFTER any tight_layout /
+            subplots_adjust call, or the positions are stale.
+
+    Returns:
+        (left, right) in figure coordinates and the width in inches.
+    """
+    boxes = [ax.get_position() for ax in fig.axes]
+    left = min(b.x0 for b in boxes)
+    right = max(b.x1 for b in boxes)
+    return left, right, (right - left) * fig.get_figwidth()
+
+
+def _fit_legend(make_legend, target_in: float, fontsize: int):
+    """Place a legend at the largest size <= ``fontsize`` that fits the plot area.
+
+    An enlarged legend is easily wider than the panels it sits above; because
+    ``bbox_inches='tight'`` grows the canvas around it, the overhang becomes the
+    saved figure's margin and the panels end up visually inset. Stepping the
+    legend font down until it fits keeps the legend flush with the plot area.
+
+    Args:
+        make_legend: Callable taking a point size and returning a placed Legend.
+        target_in: Width of the plot area in inches.
+        fontsize: Preferred point size, and the starting point for the search.
+
+    Returns:
+        (legend, point_size_used). Stops at 60% of ``fontsize`` rather than
+        shrinking without bound; an unusually long label set stays readable and
+        overhangs instead of becoming illegible.
+    """
+    floor = max(1, int(round(fontsize * 0.6)))
+    legend, pt = None, fontsize
+    for pt in range(fontsize, floor - 1, -1):
+        if legend is not None:
+            legend.remove()
+        legend = make_legend(pt)
+        fig = legend.figure
+        width = legend.get_window_extent(
+            renderer=fig.canvas.get_renderer()).width / fig.dpi
+        if width <= target_in:
+            break
+    return legend, pt
 
 
 def ensure_output_dirs():
@@ -240,6 +358,7 @@ def plot_convergence_main(
     output_path: str = None,
     save_data: bool = True,
     figsize: Tuple[float, float] = None,
+    font_scale: float = 1.0,
 ) -> Tuple[plt.Figure, str]:
     """
     Generate main convergence figure: 2x3 grid faceted by q and weight variant.
@@ -258,11 +377,17 @@ def plot_convergence_main(
         weight_variants: Ablation variants for rows (default: ["baseline", "wh8_wl4"])
         output_path: Path to save figure
         save_data: Whether to save underlying data to CSV
+        figsize: Figure size in inches (default: FIGURE_SIZES["convergence_main"])
+        font_scale: Multiplier on every text size, with bold axis labels and
+            panel titles. 1.0 leaves the style untouched, keeping the 2x3 figure
+            byte-identical; the 1x3 companion passes PRINT_FONT_SCALE so it
+            survives print reduction.
 
     Returns:
         (figure, output_path)
     """
     setup_matplotlib_style()
+    FS = _apply_font_scale(font_scale) if font_scale != 1.0 else dict(FONT_SIZES)
     ensure_output_dirs()
 
     if df is None:
@@ -471,7 +596,7 @@ def plot_convergence_main(
                     ha="center" if crowded else "right",
                     va=("top" if below else "bottom") if crowded else "bottom",
                     color=THEORY_LINE_COLOR,
-                    fontsize=FONT_SIZES["legend"], fontweight="bold", zorder=6,
+                    fontsize=FS["legend"], fontweight="bold", zorder=6,
                 )
 
             # Gray vertical line at the VERIFIED stop: the update at which the
@@ -510,22 +635,27 @@ def plot_convergence_main(
             if row_idx == 0:
                 ax.set_title(f"Noise Level {format_q(q)}")
 
-            # Row label on the leftmost column (bold, rotated)
-            if col_idx == 0:
+            # Row label on the leftmost column (bold, rotated). Only when
+            # there is more than one row to tell apart -- the 1x3 companion
+            # shows a single (w_H, w_L, k) set, which the paper text states.
+            if col_idx == 0 and n_rows > 1:
                 variant_label = WEIGHT_VARIANT_LABELS.get(variant, variant)
                 ax.annotate(
                     variant_label, xy=(0, 0.5),
-                    xytext=(-50, 0), textcoords="offset points",
+                    xytext=(-50 * max(1.0, font_scale), 0),
+                    textcoords="offset points",
                     xycoords="axes fraction", ha="right", va="center",
-                    fontsize=FONT_SIZES["axis_label"],
+                    fontsize=FS["axis_label"],
                     fontweight="bold", rotation=90,
                 )
 
             # Display the x-axis in PPO updates (step / STEPS_PER_UPDATE) with
             # natural tick spacing (0, 25, 50, ... updates; owner 2026-08-04).
+            # Enlarged labels need every other tick or "100" and "125" collide.
             # A single figure-level legend is added after the loop.
+            tick_every = 50 if font_scale >= 1.3 else 25
             ax.xaxis.set_major_locator(
-                ticker.MultipleLocator(25 * STEPS_PER_UPDATE)
+                ticker.MultipleLocator(tick_every * STEPS_PER_UPDATE)
             )
             ax.xaxis.set_major_formatter(
                 ticker.FuncFormatter(
@@ -574,11 +704,26 @@ def plot_convergence_main(
                linewidth=CONV_VLINE_LINEWIDTH,
                label="Mean verification-triggered stop"),
     ]
-    fig.legend(
-        handles=legend_handles, loc="lower right",
-        bbox_to_anchor=(1.0, 1.0), ncol=3, frameon=True,
-        fontsize=FONT_SIZES["legend"],
-    )
+    if font_scale == 1.0:
+        fig.legend(
+            handles=legend_handles, loc="lower right",
+            bbox_to_anchor=(1.0, 1.0), ncol=3, frameon=True,
+            fontsize=FS["legend"],
+        )
+    else:
+        # Sit the legend on the panels' span, not the figure's: anchored to the
+        # figure it overhangs to the left, and bbox_inches='tight' turns that
+        # overhang into the saved margin, leaving the panels inset.
+        left, right, span_in = _axes_span(fig)
+        _fit_legend(
+            lambda pt: fig.legend(
+                handles=legend_handles, loc="lower center",
+                bbox_to_anchor=(left, 1.0, right - left, 0.0),
+                bbox_transform=fig.transFigure,
+                ncol=3, frameon=True, fontsize=pt, **_LEGEND_TIGHT,
+            ),
+            span_in, FS["legend"],
+        )
 
     # Save figure
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
@@ -619,6 +764,7 @@ def plot_convergence_main_1x3(
         output_path=output_path,
         save_data=False,
         figsize=FIGURE_SIZES["exploitability_dynamics"],
+        font_scale=PRINT_FONT_SCALE,
     )
 
 
@@ -751,13 +897,23 @@ def plot_exploitability_dynamics(
     q_values: List[float] = None,
     output_path: str = None,
     save_data: bool = True,
+    font_scale: float = PRINT_FONT_SCALE,
 ) -> Tuple[plt.Figure, str]:
     """
     Plot exploitability over training.
-    
+
     Uses forward-fill for sparse evaluations.
+
+    Args:
+        df: Convergence DataFrame (loaded automatically if None).
+        q_values: Noise levels to facet over (default: Q_VALUES).
+        output_path: Destination PNG (a sibling PDF is also written).
+        save_data: Whether to dump the backing per-seed CSV.
+        font_scale: Multiplier on every text size, with bold axis labels and
+            panel titles, so the figure survives print reduction.
     """
     setup_matplotlib_style()
+    FS = _apply_font_scale(font_scale)
     ensure_output_dirs()
     
     if df is None:
@@ -918,18 +1074,23 @@ def plot_exploitability_dynamics(
             seen.add(l)
             unique_handles.append(h)
             unique_labels.append(l)
-    # Compact single-row legend fully above the axes region: the four short
-    # entries no longer squeeze the panels (tight_layout uses the full canvas
-    # and bbox_inches='tight' grows the saved figure around the legend).
-    fig.legend(
-        unique_handles, unique_labels,
-        loc="lower center", ncol=len(unique_labels),
-        fontsize=8, frameon=True,
-        bbox_to_anchor=(0.5, 1.0),
+    # Compact single-row legend fully above the axes region, spanning exactly
+    # the panels. tight_layout runs FIRST because it moves the axes, and the
+    # legend is anchored to where they end up.
+    plt.tight_layout()
+
+    left, right, span_in = _axes_span(fig)
+    _fit_legend(
+        lambda pt: fig.legend(
+            unique_handles, unique_labels,
+            loc="lower center", ncol=len(unique_labels),
+            fontsize=pt, frameon=True,
+            bbox_to_anchor=(left, 1.0, right - left, 0.0),
+            bbox_transform=fig.transFigure, **_LEGEND_TIGHT,
+        ),
+        span_in, FS["legend"],
     )
 
-    plt.tight_layout()
-    
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches='tight')
     pdf_path = output_path.replace(".png", ".pdf")
     fig.savefig(pdf_path, format='pdf', bbox_inches='tight')
@@ -1888,6 +2049,7 @@ def plot_equilibrium_recovery_dotplot(
     output_path: str = None,
     save_data: bool = True,
     final_override: pd.DataFrame = None,
+    font_scale: float = DOTPLOT_FONT_SCALE,
 ) -> Tuple[plt.Figure, str]:
     """
     Plot equilibrium recovery dot plot across scenarios (Figure 6).
@@ -1907,8 +2069,12 @@ def plot_equilibrium_recovery_dotplot(
             columns the drawing reads: ``experiment, method, q, seed, ablation,
             policy_mean_effort, agent1_effort, agent2_effort, theoretical_effort``
             (plus ``theoretical_effort1/2`` for heterogeneous-cost).
+        font_scale: Multiplier on every text size, with bold axis labels, so the
+            figure survives print reduction. Capped at DOTPLOT_FONT_SCALE by the
+            scenario-label density along the x axis.
     """
     setup_matplotlib_style()
+    FS = _apply_font_scale(font_scale)
     ensure_output_dirs()
 
     if output_path is None:
@@ -2062,13 +2228,10 @@ def plot_equilibrium_recovery_dotplot(
             x_pos += 0.5
 
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels(x_labels, fontsize=FONT_SIZES["tick_label"])
+    ax.set_xticklabels(x_labels, fontsize=FS["tick_label"])
     ax.set_ylabel("Effort Level")
-    # pad clears the two-row legend that sits between the axes and the title.
-    ax.set_title(
-        "Verified TEL-PPO Effort Estimates Relative to Analytical Benchmarks",
-        pad=52,
-    )
+    # No in-figure title: the LaTeX caption carries it, and the two companion
+    # figures (convergence 1x3, exploitability dynamics) carry none either.
 
     # Add experiment group labels
     group_starts = []
@@ -2100,7 +2263,7 @@ def plot_equilibrium_recovery_dotplot(
             center, -0.08, label,
             transform=trans,
             ha="center", va="top",
-            fontsize=FONT_SIZES["tick_label"],
+            fontsize=FS["tick_label"],
             fontweight="bold",
         )
 
@@ -2132,17 +2295,25 @@ def plot_equilibrium_recovery_dotplot(
                label="Orange: High-cost agent"),
     ]
 
-    ax.legend(
-        handles=legend_elements,
-        loc="lower center",
-        bbox_to_anchor=(0.5, 1.02),
-        ncol=3,
-        frameon=False,
-        fontsize=FONT_SIZES["legend"],
-    )
-
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.18, top=0.88)
+
+    # Legend last: it spans the axes, and tight_layout/subplots_adjust are what
+    # decide where the axes end up. ncol=3 is the owner layout above -- kept.
+    _, _, span_in = _axes_span(fig)
+    _fit_legend(
+        lambda pt: ax.legend(
+            handles=legend_elements,
+            loc="lower center",
+            bbox_to_anchor=(0.0, 1.02, 1.0, 0.0),
+            bbox_transform=ax.transAxes,
+            ncol=3,
+            frameon=False,
+            fontsize=pt,
+            **_LEGEND_TIGHT,
+        ),
+        span_in, FS["legend"],
+    )
 
     fig.savefig(output_path, dpi=OUTPUT_DPI, bbox_inches="tight")
     pdf_path = output_path.replace(".png", ".pdf")
