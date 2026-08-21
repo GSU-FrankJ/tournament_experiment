@@ -96,6 +96,13 @@ def setup_matplotlib_style():
         'grid.alpha': 0.3,
         'axes.spines.top': False,
         'axes.spines.right': False,
+        # Embed TrueType rather than matplotlib's default Type 3. Publisher PDF
+        # checks reject Type 3 ("Font DejaVuSans-Oblique is of type Type 3");
+        # the oblique face comes from mathtext ($e^*$, $q$, $w_H$). Affects
+        # embedding only, so raster output is unchanged. Matches
+        # tools/make_multistage_figures.py.
+        'pdf.fonttype': 42,
+        'ps.fonttype': 42,
     })
 
 

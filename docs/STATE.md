@@ -2,6 +2,31 @@
 
 Last updated: 2026-08-19
 
+## Figure PDFs embed TrueType, not Type 3 (2026-08-19)
+
+Owner's publisher check on the uploaded PDF: "Font DejaVuSans-Oblique is of
+type Type 3". The oblique face comes from mathtext ($e^*$, $q$, $w_H$), and
+matplotlib's default pdf.fonttype is 3.
+
+- paper/generator/plots.py setup_matplotlib_style() now sets pdf.fonttype=42 and
+  ps.fonttype=42, matching what tools/make_multistage_figures.py has always set.
+  Applies to EVERY figure this generator produces, not just F2-F4.
+- Embedding only, no layout change: the three regenerated PNGs are byte-identical
+  to the previous ones, and only the .pdf files show as modified. Verified for
+  convergence_main / kl_dynamics / distance_to_equilibrium too (PNG identical,
+  PDF now clean).
+- F2/F3/F4 regenerated: Type3 counts 3/3/4 -> 0, now Type0 + CIDFontType2
+  (subsetted TrueType).
+- STILL TYPE 3 -- not regenerated, deliberately out of scope. paper/figures/:
+  ablation_comparison, beta_evolution, convergence_main, distance_to_equilibrium,
+  effort_drift, hyperparam_sensitivity, kl_dynamics. ALL of
+  overleaf_export/figures/ (stale copies; that main.tex still references
+  convergence_main.pdf, not the 1x3). If any of these ship in the paper the
+  check will fire again -- regenerating them is one make_all, BUT kl_dynamics and
+  distance_to_equilibrium are known to render differently from their committed
+  copies (pre-existing r5-era staleness, see the 2026-08-03 note), so that regen
+  changes figure CONTENT and needs owner review, not just a font pass.
+
 ## F2/F3/F4 enlarged for print; F4 title and F2 row label dropped (2026-08-19)
 
 Owner report: the three figures were too small to read in print. Text size and
