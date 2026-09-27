@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11119",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11119,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2500,
+  "local_update": 1500,
+  "call_index": 88
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.032990637377482646,
+  "exp_root_over_dw": 0.008247659344370661,
+  "v_br_root": 3.28129943804777,
+  "v_mean_root": 3.248308800670287,
+  "dreach": 0.07352954625796837,
+  "dreach_over_dw": 0.018382386564492093,
+  "reach_delta_max": {
+   "3": 0.051977784019265005,
+   "2": 0.02026115753382829,
+   "1": 0.0012906047048750757
+  },
+  "reach_argmax_d": {
+   "3": -8.0,
+   "2": 28.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 120,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.07352954625796837,
+  "dreach_pmf_support_over_dw": 0.018382386564492093,
+  "pmf_support_delta_max": {
+   "3": 0.051977784019265005,
+   "2": 0.02026115753382829,
+   "1": 0.0012906047048750757
+  },
+  "pmf_support_count": {
+   "3": 124,
+   "2": 54,
+   "1": 1
+  },
+  "dfull": 0.07352954625796837,
+  "dfull_over_dw": 0.018382386564492093,
+  "full_delta_max": {
+   "3": 0.051977784019265005,
+   "2": 0.02026115753382829,
+   "1": 0.0012906047048750757
+  },
+  "full_argmax_d": {
+   "3": -8.0,
+   "2": 28.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.051977784019265005,
+  "delta_max_all_over_dw": 0.012994446004816251,
+  "pdl_sum": 0.03299063737748267,
+  "pdl_residual": -2.7755575615628914e-17,
+  "pdl_residual_over_dw": -6.938893903907228e-18,
+  "pmf_mass": {
+   "3": 1.0,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 0.0,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 2.348848462139813,
+    "union_lo": -117.65115153786019,
+    "union_hi": 122.34884846213981,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.987809260623294,
+    "union_lo": -239.30823889299728,
+    "union_hi": 242.55668893974928,
+    "n_grid_covered": 120
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 163,
+    "vertex": 58,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 20,
+    "vertex": 91,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 163,
+    "vertex": 58,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 17,
+    "vertex": 78,
+    "mean_action": 0,
+    "br_action": 16
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.03384576845612198,
+  "max_std_effort": 3.384576845612198,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 55.27682876586914,
+  "beta": 127.745849609375,
+  "conc": 183.02267837524414,
+  "mean_norm": 0.3020217453737468,
+  "mean_effort": 30.20217453737468
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.032990637377482646,
+   "max_over_dw": 0.008247659344370661,
+   "argmax_d": 0.0,
+   "min_raw": 0.032990637377482646
+  },
+  "2": {
+   "max_raw": 0.04273326137854028,
+   "max_over_dw": 0.01068331534463507,
+   "argmax_d": 28.0,
+   "min_raw": 0.017977969932198246
+  },
+  "3": {
+   "max_raw": 0.051977784019265005,
+   "max_over_dw": 0.012994446004816251,
+   "argmax_d": -8.0,
+   "min_raw": 4.925047036863361e-10
+  }
+ },
+ "dreach_over_dw": 0.018382386564492093,
+ "coverage_snapshot_index": 87,
+ "saved_time": "2026-09-26T02:18:58+0000"
+}

@@ -1,0 +1,135 @@
+{
+ "document": "Final T=2 protocol, frozen 2026-09-22",
+ "derived_from": "experiments/two_stage_formal_T2_20260915/manifest.json",
+ "worktree": ".",
+ "runner": "run/run_final_dp_br_round3_dense.py",
+ "python": "python",
+ "protocol_module_sha256": {
+  "agents/ppo_curriculum.py": "8a1c906ae5f8e9017993d501554f7b58172244e8e077041784e51bd86e3ed2f2",
+  "envs/curriculum_env.py": "f367d7831c386fa96ce1fbec91dfcc574d7e49771db08d193ffe392b2e1c553a",
+  "utils/dp_br_verifier.py": "3054e5500eea8876aba558ad08bb3b1971d427cf24b3e4d261cda60502049481",
+  "utils/theory_multistage.py": "eff8d2f70e3fbc3aec22d81e5ba321f366a20192eb0fd6d802222b60389ddd47",
+  "run/run_final_dp_br.py": "9d48a1cb2ab49b8b5db153197017c7a19472cc879f52bb297a63f43dab732c3a",
+  "run/run_final_dp_br_round3_dense.py": "1786eaa23f83363dd0ab475d88c859e179c5dd0ac53890ff22ecdee66da35bb8"
+ },
+ "changes_vs_20260915": [
+  "protocol.verifier_timeout: 100 -> {A: 100, B: 25, C: 25}. Phase A cadence unchanged; B and C are now sampled every 25 updates."
+ ],
+ "unchanged_vs_20260915": [
+  "phase_caps A=400 / B=600 / C=1000, warmup 100, stability_every 20",
+  "k_phase 3 (A and B), k_stop 1 (C)",
+  "phase_thr_over_dw A/B 0.02, C 0.01; conc_thr 0.04",
+  "game, ppo, lr schedule, snapshot rule, sampling design, RNG namespaces",
+  "development and final verifier tiers and tolerances",
+  "numerical-refinement tolerance 0.002, final certification rule"
+ ],
+ "phase_A_status": "Fixed-budget terminal-stage pretraining. The A verifier gate is retained in the runner but is a no-op in practice: over the 40 formal runs it fired 0 times in 161 calls (criterion passes only at A-local 300/400, concentration only early, never at the same call), and all 40 runs exit A by budget exhaustion. Its calls are kept as diagnostics. Evidence: experiments/two_stage_formal_T2_20260915/A_stage_audit/.",
+ "phase_B_rationale": "At cadence 100 the three consecutive eligible calls can only land on B-local 400/500/600, which requires concentration to cross 0.04 before B-local 400. Observed first-eligible median is B-local 500 for q=50 and 380 for q=60, so B advanced by verifier pass in 15/40 runs, all of them q=60, and 0/20 at q=50. At cadence 25 the window only has to be 50 updates wide; the 20-update offline replay predicts 38/40 fit. Evidence: experiments/two_stage_formal_T2_20260915/B_cadence_feasibility/.",
+ "phase_C_rationale": "dReach/dW moves by a median 0.0035 per 20 updates while the threshold is 0.01, so a 100-update cadence samples past eligible windows. Of the 11 no-candidate formal runs, 5 passed through eligible policies the cadence-100 verifier never queried; 4 of them convert at cadence 25 and all 4 clear final_joint_pass. Evidence: experiments/two_stage_dense_c25_20260922/ and experiments/two_stage_dense_c25_rest_20260922/.",
+ "not_a_replay_warning": "Changing the B cadence moves B's exit update, so training diverges from that point on. Unlike the C-only change, results under this protocol cannot be obtained by replaying the 2026-09-15 runs; they require fresh runs.",
+ "seeds": "not fixed here -- the held-out confirmation picks unused seeds",
+ "protocol_by_q": {
+  "50": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "e_min": 0,
+   "e_max": 100,
+   "episodes_per_update": 512,
+   "phase_caps": {
+    "A": 400,
+    "B": 600,
+    "C": 1000
+   },
+   "warmup": 100,
+   "stability_every": 20,
+   "drift_thr": 0.01,
+   "kl_thr": 0.01,
+   "stability_consecutive": 2,
+   "verifier_timeout": {
+    "A": 100,
+    "B": 25,
+    "C": 25
+   },
+   "k_phase": 3,
+   "k_stop": 1,
+   "phase_thr_over_dw": {
+    "A": 0.02,
+    "B": 0.02,
+    "C": 0.01
+   },
+   "conc_thr": 0.04,
+   "snapshot_every": 20,
+   "es_bin_width": 10,
+   "phase_c_root": 256,
+   "phase_c_es": 256,
+   "final_thr_over_dw": 0.01,
+   "refine_thr_over_dw": 0.002,
+   "sensitivity_thr_over_dw": 0.03,
+   "dense_conc_step": 0.05,
+   "recovery_step": 0.5,
+   "direct_rollout_episodes": 200000,
+   "direct_rollout_reps": 3,
+   "direct_rollout_seed_base": 9005000,
+   "rng_namespaces": {
+    "init": 0,
+    "env_noise": 1,
+    "learner_action": 2,
+    "opponent_action": 3,
+    "starts_roles": 4,
+    "minibatch": 5
+   }
+  },
+  "60": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "e_min": 0,
+   "e_max": 100,
+   "episodes_per_update": 512,
+   "phase_caps": {
+    "A": 400,
+    "B": 600,
+    "C": 1000
+   },
+   "warmup": 100,
+   "stability_every": 20,
+   "drift_thr": 0.01,
+   "kl_thr": 0.01,
+   "stability_consecutive": 2,
+   "verifier_timeout": {
+    "A": 100,
+    "B": 25,
+    "C": 25
+   },
+   "k_phase": 3,
+   "k_stop": 1,
+   "phase_thr_over_dw": {
+    "A": 0.02,
+    "B": 0.02,
+    "C": 0.01
+   },
+   "conc_thr": 0.04,
+   "snapshot_every": 20,
+   "es_bin_width": 10,
+   "phase_c_root": 256,
+   "phase_c_es": 256,
+   "final_thr_over_dw": 0.01,
+   "refine_thr_over_dw": 0.002,
+   "sensitivity_thr_over_dw": 0.03,
+   "dense_conc_step": 0.05,
+   "recovery_step": 0.5,
+   "direct_rollout_episodes": 200000,
+   "direct_rollout_reps": 3,
+   "direct_rollout_seed_base": 9005000,
+   "rng_namespaces": {
+    "init": 0,
+    "env_noise": 1,
+    "learner_action": 2,
+    "opponent_action": 3,
+    "starts_roles": 4,
+    "minibatch": 5
+   }
+  }
+ }
+}

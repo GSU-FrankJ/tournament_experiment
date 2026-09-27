@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11115",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11115,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 1800,
+  "local_update": 800,
+  "call_index": 60
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.046089934187290016,
+  "exp_root_over_dw": 0.011522483546822504,
+  "v_br_root": 3.263974488587416,
+  "v_mean_root": 3.217884554400126,
+  "dreach": 0.12429269113665908,
+  "dreach_over_dw": 0.03107317278416477,
+  "reach_delta_max": {
+   "3": 0.048259941038964804,
+   "2": 0.07547040233298308,
+   "1": 0.0005623477647112018
+  },
+  "reach_argmax_d": {
+   "3": 124.0,
+   "2": -48.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 122,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.12397105450286316,
+  "dreach_pmf_support_over_dw": 0.03099276362571579,
+  "pmf_support_delta_max": {
+   "3": 0.048259941038964804,
+   "2": 0.07514876569918716,
+   "1": 0.0005623477647112018
+  },
+  "pmf_support_count": {
+   "3": 125,
+   "2": 54,
+   "1": 1
+  },
+  "dfull": 0.12429269113665908,
+  "dfull_over_dw": 0.03107317278416477,
+  "full_delta_max": {
+   "3": 0.048259941038964804,
+   "2": 0.07547040233298308,
+   "1": 0.0005623477647112018
+  },
+  "full_argmax_d": {
+   "3": 124.0,
+   "2": -48.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.07547040233298308,
+  "delta_max_all_over_dw": 0.01886760058324577,
+  "pdl_sum": 0.04608993418728971,
+  "pdl_residual": 3.0531133177191805e-16,
+  "pdl_residual_over_dw": 7.632783294297951e-17,
+  "pmf_mass": {
+   "3": 1.0,
+   "2": 0.9999999999999999,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 2.564275549660749,
+    "union_lo": -118.56427554966075,
+    "union_hi": 121.43572445033925,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9802599256166786,
+    "union_lo": -242.53420474965506,
+    "union_hi": 245.17885691151773,
+    "n_grid_covered": 122
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 28,
+    "vertex": 82,
+    "mean_action": 1,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 28,
+    "vertex": 68,
+    "mean_action": 1,
+    "br_action": 14
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.03145198113832677,
+  "max_std_effort": 3.1451981138326772,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 71.59149932861328,
+  "beta": 149.00706481933594,
+  "conc": 220.59856414794922,
+  "mean_norm": 0.3245329343150162,
+  "mean_effort": 32.45329343150161
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.046089934187290016,
+   "max_over_dw": 0.011522483546822504,
+   "argmax_d": 0.0,
+   "min_raw": 0.046089934187290016
+  },
+  "2": {
+   "max_raw": 0.08740590089904776,
+   "max_over_dw": 0.02185147522476194,
+   "argmax_d": -48.0,
+   "min_raw": 0.011601448839369422
+  },
+  "3": {
+   "max_raw": 0.048259941038964804,
+   "max_over_dw": 0.012064985259741201,
+   "argmax_d": 124.0,
+   "min_raw": 7.08197238186159e-07
+  }
+ },
+ "dreach_over_dw": 0.03107317278416477,
+ "coverage_snapshot_index": 59,
+ "saved_time": "2026-09-26T02:12:15+0000"
+}

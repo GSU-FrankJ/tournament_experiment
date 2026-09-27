@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11112",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11112,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2675,
+  "local_update": 1675,
+  "call_index": 95
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.055438585593291734,
+  "exp_root_over_dw": 0.013859646398322933,
+  "v_br_root": 3.285216524746249,
+  "v_mean_root": 3.229777939152957,
+  "dreach": 0.15248829401690545,
+  "dreach_over_dw": 0.03812207350422636,
+  "reach_delta_max": {
+   "3": 0.05053933796292931,
+   "2": 0.10057987021718873,
+   "1": 0.0013690858367874092
+  },
+  "reach_argmax_d": {
+   "3": 120.0,
+   "2": 36.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 122,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.15248829401690545,
+  "dreach_pmf_support_over_dw": 0.03812207350422636,
+  "pmf_support_delta_max": {
+   "3": 0.05053933796292931,
+   "2": 0.10057987021718873,
+   "1": 0.0013690858367874092
+  },
+  "pmf_support_count": {
+   "3": 126,
+   "2": 52,
+   "1": 1
+  },
+  "dfull": 0.15248829401690545,
+  "dfull_over_dw": 0.03812207350422636,
+  "full_delta_max": {
+   "3": 0.05053933796292931,
+   "2": 0.10057987021718873,
+   "1": 0.0013690858367874092
+  },
+  "full_argmax_d": {
+   "3": 120.0,
+   "2": 36.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.10057987021718873,
+  "delta_max_all_over_dw": 0.025144967554297182,
+  "pdl_sum": 0.055438585593292455,
+  "pdl_residual": -7.216449660063518e-16,
+  "pdl_residual_over_dw": -1.8041124150158794e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999998,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 2.220446049250313e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 2.8022340252001214,
+    "union_lo": -117.19776597479988,
+    "union_hi": 122.80223402520012,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.963931767903148,
+    "union_lo": -240.86304672500634,
+    "union_hi": 247.46998849214313,
+    "n_grid_covered": 122
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 24,
+    "vertex": 87,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 19,
+    "vertex": 72,
+    "mean_action": 1,
+    "br_action": 19
+   },
+   "1": {
+    "grid": 1,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.026565889925683824,
+  "max_std_effort": 2.6565889925683823,
+  "stage": 2,
+  "d": -8.0,
+  "alpha": 153.209716796875,
+  "beta": 194.9365234375,
+  "conc": 348.146240234375,
+  "mean_norm": 0.44007287481758506,
+  "mean_effort": 44.0072874817585
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.055438585593291734,
+   "max_over_dw": 0.013859646398322933,
+   "argmax_d": 0.0,
+   "min_raw": 0.055438585593291734
+  },
+  "2": {
+   "max_raw": 0.11293096679090464,
+   "max_over_dw": 0.02823274169772616,
+   "argmax_d": 40.0,
+   "min_raw": 0.005573405298669787
+  },
+  "3": {
+   "max_raw": 0.05053933796292931,
+   "max_over_dw": 0.012634834490732327,
+   "argmax_d": 120.0,
+   "min_raw": 7.522718411667739e-05
+  }
+ },
+ "dreach_over_dw": 0.03812207350422636,
+ "coverage_snapshot_index": 94,
+ "saved_time": "2026-09-26T02:19:07+0000"
+}

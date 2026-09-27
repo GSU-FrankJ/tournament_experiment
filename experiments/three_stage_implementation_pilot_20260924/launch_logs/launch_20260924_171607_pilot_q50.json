@@ -1,0 +1,53 @@
+{
+ "state": "done",
+ "host": "vector2",
+ "pid": 770787,
+ "start_time": "2026-09-24T17:16:07+0000",
+ "manifests": [
+  "experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json"
+ ],
+ "max_workers": 3,
+ "planned_runs": 3,
+ "runs": [
+  {
+   "run_id": "t3_pilot_q50_s10413",
+   "q": 50,
+   "seed": 10413,
+   "manifest": "experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json",
+   "output_dir": "experiments/three_stage_implementation_pilot_20260924/runs/t3_pilot_q50_s10413",
+   "result": "exited",
+   "returncode": 0,
+   "wall_sec": 1051.4180631637573,
+   "log": "experiments/three_stage_implementation_pilot_20260924/logs/t3_pilot_q50_s10413.log",
+   "start_time": "2026-09-24T17:16:09",
+   "end_time": "2026-09-24T17:33:40+0000"
+  },
+  {
+   "run_id": "t3_pilot_q50_s10411",
+   "q": 50,
+   "seed": 10411,
+   "manifest": "experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json",
+   "output_dir": "experiments/three_stage_implementation_pilot_20260924/runs/t3_pilot_q50_s10411",
+   "result": "exited",
+   "returncode": 0,
+   "wall_sec": 1051.5799798965454,
+   "log": "experiments/three_stage_implementation_pilot_20260924/logs/t3_pilot_q50_s10411.log",
+   "start_time": "2026-09-24T17:16:09",
+   "end_time": "2026-09-24T17:33:40+0000"
+  },
+  {
+   "run_id": "t3_pilot_q50_s10412",
+   "q": 50,
+   "seed": 10412,
+   "manifest": "experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json",
+   "output_dir": "experiments/three_stage_implementation_pilot_20260924/runs/t3_pilot_q50_s10412",
+   "result": "exited",
+   "returncode": 0,
+   "wall_sec": 1054.8598351478577,
+   "log": "experiments/three_stage_implementation_pilot_20260924/logs/t3_pilot_q50_s10412.log",
+   "start_time": "2026-09-24T17:16:09",
+   "end_time": "2026-09-24T17:33:44+0000"
+  }
+ ],
+ "end_time": "2026-09-24T17:33:44+0000"
+}

@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11011",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11011,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2425,
+  "local_update": 1425,
+  "call_index": 85
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.07083116942394474,
+  "exp_root_over_dw": 0.017707792355986185,
+  "v_br_root": 2.9507486614551315,
+  "v_mean_root": 2.8799174920311867,
+  "dreach": 0.20839541913455095,
+  "dreach_over_dw": 0.05209885478363774,
+  "reach_delta_max": {
+   "3": 0.07342870119278544,
+   "2": 0.1340023280756535,
+   "1": 0.0009643898661120254
+  },
+  "reach_argmax_d": {
+   "3": 104.0,
+   "2": 28.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 104,
+   "2": 50,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.20839541913455095,
+  "dreach_pmf_support_over_dw": 0.05209885478363774,
+  "pmf_support_delta_max": {
+   "3": 0.07342870119278544,
+   "2": 0.1340023280756535,
+   "1": 0.0009643898661120254
+  },
+  "pmf_support_count": {
+   "3": 106,
+   "2": 48,
+   "1": 1
+  },
+  "dfull": 0.20839541913455095,
+  "dfull_over_dw": 0.05209885478363774,
+  "full_delta_max": {
+   "3": 0.07342870119278544,
+   "2": 0.1340023280756535,
+   "1": 0.0009643898661120254
+  },
+  "full_argmax_d": {
+   "3": 104.0,
+   "2": 28.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.1340023280756535,
+  "delta_max_all_over_dw": 0.03350058201891337,
+  "pdl_sum": 0.07083116942394377,
+  "pdl_residual": 9.71445146547012e-16,
+  "pdl_residual_over_dw": 2.42861286636753e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.216702407074365,
+    "union_lo": -100.78329759292563,
+    "union_hi": 99.21670240707437,
+    "n_grid_covered": 50
+   },
+   "3": {
+    "n_intervals": 50,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9692430214139165,
+    "union_lo": -208.34804915110857,
+    "union_hi": 204.32309580254469,
+    "n_grid_covered": 104
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 154,
+    "vertex": 47,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 31,
+    "vertex": 70,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 154,
+    "vertex": 47,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 21,
+    "vertex": 68,
+    "mean_action": 0,
+    "br_action": 12
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.030692470696019665,
+  "max_std_effort": 3.0692470696019667,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 93.58382415771484,
+  "beta": 154.71498107910156,
+  "conc": 248.2988052368164,
+  "mean_norm": 0.37690001797817246,
+  "mean_effort": 37.690001797817246
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.07083116942394474,
+   "max_over_dw": 0.017707792355986185,
+   "argmax_d": 0.0,
+   "min_raw": 0.07083116942394474
+  },
+  "2": {
+   "max_raw": 0.16817229500248132,
+   "max_over_dw": 0.04204307375062033,
+   "argmax_d": 28.0,
+   "min_raw": 0.01031666651912655
+  },
+  "3": {
+   "max_raw": 0.07342870119278544,
+   "max_over_dw": 0.01835717529819636,
+   "argmax_d": 104.0,
+   "min_raw": 4.296108525725373e-05
+  }
+ },
+ "dreach_over_dw": 0.05209885478363774,
+ "coverage_snapshot_index": 84,
+ "saved_time": "2026-09-26T01:34:33+0000"
+}

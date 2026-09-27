@@ -1,0 +1,394 @@
+{
+ "run_id": "t3_pilot_q50_s10411",
+ "cohort": "pilot",
+ "q": 50,
+ "seed": 10411,
+ "manifest": "experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json",
+ "manifest_name": "pilot_q50",
+ "output_dir": "experiments/three_stage_implementation_pilot_20260924/runs/t3_pilot_q50_s10411",
+ "resolved": {
+  "game": {
+   "w_h": 6.0,
+   "w_l": 2.0,
+   "k": 0.00028571428571428574,
+   "T": 3,
+   "e_min": 0.0,
+   "e_max": 100.0,
+   "q": 50.0
+  },
+  "derived": {
+   "dw": 4.0,
+   "B": 200.0,
+   "e_range": 100.0,
+   "domains": {
+    "1": [
+     -0.0,
+     0.0
+    ],
+    "2": [
+     -200.0,
+     200.0
+    ],
+    "3": [
+     -400.0,
+     400.0
+    ]
+   },
+   "bin_width": 10.0,
+   "bins": {
+    "1": 1,
+    "2": 40,
+    "3": 80
+   },
+   "dev_grid_points": {
+    "1": 1,
+    "2": 101,
+    "3": 201
+   },
+   "final_grid_points": {
+    "1": 1,
+    "2": 201,
+    "3": 401
+   },
+   "dense_step": 0.05,
+   "dense_points": {
+    "1": 1,
+    "2": 8001,
+    "3": 16001
+   },
+   "dense_points_total": 24003
+  },
+  "ppo": {
+   "hidden": 64,
+   "lr": 0.0003,
+   "adam_betas": [
+    0.9,
+    0.999
+   ],
+   "adam_eps": 1e-08,
+   "weight_decay": 0.0,
+   "clip_eps": 0.2,
+   "value_coef": 0.5,
+   "entropy_coef": 0.0,
+   "max_grad_norm": 0.5,
+   "epochs": 10,
+   "minibatch": 256,
+   "gamma": 1.0,
+   "gae_lambda": 1.0,
+   "c_min": 100.0,
+   "mu_clamp": 1e-06,
+   "action_clamp": 1e-06,
+   "adv_norm_eps": 1e-08
+  },
+  "phases": [
+   {
+    "name": "A",
+    "active_stages": [
+     3
+    ],
+    "start_counts": {
+     "3": 512
+    },
+    "cap": 400,
+    "check_every": 100,
+    "check_role": "diagnostic_only",
+    "k_consecutive": null,
+    "criterion": "stage3_continuation_gain_over_dw",
+    "threshold_over_dw": null,
+    "concentration_stages": [
+     3
+    ],
+    "exit_rule": "fixed_budget",
+    "cap_exit_reason": "fixed_budget_completed",
+    "per_update": {
+     "episodes": 512,
+     "transitions_by_stage": {
+      "1": 0,
+      "2": 0,
+      "3": 512
+     },
+     "joint_environment_steps": 512,
+     "physical_actions": 1024
+    },
+    "expected_direct_es_per_bin_per_update": {
+     "3": 6.4
+    }
+   },
+   {
+    "name": "B",
+    "active_stages": [
+     2,
+     3
+    ],
+    "start_counts": {
+     "2": 512
+    },
+    "cap": 600,
+    "check_every": 25,
+    "check_role": "eligibility",
+    "k_consecutive": 3,
+    "criterion": "max_D2_continuation_gain_over_dw",
+    "threshold_over_dw": 0.02,
+    "concentration_stages": [
+     2,
+     3
+    ],
+    "exit_rule": "k_consecutive_eligible",
+    "pass_exit_reason": "verifier_passed",
+    "cap_exit_reason": "budget_forced",
+    "per_update": {
+     "episodes": 512,
+     "transitions_by_stage": {
+      "1": 0,
+      "2": 512,
+      "3": 512
+     },
+     "joint_environment_steps": 1024,
+     "physical_actions": 2048
+    },
+    "expected_direct_es_per_bin_per_update": {
+     "2": 12.8
+    }
+   },
+   {
+    "name": "C",
+    "active_stages": [
+     1,
+     2,
+     3
+    ],
+    "start_counts": {
+     "1": 256,
+     "2": 85,
+     "3": 171
+    },
+    "cap": 1800,
+    "check_every": 25,
+    "check_role": "eligibility",
+    "k_consecutive": 1,
+    "criterion": "dreach_over_dw",
+    "threshold_over_dw": 0.01,
+    "concentration_stages": [
+     1,
+     2,
+     3
+    ],
+    "exit_rule": "first_eligible_candidate",
+    "pass_exit_reason": "candidate_found",
+    "cap_exit_reason": "no_candidate_budget_exhausted",
+    "per_update": {
+     "episodes": 512,
+     "transitions_by_stage": {
+      "1": 256,
+      "2": 341,
+      "3": 512
+     },
+     "joint_environment_steps": 1109,
+     "physical_actions": 2218
+    },
+    "expected_direct_es_per_bin_per_update": {
+     "2": 2.125,
+     "3": 2.1375
+    }
+   }
+  ],
+  "concentration_threshold": 0.04,
+  "snapshot_every": 20,
+  "weights_every": 25,
+  "es_bin_width": 10.0,
+  "rng": {
+   "namespaces": {
+    "init": 0,
+    "env_noise": 1,
+    "learner_action": 2,
+    "opponent_action": 3,
+    "starts_roles": 4,
+    "minibatch": 5
+   },
+   "seed_components": [
+    "seed",
+    "q",
+    "namespace"
+   ]
+  },
+  "verifier": {
+   "development": {
+    "name": "development",
+    "state_step": 4.0,
+    "effort_step": 1.0,
+    "gl_half": 16,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   },
+   "final": {
+    "name": "final",
+    "state_step": 2.0,
+    "effort_step": 0.5,
+    "gl_half": 32,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   }
+  },
+  "final_certification": {
+   "main_dreach_final_thr_over_dw": 0.01,
+   "refine_dreach_thr_over_dw": 0.002,
+   "refine_exp_root_thr_over_dw": 0.002,
+   "dense_conc_step": 0.05,
+   "dense_conc_thr": 0.04,
+   "requires_candidate": true,
+   "endpoint_rule": "first eligible C development call (candidate) else C-cap terminal (diagnostic_terminal); no promotion of other checkpoints"
+  },
+  "economics": {
+   "modes": {
+    "0": "mean_policy_selfplay",
+    "1": "stochastic_policy_selfplay"
+   },
+   "replicates": 3,
+   "episodes_per_replicate": 200000,
+   "chunk_size": 10000,
+   "seed_base": 9005000,
+   "seed_tag": 100,
+   "seed_components": [
+    "seed_base",
+    "seed",
+    "q",
+    "seed_tag",
+    "mode_id",
+    "rep_id",
+    "stream_id"
+   ],
+   "streams": {
+    "0": "environment",
+    "1": "player0_actions",
+    "2": "player1_actions"
+   },
+   "gap_quantile_method": "histogram_linear_width10"
+  },
+  "coverage": {
+   "bin_width": 10.0,
+   "tail_fraction_of_domain_half": 0.8,
+   "tolerance": 1e-09
+  },
+  "runtime": {
+   "device": "cpu",
+   "torch_threads": 1,
+   "thread_env": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+   }
+  },
+  "smoke_overrides": {},
+  "obs_encoding": "tau=(t-1)/(T-1); dnorm_1=0; dnorm_t=d/((t-1)B); float64 -> float32",
+  "dtypes": {
+   "network": "float32",
+   "gaps_rewards_verifier_statistics": "float64"
+  }
+ },
+ "provenance": {
+  "checkout": ".",
+  "checkout_git_head": "d1b84437d3be32daf40a58d77e044201b7ba09d0",
+  "checkout_git_branch": "claude/tournament-tasks-1-9-87db41",
+  "checkout_git_status_experiment_dir": "?? experiments/three_stage_implementation_pilot_20260924/",
+  "root_git_head": "d1b84437d3be32daf40a58d77e044201b7ba09d0",
+  "w_git_head": "d1b84437d3be32daf40a58d77e044201b7ba09d0",
+  "w_git_status_sources": "?? agents/ppo_curriculum.py\n?? envs/curriculum_env.py\n?? run/run_final_dp_br.py\n?? utils/dp_br_verifier.py",
+  "w_git_diff_stat_sources": "",
+  "w_sources": [
+   {
+    "path": "./envs/curriculum_env.py",
+    "size": 5108,
+    "mtime": "2026-09-22T00:26:34"
+   },
+   {
+    "path": "./agents/ppo_curriculum.py",
+    "size": 14952,
+    "mtime": "2026-09-22T00:26:34"
+   },
+   {
+    "path": "./run/run_final_dp_br.py",
+    "size": 43148,
+    "mtime": "2026-09-22T00:26:34"
+   },
+   {
+    "path": "./utils/dp_br_verifier.py",
+    "size": 26267,
+    "mtime": "2026-09-22T00:26:34"
+   },
+   {
+    "path": "./utils/theory_multistage.py",
+    "size": 14386,
+    "mtime": "2026-09-21T23:54:30"
+   }
+  ],
+  "experiment_sources": [
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/build_manifests.py",
+    "size": 15460,
+    "mtime": "2026-09-24T16:58:27"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/collect_t3.py",
+    "size": 7634,
+    "mtime": "2026-09-24T16:42:21"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/common.py",
+    "size": 10136,
+    "mtime": "2026-09-24T16:38:18"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/launch.py",
+    "size": 4771,
+    "mtime": "2026-09-24T16:46:19"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/make_report.py",
+    "size": 69823,
+    "mtime": "2026-09-24T16:49:32"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/metrics.py",
+    "size": 39569,
+    "mtime": "2026-09-24T16:41:55"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/run_experiment.py",
+    "size": 42277,
+    "mtime": "2026-09-24T16:55:03"
+   },
+   {
+    "path": "experiments/three_stage_implementation_pilot_20260924/tests/test_t3.py",
+    "size": 55747,
+    "mtime": "2026-09-24T16:58:35"
+   }
+  ],
+  "python": "3.12.3",
+  "python_executable": "python",
+  "numpy": "2.5.0",
+  "torch": "2.5.1+cu121",
+  "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "hostname": "vector2",
+  "paths": {
+   "ROOT": ".",
+   "W": ".",
+   "E": "experiments/three_stage_implementation_pilot_20260924",
+   "plan": "MultiStage/three_stage/T3_IMPLEMENTATION_PLAN_20260924.md"
+  }
+ },
+ "threads": {
+  "env": {
+   "OMP_NUM_THREADS": "1",
+   "MKL_NUM_THREADS": "1",
+   "OPENBLAS_NUM_THREADS": "1"
+  },
+  "torch_num_threads": 1
+ },
+ "cmd": "experiments/three_stage_implementation_pilot_20260924/run_experiment.py --manifest experiments/three_stage_implementation_pilot_20260924/manifests/pilot_q50.json --seed 10411",
+ "pid": 770857,
+ "host": "vector2",
+ "start_time": "2026-09-24T17:16:10+0000",
+ "resource_peak_method": "VmHWM_reset_per_segment"
+}

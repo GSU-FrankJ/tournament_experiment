@@ -1,0 +1,31 @@
+{
+ "cohort": "asamp",
+ "q": 60,
+ "generated": "2026-09-24T19:04:23+0000",
+ "study": {
+  "name": "phase_A_state_sampling_20260924",
+  "question": "Does moving A's ES3 weight toward the center interval [-B, B] reduce the A400 full-domain stage-3 deviation, given a fixed A budget and a shared network?",
+  "arms": {
+   "baseline": "512 ES3/update uniform on D3 (pilot phase A)",
+   "center": "256 ES3/update uniform on D3 + 256 ES3/update uniform on [-B, B] (its width-10 bins)"
+  },
+  "rationale": "At stage 3, |d| > B cannot change the terminal winner for any feasible actions/noise; uniform D3=[-2B,2B] puts half of the starts there. The mixture raises the expected center share from 50% to 75% while keeping full-domain coverage. This tests allocation of a fixed training amount across state regions; it is not a fix for missing bins and may not help.",
+  "unchanged": "A cap 400, check cadence 100, PPO parameters, concentration threshold, verifier tiers, all thresholds; B and C are not run",
+  "pairing": "each seed runs both arms (same initial weights and RNG stream seeds)",
+  "primary_metric": "final-tier max_{d in D3} (V3_BR(d) - V3_mean(d))/DW at the A400 endpoint",
+  "secondary_metrics": "center (|d| <= B) and outer (|d| > B) max and grid-mean of the same gain (final and dev tiers), argmax location, stage-3 concentration (dev grid max std_norm at A400 and dense D3 by region), A100-A400 dev-tier trajectory, actual per-bin exposure",
+  "decision_rule": "consistent improvement iff the center arm's primary metric is lower than the baseline's in all 3 seed pairs; center/outer values and concentration are reported with it, and a center arm that exceeds concentration 0.04 where baseline does not is flagged; training mean reward is descriptive only and never a criterion",
+  "next_if_consistent": "validate full B/C at q60, then q50; an A improvement alone is not sufficient for formal (the C-end stage-2 deviations are also large)",
+  "arm": "center",
+  "center_es": {
+   "3": 256
+  },
+  "center_half_width": 220.0
+ },
+ "pairs_planned": 3,
+ "pairs_complete": 3,
+ "pairs_primary_improved": 3,
+ "consistent_improvement": true,
+ "conc_flags": [],
+ "primary_recomputed_from_arrays": true
+}

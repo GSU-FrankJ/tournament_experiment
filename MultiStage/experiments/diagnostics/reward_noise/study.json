@@ -1,0 +1,126 @@
+{
+  "study": "endgame_reward_noise_audit_20260925",
+  "step": 1,
+  "title": "Offline terminal-reward noise audit at fixed checkpoints (stage 3)",
+  "written_utc": "2026-09-25T17:23:00Z",
+  "written_before_any_audit_result": true,
+  "hypothesis": "Given the state and both actions, the noise of a single terminal win/loss prize may mask action-value differences and make it hard for the policy to learn state-dependent structure.",
+  "status_of_hypothesis": "to be tested; it is not assumed to be the cause of the T=3 failures",
+  "sources": {
+    "E": "source experiment: three_stage_implementation_pilot_20260924 (source artifacts omitted)",
+    "W": "source implementation: candidate-search-recovery-data (code omitted)",
+    "manifest": "E/manifests/asamp_abc_q60_baseline.json (game/PPO/verifier config is read from resolved)",
+    "runs": {
+      "10441": "E/runs/t3_asamp_abc_q60_baseline_s10441",
+      "10442": "E/runs/t3_asamp_abc_q60_baseline_s10442",
+      "10443": "E/runs/t3_asamp_abc_q60_baseline_s10443"
+    }
+  },
+  "seeds": [
+    10441,
+    10442,
+    10443
+  ],
+  "checkpoints": {
+    "A400": {
+      "file": "weights/update_00400.npz",
+      "contents": "actor.* and critic.* float32 arrays only (no opponent, no optimizer)",
+      "opponent_rule": "reconstructed as an exact copy of the A400 actor. Evidence required from the original runner: train_step refreshes the snapshot when global_update % snapshot_every(20) == 0 BEFORE exporting weights when global_update % weights_every(25) == 0, so at g=400 the refresh precedes the export; events.jsonl must show snapshot_refresh(periodic, g=400) before checkpoint_saved(periodic_weights, update_00400) and snapshot_refresh(phase_B_entry, g=400) after it. If this evidence is missing the audit records the limitation instead of claiming an exact reconstruction.",
+      "replay_check": "dev-tier verifier on the loaded actor must reproduce the recorded A400 development call's stage-3 continuation gain"
+    },
+    "C_min": {
+      "file": "checkpoints/min_dev.pt",
+      "contents": "actor, critic, opponent state_dicts (+ optimizer states, not used)",
+      "opponent_rule": "the opponent state_dict saved in the checkpoint; whether it equals the actor is reported",
+      "replay_check": "dev-tier verifier on the loaded actor must reproduce the recorded minimum C call's dReach"
+    }
+  },
+  "frozen_weights": "no optimizer is stepped, the snapshot is never refreshed during the audit, gradients are read from autograd only; after the audit the in-memory actor/critic/opponent are compared with a fresh load of the same checkpoint file",
+  "stage": 3,
+  "state_distribution": "phase-A exploring starts restored exactly: E run_experiment.sample_starts(spec, StartSampler(spec, 10), {'3': 512}, rng) = StartSampler.balanced on D3=[-440,440] (88 width-10 bins, bin then uniform), no center mixture, learner role uniform {0,1}; learner-signed gap d = d0 (role 0) or -d0 (role 1)",
+  "rollout": "one stage-3 transition per state with the training collector code path (terminal_noise.collect_batch_k with K=8, trace=True): learner action ~ actor Beta(obs(3,d)), opponent action ~ opponent Beta(obs(3,-d)) (sampled, never the mean action), stored actions float32 clipped to [1e-6, 1-1e-6], log-probs from torch Beta on the stored action; noise copy 1 = (eps0, eps1) drawn exactly as the collector draws its environment noise; copies 2..8 from a separate stream, array shape (7, 2, n) = (copy, player, episode)",
+  "audit_rng": {
+    "tag": 20260925,
+    "seed_sequence": "SeedSequence([tag, seed, q, stream_id]); independent of every training stream (training uses SeedSequence([seed, q, ns]))",
+    "stream_ids": {
+      "starts_roles": 1,
+      "learner_action": 2,
+      "opponent_action": 3,
+      "env_noise_copy1": 4,
+      "terminal_copies_2_to_8": 5
+    },
+    "shared_across_checkpoints_of_a_seed": true,
+    "note": "the same audit streams are used for A400 and C_min of a seed (common random numbers for states and noise; actions differ because the policies differ)"
+  },
+  "scale": {
+    "batches": 64,
+    "batch_size": 512,
+    "K": 8,
+    "fixed": "no additional batches or seeds are added after results are seen"
+  },
+  "estimators": {
+    "K1": "r = -k e_L^2 + R(y + xi_1)  (the original single realized prize)",
+    "K8": "r = -k e_L^2 + mean_{j=1..8} R(y + xi_j), xi_1 shared with K1; cost charged once",
+    "ref": "r = -k e_L^2 + w_l + dW * F_xi(y); offline reference only, never a training reward"
+  },
+  "definitions": {
+    "y": "d + e_L - e_O (learner-signed pre-noise gap after actions)",
+    "xi": "eps_L - eps_O ~ Triangular(-2q, 2q)",
+    "p": "F_xi(y) = win probability given (d, e_L, e_O)",
+    "R": "realized prize w_h / w_l / (w_h+w_l)/2 from the final gap",
+    "V": "critic(obs(3, d)) of the checkpoint (float32 -> float64)",
+    "raw_advantage": "A_E = r_E - V (gamma = lambda = 1, one terminal transition, zero bootstrap)",
+    "score": "s_i = grad_theta log pi_theta(a_i | s_i) over all actor parameters, per sample via torch.func (reward and V detached)",
+    "raw_gradient": "g_raw = (1/n) sum_{i in region} A_E,i s_i  (unnormalized, unclipped; n = 512 so g_all = g_center + g_outer)",
+    "surrogate_gradient": "g_sur = (1/n) sum_{i in region} Ahat_E,i s_i with Ahat = (A - mean A)/(population SD A + 1e-8) over the whole 512-sample batch in float32, exactly the PPO normalization; equals -grad(actor_loss) of CurriculumPPO's clipped surrogate at ratio 1 before any optimizer step (checked by autograd); reported as an ascent direction",
+    "regions": "all; center |d| <= B (B = 220 at q60, relative tolerance 1e-9 as in E metrics.stage_region_metrics); outer |d| > B",
+    "cross_batch_statistics (per grad type, estimator, region)": {
+      "mean_vector": "gbar = mean_b g_b; report |gbar|",
+      "per_batch_norm": "mean_b |g_b|",
+      "total_variance": "V = (1/63) sum_b |g_b - gbar|^2 (trace of the sample covariance)",
+      "deviation_from_reference": "D = mean_b |g_b - g_ref,b|^2 (same batch, same states/actions); also |gbar - gbar_ref| and cos(gbar, gbar_ref)",
+      "same_batch_cosine": "c_same = mean_b cos(g_b, g_ref,b)",
+      "expected_direction_alignment": "c_loo = mean_b cos(g_b, gbar_ref^(-b)), gbar_ref^(-b) = mean of the reference estimator's gradients (same type and region) over the other 63 batches",
+      "snr": "(|gbar|^2 - V/64) / V",
+      "clip_fraction": "surrogate, all region only: fraction of batches with |g_sur| > max_grad_norm 0.5 (full-batch norm; PPO clips per 256-minibatch, so this is descriptive)"
+    },
+    "derived_raw": {
+      "phi": "D_K1 / V_K1 = share of the per-batch raw-gradient variance caused by terminal noise under K=1",
+      "rho": "V_K8 / V_K1 = raw-gradient estimator variance ratio",
+      "signal_sq": "S2 = |gbar_ref|^2 - V_ref/64 (debiased squared norm of the expected raw gradient)",
+      "tau": "D_K1 / S2 = per-batch terminal gradient-noise energy relative to the signal energy (undefined if S2 <= 0)",
+      "D_pred": "mean_b (1/n^2) sum_{i in region} dW^2 p_i (1-p_i) |s_i|^2 / K (exact conditional expectation of D given states and actions)"
+    },
+    "derived_surrogate": {
+      "delta_c_loo": "c_loo(K8) - c_loo(K1)",
+      "snr_ratio": "SNR(K8) / SNR(K1) when both are > 0"
+    },
+    "reward_and_advantage": "pooled over the 64 x 512 samples of each region: mean and variance of r_E and A_E for E in {K1, K8, ref}; mean conditional terminal variance dW^2 p(1-p); per width-20 d-bin profiles for figures"
+  },
+  "math_and_implementation_checks": {
+    "outer_prizes_identical": "for |d| > B: prize_K1 == prize_K8 == prize_ref exactly and p in {0, 1} exactly",
+    "cost_charged_once": "r_E - prize_E is bitwise identical across E and equals -k e_L^2",
+    "first_copy_shared": "prize_K1 == copy 1 and prize_K8 == mean of the 8 copies including copy 1; collector returns/advantages equal r_K8 and r_K8 - V",
+    "conditional_mean_center": "mean(prize_K - prize_ref) over center samples: |z| <= 4 for K in {1, 8}",
+    "conditional_variance_center": "mean((prize_K - prize_ref)^2) vs mean(dW^2 p(1-p))/K over center samples: |z| <= 4 for K in {1, 8} (z from the per-sample SE)",
+    "gradient_noise_matches_theory": "center raw gradient: mean_b D_K,b vs mean_b D_pred,K,b: |z| <= 4 for K in {1, 8} (z from the per-batch SE)",
+    "surrogate_equals_ppo_autograd": "first batch of every checkpoint: (1/n) S^T Ahat equals -grad of the PPO clipped-surrogate actor loss over the full batch, and (1/n) S^T A equals grad of mean(A log pi); max abs diff <= 1e-4 * max abs component",
+    "weights_unchanged": "after the audit the actor, critic and opponent tensors equal a fresh load of the checkpoint file",
+    "checkpoint_replay": "dev verifier replay matches the recorded call (abs diff <= 1e-12)",
+    "opponent_provenance": "A400 event-order evidence present (see checkpoints.A400.opponent_rule); C_min opponent read from the file",
+    "any_failure": "report and stop (no Step 2)"
+  },
+  "questions_and_reading_rules": {
+    "Q1_terminal_noise_large_vs_signal": "yes at a checkpoint if, in the center region, phi >= 0.25 and tau > 1 in all 3 seeds; otherwise reported with the values",
+    "Q2_K8_improves_center_gradient_not_only_reward": "judged on the gradient metrics (rho for raw, c_loo and SNR for the normalized surrogate); reward/advantage variance reductions alone never count",
+    "Q3_direction_consistent_across_seeds": "each metric's direction (K8 better or not) reported per seed; consistent = same direction in 3/3",
+    "Q4_A400_vs_Cmin": "all metrics reported side by side for both checkpoints; descriptive only"
+  },
+  "step2_entry_rule": {
+    "enter_step2_iff": "every math/implementation check passes AND, at A400, center region, in each of the 3 seeds: (G1) phi_raw >= 0.25, (G2) rho_raw <= 0.80, (G3) c_loo(surrogate, K8) > c_loo(surrogate, K1)",
+    "reason_for_A400": "Step 2 is an A-only training comparison; A400 is the late-A state of the same training protocol. C_min is reported for context and does not enter the rule.",
+    "not_criteria": "reward variance, advantage variance, training reward, the outer/all regions, SNR values",
+    "if_not_met": "report the results, state which item failed, and stop; no further audit batches, seeds or alternative metrics"
+  },
+  "out_of_scope": "B/C, q50 and formal; no change to verifier, certification thresholds, concentration, network, learning rate or PPO parameters"
+}

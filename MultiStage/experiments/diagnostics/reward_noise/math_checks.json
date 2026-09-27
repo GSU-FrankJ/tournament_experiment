@@ -1,0 +1,590 @@
+{
+ "10441_A400": {
+  "outer_prizes_identical": {
+   "n_outer": 16358,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.375839968151496e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": 0.006446110330086835,
+   "se": 0.007946006494208489,
+   "z": 0.8112389959390462,
+   "n": 16410,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": 0.006114326508536663,
+   "se": 0.016456497597311354,
+   "z": 0.3715448243091298,
+   "n": 16410,
+   "empirical": 1.0360897184896987,
+   "theory_dw2p1p_over_K": 1.029975391981162,
+   "ratio": 1.0059363811564233,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": 0.05142263820954668,
+   "se": 0.12032299064602212,
+   "z": 0.427371676297731,
+   "n": 64,
+   "empirical_mean_D": 0.5168161076025608,
+   "theory_mean_D": 0.4653934693930142,
+   "ratio": 1.1104928229367168,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.002515580165553015,
+   "se": 0.002775459814354401,
+   "z": 0.9063651912892725,
+   "n": 16410,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": -0.002339161489468929,
+   "se": 0.002258681082452415,
+   "z": -1.0356315938720888,
+   "n": 16410,
+   "empirical": 0.12640776250817634,
+   "theory_dw2p1p_over_K": 0.12874692399764526,
+   "ratio": 0.9818313213486041,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": -0.010944385778615416,
+   "se": 0.007182262705827098,
+   "z": -1.523807500070422,
+   "n": 64,
+   "empirical_mean_D": 0.04722979789551135,
+   "theory_mean_D": 0.05817418367412677,
+   "ratio": 0.8118686831959279,
+   "ok": true
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 1.656090287127654e-07,
+   "sur_scale": 0.19935932755470276,
+   "raw_max_abs_diff": 1.4481090054863088e-07,
+   "raw_scale": 0.14534351229667664,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "stage-3 continuation gain (raw) of the A400 development call",
+   "recorded": 0.5692242079414771,
+   "replay": 0.5692242079414771,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "event_index_periodic_refresh_g400": 38,
+   "event_index_weights_saved_g400": 39,
+   "event_index_phase_B_entry_refresh": 41,
+   "refreshes_between_refresh_and_save": [],
+   "opponent_equals_A400_actor_confirmed": true,
+   "runner_rule": "E run_experiment.Run.train_step: refresh_snapshot() if g % snapshot_every == 0, then export_weights_npz if g % weights_every == 0 (snapshot_every=20, weights_every=25)"
+  },
+  "all_ok": true
+ },
+ "10441_C_min": {
+  "outer_prizes_identical": {
+   "n_outer": 16358,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.440892098500626e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": 0.006626563621943687,
+   "se": 0.00790010446590714,
+   "z": 0.8387944299395771,
+   "n": 16410,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": 0.004527393040546993,
+   "se": 0.0157078555794097,
+   "z": 0.2882247686617152,
+   "n": 16410,
+   "empirical": 1.0241566855854194,
+   "theory_dw2p1p_over_K": 1.0196292925448724,
+   "ratio": 1.0044402343809162,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": 0.5591102237828978,
+   "se": 0.6815133204315881,
+   "z": 0.8203951515266422,
+   "n": 64,
+   "empirical_mean_D": 4.147631389532513,
+   "theory_mean_D": 3.588521165749615,
+   "ratio": 1.1558051904832793,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.001903833579286769,
+   "se": 0.0027517022130293294,
+   "z": 0.6918748585047115,
+   "n": 16410,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": -0.003203303065464365,
+   "se": 0.002283255974103328,
+   "z": -1.4029539840456804,
+   "n": 16410,
+   "empirical": 0.12425035850264472,
+   "theory_dw2p1p_over_K": 0.12745366156810906,
+   "ratio": 0.9748669200550779,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": -0.0835079776958226,
+   "se": 0.045546102693511815,
+   "z": -1.8334824004100483,
+   "n": 64,
+   "empirical_mean_D": 0.36505716802287924,
+   "theory_mean_D": 0.4485651457187019,
+   "ratio": 0.8138331109921076,
+   "ok": true
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 1.3592947090135254e-06,
+   "sur_scale": 0.29643145203590393,
+   "raw_max_abs_diff": 3.679376830018066e-07,
+   "raw_scale": 0.21610485017299652,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "dReach/DW of the minimum C development call",
+   "recorded": 0.02874021098240498,
+   "replay": 0.02874021098240498,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "source": "opponent state_dict saved in the checkpoint",
+   "opponent_equals_actor": false
+  },
+  "all_ok": true
+ },
+ "10442_A400": {
+  "outer_prizes_identical": {
+   "n_outer": 16228,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.34114549863196e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": -0.00597101565662669,
+   "se": 0.007815394888372256,
+   "z": -0.7640069045660594,
+   "n": 16540,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": -0.0012515416649780447,
+   "se": 0.016306807380227797,
+   "z": -0.07674964423112977,
+   "n": 16540,
+   "empirical": 1.0102443433308788,
+   "theory_dw2p1p_over_K": 1.011495884995857,
+   "ratio": 0.9987626823959017,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": 0.0015378946927801299,
+   "se": 0.0881265703844793,
+   "z": 0.017450976318159107,
+   "n": 64,
+   "empirical_mean_D": 0.5236460959431661,
+   "theory_mean_D": 0.5221082012503862,
+   "ratio": 1.002945547855975,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.000588839240592175,
+   "se": 0.002794952673736718,
+   "z": 0.21067950313624637,
+   "n": 16540,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": 0.0027620671637203407,
+   "se": 0.0023375945258772486,
+   "z": 1.1815852292363649,
+   "n": 16540,
+   "empirical": 0.12919905278820246,
+   "theory_dw2p1p_over_K": 0.12643698562448213,
+   "ratio": 1.0218454050456696,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": -0.025260276431747733,
+   "se": 0.005494923146837512,
+   "z": -4.597020878496864,
+   "n": 64,
+   "empirical_mean_D": 0.04000324872455052,
+   "theory_mean_D": 0.06526352515629827,
+   "ratio": 0.6129495553411736,
+   "ok": false
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 6.037324751240192e-08,
+   "sur_scale": 0.0020099561661481857,
+   "raw_max_abs_diff": 7.686083451467762e-08,
+   "raw_scale": 0.0021851840429008007,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "stage-3 continuation gain (raw) of the A400 development call",
+   "recorded": 0.5858088284295588,
+   "replay": 0.5858088284295588,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "event_index_periodic_refresh_g400": 38,
+   "event_index_weights_saved_g400": 39,
+   "event_index_phase_B_entry_refresh": 41,
+   "refreshes_between_refresh_and_save": [],
+   "opponent_equals_A400_actor_confirmed": true,
+   "runner_rule": "E run_experiment.Run.train_step: refresh_snapshot() if g % snapshot_every == 0, then export_weights_npz if g % weights_every == 0 (snapshot_every=20, weights_every=25)"
+  },
+  "all_ok": false
+ },
+ "10442_C_min": {
+  "outer_prizes_identical": {
+   "n_outer": 16228,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.440892098500626e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": -0.00500335085288862,
+   "se": 0.0076748038677983965,
+   "z": -0.6519190508413458,
+   "n": 16540,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": -0.007849568232049839,
+   "se": 0.0168492586011857,
+   "z": -0.46587024496718543,
+   "n": 16540,
+   "empirical": 0.9742153732330733,
+   "theory_dw2p1p_over_K": 0.9820649414651229,
+   "ratio": 0.992007078248472,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": -0.033635488944083275,
+   "se": 0.6642554731560723,
+   "z": -0.05063637456274349,
+   "n": 64,
+   "empirical_mean_D": 4.340711718859563,
+   "theory_mean_D": 4.3743472078036465,
+   "ratio": 0.992310740929737,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.000861219884717184,
+   "se": 0.0027606538125297475,
+   "z": 0.31196228980554364,
+   "n": 16540,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": 0.0032898074844602476,
+   "se": 0.0023194576438164255,
+   "z": 1.4183520415777944,
+   "n": 16540,
+   "empirical": 0.1260479251676006,
+   "theory_dw2p1p_over_K": 0.12275811768314036,
+   "ratio": 1.026799103363183,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": 0.3706923412958619,
+   "se": 0.16252240309726804,
+   "z": 2.2808691862253987,
+   "n": 64,
+   "empirical_mean_D": 0.9174857422713177,
+   "theory_mean_D": 0.5467934009754558,
+   "ratio": 1.6779385790584942,
+   "ok": true
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 4.535068838240619e-07,
+   "sur_scale": 0.5319353342056274,
+   "raw_max_abs_diff": 1.2052832248365952e-06,
+   "raw_scale": 0.40204745531082153,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "dReach/DW of the minimum C development call",
+   "recorded": 0.03890195810983943,
+   "replay": 0.03890195810983943,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "source": "opponent state_dict saved in the checkpoint",
+   "opponent_equals_actor": false
+  },
+  "all_ok": true
+ },
+ "10443_A400": {
+  "outer_prizes_identical": {
+   "n_outer": 16365,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.34114549863196e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": 0.00564775135398459,
+   "se": 0.007670441201140116,
+   "z": 0.7363007167234555,
+   "n": 16403,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": -0.004305621944127267,
+   "se": 0.015675892436346744,
+   "z": -0.27466518806572576,
+   "n": 16403,
+   "empirical": 0.9650545272422212,
+   "theory_dw2p1p_over_K": 0.9693601491863484,
+   "ratio": 0.9955582845573534,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": -0.06856866823267739,
+   "se": 0.15022062861308563,
+   "z": -0.4564530774883498,
+   "n": 64,
+   "empirical_mean_D": 0.7578355688849026,
+   "theory_mean_D": 0.8264042371175799,
+   "ratio": 0.9170276903808741,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.0011973459403407465,
+   "se": 0.0027199507267562017,
+   "z": 0.4402086878127732,
+   "n": 16403,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": 0.00017557533101732013,
+   "se": 0.002345108719801747,
+   "z": 0.07486873829549492,
+   "n": 16403,
+   "empirical": 0.12134559397931088,
+   "theory_dw2p1p_over_K": 0.12117001864829355,
+   "ratio": 1.0014489997853921,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": -0.0064531978570867045,
+   "se": 0.016227167913733465,
+   "z": -0.3976786270649975,
+   "n": 64,
+   "empirical_mean_D": 0.09684733178261078,
+   "theory_mean_D": 0.10330052963969749,
+   "ratio": 0.9375298666948285,
+   "ok": true
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 4.0174475196552706e-07,
+   "sur_scale": 0.4607856869697571,
+   "raw_max_abs_diff": 1.1957412957008806e-07,
+   "raw_scale": 0.2602347135543823,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "stage-3 continuation gain (raw) of the A400 development call",
+   "recorded": 0.3051676935533396,
+   "replay": 0.3051676935533396,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "event_index_periodic_refresh_g400": 38,
+   "event_index_weights_saved_g400": 39,
+   "event_index_phase_B_entry_refresh": 41,
+   "refreshes_between_refresh_and_save": [],
+   "opponent_equals_A400_actor_confirmed": true,
+   "runner_rule": "E run_experiment.Run.train_step: refresh_snapshot() if g % snapshot_every == 0, then export_weights_npz if g % weights_every == 0 (snapshot_every=20, weights_every=25)"
+  },
+  "all_ok": true
+ },
+ "10443_C_min": {
+  "outer_prizes_identical": {
+   "n_outer": 16365,
+   "copies_all_equal": true,
+   "ref_equals_copy1": true,
+   "p_in_0_1": true,
+   "ok": true
+  },
+  "cost_charged_once": {
+   "max_abs_r_minus_prize_plus_k_e2": 4.440892098500626e-16,
+   "ok": true,
+   "collector_reward_is_minus_k_e2_plus_mean_of_copies": true
+  },
+  "first_copy_shared": {
+   "ok": true,
+   "definition": "prize_K1 == R(d_next) of the environment draw; K8 = mean of copies incl. copy 1"
+  },
+  "conditional_mean_center_K1": {
+   "mean": 0.006143237186995785,
+   "se": 0.00796473805852794,
+   "z": 0.7713043595223007,
+   "n": 16403,
+   "ok": true
+  },
+  "conditional_variance_center_K1": {
+   "mean": -0.018348423712937656,
+   "se": 0.01499864683025782,
+   "z": -1.223338606514962,
+   "n": 16403,
+   "empirical": 1.0405322718596177,
+   "theory_dw2p1p_over_K": 1.0588806955725556,
+   "ratio": 0.9826718687103682,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K1": {
+   "mean": 1.1609110277553094,
+   "se": 1.274231213508094,
+   "z": 0.9110677995080642,
+   "n": 64,
+   "empirical_mean_D": 7.336736981397673,
+   "theory_mean_D": 6.175825953642365,
+   "ratio": 1.1879766425526659,
+   "ok": true
+  },
+  "conditional_mean_center_K8": {
+   "mean": 0.0038570700224527157,
+   "se": 0.0028270234554126764,
+   "z": 1.3643572765793264,
+   "n": 16403,
+   "ok": true
+  },
+  "conditional_variance_center_K8": {
+   "mean": -0.0012594153079401411,
+   "se": 0.002429859522484865,
+   "z": -0.51830786771254,
+   "n": 16403,
+   "empirical": 0.1311006716386293,
+   "theory_dw2p1p_over_K": 0.13236008694656945,
+   "ratio": 0.9904849313943972,
+   "ok": true
+  },
+  "gradient_noise_matches_theory_center_K8": {
+   "mean": -0.008425169010418343,
+   "se": 0.12579714087159902,
+   "z": -0.06697424879487446,
+   "n": 64,
+   "empirical_mean_D": 0.7635530751948771,
+   "theory_mean_D": 0.7719782442052956,
+   "ratio": 0.9890862610783914,
+   "ok": true
+  },
+  "surrogate_equals_ppo_autograd": {
+   "max_abs_ratio_minus_1": 0.0,
+   "sur_max_abs_diff": 1.3162402956456987e-06,
+   "sur_scale": 1.8144440650939941,
+   "raw_max_abs_diff": 1.146542937036088e-06,
+   "raw_scale": 1.1505039930343628,
+   "ok": true
+  },
+  "weights_unchanged": {
+   "ok": true
+  },
+  "checkpoint_replay": {
+   "quantity": "dReach/DW of the minimum C development call",
+   "recorded": 0.015125583145762733,
+   "replay": 0.015125583145762733,
+   "abs_diff": 0.0,
+   "ok": true
+  },
+  "opponent_provenance": {
+   "ok": true,
+   "source": "opponent state_dict saved in the checkpoint",
+   "opponent_equals_actor": true
+  },
+  "all_ok": true
+ }
+}

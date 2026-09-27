@@ -1,0 +1,805 @@
+{
+ "experiment": "Dense-C verifier re-run of the remaining no-candidate formal T=2 runs, 20260922",
+ "settings_document": "experiments/two_stage_formal_T2_20260915/PREREGISTRATION.md",
+ "worktree": ".",
+ "result_root": "experiments/two_stage_dense_c25_rest_20260922",
+ "python": "python",
+ "formal_run_count": 5,
+ "group_order": [
+  "F1_A400_const_first_eligible"
+ ],
+ "max_concurrent_processes": 5,
+ "threads_per_process": {
+  "torch": 1,
+  "OMP": 1,
+  "MKL": 1,
+  "OPENBLAS": 1
+ },
+ "rng_group_id_in_seed": false,
+ "rng_phase_id_in_seed": false,
+ "source_manifest": "experiments/two_stage_formal_T2_20260915/manifest.json",
+ "status": "planned_not_started",
+ "held_out_training_seeds": [
+  10001,
+  10002,
+  10003,
+  10004,
+  10005,
+  10006,
+  10007,
+  10008,
+  10009,
+  10010,
+  10011,
+  10012,
+  10013,
+  10014,
+  10015,
+  10016,
+  10017,
+  10018,
+  10019,
+  10020
+ ],
+ "formal_candidate_rule": "First valid C development call with BR and concentration passing, including the cap call; no-candidate final iterate evaluations are diagnostic only.",
+ "source_worktree_git_commit": "d1b84437d3be32daf40a58d77e044201b7ba09d0",
+ "purpose": "Complete the dense-C evidence: re-run the five no-candidate runs the first dense batch did not cover, so all 11 budget-exhaustion failures of the formal T=2 batch have been observed at a 25-update phase-C cadence. Phase A/B cadence unchanged at 100, so the training trajectory is identical to the source run and only the verifier sampling positions differ.",
+ "source_experiment": "experiments/two_stage_formal_T2_20260915",
+ "diagnosis_package": "experiments/two_stage_formal_T2_20260915/no_candidate_C_history",
+ "runner": "run/run_final_dp_br_round3_dense.py",
+ "changes_vs_source": [
+  "protocol.verifier_timeout: 100 -> {A:100, B:100, C:25}",
+  "protocol.weights_every: new, 25 (actor+critic npz every 25 global updates)",
+  "output_dir: redirected to this experiment's runs/ tree"
+ ],
+ "unchanged": "seeds, game, ppo, lr_schedule, phase_caps A400/B600/C1000, warmup 100, stability_every 20, k_phase 3, k_stop 1, phase_thr_over_dw A/B .02 C .01, conc_thr .04, verifier tiers, RNG namespaces and seed derivation",
+ "protocol_module_sha256": {
+  "agents/ppo_curriculum.py": "8a1c906ae5f8e9017993d501554f7b58172244e8e077041784e51bd86e3ed2f2",
+  "envs/curriculum_env.py": "f367d7831c386fa96ce1fbec91dfcc574d7e49771db08d193ffe392b2e1c553a",
+  "utils/dp_br_verifier.py": "3054e5500eea8876aba558ad08bb3b1971d427cf24b3e4d261cda60502049481",
+  "utils/theory_multistage.py": "eff8d2f70e3fbc3aec22d81e5ba321f366a20192eb0fd6d802222b60389ddd47",
+  "run/run_final_dp_br.py": "9d48a1cb2ab49b8b5db153197017c7a19472cc879f52bb297a63f43dab732c3a",
+  "run/run_final_dp_br_round3_dense.py": "1786eaa23f83363dd0ab475d88c859e179c5dd0ac53890ff22ecdee66da35bb8"
+ },
+ "runs_selected": [
+  "tel_q50_s10005",
+  "tel_q50_s10006",
+  "tel_q50_s10007",
+  "tel_q50_s10010",
+  "tel_q50_s10016"
+ ],
+ "run_selection_rule": "The five no-candidate runs not covered by two_stage_dense_c25_20260922: the stratum-3 runs whose 20-update replay never went below the 0.01 threshold (replay minima 17-38% above it). Together with batch 1 this covers all 11 no-candidate runs.",
+ "runs": [
+  {
+   "run": "tel_q50_s10005",
+   "q": 50,
+   "seed": 10005,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 400,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 100,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "F1_A400_const_first_eligible",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "experiments/two_stage_dense_c25_rest_20260922/runs/F1_A400_const_first_eligible/tel_q50_s10005"
+  },
+  {
+   "run": "tel_q50_s10006",
+   "q": 50,
+   "seed": 10006,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 400,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 100,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "F1_A400_const_first_eligible",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "experiments/two_stage_dense_c25_rest_20260922/runs/F1_A400_const_first_eligible/tel_q50_s10006"
+  },
+  {
+   "run": "tel_q50_s10007",
+   "q": 50,
+   "seed": 10007,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 400,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 100,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "F1_A400_const_first_eligible",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "experiments/two_stage_dense_c25_rest_20260922/runs/F1_A400_const_first_eligible/tel_q50_s10007"
+  },
+  {
+   "run": "tel_q50_s10010",
+   "q": 50,
+   "seed": 10010,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 400,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 100,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "F1_A400_const_first_eligible",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "experiments/two_stage_dense_c25_rest_20260922/runs/F1_A400_const_first_eligible/tel_q50_s10010"
+  },
+  {
+   "run": "tel_q50_s10016",
+   "q": 50,
+   "seed": 10016,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 400,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 100,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "F1_A400_const_first_eligible",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "experiments/two_stage_dense_c25_rest_20260922/runs/F1_A400_const_first_eligible/tel_q50_s10016"
+  }
+ ],
+ "companion_batch": "experiments/two_stage_dense_c25_20260922"
+}

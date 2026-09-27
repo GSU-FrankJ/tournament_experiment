@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11114",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11114,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 1850,
+  "local_update": 850,
+  "call_index": 62
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.02595329944450331,
+  "exp_root_over_dw": 0.006488324861125827,
+  "v_br_root": 3.0831860378785962,
+  "v_mean_root": 3.057232738434093,
+  "dreach": 0.07040607581078406,
+  "dreach_over_dw": 0.017601518952696016,
+  "reach_delta_max": {
+   "3": 0.04049444916671785,
+   "2": 0.026221168742781575,
+   "1": 0.0036904579012846384
+  },
+  "reach_argmax_d": {
+   "3": -120.0,
+   "2": 16.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 121,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.07040607581078406,
+  "dreach_pmf_support_over_dw": 0.017601518952696016,
+  "pmf_support_delta_max": {
+   "3": 0.04049444916671785,
+   "2": 0.026221168742781575,
+   "1": 0.0036904579012846384
+  },
+  "pmf_support_count": {
+   "3": 124,
+   "2": 51,
+   "1": 1
+  },
+  "dfull": 0.07040607581078406,
+  "dfull_over_dw": 0.017601518952696016,
+  "full_delta_max": {
+   "3": 0.04049444916671785,
+   "2": 0.026221168742781575,
+   "1": 0.0036904579012846384
+  },
+  "full_argmax_d": {
+   "3": -120.0,
+   "2": 16.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.04049444916671785,
+  "delta_max_all_over_dw": 0.010123612291679462,
+  "pdl_sum": 0.025953299444503496,
+  "pdl_residual": -1.8735013540549517e-16,
+  "pdl_residual_over_dw": -4.683753385137379e-17,
+  "pmf_mass": {
+   "3": 1.0,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 0.0,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.759861574978032,
+    "union_lo": -123.75986157497803,
+    "union_hi": 116.24013842502197,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.95438158584642,
+    "union_lo": -245.9302086705631,
+    "union_hi": 238.93465730134994,
+    "n_grid_covered": 121
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 25,
+    "vertex": 86,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 24,
+    "vertex": 72,
+    "mean_action": 0,
+    "br_action": 15
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.03429550064389241,
+  "max_std_effort": 3.429550064389241,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 78.18794250488281,
+  "beta": 122.86759948730469,
+  "conc": 201.0555419921875,
+  "mean_norm": 0.3888872782622475,
+  "mean_effort": 38.88872782622475
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.02595329944450331,
+   "max_over_dw": 0.006488324861125827,
+   "argmax_d": 0.0,
+   "min_raw": 0.02595329944450331
+  },
+  "2": {
+   "max_raw": 0.04698005038857489,
+   "max_over_dw": 0.011745012597143722,
+   "argmax_d": -196.0,
+   "min_raw": 0.006793263396738247
+  },
+  "3": {
+   "max_raw": 0.04049444916671785,
+   "max_over_dw": 0.010123612291679462,
+   "argmax_d": -120.0,
+   "min_raw": 4.264009098697841e-06
+  }
+ },
+ "dreach_over_dw": 0.017601518952696016,
+ "coverage_snapshot_index": 61,
+ "saved_time": "2026-09-26T02:12:48+0000"
+}

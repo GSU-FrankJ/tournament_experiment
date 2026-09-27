@@ -1,0 +1,72 @@
+{
+  "study": "endgame_reward_noise_audit_20260925",
+  "step": "representation_fit",
+  "title": "Fixed-budget offline fit of the stage-3 best-response target at the three A400 checkpoints",
+  "written_before_any_fit": true,
+  "question": "Can the existing A400 features (head-only fit), or the same architecture with trainable hidden layers (full fit), express the stage-3 best response to a frozen mean opponent under a fixed optimization budget?",
+  "status": "offline diagnostic only: the BR labels never enter PPO training, and a fitted policy is not an equilibrium candidate because its opponent is frozen",
+  "sources": {
+    "E": "source experiment: three_stage_implementation_pilot_20260924 (source artifacts omitted)",
+    "manifest": "E/manifests/asamp_abc_q60_baseline.json (game, PPO, RNG namespaces, verifier tiers read from resolved)",
+    "checkpoints": {
+      "10441": "E/runs/t3_asamp_abc_q60_baseline_s10441/weights/update_00400.npz",
+      "10442": "E/runs/t3_asamp_abc_q60_baseline_s10442/weights/update_00400.npz",
+      "10443": "E/runs/t3_asamp_abc_q60_baseline_s10443/weights/update_00400.npz"
+    }
+  },
+  "seeds": [
+    10441,
+    10442,
+    10443
+  ],
+  "fixed_opponent": "mean effort of the A400 actor at the opponent's own signed state: e_O(d) = mean_fn(3, -d) from E/W make_policy_fns (float32 network, float64 mean). Step 1 established that the A400 opponent equals the A400 actor. e_O is computed once per seed and never changes.",
+  "target": {
+    "Q": "Q(d, e) = -k e^2 + w_l + dW * F_xi(d + e - e_O(d)) (stage 3, closed-form terminal expectation, float64)",
+    "best_response": "a_BR(d) = argmax_{e in [e_min, e_max]} Q(d, e). For these parameters Q is strictly concave in e (Q'' <= -2k + dW/(4 q^2) < 0 on every piece and Q' is continuous), so a_BR is the unique root of Q'(e) = -2 k e + dW f_xi(d + e - e_O(d)) on [0, 100], or 0 when Q'(0) <= 0; solved by vectorized bisection to 1e-10",
+    "V_BR": "Q(d, a_BR(d))",
+    "cross_check": "on the evaluation grid (= the final verifier's stage-3 grid) a_BR, V_BR and the original actor's loss are compared with the final-tier verifier arrays of the A400 actor (reported, max abs differences)"
+  },
+  "grids": {
+    "train": "d = -439, -437, ..., 439 (440 points, step 2)",
+    "eval": "d = -440, -438, ..., 440 (441 points, step 2) = the final verifier's stage-3 grid; interleaved with the training grid, so no evaluation state is a training state",
+    "weighting": "uniform over the grid (matches the uniform D3 exploring-start distribution)"
+  },
+  "policy_effort": "e_theta(d) = e_range * clamp(sigmoid(z_mu(d)), 1e-6, 1-1e-6) = the Beta mean of the actor (alpha/(alpha+beta) = mu). Training uses this float32 functional form; final evaluation uses the actor forward through make_policy_fns (float64 mean from float32 alpha, beta) and both are compared.",
+  "arms": {
+    "original": "A400 actor, no fitting (current policy error)",
+    "head_only": "start at A400; hidden layers l1, l2 frozen; fit only the mean head out.weight[0,:] and out.bias[0] (65 parameters); concentration head out.weight[1,:], out.bias[1] frozen",
+    "full": "start at A400; fit l1, l2 and the mean head (4418 parameters); concentration head frozen",
+    "full_from_init": "DESCRIPTIVE ONLY, not part of the interpretation: same as full but starting from the seed's exact PPO initialization theta_0 (make_streams(seed, q, namespaces) -> CurriculumPPO, as in E's runner; verified by reproducing weights/update_00025.npz bit-for-bit with 25 original phase-A training updates). It compares supervised fitting with PPO from the same start, same optimizer and same step count."
+  },
+  "objective": "effort MSE: mean over the training grid of (e_theta(d) - a_BR(d))^2 in effort units^2; float32; full batch; deterministic (no RNG)",
+  "optimizer": "torch.optim.Adam(lr=3e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0) = the PPO actor optimizer settings; fresh optimizer state; no gradient clipping",
+  "budget": {
+    "primary": 8000,
+    "primary_rationale": "number of actor optimizer steps PPO made in phase A: 400 updates x 10 epochs x (512 / 256) minibatches",
+    "extension_descriptive": 80000,
+    "extension_rule": "the same run continued to 80000 steps; its values are reported to show whether the primary budget was binding and never enter the interpretation",
+    "logging": "steps 0, 50, ..., 8000, then 8500, ..., 80000"
+  },
+  "metrics_on_eval_grid": {
+    "regions": "all D3; center |d| <= B (B = 220); outer |d| > B",
+    "effort_error": "RMSE and max |e_theta(d) - a_BR(d)| per region",
+    "payoff_loss": "L(d) = V_BR(d) - Q(d, e_theta(d)) >= 0 against the frozen opponent; max and mean of L/dW per region and the argmax state",
+    "policy_curves": "e_theta(d) before fitting, at 8000 and at 80000 steps; a_BR(d); e_O(d)",
+    "parameter_change": "||theta - theta_start||_2 over the fitted parameters and per group (l1, l2, mean head), relative norms, max |delta|, max |theta|; reference scale: PPO's phase-A displacement ||theta_A400 - theta_0|| of the same groups",
+    "fitting_curves": "train MSE, eval effort RMSE, eval max and mean payoff loss, parameter-change norm vs step",
+    "side_effect": "maximum normalized Beta std on the evaluation grid before and after fitting (the concentration head is frozen, but in the full arms its input features change)"
+  },
+  "success_definition": "an arm succeeds for a seed iff at the primary budget (step 8000) max_{d in eval grid} L(d)/dW <= 0.01 over all of D3 (the protocol's per-criterion threshold scale)",
+  "descriptive_flags": {
+    "large_change": "an arm is flagged when its ||theta - theta_start|| over the fitted parameters exceeds PPO's phase-A displacement ||theta_A400 - theta_0|| over the same parameters",
+    "first_success_step": "first logged step at which the success condition holds"
+  },
+  "interpretation_per_seed": {
+    "head_only succeeds": "existing features are sufficient; prioritize studying PPO's signal, update and optimization process",
+    "only full succeeds": "the same architecture can express the target, but the current training did not learn suitable features",
+    "both fail": "only that this finite fit did not succeed; it does not establish insufficient network capacity and is not a reason to enlarge the network immediately",
+    "head_only succeeds but full fails": "reported as an optimization anomaly",
+    "across seeds": "reported per seed; a common reading is stated only if all 3 seeds agree"
+  },
+  "out_of_scope": "no full ABC, q50 or formal runs; no change to PPO, verifier, certification thresholds or concentration; BR labels are never used for training; the Step-1 decision.json stays unchanged; the Step-1 statistical anomaly stays unresolved (no additional sampling, not declared a code bug)"
+}

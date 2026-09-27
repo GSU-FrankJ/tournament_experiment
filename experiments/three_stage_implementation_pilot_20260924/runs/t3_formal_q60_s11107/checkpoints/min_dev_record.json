@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11107",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11107,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2250,
+  "local_update": 1250,
+  "call_index": 78
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.03017984857888889,
+  "exp_root_over_dw": 0.007544962144722223,
+  "v_br_root": 3.072795975238427,
+  "v_mean_root": 3.042616126659538,
+  "dreach": 0.0923428813532885,
+  "dreach_over_dw": 0.023085720338322124,
+  "reach_delta_max": {
+   "3": 0.04079444560837464,
+   "2": 0.05153574200356292,
+   "1": 1.2693741350933152e-05
+  },
+  "reach_argmax_d": {
+   "3": -116.0,
+   "2": 76.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 120,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.0923428813532885,
+  "dreach_pmf_support_over_dw": 0.023085720338322124,
+  "pmf_support_delta_max": {
+   "3": 0.04079444560837464,
+   "2": 0.05153574200356292,
+   "1": 1.2693741350933152e-05
+  },
+  "pmf_support_count": {
+   "3": 124,
+   "2": 52,
+   "1": 1
+  },
+  "dfull": 0.0923428813532885,
+  "dfull_over_dw": 0.023085720338322124,
+  "full_delta_max": {
+   "3": 0.04079444560837464,
+   "2": 0.05153574200356292,
+   "1": 1.2693741350933152e-05
+  },
+  "full_argmax_d": {
+   "3": -116.0,
+   "2": 76.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.05153574200356292,
+  "delta_max_all_over_dw": 0.01288393550089073,
+  "pdl_sum": 0.03017984857888885,
+  "pdl_residual": 4.163336342344337e-17,
+  "pdl_residual_over_dw": 1.0408340855860843e-17,
+  "pmf_mass": {
+   "3": 0.9999999999999998,
+   "2": 0.9999999999999999,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 2.220446049250313e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.1657553271547556,
+    "union_lo": -119.16575532715476,
+    "union_hi": 120.83424467284524,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.946045217752612,
+    "union_lo": -239.63426873638042,
+    "union_hi": 243.41541069376754,
+    "n_grid_covered": 120
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 28,
+    "vertex": 82,
+    "mean_action": 1,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 1,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 30,
+    "vertex": 71,
+    "mean_action": 0,
+    "br_action": 10
+   },
+   "1": {
+    "grid": 1,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.028572816131962008,
+  "max_std_effort": 2.857281613196201,
+  "stage": 2,
+  "d": 28.0,
+  "alpha": 148.73728942871094,
+  "beta": 156.29498291015625,
+  "conc": 305.0322723388672,
+  "mean_norm": 0.48761164937812007,
+  "mean_effort": 48.761164937812005
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.03017984857888889,
+   "max_over_dw": 0.007544962144722223,
+   "argmax_d": 0.0,
+   "min_raw": 0.03017984857888889
+  },
+  "2": {
+   "max_raw": 0.06819051721925362,
+   "max_over_dw": 0.017047629304813405,
+   "argmax_d": 76.0,
+   "min_raw": 0.00953887438429657
+  },
+  "3": {
+   "max_raw": 0.04079444560837464,
+   "max_over_dw": 0.01019861140209366,
+   "argmax_d": -116.0,
+   "min_raw": 2.9261877778630208e-06
+  }
+ },
+ "dreach_over_dw": 0.023085720338322124,
+ "coverage_snapshot_index": 77,
+ "saved_time": "2026-09-26T01:55:09+0000"
+}

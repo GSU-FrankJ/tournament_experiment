@@ -1,0 +1,74 @@
+{
+ "cohort": "asamp_abc",
+ "q": 60,
+ "generated": "2026-09-24T20:08:31+0000",
+ "study": {
+  "name": "phase_A_state_sampling_full_ABC_20260924",
+  "phases_run": [
+   "A",
+   "B",
+   "C"
+  ],
+  "question": "Does the center-weighted phase-A sampling carry over to B/C and to final certification?",
+  "arms": {
+   "baseline": "pilot configuration (A: 512 ES3 uniform on D3)",
+   "center": "pilot configuration except phase A: 256 ES3 uniform on D3 + 256 ES3 uniform on [-B, B]"
+  },
+  "only_difference": "phase-A start sampling; A400/B600/C1800, B/C start mixtures, PPO, cadence, first-eligible rule, final verifier, economics and all thresholds are the pilot values; the center sampling is not applied to B or C",
+  "pairing": "each fresh seed runs both arms from initialization (no continuation of earlier A400 runs; earlier pilot runs are not used as the paired control)",
+  "primary_endpoint": "final certification success (certification == certified) per run",
+  "reported_counts": "per arm: certified / all runs, candidate / all runs, certified / candidates (N/A when there is no candidate); per-seed paired outcomes; 3 seeds are diagnostic only and no reliability rate is claimed",
+  "continuous_diagnostic": "minimum valid C development dReach/DW with the same call's stage contributions, maximum-deviation states, concentration, plus actual check counts, updates and environment steps; an early stop is reported as the actual stop, never as a C1800 endpoint, and the historical minimum is never promoted to a candidate",
+  "retention_check": "stage-3 policy and stage-3 deviation (full/center/outer) plus stage-2 deviation (continuation gain and one-step delta) at A400, B exit, C minimum and the actual stop; descriptive paired signs per checkpoint",
+  "interpretation_rules": "if the A advantage disappears in B/C and there is no candidate or certification gain, stop this sampling change; if only the minimum decreases and both arms still have no candidate, report a diagnostic improvement and do not advance to formal; q50 and formal are not run in this round",
+  "retention_operationalization": "the A advantage is retained at a checkpoint if the center arm's dev-tier stage-3 full-domain max (V3_BR-V3_mean)/DW is lower in all 3 pairs; it has disappeared in B/C if it is retained at neither the C minimum nor the actual stop",
+  "gain_operationalization": "candidate gain = more candidate runs in the center arm than in baseline; certification gain = more certified runs in the center arm than in baseline",
+  "diagnostic_improvement_operationalization": "minimum valid C dReach/DW lower in the center arm in all 3 pairs while both arms have 0 candidates",
+  "arm": "center",
+  "center_es_phase_A": {
+   "3": 256
+  },
+  "center_half_width": 220.0
+ },
+ "counts": {
+  "baseline": {
+   "n_runs": 3,
+   "n_done": 3,
+   "candidate": "0/3",
+   "certified": "0/3",
+   "certified_given_candidate": "N/A (0 candidates)",
+   "n_candidate": 0,
+   "n_certified": 0
+  },
+  "center": {
+   "n_runs": 3,
+   "n_done": 3,
+   "candidate": "0/3",
+   "certified": "0/3",
+   "certified_given_candidate": "N/A (0 candidates)",
+   "n_candidate": 0,
+   "n_certified": 0
+  }
+ },
+ "pairs_center_lower_stage3_full_max": {
+  "A400": "2/3",
+  "B_exit": "1/3",
+  "C_minimum": "1/3",
+  "actual_stop": "2/3"
+ },
+ "pairs_center_lower_stage2_cont_max": {
+  "A400": "3/3",
+  "B_exit": "3/3",
+  "C_minimum": "0/3",
+  "actual_stop": "1/3"
+ },
+ "pairs_center_lower_min_valid_C_dreach": "1/3",
+ "A_advantage_retained_at": [],
+ "A_advantage_disappeared_in_BC": true,
+ "candidate_gain": false,
+ "certification_gain": false,
+ "rule_stop_sampling_change": true,
+ "rule_diagnostic_improvement_only": false,
+ "checkpoint_replays_match_recorded_calls": true,
+ "all_runs_done": true
+}

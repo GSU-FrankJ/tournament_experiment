@@ -1,0 +1,37 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11018",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11018,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2175,
+  "local_update": 1175,
+  "call_index": 75
+ },
+ "dense_concentration": {
+  "valid": true,
+  "n_points": 24003,
+  "step": 0.05,
+  "max_std_norm": 0.036218975703004565,
+  "max_std_effort": 3.6218975703004563,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 72.10855102539062,
+  "beta": 109.4170150756836
+ },
+ "dev_replay_dreach_over_dw": 0.03144326559179056,
+ "dev_replay_error": null,
+ "recorded_dreach_over_dw": 0.03144326559179056,
+ "dev_replay_abs_diff": 0.0,
+ "resources": {
+  "segment": "min_dev_profiles",
+  "rss_before_bytes": 520921088,
+  "wall_sec": 0.11723255692049861,
+  "cpu_sec": 0.11723454100001618,
+  "rss_after_bytes": 524632064,
+  "rss_peak_bytes": 529506304,
+  "peak_method": "VmHWM_reset_per_segment"
+ }
+}

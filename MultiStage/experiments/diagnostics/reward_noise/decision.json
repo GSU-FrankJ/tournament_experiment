@@ -1,0 +1,85 @@
+{
+  "rule": "every math/implementation check passes AND, at A400, center region, in each of the 3 seeds: (G1) phi_raw >= 0.25, (G2) rho_raw <= 0.80, (G3) c_loo(surrogate, K8) > c_loo(surrogate, K1)",
+  "math_checks_ok": {
+    "10441_A400": true,
+    "10441_C_min": true,
+    "10442_A400": false,
+    "10442_C_min": true,
+    "10443_A400": true,
+    "10443_C_min": true
+  },
+  "all_math_checks_ok": false,
+  "A400_center_per_seed": {
+    "10441": {
+      "phi_raw": 0.9867557596515109,
+      "rho_raw": 0.09620985102215128,
+      "c_loo_sur_K1": 0.1286349268068931,
+      "c_loo_sur_K8": 0.5862962643700472,
+      "G1": true,
+      "G2": true,
+      "G3": true
+    },
+    "10442": {
+      "phi_raw": 1.0044450659449513,
+      "rho_raw": 0.07384340232187586,
+      "c_loo_sur_K1": 0.15612781074035476,
+      "c_loo_sur_K8": 0.2609594988649897,
+      "G1": true,
+      "G2": true,
+      "G3": true
+    },
+    "10443": {
+      "phi_raw": 0.9724931002693773,
+      "rho_raw": 0.1492676611274434,
+      "c_loo_sur_K1": 0.2664985033255753,
+      "c_loo_sur_K8": 0.2325896541395832,
+      "G1": true,
+      "G2": true,
+      "G3": false
+    }
+  },
+  "enter_step2": false,
+  "failed_items": [
+    "10442_A400",
+    "10443:G3"
+  ],
+  "Q1_reading": {
+    "A400": {
+      "per_seed": {
+        "10441": {
+          "phi_raw": 0.9867557596515109,
+          "tau_raw": 31.575550870934602
+        },
+        "10442": {
+          "phi_raw": 1.0044450659449513,
+          "tau_raw": 39.322652874759726
+        },
+        "10443": {
+          "phi_raw": 0.9724931002693773,
+          "tau_raw": 52.25393528060111
+        }
+      },
+      "yes": true
+    },
+    "C_min": {
+      "per_seed": {
+        "10441": {
+          "phi_raw": 1.0043512607189746,
+          "tau_raw": 15266.718727121775
+        },
+        "10442": {
+          "phi_raw": 0.9966384581020733,
+          "tau_raw": 7333.75706990948
+        },
+        "10443": {
+          "phi_raw": 0.9631669735990686,
+          "tau_raw": 2750.747856928888
+        }
+      },
+      "yes": true
+    }
+  },
+  "generated": "2026-09-25T17:57:47+0000",
+  "study_file": "study.json",
+  "total_wall_sec": 13.684761994052678
+}

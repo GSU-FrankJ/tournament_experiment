@@ -1,0 +1,209 @@
+{
+ "cohort": "pilot",
+ "q": null,
+ "generated": "2026-09-24T17:36:46+0000",
+ "runs": [
+  {
+   "run_id": "t3_pilot_q50_s10411",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  },
+  {
+   "run_id": "t3_pilot_q50_s10412",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  },
+  {
+   "run_id": "t3_pilot_q50_s10413",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  },
+  {
+   "run_id": "t3_pilot_q60_s10401",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  },
+  {
+   "run_id": "t3_pilot_q60_s10402",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  },
+  {
+   "run_id": "t3_pilot_q60_s10403",
+   "state": "done",
+   "ok": true,
+   "failures": [],
+   "notes": [],
+   "unavailable_checks": []
+  }
+ ],
+ "aggregate_by_q": {
+  "50": {
+   "label": "implementation/debug outcome (not a reliability estimate)",
+   "N_planned": 3,
+   "N_started": 3,
+   "N_completed": 3,
+   "N_operational_failed": 0,
+   "N_running": 0,
+   "N_pending": 0,
+   "all_attempted": true,
+   "primary": {
+    "n_attempted": 3,
+    "n_candidate": 0,
+    "n_certified": 0,
+    "n_candidate_certification_error": 0,
+    "n_candidate_not_yet_certified": 0,
+    "candidate_discovery": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    },
+    "conditional_certification": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null,
+     "reason": "no candidates (N/A)"
+    },
+    "end_to_end": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    }
+   },
+   "completed_only_sensitivity": {
+    "n_attempted": 3,
+    "n_candidate": 0,
+    "n_certified": 0,
+    "n_candidate_certification_error": 0,
+    "n_candidate_not_yet_certified": 0,
+    "candidate_discovery": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    },
+    "conditional_certification": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null,
+     "reason": "no candidates (N/A)"
+    },
+    "end_to_end": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    }
+   },
+   "denominator_rule": "primary = all started runs incl. operational failures; conditional certification denominator = candidates"
+  },
+  "60": {
+   "label": "implementation/debug outcome (not a reliability estimate)",
+   "N_planned": 3,
+   "N_started": 3,
+   "N_completed": 3,
+   "N_operational_failed": 0,
+   "N_running": 0,
+   "N_pending": 0,
+   "all_attempted": true,
+   "primary": {
+    "n_attempted": 3,
+    "n_candidate": 0,
+    "n_certified": 0,
+    "n_candidate_certification_error": 0,
+    "n_candidate_not_yet_certified": 0,
+    "candidate_discovery": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    },
+    "conditional_certification": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null,
+     "reason": "no candidates (N/A)"
+    },
+    "end_to_end": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    }
+   },
+   "completed_only_sensitivity": {
+    "n_attempted": 3,
+    "n_candidate": 0,
+    "n_certified": 0,
+    "n_candidate_certification_error": 0,
+    "n_candidate_not_yet_certified": 0,
+    "candidate_discovery": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    },
+    "conditional_certification": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null,
+     "reason": "no candidates (N/A)"
+    },
+    "end_to_end": {
+     "k": 0,
+     "n": 3,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.5614970317550454
+    }
+   },
+   "denominator_rule": "primary = all started runs incl. operational failures; conditional certification denominator = candidates"
+  }
+ },
+ "figures": [
+  "policy_curves_q50",
+  "asymmetry_q50",
+  "state_histogram_q50",
+  "deviation_profile_q50",
+  "verifier_curves_q50",
+  "coverage_A_q50",
+  "policy_curves_q60",
+  "asymmetry_q60",
+  "state_histogram_q60",
+  "deviation_profile_q60",
+  "verifier_curves_q60",
+  "coverage_A_q60"
+ ]
+}

@@ -1,0 +1,10 @@
+{
+  "status": "post-hoc diagnostics written after the Step-1 results were seen; not part of the pre-registered evaluation and not used to change the Step-2 decision",
+  "generated": "2026-09-25T18:15:02+0000",
+  "files": {
+    "gradient_noise_check_summary.csv": "pre-registered empirical-SE z vs exact conditional z",
+    "c_loo_paired.csv": "paired per-batch cosine differences (K8 - K1) against the LOO reference mean",
+    "center_outer_expected_gradient.csv": "descriptive: mean center/outer raw-gradient contributions, their cosine, and the actor output-layer energy share"
+  },
+  "omitted": "Per-batch table, raw gradient tensors and simulation code are not included; this is archived summary evidence."
+}

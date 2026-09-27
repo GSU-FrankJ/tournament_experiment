@@ -1,0 +1,37 @@
+{
+ "identity": {
+  "run_id": "t3_pilot_q50_s10411",
+  "cohort": "pilot",
+  "q": 50,
+  "seed": 10411,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2625,
+  "local_update": 1625,
+  "call_index": 93
+ },
+ "dense_concentration": {
+  "valid": true,
+  "n_points": 24003,
+  "step": 0.05,
+  "max_std_norm": 0.03153852433143204,
+  "max_std_effort": 3.153852433143204,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 114.89217376708984,
+  "beta": 133.96847534179688
+ },
+ "dev_replay_dreach_over_dw": 0.026149226499304068,
+ "dev_replay_error": null,
+ "recorded_dreach_over_dw": 0.026149226499304068,
+ "dev_replay_abs_diff": 0.0,
+ "resources": {
+  "segment": "min_dev_profiles",
+  "rss_before_bytes": 524730368,
+  "wall_sec": 0.10540738981217146,
+  "cpu_sec": 0.10540921799997705,
+  "rss_after_bytes": 524763136,
+  "rss_peak_bytes": 531128320,
+  "peak_method": "VmHWM_reset_per_segment"
+ }
+}

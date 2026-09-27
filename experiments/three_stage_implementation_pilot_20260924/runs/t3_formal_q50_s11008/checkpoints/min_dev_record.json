@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11008",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11008,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 1350,
+  "local_update": 350,
+  "call_index": 42
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.1911863421571076,
+  "exp_root_over_dw": 0.0477965855392769,
+  "v_br_root": 3.3799240094298852,
+  "v_mean_root": 3.1887376672727776,
+  "dreach": 0.46712444120294405,
+  "dreach_over_dw": 0.11678111030073601,
+  "reach_delta_max": {
+   "3": 0.35215387925722474,
+   "2": 0.10608228620339855,
+   "1": 0.008888275742320761
+  },
+  "reach_argmax_d": {
+   "3": -16.0,
+   "2": -92.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 102,
+   "2": 50,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.4841697005376864,
+  "dreach_pmf_support_over_dw": 0.1210424251344216,
+  "pmf_support_delta_max": {
+   "3": 0.35215387925722474,
+   "2": 0.12312754553814087,
+   "1": 0.008888275742320761
+  },
+  "pmf_support_count": {
+   "3": 105,
+   "2": 47,
+   "1": 1
+  },
+  "dfull": 0.6283489948369323,
+  "dfull_over_dw": 0.15708724870923307,
+  "full_delta_max": {
+   "3": 0.35215387925722474,
+   "2": 0.2673068398373868,
+   "1": 0.008888275742320761
+  },
+  "full_argmax_d": {
+   "3": -16.0,
+   "2": -200.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.35215387925722474,
+  "delta_max_all_over_dw": 0.08803846981430619,
+  "pdl_sum": 0.1911863421571082,
+  "pdl_residual": -5.828670879282072e-16,
+  "pdl_residual_over_dw": -1.457167719820518e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.830621785843732,
+    "union_lo": -95.83062178584373,
+    "union_hi": 104.16937821415627,
+    "n_grid_covered": 50
+   },
+   "3": {
+    "n_intervals": 50,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9955602333022853,
+    "union_lo": -216.41316277891906,
+    "union_hi": 191.0406553137537,
+    "n_grid_covered": 102
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 151,
+    "vertex": 50,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 29,
+    "vertex": 72,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 1,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 151,
+    "vertex": 50,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 28,
+    "vertex": 73,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.032396568950256645,
+  "max_std_effort": 3.2396568950256643,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 68.65301513671875,
+  "beta": 140.45973205566406,
+  "conc": 209.1127471923828,
+  "mean_norm": 0.3283062178584373,
+  "mean_effort": 32.830621785843725
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.1911863421571076,
+   "max_over_dw": 0.0477965855392769,
+   "argmax_d": 0.0,
+   "min_raw": 0.1911863421571076
+  },
+  "2": {
+   "max_raw": 0.512255636755625,
+   "max_over_dw": 0.12806390918890626,
+   "argmax_d": -200.0,
+   "min_raw": 0.10841153607166554
+  },
+  "3": {
+   "max_raw": 0.35215387925722474,
+   "max_over_dw": 0.08803846981430619,
+   "argmax_d": -16.0,
+   "min_raw": 0.00021700488509601712
+  }
+ },
+ "dreach_over_dw": 0.11678111030073601,
+ "coverage_snapshot_index": 41,
+ "saved_time": "2026-09-26T01:06:22+0000"
+}
