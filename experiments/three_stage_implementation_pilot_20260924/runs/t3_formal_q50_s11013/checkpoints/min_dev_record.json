@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11013",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11013,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2750,
+  "local_update": 1750,
+  "call_index": 98
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.02239391817900893,
+  "exp_root_over_dw": 0.005598479544752233,
+  "v_br_root": 2.7934421818333606,
+  "v_mean_root": 2.7710482636543516,
+  "dreach": 0.061700733050304546,
+  "dreach_over_dw": 0.015425183262576136,
+  "reach_delta_max": {
+   "3": 0.04157825810668658,
+   "2": 0.017124029204344637,
+   "1": 0.0029984457392733255
+  },
+  "reach_argmax_d": {
+   "3": 104.0,
+   "2": -4.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 102,
+   "2": 50,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.061700733050304546,
+  "dreach_pmf_support_over_dw": 0.015425183262576136,
+  "pmf_support_delta_max": {
+   "3": 0.04157825810668658,
+   "2": 0.017124029204344637,
+   "1": 0.0029984457392733255
+  },
+  "pmf_support_count": {
+   "3": 105,
+   "2": 47,
+   "1": 1
+  },
+  "dfull": 0.066256255936747,
+  "dfull_over_dw": 0.01656406398418675,
+  "full_delta_max": {
+   "3": 0.04157825810668658,
+   "2": 0.02167955209078709,
+   "1": 0.0029984457392733255
+  },
+  "full_argmax_d": {
+   "3": 104.0,
+   "2": 200.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.04157825810668658,
+  "delta_max_all_over_dw": 0.010394564526671646,
+  "pdl_sum": 0.02239391817900839,
+  "pdl_residual": 5.412337245047638e-16,
+  "pdl_residual_over_dw": 1.3530843112619095e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.6930989800543017,
+    "union_lo": -95.6930989800543,
+    "union_hi": 104.3069010199457,
+    "n_grid_covered": 50
+   },
+   "3": {
+    "n_intervals": 50,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.98439256428982,
+    "union_lo": -198.4681464834856,
+    "union_hi": 210.82710959477467,
+    "n_grid_covered": 102
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 154,
+    "vertex": 47,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 35,
+    "vertex": 66,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 154,
+    "vertex": 47,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 30,
+    "vertex": 54,
+    "mean_action": 0,
+    "br_action": 17
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.02674091135568024,
+  "max_std_effort": 2.674091135568024,
+  "stage": 2,
+  "d": 12.0,
+  "alpha": 168.91091918945312,
+  "beta": 179.38587951660156,
+  "conc": 348.2967987060547,
+  "mean_norm": 0.4849625945945188,
+  "mean_effort": 48.496259459451885
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.02239391817900893,
+   "max_over_dw": 0.005598479544752233,
+   "argmax_d": 0.0,
+   "min_raw": 0.02239391817900893
+  },
+  "2": {
+   "max_raw": 0.03952407931996138,
+   "max_over_dw": 0.009881019829990345,
+   "argmax_d": 192.0,
+   "min_raw": 0.010933681693438668
+  },
+  "3": {
+   "max_raw": 0.04157825810668658,
+   "max_over_dw": 0.010394564526671646,
+   "argmax_d": 104.0,
+   "min_raw": 3.511595965122183e-07
+  }
+ },
+ "dreach_over_dw": 0.015425183262576136,
+ "coverage_snapshot_index": 97,
+ "saved_time": "2026-09-26T01:38:03+0000"
+}

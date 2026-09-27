@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11116",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11116,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2725,
+  "local_update": 1725,
+  "call_index": 97
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.045410580050744276,
+  "exp_root_over_dw": 0.011352645012686069,
+  "v_br_root": 3.0749791248305063,
+  "v_mean_root": 3.029568544779762,
+  "dreach": 0.10776926122034158,
+  "dreach_over_dw": 0.026942315305085396,
+  "reach_delta_max": {
+   "3": 0.054418896131033456,
+   "2": 0.03644733993423799,
+   "1": 0.01690302515507014
+  },
+  "reach_argmax_d": {
+   "3": 124.0,
+   "2": 32.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 123,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.10776926122034158,
+  "dreach_pmf_support_over_dw": 0.026942315305085396,
+  "pmf_support_delta_max": {
+   "3": 0.054418896131033456,
+   "2": 0.03644733993423799,
+   "1": 0.01690302515507014
+  },
+  "pmf_support_count": {
+   "3": 126,
+   "2": 51,
+   "1": 1
+  },
+  "dfull": 0.11628836300265366,
+  "dfull_over_dw": 0.029072090750663415,
+  "full_delta_max": {
+   "3": 0.054418896131033456,
+   "2": 0.044966441716550065,
+   "1": 0.01690302515507014
+  },
+  "full_argmax_d": {
+   "3": 124.0,
+   "2": 220.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.054418896131033456,
+  "delta_max_all_over_dw": 0.013604724032758364,
+  "pdl_sum": 0.04541058005074377,
+  "pdl_residual": 5.065392549852277e-16,
+  "pdl_residual_over_dw": 1.2663481374630692e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.501534046560238,
+    "union_lo": -128.49846595343976,
+    "union_hi": 111.50153404656024,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9425395165796147,
+    "union_lo": -257.151999279509,
+    "union_hi": 235.4455900290788,
+    "n_grid_covered": 123
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 23,
+    "vertex": 88,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 164,
+    "vertex": 57,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 24,
+    "vertex": 71,
+    "mean_action": 0,
+    "br_action": 16
+   },
+   "1": {
+    "grid": 1,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.02679170801570813,
+  "max_std_effort": 2.679170801570813,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 133.50282287597656,
+  "beta": 199.9542694091797,
+  "conc": 333.45709228515625,
+  "mean_norm": 0.4003598242913108,
+  "mean_effort": 40.03598242913108
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.045410580050744276,
+   "max_over_dw": 0.011352645012686069,
+   "argmax_d": 0.0,
+   "min_raw": 0.045410580050744276
+  },
+  "2": {
+   "max_raw": 0.0737285590053256,
+   "max_over_dw": 0.0184321397513314,
+   "argmax_d": 220.0,
+   "min_raw": 0.010673553733623553
+  },
+  "3": {
+   "max_raw": 0.054418896131033456,
+   "max_over_dw": 0.013604724032758364,
+   "argmax_d": 124.0,
+   "min_raw": 3.8887069555570974e-06
+  }
+ },
+ "dreach_over_dw": 0.026942315305085396,
+ "coverage_snapshot_index": 96,
+ "saved_time": "2026-09-26T02:20:09+0000"
+}

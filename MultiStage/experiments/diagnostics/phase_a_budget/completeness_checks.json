@@ -1,0 +1,297 @@
+{
+  "generated": "2026-09-26T00:05:08+0000",
+  "manifest": "source manifest: q60_phase_a_budget_extension_20260925/manifests/pba_q60_A800.json (omitted)",
+  "expected_counts_formula": {
+    "ppo_updates": 800,
+    "episodes": 409600,
+    "actor_optimizer_steps": 16000
+  },
+  "runs_planned": 3,
+  "runs_done": 3,
+  "per_run": {
+    "10461": {
+      "state": "done",
+      "stage3_checkpoints": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_expected": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_complete": true,
+      "reload_equals_in_memory_all": true,
+      "region_summaries_match_per_state_tables": true,
+      "region_check_max_abs_diff": 0.0,
+      "full_state_checkpoint_actor_equals_weights_all": true,
+      "eval_did_not_change_training_state_all": true,
+      "opponent_is_policy_at_minus_d_all": true,
+      "verifier_errors": [],
+      "history_rows": 800,
+      "updates_contiguous_1_to_cap": true,
+      "all_updates_phase_A": true,
+      "es_per_update_expected": 512,
+      "all_updates_stage3_es_count": true,
+      "all_updates_stage3_transitions_only": true,
+      "episodes": 409600,
+      "transitions": 409600,
+      "actor_optimizer_steps_from_logs": 16000,
+      "adam_actor_step_at_endpoint": [
+        16000.0
+      ],
+      "adam_critic_step_at_endpoint": [
+        16000.0
+      ],
+      "phase_entries": [
+        [
+          "A",
+          0
+        ]
+      ],
+      "phase_exits": [
+        [
+          "A",
+          800,
+          "fixed_budget_completed"
+        ]
+      ],
+      "single_phase_no_transition": true,
+      "snapshot_refresh_reasons": [
+        "init",
+        "periodic",
+        "phase_A_entry"
+      ],
+      "periodic_refreshes_every_snapshot_every": true,
+      "coverage_total_equals_episodes": true,
+      "coverage_first_half_equals_half_episodes": true,
+      "coverage_every_bin_hit_in_both_halves": true,
+      "coverage_bin_count_range_A1_half": [
+        2217,
+        2465
+      ],
+      "coverage_bin_count_range_second_half": [
+        2202,
+        2447
+      ],
+      "initial_weights_mean_and_conc_heads_zero": true,
+      "endpoint_final_eval_R3_equals_offline": true,
+      "resources": {
+        "training_wall_sec": 192.0975791560486,
+        "training_cpu_sec": 103.48461857699999,
+        "process_peak_rss_bytes": 528166912,
+        "stage3_eval_wall_sec_total": 1.537318245973438,
+        "final_eval_wall_sec": 0.32226578379049897,
+        "start_time": "2026-09-26T00:01:27+0000",
+        "end_time": "2026-09-26T00:04:41+0000"
+      }
+    },
+    "10462": {
+      "state": "done",
+      "stage3_checkpoints": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_expected": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_complete": true,
+      "reload_equals_in_memory_all": true,
+      "region_summaries_match_per_state_tables": true,
+      "region_check_max_abs_diff": 0.0,
+      "full_state_checkpoint_actor_equals_weights_all": true,
+      "eval_did_not_change_training_state_all": true,
+      "opponent_is_policy_at_minus_d_all": true,
+      "verifier_errors": [],
+      "history_rows": 800,
+      "updates_contiguous_1_to_cap": true,
+      "all_updates_phase_A": true,
+      "es_per_update_expected": 512,
+      "all_updates_stage3_es_count": true,
+      "all_updates_stage3_transitions_only": true,
+      "episodes": 409600,
+      "transitions": 409600,
+      "actor_optimizer_steps_from_logs": 16000,
+      "adam_actor_step_at_endpoint": [
+        16000.0
+      ],
+      "adam_critic_step_at_endpoint": [
+        16000.0
+      ],
+      "phase_entries": [
+        [
+          "A",
+          0
+        ]
+      ],
+      "phase_exits": [
+        [
+          "A",
+          800,
+          "fixed_budget_completed"
+        ]
+      ],
+      "single_phase_no_transition": true,
+      "snapshot_refresh_reasons": [
+        "init",
+        "periodic",
+        "phase_A_entry"
+      ],
+      "periodic_refreshes_every_snapshot_every": true,
+      "coverage_total_equals_episodes": true,
+      "coverage_first_half_equals_half_episodes": true,
+      "coverage_every_bin_hit_in_both_halves": true,
+      "coverage_bin_count_range_A1_half": [
+        2216,
+        2454
+      ],
+      "coverage_bin_count_range_second_half": [
+        2212,
+        2427
+      ],
+      "initial_weights_mean_and_conc_heads_zero": true,
+      "endpoint_final_eval_R3_equals_offline": true,
+      "resources": {
+        "training_wall_sec": 195.79367049736902,
+        "training_cpu_sec": 107.321396564,
+        "process_peak_rss_bytes": 526479360,
+        "stage3_eval_wall_sec_total": 1.5552301644347608,
+        "final_eval_wall_sec": 0.30707231163978577,
+        "start_time": "2026-09-26T00:01:27+0000",
+        "end_time": "2026-09-26T00:04:45+0000"
+      }
+    },
+    "10463": {
+      "state": "done",
+      "stage3_checkpoints": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_expected": [
+        100,
+        200,
+        300,
+        400,
+        500,
+        600,
+        700,
+        800
+      ],
+      "stage3_checkpoints_complete": true,
+      "reload_equals_in_memory_all": true,
+      "region_summaries_match_per_state_tables": true,
+      "region_check_max_abs_diff": 0.0,
+      "full_state_checkpoint_actor_equals_weights_all": true,
+      "eval_did_not_change_training_state_all": true,
+      "opponent_is_policy_at_minus_d_all": true,
+      "verifier_errors": [],
+      "history_rows": 800,
+      "updates_contiguous_1_to_cap": true,
+      "all_updates_phase_A": true,
+      "es_per_update_expected": 512,
+      "all_updates_stage3_es_count": true,
+      "all_updates_stage3_transitions_only": true,
+      "episodes": 409600,
+      "transitions": 409600,
+      "actor_optimizer_steps_from_logs": 16000,
+      "adam_actor_step_at_endpoint": [
+        16000.0
+      ],
+      "adam_critic_step_at_endpoint": [
+        16000.0
+      ],
+      "phase_entries": [
+        [
+          "A",
+          0
+        ]
+      ],
+      "phase_exits": [
+        [
+          "A",
+          800,
+          "fixed_budget_completed"
+        ]
+      ],
+      "single_phase_no_transition": true,
+      "snapshot_refresh_reasons": [
+        "init",
+        "periodic",
+        "phase_A_entry"
+      ],
+      "periodic_refreshes_every_snapshot_every": true,
+      "coverage_total_equals_episodes": true,
+      "coverage_first_half_equals_half_episodes": true,
+      "coverage_every_bin_hit_in_both_halves": true,
+      "coverage_bin_count_range_A1_half": [
+        2219,
+        2430
+      ],
+      "coverage_bin_count_range_second_half": [
+        2207,
+        2477
+      ],
+      "initial_weights_mean_and_conc_heads_zero": true,
+      "endpoint_final_eval_R3_equals_offline": true,
+      "resources": {
+        "training_wall_sec": 191.22423982899636,
+        "training_cpu_sec": 103.075457445,
+        "process_peak_rss_bytes": 527560704,
+        "stage3_eval_wall_sec_total": 1.516473464667797,
+        "final_eval_wall_sec": 0.32344424771144986,
+        "start_time": "2026-09-26T00:01:27+0000",
+        "end_time": "2026-09-26T00:04:40+0000"
+      }
+    }
+  },
+  "all_counts_match_formula": true,
+  "all_boolean_checks_true": {
+    "stage3_checkpoints_complete": true,
+    "reload_equals_in_memory_all": true,
+    "region_summaries_match_per_state_tables": true,
+    "full_state_checkpoint_actor_equals_weights_all": true,
+    "eval_did_not_change_training_state_all": true,
+    "opponent_is_policy_at_minus_d_all": true,
+    "updates_contiguous_1_to_cap": true,
+    "all_updates_phase_A": true,
+    "all_updates_stage3_es_count": true,
+    "all_updates_stage3_transitions_only": true,
+    "single_phase_no_transition": true,
+    "periodic_refreshes_every_snapshot_every": true,
+    "coverage_total_equals_episodes": true,
+    "coverage_first_half_equals_half_episodes": true,
+    "coverage_every_bin_hit_in_both_halves": true,
+    "initial_weights_mean_and_conc_heads_zero": true,
+    "endpoint_final_eval_R3_equals_offline": true
+  }
+}

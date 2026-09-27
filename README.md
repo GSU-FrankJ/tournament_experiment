@@ -1,3 +1,9 @@
+# Multi-stage experiment release
+
+For the two-stage → three-stage experiments, start with **[MultiStage/README.md](MultiStage/README.md)**. It maps each design and seed cohort to its code, verification outcomes and economic diagnostics, including failed runs.
+
+---
+
 # Tournament Experiment
 
 Game-theoretic tournament experiments with PPO reinforcement learning. The active track verifies whether a PPO agent can learn the theoretical Nash equilibrium effort in two-player symmetric tournaments.

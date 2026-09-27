@@ -1,0 +1,821 @@
+{
+ "run_id": "t3_formal_q50_s11012",
+ "cohort": "formal",
+ "q": 50,
+ "seed": 11012,
+ "state": "done",
+ "stage": "finished",
+ "pid": 1797011,
+ "host": "vector2",
+ "start_time": "2026-09-26T01:17:16+0000",
+ "end_time": "2026-09-26T01:37:45+0000",
+ "cmd": "experiments/three_stage_implementation_pilot_20260924/run_experiment.py --manifest experiments/three_stage_implementation_pilot_20260924/manifests/formal_q50.json --seed 11012",
+ "failure_reason": null,
+ "search_outcome": "no_candidate_budget_exhausted",
+ "has_candidate": false,
+ "endpoint": {
+  "identity": {
+   "run_id": "t3_formal_q50_s11012",
+   "cohort": "formal",
+   "q": 50,
+   "seed": 11012,
+   "checkpoint_kind": "diagnostic_terminal",
+   "global_update": 2800,
+   "phase": "C",
+   "call_index": 100,
+   "local_update": 1800
+  },
+  "files": {
+   "pt": "checkpoints/endpoint.pt",
+   "weights_npz": "checkpoints/endpoint_weights.npz"
+  }
+ },
+ "available_checkpoints": [
+  "checkpoints/endpoint.pt",
+  "checkpoints/endpoint_record.json",
+  "checkpoints/endpoint_weights.npz",
+  "checkpoints/min_dev.pt",
+  "checkpoints/min_dev_arrays.npz",
+  "checkpoints/min_dev_profiles.json",
+  "checkpoints/min_dev_profiles.npz",
+  "checkpoints/min_dev_record.json",
+  "checkpoints/min_dev_weights.npz",
+  "weights/update_00025.npz",
+  "weights/update_00050.npz",
+  "weights/update_00075.npz",
+  "weights/update_00100.npz",
+  "weights/update_00125.npz",
+  "weights/update_00150.npz",
+  "weights/update_00175.npz",
+  "weights/update_00200.npz",
+  "weights/update_00225.npz",
+  "weights/update_00250.npz",
+  "weights/update_00275.npz",
+  "weights/update_00300.npz",
+  "weights/update_00325.npz",
+  "weights/update_00350.npz",
+  "weights/update_00375.npz",
+  "weights/update_00400.npz",
+  "weights/update_00425.npz",
+  "weights/update_00450.npz",
+  "weights/update_00475.npz",
+  "weights/update_00500.npz",
+  "weights/update_00525.npz",
+  "weights/update_00550.npz",
+  "weights/update_00575.npz",
+  "weights/update_00600.npz",
+  "weights/update_00625.npz",
+  "weights/update_00650.npz",
+  "weights/update_00675.npz",
+  "weights/update_00700.npz",
+  "weights/update_00725.npz",
+  "weights/update_00750.npz",
+  "weights/update_00775.npz",
+  "weights/update_00800.npz",
+  "weights/update_00825.npz",
+  "weights/update_00850.npz",
+  "weights/update_00875.npz",
+  "weights/update_00900.npz",
+  "weights/update_00925.npz",
+  "weights/update_00950.npz",
+  "weights/update_00975.npz",
+  "weights/update_01000.npz",
+  "weights/update_01025.npz",
+  "weights/update_01050.npz",
+  "weights/update_01075.npz",
+  "weights/update_01100.npz",
+  "weights/update_01125.npz",
+  "weights/update_01150.npz",
+  "weights/update_01175.npz",
+  "weights/update_01200.npz",
+  "weights/update_01225.npz",
+  "weights/update_01250.npz",
+  "weights/update_01275.npz",
+  "weights/update_01300.npz",
+  "weights/update_01325.npz",
+  "weights/update_01350.npz",
+  "weights/update_01375.npz",
+  "weights/update_01400.npz",
+  "weights/update_01425.npz",
+  "weights/update_01450.npz",
+  "weights/update_01475.npz",
+  "weights/update_01500.npz",
+  "weights/update_01525.npz",
+  "weights/update_01550.npz",
+  "weights/update_01575.npz",
+  "weights/update_01600.npz",
+  "weights/update_01625.npz",
+  "weights/update_01650.npz",
+  "weights/update_01675.npz",
+  "weights/update_01700.npz",
+  "weights/update_01725.npz",
+  "weights/update_01750.npz",
+  "weights/update_01775.npz",
+  "weights/update_01800.npz",
+  "weights/update_01825.npz",
+  "weights/update_01850.npz",
+  "weights/update_01875.npz",
+  "weights/update_01900.npz",
+  "weights/update_01925.npz",
+  "weights/update_01950.npz",
+  "weights/update_01975.npz",
+  "weights/update_02000.npz",
+  "weights/update_02025.npz",
+  "weights/update_02050.npz",
+  "weights/update_02075.npz",
+  "weights/update_02100.npz",
+  "weights/update_02125.npz",
+  "weights/update_02150.npz",
+  "weights/update_02175.npz",
+  "weights/update_02200.npz",
+  "weights/update_02225.npz",
+  "weights/update_02250.npz",
+  "weights/update_02275.npz",
+  "weights/update_02300.npz",
+  "weights/update_02325.npz",
+  "weights/update_02350.npz",
+  "weights/update_02375.npz",
+  "weights/update_02400.npz",
+  "weights/update_02425.npz",
+  "weights/update_02450.npz",
+  "weights/update_02475.npz",
+  "weights/update_02500.npz",
+  "weights/update_02525.npz",
+  "weights/update_02550.npz",
+  "weights/update_02575.npz",
+  "weights/update_02600.npz",
+  "weights/update_02625.npz",
+  "weights/update_02650.npz",
+  "weights/update_02675.npz",
+  "weights/update_02700.npz",
+  "weights/update_02725.npz",
+  "weights/update_02750.npz",
+  "weights/update_02775.npz",
+  "weights/update_02800.npz"
+ ],
+ "last_completed_update": 2800,
+ "updated_time": "2026-09-26T01:37:45+0000",
+ "phases": [
+  {
+   "phase": "A",
+   "entry_global_update": 0,
+   "exit_global_update": 400,
+   "local_updates": 400,
+   "cap": 400,
+   "exit_reason": "fixed_budget_completed",
+   "n_checks": 4,
+   "eligible_count": 0,
+   "consecutive_at_exit": 0,
+   "check_sequence": [
+    {
+     "local": 100,
+     "global": 100,
+     "eligible": null,
+     "consecutive": 0
+    },
+    {
+     "local": 200,
+     "global": 200,
+     "eligible": null,
+     "consecutive": 0
+    },
+    {
+     "local": 300,
+     "global": 300,
+     "eligible": null,
+     "consecutive": 0
+    },
+    {
+     "local": 400,
+     "global": 400,
+     "eligible": null,
+     "consecutive": 0
+    }
+   ],
+   "phase_episodes": 204800,
+   "phase_environment_steps": 204800,
+   "phase_physical_actions": 409600,
+   "phase_updates": 400
+  },
+  {
+   "phase": "B",
+   "entry_global_update": 400,
+   "exit_global_update": 1000,
+   "local_updates": 600,
+   "cap": 600,
+   "exit_reason": "budget_forced",
+   "n_checks": 24,
+   "eligible_count": 0,
+   "consecutive_at_exit": 0,
+   "check_sequence": [
+    {
+     "local": 25,
+     "global": 425,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 50,
+     "global": 450,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 75,
+     "global": 475,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 100,
+     "global": 500,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 125,
+     "global": 525,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 150,
+     "global": 550,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 175,
+     "global": 575,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 200,
+     "global": 600,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 225,
+     "global": 625,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 250,
+     "global": 650,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 275,
+     "global": 675,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 300,
+     "global": 700,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 325,
+     "global": 725,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 350,
+     "global": 750,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 375,
+     "global": 775,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 400,
+     "global": 800,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 425,
+     "global": 825,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 450,
+     "global": 850,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 475,
+     "global": 875,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 500,
+     "global": 900,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 525,
+     "global": 925,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 550,
+     "global": 950,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 575,
+     "global": 975,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 600,
+     "global": 1000,
+     "eligible": false,
+     "consecutive": 0
+    }
+   ],
+   "phase_episodes": 307200,
+   "phase_environment_steps": 614400,
+   "phase_physical_actions": 1228800,
+   "phase_updates": 600
+  },
+  {
+   "phase": "C",
+   "entry_global_update": 1000,
+   "exit_global_update": 2800,
+   "local_updates": 1800,
+   "cap": 1800,
+   "exit_reason": "no_candidate_budget_exhausted",
+   "n_checks": 72,
+   "eligible_count": 0,
+   "consecutive_at_exit": 0,
+   "check_sequence": [
+    {
+     "local": 25,
+     "global": 1025,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 50,
+     "global": 1050,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 75,
+     "global": 1075,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 100,
+     "global": 1100,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 125,
+     "global": 1125,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 150,
+     "global": 1150,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 175,
+     "global": 1175,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 200,
+     "global": 1200,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 225,
+     "global": 1225,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 250,
+     "global": 1250,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 275,
+     "global": 1275,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 300,
+     "global": 1300,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 325,
+     "global": 1325,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 350,
+     "global": 1350,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 375,
+     "global": 1375,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 400,
+     "global": 1400,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 425,
+     "global": 1425,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 450,
+     "global": 1450,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 475,
+     "global": 1475,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 500,
+     "global": 1500,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 525,
+     "global": 1525,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 550,
+     "global": 1550,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 575,
+     "global": 1575,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 600,
+     "global": 1600,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 625,
+     "global": 1625,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 650,
+     "global": 1650,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 675,
+     "global": 1675,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 700,
+     "global": 1700,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 725,
+     "global": 1725,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 750,
+     "global": 1750,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 775,
+     "global": 1775,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 800,
+     "global": 1800,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 825,
+     "global": 1825,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 850,
+     "global": 1850,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 875,
+     "global": 1875,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 900,
+     "global": 1900,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 925,
+     "global": 1925,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 950,
+     "global": 1950,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 975,
+     "global": 1975,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1000,
+     "global": 2000,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1025,
+     "global": 2025,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1050,
+     "global": 2050,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1075,
+     "global": 2075,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1100,
+     "global": 2100,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1125,
+     "global": 2125,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1150,
+     "global": 2150,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1175,
+     "global": 2175,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1200,
+     "global": 2200,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1225,
+     "global": 2225,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1250,
+     "global": 2250,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1275,
+     "global": 2275,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1300,
+     "global": 2300,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1325,
+     "global": 2325,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1350,
+     "global": 2350,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1375,
+     "global": 2375,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1400,
+     "global": 2400,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1425,
+     "global": 2425,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1450,
+     "global": 2450,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1475,
+     "global": 2475,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1500,
+     "global": 2500,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1525,
+     "global": 2525,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1550,
+     "global": 2550,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1575,
+     "global": 2575,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1600,
+     "global": 2600,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1625,
+     "global": 2625,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1650,
+     "global": 2650,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1675,
+     "global": 2675,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1700,
+     "global": 2700,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1725,
+     "global": 2725,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1750,
+     "global": 2750,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1775,
+     "global": 2775,
+     "eligible": false,
+     "consecutive": 0
+    },
+    {
+     "local": 1800,
+     "global": 2800,
+     "eligible": false,
+     "consecutive": 0
+    }
+   ],
+   "phase_episodes": 921600,
+   "phase_environment_steps": 1996200,
+   "phase_physical_actions": 3992400,
+   "phase_updates": 1800
+  }
+ ],
+ "stop_global_update": 2800,
+ "stop_C_local_update": 1800,
+ "totals": {
+  "episodes": 1433600,
+  "environment_steps": 2815400,
+  "physical_actions": 5630800
+ },
+ "certification": "not_applicable_no_candidate",
+ "final_joint_pass": false,
+ "process_peak_rss_bytes": 540540928
+}

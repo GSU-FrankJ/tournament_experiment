@@ -1,0 +1,4562 @@
+{
+  "experiment": "Prospective q50 T2 independent random restart evaluation 20260924",
+  "preregistration": "experiments/two_stage_q50_restarts_20260924/PREREGISTRATION.md",
+  "protocol_document": "MultiStage/two_stage/protocol/FINAL_T2_PROTOCOL_20260922.json",
+  "source_manifest": "experiments/two_stage_E1_q50_p_20260923/manifest.json",
+  "worktree": ".",
+  "runner": "run/run_final_dp_br_round3_dense.py",
+  "python": "python",
+  "protocol_module_sha256": {
+    "agents/ppo_curriculum.py": "8a1c906ae5f8e9017993d501554f7b58172244e8e077041784e51bd86e3ed2f2",
+    "envs/curriculum_env.py": "f367d7831c386fa96ce1fbec91dfcc574d7e49771db08d193ffe392b2e1c553a",
+    "utils/dp_br_verifier.py": "3054e5500eea8876aba558ad08bb3b1971d427cf24b3e4d261cda60502049481",
+    "utils/theory_multistage.py": "eff8d2f70e3fbc3aec22d81e5ba321f366a20192eb0fd6d802222b60389ddd47",
+    "run/run_final_dp_br.py": "9d48a1cb2ab49b8b5db153197017c7a19472cc879f52bb297a63f43dab732c3a",
+    "run/run_final_dp_br_round3_dense.py": "1786eaa23f83363dd0ab475d88c859e179c5dd0ac53890ff22ecdee66da35bb8"
+  },
+  "status": "planned_not_started",
+  "group_order": [
+    "FINAL_A400_B25_C25"
+  ],
+  "formal_run_count": 30,
+  "held_out_training_seeds": {
+    "50": [
+      10201,
+      10202,
+      10203,
+      10204,
+      10205,
+      10206,
+      10207,
+      10208,
+      10209,
+      10210,
+      10211,
+      10212,
+      10213,
+      10214,
+      10215,
+      10216,
+      10217,
+      10218,
+      10219,
+      10220,
+      10221,
+      10222,
+      10223,
+      10224,
+      10225,
+      10226,
+      10227,
+      10228,
+      10229,
+      10230
+    ]
+  },
+  "seed_pairing": "Ten fixed consecutive non-overlapping triples; all30 evaluated independently before reporting. k=1,2,3 are fixed prefixes, never reordered.",
+  "max_concurrent_processes": 10,
+  "threads_per_process": {
+    "torch": 1,
+    "OMP": 1,
+    "MKL": 1,
+    "OPENBLAS": 1
+  },
+  "rng_group_id_in_seed": false,
+  "rng_phase_id_in_seed": false,
+  "formal_candidate_rule": "First valid C development call with BR and concentration passing, including the cap call; no-candidate final iterate evaluations are diagnostic only.",
+  "runs": [
+    {
+      "run": "tel_q50_s10201",
+      "q": 50,
+      "seed": 10201,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10201"
+    },
+    {
+      "run": "tel_q50_s10202",
+      "q": 50,
+      "seed": 10202,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10202"
+    },
+    {
+      "run": "tel_q50_s10203",
+      "q": 50,
+      "seed": 10203,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10203"
+    },
+    {
+      "run": "tel_q50_s10204",
+      "q": 50,
+      "seed": 10204,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10204"
+    },
+    {
+      "run": "tel_q50_s10205",
+      "q": 50,
+      "seed": 10205,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10205"
+    },
+    {
+      "run": "tel_q50_s10206",
+      "q": 50,
+      "seed": 10206,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10206"
+    },
+    {
+      "run": "tel_q50_s10207",
+      "q": 50,
+      "seed": 10207,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10207"
+    },
+    {
+      "run": "tel_q50_s10208",
+      "q": 50,
+      "seed": 10208,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10208"
+    },
+    {
+      "run": "tel_q50_s10209",
+      "q": 50,
+      "seed": 10209,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10209"
+    },
+    {
+      "run": "tel_q50_s10210",
+      "q": 50,
+      "seed": 10210,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10210"
+    },
+    {
+      "run": "tel_q50_s10211",
+      "q": 50,
+      "seed": 10211,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10211"
+    },
+    {
+      "run": "tel_q50_s10212",
+      "q": 50,
+      "seed": 10212,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10212"
+    },
+    {
+      "run": "tel_q50_s10213",
+      "q": 50,
+      "seed": 10213,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10213"
+    },
+    {
+      "run": "tel_q50_s10214",
+      "q": 50,
+      "seed": 10214,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10214"
+    },
+    {
+      "run": "tel_q50_s10215",
+      "q": 50,
+      "seed": 10215,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10215"
+    },
+    {
+      "run": "tel_q50_s10216",
+      "q": 50,
+      "seed": 10216,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10216"
+    },
+    {
+      "run": "tel_q50_s10217",
+      "q": 50,
+      "seed": 10217,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10217"
+    },
+    {
+      "run": "tel_q50_s10218",
+      "q": 50,
+      "seed": 10218,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10218"
+    },
+    {
+      "run": "tel_q50_s10219",
+      "q": 50,
+      "seed": 10219,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10219"
+    },
+    {
+      "run": "tel_q50_s10220",
+      "q": 50,
+      "seed": 10220,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10220"
+    },
+    {
+      "run": "tel_q50_s10221",
+      "q": 50,
+      "seed": 10221,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10221"
+    },
+    {
+      "run": "tel_q50_s10222",
+      "q": 50,
+      "seed": 10222,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10222"
+    },
+    {
+      "run": "tel_q50_s10223",
+      "q": 50,
+      "seed": 10223,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10223"
+    },
+    {
+      "run": "tel_q50_s10224",
+      "q": 50,
+      "seed": 10224,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10224"
+    },
+    {
+      "run": "tel_q50_s10225",
+      "q": 50,
+      "seed": 10225,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10225"
+    },
+    {
+      "run": "tel_q50_s10226",
+      "q": 50,
+      "seed": 10226,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10226"
+    },
+    {
+      "run": "tel_q50_s10227",
+      "q": 50,
+      "seed": 10227,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10227"
+    },
+    {
+      "run": "tel_q50_s10228",
+      "q": 50,
+      "seed": 10228,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10228"
+    },
+    {
+      "run": "tel_q50_s10229",
+      "q": 50,
+      "seed": 10229,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10229"
+    },
+    {
+      "run": "tel_q50_s10230",
+      "q": 50,
+      "seed": 10230,
+      "T": 2,
+      "game": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "q": 50,
+        "T": 2,
+        "e_min": 0,
+        "e_max": 100
+      },
+      "dw": 4,
+      "B": 200,
+      "domain_half_stage2": 200,
+      "ppo": {
+        "hidden": 64,
+        "lr": 0.0003,
+        "adam_betas": [
+          0.9,
+          0.999
+        ],
+        "adam_eps": 1e-08,
+        "weight_decay": 0,
+        "clip_eps": 0.2,
+        "value_coef": 0.5,
+        "entropy_coef": 0,
+        "max_grad_norm": 0.5,
+        "epochs": 10,
+        "minibatch": 256,
+        "gamma": 1,
+        "gae_lambda": 1,
+        "c_min": 100,
+        "mu_clamp": 1e-06,
+        "action_clamp": 1e-06,
+        "adv_norm_eps": 1e-08
+      },
+      "protocol": {
+        "w_h": 6,
+        "w_l": 2,
+        "k": 0.00028571428571428574,
+        "e_min": 0,
+        "e_max": 100,
+        "episodes_per_update": 512,
+        "phase_caps": {
+          "A": 400,
+          "B": 600,
+          "C": 1000
+        },
+        "warmup": 100,
+        "stability_every": 20,
+        "drift_thr": 0.01,
+        "kl_thr": 0.01,
+        "stability_consecutive": 2,
+        "verifier_timeout": {
+          "A": 100,
+          "B": 25,
+          "C": 25
+        },
+        "k_phase": 3,
+        "k_stop": 1,
+        "phase_thr_over_dw": {
+          "A": 0.02,
+          "B": 0.02,
+          "C": 0.01
+        },
+        "conc_thr": 0.04,
+        "snapshot_every": 20,
+        "es_bin_width": 10,
+        "phase_c_root": 256,
+        "phase_c_es": 256,
+        "final_thr_over_dw": 0.01,
+        "refine_thr_over_dw": 0.002,
+        "sensitivity_thr_over_dw": 0.03,
+        "dense_conc_step": 0.05,
+        "recovery_step": 0.5,
+        "direct_rollout_episodes": 200000,
+        "direct_rollout_reps": 3,
+        "direct_rollout_seed_base": 9005000,
+        "rng_namespaces": {
+          "init": 0,
+          "env_noise": 1,
+          "learner_action": 2,
+          "opponent_action": 3,
+          "starts_roles": 4,
+          "minibatch": 5
+        },
+        "weights_every": 25
+      },
+      "smoke_overrides": {},
+      "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+      "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+      "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+      "es_bins_stage2": 40,
+      "verifier": {
+        "development": {
+          "name": "development",
+          "state_step": 4,
+          "effort_step": 1,
+          "gl_half": 16,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        },
+        "final": {
+          "name": "final",
+          "state_step": 2,
+          "effort_step": 0.5,
+          "gl_half": 32,
+          "grid_tol": 1e-09,
+          "mass_tol": 1e-10,
+          "pdl_tol_over_dw": 1e-10
+        }
+      },
+      "dtypes": {
+        "network": "float32",
+        "env_gap_reward": "float64",
+        "verifier": "float64"
+      },
+      "device": "cpu",
+      "torch_threads": 1,
+      "versions": {
+        "python": "3.12.3",
+        "torch": "2.5.1+cu121",
+        "numpy": "2.5.0"
+      },
+      "group": "FINAL_A400_B25_C25",
+      "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+      "lr_schedule": {
+        "kind": "constant",
+        "actor_and_critic": true,
+        "ab_lr": 0.0003,
+        "c_start_lr": 0.0003,
+        "c_end_lr": 0.0003,
+        "c_budget_updates": 1000,
+        "c_local_first": 1,
+        "c_local_last": 1000,
+        "linear_denominator": 999,
+        "apply_before_each_update": true,
+        "constant_within_update": true,
+        "preserve_adam_state": true
+      },
+      "output_dir": "scratch/two_stage/two_stage_q50_restarts_20260924/runs/FINAL_A400_B25_C25/tel_q50_s10230"
+    }
+  ],
+  "created_at_utc": "2026-09-24T14:06:36.104298+00:00",
+  "changes_vs_E1": [
+    "Only run identity, seed and output directory; all model, training and verifier settings unchanged."
+  ],
+  "restart_evaluation": {
+    "max_runs_per_solver_call": 3,
+    "groups": [
+      {
+        "group_id": 1,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10201,
+          10202,
+          10203
+        ]
+      },
+      {
+        "group_id": 2,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10204,
+          10205,
+          10206
+        ]
+      },
+      {
+        "group_id": 3,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10207,
+          10208,
+          10209
+        ]
+      },
+      {
+        "group_id": 4,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10210,
+          10211,
+          10212
+        ]
+      },
+      {
+        "group_id": 5,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10213,
+          10214,
+          10215
+        ]
+      },
+      {
+        "group_id": 6,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10216,
+          10217,
+          10218
+        ]
+      },
+      {
+        "group_id": 7,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10219,
+          10220,
+          10221
+        ]
+      },
+      {
+        "group_id": 8,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10222,
+          10223,
+          10224
+        ]
+      },
+      {
+        "group_id": 9,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10225,
+          10226,
+          10227
+        ]
+      },
+      {
+        "group_id": 10,
+        "q": 50,
+        "T": 2,
+        "seeds": [
+          10228,
+          10229,
+          10230
+        ]
+      }
+    ],
+    "evaluation_runs_all_planned_seeds": true,
+    "operational_policy": "Return first candidate passing final_joint_pass, otherwise exhaust at3; report every attempted run.",
+    "decision": "Retain as a useful T2 pilot only if complete data show k3 joint success count > k1 joint success count and at least one group is rescued; otherwise terminate this method. No significance claim, no extra seeds."
+  },
+  "publication_note": "Execution paths are portable. Numeric settings and seed schedules are unchanged. protocol_module_sha256 records original research code provenance; publication-only path/docstring changes are described in MultiStage/two_stage/README.md."
+}

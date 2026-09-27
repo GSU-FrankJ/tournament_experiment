@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11018",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11018,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2175,
+  "local_update": 1175,
+  "call_index": 75
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.05312266680980482,
+  "exp_root_over_dw": 0.013280666702451205,
+  "v_br_root": 2.7589685602490537,
+  "v_mean_root": 2.705845893439249,
+  "dreach": 0.12577306236716224,
+  "dreach_over_dw": 0.03144326559179056,
+  "reach_delta_max": {
+   "3": 0.0671269600063189,
+   "2": 0.050084443547694146,
+   "1": 0.008561658813149187
+  },
+  "reach_argmax_d": {
+   "3": 104.0,
+   "2": -4.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 103,
+   "2": 50,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.12577306236716224,
+  "dreach_pmf_support_over_dw": 0.03144326559179056,
+  "pmf_support_delta_max": {
+   "3": 0.0671269600063189,
+   "2": 0.050084443547694146,
+   "1": 0.008561658813149187
+  },
+  "pmf_support_count": {
+   "3": 107,
+   "2": 48,
+   "1": 1
+  },
+  "dfull": 0.12577306236716224,
+  "dfull_over_dw": 0.03144326559179056,
+  "full_delta_max": {
+   "3": 0.0671269600063189,
+   "2": 0.050084443547694146,
+   "1": 0.008561658813149187
+  },
+  "full_argmax_d": {
+   "3": 104.0,
+   "2": -4.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.0671269600063189,
+  "delta_max_all_over_dw": 0.016781740001579726,
+  "pdl_sum": 0.053122666809804084,
+  "pdl_residual": 7.355227538141662e-16,
+  "pdl_residual_over_dw": 1.8388068845354155e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999998,
+   "2": 0.9999999999999999,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 2.220446049250313e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.272177620963504,
+    "union_lo": -91.2721776209635,
+    "union_hi": 108.7278223790365,
+    "n_grid_covered": 50
+   },
+   "3": {
+    "n_intervals": 50,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.940408035288968,
+    "union_lo": -203.42811188814466,
+    "union_hi": 211.57476750896163,
+    "n_grid_covered": 103
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 155,
+    "vertex": 46,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 37,
+    "vertex": 63,
+    "mean_action": 1,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 155,
+    "vertex": 46,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 31,
+    "vertex": 58,
+    "mean_action": 1,
+    "br_action": 11
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 0,
+    "mean_action": 0,
+    "br_action": 1
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.036218975703004565,
+  "max_std_effort": 3.6218975703004563,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 72.10855102539062,
+  "beta": 109.4170150756836,
+  "conc": 181.52556610107422,
+  "mean_norm": 0.39723633741618675,
+  "mean_effort": 39.72363374161867
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.05312266680980482,
+   "max_over_dw": 0.013280666702451205,
+   "argmax_d": 0.0,
+   "min_raw": 0.05312266680980482
+  },
+  "2": {
+   "max_raw": 0.07855621067561014,
+   "max_over_dw": 0.019639052668902535,
+   "argmax_d": 32.0,
+   "min_raw": 0.01055090448694207
+  },
+  "3": {
+   "max_raw": 0.0671269600063189,
+   "max_over_dw": 0.016781740001579726,
+   "argmax_d": 104.0,
+   "min_raw": 1.4380344406816903e-05
+  }
+ },
+ "dreach_over_dw": 0.03144326559179056,
+ "coverage_snapshot_index": 74,
+ "saved_time": "2026-09-26T01:33:49+0000"
+}

@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11009",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11009,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2175,
+  "local_update": 1175,
+  "call_index": 75
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.04847002446658344,
+  "exp_root_over_dw": 0.01211750611664586,
+  "v_br_root": 2.677951536395737,
+  "v_mean_root": 2.6294815119291535,
+  "dreach": 0.178800608760723,
+  "dreach_over_dw": 0.04470015219018075,
+  "reach_delta_max": {
+   "3": 0.09828961916173551,
+   "2": 0.07334830211501675,
+   "1": 0.007162687483970753
+  },
+  "reach_argmax_d": {
+   "3": -8.0,
+   "2": 68.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 103,
+   "2": 50,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.178800608760723,
+  "dreach_pmf_support_over_dw": 0.04470015219018075,
+  "pmf_support_delta_max": {
+   "3": 0.09828961916173551,
+   "2": 0.07334830211501675,
+   "1": 0.007162687483970753
+  },
+  "pmf_support_count": {
+   "3": 106,
+   "2": 50,
+   "1": 1
+  },
+  "dfull": 0.178800608760723,
+  "dfull_over_dw": 0.04470015219018075,
+  "full_delta_max": {
+   "3": 0.09828961916173551,
+   "2": 0.07334830211501675,
+   "1": 0.007162687483970753
+  },
+  "full_argmax_d": {
+   "3": -8.0,
+   "2": 68.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.09828961916173551,
+  "delta_max_all_over_dw": 0.024572404790433877,
+  "pdl_sum": 0.048470024466582474,
+  "pdl_residual": 9.645062526431047e-16,
+  "pdl_residual_over_dw": 2.411265631607762e-16,
+  "pmf_mass": {
+   "3": 1.0,
+   "2": 0.9999999999999999,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 2.1168836291902977,
+    "union_lo": -106.1168836291903,
+    "union_hi": 93.8831163708097,
+    "n_grid_covered": 50
+   },
+   "3": {
+    "n_intervals": 50,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.986482864236109,
+    "union_lo": -209.95370222984332,
+    "union_hi": 201.12170039960756,
+    "n_grid_covered": 103
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 155,
+    "vertex": 46,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 34,
+    "vertex": 67,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 155,
+    "vertex": 46,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 30,
+    "vertex": 56,
+    "mean_action": 0,
+    "br_action": 15
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.02873949473059103,
+  "max_std_effort": 2.873949473059103,
+  "stage": 3,
+  "d": 28.0,
+  "alpha": 146.1511993408203,
+  "beta": 155.25149536132812,
+  "conc": 301.40269470214844,
+  "mean_norm": 0.4849034262459052,
+  "mean_effort": 48.49034262459052
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.04847002446658344,
+   "max_over_dw": 0.01211750611664586,
+   "argmax_d": 0.0,
+   "min_raw": 0.04847002446658344
+  },
+  "2": {
+   "max_raw": 0.1007847501863921,
+   "max_over_dw": 0.025196187546598026,
+   "argmax_d": 68.0,
+   "min_raw": 0.028074823898911028
+  },
+  "3": {
+   "max_raw": 0.09828961916173551,
+   "max_over_dw": 0.024572404790433877,
+   "argmax_d": -8.0,
+   "min_raw": 6.025287999200657e-06
+  }
+ },
+ "dreach_over_dw": 0.04470015219018075,
+ "coverage_snapshot_index": 74,
+ "saved_time": "2026-09-26T01:12:52+0000"
+}

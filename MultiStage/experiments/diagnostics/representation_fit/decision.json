@@ -1,0 +1,82 @@
+{
+  "success_threshold_over_dw": 0.01,
+  "primary_budget": 8000,
+  "per_seed": {
+    "10441": {
+      "max_loss_over_dw_at_primary": {
+        "head_only": 0.028770765654608232,
+        "full": 0.0004689113826367164,
+        "full_from_init": 0.08502192330983904
+      },
+      "success": {
+        "head_only": false,
+        "full": true,
+        "full_from_init": false
+      },
+      "first_success_step": {
+        "head_only": null,
+        "full": 900,
+        "full_from_init": null
+      },
+      "reading": "only full succeeds: the architecture can express the target; current training did not learn suitable features",
+      "large_change_flag": {
+        "head_only": true,
+        "full": true,
+        "full_from_init": true
+      },
+      "original_max_loss_over_dw": 0.14230605198536916
+    },
+    "10442": {
+      "max_loss_over_dw_at_primary": {
+        "head_only": 0.14491016106828625,
+        "full": 0.0001897274974613783,
+        "full_from_init": 0.14578940390660144
+      },
+      "success": {
+        "head_only": false,
+        "full": true,
+        "full_from_init": false
+      },
+      "first_success_step": {
+        "head_only": null,
+        "full": 650,
+        "full_from_init": null
+      },
+      "reading": "only full succeeds: the architecture can express the target; current training did not learn suitable features",
+      "large_change_flag": {
+        "head_only": true,
+        "full": true,
+        "full_from_init": false
+      },
+      "original_max_loss_over_dw": 0.1464522071073897
+    },
+    "10443": {
+      "max_loss_over_dw_at_primary": {
+        "head_only": 0.015333219290806888,
+        "full": 0.0007698933752056103,
+        "full_from_init": 0.14637402368589114
+      },
+      "success": {
+        "head_only": false,
+        "full": true,
+        "full_from_init": false
+      },
+      "first_success_step": {
+        "head_only": null,
+        "full": 650,
+        "full_from_init": null
+      },
+      "reading": "only full succeeds: the architecture can express the target; current training did not learn suitable features",
+      "large_change_flag": {
+        "head_only": true,
+        "full": true,
+        "full_from_init": false
+      },
+      "original_max_loss_over_dw": 0.07629192338833479
+    }
+  },
+  "common_reading": "only full succeeds: the architecture can express the target; current training did not learn suitable features",
+  "note": "full_from_init is descriptive and does not enter the reading",
+  "generated": "2026-09-25T19:00:10+0000",
+  "study_file": "study.json"
+}

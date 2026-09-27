@@ -1,0 +1,88 @@
+{
+  "experiment": "q60_phase_a_budget_extension_20260925",
+  "written_before_any_run": true,
+  "nature": "implementation/debug experiment; not a formal result; no success-rate estimate",
+  "question": "Does the original PPO, continued from A400 to A800 within one uninterrupted phase-A run, learn the stage-3 state structure by itself and lower the self-play terminal maximum deviation?",
+  "seeds": [
+    10461,
+    10462,
+    10463
+  ],
+  "seed_selection": {
+    "rule": "first three integers from 10461 that are unused and unreserved",
+    "known_reserved_or_used": {
+      "formal": "11001-11020, 11101-11120",
+      "historical_t3_debug": "10300-10303",
+      "smoke": "10400, 10410",
+      "pilot": "10401-10403, 10411-10413",
+      "a_sampling": "10430-10433",
+      "asamp_abc": "10440-10443"
+    },
+    "fixed": "the list is recorded before training and is never replaced because of results"
+  },
+  "intervention": "phase-A budget 400 -> 800 updates, the only change. Each seed trains from its own PPO initialization in one continuous phase-A run to A800: no phase transition at 400 and no reset of optimizer, critic, RNG or opponent. The A400 state of each trajectory is its own paired budget reference.",
+  "inherited_unchanged": {
+    "source_manifest": "E/manifests/asamp_q60_baseline.json (A-only baseline arm); resolved config copied verbatim except phases[0].cap (400 -> 800) and the study block",
+    "items": [
+      "q=60",
+      "512 exploring-start episodes per update, uniform on D3=[-440,440] with width-10 bins (StartSampler.balanced), stage 3 only",
+      "sampled rewards, one terminal outcome per transition (K=1)",
+      "network 2-64-64 actor/critic, initialization, Adam lr 3e-4, 10 epochs, minibatch 256",
+      "advantage normalization, gradient clipping 0.5, clip eps 0.2, entropy 0",
+      "opponent snapshot: refresh at phase entry and every 20 updates",
+      "concentration: c = 100 + softplus(z_c), threshold 0.04 (diagnostic)",
+      "economics w_h=6, w_l=2, k=1/3500; state encoding; effort range [0,100]",
+      "development verifier checks every 100 updates; weights exported every 25 updates",
+      "RNG namespaces init 0, env_noise 1, learner_action 2, opponent_action 3, starts_roles 4, minibatch 5"
+    ]
+  },
+  "not_introduced": [
+    "center-weighted sampling",
+    "K8 or any terminal resampling",
+    "non-zero mean-head initialization",
+    "larger network",
+    "BR-label supervision or warm start",
+    "concentration floor/threshold/learning-rate changes",
+    "B/C phases, q50, formal runs"
+  ],
+  "budget": {
+    "fixed_endpoint": "A800 regardless of intermediate results; no extension to A1600",
+    "expected_counts_per_run": {
+      "ppo_updates": 800,
+      "stage3_episodes": 409600,
+      "stage3_transitions": 409600,
+      "actor_optimizer_steps": 16000
+    },
+    "counts_rule": "verified from the actual logs (history.jsonl, Adam state step counts), not filled from formulas"
+  },
+  "evaluation": {
+    "primary_metric": "R3(u) = max_{d in D3} [V3_BR(d; pi_u) - V3_mean(d; pi_u)] / dW, where the learner plays pi_u(3,d), the opponent plays the same checkpoint's mean action pi_u(3,-d) (shared symmetric policy), and V3_BR is the best response to that current mean opponent",
+    "primary_comparison": "R3(A800) - R3(A400) per seed; A800 is the primary endpoint and the historical minimum is descriptive only",
+    "verifier": "the existing final-tier DP-BR verifier (W utils.dp_br_verifier.verify via run_final_dp_br.run_verifier) with the manifest's final tier: state_step 2, effort_step 0.5, gl_half 32; only its stage-3 arrays are used; at stage 3 the terminal expectation is closed-form (w_l + dW F_xi), so gl_half does not enter R3",
+    "checkpoints": "A100, A200, ..., A800 (the development-check updates); evaluated in memory right after each check and again offline from the saved weights",
+    "purity": "evaluation draws no random numbers, never updates the networks and never refreshes the opponent",
+    "per_checkpoint": [
+      "deviation/dW max and mean over all D3, center |d|<=220 and outer |d|>220, with argmax states; R3<=0.01 as a descriptive boolean",
+      "per-state table on the verifier grid: d, learner mean effort, opponent mean effort, BR effort, V3_BR, V3_mean, deviation/dW, mu, concentration c, normalized std",
+      "e3(0); center and outer mean effort; min/max mean effort and their states; center effort range",
+      "max normalized std over D3 and its state with mu and c; mu, c, std at the mean-effort peak; max std<=0.04 as a descriptive boolean"
+    ],
+    "dense_concentration": "E metrics.policy_profiles on the original 0.05 grid at A400 and A800 (reported for all stages as originally defined and for stage 3 alone)",
+    "training_and_coverage": "existing PPO logs (loss, KL, clip fraction, gradient norms); actual updates, episodes, actor optimizer steps; learner-signed ES counts per D3 bin cumulative and split A1-400 / A401-800; runtime, CPU time, peak memory",
+    "parameter_change": "L2 displacement of l1, l2, mean head, concentration head: init->A400, init->A800, A400->A800",
+    "not_evaluated": "stages 1-2 (untrained in an A-only run); candidate discovery, full certification and three-stage success are not evaluated in this round (not 0/3)"
+  },
+  "interpretation_rules": [
+    "primary endpoint A800; the minimum over checkpoints is descriptive",
+    "no 3/3 gate for continuing; a single curve does not establish that a method works",
+    "R3<=0.01 and std<=0.04 are stage-3 diagnostics of this round, not candidate or certification",
+    "state structure vs level shift is judged from the effort profile and BR curves, never from e3(0) or training reward alone",
+    "supervised-fit step counts from the representation-fit experiment are not translated into a PPO budget",
+    "the result is not evidence for or against K8",
+    "the noise-audit decision.json stays unchanged and its statistical anomaly stays unresolved"
+  ],
+  "execution": {
+    "failures": "every seed is reported; a failed seed is never replaced or dropped; a rerun of the same seed is allowed only for an implementation error, keeping the failed record and the reason",
+    "stop": "after the three A800 runs the experiment stops; no ABC, q50, formal, new initialization or longer budget"
+  }
+}

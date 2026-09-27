@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q60_s11117",
+  "cohort": "formal",
+  "q": 60,
+  "seed": 11117,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 1825,
+  "local_update": 825,
+  "call_index": 61
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.03127457465552519,
+  "exp_root_over_dw": 0.007818643663881297,
+  "v_br_root": 3.044351631215631,
+  "v_mean_root": 3.013077056560106,
+  "dreach": 0.08316863290460752,
+  "dreach_over_dw": 0.02079215822615188,
+  "reach_delta_max": {
+   "3": 0.039815612707810644,
+   "2": 0.04100863802051169,
+   "1": 0.002344382176285187
+  },
+  "reach_argmax_d": {
+   "3": -116.0,
+   "2": 12.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 122,
+   "2": 60,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.08316863290460752,
+  "dreach_pmf_support_over_dw": 0.02079215822615188,
+  "pmf_support_delta_max": {
+   "3": 0.039815612707810644,
+   "2": 0.04100863802051169,
+   "1": 0.002344382176285187
+  },
+  "pmf_support_count": {
+   "3": 126,
+   "2": 52,
+   "1": 1
+  },
+  "dfull": 0.08316863290460752,
+  "dfull_over_dw": 0.02079215822615188,
+  "full_delta_max": {
+   "3": 0.039815612707810644,
+   "2": 0.04100863802051169,
+   "1": 0.002344382176285187
+  },
+  "full_argmax_d": {
+   "3": -116.0,
+   "2": 12.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.04100863802051169,
+  "delta_max_all_over_dw": 0.010252159505127922,
+  "pdl_sum": 0.03127457465552465,
+  "pdl_residual": 5.412337245047638e-16,
+  "pdl_residual_over_dw": 1.3530843112619095e-16,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 2.710061405353173,
+    "union_lo": -122.71006140535317,
+    "union_hi": 117.28993859464683,
+    "n_grid_covered": 60
+   },
+   "3": {
+    "n_intervals": 60,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9303263842911633,
+    "union_lo": -247.02703386861734,
+    "union_hi": 242.3213224907998,
+    "n_grid_covered": 122
+   }
+  },
+  "grid_points": {
+   "3": 221,
+   "2": 111,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 26,
+    "vertex": 83,
+    "mean_action": 2,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 162,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 26,
+    "vertex": 75,
+    "mean_action": 1,
+    "br_action": 9
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 333,
+  "max_std_norm": 0.03360038143818194,
+  "max_std_effort": 3.360038143818194,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 77.73513793945312,
+  "beta": 129.0615692138672,
+  "conc": 206.7967071533203,
+  "mean_norm": 0.37590123657926444,
+  "mean_effort": 37.59012365792644
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.03127457465552519,
+   "max_over_dw": 0.007818643663881297,
+   "argmax_d": 0.0,
+   "min_raw": 0.03127457465552519
+  },
+  "2": {
+   "max_raw": 0.05101145709426014,
+   "max_over_dw": 0.012752864273565034,
+   "argmax_d": 64.0,
+   "min_raw": 0.006765241224446328
+  },
+  "3": {
+   "max_raw": 0.039815612707810644,
+   "max_over_dw": 0.009953903176952661,
+   "argmax_d": -116.0,
+   "min_raw": 4.6024362854169e-07
+  }
+ },
+ "dreach_over_dw": 0.02079215822615188,
+ "coverage_snapshot_index": 60,
+ "saved_time": "2026-09-26T02:13:23+0000"
+}

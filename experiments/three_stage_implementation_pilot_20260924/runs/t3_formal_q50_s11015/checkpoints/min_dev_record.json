@@ -1,0 +1,183 @@
+{
+ "identity": {
+  "run_id": "t3_formal_q50_s11015",
+  "cohort": "formal",
+  "q": 50,
+  "seed": 11015,
+  "checkpoint_kind": "minimum_development",
+  "phase": "C",
+  "global_update": 2150,
+  "local_update": 1150,
+  "call_index": 74
+ },
+ "files": {
+  "pt": "checkpoints/min_dev.pt",
+  "weights_npz": "checkpoints/min_dev_weights.npz",
+  "arrays_npz": "checkpoints/min_dev_arrays.npz"
+ },
+ "summary": {
+  "config": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "gl_weight_sum": 1.0,
+  "valid": true,
+  "invalid_reasons": [],
+  "exp_root": 0.03655452763162348,
+  "exp_root_over_dw": 0.00913863190790587,
+  "v_br_root": 2.6525452620810865,
+  "v_mean_root": 2.615990734449463,
+  "dreach": 0.134178143276654,
+  "dreach_over_dw": 0.0335445358191635,
+  "reach_delta_max": {
+   "3": 0.06150111707736805,
+   "2": 0.0725944451328604,
+   "1": 8.258106642555774e-05
+  },
+  "reach_argmax_d": {
+   "3": -56.0,
+   "2": -4.0,
+   "1": 0.0
+  },
+  "reach_count": {
+   "3": 105,
+   "2": 51,
+   "1": 1
+  },
+  "dreach_pmf_support": 0.134178143276654,
+  "dreach_pmf_support_over_dw": 0.0335445358191635,
+  "pmf_support_delta_max": {
+   "3": 0.06150111707736805,
+   "2": 0.0725944451328604,
+   "1": 8.258106642555774e-05
+  },
+  "pmf_support_count": {
+   "3": 107,
+   "2": 47,
+   "1": 1
+  },
+  "dfull": 0.134178143276654,
+  "dfull_over_dw": 0.0335445358191635,
+  "full_delta_max": {
+   "3": 0.06150111707736805,
+   "2": 0.0725944451328604,
+   "1": 8.258106642555774e-05
+  },
+  "full_argmax_d": {
+   "3": -56.0,
+   "2": -4.0,
+   "1": 0.0
+  },
+  "delta_max_all": 0.0725944451328604,
+  "delta_max_all_over_dw": 0.0181486112832151,
+  "pdl_sum": 0.03655452763162315,
+  "pdl_residual": 3.2612801348363973e-16,
+  "pdl_residual_over_dw": 8.153200337090993e-17,
+  "pmf_mass": {
+   "3": 0.9999999999999999,
+   "2": 1.0,
+   "1": 1.0
+  },
+  "pmf_mass_err_max": 1.1102230246251565e-16,
+  "reach_interval_diag": {
+   "2": {
+    "n_intervals": 1,
+    "n_endpoints_on_grid": 2,
+    "max_uncovered_margin": 0.0,
+    "union_lo": -100.0,
+    "union_hi": 100.0,
+    "n_grid_covered": 51
+   },
+   "3": {
+    "n_intervals": 51,
+    "n_endpoints_on_grid": 0,
+    "max_uncovered_margin": 3.9798985958851176,
+    "union_lo": -214.38267216349487,
+    "union_hi": 206.7374024552069,
+    "n_grid_covered": 105
+   }
+  },
+  "grid_points": {
+   "3": 201,
+   "2": 101,
+   "1": 1
+  },
+  "effort_grid_points": 101,
+  "a_br_source_counts": {
+   "3": {
+    "grid": 153,
+    "vertex": 48,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 31,
+    "vertex": 69,
+    "mean_action": 1,
+    "br_action": 0
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 0,
+    "mean_action": 1,
+    "br_action": 0
+   }
+  },
+  "a_dev_source_counts": {
+   "3": {
+    "grid": 153,
+    "vertex": 48,
+    "mean_action": 0,
+    "br_action": 0
+   },
+   "2": {
+    "grid": 32,
+    "vertex": 59,
+    "mean_action": 0,
+    "br_action": 10
+   },
+   "1": {
+    "grid": 0,
+    "vertex": 1,
+    "mean_action": 0,
+    "br_action": 0
+   }
+  }
+ },
+ "concentration": {
+  "valid": true,
+  "n_points": 303,
+  "max_std_norm": 0.03592457071010541,
+  "max_std_effort": 3.592457071010541,
+  "stage": 1,
+  "d": 0.0,
+  "alpha": 85.469970703125,
+  "beta": 105.17305755615234,
+  "conc": 190.64302825927734,
+  "mean_norm": 0.4483246593569872,
+  "mean_effort": 44.83246593569872
+ },
+ "continuation_gain_by_stage": {
+  "1": {
+   "max_raw": 0.03655452763162348,
+   "max_over_dw": 0.00913863190790587,
+   "argmax_d": 0.0,
+   "min_raw": 0.03655452763162348
+  },
+  "2": {
+   "max_raw": 0.09166638802702654,
+   "max_over_dw": 0.022916597006756634,
+   "argmax_d": -4.0,
+   "min_raw": 0.009121594545557166
+  },
+  "3": {
+   "max_raw": 0.06150111707736805,
+   "max_over_dw": 0.015375279269342013,
+   "argmax_d": -56.0,
+   "min_raw": 3.634912282279856e-08
+  }
+ },
+ "dreach_over_dw": 0.0335445358191635,
+ "coverage_snapshot_index": 73,
+ "saved_time": "2026-09-26T01:33:32+0000"
+}
