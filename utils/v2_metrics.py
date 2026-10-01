@@ -309,6 +309,52 @@ def induced_stage1_target(res: VerifierResult, k: float, e_min: float = 0.0, e_m
 
 
 # ---------------------------------------------------------------------------
+# Induced stage-1 target by residual minimization (2026-10-01 decision D2; supersedes the
+# bracketing + Brent solver above, which is kept only to reproduce the Pilot-2 appendix)
+# ---------------------------------------------------------------------------
+
+def stage1_residual_sweep(policy2: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
+                          e_sweep: np.ndarray) -> np.ndarray:
+    """Delta_1(e; e_hat_2) for every sweep effort e (the verifier's own one-step root residual).
+
+    For each e both players' stage-1 root action is set to e and the continuation is
+    ``policy2`` (the candidate's stage-2 mapping) for both players; ``verify`` is called on that
+    policy and its stage-1 ``delta[0]`` is returned (its own action search: effort grid, concave
+    vertices, own action, dynamic-BR action). No extra refinement is added.
+    """
+    out = np.empty(len(e_sweep))
+    for i, e in enumerate(e_sweep):
+        def pol(t, d, e=float(e)):
+            d = np.asarray(d, dtype=float)
+            return np.full(d.shape, e) if t == 1 else np.asarray(policy2(t, d), dtype=float)
+        res = verify(pol, w_h=spec.w_h, w_l=spec.w_l, k=spec.k, q=spec.q, T=spec.T,
+                     e_min=spec.e_min, e_max=spec.e_max, cfg=cfg)
+        out[i] = float(res.stages[1].delta[0])
+    return out
+
+
+def sweep_grid(anchor: float, lo: float, hi: float, step: float) -> np.ndarray:
+    """Grid anchor + k*step covering [lo, hi] (``anchor`` is an exact node), clipped to [0, 100]."""
+    k0 = int(np.floor((lo - anchor) / step))
+    k1 = int(np.ceil((hi - anchor) / step))
+    g = anchor + step * np.arange(k0, k1 + 1)
+    return g[(g >= 0.0) & (g <= 100.0)]
+
+
+def induced_band(e_sweep: np.ndarray, delta: np.ndarray, floor: float) -> Dict[str, float]:
+    """Point estimate argmin Delta_1, its value, and the band {e : Delta_1(e) <= min + floor}."""
+    j = int(np.argmin(delta))
+    dmin = float(delta[j])
+    inb = delta <= dmin + floor
+    idx = np.nonzero(inb)[0]
+    return {"e_tilde": float(e_sweep[j]), "delta1_min": dmin, "band_lo": float(e_sweep[idx.min()]),
+            "band_hi": float(e_sweep[idx.max()]), "band_n_points": int(inb.sum()),
+            "band_contiguous": bool(idx.max() - idx.min() + 1 == idx.size), "floor": float(floor),
+            "sweep_lo": float(e_sweep[0]), "sweep_hi": float(e_sweep[-1]),
+            "argmin_at_sweep_edge": bool(j in (0, len(e_sweep) - 1))}
+
+
+# ---------------------------------------------------------------------------
 # Main evaluation
 # ---------------------------------------------------------------------------
 
@@ -364,7 +410,8 @@ def _invariants(res: VerifierResult, G: Dict[int, np.ndarray]) -> Dict[str, obje
 
 
 def evaluate(policy: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
-             beta_fn: Optional[BetaFn] = None, recovery_step: float = 0.5) -> V2Eval:
+             beta_fn: Optional[BetaFn] = None, recovery_step: float = 0.5,
+             legacy_induced: bool = False) -> V2Eval:
     """Run the existing verifier and compute every v2 metric for a frozen candidate.
 
     Pure function: consumes no RNG and mutates nothing (the existing ``verify`` is pure).
@@ -375,6 +422,8 @@ def evaluate(policy: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
         cfg: Verifier tier.
         beta_fn: Optional ``(t, d) -> (alpha, beta)`` for distribution logging.
         recovery_step: State spacing of the closed-form recovery grid (T=2 only).
+        legacy_induced: Also run the SUPERSEDED bracketing + Brent induced-target solver
+            (Pilot 2 runs logged it; kept only to reproduce that appendix).
 
     Returns:
         A :class:`V2Eval`.
@@ -440,9 +489,10 @@ def evaluate(policy: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
         sc.update(rsc)
         arrays.update(rarr)
         sc["stage1_rel_err_abs"] = abs(sc["stage1_rel_err_signed"])
+    if T == 2 and legacy_induced:
+        g1 = sc["g1"]
         ind = induced_stage1_target(res, spec.k, spec.e_min, spec.e_max)
         sc.update(ind)
-        g1 = sc["g1"]
         sc["stage1_learning_err"] = sc["e1_at_0"] - ind["induced_e1"]          # e_hat_1 - e~1[e_hat_2]
         sc["stage1_inherited_err"] = ind["induced_e1"] - g1                    # e~1[e_hat_2] - e1*
         sc["stage1_learning_err_rel"] = sc["stage1_learning_err"] / g1

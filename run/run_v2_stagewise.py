@@ -8,7 +8,11 @@ operations in the same order and writes the same ``train_history.json`` / ``fina
 C7). New behaviour, all behind flags recorded in ``manifest.json``:
 
   modes          full (A -> B -> C, existing rules) | phase_A (A only, then a full-state
-                 checkpoint) | phase_B (B only, restored from a full-state parent checkpoint)
+                 checkpoint) | phase_B (B only, restored from a full-state parent checkpoint) |
+                 phase_A_continue (restore an end-of-A parent and continue phase A; the phase-entry
+                 snapshot refresh and the phase-local verifier/stop-rule counters restart)
+  full_state_at  optional list of global updates at which a full-state checkpoint
+                 ``state_u<update>.pt`` is also written (default: none)
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -69,7 +73,7 @@ REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "mode",
 FLAG_KEYS = ("reward_mode", "stage2_update_mode", "adv_norm_scope", "continuation_action_mode")
 DEFAULT_FLAGS = {"reward_mode": "sampled", "stage2_update_mode": "joint",
                  "adv_norm_scope": "all_rows", "continuation_action_mode": "stochastic"}
-MODES = ("full", "phase_A", "phase_B")
+MODES = ("full", "phase_A", "phase_B", "phase_A_continue")
 OVERRIDE_KEYS = ("phase_caps", "warmup", "stability_every", "verifier_timeout",
                  "direct_rollout_episodes", "direct_rollout_reps")
 RNG_NAMES = ("env", "learn", "opp", "start")   # + the minibatch stream held by the agent
@@ -133,15 +137,17 @@ def validate_config(cfg: Dict) -> None:
         raise ConfigError("continuation_action_mode=mean requires stage2_update_mode=frozen")
     if fl["stage2_update_mode"] == "frozen" and mode != "phase_B":
         raise ConfigError("stage2_update_mode=frozen is only defined in mode phase_B")
-    if mode == "phase_A" and fl["adv_norm_scope"] != "all_rows":
+    if mode in ("phase_A", "phase_A_continue") and fl["adv_norm_scope"] != "all_rows":
         raise ConfigError("phase_A has no stage-1 rows; adv_norm_scope must be all_rows")
+    if not isinstance(cfg.get("full_state_at", []), list):
+        raise ConfigError("full_state_at must be a list of global updates")
     if mode == "full" and (fl != DEFAULT_FLAGS or cfg["fixed_budget"]):
         raise ConfigError("mode full is the regression mode: default flags, fixed_budget false")
-    if mode == "phase_B":
+    if mode in ("phase_B", "phase_A_continue"):
         if not cfg["parent_checkpoint"] or not cfg["parent_sha256"]:
-            raise ConfigError("phase_B needs parent_checkpoint and parent_sha256")
+            raise ConfigError(f"{mode} needs parent_checkpoint and parent_sha256")
     elif cfg["parent_checkpoint"] is not None or cfg["parent_sha256"] is not None:
-        raise ConfigError("parent_checkpoint/parent_sha256 must be null unless mode=phase_B")
+        raise ConfigError("parent_checkpoint/parent_sha256 must be null unless mode=phase_B or phase_A_continue")
     bad = set(cfg["budget_overrides"]) - set(OVERRIDE_KEYS)
     if bad:
         raise ConfigError(f"unknown budget_overrides {sorted(bad)}")
@@ -251,6 +257,7 @@ class Run:
         self.parent_ref: Optional[Dict[str, np.ndarray]] = None
         self.weights_every = int(P["weights_every"])
         self.weights_dir = os.path.join(out_dir, "weights")
+        self.full_state_at = {int(u) for u in cfg.get("full_state_at", [])}
 
     # ------------------------------------------------------------------ policy functions
     def policy_fns(self) -> Tuple[Callable, Callable]:
@@ -453,6 +460,8 @@ class Run:
                 agent.refresh_snapshot()
                 self.snapshot_log.append({"update": self.global_u, "reason": f"every_{P['snapshot_every']}"})
                 snap = True
+            if self.global_u in self.full_state_at:
+                torch.save(self.full_state(phase), os.path.join(self.out_dir, f"state_u{self.global_u:05d}.pt"))
             if self.weights_every and self.global_u % self.weights_every == 0:
                 os.makedirs(self.weights_dir, exist_ok=True)
                 w_path = os.path.join(self.weights_dir, f"u{self.global_u:05d}.npz")
@@ -635,7 +644,8 @@ class Run:
             "wall_sec": time.perf_counter() - t_ph, "process_cpu_sec": time.process_time() - c_ph,
             "updates": local, "global_entry": entry, "global_exit": self.global_u,
             "by_category_sec": {k_: v_ - cost_before.get(k_, 0.0) for k_, v_ in self.costs.t.items()}}
-        self.phases_done.append(phase)
+        if not (self.phases_done and self.phases_done[-1] == phase):   # continuation: no duplicate
+            self.phases_done.append(phase)
         return exit_reason
 
 
@@ -687,7 +697,7 @@ def main() -> int:
     if os.path.exists(status_path):
         print(f"[refuse] {out_dir} already holds status.json; not restarting", flush=True)
         return 3
-    if cfg.get("mode") == "phase_B" and cfg.get("parent_checkpoint"):
+    if cfg.get("mode") in ("phase_B", "phase_A_continue") and cfg.get("parent_checkpoint"):
         if not os.path.exists(cfg["parent_checkpoint"]):
             raise ConfigError(f"parent checkpoint {cfg['parent_checkpoint']} not found")
         actual = sha256_file(cfg["parent_checkpoint"])
@@ -720,6 +730,11 @@ def execute(run: Run, cfg: Dict, out_dir: str, cmd: str) -> int:
                 run.agent.freeze_stage2_snapshot()
             phases = ["B"]
         elif run.mode == "phase_A":
+            phases = ["A"]
+        elif run.mode == "phase_A_continue":
+            run.restore(cfg["parent_checkpoint"])
+            if run.phases_done != ["A"]:
+                raise ConfigError(f"parent phases_done {run.phases_done} != ['A']")
             phases = ["A"]
         else:
             phases = ["A", "B", "C"]

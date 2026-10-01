@@ -39,6 +39,11 @@ ARMS_A = {
     "sampled": {"reward_mode": "sampled"},
     "expected": {"reward_mode": "expected"},
 }
+ARMS_ACONT = {
+    "expected_ext": {"reward_mode": "expected"},
+}
+ACONT_CAPS = {"A": 1200, "B": 600, "C": 1000}     # continue phase A from u400 to u1600
+ACONT_FULL_STATE_AT = [800, 1200, 1600]
 ARMS_B = {
     "A_joint": {"stage2_update_mode": "joint", "adv_norm_scope": "all_rows", "continuation_action_mode": "stochastic"},
     "B1_frozen_allnorm": {"stage2_update_mode": "frozen", "adv_norm_scope": "all_rows", "continuation_action_mode": "stochastic"},
@@ -74,15 +79,21 @@ def build_config(pilot, phase, q, seed, arm, reward_mode, parent, overrides, roo
              "continuation_action_mode": "stochastic"}
     if phase == "A":
         flags.update(ARMS_A[arm])
+    elif phase == "Acont":
+        flags.update(ARMS_ACONT[arm])
     else:
         flags.update(ARMS_B[arm])
         flags["reward_mode"] = reward_mode
     cfg = {"schema": "v2_run_config/1", "base_commit": BASE_COMMIT, "pilot": pilot, "arm": arm,
-           "run": rec["run"], "q": q, "seed": seed, "mode": f"phase_{phase}", "fixed_budget": True,
+           "run": rec["run"], "q": q, "seed": seed,
+           "mode": "phase_A_continue" if phase == "Acont" else f"phase_{phase}", "fixed_budget": True,
            "flags": flags, "parent_checkpoint": None, "parent_sha256": None, "record": rec,
            "threads_per_process": threads, "budget_overrides": overrides,
            "record_source_manifest": src}
-    if phase == "B":
+    if phase == "Acont":
+        cfg["budget_overrides"] = dict(overrides) or {"phase_caps": dict(ACONT_CAPS)}
+        cfg["full_state_at"] = list(ACONT_FULL_STATE_AT)
+    if phase in ("B", "Acont"):
         cfg["parent_checkpoint"] = parent
         cfg["parent_sha256"] = sha256_file(parent)
     return cfg, out
@@ -92,7 +103,7 @@ def main() -> int:
     """Write configs and run them with a bounded process pool."""
     p = argparse.ArgumentParser()
     p.add_argument("--pilot", required=True)
-    p.add_argument("--phase", choices=("A", "B"), required=True)
+    p.add_argument("--phase", choices=("A", "B", "Acont"), required=True)
     p.add_argument("--qs", type=int, nargs="+", required=True)
     p.add_argument("--seeds", type=int, nargs="+", required=True)
     p.add_argument("--arms", nargs="+", required=True)
@@ -104,18 +115,18 @@ def main() -> int:
     p.add_argument("--budget-overrides", default="{}", help="JSON; smoke runs only (recorded)")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
-    arms_ok = ARMS_A if a.phase == "A" else ARMS_B
+    arms_ok = {"A": ARMS_A, "B": ARMS_B, "Acont": ARMS_ACONT}[a.phase]
     for arm in a.arms:
         if arm not in arms_ok:
             p.error(f"arm {arm} not valid for phase {a.phase}: {sorted(arms_ok)}")
-    if a.phase == "B" and not (a.parent_pilot and a.parent_arm and a.reward_mode):
-        p.error("phase B needs --parent-pilot, --parent-arm and --reward-mode")
+    if a.phase in ("B", "Acont") and not (a.parent_pilot and a.parent_arm and a.reward_mode):
+        p.error("phase B / Acont need --parent-pilot, --parent-arm and --reward-mode")
     overrides = json.loads(a.budget_overrides)
     jobs = []
     for q in a.qs:
         for seed in a.seeds:
             parent = None
-            if a.phase == "B":
+            if a.phase in ("B", "Acont"):
                 parent = os.path.join(a.root, a.parent_pilot, f"q{q}", f"seed{seed}", a.parent_arm, "state_end_A.pt")
                 if not os.path.exists(parent):
                     p.error(f"missing parent {parent}")

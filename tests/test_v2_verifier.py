@@ -250,7 +250,9 @@ def test_cell_masses_sum_to_one(q):
 
 @pytest.mark.parametrize("q", QS)
 def test_induced_stage1_target_calibration(q):
-    """e~1[e2*] vs e1*: RECORDED numerical floor of the induced target (analysis-only metric).
+    """SUPERSEDED solver (bracketing + Brent; reproduces the Pilot-2 appendix only).
+
+    e~1[e2*] vs e1*: RECORDED numerical floor of the induced target (analysis-only metric).
 
     The requested criterion was 'within the verifier floor'. In value units the stage-1 BR gain at
     e1* found by the continuous refinement is up to 9.1e-7 DW (q=50, development tier), above the
@@ -260,10 +262,27 @@ def test_induced_stage1_target_calibration(q):
     from utils.v2_metrics import stage1_Q, stage1_br
     spec = spec_for(q)
     for cfg in TIERS:
-        ev = evaluate(analytic_policy(spec), spec, cfg)
+        ev = evaluate(analytic_policy(spec), spec, cfg, legacy_induced=True)
         s = ev.scalars
         assert s["induced_n_sign_changes"] == 1
         assert abs(s["stage1_inherited_err_rel"]) <= 3e-3, (cfg.name, s["stage1_inherited_err_rel"])
         Q = stage1_Q(ev.res, spec.k)
         _, qmax = stage1_br(Q, ev.res.e_grid, s["g1"], 0.0, 100.0)
         assert (qmax - float(Q(s["g1"], s["g1"])[0])) / spec.dw <= 1e-6
+
+
+@pytest.mark.parametrize("q", QS)
+def test_residual_band_calibration_gate(q):
+    """Decision D2: with e_hat_2 = e2* on the final tier the band must contain e1*(0)."""
+    from utils.dp_br_verifier import FINAL_CONFIG
+    from utils.v2_metrics import induced_band, stage1_residual_sweep, sweep_grid
+    spec = spec_for(q)
+    eq = analytic_policy(spec)
+    g1 = float(eq(1, np.zeros(1))[0])
+    floor = max(stage1_residual_sweep(eq, spec, FINAL_CONFIG, np.array([g1]))[0], 1e-12 * spec.dw)
+    E = sweep_grid(g1, g1 - 2.0, g1 + 2.0, 0.05)
+    assert np.any(E == g1)
+    b = induced_band(E, stage1_residual_sweep(eq, spec, FINAL_CONFIG, E), floor)
+    assert b["band_lo"] <= g1 <= b["band_hi"]
+    assert not b["argmin_at_sweep_edge"]
+    assert (b["band_hi"] - b["band_lo"]) / g1 < 1e-2

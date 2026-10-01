@@ -335,3 +335,31 @@ def test_rng_positions_logged_and_divergence_utility(branches):
     assert all(rec[s] == "never" for s in ("env", "learn", "opp", "start", "minibatch"))
     # positions advance every update (they are positions, not constants)
     assert len({r["rngpos_env"] for r in rows}) == N_B
+
+
+# ---------------------------------------------------------------- phase A continuation
+def test_phase_a_continue_reproducible_and_branchable(parent, tmp_path):
+    outs = []
+    for rep in (0, 1):
+        d = str(tmp_path / f"c{rep}")
+        os.makedirs(d)
+        cfg = base_config()
+        cfg.update(mode="phase_A_continue", parent_checkpoint=parent, parent_sha256="in-process",
+                   full_state_at=[9, 12])
+        cfg["flags"]["reward_mode"] = "expected"
+        cfg["budget_overrides"]["phase_caps"]["A"] = 6
+        run = Run(cfg, d)
+        assert execute(run, cfg, d, "pytest") == 0
+        outs.append(d)
+    h0, h1 = (json.load(open(os.path.join(d, "train_history.json"))) for d in outs)
+    assert len(h0["history"]) == 6 and h0["history"][0]["update"] == 7
+    assert _eq(h0["history"], h1["history"]) == []
+    for u in (9, 12):
+        s_ = torch.load(os.path.join(outs[0], f"state_u{u:05d}.pt"), weights_only=False)
+        assert s_["phases_done"] == ["A"] and s_["counters"]["global_u"] == u
+    end = torch.load(os.path.join(outs[0], "state_end_A.pt"), weights_only=False)
+    assert end["phases_done"] == ["A"] and end["counters"]["global_u"] == 12
+    # an intermediate state is a valid phase-B parent
+    r = make_run("phase_B", B_ARMS["B2_frozen_s1norm"], str(tmp_path / "b"),
+                 os.path.join(outs[0], "state_u00009.pt"))
+    assert r.global_u == 9
