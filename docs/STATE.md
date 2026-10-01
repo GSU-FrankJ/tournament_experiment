@@ -1,6 +1,17 @@
 # Project state
 
-Last updated: 2026-08-19
+Last updated: 2026-10-01
+
+## v2 T=2 stagewise pilots (2026-10-01, branch v2-stagewise-pilots)
+
+Branch is based on 657f54a (the published two-stage archive), not main. The v2 runner
+`run/run_v2_stagewise.py` reproduces the existing T=2 runner bit-exactly with default flags (C7).
+Done: verifier upgrade (Gmax_full, invariants, on/off-path), Pilot 1 (reward estimator ->
+`expected` chosen), Pilot 2 (joint vs frozen -> B2 chosen), Pilot 3 (stochastic vs mean
+continuation), Phase A extension to 1600 updates. Index of reports: `reports/v2/summary.md`.
+Known issues / next steps: open-questions list in `reports/v2/summary.md`; Phase A budget and
+precision criterion are the owner's decision. Full-state checkpoints and NPZ arrays are on disk
+under `results/v2_pilots/` but not committed (size, gitignored .pt).
 
 ## Figure PDFs embed TrueType, not Type 3 (2026-08-19)
 
