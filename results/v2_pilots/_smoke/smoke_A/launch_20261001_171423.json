@@ -1,0 +1,54 @@
+{
+ "pilot": "smoke_A",
+ "phase": "A",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "smoke_A",
+  "--phase",
+  "A",
+  "--qs",
+  "50",
+  "--seeds",
+  "10501",
+  "--arms",
+  "sampled",
+  "expected",
+  "--workers",
+  "2",
+  "--root",
+  "results/v2_pilots/_smoke",
+  "--budget-overrides",
+  "{\"phase_caps\":{\"A\":40,\"B\":20,\"C\":1},\"warmup\":10,\"stability_every\":5,\"verifier_timeout\":5}"
+ ],
+ "workers": 2,
+ "nproc": 64,
+ "loadavg_at_start": [
+  2.18505859375,
+  2.2529296875,
+  1.5048828125
+ ],
+ "planned": [
+  "results/v2_pilots/_smoke/smoke_A/q50/seed10501/sampled",
+  "results/v2_pilots/_smoke/smoke_A/q50/seed10501/expected"
+ ],
+ "runs": [
+  {
+   "out": "results/v2_pilots/_smoke/smoke_A/q50/seed10501/expected",
+   "returncode": 0,
+   "wall_sec": 6.872259747004136
+  },
+  {
+   "out": "results/v2_pilots/_smoke/smoke_A/q50/seed10501/sampled",
+   "returncode": 0,
+   "wall_sec": 7.308347493002657
+  }
+ ],
+ "state": "done",
+ "started": "20261001_171423",
+ "loadavg_at_end": [
+  2.38427734375,
+  2.29443359375,
+  1.52685546875
+ ]
+}

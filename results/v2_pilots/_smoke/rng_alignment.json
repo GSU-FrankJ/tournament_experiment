@@ -1,0 +1,82 @@
+{
+ "sampled_vs_expected (phase A from init)": {
+  "after_one_batch": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  },
+  "after_20_updates": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  }
+ },
+ "stochastic_vs_mean (frozen B1, phase B)": {
+  "after_one_batch": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  },
+  "after_20_updates": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  }
+ },
+ "A_joint_vs_B1 (phase B)": {
+  "after_one_batch": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  },
+  "after_20_updates": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  }
+ },
+ "A_joint_vs_B2 (phase B)": {
+  "after_one_batch": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  },
+  "after_20_updates": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  }
+ },
+ "B1_vs_B2 (phase B)": {
+  "after_one_batch": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  },
+  "after_20_updates": {
+   "env": true,
+   "learn": true,
+   "opp": true,
+   "start": true,
+   "minibatch": true
+  }
+ }
+}
