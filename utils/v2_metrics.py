@@ -36,7 +36,7 @@ from utils.dp_br_verifier import (
     stage_result_arrays,
     verify,
 )
-from utils.theory_multistage import g1_two_stage, g2_two_stage
+from utils.theory_multistage import F_xi, g1_two_stage, g2_two_stage
 
 
 # ---------------------------------------------------------------------------
@@ -119,26 +119,51 @@ def candidate_pmf(res: VerifierResult, q: float) -> Dict[int, np.ndarray]:
     return pmf
 
 
-def onoff_split(values: np.ndarray, pmf: np.ndarray, d_grid: np.ndarray) -> Dict[str, float]:
-    """Split a per-state quantity into on-path (pmf > 0, exact) and off-path parts.
+def onpath_mask(d_grid: np.ndarray, drift: float, q: float) -> np.ndarray:
+    """On-path set {d in D_t : |d - drift| < 2q} (open interval; nodes at exactly 2q are off-path).
 
-    On-path is decided by exact positivity of the candidate pmf: a node is on-path iff
-    it received strictly positive mass from the linear split. No threshold is applied.
+    For T=2 under the candidate's own chain from the root, d_2 = drift + xi_1 with
+    drift = e_hat_1(0) - e_hat_1(-0), so this is the continuous support of the stage-2 law.
+    """
+    return np.abs(np.asarray(d_grid, dtype=float) - float(drift)) < 2.0 * float(q)
+
+
+def cell_masses(d_grid: np.ndarray, drift: float, q: float) -> Tuple[np.ndarray, float]:
+    """Exact probability of each grid cell under d = drift + xi, xi ~ Triangular(-2q, 2q).
+
+    Cell boundaries are the midpoints between adjacent nodes; the outermost boundaries are the
+    domain edges d_grid[0], d_grid[-1]. mass_i = F_xi(b_{i+1} - drift) - F_xi(b_i - drift).
+
+    Returns:
+        ``(normalized_masses, captured_total)``; the total is the raw sum before normalization.
+    """
+    g = np.asarray(d_grid, dtype=float)
+    b = np.concatenate([[g[0]], 0.5 * (g[1:] + g[:-1]), [g[-1]]])
+    m = np.diff(F_xi(b - float(drift), q))
+    tot = float(m.sum())
+    return m / tot, tot
+
+
+def onoff_split(values: np.ndarray, on: np.ndarray, weights: np.ndarray,
+                d_grid: np.ndarray) -> Dict[str, float]:
+    """Split a per-state quantity into on-path and off-path parts.
 
     Args:
-        values: Quantity per grid node (e.g. Delta_2 or |drift|).
-        pmf: Candidate pmf on the same grid.
+        values: Quantity per grid node (e.g. Delta_2 or |stage-2 drift|).
+        on: Boolean on-path mask (see :func:`onpath_mask`).
+        weights: Normalized cell masses (see :func:`cell_masses`).
         d_grid: The grid.
 
     Returns:
-        Dict with on-path max / unweighted mean / pmf-weighted mean, off-path max /
-        unweighted mean, node counts and argmax locations. Empty parts give NaN.
+        Dict with on-path max (+argmax d), unweighted mean and cell-mass-weighted mean
+        (weights renormalized over the on-path cells), off-path max (+argmax d) and unweighted
+        mean, node counts and the cell mass on each side. Empty parts give NaN.
     """
     v = np.asarray(values, dtype=float)
-    on = pmf > 0.0
+    on = np.asarray(on, dtype=bool)
     off = ~on
     out: Dict[str, float] = {"n_on": int(on.sum()), "n_off": int(off.sum()),
-                             "on_mass": float(pmf[on].sum())}
+                             "on_mass": float(weights[on].sum()), "off_mass": float(weights[off].sum())}
     for name, m in (("on", on), ("off", off)):
         if m.any():
             j = int(np.argmax(np.where(m, v, -np.inf)))
@@ -147,7 +172,8 @@ def onoff_split(values: np.ndarray, pmf: np.ndarray, d_grid: np.ndarray) -> Dict
             out[f"{name}_mean_unweighted"] = float(v[m].mean())
         else:
             out[f"{name}_max"] = out[f"{name}_argmax_d"] = out[f"{name}_mean_unweighted"] = float("nan")
-    out["on_mean_pmf_weighted"] = float(np.sum(pmf[on] * v[on]) / pmf[on].sum()) if on.any() else float("nan")
+    out["on_mean_cellmass_weighted"] = (float(np.sum(weights[on] * v[on]) / weights[on].sum())
+                                        if on.any() and weights[on].sum() > 0 else float("nan"))
     return out
 
 
@@ -187,9 +213,12 @@ def recovery_metrics(policy: MeanPolicy, spec: GameSpec, step: float) -> Tuple[D
         "g1": g1, "g2_at_0": g20, "e1_at_0": e1, "e2_at_0": float(e2[z]),
         "stage1_rel_err_signed": (e1 - g1) / g1,
         "stage2_peak_rel_err_signed": (float(e2[z]) - g20) / g20,
+        "stage2_peak_rel_err_abs": abs(float(e2[z]) - g20) / g20,
         "stage2_rmse_pos": rmse, "stage2_rmse_pos_over_g2_0": rmse / g20,
         "stage2_tail_mean": float(e2[tail].mean()), "stage2_tail_max": float(e2[jt]),
         "stage2_tail_argmax_d": float(D[jt]),
+        "stage2_tail_mean_over_g2_0": float(e2[tail].mean()) / g20,
+        "stage2_tail_max_over_g2_0": float(e2[jt]) / g20,
         "stage2_sym_err_max": float(sym[js]), "stage2_sym_err_max_over_g2_0": float(sym[js]) / g20,
         "stage2_sym_err_argmax_d": float(abs(D[js])),
         "recovery_grid_step": float(step), "recovery_n_pos": int(pos.sum()), "recovery_n_tail": int(tail.sum()),
@@ -299,20 +328,28 @@ def evaluate(policy: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
     pmf_c = candidate_pmf(res, spec.q)
     T = spec.T
     sT = res.stages[T]
-    split = onoff_split(sT.delta / dw, pmf_c[T], sT.d_grid)
+    # on-path rule (2026-10-01 decision): open support |d - drift| < 2q, exact cell masses
+    s1 = res.stages[1]
+    drift = float(s1.e_hat[0] - s1.e_opp[0])
+    on_T = onpath_mask(sT.d_grid, drift, spec.q)
+    w_T, w_tot = cell_masses(sT.d_grid, drift, spec.q)
+    split = onoff_split(sT.delta / dw, on_T, w_T, sT.d_grid)
     sc.update({f"DeltaT_over_dw_{k_}": v for k_, v in split.items()})
-    sc["cand_pmf_mass_T"] = float(pmf_c[T].sum())
-    sc["cand_pmf_min_positive_T"] = float(pmf_c[T][pmf_c[T] > 0].min())
+    sc["stage1_drift"] = drift
+    sc["stage1_drift_is_zero"] = bool(drift == 0.0)
+    sc["cellmass_captured_total"] = w_tot
+    sc["node_pmf_n_positive_T"] = int((pmf_c[T] > 0).sum())
 
     arrays = stage_result_arrays(res, "v")
     for t in G:
         s = res.stages[t]
         arrays[f"v_t{t}_G"] = G[t]
-        arrays[f"v_t{t}_cand_pmf"] = pmf_c[t]
-        arrays[f"v_t{t}_onpath"] = pmf_c[t] > 0.0
+        arrays[f"v_t{t}_cand_pmf"] = pmf_c[t]   # node-based GL pmf (kept for reference only)
         if s.alpha is not None:
             arrays[f"v_t{t}_sigma_effort"] = s.std_norm * spec.e_range
             sc[f"sigma_effort_at_0_t{t}"] = float(arrays[f"v_t{t}_sigma_effort"][zero_index(s.d_grid)])
+    arrays[f"v_t{T}_onpath"] = on_T
+    arrays[f"v_t{T}_cell_mass"] = w_T
     if res.stages[T].alpha is not None and T == 2:
         pos = np.abs(sT.d_grid) < 2.0 * spec.q
         sc["sigma2_effort_mean_pos"] = float(arrays["v_t2_sigma_effort"][pos].mean())

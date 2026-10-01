@@ -20,13 +20,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools" / "v2"))
 
-from common import TIERS, analytic_policy, spec_for, zero_policy  # noqa: E402
+from common import TIERS, analytic_policy, checkpoint_policy, spec_for, zero_policy  # noqa: E402
 from envs.curriculum_env import step_gap  # noqa: E402
 from run.run_final_dp_br import recovery_metrics as old_recovery  # noqa: E402
 from utils.dp_br_verifier import stage_grid  # noqa: E402
 from utils.theory_multistage import F_xi, g2_two_stage  # noqa: E402
 from utils.v2_metrics import (  # noqa: E402
     append_csv,
+    cell_masses,
     evaluate,
     onoff_split,
     recovery_metrics,
@@ -115,14 +116,16 @@ def test_candidate_pmf_mass_and_moments(q):
 
 def test_onoff_split():
     g = np.linspace(-4, 4, 9)
-    pmf = np.array([0, 0, .1, .2, .4, .2, .1, 0, 0])
+    on = np.array([0, 0, 1, 1, 1, 1, 1, 0, 0], bool)
+    w = np.array([0, .05, .1, .2, .3, .2, .1, .05, 0])
     v = np.array([9., 1, 2, 3, 4, 5, 6, 7, 0])
-    s = onoff_split(v, pmf, g)
+    s = onoff_split(v, on, w, g)
     assert s["n_on"] == 5 and s["n_off"] == 4
     assert s["on_max"] == 6 and s["on_argmax_d"] == 2.0
     assert s["off_max"] == 9 and s["off_argmax_d"] == -4.0
     assert s["on_mean_unweighted"] == pytest.approx(4.0)
-    assert s["on_mean_pmf_weighted"] == pytest.approx(.2 + .6 + 1.6 + 1.0 + .6)
+    assert s["on_mean_cellmass_weighted"] == pytest.approx((.2 + .6 + 1.2 + 1.0 + .6) / .9)
+    assert s["on_mass"] == pytest.approx(.9) and s["off_mass"] == pytest.approx(.1)
     assert s["off_mean_unweighted"] == pytest.approx((9 + 1 + 7 + 0) / 4)
 
 
@@ -192,13 +195,54 @@ def test_storage_roundtrip(tmp_path):
         append_csv(str(tmp_path / "m.csv"), {"a": 1, "c": 2})
 
 
-@pytest.mark.xfail(strict=True, reason="GL-node pmf adds +-2q and leaves interior holes; "
-                                        "see reports/v2/phase2_opening_checks.md section 1c")
+@pytest.mark.xfail(strict=True, reason="DOCUMENTS the node-based GL pmf mismatch (adds +-2q, interior "
+                                        "holes); reports/v2/phase2_opening_checks.md section 1c. Not the "
+                                        "on-path rule in use.")
 @pytest.mark.parametrize("q", QS)
-def test_onpath_equals_open_support(q):
+def test_node_pmf_support_mismatch_documented(q):
     spec = spec_for(q)
     for pol in (analytic_policy(spec), zero_policy):
         for cfg in TIERS:
             ev = evaluate(pol, spec, cfg)
             g = ev.res.stages[2].d_grid
             assert np.array_equal(ev.pmf_cand[2] > 0.0, np.abs(g) < 2.0 * q)
+
+
+def _onpath_candidates(q):
+    spec = spec_for(q)
+    out = [("analytic", analytic_policy(spec)), ("zero", zero_policy)]
+    raw = Path("/home/fjiang4/tournament_experiment/experiments")
+    coh = {50.0: "two_stage_q50_restarts_20260924", 60.0: "two_stage_confirmation_T2_20260922"}[q]
+    import glob
+    import json as _json
+    cks = [c for c in sorted(glob.glob(str(raw / coh / "runs" / "*" / "*" / "checkpoint.pt")))
+           if float(_json.load(open(Path(c).parent / "config.json"))["q"]) == q][:4]
+    for c in cks:   # a sample of the existing final checkpoints (skipped if the archive is absent)
+        out.append((c, checkpoint_policy(c, spec)[0]))
+    return spec, out
+
+
+@pytest.mark.parametrize("q", QS)
+def test_onpath_rule_equals_open_support(q):
+    spec, cands = _onpath_candidates(q)
+    assert len(cands) >= 2
+    for name, pol in cands:
+        for cfg in TIERS:
+            ev = evaluate(pol, spec, cfg)
+            g = ev.res.stages[2].d_grid
+            assert ev.scalars["stage1_drift"] == 0.0, name
+            assert np.array_equal(ev.arrays["v_t2_onpath"], np.abs(g) < 2.0 * q), (name, cfg.name)
+            assert not ev.arrays["v_t2_onpath"][np.abs(np.abs(g) - 2.0 * q) == 0.0].any()
+
+
+@pytest.mark.parametrize("q", QS)
+def test_cell_masses_sum_to_one(q):
+    spec = spec_for(q)
+    for cfg in TIERS:
+        g = stage_grid(2, spec.B, cfg.state_step)
+        for drift in (0.0, 13.7, -40.0):
+            w, tot = cell_masses(g, drift, q)
+            assert abs(tot - 1.0) <= 1e-12 and abs(w.sum() - 1.0) <= 1e-12
+            assert np.all(w >= 0.0)
+            # cells wholly outside |d - drift| <= 2q carry zero mass
+            assert np.all(w[np.abs(g - drift) > 2.0 * q + (g[1] - g[0])] == 0.0)

@@ -322,3 +322,16 @@ def test_rng_alignment_after_updates_fixed_count_streams(alignment):
     for name, res in alignment.items():
         r = res[f"after_{N_B}_updates"]
         assert r["env"] and r["start"] and r["minibatch"], (name, r)
+
+
+# ---------------------------------------------------------------- 1c RNG position log
+def test_rng_positions_logged_and_divergence_utility(branches):
+    from rng_divergence import first_divergence
+    d0, d1 = branches["A_joint"]
+    rows = _read_csv(os.path.join(d0, "v2_updates.csv"))
+    assert all(r[f"rngpos_{s}"] for r in rows for s in ("env", "learn", "opp", "start", "minibatch"))
+    rec = first_divergence(d0, d1)
+    assert rec["n_updates_compared"] == N_B
+    assert all(rec[s] == "never" for s in ("env", "learn", "opp", "start", "minibatch"))
+    # positions advance every update (they are positions, not constants)
+    assert len({r["rngpos_env"] for r in rows}) == N_B

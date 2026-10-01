@@ -99,6 +99,16 @@ def git_state() -> Dict[str, object]:
     return {"commit": commit, "short": commit[:7], "dirty": dirty}
 
 
+def rng_position(g: np.random.Generator) -> str:
+    """Exact position of a numpy PCG64 stream: 128-bit state, cached-uint32 flag and value.
+
+    Diagnostic only (reading the state does not advance the stream). ``inc`` is fixed per
+    stream and omitted.
+    """
+    st = g.bit_generator.state
+    return f"{st['state']['state']:032x}:{st['has_uint32']}:{st['uinteger']}"
+
+
 def validate_config(cfg: Dict) -> None:
     """Refuse a config with a missing field or an invalid flag combination."""
     missing = [k for k in REQUIRED if k not in cfg]
@@ -328,14 +338,14 @@ class Run:
         live = self.stage2_mapping()
         mean_fn, _ = self.policy_fns()
         cand = np.asarray(mean_fn(2, self.dev_grid2), dtype=float)
-        pmf = ev.pmf_cand[2]
+        on, w = ev.arrays["v_t2_onpath"], ev.arrays["v_t2_cell_mass"]
         out: Dict[str, object] = {}
         arr: Dict[str, np.ndarray] = {"drift_parent_mean": self.parent_ref["mean"],
                                       "drift_live_mean": live["mean"], "drift_cand_mean": cand}
         for name, x in (("live", live["mean"]), ("cand", cand)):
             dd = np.abs(x - self.parent_ref["mean"])
             out[f"stage2_drift_{name}_maxabs"] = float(dd.max())
-            for k_, v_ in onoff_split(dd, pmf, self.dev_grid2).items():
+            for k_, v_ in onoff_split(dd, on, w, self.dev_grid2).items():
                 out[f"stage2_drift_{name}_{k_}"] = v_
         out["stage2_drift_live_alpha_maxabs"] = float(np.max(np.abs(live["alpha"] - self.parent_ref["alpha"])))
         out["stage2_drift_live_beta_maxabs"] = float(np.max(np.abs(live["beta"] - self.parent_ref["beta"])))
@@ -497,7 +507,9 @@ class Run:
                      "n_actor_steps_skipped": diag.get("n_actor_steps_skipped_no_policy_rows", 0),
                      "kl_final_epoch": diag["kl_final_epoch"], "clip_frac": diag["clip_frac"],
                      "policy_loss": diag["policy_loss"], "value_loss": diag["value_loss"],
-                     "update_wall_sec": time.perf_counter() - t_upd}
+                     "update_wall_sec": time.perf_counter() - t_upd,
+                     **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
+                     "rngpos_minibatch": rng_position(agent.rng_mb)}
             self.v2_history.append(v2row)
             if reason is not None:
                 t_v = time.perf_counter()
