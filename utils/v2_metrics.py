@@ -227,6 +227,88 @@ def recovery_metrics(policy: MeanPolicy, spec: GameSpec, step: float) -> Tuple[D
 
 
 # ---------------------------------------------------------------------------
+# Induced stage-1 target (analysis only; never enters training)
+# ---------------------------------------------------------------------------
+
+def stage1_Q(res: VerifierResult, k: float):
+    """Q_1(0, e' | opponent e) with the candidate's V_2^e_hat continuation (verifier formula)."""
+    s2 = res.stages[2]
+    G, V = s2.d_grid, s2.v_mean
+    nodes, weights = res.gl_nodes, res.gl_weights
+
+    def Q(ep, e):
+        ep = np.atleast_1d(np.asarray(ep, dtype=float))
+        y = ep - e
+        acc = np.zeros_like(y)
+        for x, w in zip(nodes, weights):
+            acc += w * np.interp(y + x, G, V)
+        return -k * ep ** 2 + acc
+    return Q
+
+
+def stage1_br(Q, E: np.ndarray, e: float, e_min: float, e_max: float) -> Tuple[float, float]:
+    """(argmax, max) of Q(., e): dense search on E, then bounded refinement on the adjacent cells."""
+    from scipy.optimize import minimize_scalar
+
+    h = float(E[1] - E[0])
+    vals = Q(E, e)
+    j = int(np.argmax(vals))
+    lo, hi = max(e_min, E[j] - h), min(e_max, E[j] + h)
+    r = minimize_scalar(lambda a: -float(Q(a, e)[0]), bounds=(lo, hi), method="bounded",
+                        options={"xatol": 1e-12})
+    if -float(r.fun) > vals[j]:
+        return float(r.x), -float(r.fun)
+    return float(E[j]), float(vals[j])
+
+
+def induced_stage1_target(res: VerifierResult, k: float, e_min: float = 0.0, e_max: float = 100.0,
+                          xtol: float = 1e-10) -> Dict[str, float]:
+    """Symmetric fixed point e~1 of the root stage game given the candidate's stage-2 mapping.
+
+    Q_1(0, e' | opponent e) = -k e'^2 + sum_x w_x interp(e' - e + x; D_2 grid, V_2^e_hat), i.e. the
+    verifier's stage-1 Q^mean formula (``utils/dp_br_verifier.py:364-375, 405``) with the GL
+    nodes/weights and V_2^e_hat (``v_mean`` at t=2, which does not depend on the stage-1 policy)
+    of ``res``. BR(e) = argmax_{e' in [e_min, e_max]} Q_1: dense search on the verifier's effort
+    grid, then bounded scalar refinement on the neighbouring cells. The fixed point solves
+    h(e) = BR(e) - e = 0: h is scanned on the effort grid (bracketing) and the bracket is refined
+    with Brent's method. The opponent's own action is NOT a BR candidate (it would create a band
+    of spurious grid fixed points).
+
+    Returns:
+        e_tilde, number of sign changes of h on the grid, Brent iterations, final bracket width,
+        residual |BR(e~) - e~|, and the number of BR evaluations.
+    """
+    from scipy.optimize import brentq
+
+    E = res.e_grid
+    n_eval = [0]
+    Q = stage1_Q(res, k)
+
+    def br(e):
+        n_eval[0] += 1
+        return stage1_br(Q, E, e, e_min, e_max)[0]
+
+    hv = np.array([br(e) - e for e in E])
+    sc = np.nonzero(np.sign(hv[:-1]) * np.sign(hv[1:]) <= 0)[0]
+    out: Dict[str, float] = {"induced_n_sign_changes": int(sc.size)}
+    if sc.size == 0:
+        out.update(induced_e1=float("nan"), induced_brent_iters=0, induced_final_bracket=float("nan"),
+                   induced_residual=float("nan"), induced_br_evals=n_eval[0])
+        return out
+    j = int(sc[0])
+    a, b = float(E[j]), float(E[j + 1])
+    if hv[j] == 0.0:
+        root, it = a, 0
+    else:
+        root, info = brentq(lambda e: br(e) - e, a, b, xtol=xtol, full_output=True)
+        it = info.iterations
+    out.update(induced_e1=float(root), induced_brent_iters=int(it), induced_final_bracket=float(xtol),
+               induced_bracket_grid=f"[{a:g},{b:g}]", induced_residual=abs(br(root) - root),
+               induced_br_evals=n_eval[0])
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Main evaluation
 # ---------------------------------------------------------------------------
 
@@ -357,6 +439,14 @@ def evaluate(policy: MeanPolicy, spec: GameSpec, cfg: VerifierConfig,
         rsc, rarr = recovery_metrics(policy, spec, recovery_step)
         sc.update(rsc)
         arrays.update(rarr)
+        sc["stage1_rel_err_abs"] = abs(sc["stage1_rel_err_signed"])
+        ind = induced_stage1_target(res, spec.k, spec.e_min, spec.e_max)
+        sc.update(ind)
+        g1 = sc["g1"]
+        sc["stage1_learning_err"] = sc["e1_at_0"] - ind["induced_e1"]          # e_hat_1 - e~1[e_hat_2]
+        sc["stage1_inherited_err"] = ind["induced_e1"] - g1                    # e~1[e_hat_2] - e1*
+        sc["stage1_learning_err_rel"] = sc["stage1_learning_err"] / g1
+        sc["stage1_inherited_err_rel"] = sc["stage1_inherited_err"] / g1
     return V2Eval(res=res, G=G, pmf_cand=pmf_c, scalars=sc, arrays=arrays)
 
 
