@@ -23,7 +23,7 @@ These are descriptive statistics. **The frozen variant for Pilot 3 is not chosen
 
 ### Code added before launch (commit `1791687`)
 
-**`utils/v2_metrics.py`: induced stage-1 target ẽ₁[ê₂].** It is computed in every `evaluate` call, so it is logged at every training-time verifier checkpoint and at every weight-export re-evaluation. It is analysis only and enters nothing in training.
+**`utils/v2_metrics.py`: induced stage-1 target ẽ₁[ê₂]. SUPERSEDED by §6 (decision D2); kept for Appendix S.** It is computed in every `evaluate` call, so it is logged at every training-time verifier checkpoint and at every weight-export re-evaluation. It is analysis only and enters nothing in training.
 - **Q₁.** Q₁(0, e′ | opponent e) = −k e′² + Σ_x w_x · interp(e′ − e + x; D₂ grid, V₂^ê). This is the verifier's own stage-1 Q^mean formula, using its GL nodes and weights and its `v_mean` at t = 2.
 - **BR(e).** The argmax over e′ ∈ [0, 100]: dense search on the verifier's effort grid, then bounded scalar refinement on the adjacent cells. The opponent's own action is **excluded** as a candidate; including it makes a band of grid points into spurious fixed points.
 - **Fixed point.** h(e) = BR(e) − e is scanned on the effort grid to bracket a sign change, and the bracket is refined with Brent's method (xtol 1e−10).
@@ -41,25 +41,9 @@ These are descriptive statistics. **The frozen variant for Pilot 3 is not chosen
 - Suite: `55 passed, 2 xfailed`.
 - C7 against the existing runner: **IDENTICAL** (`results/v2_pilots/phase2_regression/v2_full_1791687.compare.txt`; manifest `dirty: false`).
 
-### 1.1 Calibration of the induced target (the requested test)
+### 1.1 Induced target: superseded method
 
-The requested criterion was: for ê₂ = e₂*, ẽ₁ must equal e₁*(0) to within the verifier floor. Values below are from `evaluate` on the analytic policy; the gain is the best stage-1 deviation against an opponent playing e₁*. These numbers came from an in-session script and are reproducible with `test_induced_stage1_target_calibration`.
-
-| q | Tier | ẽ₁[e₂*] − e₁* (effort) | relative | stage-1 BR gain at e₁*, /ΔW |
-|---|---|---|---|---|
-| 50 | development | +0.11970 | +2.56e−3 | 9.118e−07 |
-| 50 | dev_2x | −0.03675 | −7.87e−4 | 9.646e−08 |
-| 50 | final | −0.00170 | −3.63e−5 | 1.452e−08 |
-| 60 | development | −0.01049 | −2.70e−4 | 7.864e−09 |
-| 60 | dev_2x | −0.07276 | −1.87e−3 | 3.701e−07 |
-| 60 | final | −0.07215 | −1.86e−3 | 3.712e−07 |
-
-**The criterion is not met as stated at q=50 on the development tier.**
-- The value gain there, 9.1e−7·ΔW, exceeds the verifier's recorded floor at that point, 2.2e−16 (Phase 1), and the global floor of 3.5e−7.
-- **Source.** The continuous refinement searches the verifier's *interpolated* Q₁ more finely than the verifier's grid-plus-vertex search does. Linear interpolation of V₂ on the state grid makes Q₁ slightly non-smooth, and the refinement finds tiny gains between the kinks.
-- **In effort units** the induced-target floor is ≤ 2.6e−3·e₁* (development tier).
-- **The test records these observed floors as a regression guard,** not as the requested criterion. Its docstring says so.
-- **This needs your decision** on whether to keep this solver, restrict BR to the verifier's grid-plus-vertex candidates, or evaluate ẽ₁ on the final tier. All required arrays are stored in every checkpoint NPZ, so ẽ₁ can be recomputed later without new runs.
+The induced-target calibration of the original bracketing-plus-Brent solver has moved to **Appendix S (superseded)**. The decomposition now uses the residual-band method; see §6.
 
 ### 1.2 Parent verification
 
@@ -116,6 +100,7 @@ Units:
 - `peak₂ rel` and `e1 rel err` are relative errors;
 - Ĝmax, EXP, dReach, Δmax_all, dFull and η₂ are /ΔW;
 - `ẽ₁ resid` = |BR(ẽ₁) − ẽ₁| in effort units.
+- **The columns `learn err/e1*`, `inher err/e1*` and `ẽ₁ resid` come from the SUPERSEDED solver; see §6 for the revised values.**
 
 Normalized tails, absolute errors, Δ₂ on/off, σ₂ and KL/clip are in the CSV.
 
@@ -519,8 +504,8 @@ Source: `A/rng_divergence.csv`, from `tools/v2/rng_divergence.py`; the entries a
 
 ## 3. Anomalies and deviations
 
-1. **Induced-target calibration** (§1.1). The requested "within the verifier floor" criterion is not met at q=50 on the development tier in value units (9.1e−7·ΔW). Decision needed.
-2. **The induced target is ill-conditioned at q=60.** Over all training-time checkpoints, |BR(ẽ₁) − ẽ₁| exceeds 1e−3 effort units in:
+1. *(SUPERSEDED solver; see Appendix S and §6)* **Induced-target calibration** (§1.1). The requested "within the verifier floor" criterion is not met at q=50 on the development tier in value units (9.1e−7·ΔW). Decision needed.
+2. *(SUPERSEDED solver; see Appendix S and §6)* **The induced target is ill-conditioned at q=60.** Over all training-time checkpoints, |BR(ẽ₁) − ẽ₁| exceeds 1e−3 effort units in:
    - 100% of q=60 A checkpoints (median 0.19, max 0.29);
    - 90% of q=60 B1/B2 checkpoints (median 0.11);
    - 1% (A) and 10% (B1/B2) at q=50.
@@ -528,7 +513,7 @@ Source: `A/rng_divergence.csv`, from `tools/v2/rng_divergence.py`; the entries a
    The maximum is 0.74% of e₁*. Brent then converges onto a discontinuity of BR: the interpolated Q₁ has two nearly equal local maxima, so BR jumps across e = BR(e). Also, 84 of 1,260 checkpoints have two sign changes of h; the first root is reported.
 
    **Consequence:** at q=60 both decomposition terms carry an uncertainty of order 0.005·e₁*. That is comparable to the inherited-error term itself (median 0.0036 in B1/B2) and to some learning-error values. The residual is logged per checkpoint (`induced_residual` in `v2_checkpoints.csv`).
-3. **Fixed-point iteration was replaced** by bracketing plus Brent (§1). The step-size report is replaced by the Brent iteration count, the residual and the bracket.
+3. *(SUPERSEDED solver; see Appendix S and §6)* **Fixed-point iteration was replaced** by bracketing plus Brent (§1). The step-size report is replaced by the Brent iteration count, the residual and the bracket.
 4. **The action streams desynchronize early again.** The learner and opponent action RNG streams desynchronize in every arm pair within 3–164 updates of the branch point, which is global update 400. The source is the rejection-based Beta sampler identified in Phase 2. The env, start and minibatch streams stay aligned for all 600 updates.
 5. **Not committed.** The per-checkpoint NPZs, weight exports, `train_history.json` and the `state_end_B.pt` full states are on disk under `P2/` but not in git, because of their size and the gitignored `.pt`.
 
@@ -544,7 +529,7 @@ Source: `A/rng_divergence.csv`, from `tools/v2/rng_divergence.py`; the entries a
   - In A the stage-2 **peak** error keeps improving (median signed −0.060 vs −0.129 at q=50; −0.062 vs −0.099 at q=60). A's |peak error| is smaller than B1/B2's in 9/10 pairs at q=50 and 8/10 at q=60.
   - A's **tail** effort rises (median 2.58 vs 1.48; 2.19 vs 1.34). B1/B2's tail mean is lower in 10/10 pairs at both q.
   - Off-path Δ₂ is larger in A: B1/B2 are lower in 8/10 pairs (q=50) and 10/10 (q=60), and the CIs exclude 0 (`A/paired_summary.csv`, metric `DeltaT_over_dw_off_max`).
-- **Stage-1 recovery.** All three arms reach a few percent of e₁* by update 1000. No consistent paired difference is visible: sign counts are 3–7 out of 10, and every bootstrap CI of the |stage-1 error| differences includes 0. In absolute terms the decomposition attributes most of the remaining stage-1 error to the learning term: median |ê₁ − ẽ₁|/e₁* is 0.040–0.073 across arms, against 0.004–0.011 for |ẽ₁ − e₁*|/e₁* (`A/final_table.csv`). The signed medians are smaller because signs differ across seeds. See anomaly 2 for the q=60 caveat.
+- **Stage-1 recovery.** All three arms reach a few percent of e₁* by update 1000. No consistent paired difference is visible: sign counts are 3–7 out of 10, and every bootstrap CI of the |stage-1 error| differences includes 0. *(Superseded solver; the revised values in §6 lead to the same conclusion.)* In absolute terms the decomposition attributes most of the remaining stage-1 error to the learning term: median |ê₁ − ẽ₁|/e₁* is 0.040–0.073 across arms, against 0.004–0.011 for |ẽ₁ − e₁*|/e₁* (`A/final_table.csv`). The signed medians are smaller because signs differ across seeds. See anomaly 2 for the q=60 caveat.
 - **Strategic quality.**
   - At q=50, Ĝmax_full is higher in the frozen arms (median 0.0046 vs 0.0032·ΔW). In 9/10 frozen runs the maximum sits on-path at stage 2: it is the parent's residual η₂, which freezing preserves and joint training keeps reducing.
   - At q=60 the frozen arms are lower (0.0020/0.0018 vs 0.0027). In A the maximum moves to stage 1 or off-path stage 2.
@@ -572,4 +557,226 @@ OMP_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/
 
 ---
 
-**STOP — Pilot 2 complete. Waiting for your choice between B1 and B2 for Pilot 3, and for a decision on the induced-target solver (§1.1, §3).**
+**Pilot 2 closed.** Your decisions were B2 for Pilot 3 and residual minimization for ẽ₁ (§6).
+
+
+---
+
+## 6. Revised decomposition: residual minimization on the final tier (decision D2)
+
+Added 2026-10-01 at commit `cd760fd`; no new runs.
+
+### Tools and data
+
+- Tools: `tools/v2/induced_band.py` (`calib`, `parents`, `joint`) and `tools/v2/decomposition.py --pilot pilot2`.
+- Data: `results/v2_pilots/induced_band/` (`floors.json`, `calibration.csv`, `parent_bands.csv`, `joint_export_bands.csv`, plus one NPZ per sweep in `sweeps/`) and `results/v2_pilots/pilot2/analysis/decomposition_residual_band.csv`.
+
+### Method
+
+**Sweep.**
+- Δ₁(e; ê₂) is the verifier's own one-step root residual. Both players' root action is set to e, the continuation is ê₂, and `verify` runs on the final tier (state 2, effort 0.5, GL 32/half). Its own action search is used, with no extra refinement.
+- The sweep grid is anchored at e₁*(0), with step **0.01** effort units:
+  - frozen stage 2 (B1/B2, one sweep per parent): **[0.4·e₁*, 1.7·e₁*]**;
+  - each A_joint weight export (live stage 2): **[min(ê₁, e₁*) − 2, max(ê₁, e₁*) + 2]**.
+
+**Estimate and band.**
+- ẽ₁ = argmin Δ₁.
+- The band is {e : Δ₁(e) ≤ Δ₁,min + floor}, with floor = max(Δ₁(e₁*; e₂*) on the final tier, 1e−12·ΔW): 4e−12 at q=50 and 1.404e−6 at q=60, in value units (`floors.json`).
+
+**Decomposition.**
+- Learning term: ê₁ − ẽ₁, with interval [ê₁ − band_hi, ê₁ − band_lo].
+- Inherited term: ẽ₁ − e₁*, with interval [band_lo − e₁*, band_hi − e₁*].
+- Both are reported /e₁*.
+
+**Rows.**
+- Every weight export in all arms (u425–u1000).
+- Every training-time checkpoint in B1/B2, where ẽ₁ is the parent's and is constant.
+- The A_joint training-time checkpoints are **not** covered: their stage-2 weights exist only at the 25-update exports.
+
+### Calibration gate (ê₂ = e₂*)
+
+Source: `results/v2_pilots/induced_band/calibration.csv`, sweep e₁* ± 5.
+
+| q | Band | Contains e₁* | Width / e₁* |
+|---|---|---|---|
+| 50 | [46.6567, 46.6967] | **yes** | 8.57e−4 |
+| 60 | [38.7489, 38.8889] | **yes** | 3.60e−3 |
+
+- Δ₁,min = 0 at both q. **The gate passed.**
+- Caveat: e₁* is an exact sweep node and Δ₁(e₁*) equals the floor by definition, so containment is guaranteed by construction. The informative quantities are the band's width and location.
+
+### Band diagnostics
+
+- **Parents (the frozen stage 2 of B1/B2; `parent_bands.csv`):** n=20; band width/e1* median 0.002571, max 0.004714; non-contiguous 4; argmin at sweep edge 0; max Delta1_min/DW 3.95e-10
+- **A_joint weight exports (`joint_export_bands.csv`):** n=480; band width/e1* median 0.002786, max 0.008143; non-contiguous 167; argmin at sweep edge 0; max Delta1_min/DW 6.88e-10
+
+**Non-contiguous bands.** Δ₁ often returns to its minimum at points separated by sweep points above it. The interval uses the outermost band points, so it is conservative.
+
+### Final checkpoint (update 1000, weight export), all 60 runs
+
+Source: `results/v2_pilots/pilot2/analysis/decomposition_residual_band.csv`, rows `source == weights`, `update == 1000`. Values are /e₁*.
+
+| q | seed | arm | total_rel | learning_rel | learning band | learning_contains_0 | inherited_rel | inherited band | inherited_contains_0 |
+|---|---|---|---|---|---|---|---|---|---|
+| 50 | 10501 | A | 0.03061 | 0.02332 | [0.0182, 0.0233] | False | 0.007286 | [0.0073, 0.0124] | False |
+| 50 | 10501 | B1 | 0.007959 | 0.006031 | [0.0039, 0.0060] | False | 0.001929 | [0.0019, 0.0041] | False |
+| 50 | 10501 | B2 | 0.1078 | 0.1059 | [0.1037, 0.1059] | False | 0.001929 | [0.0019, 0.0041] | False |
+| 50 | 10502 | A | -0.0315 | -0.024 | [-0.0268, -0.0240] | False | -0.0075 | [-0.0075, -0.0047] | False |
+| 50 | 10502 | B1 | -0.05228 | -0.06342 | [-0.0641, -0.0634] | False | 0.01114 | [0.0111, 0.0118] | False |
+| 50 | 10502 | B2 | -0.07982 | -0.09097 | [-0.0916, -0.0910] | False | 0.01114 | [0.0111, 0.0118] | False |
+| 50 | 10503 | A | -0.1986 | -0.2059 | [-0.2119, -0.2059] | False | 0.007286 | [0.0073, 0.0133] | False |
+| 50 | 10503 | B1 | -0.016 | -0.03207 | [-0.0338, -0.0321] | False | 0.01607 | [0.0161, 0.0178] | False |
+| 50 | 10503 | B2 | 0.03017 | 0.0141 | [0.0124, 0.0141] | False | 0.01607 | [0.0161, 0.0178] | False |
+| 50 | 10504 | A | -0.004075 | -0.0006464 | [-0.0056, -0.0006] | False | -0.003429 | [-0.0034, 0.0015] | True |
+| 50 | 10504 | B1 | -0.09082 | -0.07904 | [-0.0790, -0.0790] | False | -0.01179 | [-0.0118, -0.0118] | False |
+| 50 | 10504 | B2 | 0.04166 | 0.05344 | [0.0534, 0.0534] | False | -0.01179 | [-0.0118, -0.0118] | False |
+| 50 | 10505 | A | -0.1245 | -0.1127 | [-0.1181, -0.1127] | False | -0.01179 | [-0.0118, -0.0064] | False |
+| 50 | 10505 | B1 | -0.08866 | -0.08373 | [-0.0848, -0.0837] | False | -0.004929 | [-0.0049, -0.0039] | False |
+| 50 | 10505 | B2 | 0.02551 | 0.03044 | [0.0294, 0.0304] | False | -0.004929 | [-0.0049, -0.0039] | False |
+| 50 | 10506 | A | -0.08518 | -0.09247 | [-0.0983, -0.0925] | False | 0.007286 | [0.0073, 0.0131] | False |
+| 50 | 10506 | B1 | 0.03085 | 0.03407 | [0.0332, 0.0341] | False | -0.003214 | [-0.0032, -0.0024] | False |
+| 50 | 10506 | B2 | 0.01374 | 0.01695 | [0.0161, 0.0170] | False | -0.003214 | [-0.0032, -0.0024] | False |
+| 50 | 10507 | A | -0.02225 | -0.02054 | [-0.0274, -0.0205] | False | -0.001714 | [-0.0017, 0.0051] | True |
+| 50 | 10507 | B1 | 0.04553 | 0.04468 | [0.0423, 0.0447] | False | 0.0008571 | [0.0009, 0.0032] | False |
+| 50 | 10507 | B2 | -0.09501 | -0.09586 | [-0.0982, -0.0959] | False | 0.0008571 | [0.0009, 0.0032] | False |
+| 50 | 10508 | A | -0.0792 | -0.06506 | [-0.0681, -0.0651] | False | -0.01414 | [-0.0141, -0.0111] | False |
+| 50 | 10508 | B1 | 0.03869 | 0.04212 | [0.0374, 0.0421] | False | -0.003429 | [-0.0034, 0.0013] | True |
+| 50 | 10508 | B2 | -0.07957 | -0.07614 | [-0.0809, -0.0761] | False | -0.003429 | [-0.0034, 0.0013] | True |
+| 50 | 10509 | A | -0.009873 | -0.006444 | [-0.0114, -0.0064] | False | -0.003429 | [-0.0034, 0.0015] | True |
+| 50 | 10509 | B1 | 0.08262 | 0.07426 | [0.0698, 0.0743] | False | 0.008357 | [0.0084, 0.0129] | False |
+| 50 | 10509 | B2 | -0.05001 | -0.05836 | [-0.0629, -0.0584] | False | 0.008357 | [0.0084, 0.0129] | False |
+| 50 | 10510 | A | -0.04532 | -0.06332 | [-0.0702, -0.0633] | False | 0.018 | [0.0180, 0.0249] | False |
+| 50 | 10510 | B1 | 0.05032 | 0.04067 | [0.0360, 0.0407] | False | 0.009643 | [0.0096, 0.0144] | False |
+| 50 | 10510 | B2 | 0.1073 | 0.09765 | [0.0929, 0.0976] | False | 0.009643 | [0.0096, 0.0144] | False |
+| 60 | 10501 | A | -0.03434 | -0.03203 | [-0.0341, -0.0318] | False | -0.002314 | [-0.0026, -0.0003] | False |
+| 60 | 10501 | B1 | -0.03886 | -0.03963 | [-0.0419, -0.0391] | False | 0.0007714 | [0.0003, 0.0031] | False |
+| 60 | 10501 | B2 | -0.07002 | -0.07079 | [-0.0731, -0.0703] | False | 0.0007714 | [0.0003, 0.0031] | False |
+| 60 | 10502 | A | 0.1525 | 0.1502 | [0.1484, 0.1507] | False | 0.002314 | [0.0018, 0.0041] | False |
+| 60 | 10502 | B1 | 0.1313 | 0.1362 | [0.1341, 0.1367] | False | -0.004886 | [-0.0054, -0.0028] | False |
+| 60 | 10502 | B2 | -0.04905 | -0.04416 | [-0.0462, -0.0436] | False | -0.004886 | [-0.0054, -0.0028] | False |
+| 60 | 10503 | A | 0.07366 | 0.06517 | [0.0634, 0.0654] | False | 0.008486 | [0.0082, 0.0103] | False |
+| 60 | 10503 | B1 | 0.07591 | 0.07077 | [0.0685, 0.0713] | False | 0.005143 | [0.0046, 0.0075] | False |
+| 60 | 10503 | B2 | 0.01667 | 0.01153 | [0.0092, 0.0120] | False | 0.005143 | [0.0046, 0.0075] | False |
+| 60 | 10504 | A | -0.1584 | -0.1568 | [-0.1589, -0.1566] | False | -0.001543 | [-0.0018, 0.0005] | True |
+| 60 | 10504 | B1 | 0.0488 | 0.05446 | [0.0521, 0.0550] | False | -0.005657 | [-0.0062, -0.0033] | False |
+| 60 | 10504 | B2 | 0.05691 | 0.06257 | [0.0603, 0.0631] | False | -0.005657 | [-0.0062, -0.0033] | False |
+| 60 | 10505 | A | -0.001788 | 0.0007839 | [-0.0013, 0.0013] | True | -0.002571 | [-0.0031, -0.0005] | False |
+| 60 | 10505 | B1 | 0.04873 | 0.04976 | [0.0474, 0.0503] | False | -0.001029 | [-0.0015, 0.0013] | True |
+| 60 | 10505 | B2 | 0.002742 | 0.00377 | [0.0015, 0.0043] | False | -0.001029 | [-0.0015, 0.0013] | True |
+| 60 | 10506 | A | 0.08363 | 0.0826 | [0.0805, 0.0829] | False | 0.001029 | [0.0008, 0.0031] | False |
+| 60 | 10506 | B1 | -0.06017 | -0.05991 | [-0.0620, -0.0594] | False | -0.0002571 | [-0.0008, 0.0018] | True |
+| 60 | 10506 | B2 | 0.02381 | 0.02407 | [0.0220, 0.0246] | False | -0.0002571 | [-0.0008, 0.0018] | True |
+| 60 | 10507 | A | -0.1818 | -0.1787 | [-0.1807, -0.1784] | False | -0.003086 | [-0.0033, -0.0010] | False |
+| 60 | 10507 | B1 | 0.1241 | 0.1125 | [0.1102, 0.1128] | False | 0.01157 | [0.0113, 0.0139] | False |
+| 60 | 10507 | B2 | -0.04991 | -0.06148 | [-0.0638, -0.0612] | False | 0.01157 | [0.0113, 0.0139] | False |
+| 60 | 10508 | A | -0.03688 | -0.02814 | [-0.0305, -0.0276] | False | -0.008743 | [-0.0093, -0.0064] | False |
+| 60 | 10508 | B1 | -0.07548 | -0.07599 | [-0.0786, -0.0755] | False | 0.0005143 | [0.0000, 0.0031] | True |
+| 60 | 10508 | B2 | -0.1434 | -0.1439 | [-0.1465, -0.1434] | False | 0.0005143 | [0.0000, 0.0031] | True |
+| 60 | 10509 | A | -0.001444 | 0.01141 | [0.0091, 0.0117] | False | -0.01286 | [-0.0131, -0.0105] | False |
+| 60 | 10509 | B1 | 0.06334 | 0.05614 | [0.0538, 0.0564] | False | 0.0072 | [0.0069, 0.0095] | False |
+| 60 | 10509 | B2 | 0.02678 | 0.01958 | [0.0173, 0.0198] | False | 0.0072 | [0.0069, 0.0095] | False |
+| 60 | 10510 | A | 0.02946 | 0.02637 | [0.0246, 0.0269] | False | 0.003086 | [0.0026, 0.0049] | False |
+| 60 | 10510 | B1 | 0.09226 | 0.08609 | [0.0838, 0.0866] | False | 0.006171 | [0.0057, 0.0085] | False |
+| 60 | 10510 | B2 | 0.07444 | 0.06827 | [0.0660, 0.0688] | False | 0.006171 | [0.0057, 0.0085] | False |
+
+### Summary per (q, arm)
+
+| q | arm | median total | median learning | median abs learning | learning band contains 0 (of 10) | median inherited | median abs inherited | inherited band contains 0 (of 10) |
+|---|---|---|---|---|---|---|---|---|
+| 50 | A | -0.03841 | -0.04366 | 0.04366 | 0 | -0.002571 | 0.007286 | 3 |
+| 50 | B1 | 0.01941 | 0.02005 | 0.0434 | 0 | 0.001393 | 0.006643 | 1 |
+| 50 | B2 | 0.01962 | 0.01553 | 0.06725 | 0 | 0.001393 | 0.006643 | 1 |
+| 60 | A | -0.001616 | 0.006099 | 0.0486 | 1 | -0.001929 | 0.002829 | 1 |
+| 60 | B1 | 0.05607 | 0.0553 | 0.06534 | 0 | 0.0006429 | 0.005014 | 3 |
+| 60 | B2 | 0.009708 | 0.007651 | 0.05282 | 0 | 0.0006429 | 0.005014 | 3 |
+
+All rows (exports and checkpoints) per arm, with the fraction whose band contains 0, and the rows whose ê₁ lies outside the sweep:
+
+| arm | rows | learning_band_contains0_frac | inherited_band_contains0_frac | e1_outside_sweep |
+|---|---|---|---|---|
+| A_joint | 480 | 0.02083 | 0.2271 | 0 |
+| B1_frozen_allnorm | 900 | 0.01111 | 0.2 | 3 |
+| B2_frozen_s1norm | 900 | 0.004444 | 0.2 | 4 |
+
+The 7 out-of-sweep rows are early B1/B2 exports and checkpoints where ê₁ > 1.7·e₁*. ẽ₁ does not depend on ê₁, so their values are still defined. No final row is affected.
+
+### Paired comparisons of the revised terms
+
+Source: `results/v2_pilots/pilot2/analysis/decomposition_residual_band_paired.csv`. Bootstrap: 10,000 resamples, seed 20261001.
+
+| q | comparison | metric | mean | median | n<0 | n>0 | n=0 | CI95 |
+|---|---|---|---|---|---|---|---|---|
+| 50 | B1-A | abs_learning | -0.01144 | -0.01997 | 6 | 4 | 0 | [-0.05717, 0.02817] |
+| 50 | B1-A | abs_inherited | -0.00105 | -0.002464 | 6 | 4 | 0 | [-0.005079, 0.003171] |
+| 50 | B1-A | learning_rel | 0.05514 | 0.07296 | 3 | 7 | 0 | [0.006354, 0.1006] |
+| 50 | B1-A | inherited_rel | 0.002679 | 0.004714 | 4 | 6 | 0 | [-0.003343, 0.008614] |
+| 50 | B2-A | abs_learning | 0.002537 | 0.04312 | 3 | 7 | 0 | [-0.05422, 0.04977] |
+| 50 | B2-A | abs_inherited | -0.00105 | -0.002464 | 6 | 4 | 0 | [-0.00525, 0.00315] |
+| 50 | B2-A | learning_rel | 0.05649 | 0.06833 | 4 | 6 | 0 | [-0.003815, 0.1177] |
+| 50 | B2-A | inherited_rel | 0.002679 | 0.004714 | 4 | 6 | 0 | [-0.003364, 0.008679] |
+| 50 | B2-B1 | abs_learning | 0.01397 | 0.005823 | 5 | 5 | 0 | [-0.01312, 0.04291] |
+| 50 | B2-B1 | abs_inherited | 0 | 0 | 0 | 0 | 10 | [0, 0] |
+| 50 | B2-B1 | learning_rel | 0.001357 | 0.01453 | 5 | 5 | 0 | [-0.06081, 0.06139] |
+| 50 | B2-B1 | inherited_rel | 0 | 0 | 0 | 0 | 10 | [0, 0] |
+| 60 | B1-A | abs_learning | 0.0009256 | 0.006598 | 4 | 6 | 0 | [-0.03322, 0.03061] |
+| 60 | B1-A | abs_inherited | -0.0002829 | -0.001157 | 6 | 4 | 0 | [-0.003189, 0.002623] |
+| 60 | B1-A | learning_rel | 0.04495 | 0.02516 | 4 | 6 | 0 | [-0.02517, 0.1215] |
+| 60 | B1-A | inherited_rel | 0.003574 | 0.002314 | 4 | 6 | 0 | [-0.001157, 0.008846] |
+| 60 | B2-A | abs_learning | -0.02221 | -0.02533 | 5 | 5 | 0 | [-0.06623, 0.02406] |
+| 60 | B2-A | abs_inherited | -0.0002829 | -0.001157 | 6 | 4 | 0 | [-0.003215, 0.002546] |
+| 60 | B2-A | learning_rel | -0.007139 | -0.01789 | 5 | 5 | 0 | [-0.07297, 0.06316] |
+| 60 | B2-A | inherited_rel | 0.003574 | 0.002314 | 4 | 6 | 0 | [-0.001234, 0.009] |
+| 60 | B2-B1 | abs_learning | -0.02313 | -0.0362 | 7 | 3 | 0 | [-0.04983, 0.005662] |
+| 60 | B2-B1 | abs_inherited | 0 | 0 | 0 | 0 | 10 | [0, 0] |
+| 60 | B2-B1 | learning_rel | -0.05209 | -0.04127 | 8 | 2 | 0 | [-0.09826, -0.007124] |
+| 60 | B2-B1 | inherited_rel | 0 | 0 | 0 | 0 | 10 | [0, 0] |
+
+### Comparison with the superseded solver (medians at update 1000, /e₁*)
+
+| q | arm | median abs learning | median inherited | median abs inherited | superseded median abs learning | superseded median inherited | superseded median abs inherited |
+|---|---|---|---|---|---|---|---|
+| 50 | A | 0.04366 | -0.002571 | 0.007286 | 0.0475 | 0.005493 | 0.01075 |
+| 50 | B1 | 0.0434 | 0.001393 | 0.006643 | 0.03993 | 0.008119 | 0.01019 |
+| 50 | B2 | 0.06725 | 0.001393 | 0.006643 | 0.07285 | 0.008119 | 0.01019 |
+| 60 | A | 0.0486 | -0.001929 | 0.002829 | 0.04975 | 0.001547 | 0.004389 |
+| 60 | B1 | 0.06534 | 0.0006429 | 0.005014 | 0.06524 | 0.003562 | 0.003562 |
+| 60 | B2 | 0.05282 | 0.0006429 | 0.005014 | 0.05368 | 0.003562 | 0.003562 |
+
+### Does any Pilot 2 statement change?
+
+- **"Most of the remaining stage-1 error is the learning term" — unchanged.**
+  - The median |learning| is 0.043–0.067·e₁*, against 0.003–0.007·e₁* for |inherited|.
+  - No final learning band contains 0, except 1 of 10 q=60 A runs.
+- **The size and sign of the inherited term — changed.**
+  - The superseded medians were positive in every arm (0.0015–0.0081·e₁*).
+  - The revised medians are smaller in magnitude, and **negative for A** (−0.0026 at q=50, −0.0019 at q=60) while B1/B2 stay positive (0.0014, 0.0006).
+  - The inherited band contains 0 in 1–3 of 10 final runs per (q, arm).
+  - In the paired comparisons, no arm difference in |inherited| has a CI excluding 0.
+- **The q=60 "ill-conditioning" caveat (§3 item 2) — replaced.** The bands quantify that uncertainty directly: widths up to 0.81% of e₁*, similar in size to the old residual (≤ 0.74%).
+- **Unchanged:** every statement that does not use ẽ₁. That covers stage-2 drift, stage-1 relative error and its paired counts and CIs, Ĝmax/EXP/dReach, the normalization scope, and the records.
+
+---
+
+## Appendix S — superseded: bracketing + Brent induced target (original §1.1)
+
+### S.1 Calibration of the superseded solver
+
+The requested criterion was: for ê₂ = e₂*, ẽ₁ must equal e₁*(0) to within the verifier floor. Values below are from `evaluate` on the analytic policy; the gain is the best stage-1 deviation against an opponent playing e₁*. These numbers came from an in-session script and are reproducible with `test_induced_stage1_target_calibration`.
+
+| q | Tier | ẽ₁[e₂*] − e₁* (effort) | relative | stage-1 BR gain at e₁*, /ΔW |
+|---|---|---|---|---|
+| 50 | development | +0.11970 | +2.56e−3 | 9.118e−07 |
+| 50 | dev_2x | −0.03675 | −7.87e−4 | 9.646e−08 |
+| 50 | final | −0.00170 | −3.63e−5 | 1.452e−08 |
+| 60 | development | −0.01049 | −2.70e−4 | 7.864e−09 |
+| 60 | dev_2x | −0.07276 | −1.87e−3 | 3.701e−07 |
+| 60 | final | −0.07215 | −1.86e−3 | 3.712e−07 |
+
+**The criterion is not met as stated at q=50 on the development tier.**
+- The value gain there, 9.1e−7·ΔW, exceeds the verifier's recorded floor at that point, 2.2e−16 (Phase 1), and the global floor of 3.5e−7.
+- **Source.** The continuous refinement searches the verifier's *interpolated* Q₁ more finely than the verifier's grid-plus-vertex search does. Linear interpolation of V₂ on the state grid makes Q₁ slightly non-smooth, and the refinement finds tiny gains between the kinks.
+- **In effort units** the induced-target floor is ≤ 2.6e−3·e₁* (development tier).
+- **The test records these observed floors as a regression guard,** not as the requested criterion. Its docstring says so.
+- **This needs your decision** on whether to keep this solver, restrict BR to the verifier's grid-plus-vertex candidates, or evaluate ẽ₁ on the final tier. All required arrays are stored in every checkpoint NPZ, so ẽ₁ can be recomputed later without new runs.
+
+
