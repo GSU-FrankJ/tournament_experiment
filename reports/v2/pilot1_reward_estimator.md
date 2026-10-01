@@ -307,3 +307,94 @@ OMP_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/
 ---
 
 **STOP — Pilot 1 complete. Waiting for your choice of reward estimator.**
+
+
+---
+
+## 7. Side analysis (requested with Pilot 2): smoothed-game prediction of the stage-2 policy
+
+No new runs. Tool: `tools/v2/pilot1_smoothed_game.py` (commit listed in `reports/v2/pilot2_freeze.md`). Data: `results/v2_pilots/pilot1/analysis/smoothed_game/per_run.csv` and `curves.csv`.
+
+### Method
+
+**Prediction.** ê_pred(d) = (ΔW/2k)·E[f_ξ(d + a_i − a_j)], where:
+- a_i is the learned stage-2 Beta action at d, centred on its own mean, in effort units;
+- a_j is the same at −d.
+
+This is the location-shift approximation of the stochastic-policy first-order condition.
+
+**Inputs.** The saved final-checkpoint α(d) and β(d) (`final_development.npz`: `v_t2_alpha`, `v_t2_beta`), on the development D₂ grid. The grid is symmetric about 0 and contains −d for every d, which the tool checks, so **no interpolation** was needed.
+
+**Quadrature.**
+- 400 equal-probability nodes per Beta (midpoint quantiles), as a tensor product: 160,000 pairs per d.
+- Node sensitivity at d = 0, q50 s10501 expected: ê_pred(0) is 66.5658 with 200 nodes and 66.5613 with 800 nodes.
+
+**ê_learned** is the Beta mean, `v_t2_e_hat`.
+
+### Summary (median over 10 seeds per cell; share shown with [min, max])
+
+| q | arm | median RMSE(ê_learned − ê_pred), \|d\|<2q | median RMSE(ê_learned − e2*), \|d\|<2q | runs with RMSE to ê_pred < RMSE to e2* | median ê_pred(0) | median ê_learned(0) | share of peak gap explained (e2*(0) − ê_pred(0))/(e2*(0) − ê_learned(0)) |
+|---|---|---|---|---|---|---|---|
+| 50 | expected | 2.737 | 3.077 | 10/10 | 66.892 | 60.952 | 0.331 [0.294, 0.572] |
+| 50 | sampled | 12.455 | 12.751 | 10/10 | 66.505 | 42.033 | 0.126 [0.055, 0.182] |
+| 60 | expected | 1.760 | 1.885 | 10/10 | 56.153 | 52.575 | 0.376 [0.296, 0.582] |
+| 60 | sampled | 12.651 | 12.807 | 10/10 | 56.080 | 30.767 | 0.082 [0.054, 0.189] |
+
+### Per run
+
+| q | seed | arm | RMSE(learned − pred) | RMSE(learned − e2*) | ê_learned(0) | ê_pred(0) | e2*(0) | share of peak gap explained |
+|---|---|---|---|---|---|---|---|---|
+| 50 | 10501 | expected | 3.876 | 4.173 | 59.063 | 66.563 | 70.000 | 0.314 |
+| 50 | 10502 | expected | 3.281 | 3.501 | 60.730 | 67.046 | 70.000 | 0.319 |
+| 50 | 10503 | expected | 2.971 | 3.237 | 61.003 | 66.823 | 70.000 | 0.353 |
+| 50 | 10504 | expected | 2.093 | 2.405 | 61.487 | 66.962 | 70.000 | 0.357 |
+| 50 | 10505 | expected | 2.141 | 2.466 | 60.998 | 66.982 | 70.000 | 0.335 |
+| 50 | 10506 | expected | 2.581 | 2.968 | 59.259 | 66.714 | 70.000 | 0.306 |
+| 50 | 10507 | expected | 2.894 | 3.186 | 59.785 | 66.993 | 70.000 | 0.294 |
+| 50 | 10508 | expected | 2.162 | 2.336 | 64.432 | 66.816 | 70.000 | 0.572 |
+| 50 | 10509 | expected | 2.189 | 2.521 | 61.292 | 66.818 | 70.000 | 0.365 |
+| 50 | 10510 | expected | 3.732 | 3.927 | 60.905 | 67.036 | 70.000 | 0.326 |
+| 50 | 10501 | sampled | 12.574 | 12.891 | 42.000 | 66.388 | 70.000 | 0.129 |
+| 50 | 10502 | sampled | 17.993 | 18.236 | 34.591 | 66.686 | 70.000 | 0.094 |
+| 50 | 10503 | sampled | 25.347 | 25.543 | 19.596 | 67.234 | 70.000 | 0.055 |
+| 50 | 10504 | sampled | 7.675 | 7.996 | 50.658 | 66.483 | 70.000 | 0.182 |
+| 50 | 10505 | sampled | 14.844 | 15.129 | 38.019 | 66.570 | 70.000 | 0.107 |
+| 50 | 10506 | sampled | 9.339 | 9.636 | 48.589 | 66.478 | 70.000 | 0.165 |
+| 50 | 10507 | sampled | 12.335 | 12.612 | 44.448 | 66.480 | 70.000 | 0.138 |
+| 50 | 10508 | sampled | 11.740 | 12.047 | 42.065 | 66.563 | 70.000 | 0.123 |
+| 50 | 10509 | sampled | 9.665 | 10.003 | 45.945 | 66.412 | 70.000 | 0.149 |
+| 50 | 10510 | sampled | 14.100 | 14.364 | 41.650 | 66.527 | 70.000 | 0.123 |
+| 60 | 10501 | expected | 1.662 | 1.830 | 52.586 | 56.079 | 58.333 | 0.392 |
+| 60 | 10502 | expected | 1.574 | 1.759 | 52.167 | 56.171 | 58.333 | 0.351 |
+| 60 | 10503 | expected | 1.782 | 1.875 | 54.319 | 55.998 | 58.333 | 0.582 |
+| 60 | 10504 | expected | 1.554 | 1.686 | 53.490 | 56.194 | 58.333 | 0.442 |
+| 60 | 10505 | expected | 1.959 | 2.127 | 52.102 | 56.004 | 58.333 | 0.374 |
+| 60 | 10506 | expected | 1.586 | 1.745 | 52.622 | 56.237 | 58.333 | 0.367 |
+| 60 | 10507 | expected | 2.008 | 2.120 | 53.228 | 56.181 | 58.333 | 0.422 |
+| 60 | 10508 | expected | 2.031 | 2.253 | 50.455 | 56.002 | 58.333 | 0.296 |
+| 60 | 10509 | expected | 1.842 | 2.045 | 51.009 | 56.153 | 58.333 | 0.298 |
+| 60 | 10510 | expected | 1.739 | 1.895 | 52.564 | 56.154 | 58.333 | 0.378 |
+| 60 | 10501 | sampled | 15.962 | 16.096 | 24.512 | 56.255 | 58.333 | 0.061 |
+| 60 | 10502 | sampled | 5.942 | 6.117 | 45.079 | 55.822 | 58.333 | 0.189 |
+| 60 | 10503 | sampled | 18.206 | 18.329 | 21.206 | 56.335 | 58.333 | 0.054 |
+| 60 | 10504 | sampled | 5.577 | 5.802 | 42.228 | 55.847 | 58.333 | 0.154 |
+| 60 | 10505 | sampled | 6.427 | 6.605 | 43.443 | 55.870 | 58.333 | 0.165 |
+| 60 | 10506 | sampled | 15.230 | 15.369 | 25.486 | 56.210 | 58.333 | 0.065 |
+| 60 | 10507 | sampled | 14.000 | 14.144 | 28.848 | 56.146 | 58.333 | 0.074 |
+| 60 | 10508 | sampled | 16.755 | 16.889 | 23.416 | 56.257 | 58.333 | 0.059 |
+| 60 | 10509 | sampled | 7.189 | 7.367 | 41.113 | 55.944 | 58.333 | 0.139 |
+| 60 | 10510 | sampled | 11.301 | 11.471 | 32.685 | 56.015 | 58.333 | 0.090 |
+
+### Figures
+
+- `reports/v2/figures/pilot1/smoothed_game_q50.png`
+- `reports/v2/figures/pilot1/smoothed_game_q60.png`
+
+Each shows e2*, the median over seeds of ê_pred, and the median of ê_learned, with one panel per arm.
+
+### Interpretation (labelled; descriptive)
+
+- The self-noise smoothing lowers the predicted peak to about 66.9 at q=50 and 56.2 at q=60 (medians). In the `expected` arm this accounts for about a third of the remaining peak gap: median share 0.33 at q=50 and 0.38 at q=60, with run range 0.29–0.58.
+- ê_learned is closer to ê_pred than to e2* in every run, in both arms. However, the RMSE improvement over |d| < 2q is small (for example, 2.74 vs 3.08 at q=50 expected), because ê_pred differs from e2* mainly near the peak.
+- In the `sampled` arm the smoothing explains only 0.08–0.13 of the (much larger) peak gap.
+- So, under this approximation, most of the remaining underestimation in `expected` is not explained by the policy's own action noise.
