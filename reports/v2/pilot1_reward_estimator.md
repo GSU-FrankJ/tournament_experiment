@@ -313,7 +313,7 @@ OMP_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/
 
 ## 7. Side analysis (requested with Pilot 2): smoothed-game prediction of the stage-2 policy
 
-No new runs. Tool: `tools/v2/pilot1_smoothed_game.py` (commit listed in `reports/v2/pilot2_freeze.md`). Data: `results/v2_pilots/pilot1/analysis/smoothed_game/per_run.csv` and `curves.csv`.
+No new runs. Tool: `tools/v2/pilot1_smoothed_game.py` (commit `e98e434`). Data: `results/v2_pilots/pilot1/analysis/smoothed_game/per_run.csv` and `curves.csv`.
 
 ### Method
 
