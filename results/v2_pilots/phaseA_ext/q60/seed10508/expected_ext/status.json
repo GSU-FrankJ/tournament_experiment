@@ -1,0 +1,22 @@
+{
+ "run": "phaseA_ext_q60_s10508_expected_ext",
+ "pilot": "phaseA_ext",
+ "arm": "expected_ext",
+ "q": 60,
+ "seed": 10508,
+ "mode": "phase_A_continue",
+ "state": "done",
+ "pid": 1098010,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/phaseA_ext/q60/seed10508/expected_ext/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/phaseA_ext/q60/seed10508/expected_ext",
+ "start_time": "2026-10-01 23:30:18",
+ "git": {
+  "commit": "cd760fd6dbedc2387d33bf66a5c926aa409ccc65",
+  "short": "cd760fd",
+  "dirty": false
+ },
+ "end_time": "2026-10-01 23:33:37",
+ "total_wall_sec": 199.28800010296982,
+ "exit_code": 0,
+ "final_global_update": 1600
+}

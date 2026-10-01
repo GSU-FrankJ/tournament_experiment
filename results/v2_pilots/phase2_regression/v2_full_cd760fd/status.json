@@ -1,0 +1,22 @@
+{
+ "run": "tel_q50_s10501",
+ "pilot": "phase2_regression",
+ "arm": "full_defaults",
+ "q": 50,
+ "seed": 10501,
+ "mode": "full",
+ "state": "done",
+ "pid": 1097724,
+ "host": "vector2",
+ "cmd": "run/run_v2_stagewise.py --config results/v2_pilots/phase2_regression/run_config.json --out-dir results/v2_pilots/phase2_regression/v2_full_cd760fd",
+ "start_time": "2026-10-01 23:29:27",
+ "git": {
+  "commit": "cd760fd6dbedc2387d33bf66a5c926aa409ccc65",
+  "short": "cd760fd",
+  "dirty": false
+ },
+ "end_time": "2026-10-01 23:29:40",
+ "total_wall_sec": 13.027437410026323,
+ "exit_code": 0,
+ "final_global_update": 120
+}
