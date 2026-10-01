@@ -190,3 +190,15 @@ def test_storage_roundtrip(tmp_path):
     append_csv(str(tmp_path / "m.csv"), {"a": 3, "b": 4})
     with pytest.raises(ValueError):
         append_csv(str(tmp_path / "m.csv"), {"a": 1, "c": 2})
+
+
+@pytest.mark.xfail(strict=True, reason="GL-node pmf adds +-2q and leaves interior holes; "
+                                        "see reports/v2/phase2_opening_checks.md section 1c")
+@pytest.mark.parametrize("q", QS)
+def test_onpath_equals_open_support(q):
+    spec = spec_for(q)
+    for pol in (analytic_policy(spec), zero_policy):
+        for cfg in TIERS:
+            ev = evaluate(pol, spec, cfg)
+            g = ev.res.stages[2].d_grid
+            assert np.array_equal(ev.pmf_cand[2] > 0.0, np.abs(g) < 2.0 * q)
