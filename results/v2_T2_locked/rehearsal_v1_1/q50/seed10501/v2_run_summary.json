@@ -1,0 +1,71 @@
+{
+ "phase_timing": {
+  "A": {
+   "wall_sec": 149.170762459049,
+   "process_cpu_sec": 148.285597472,
+   "updates": 1600,
+   "global_entry": 0,
+   "global_exit": 1600,
+   "by_category_sec": {
+    "train_rollout": 3.545235126046464,
+    "train_update": 144.74584690423217,
+    "stability_check": 0.05522922606905922,
+    "dev_verifier": 0.14201643003616482
+   }
+  },
+  "B": {
+   "wall_sec": 103.30082142399624,
+   "process_cpu_sec": 103.242361539,
+   "updates": 600,
+   "global_entry": 1600,
+   "global_exit": 2200,
+   "by_category_sec": {
+    "train_rollout": 2.326657381549012,
+    "train_update": 100.3263712960179,
+    "stability_check": 0.03404755814699456,
+    "dev_verifier": 0.17198649822967127
+   }
+  }
+ },
+ "would_have_fired": {
+  "A": {
+   "global_update": 1100,
+   "local_update": 1100,
+   "rule": "k_phase"
+  },
+  "B": {
+   "global_update": 1850,
+   "local_update": 250,
+   "rule": "k_phase"
+  }
+ },
+ "fixed_budget": true,
+ "costs": {
+  "seconds": {
+   "train_rollout": 5.871892507595476,
+   "train_update": 245.07221820025006,
+   "stability_check": 0.08927678421605378,
+   "dev_verifier": 0.3140029282658361
+  },
+  "count": {
+   "train_rollout": 2200,
+   "train_update": 2200,
+   "stability_check": 110,
+   "dev_verifier": 37
+  }
+ },
+ "costs_v2": {
+  "seconds": {
+   "v2_outputs": 0.12321416026679799
+  },
+  "count": {
+   "v2_outputs": 37
+  }
+ },
+ "phases_done": [
+  "A",
+  "B"
+ ],
+ "final_global_update": 2200,
+ "total_wall_sec": 322.26135567901656
+}

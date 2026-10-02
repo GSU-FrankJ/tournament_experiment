@@ -1,0 +1,46 @@
+{
+ "launch_commit": "95c000e0670072ee0a382439c3a2c5ddfda8fcce",
+ "v1_1_protocol_sha256": "21d85983f2a2bebc0998e99fcf665c2c729f060996c529fa3162b3d62222a40f",
+ "R1": {
+  "pass": true,
+  "n_identical": 20,
+  "n": 20,
+  "failing_fields": [],
+  "details": "results/v2_T2_locked/rehearsal_v1_1_R1_details.csv"
+ },
+ "R2": {
+  "pass": true,
+  "n_pass": 20,
+  "n": 20
+ },
+ "R3": {
+  "pass": true,
+  "n_ok": 20,
+  "n": 20
+ },
+ "R4": {
+  "pass": true,
+  "n_ok": 20,
+  "n": 20
+ },
+ "R5": {
+  "pass": true,
+  "returncode": 0,
+  "n_agree": 20,
+  "n": 20,
+  "max_abs_value_diff": 0.0,
+  "output": "results/v2_T2_locked/rehearsal_v1_1_analysis"
+ },
+ "R6": {
+  "pass": true,
+  "pytest_summary": "1 failed, 103 passed, 2 xfailed in 125.88s (0:02:05)",
+  "pytest_failed": [
+   "tests/test_registry_canonicalization.py::test_registry_canonicalization"
+  ],
+  "c7_identical": true,
+  "c7_commit": "95c000e",
+  "c7_dirty": false,
+  "pytest_log": "results/v2_T2_locked/rehearsal_v1_1_pytest.txt"
+ },
+ "ALL_PASS": true
+}

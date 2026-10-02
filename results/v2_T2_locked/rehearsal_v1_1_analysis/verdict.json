@@ -1,0 +1,15 @@
+{
+ "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1",
+ "seeds": [
+  10501,
+  10510
+ ],
+ "rule": "each q >= 18 of 20 runs pass; both q",
+ "per_q": {
+  "50": false,
+  "60": false
+ },
+ "overall": "not applicable (rule needs 20 seeds per q)",
+ "n_agreement_rows": 20,
+ "n_all_agree": 20
+}
