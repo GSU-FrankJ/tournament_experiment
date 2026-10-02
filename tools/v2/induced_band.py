@@ -12,9 +12,13 @@ Sub-commands
            Pilot 3): range [0.4 e1*, 1.7 e1*]
   joint    one sweep per Pilot-2 A_joint weight export (live stage 2): range
            [min(e1, e1*) - MARGIN, max(e1, e1*) + MARGIN]
+  parents4 one sweep per Phase-A-extension u1600 parent (state_u01600.pt; the frozen stage 2 of
+           Pilot 4 section 2b): range [min(0.4 e1*, e1_min - MARGIN), max(1.7 e1*, e1_max + MARGIN)],
+           e1_min / e1_max over every checkpoint and weight-export row of both 2b arms of that
+           (q, seed), so no row falls outside; the sweep is split into chunks across workers
 Outputs under results/v2_pilots/induced_band/ (CSV + NPZ of every sweep).
 
-Usage: python tools/v2/induced_band.py {calib|parents|joint} [--workers N]
+Usage: python tools/v2/induced_band.py {calib|parents|joint|parents4} [--workers N]
 """
 
 from __future__ import annotations
@@ -84,9 +88,56 @@ def _sweep(job):
             "sweep_npz": os.path.relpath(npz_out, ROOT), "delta1_min_over_dw": b["delta1_min"] / spec.dw, **b}
 
 
+def _chunk(job):
+    q, policy_path, E = job
+    return stage1_residual_sweep(actor_policy(policy_path, spec_for(q)), spec_for(q), FINAL_CONFIG, E)
+
+
+def parents4(fl: dict, workers: int) -> int:
+    """Bands of the 20 Phase-A-extension u1600 parents (Pilot 4, 2b), adaptive sweep range."""
+    rows, jobs, meta = [], [], []
+    for d in sorted(glob.glob(str(ROOT / "results/v2_pilots/phaseA_ext/q*/seed*/expected_ext"))):
+        man = json.load(open(os.path.join(d, "manifest.json")))
+        q, seed = float(man["q"]), man["seed"]
+        spec = spec_for(q)
+        g1 = fl[int(q)]["g1"]
+        e1s = []
+        for arm_dir in sorted(glob.glob(str(ROOT / f"results/v2_pilots/pilot4_B/q{int(q)}/seed{seed}/*"))):
+            if not os.path.exists(os.path.join(arm_dir, "v2_checkpoints.csv")):
+                continue
+            e1s += list(pd.read_csv(os.path.join(arm_dir, "v2_checkpoints.csv")).e1_at_0)
+            for f in sorted(glob.glob(os.path.join(arm_dir, "weights", "u*.npz"))):
+                e1s.append(float(actor_policy(f, spec)(1, np.zeros(1))[0]))
+        lo = min(PARENT_RANGE[0] * g1, min(e1s) - MARGIN)
+        hi = max(PARENT_RANGE[1] * g1, max(e1s) + MARGIN)
+        ck = os.path.join(d, "state_u01600.pt")
+        E = sweep_grid(g1, lo, hi, STEP)
+        pieces = np.array_split(E, max(1, int(np.ceil(E.size / 400))))
+        meta.append((q, seed, ck, E, len(pieces), min(e1s), max(e1s), len(e1s)))
+        jobs += [(q, ck, piece) for piece in pieces]
+    with Pool(workers) as pool:
+        res = pool.map(_chunk, jobs, chunksize=1)
+    i = 0
+    for q, seed, ck, E, n, e1min, e1max, nrows in meta:
+        D = np.concatenate(res[i:i + n])
+        i += n
+        spec = spec_for(q)
+        npz_out = OUT / "sweeps" / f"parent4_q{int(q)}_s{seed}.npz"
+        np.savez(npz_out, e_sweep=E, delta1=D)
+        b = induced_band(E, D, fl[int(q)]["floor"])
+        rows.append({"seed": seed, "source": "parent_u1600", "q": int(q), "g1": fl[int(q)]["g1"],
+                     "policy": os.path.relpath(ck, ROOT), "step": STEP, "sweep_npz": os.path.relpath(npz_out, ROOT),
+                     "rows_e1_min": e1min, "rows_e1_max": e1max, "n_rows_covered": nrows,
+                     "delta1_min_over_dw": b["delta1_min"] / spec.dw, **b})
+    pd.DataFrame(rows).to_csv(OUT / "parent4_bands.csv", index=False)
+    print(pd.DataFrame(rows)[["q", "seed", "sweep_lo", "sweep_hi", "rows_e1_min", "rows_e1_max", "e_tilde",
+                              "band_lo", "band_hi", "band_contiguous", "argmin_at_sweep_edge"]].to_string())
+    return 0
+
+
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("cmd", choices=("calib", "parents", "joint"))
+    p.add_argument("cmd", choices=("calib", "parents", "joint", "parents4"))
     p.add_argument("--workers", type=int, default=8)
     a = p.parse_args()
     os.makedirs(OUT / "sweeps", exist_ok=True)
@@ -112,6 +163,8 @@ def main() -> int:
             return 2
         return 0
     jobs = []
+    if a.cmd == "parents4":
+        return parents4(fl, a.workers)
     if a.cmd == "parents":
         for ck in sorted(glob.glob(str(ROOT / "results/v2_pilots/pilot1/q*/seed*/expected/state_end_A.pt"))):
             man = json.load(open(os.path.join(os.path.dirname(ck), "manifest.json")))
