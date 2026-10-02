@@ -619,3 +619,18 @@ OMP_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/
 ```bash
 OMP_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/locked_rehearsal_analysis.py && /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/locked_tables.py
 ```
+
+---
+
+## Addendum (2026-10-02): decision D1 of the v1.1 round — Check 1 accepted
+
+Owner decision, recorded verbatim in substance and appended after the report above (the text above is unchanged).
+
+- **Check 1 is accepted.** In 20/20 runs the training state was bit-identical to the stitched development path. The three process-global RNG states (torch global, numpy legacy global, Python `random`) were never consumed by training; they are diagnostics only.
+- **Training-relevant state.** From now on, every bit-identity check compares exactly:
+  - the actor, the critic, the lagged opponent, the frozen stage-2 snapshot (Phase B), and both Adam states;
+  - the five training RNG streams (env, learn, opp, start, minibatch) and the torch generator;
+  - all weight exports and the final weights;
+  - training histories and per-update logs, without their wall-clock fields;
+  - checkpoint metrics, gate-metric values, and the evaluation outputs (`gateA_*.npz`, `final_*.npz`, `induced_band.json`, `band_sweep.npz`, `drift_test.json`).
+- **Excluded:** verdict fields, manifests, and the three process-global RNG states.
