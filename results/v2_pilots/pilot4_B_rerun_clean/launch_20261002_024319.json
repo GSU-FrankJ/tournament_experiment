@@ -1,0 +1,51 @@
+{
+ "pilot": "pilot4_B_rerun_clean",
+ "phase": "B",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "pilot4_B_rerun_clean",
+  "--phase",
+  "B",
+  "--parent-pilot",
+  "phaseA_ext",
+  "--parent-arm",
+  "expected_ext",
+  "--parent-file",
+  "state_u01600.pt",
+  "--reward-mode",
+  "expected",
+  "--qs",
+  "60",
+  "--seeds",
+  "10507",
+  "--arms",
+  "B2_mean_constant",
+  "--workers",
+  "1"
+ ],
+ "workers": 1,
+ "nproc": 64,
+ "loadavg_at_start": [
+  1.71728515625,
+  0.73828125,
+  0.67041015625
+ ],
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_B_rerun_clean/q60/seed10507/B2_mean_constant"
+ ],
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_B_rerun_clean/q60/seed10507/B2_mean_constant",
+   "returncode": 0,
+   "wall_sec": 81.39276993100066
+  }
+ ],
+ "state": "done",
+ "started": "20261002_024319",
+ "loadavg_at_end": [
+  2.1259765625,
+  1.103515625,
+  0.8076171875
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "dir_a": "results/v2_pilots/pilot4_B/q60/seed10507/B2_mean_constant",
+ "dir_b": "results/v2_pilots/pilot4_B_rerun_clean/q60/seed10507/B2_mean_constant",
+ "state_file": "state_end_B.pt",
+ "history_identical": true,
+ "stability_identical": true,
+ "verifier_calls_identical": true,
+ "n_updates": 600,
+ "n_weight_exports": 24,
+ "weight_exports_identical": true,
+ "final_weights_identical": true,
+ "rng_positions_identical": true,
+ "end_state_actor_identical": true,
+ "end_state_critic_identical": true,
+ "end_state_opponent_identical": true,
+ "end_state_frozen_identical": true,
+ "end_state_opt_actor_identical": true,
+ "end_state_opt_critic_identical": true,
+ "end_state_rng_minibatch_identical": true,
+ "end_state_rng_streams_identical": true,
+ "end_state_torch_generator_identical": true,
+ "ALL_IDENTICAL": true
+}
