@@ -13,6 +13,10 @@ C7). New behaviour, all behind flags recorded in ``manifest.json``:
                  snapshot refresh and the phase-local verifier/stop-rule counters restart)
   full_state_at  optional list of global updates at which a full-state checkpoint
                  ``state_u<update>.pt`` is also written (default: none)
+  lr_decay       optional {phase, start_lr, end_lr, local_first, local_last}: inside that phase
+                 both optimizers follow the existing phase-C linear form ``lr_at`` (round-3
+                 runner) mapped onto local updates local_first..local_last (default: none, i.e.
+                 the record's schedule; refused in mode full)
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -77,6 +81,7 @@ MODES = ("full", "phase_A", "phase_B", "phase_A_continue")
 OVERRIDE_KEYS = ("phase_caps", "warmup", "stability_every", "verifier_timeout",
                  "direct_rollout_episodes", "direct_rollout_reps")
 RNG_NAMES = ("env", "learn", "opp", "start")   # + the minibatch stream held by the agent
+LR_DECAY_KEYS = ("phase", "start_lr", "end_lr", "local_first", "local_last")
 
 
 def sha256_file(path: str) -> str:
@@ -143,6 +148,17 @@ def validate_config(cfg: Dict) -> None:
         raise ConfigError("full_state_at must be a list of global updates")
     if mode == "full" and (fl != DEFAULT_FLAGS or cfg["fixed_budget"]):
         raise ConfigError("mode full is the regression mode: default flags, fixed_budget false")
+    dec = cfg.get("lr_decay")
+    if dec is not None:
+        if mode == "full":
+            raise ConfigError("lr_decay is not allowed in mode full (regression mode)")
+        if set(dec) != set(LR_DECAY_KEYS):
+            raise ConfigError(f"lr_decay must have exactly {LR_DECAY_KEYS}; got {sorted(dec)}")
+        own = "B" if mode == "phase_B" else "A"
+        if dec["phase"] != own:
+            raise ConfigError(f"lr_decay.phase {dec['phase']!r} is not the phase run by mode {mode}")
+        if not 1 <= int(dec["local_first"]) < int(dec["local_last"]):
+            raise ConfigError("lr_decay needs 1 <= local_first < local_last")
     if mode in ("phase_B", "phase_A_continue"):
         if not cfg["parent_checkpoint"] or not cfg["parent_sha256"]:
             raise ConfigError(f"{mode} needs parent_checkpoint and parent_sha256")
@@ -258,6 +274,27 @@ class Run:
         self.weights_every = int(P["weights_every"])
         self.weights_dir = os.path.join(out_dir, "weights")
         self.full_state_at = {int(u) for u in cfg.get("full_state_at", [])}
+        self.lr_decay = cfg.get("lr_decay")
+        if self.lr_decay is not None:
+            if int(self.lr_decay["local_last"]) != int(P["phase_caps"][self.lr_decay["phase"]]):
+                raise ConfigError("lr_decay.local_last must equal the phase cap")
+            if float(self.lr_decay["start_lr"]) != float(sched["ab_lr"]):
+                raise ConfigError("lr_decay.start_lr must equal lr_schedule.ab_lr")
+
+    # ------------------------------------------------------------------ learning rate
+    def lr_for(self, phase: str, local: int) -> float:
+        """LR before local update ``local``: the record's ``lr_at``, or the linear decay window.
+
+        The decay reuses ``lr_at``'s linear branch unchanged:
+        lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first).
+        """
+        dec = self.lr_decay
+        if dec is None or dec["phase"] != phase:
+            return lr_at(self.sched, phase, local)
+        lin = dict(self.sched, kind="linear", c_start_lr=float(dec["start_lr"]),
+                   c_end_lr=float(dec["end_lr"]), c_local_first=int(dec["local_first"]),
+                   linear_denominator=int(dec["local_last"]) - int(dec["local_first"]))
+        return lr_at(lin, "C", local)
 
     # ------------------------------------------------------------------ policy functions
     def policy_fns(self) -> Tuple[Callable, Callable]:
@@ -384,7 +421,7 @@ class Run:
         csv_path = os.path.join(self.out_dir, "v2_checkpoints.csv")
         os.makedirs(os.path.join(self.out_dir, "checkpoints"), exist_ok=True)
         print(f"[phase {phase}] entry at global update {self.global_u}, cap {cap}, active stages {active}, "
-              f"lr(first)={lr_at(sched, phase, 1):.6g}", flush=True)
+              f"lr(first)={self.lr_for(phase, 1):.6g}", flush=True)
 
         def stability_points() -> Dict[int, np.ndarray]:
             return {2: self.dev_grid2} if phase == "A" else {1: np.zeros(1), 2: self.dev_grid2}
@@ -404,7 +441,7 @@ class Run:
             local += 1
             self.global_u += 1
             t_upd = time.perf_counter()
-            lr_now = lr_at(sched, phase, local)
+            lr_now = self.lr_for(phase, local)
             set_lr(agent, lr_now)
             actor_lr, critic_lr = read_lr(agent)
             if id(agent.opt_actor) != self.opt_ids["actor"] or id(agent.opt_critic) != self.opt_ids["critic"]:
@@ -622,12 +659,12 @@ class Run:
                                     "local_updates": local, "cap": cap, "exit_reason": exit_reason,
                                     "active_stages": active, "consecutive_eligible_at_exit": eligible,
                                     "n_verifier_calls": sum(1 for v in self.verifier_log if v["phase"] == phase),
-                                    "lr_first": lr_at(sched, phase, 1), "lr_last": lr_at(sched, phase, local),
+                                    "lr_first": self.lr_for(phase, 1), "lr_last": self.lr_for(phase, local),
                                     "episodes": phase_updates["episodes"], "transitions": phase_updates["transitions"],
                                     "minibatch_steps": phase_updates["minibatch_steps"],
                                     "exit_call_update": (self.verifier_log[-1]["update"] if self.verifier_log and self.verifier_log[-1]["phase"] == phase else None)})
         print(f"[phase {phase}] exit at global update {self.global_u} after {local} local updates: {exit_reason} "
-              f"(lr last {lr_at(sched, phase, local):.6g})", flush=True)
+              f"(lr last {self.lr_for(phase, local):.6g})", flush=True)
         if phase in ("A", "B") and last_result is not None:
             np.savez(os.path.join(self.out_dir, f"phase_{phase}_exit_arrays.npz"),
                      **stage_result_arrays(last_result, f"dev_phase{phase}_exit"),
@@ -671,7 +708,7 @@ def write_manifest(run: Run, cfg: Dict, out_dir: str, cmd: str) -> Dict:
         "resolved_config": {"game": dataclasses.asdict(spec), "ppo": dataclasses.asdict(run.ppo_cfg),
                             "verifier": {"development": dataclasses.asdict(run.dev_cfg),
                                          "final": dataclasses.asdict(run.fin_cfg)},
-                            "lr_schedule": run.sched},
+                            "lr_schedule": run.sched, "lr_decay": run.lr_decay},
         "grids": grids,
         "verifier_cadence": {"warmup": P["warmup"], "stability_every": P["stability_every"],
                              "stability_consecutive": P["stability_consecutive"],

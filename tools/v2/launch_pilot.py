@@ -15,6 +15,11 @@ Examples (run inside tmux; see reports/v2/phase2_infra.md):
   python tools/v2/launch_pilot.py --pilot pilot2 --phase B --parent-pilot pilot1 --parent-arm expected \
       --reward-mode expected --qs 50 60 --seeds 10501 10502 10503 \
       --arms A_joint B1_frozen_allnorm B2_frozen_s1norm --workers 18
+  Pilot 4 (LR decay; parents are mid-run full states of the Phase A extension):
+  python tools/v2/launch_pilot.py --pilot pilot4_A --phase Acont --parent-pilot phaseA_ext \
+      --parent-arm expected_ext --parent-file state_u01200.pt --reward-mode expected \
+      --budget-overrides '{"phase_caps": {"A": 400, "B": 600, "C": 1000}}' \
+      --qs 50 60 --seeds ... --arms constant decay --workers 40
 """
 
 from __future__ import annotations
@@ -41,6 +46,8 @@ ARMS_A = {
 }
 ARMS_ACONT = {
     "expected_ext": {"reward_mode": "expected"},
+    "constant": {"reward_mode": "expected"},
+    "decay": {"reward_mode": "expected"},
 }
 ACONT_CAPS = {"A": 1200, "B": 600, "C": 1000}     # continue phase A from u400 to u1600
 ACONT_FULL_STATE_AT = [800, 1200, 1600]
@@ -50,7 +57,14 @@ ARMS_B = {
     "B2_frozen_s1norm": {"stage2_update_mode": "frozen", "adv_norm_scope": "stage1_rows", "continuation_action_mode": "stochastic"},
     "B1_frozen_allnorm_mean": {"stage2_update_mode": "frozen", "adv_norm_scope": "all_rows", "continuation_action_mode": "mean"},
     "B2_frozen_s1norm_mean": {"stage2_update_mode": "frozen", "adv_norm_scope": "stage1_rows", "continuation_action_mode": "mean"},
+    "B2_mean_constant": {"stage2_update_mode": "frozen", "adv_norm_scope": "stage1_rows", "continuation_action_mode": "mean"},
+    "B2_mean_decay": {"stage2_update_mode": "frozen", "adv_norm_scope": "stage1_rows", "continuation_action_mode": "mean"},
 }
+# Arms whose whole phase follows the existing linear schedule form (lr_at, kind "linear") from
+# ab_lr to the existing linear end value 3e-5 (groups G3/G4, MultiStage/Discussion/
+# ROUND2_T2_FOUR_GROUP_SETTINGS_20260909.md lines 24 and 38: 3e-4 linearly to 3e-5).
+DECAY_ARMS = ("decay", "B2_mean_decay")
+LINEAR_END_LR = 3e-5
 
 
 def sha256_file(path: str) -> str:
@@ -96,6 +110,11 @@ def build_config(pilot, phase, q, seed, arm, reward_mode, parent, overrides, roo
     if phase in ("B", "Acont"):
         cfg["parent_checkpoint"] = parent
         cfg["parent_sha256"] = sha256_file(parent)
+    if arm in DECAY_ARMS:
+        ph = "A" if phase == "Acont" else "B"
+        caps = cfg["budget_overrides"].get("phase_caps", rec["protocol"]["phase_caps"])
+        cfg["lr_decay"] = {"phase": ph, "start_lr": float(rec["lr_schedule"]["ab_lr"]),
+                           "end_lr": LINEAR_END_LR, "local_first": 1, "local_last": int(caps[ph])}
     return cfg, out
 
 
@@ -111,6 +130,7 @@ def main() -> int:
     p.add_argument("--root", default=str(ROOT / "results" / "v2_pilots"))
     p.add_argument("--parent-pilot")
     p.add_argument("--parent-arm")
+    p.add_argument("--parent-file", default="state_end_A.pt", help="full-state file inside the parent run dir")
     p.add_argument("--reward-mode", choices=("sampled", "expected"))
     p.add_argument("--budget-overrides", default="{}", help="JSON; smoke runs only (recorded)")
     p.add_argument("--dry-run", action="store_true")
@@ -127,7 +147,7 @@ def main() -> int:
         for seed in a.seeds:
             parent = None
             if a.phase in ("B", "Acont"):
-                parent = os.path.join(a.root, a.parent_pilot, f"q{q}", f"seed{seed}", a.parent_arm, "state_end_A.pt")
+                parent = os.path.join(a.root, a.parent_pilot, f"q{q}", f"seed{seed}", a.parent_arm, a.parent_file)
                 if not os.path.exists(parent):
                     p.error(f"missing parent {parent}")
             for arm in a.arms:

@@ -79,6 +79,10 @@ def parent(tmp_path_factory) -> str:
     (lambda c: c.update(mode="phase_B"), "needs parent"),
     (lambda c: c.update(mode="full"), "regression mode"),
     (lambda c: c["flags"].pop("reward_mode"), "flags must have"),
+    (lambda c: c.update(lr_decay={"phase": "A", "start_lr": 3e-4, "end_lr": 3e-5, "local_first": 1}), "lr_decay must have"),
+    (lambda c: c.update(lr_decay={"phase": "B", "start_lr": 3e-4, "end_lr": 3e-5, "local_first": 1, "local_last": 6}), "not the phase run"),
+    (lambda c: c.update(mode="full", fixed_budget=False, lr_decay={"phase": "A", "start_lr": 3e-4, "end_lr": 3e-5,
+                                                                    "local_first": 1, "local_last": 6}), "not allowed in mode full"),
 ])
 def test_config_refusals(mutate, msg):
     c = base_config()
@@ -363,3 +367,27 @@ def test_phase_a_continue_reproducible_and_branchable(parent, tmp_path):
     r = make_run("phase_B", B_ARMS["B2_frozen_s1norm"], str(tmp_path / "b"),
                  os.path.join(outs[0], "state_u00009.pt"))
     assert r.global_u == 9
+
+
+# ---------------------------------------------------------------- Pilot 4: linear LR decay window
+def test_lr_decay_follows_existing_linear_form(tmp_path):
+    """Decay arm: both optimizers follow lr_at's linear branch over the phase; no decay = constant."""
+    from run.run_final_dp_br_round3_dense import lr_at
+    c = base_config()
+    c["lr_decay"] = {"phase": "A", "start_lr": 3e-4, "end_lr": 3e-5, "local_first": 1, "local_last": 6}
+    os.makedirs(tmp_path / "d")
+    run = Run(c, str(tmp_path / "d"))
+    assert execute(run, c, str(tmp_path / "d"), "pytest") == 0
+    want = [3e-4 + (3e-5 - 3e-4) * (j - 1) / 5 for j in range(1, 7)]
+    got = [(h["actor_lr"], h["critic_lr"]) for h in run.history]
+    assert all(abs(a - w) <= 1e-15 and abs(b - w) <= 1e-15 for (a, b), w in zip(got, want))
+    assert got[0][0] == 3e-4 and abs(got[-1][0] - 3e-5) <= 1e-15
+    lin = dict(run.sched, kind="linear", c_start_lr=3e-4, c_end_lr=3e-5, c_local_first=1, linear_denominator=5)
+    assert [run.lr_for("A", j) for j in range(1, 7)] == [lr_at(lin, "C", j) for j in range(1, 7)]
+    c2 = base_config()
+    run2 = Run(c2, str(tmp_path / "c"))
+    assert all(run2.lr_for("A", j) == 3e-4 for j in range(1, 7))
+    c3 = base_config()
+    c3["lr_decay"] = dict(c["lr_decay"], local_last=5)
+    with pytest.raises(ConfigError, match="phase cap"):
+        Run(c3, str(tmp_path / "x"))
