@@ -16,6 +16,7 @@ All values are descriptive. Each table names its source file; the full reports c
 | Phase A extension | `reports/v2/phaseA_ext.md` | `cd760fd` | 20 |
 | Pilot 4: stabilization (1a–1d analyses, LR decay 2a/2b) | `reports/v2/pilot4_stabilization.md` | `c92ee74` | 80 |
 | Protocol lock + dress rehearsal (dev seeds) + cusp diagnostic | `reports/v2/protocol_lock_and_rehearsal.md` | lock `4bd2214`; rehearsal `5b07293` | 20 + 2 + 1 |
+| Protocol v1.1 + re-rehearsal + **fresh-seed confirmation** | `reports/v2/protocol_v1_1_confirmation.md` | lock `431474d`; rehearsal `95c000e`; confirmation `f6838ec` | 20 + 40 |
 
 **Decisions taken so far:**
 - reward estimator = `expected` (after Pilot 1);
@@ -185,6 +186,20 @@ Source: `results/v2_T2_locked/rehearsal_analysis/`.
 - **Cusp diagnostic:** the exact-target fit first drops below 5% peak error after 8,500–9,500 full-batch steps, with RMSE ≈ 0.016 by then. RL Phase A gives 32,000 actor steps (8,000 in the last 400 updates).
 - **Proposed confirmation seed block:** 20501–20520 (0 collisions); awaiting your confirmation. The confirmation was not run.
 
+## Protocol v1.1 and the confirmation (2026-10-02)
+
+- **v1.1 changes:** the stage-1 criterion moves from G-F to the secondary S1; gate G-N is added (|dev − final| of η₂ and Ĝmax ≤ 0.001·ΔW); the process-global RNGs are hardened.
+- **Lock:** commit `431474d` (`protocols/v2_T2_locked_v1_1.json`, SHA-256 `21d85983…`), recorded in `protocols/LOCK` at `95c000e`. v1.0 is unchanged.
+- **Re-rehearsal on the development seeds:** R1–R6 all pass (`results/v2_T2_locked/rehearsal_v1_1_checks.json`). The training state is bit-identical to v1.0 in 20/20.
+- **Confirmation** (seeds 20501–20520, launch commit `f6838ec`) — **verdict: PASS.**
+
+| q | primary passes | exact 95% CI | S1 passes | mean signed stage-1 err [boot 95% CI] | v1.0 outcome |
+|---|---|---|---|---|---|
+| 50 | 20/20 | [0.832, 1] | 20/20 | −0.0051 [−0.0259, 0.0161] | 20/20 |
+| 60 | 20/20 | [0.832, 1] | 18/20 | +0.0077 [−0.0185, 0.0349] | 18/20 |
+
+Source: `results/v2_T2_locked/confirmation_analysis/` (pre-registered script, run unchanged). 40/40 runs had exit code 0, no global-RNG violations and no crashes.
+
 ---
 
 ## Open questions
@@ -201,5 +216,5 @@ Source: `results/v2_T2_locked/rehearsal_analysis/`.
 7. **Phase C and T=3** are out of scope and not run (Phase C dropped from v2, D3).
 8. **Gate thresholds and protocol lock**: done (locked v1, `protocols/LOCK`).
 9. **Eight Pilot-4 2b manifests carry `dirty: true`**: resolved. A clean re-run of q60/10507 `B2_mean_constant` is bit-identical.
-10. **Rehearsal Check 1:** accept it on the training-state identity, or not (`reports/v2/protocol_lock_and_rehearsal.md` §4.1).
-11. **Confirmation seed block 20501–20520:** awaiting your confirmation.
+10. **Rehearsal Check 1:** accepted (D1, v1.1 round).
+11. **Confirmation seed block 20501–20520:** confirmed and run; the confirmation passed.

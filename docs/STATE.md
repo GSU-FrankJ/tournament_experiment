@@ -2,6 +2,13 @@
 
 Last updated: 2026-10-02
 
+## v2 T=2 protocol v1.1: fresh-seed confirmation PASSED (2026-10-02, branch v2-stagewise-pilots)
+
+Protocol v1.1 is locked at 431474d (protocols/v2_T2_locked_v1_1.json; LOCK record at 95c000e). The v1.1
+re-rehearsal checks R1-R6 all passed. Confirmation q in {50, 60} x seeds 20501-20520 at f6838ec: 20/20 and
+20/20 primary passes (G-A, G-F, G-N) -> PASS. S1 passes 20/20 and 18/20.
+Report: reports/v2/protocol_v1_1_confirmation.md. Nothing may change after the confirmation; no T=3 work started.
+
 ## v2 T=2 protocol locked + dress rehearsal (2026-10-02, branch v2-stagewise-pilots)
 
 Canonical worktree: .claude/worktrees/pilot-4-stabilization-fb99a2 on v2-stagewise-pilots (the original
