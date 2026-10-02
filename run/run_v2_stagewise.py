@@ -13,10 +13,14 @@ C7). New behaviour, all behind flags recorded in ``manifest.json``:
                  snapshot refresh and the phase-local verifier/stop-rule counters restart)
   full_state_at  optional list of global updates at which a full-state checkpoint
                  ``state_u<update>.pt`` is also written (default: none)
-  lr_decay       optional {phase, start_lr, end_lr, local_first, local_last}: inside that phase
+  lr_decay       optional window {phase, start_lr, end_lr, local_first, local_last}, or a list
+                 of windows (at most one per phase): from local update local_first to local_last
                  both optimizers follow the existing phase-C linear form ``lr_at`` (round-3
-                 runner) mapped onto local updates local_first..local_last (default: none, i.e.
-                 the record's schedule; refused in mode full)
+                 runner); before local_first the record's schedule applies (default: none, i.e.
+                 the record's schedule everywhere; refused in mode full)
+  mode locked    the locked v2 T=2 pipeline (run/run_v2_T2_locked.py): phase A then, after the
+                 caller freezes the stage-2 snapshot, phase B in the same process; flags must be
+                 expected / frozen / stage1_rows / mean (frozen only takes effect in phase B)
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -77,7 +81,11 @@ REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "mode",
 FLAG_KEYS = ("reward_mode", "stage2_update_mode", "adv_norm_scope", "continuation_action_mode")
 DEFAULT_FLAGS = {"reward_mode": "sampled", "stage2_update_mode": "joint",
                  "adv_norm_scope": "all_rows", "continuation_action_mode": "stochastic"}
-MODES = ("full", "phase_A", "phase_B", "phase_A_continue")
+MODES = ("full", "phase_A", "phase_B", "phase_A_continue", "locked")
+LOCKED_FLAGS = {"reward_mode": "expected", "stage2_update_mode": "frozen",
+                "adv_norm_scope": "stage1_rows", "continuation_action_mode": "mean"}
+MODE_PHASES = {"full": ("A", "B", "C"), "phase_A": ("A",), "phase_A_continue": ("A",), "phase_B": ("B",),
+               "locked": ("A", "B")}
 OVERRIDE_KEYS = ("phase_caps", "warmup", "stability_every", "verifier_timeout",
                  "direct_rollout_episodes", "direct_rollout_reps")
 RNG_NAMES = ("env", "learn", "opp", "start")   # + the minibatch stream held by the agent
@@ -140,8 +148,10 @@ def validate_config(cfg: Dict) -> None:
         raise ConfigError("joint requires adv_norm_scope=all_rows")
     if fl["stage2_update_mode"] == "joint" and fl["continuation_action_mode"] != "stochastic":
         raise ConfigError("continuation_action_mode=mean requires stage2_update_mode=frozen")
-    if fl["stage2_update_mode"] == "frozen" and mode != "phase_B":
+    if fl["stage2_update_mode"] == "frozen" and mode not in ("phase_B", "locked"):
         raise ConfigError("stage2_update_mode=frozen is only defined in mode phase_B")
+    if mode == "locked" and (fl != LOCKED_FLAGS or not cfg["fixed_budget"]):
+        raise ConfigError(f"mode locked requires flags {LOCKED_FLAGS} and fixed_budget true")
     if mode in ("phase_A", "phase_A_continue") and fl["adv_norm_scope"] != "all_rows":
         raise ConfigError("phase_A has no stage-1 rows; adv_norm_scope must be all_rows")
     if not isinstance(cfg.get("full_state_at", []), list):
@@ -152,13 +162,16 @@ def validate_config(cfg: Dict) -> None:
     if dec is not None:
         if mode == "full":
             raise ConfigError("lr_decay is not allowed in mode full (regression mode)")
-        if set(dec) != set(LR_DECAY_KEYS):
-            raise ConfigError(f"lr_decay must have exactly {LR_DECAY_KEYS}; got {sorted(dec)}")
-        own = "B" if mode == "phase_B" else "A"
-        if dec["phase"] != own:
-            raise ConfigError(f"lr_decay.phase {dec['phase']!r} is not the phase run by mode {mode}")
-        if not 1 <= int(dec["local_first"]) < int(dec["local_last"]):
-            raise ConfigError("lr_decay needs 1 <= local_first < local_last")
+        wins = dec if isinstance(dec, list) else [dec]
+        for w in wins:
+            if not isinstance(w, dict) or set(w) != set(LR_DECAY_KEYS):
+                raise ConfigError(f"lr_decay must have exactly {LR_DECAY_KEYS}; got {sorted(w) if isinstance(w, dict) else w}")
+            if w["phase"] not in MODE_PHASES[mode]:
+                raise ConfigError(f"lr_decay.phase {w['phase']!r} is not the phase run by mode {mode}")
+            if not 1 <= int(w["local_first"]) < int(w["local_last"]):
+                raise ConfigError("lr_decay needs 1 <= local_first < local_last")
+        if len({w["phase"] for w in wins}) != len(wins):
+            raise ConfigError("lr_decay: at most one window per phase")
     if mode in ("phase_B", "phase_A_continue"):
         if not cfg["parent_checkpoint"] or not cfg["parent_sha256"]:
             raise ConfigError(f"{mode} needs parent_checkpoint and parent_sha256")
@@ -275,21 +288,23 @@ class Run:
         self.weights_dir = os.path.join(out_dir, "weights")
         self.full_state_at = {int(u) for u in cfg.get("full_state_at", [])}
         self.lr_decay = cfg.get("lr_decay")
-        if self.lr_decay is not None:
-            if int(self.lr_decay["local_last"]) != int(P["phase_caps"][self.lr_decay["phase"]]):
+        dec = self.lr_decay
+        self.lr_windows = {w["phase"]: w for w in (dec if isinstance(dec, list) else [dec])} if dec is not None else {}
+        for w in self.lr_windows.values():
+            if int(w["local_last"]) != int(P["phase_caps"][w["phase"]]):
                 raise ConfigError("lr_decay.local_last must equal the phase cap")
-            if float(self.lr_decay["start_lr"]) != float(sched["ab_lr"]):
+            if float(w["start_lr"]) != float(sched["ab_lr"]):
                 raise ConfigError("lr_decay.start_lr must equal lr_schedule.ab_lr")
 
     # ------------------------------------------------------------------ learning rate
     def lr_for(self, phase: str, local: int) -> float:
         """LR before local update ``local``: the record's ``lr_at``, or the linear decay window.
 
-        The decay reuses ``lr_at``'s linear branch unchanged:
-        lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first).
+        Inside the window (local_first <= local) the decay reuses ``lr_at``'s linear branch
+        unchanged: lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first).
         """
-        dec = self.lr_decay
-        if dec is None or dec["phase"] != phase:
+        dec = self.lr_windows.get(phase)
+        if dec is None or local < int(dec["local_first"]):
             return lr_at(self.sched, phase, local)
         lin = dict(self.sched, kind="linear", c_start_lr=float(dec["start_lr"]),
                    c_end_lr=float(dec["end_lr"]), c_local_first=int(dec["local_first"]),
@@ -418,7 +433,8 @@ class Run:
         would_fire: Optional[Dict] = None
         frozen = agent.frozen if (phase == "B" and self.flags["stage2_update_mode"] == "frozen") else None
         masked = frozen is not None
-        csv_path = os.path.join(self.out_dir, "v2_checkpoints.csv")
+        # mode locked runs A and B in one process; B rows carry extra drift columns -> one CSV per phase
+        csv_path = os.path.join(self.out_dir, f"v2_checkpoints_{phase}.csv" if self.mode == "locked" else "v2_checkpoints.csv")
         os.makedirs(os.path.join(self.out_dir, "checkpoints"), exist_ok=True)
         print(f"[phase {phase}] entry at global update {self.global_u}, cap {cap}, active stages {active}, "
               f"lr(first)={self.lr_for(phase, 1):.6g}", flush=True)
@@ -465,7 +481,11 @@ class Run:
             batch = collect_batch_v2(spec, agent, t0, d0, roles, self.rngs["env"], self.rngs["learn"],
                                      self.rngs["opp"], ppo_cfg.gamma, ppo_cfg.gae_lambda, P["es_bin_width"],
                                      reward_mode=self.flags["reward_mode"], frozen=frozen,
-                                     continuation_action_mode=self.flags["continuation_action_mode"])
+                                     # 'mean' is defined only with a frozen stage-2 actor; without
+                                     # one (phase A of mode locked) the default 'stochastic' applies,
+                                     # which is what every other mode already validates to
+                                     continuation_action_mode=(self.flags["continuation_action_mode"]
+                                                               if frozen is not None else "stochastic"))
             self.costs.add("train_rollout", time.perf_counter() - t_r)
             s1 = batch["stage"] == 1
             adv_t = torch.as_tensor(batch["advantages"])

@@ -1,0 +1,537 @@
+{
+ "schema": "v2_T2_locked_protocol/1",
+ "version": 1,
+ "name": "v2 T=2 stagewise protocol (locked)",
+ "date": "2026-10-02",
+ "base_commit": "657f54a",
+ "q_values": [
+  50,
+  60
+ ],
+ "pipeline": {
+  "entry_point": "run/run_v2_T2_locked.py",
+  "mode": "locked",
+  "fixed_budget": true,
+  "flags": {
+   "reward_mode": "expected",
+   "stage2_update_mode": "frozen",
+   "adv_norm_scope": "stage1_rows",
+   "continuation_action_mode": "mean"
+  },
+  "flags_note": "stage2_update_mode=frozen, adv_norm_scope and continuation_action_mode take effect only in Phase B (after the freeze); Phase A trains stage 2 alone with all rows normalized and stochastic actions",
+  "phase_A": {
+   "updates": 1600,
+   "active_stages": [
+    2
+   ],
+   "starts": "bin-balanced exploring starts on D_2 (es_bin_width 10)",
+   "lr": "constant 0.0003 for local updates 1-1200, then linear 0.0003 -> 3e-05 over local 1201-1600"
+  },
+  "freeze": "frozen stage-2 snapshot = deep copy of the actor at the end of Phase A (B2 machinery; no grad, no optimizer)",
+  "phase_B": {
+   "updates": 600,
+   "active_stages": [
+    1
+   ],
+   "starts": "root (t=1, d=0)",
+   "adv_norm_scope": "stage1_rows",
+   "continuation_action_mode": "mean",
+   "opponent": "lagged copy of the actor, refreshed every 20 global updates",
+   "lr": "linear 0.0003 -> 3e-05 over local updates 1-600"
+  },
+  "lr_decay": [
+   {
+    "phase": "A",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1201,
+    "local_last": 1600
+   },
+   {
+    "phase": "B",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 600
+   }
+  ],
+  "lr_form": "lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first), applied to actor and critic before each update, constant within an update, Adam state preserved (run/run_final_dp_br_round3_dense.py:lr_at, kind 'linear'; run/run_v2_stagewise.py:Run.lr_for)",
+  "not_used": [
+   "joint training",
+   "Phase C",
+   "tail averaging"
+  ],
+  "evaluated_candidate": "last iterate, Beta mean: stage 2 at the end of A (frozen), stage 1 at the end of B",
+  "unchanged": [
+   "RNG streams and samplers (numpy PCG64 streams from SeedSequence([seed, q, namespace]))",
+   "on-path rule: open interval |d - drift| < 2q with exact cell masses",
+   "e~1 residual-band method on the final tier"
+  ],
+  "outputs": [
+   "manifest.json (commit, clean-tree flag, protocol SHA-256, q, seed)",
+   "gates.json",
+   "v2_checkpoints_A.csv, v2_checkpoints_B.csv + checkpoints/u*.npz (per verifier call)",
+   "weights/u*.npz (every 25 updates)",
+   "state_end_A.pt, state_end_B.pt (full state)",
+   "train_history.json, v2_updates.csv, v2_run_summary.json",
+   "gateA_{final,development}.npz, final_{final,development}.npz, drift_test.json, induced_band.json + sweep NPZ"
+  ]
+ },
+ "gates": {
+  "G-A": {
+   "stage": "end of Phase A",
+   "candidate": "stage-2 last iterate (Beta mean of the live actor at global u1600)",
+   "tier": "final",
+   "all_must_hold": [
+    {
+     "metric": "eta_T_over_dw",
+     "op": "<=",
+     "threshold": 0.005,
+     "definition": "eta_2 / DW = max over the full final-tier D_2 grid of the one-step deviation gap Delta_2(d), divided by DW (utils.dp_br_verifier.verify -> full_delta_max[2]; utils.v2_metrics.evaluate scalar 'eta_T_over_dw')"
+    },
+    {
+     "metric": "stage2_rmse_pos_over_g2_0",
+     "op": "<=",
+     "threshold": 0.05,
+     "definition": "sqrt(mean over the recovery grid nodes with |d| < 2q of (e_hat_2(d) - e2*(d))^2) / e2*(0); recovery grid = symmetric grid on D_2 with step 'recovery_step' = 0.5 (utils.v2_metrics.recovery_metrics; independent of the verifier tier)"
+    },
+    {
+     "metric": "stage2_tail_mean_over_g2_0",
+     "op": "<=",
+     "threshold": 0.02,
+     "definition": "mean of e_hat_2(d) over the recovery grid nodes with |d| >= 2q, divided by e2*(0) (utils.v2_metrics.recovery_metrics; independent of the verifier tier)"
+    }
+   ]
+  },
+  "G-F": {
+   "stage": "end of Phase B",
+   "candidate": "full last iterate: live actor at t=1 (global u2200), frozen stage-2 snapshot at t=2",
+   "tier": "final",
+   "all_must_hold": [
+    {
+     "metric": "Gmax_full_over_dw",
+     "op": "<=",
+     "threshold": 0.01,
+     "definition": "max over stages t and final-tier grid nodes d of G_t(d) = V_t^BR(d) - V_t^mean(d), divided by DW (utils.v2_metrics.evaluate scalar 'Gmax_full_over_dw')"
+    },
+    {
+     "metric": "stage1_rel_err_abs",
+     "op": "<=",
+     "threshold": 0.1,
+     "definition": "|e_hat_1(0) - e1*(0)| / e1*(0) (utils.v2_metrics.recovery_metrics 'stage1_rel_err_signed', absolute value)"
+    }
+   ]
+  },
+  "run_outcome": "pass iff G-A and G-F both pass; a run failing G-A is a stage-2 failure: its Phase B is still executed and reported as a diagnostic, and the run counts as failed",
+  "dev_tier": "every gate and reported metric is also computed on the development tier and reported; the gates use the final tier"
+ },
+ "reported_not_gated": {
+  "stage2": [
+   "stage2_peak_rel_err_signed",
+   "stage2_peak_locfree_rel_err (+ argmax d)",
+   "stage2_sym_err_max",
+   "stage2_tail_max",
+   "DeltaT_over_dw_on_max",
+   "DeltaT_over_dw_off_max",
+   "sigma_effort_at_0_t2",
+   "smoothed_share_peak_gap_d0 (Pilot-1 method: 400 equal-probability nodes per Beta at d=0)"
+  ],
+  "stage1_and_full": [
+   "EXP_root_over_dw",
+   "dReach_over_dw",
+   "Deltamax_all_over_dw",
+   "dFull_over_dw",
+   "stage-1 decomposition: learning (e_hat_1 - e~1)/e1*, inherited (e~1 - e1*)/e1*, with residual bands",
+   "sigma_effort_at_0_t1"
+  ],
+  "numerics": "dev-tier minus final-tier difference of every gate and reported metric"
+ },
+ "peak_error": "not gated; reported with its decomposition (smoothed-game share; Pilot 4 section 1d floor)",
+ "stage1_decomposition": {
+  "method": "e~1 = argmin_e Delta_1(e; e_hat_2) on the final tier, band = {e: Delta_1 <= min + floor}",
+  "floor": "max(Delta_1(e1*; e2*) on the final tier, 1e-12 DW)",
+  "step": 0.01,
+  "sweep_range": "anchored at e1*, covering [min(0.4 e1*, e_hat_1 - 2), max(1.7 e1*, e_hat_1 + 2)]",
+  "functions": "utils.v2_metrics.stage1_residual_sweep / sweep_grid / induced_band"
+ },
+ "confirmation": {
+  "status": "pre-registered; executed only in the next round after owner approval",
+  "q_values": [
+   50,
+   60
+  ],
+  "n_seeds": 20,
+  "seeds_used_for_both_q": true,
+  "proposed_seed_block": [
+   20501,
+   20502,
+   20503,
+   20504,
+   20505,
+   20506,
+   20507,
+   20508,
+   20509,
+   20510,
+   20511,
+   20512,
+   20513,
+   20514,
+   20515,
+   20516,
+   20517,
+   20518,
+   20519,
+   20520
+  ],
+  "seed_block_status": "proposed; pending owner confirmation",
+  "disjointness_check": "tools/v2/seed_inventory.py -> results/v2_T2_locked/consolidation/seed_inventory.csv (0 collisions among 263 recorded seed values)",
+  "pass_rule": "for each q, at least 18 of 20 runs pass both gates (G-A and G-F)",
+  "reporting": "every run is reported, failures included; nothing changes after the lock"
+ },
+ "development_seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "records": {
+  "50": {
+   "run": null,
+   "q": 50,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  },
+  "60": {
+   "run": null,
+   "q": 60,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 60,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 220,
+   "domain_half_stage2": 220,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 44,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  }
+ },
+ "record_sources": {
+  "50": "experiments/two_stage_q50_precision_20260924/manifest.json",
+  "60": "experiments/two_stage_confirmation_T2_20260922/manifest.json"
+ },
+ "threads_per_process": {
+  "torch": 1,
+  "OMP": 1,
+  "MKL": 1,
+  "OPENBLAS": 1
+ },
+ "known_issues": [
+  "tests/test_registry_canonicalization.py fails on main and on this branch (paper registry vs data on disk; 'expected 15 Set-2 gradient runs, got 0'); pre-existing, unrelated to v2; test and data unchanged"
+ ],
+ "change_log": [
+  {
+   "from": "0929 plan development targets (5% stage-1 error, 5% stage-2 peak error)",
+   "to": "gates G-A and G-F above; peak error reported, not gated",
+   "when": "2026-10-02, before any confirmation run",
+   "evidence": [
+    "reports/v2/pilot4_stabilization.md section 6 (distribution tables)",
+    "reports/v2/pilot4_stabilization.md section 2b (stability, decay vs constant)",
+    "reports/v2/pilot4_stabilization.md section 1d (representation floor, peak-gap decomposition)"
+   ]
+  }
+ ],
+ "evidence": {
+  "reward_mode=expected": "reports/v2/pilot1_reward_estimator.md",
+  "frozen B2 (adv_norm_scope=stage1_rows)": "reports/v2/pilot2_freeze.md",
+  "continuation_action_mode=mean": "reports/v2/pilot3_continuation_mode.md; decision D1 (Pilot 4 round)",
+  "Phase A 1600 updates": "reports/v2/phaseA_ext.md; decision D2 (Pilot 4 round)",
+  "Phase A end decay u1201-1600": "reports/v2/pilot4_stabilization.md section 2a",
+  "Phase B decay": "reports/v2/pilot4_stabilization.md section 2b",
+  "no joint training, no Phase C": "reports/v2/pilot2_freeze.md; decision D3 (Pilot 4 round)",
+  "no sampler change": "reports/v2/phase2_infra.md section 2; decision D4 (Pilot 4 round)",
+  "e~1 residual band": "reports/v2/pilot2_freeze.md section 6",
+  "on-path rule": "reports/v2/dreach_reach_mask_check.md",
+  "gate thresholds": "reports/v2/pilot4_stabilization.md section 6",
+  "C7 regression": "reports/v2/phase2_infra.md section 3"
+ }
+}
