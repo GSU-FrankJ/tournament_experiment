@@ -9,3 +9,22 @@
  "date": "2026-10-02",
  "rule": "nothing in protocols/ changes after this lock without a new version number and a stated reason"
 }
+{
+ "protocol": "protocols/v2_T2_locked_v1_1.json",
+ "protocol_version": "1.1",
+ "lock_commit": "431474d18259ff7534520b8a6d52616beb36c800",
+ "protocol_sha256": "21d85983f2a2bebc0998e99fcf665c2c729f060996c529fa3162b3d62222a40f",
+ "protocol_md_sha256": "2ac714107d8242d3356fc6b49753f0d75a6871b2e7fd172106df2d6db53cfa3a",
+ "entry_point": "run/run_v2_T2_locked.py",
+ "entry_point_sha256_at_lock": "f40cc81425631b3a822a999962509aab2b1bf7a837545cf41faff76b45a02296",
+ "analysis_script": "tools/v2/confirmation_analysis.py",
+ "analysis_script_sha256": "f03ab182cfe1301ffdce0180794dc23e8a3f0de77d3ee48a2ba840109a92f025",
+ "date": "2026-10-02",
+ "reason": "owner decisions D1-D5 of the v1.1 round, after the v1.0 development-seed rehearsal and before any confirmation seed: stage-1 criterion moved from G-F to secondary S1; gate G-N added; process-global RNG hardening; training-relevant state defined; seed block 20501-20520 confirmed",
+ "supersedes": {
+  "protocol": "protocols/v2_T2_locked.json",
+  "protocol_version": 1,
+  "lock_commit": "4bd2214"
+ },
+ "rule": "nothing in protocols/, the entry point, the pipeline code or the analysis script changes after this lock without a new version number and a stated reason"
+}
