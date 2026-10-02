@@ -2,6 +2,18 @@
 
 Last updated: 2026-10-02
 
+## v2 T=2 protocol locked + dress rehearsal (2026-10-02, branch v2-stagewise-pilots)
+
+Canonical worktree: .claude/worktrees/pilot-4-stabilization-fb99a2 on v2-stagewise-pilots (the original
+v2 worktree is detached at e0e8327). Locked protocol v1: protocols/v2_T2_locked.{json,md}, lock commit
+4bd2214, protocols/LOCK; entry point run/run_v2_T2_locked.py (refuses a modified protocol and any
+argument other than --q/--seed/--out-dir). Rehearsal of the 20 development-seed runs: G-A 20/20; G-F 9/10 (q50)
+and 8/10 (q60). Check 2 is bit-identical. Check 1: training state identical, but 3 process-global RNG states
+(never consumed) differ, so it fails literally; awaiting the owner. Cusp diagnostic done.
+Report: reports/v2/protocol_lock_and_rehearsal.md.
+Next: the owner decides on Check 1 and confirms seeds 20501-20520; then the confirmation runs (40 runs) in
+results/v2_T2_locked/confirmation/. NOT run yet.
+
 ## v2 Pilot 4 stabilization round (2026-10-02, branch claude/pilot-4-stabilization-fb99a2)
 
 On top of v2-stagewise-pilots (e0e8327). Added an optional `lr_decay` window to run/run_v2_stagewise.py

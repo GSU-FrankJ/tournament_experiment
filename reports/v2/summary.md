@@ -15,6 +15,7 @@ All values are descriptive. Each table names its source file; the full reports c
 | Pilot 3: continuation mode | `reports/v2/pilot3_continuation_mode.md` | `cd760fd` | 40 |
 | Phase A extension | `reports/v2/phaseA_ext.md` | `cd760fd` | 20 |
 | Pilot 4: stabilization (1a–1d analyses, LR decay 2a/2b) | `reports/v2/pilot4_stabilization.md` | `c92ee74` | 80 |
+| Protocol lock + dress rehearsal (dev seeds) + cusp diagnostic | `reports/v2/protocol_lock_and_rehearsal.md` | lock `4bd2214`; rehearsal `5b07293` | 20 + 2 + 1 |
 
 **Decisions taken so far:**
 - reward estimator = `expected` (after Pilot 1);
@@ -161,6 +162,29 @@ Launch commit `c92ee74`; C7 IDENTICAL at that commit. 2a: 40 runs (u1200→u1600
 
 Gate-setting distribution tables (quantiles over seeds, no thresholds): `reports/v2/pilot4_stabilization.md` §6, `results/v2_pilots/pilot4/analysis/gate_distribution_tables.csv`.
 
+## Protocol lock and dress rehearsal (2026-10-02)
+
+- **Locked protocol v1:** `protocols/v2_T2_locked.json` / `.md`.
+  - Lock commit `4bd2214`, recorded in `protocols/LOCK` (`7412c41`).
+  - Protocol SHA-256 `cf7b6929…`.
+  - Entry point `run/run_v2_T2_locked.py`, which takes only `--q`, `--seed`, `--out-dir`.
+  - C7 is IDENTICAL at the lock.
+- **Canonical worktree:** `.claude/worktrees/pilot-4-stabilization-fb99a2`, on branch `v2-stagewise-pilots` (fast-forwarded). Canonical development results: its `results/v2_pilots/`; all 10,034 original files are checksum-identical.
+- **Calibration at the lock** matches Phase 1 to ≤ 1e−16. Zero policy: 0.25926 / 0.19551 at stage 2, which matches the PI reference.
+- **Rehearsal on the development seeds** (not evidence for the protocol):
+
+| q | G-A | G-F | run pass | median η₂/ΔW | median Ĝmax_full/ΔW | median \|stage-1 err\| |
+|---|---|---|---|---|---|---|
+| 50 | 10/10 | 9/10 | 9/10 | 0.0012 | 0.0013 | 0.035 |
+| 60 | 10/10 | 8/10 | 8/10 | 0.00085 | 0.00085 | 0.045 |
+
+Source: `results/v2_T2_locked/rehearsal_analysis/`.
+- All 3 failures are |stage-1 err| > 0.10.
+- Check 2 (Phase B code path): bit-identical, 2/2.
+- **Check 1** (Phase A vs the stitched development state): every training state is bit-identical in 20/20. Three never-consumed, process-global RNG states (torch / numpy legacy / python) differ, so the literal criterion fails. Your decision is pending.
+- **Cusp diagnostic:** the exact-target fit first drops below 5% peak error after 8,500–9,500 full-batch steps, with RMSE ≈ 0.016 by then. RL Phase A gives 32,000 actor steps (8,000 in the last 400 updates).
+- **Proposed confirmation seed block:** 20501–20520 (0 collisions); awaiting your confirmation. The confirmation was not run.
+
 ---
 
 ## Open questions
@@ -175,5 +199,7 @@ Gate-setting distribution tables (quantiles over seeds, no thresholds): `reports
 5. **Induced-target bands.** 167 of 480 A_joint export bands are non-contiguous; the outermost points are used. The parent sweep range [0.4, 1.7]·e₁* misses ê₁ at 13 early rows (Pilot 2: 7, Pilot 3: 6).
 6. **The q=60 calibration floor** (3.5e−7·ΔW at the root on the finer tiers) is still unexplained (Phase 1). e₁* lies off-grid at both q.
 7. **Phase C and T=3** are out of scope and not run (Phase C dropped from v2, D3).
-8. **Gate thresholds and protocol lock** (after Pilot 4): your decision. The distribution tables are in `reports/v2/pilot4_stabilization.md` §6.
-9. **Eight Pilot-4 2b manifests carry `dirty: true`** (untracked analysis scripts present at launch; tracked code = `c92ee74`). A clean re-run of one of them would confirm this.
+8. **Gate thresholds and protocol lock**: done (locked v1, `protocols/LOCK`).
+9. **Eight Pilot-4 2b manifests carry `dirty: true`**: resolved. A clean re-run of q60/10507 `B2_mean_constant` is bit-identical.
+10. **Rehearsal Check 1:** accept it on the training-state identity, or not (`reports/v2/protocol_lock_and_rehearsal.md` §4.1).
+11. **Confirmation seed block 20501–20520:** awaiting your confirmation.
