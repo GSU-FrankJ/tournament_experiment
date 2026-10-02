@@ -14,12 +14,14 @@ All values are descriptive. Each table names its source file; the full reports c
 | Pilot 2: joint vs frozen | `reports/v2/pilot2_freeze.md` | `1791687` (+ §6 recompute at `cd760fd`) | 60 |
 | Pilot 3: continuation mode | `reports/v2/pilot3_continuation_mode.md` | `cd760fd` | 40 |
 | Phase A extension | `reports/v2/phaseA_ext.md` | `cd760fd` | 20 |
+| Pilot 4: stabilization (1a–1d analyses, LR decay 2a/2b) | `reports/v2/pilot4_stabilization.md` | `c92ee74` | 80 |
 
 **Decisions taken so far:**
 - reward estimator = `expected` (after Pilot 1);
 - frozen variant = B2 (`adv_norm_scope = stage1_rows`) (after Pilot 2);
 - ẽ₁ by residual minimization on the final tier (decision D2);
-- on-path set = {|d − drift| < 2q}, weighted with exact cell masses.
+- on-path set = {|d − drift| < 2q}, weighted with exact cell masses;
+- (2026-10-02, before Pilot 4) D1 continuation mode = `mean`; D2 Phase A = fixed 1600 updates + end-of-phase pass/fail gate on η₂ and tail/RMSE (thresholds pending); D3 joint training and Phase C dropped from v2; D4 no sampler change.
 
 ---
 
@@ -141,6 +143,24 @@ Plateau description (from `reports/v2/phaseA_ext.md` §3):
 - tail effort, σ₂ and off-path Δ₂ keep decreasing through u1600;
 - η₂ drifts down noisily.
 
+## Pilot 4 — stabilization round (2026-10-02)
+
+Launch commit `c92ee74`; C7 IDENTICAL at that commit. 2a: 40 runs (u1200→u1600, `constant` vs linear `decay` 3e−4→3e−5). 2b: 40 runs (B2 + `mean`, parent u1600, u1601→u2200, `constant` vs `decay`). Full report: `reports/v2/pilot4_stabilization.md`.
+
+- **1a** The reference BR slope / E[V₂″]/(2k) values are reproduced within fit and step variation (q=50: slope −0.85 to −1.06, ref −0.961; q=60: −0.26 to −0.33, ref −0.309). Source: `results/v2_pilots/pilot4/analysis/root_game/`.
+- **1b** ê₁(0) − e₁*: median lag-20 ACF 0.48–0.60, ≈ 0 at lag 60, negative at 100–160. Window slope −0.15 (q=50) / −0.20 (q=60), pooled. Source: `.../analysis/fluctuation/`.
+- **1c** Tail-averaging stage 2 (K up to 16) lowers RMSE and the symmetry error, and does not move the peak error (≈ −0.06). Source: `.../analysis/candidates_all.csv`, `paired_summary.csv`.
+- **1d** The supervised floor of the stage-2 actor at d=0 is ≤ 0.06% of e₂*(0). The RL gap is 6–7%, of which action-noise smoothing predicts ≈ 45%. Source: `.../analysis/repr_floor/`.
+- **2a** `constant` is bit-identical to the extension (20/20). Decay lowers RMSE (q=60 8/10) and KL/clip; peak and η₂ are unchanged; tail mean is slightly higher.
+- **2b** Decay vs constant, medians:
+
+| q | within-run SD last5 | across-seed SD final ê₁ | |stage-1 err| (K=1) | EXP_root/ΔW (K=1) |
+|---|---|---|---|---|
+| 50 | 1.02 vs 1.75 (CI excl. 0) | 2.49 vs 3.33 | 0.043 vs 0.063 (CI incl. 0) | lower in 7/10 (CI excl. 0) |
+| 60 | 0.99 vs 1.37 (CI excl. 0) | 1.70 vs 3.31 | 0.034 vs 0.055 (CI incl. 0) | lower in 6/10 (CI excl. 0) |
+
+Gate-setting distribution tables (quantiles over seeds, no thresholds): `reports/v2/pilot4_stabilization.md` §6, `results/v2_pilots/pilot4/analysis/gate_distribution_tables.csv`.
+
 ---
 
 ## Open questions
@@ -154,4 +174,6 @@ Plateau description (from `reports/v2/phaseA_ext.md` §3):
 4. **RNG pairing.** The learner/opponent Beta streams desynchronize in every pair within tens to about 160 updates, because numpy's Beta sampler is rejection-based. Pairing therefore controls initialization, shocks, starts and minibatches, but not action noise. An inverse-CDF sampler would align them, but it would break C7 against the existing runner; that is your call.
 5. **Induced-target bands.** 167 of 480 A_joint export bands are non-contiguous; the outermost points are used. The parent sweep range [0.4, 1.7]·e₁* misses ê₁ at 13 early rows (Pilot 2: 7, Pilot 3: 6).
 6. **The q=60 calibration floor** (3.5e−7·ΔW at the root on the finer tiers) is still unexplained (Phase 1). e₁* lies off-grid at both q.
-7. **Phase C and T=3** are out of scope and not run.
+7. **Phase C and T=3** are out of scope and not run (Phase C dropped from v2, D3).
+8. **Gate thresholds and protocol lock** (after Pilot 4): your decision. The distribution tables are in `reports/v2/pilot4_stabilization.md` §6.
+9. **Eight Pilot-4 2b manifests carry `dirty: true`** (untracked analysis scripts present at launch; tracked code = `c92ee74`). A clean re-run of one of them would confirm this.

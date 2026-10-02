@@ -1,6 +1,18 @@
 # Project state
 
-Last updated: 2026-10-01
+Last updated: 2026-10-02
+
+## v2 Pilot 4 stabilization round (2026-10-02, branch claude/pilot-4-stabilization-fb99a2)
+
+On top of v2-stagewise-pilots (e0e8327). Added an optional `lr_decay` window to run/run_v2_stagewise.py
+(existing lr_at linear form, 3e-4 -> 3e-5) and `--parent-file` to the launcher; launch commit c92ee74,
+C7 IDENTICAL. Ran 2a (Phase A u1200->1600 constant/decay, 40 runs; constant bit-identical to the
+extension) and 2b (Phase B B2+mean from u1600, constant/decay, 40 runs), plus analyses 1a-1d.
+Report: reports/v2/pilot4_stabilization.md; summary: reports/v2/summary.md.
+Known issues: 8 2b manifests dirty=true (untracked analysis files at launch); the 1d fits hit the step
+cap (floor is an upper bound); tests/test_registry_canonicalization.py fails on main too (data on disk).
+Next: owner sets the gate thresholds and locks the protocol; no formal/fresh-seed runs were done.
+Run data: this worktree's results/v2_pilots/ (parents copied from the v2-stagewise-pilots worktree).
 
 ## v2 T=2 stagewise pilots (2026-10-01, branch v2-stagewise-pilots)
 
