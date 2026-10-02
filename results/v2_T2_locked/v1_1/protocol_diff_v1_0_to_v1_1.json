@@ -1,0 +1,352 @@
+[
+ {
+  "op": "changed",
+  "path": "/change_log",
+  "old": [
+   {
+    "from": "0929 plan development targets (5% stage-1 error, 5% stage-2 peak error)",
+    "to": "gates G-A and G-F above; peak error reported, not gated",
+    "when": "2026-10-02, before any confirmation run",
+    "evidence": [
+     "reports/v2/pilot4_stabilization.md section 6 (distribution tables)",
+     "reports/v2/pilot4_stabilization.md section 2b (stability, decay vs constant)",
+     "reports/v2/pilot4_stabilization.md section 1d (representation floor, peak-gap decomposition)"
+    ]
+   }
+  ],
+  "new": [
+   {
+    "from": "0929 plan development targets (5% stage-1 error, 5% stage-2 peak error)",
+    "to": "gates G-A and G-F above; peak error reported, not gated",
+    "when": "2026-10-02, before any confirmation run",
+    "evidence": [
+     "reports/v2/pilot4_stabilization.md section 6 (distribution tables)",
+     "reports/v2/pilot4_stabilization.md section 2b (stability, decay vs constant)",
+     "reports/v2/pilot4_stabilization.md section 1d (representation floor, peak-gap decomposition)"
+    ]
+   },
+   {
+    "version": "1.1",
+    "change": "stage-1 criterion |e_hat_1(0) - e1*(0)|/e1*(0) <= 0.10 moved from G-F to the secondary criterion S1 (no pass rule)",
+    "why": "all 3 v1.0 rehearsal failures were on this criterion while Gmax_full/DW was 0.0021-0.0023; the 0.10 threshold came from Pilot 4 distributions with a constant-LR Phase A parent; the locked pipeline's distribution has a heavier upper tail",
+    "evidence": [
+     "reports/v2/protocol_lock_and_rehearsal.md sections 4.3-4.5",
+     "results/v2_T2_locked/rehearsal_analysis/gates_per_run.csv",
+     "results/v2_T2_locked/v1_1/v1_0_pass_probability.json (tools/v2/v1_0_pass_probability.py)"
+    ],
+    "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+   },
+   {
+    "version": "1.1",
+    "change": "gate G-N added: |dev - final| of eta_2 and of Gmax_full, each <= 0.001 DW",
+    "why": "numerical refinement check; in the v1.0 rehearsal the dev - final differences were at most 2.2e-4 DW",
+    "evidence": [
+     "reports/v2/protocol_lock_and_rehearsal.md section 4.5",
+     "results/v2_T2_locked/rehearsal_analysis/gate_distributions.csv"
+    ],
+    "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+   },
+   {
+    "version": "1.1",
+    "change": "hardening of the process-global RNGs (seeded with the run seed; reference state; assertions; digests)",
+    "why": "rehearsal Check 1: three unseeded, never-consumed process-global RNG states differed between processes",
+    "evidence": [
+     "reports/v2/protocol_lock_and_rehearsal.md section 4.1 and addendum",
+     "results/v2_T2_locked/rehearsal_analysis/check1_phaseA_vs_stitched.csv"
+    ],
+    "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+   },
+   {
+    "version": "1.1",
+    "change": "training-relevant state defined for every bit-identity check; confirmation seed block confirmed; v1.0 outcome reported only; pass-rate CIs exact",
+    "why": "owner decisions D1 and D4 of the v1.1 round",
+    "evidence": [
+     "reports/v2/protocol_lock_and_rehearsal.md addendum"
+    ],
+    "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+   }
+  ]
+ },
+ {
+  "op": "added",
+  "path": "/confirmation/analysis_script",
+  "new": "tools/v2/confirmation_analysis.py"
+ },
+ {
+  "op": "added",
+  "path": "/confirmation/crash_rule",
+  "new": "infrastructure kill (OOM, disk full, process killed): move the run directory to confirmation/crashed/q{q}/seed{s}_attempt1/ and re-run once into the original path; a second infrastructure failure stops the round and that run is not counted either way; any other nonzero exit (pipeline exception, global-RNG violation) counts as a failed run"
+ },
+ {
+  "op": "changed",
+  "path": "/confirmation/pass_rule",
+  "old": "for each q, at least 18 of 20 runs pass both gates (G-A and G-F)",
+  "new": "for each q, at least 18 of 20 runs pass (G-A and G-F and G-N); the confirmation passes iff both q pass; each q's pass rate is reported with an exact Clopper-Pearson 95% CI"
+ },
+ {
+  "op": "removed",
+  "path": "/confirmation/proposed_seed_block",
+  "old": [
+   20501,
+   20502,
+   20503,
+   20504,
+   20505,
+   20506,
+   20507,
+   20508,
+   20509,
+   20510,
+   20511,
+   20512,
+   20513,
+   20514,
+   20515,
+   20516,
+   20517,
+   20518,
+   20519,
+   20520
+  ]
+ },
+ {
+  "op": "added",
+  "path": "/confirmation/seed_block",
+  "new": [
+   20501,
+   20502,
+   20503,
+   20504,
+   20505,
+   20506,
+   20507,
+   20508,
+   20509,
+   20510,
+   20511,
+   20512,
+   20513,
+   20514,
+   20515,
+   20516,
+   20517,
+   20518,
+   20519,
+   20520
+  ]
+ },
+ {
+  "op": "changed",
+  "path": "/confirmation/seed_block_status",
+  "old": "proposed; pending owner confirmation",
+  "new": "confirmed by the owner (v1.1 round)"
+ },
+ {
+  "op": "changed",
+  "path": "/confirmation/status",
+  "old": "pre-registered; executed only in the next round after owner approval",
+  "new": "pre-registered; executed in the v1.1 round only if the v1.1 re-rehearsal checks R1-R6 all pass"
+ },
+ {
+  "op": "added",
+  "path": "/evidence/v1.1 changes",
+  "new": "reports/v2/protocol_lock_and_rehearsal.md sections 4.1, 4.3-4.5 and addendum; reports/v2/protocol_v1_1_confirmation.md"
+ },
+ {
+  "op": "changed",
+  "path": "/gates/G-F/all_must_hold",
+  "old": [
+   {
+    "metric": "Gmax_full_over_dw",
+    "op": "<=",
+    "threshold": 0.01,
+    "definition": "max over stages t and final-tier grid nodes d of G_t(d) = V_t^BR(d) - V_t^mean(d), divided by DW (utils.v2_metrics.evaluate scalar 'Gmax_full_over_dw')"
+   },
+   {
+    "metric": "stage1_rel_err_abs",
+    "op": "<=",
+    "threshold": 0.1,
+    "definition": "|e_hat_1(0) - e1*(0)| / e1*(0) (utils.v2_metrics.recovery_metrics 'stage1_rel_err_signed', absolute value)"
+   }
+  ],
+  "new": [
+   {
+    "metric": "Gmax_full_over_dw",
+    "op": "<=",
+    "threshold": 0.01,
+    "definition": "max over stages t and final-tier grid nodes d of G_t(d) = V_t^BR(d) - V_t^mean(d), divided by DW (utils.v2_metrics.evaluate scalar 'Gmax_full_over_dw')"
+   }
+  ]
+ },
+ {
+  "op": "added",
+  "path": "/gates/G-N",
+  "new": {
+   "stage": "end of Phase A (eta_2) and end of Phase B (Gmax_full)",
+   "candidate": "as in G-A and G-F",
+   "tier": "development vs final",
+   "all_must_hold": [
+    {
+     "metric": "eta_T_over_dw_dev_minus_final_abs",
+     "op": "<=",
+     "threshold": 0.001,
+     "definition": "|eta_T_over_dw(development) - eta_T_over_dw(final)| of the G-A candidate at the end of Phase A"
+    },
+    {
+     "metric": "Gmax_full_over_dw_dev_minus_final_abs",
+     "op": "<=",
+     "threshold": 0.001,
+     "definition": "|Gmax_full_over_dw(development) - Gmax_full_over_dw(final)| of the G-F candidate at the end of Phase B"
+    }
+   ]
+  }
+ },
+ {
+  "op": "added",
+  "path": "/gates/comparison",
+  "new": "every '<=' is inclusive; values compared at full float64 precision, no rounding"
+ },
+ {
+  "op": "changed",
+  "path": "/gates/dev_tier",
+  "old": "every gate and reported metric is also computed on the development tier and reported; the gates use the final tier",
+  "new": "G-A and G-F use the final tier; G-N compares development and final tier; every gate and reported metric is also reported on the development tier"
+ },
+ {
+  "op": "changed",
+  "path": "/gates/run_outcome",
+  "old": "pass iff G-A and G-F both pass; a run failing G-A is a stage-2 failure: its Phase B is still executed and reported as a diagnostic, and the run counts as failed",
+  "new": "pass iff G-A, G-F and G-N all pass; a run failing G-A is a stage-2 failure: its Phase B is still executed and reported, and the run counts as failed; a run with a global-RNG violation (hardening) or any nonzero exit counts as failed"
+ },
+ {
+  "op": "added",
+  "path": "/global_rng_hardening",
+  "new": {
+   "seeding": "at the start of the pipeline function (run_v2_T2_locked.run_pipeline), before any object is constructed: torch.manual_seed(seed), np.random.seed(seed), random.seed(seed) with the run seed; seeds recorded in the manifest",
+   "reference_state": "each RNG's state immediately before the first Phase A update (Run.phase_start_hook at phase A); the post-seed state is also recorded, with whether anything between seeding and the reference drew from each RNG",
+   "assertion_points": [
+    "end_of_A",
+    "after_G-A",
+    "end_of_B",
+    "end_of_run"
+   ],
+   "assertion": "each of the three states equals its reference state at every assertion point",
+   "on_violation": "record the RNG and the point in gates.json; the run finishes and writes all outputs, then the entry point exits with a nonzero code (5); the run counts as failed",
+   "digests": "SHA-256 of each RNG state at seeding, at the reference point and at each assertion point, in the manifest",
+   "training": "no change to training-relevant state (checked by the re-rehearsal R1)"
+  }
+ },
+ {
+  "op": "changed",
+  "path": "/name",
+  "old": "v2 T=2 stagewise protocol (locked)",
+  "new": "v2 T=2 stagewise protocol (locked, v1.1)"
+ },
+ {
+  "op": "added",
+  "path": "/pipeline/entry_point_reads",
+  "new": "protocols/v2_T2_locked_v1_1.json"
+ },
+ {
+  "op": "changed",
+  "path": "/pipeline/outputs",
+  "old": [
+   "manifest.json (commit, clean-tree flag, protocol SHA-256, q, seed)",
+   "gates.json",
+   "v2_checkpoints_A.csv, v2_checkpoints_B.csv + checkpoints/u*.npz (per verifier call)",
+   "weights/u*.npz (every 25 updates)",
+   "state_end_A.pt, state_end_B.pt (full state)",
+   "train_history.json, v2_updates.csv, v2_run_summary.json",
+   "gateA_{final,development}.npz, final_{final,development}.npz, drift_test.json, induced_band.json + sweep NPZ"
+  ],
+  "new": [
+   "manifest.json (commit, clean-tree flag, protocol SHA-256, q, seed)",
+   "gates.json",
+   "v2_checkpoints_A.csv, v2_checkpoints_B.csv + checkpoints/u*.npz (per verifier call)",
+   "weights/u*.npz (every 25 updates)",
+   "state_end_A.pt, state_end_B.pt (full state)",
+   "train_history.json, v2_updates.csv, v2_run_summary.json",
+   "gateA_{final,development}.npz, final_{final,development}.npz, drift_test.json, induced_band.json + sweep NPZ",
+   "gates.json (v1.1): G-A, G-F, G-N, run_pass, S1, v1_0_outcome, global_rng, protocol_version 1.1",
+   "manifest.json (v1.1): global-RNG seeds and digests"
+  ]
+ },
+ {
+  "op": "changed",
+  "path": "/schema",
+  "old": "v2_T2_locked_protocol/1",
+  "new": "v2_T2_locked_protocol/1.1"
+ },
+ {
+  "op": "added",
+  "path": "/secondary",
+  "new": {
+   "S1": {
+    "criterion": {
+     "metric": "stage1_rel_err_abs",
+     "op": "<=",
+     "threshold": 0.1,
+     "definition": "|e_hat_1(0) - e1*(0)| / e1*(0) (utils.v2_metrics.recovery_metrics 'stage1_rel_err_signed', absolute value)"
+    },
+    "part_of_run_pass": false,
+    "pass_rule": null,
+    "report_per_run": "value and pass/fail",
+    "report_per_q": [
+     "S1 pass count out of the seeds, exact Clopper-Pearson 95% CI",
+     "mean signed stage-1 relative error with 95% percentile bootstrap CI",
+     "median and SD of the signed stage-1 relative error"
+    ]
+   },
+   "bootstrap": {
+    "resamples": 10000,
+    "seed": 20261002,
+    "rng": "numpy.random.default_rng(seed)",
+    "method": "percentile 95% CI of the mean over seeds; one bootstrap stream per (q, statistic) in table order"
+   },
+   "binomial_ci": "exact Clopper-Pearson 95% (scipy.stats.beta quantiles)"
+  }
+ },
+ {
+  "op": "added",
+  "path": "/supersedes",
+  "new": {
+   "version": 1,
+   "file": "protocols/v2_T2_locked.json",
+   "lock_commit": "4bd2214",
+   "sha256": "cf7b6929adfaef6b712eb01d1a731adc937d0b87fcc37a0a9e68eda9ae92d9f6"
+  }
+ },
+ {
+  "op": "added",
+  "path": "/training_relevant_state",
+  "new": {
+   "compared": [
+    "actor, critic, lagged opponent, frozen stage-2 snapshot (Phase B), both Adam states",
+    "the five training RNG streams (env, learn, opp, start, minibatch) and the torch generator",
+    "all weight exports and the final weights",
+    "training histories and per-update logs, without their wall-clock fields",
+    "checkpoint metrics, gate-metric values, and the evaluation outputs (gateA_*.npz, final_*.npz, induced_band.json, band_sweep.npz, drift_test.json)"
+   ],
+   "excluded": [
+    "verdict fields",
+    "manifests",
+    "the process-global RNG states (torch global, numpy legacy global, Python random)"
+   ],
+   "decided": "2026-10-02, owner decision D1 of the v1.1 round (reports/v2/protocol_lock_and_rehearsal.md, addendum)"
+  }
+ },
+ {
+  "op": "added",
+  "path": "/v1_0_outcome_reported",
+  "new": {
+   "definition": "G-A and the v1.0 G-F (Gmax_full_over_dw <= 0.01 AND stage1_rel_err_abs <= 0.10)",
+   "role": "reported only; decides nothing"
+  }
+ },
+ {
+  "op": "changed",
+  "path": "/version",
+  "old": 1,
+  "new": "1.1"
+ }
+]

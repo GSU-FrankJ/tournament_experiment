@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
-"""Locked v2 T=2 pipeline: Phase A (1600) -> G-A -> freeze stage 2 -> Phase B (600) -> G-F.
+"""Locked v2 T=2 pipeline (protocol v1.1): Phase A (1600) -> G-A -> freeze -> Phase B (600) -> G-F, G-N.
 
-The ONLY configuration source is ``protocols/v2_T2_locked.json``. The run refuses to start if
-that file's SHA-256 differs from ``PROTOCOL_SHA256`` (the hash at the lock commit; also checked
-against ``protocols/LOCK`` when that file exists) or if any command-line argument other than
-``--q``, ``--seed`` and ``--out-dir`` is given.
+The ONLY configuration source is ``protocols/v2_T2_locked_v1_1.json``. The run refuses to start if
+that file's SHA-256 differs from ``PROTOCOL_SHA256`` (the hash at the v1.1 lock commit; also checked
+against the v1.1 record in ``protocols/LOCK`` once that record exists), if any command-line argument
+other than ``--q``, ``--seed`` and ``--out-dir`` is given, or if q is not in the protocol's q values.
+Protocol v1.0 (``protocols/v2_T2_locked.json``) is run by this file as of its lock commit 4bd2214.
 
-Training is ``run.run_v2_stagewise.Run`` in mode ``locked`` (same loop, RNG streams and samplers
-as every v2 pilot). Gates use the final verifier tier; the development tier is also reported.
+Training is ``run.run_v2_stagewise.Run`` in mode ``locked`` (same loop, RNG streams and samplers as
+every v2 pilot and as v1.0). v1.1 adds, without changing training:
+  - gates G-A (unchanged), G-F (Gmax_full only), G-N (dev vs final refinement); run pass = all three;
+  - the secondary criterion S1 (stage-1 error <= 0.10) and the v1.0 outcome, reported only;
+  - hardening of the process-global RNGs (torch global, numpy legacy global, Python random): seeded
+    with the run seed at the start of ``run_pipeline``; reference state immediately before the first
+    Phase A update; equality asserted at the end of A, after G-A, at the end of B and at the end of the
+    run; a violation is recorded in gates.json, the run finishes, and the exit code is 5.
 The closed form enters only the evaluation (gates, reported metrics, decomposition).
 
-Outputs in --out-dir: manifest.json (commit, clean-tree flag, protocol SHA-256, q, seed),
-gates.json, v2_checkpoints_{A,B}.csv + checkpoints/, weights/, state_end_A.pt, state_end_B.pt,
-gateA_{final,development}.npz, final_{final,development}.npz, induced_band.json + band_sweep.npz,
-drift_test.json, train_history.json, v2_updates.csv, v2_run_summary.json, status.json.
+Outputs in --out-dir: manifest.json (commit, clean-tree flag, protocol SHA-256 and version, q, seed,
+global-RNG seeds and digests), gates.json, v2_checkpoints_{A,B}.csv + checkpoints/, weights/,
+state_end_A.pt, state_end_B.pt, gateA_{final,development}.npz, final_{final,development}.npz,
+induced_band.json + band_sweep.npz, drift_test.json, train_history.json, v2_updates.csv,
+v2_run_summary.json, status.json, run_config.json.
 
 Usage:
     OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
@@ -28,6 +36,7 @@ import csv
 import hashlib
 import json
 import os
+import random
 import sys
 import time
 import traceback
@@ -47,11 +56,15 @@ from utils.dp_br_verifier import VerifierConfig  # noqa: E402
 from utils.theory_multistage import f_xi, g1_two_stage, g2_two_stage  # noqa: E402
 from utils.v2_metrics import evaluate, induced_band, save_npz, stage1_residual_sweep, sweep_grid  # noqa: E402
 
-PROTOCOL_PATH = ROOT / "protocols" / "v2_T2_locked.json"
+PROTOCOL_PATH = ROOT / "protocols" / "v2_T2_locked_v1_1.json"
+PROTOCOL_REL = "protocols/v2_T2_locked_v1_1.json"
 LOCK_PATH = ROOT / "protocols" / "LOCK"
-PROTOCOL_SHA256 = "cf7b6929adfaef6b712eb01d1a731adc937d0b87fcc37a0a9e68eda9ae92d9f6"
+PROTOCOL_SHA256 = "21d85983f2a2bebc0998e99fcf665c2c729f060996c529fa3162b3d62222a40f"
 ALLOWED_ARGS = ("--q", "--seed", "--out-dir")
 SMOOTH_NODES = 400
+RNG_VIOLATION_EXIT = 5
+GLOBAL_RNGS = ("torch_global", "numpy_global", "python_random")
+ASSERT_POINTS = ("end_of_A", "after_G-A", "end_of_B", "end_of_run")
 
 
 def sha256_file(path: Path) -> str:
@@ -63,21 +76,34 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def load_protocol(path: Path = PROTOCOL_PATH, expected: str = PROTOCOL_SHA256) -> Dict:
-    """Load the locked protocol; refuse on any hash mismatch (file vs code, file vs LOCK)."""
+def lock_records(path: Path = LOCK_PATH) -> List[Dict]:
+    """All JSON records in protocols/LOCK (concatenated JSON objects, v1.0 record first)."""
+    if not path.exists():
+        return []
+    txt, dec, out, i = path.read_text(), json.JSONDecoder(), [], 0
+    while True:
+        while i < len(txt) and txt[i].isspace():
+            i += 1
+        if i >= len(txt):
+            return out
+        obj, i = dec.raw_decode(txt, i)
+        out.append(obj)
+
+
+def load_protocol(path: Path = PROTOCOL_PATH, expected: str = PROTOCOL_SHA256, lock_path: Path = LOCK_PATH) -> Dict:
+    """Load the locked protocol; refuse on any hash mismatch (file vs code, file vs its LOCK record)."""
     actual = sha256_file(path)
     if actual != expected:
         raise ConfigError(f"protocol {path} sha256 {actual} != locked {expected}; refusing to run")
-    if LOCK_PATH.exists():
-        lock = json.load(open(LOCK_PATH))
-        if lock.get("protocol_sha256") != actual:
-            raise ConfigError(f"protocols/LOCK records protocol sha256 {lock.get('protocol_sha256')} != {actual}")
+    mine = [r for r in lock_records(lock_path) if r.get("protocol") == PROTOCOL_REL]
+    if mine and mine[-1].get("protocol_sha256") != actual:
+        raise ConfigError(f"protocols/LOCK records sha256 {mine[-1].get('protocol_sha256')} for {PROTOCOL_REL} != {actual}")
     return json.load(open(path))
 
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
     """Accept exactly --q, --seed, --out-dir; refuse anything else."""
-    p = argparse.ArgumentParser(description="locked v2 T=2 pipeline", allow_abbrev=False)
+    p = argparse.ArgumentParser(description="locked v2 T=2 pipeline (v1.1)", allow_abbrev=False)
     p.add_argument("--q", type=int, required=True)
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--out-dir", required=True)
@@ -100,6 +126,67 @@ def build_config(proto: Dict, q: int, seed: int, out_dir: str) -> Dict:
             "flags": dict(pl["flags"]), "parent_checkpoint": None, "parent_sha256": None, "record": rec,
             "threads_per_process": proto["threads_per_process"], "budget_overrides": {},
             "lr_decay": copy.deepcopy(pl["lr_decay"]), "full_state_at": []}
+
+
+# ---------------------------------------------------------------------------- process-global RNGs (D5)
+def seed_globals(seed: int) -> None:
+    """Seed the three process-global RNGs with the run seed."""
+    torch.manual_seed(int(seed))
+    np.random.seed(int(seed))
+    random.seed(int(seed))
+
+
+def global_states() -> Dict[str, object]:
+    """Current states of the three process-global RNGs."""
+    return {"torch_global": torch.get_rng_state().clone(), "numpy_global": np.random.get_state(),
+            "python_random": random.getstate()}
+
+
+def _state_bytes(name: str, st) -> bytes:
+    if name == "torch_global":
+        return st.numpy().tobytes()
+    if name == "numpy_global":
+        kind, key, pos, has_gauss, cached = st
+        return repr((kind, pos, has_gauss, float(cached))).encode() + np.asarray(key).tobytes()
+    return repr(st).encode()
+
+
+def digests(states: Dict[str, object]) -> Dict[str, str]:
+    """SHA-256 of each global RNG state."""
+    return {k: hashlib.sha256(_state_bytes(k, v)).hexdigest() for k, v in states.items()}
+
+
+# ---------------------------------------------------------------------------- verdicts (D2, D3, D4)
+def verdicts(v: Dict[str, float], proto: Dict) -> Dict[str, object]:
+    """Gate verdicts from metric values (inclusive <=, full precision).
+
+    ``v`` keys: eta_final, eta_dev, rmse, tail, gmax_final, gmax_dev, s1 (all /DW or relative).
+    Run pass = G-A and G-F and G-N. S1 and the v1.0 outcome are reported only.
+    """
+    g = proto["gates"]
+    ta = {c["metric"]: c["threshold"] for c in g["G-A"]["all_must_hold"]}
+    tf = {c["metric"]: c["threshold"] for c in g["G-F"]["all_must_hold"]}
+    tn = {c["metric"]: c["threshold"] for c in g["G-N"]["all_must_hold"]}
+    t1 = proto["secondary"]["S1"]["criterion"]["threshold"]
+    GA = [("eta_T_over_dw", v["eta_final"], ta["eta_T_over_dw"]),
+          ("stage2_rmse_pos_over_g2_0", v["rmse"], ta["stage2_rmse_pos_over_g2_0"]),
+          ("stage2_tail_mean_over_g2_0", v["tail"], ta["stage2_tail_mean_over_g2_0"])]
+    GF = [("Gmax_full_over_dw", v["gmax_final"], tf["Gmax_full_over_dw"])]
+    GN = [("eta_T_over_dw_dev_minus_final_abs", abs(v["eta_dev"] - v["eta_final"]), tn["eta_T_over_dw_dev_minus_final_abs"]),
+          ("Gmax_full_over_dw_dev_minus_final_abs", abs(v["gmax_dev"] - v["gmax_final"]), tn["Gmax_full_over_dw_dev_minus_final_abs"])]
+
+    def block(rows):
+        crit = [{"metric": m, "value": float(x), "threshold": t, "pass": bool(x <= t)} for m, x, t in rows]
+        return {"criteria": crit, "pass": all(c["pass"] for c in crit)}
+    out = {"G-A": block(GA), "G-F": block(GF), "G-N": block(GN)}
+    out["run_pass"] = bool(out["G-A"]["pass"] and out["G-F"]["pass"] and out["G-N"]["pass"])
+    s1 = bool(v["s1"] <= t1)
+    out["S1"] = {"metric": "stage1_rel_err_abs", "value": float(v["s1"]), "threshold": t1, "pass": s1}
+    gf10 = bool(out["G-F"]["pass"] and s1)
+    out["v1_0_outcome"] = {"G-A": out["G-A"]["pass"], "G-F_v1_0": gf10, "run_pass_v1_0": bool(out["G-A"]["pass"] and gf10)}
+    out["outcome"] = ("pass" if out["run_pass"] else "stage2_failure" if not out["G-A"]["pass"]
+                      else "fail_G-F" if not out["G-F"]["pass"] else "fail_G-N")
+    return out
 
 
 # ---------------------------------------------------------------------------- evaluation helpers
@@ -155,19 +242,6 @@ def decomposition(run: Run, e1: float, proto: Dict, fin: VerifierConfig, step: O
     return out
 
 
-def gate_block(name: str, crit: List[Dict], sc_fin: Dict, sc_dev: Dict) -> Dict[str, object]:
-    """Gate verdict from the final-tier scalars (dev tier reported alongside)."""
-    rows = []
-    for c in crit:
-        m = c["metric"]
-        vf, vd = float(sc_fin[m]), float(sc_dev[m])
-        rows.append({"metric": m, "threshold": c["threshold"], "value_final": vf, "value_dev": vd,
-                     "dev_minus_final": vd - vf, "pass_final": bool(vf <= c["threshold"]),
-                     "pass_dev": bool(vd <= c["threshold"])})
-    return {"gate": name, "criteria": rows, "pass": all(r["pass_final"] for r in rows),
-            "pass_dev_tier": all(r["pass_dev"] for r in rows)}
-
-
 REPORT_KEYS_A = ("stage2_peak_rel_err_signed", "stage2_peak_rel_err_abs", "stage2_sym_err_max", "stage2_tail_max",
                  "stage2_tail_max_over_g2_0", "stage2_tail_mean", "DeltaT_over_dw_on_max", "DeltaT_over_dw_off_max",
                  "DeltaT_over_dw_on_mean_cellmass_weighted", "sigma_effort_at_0_t2", "e2_at_0", "g2_at_0",
@@ -187,24 +261,52 @@ def diff(dev: Dict, fin: Dict) -> Dict[str, float]:
 
 
 # ---------------------------------------------------------------------------- pipeline
-def execute_locked(run: Run, cfg: Dict, proto: Dict, proto_sha: str, out_dir: str, cmd: str,
-                   band_step: Optional[float] = None) -> int:
-    """Phase A -> G-A -> freeze -> Phase B -> G-F -> final evaluation (one process)."""
+def run_pipeline(cfg: Dict, proto: Dict, proto_sha: str, out_dir: str, cmd: str,
+                 band_step: Optional[float] = None) -> int:
+    """Seed globals -> build Run -> Phase A -> G-A -> freeze -> Phase B -> G-F, G-N -> final evaluation.
+
+    Returns 0, 1 (pipeline exception) or RNG_VIOLATION_EXIT (global-RNG assertion violated).
+    """
+    seed = int(cfg["seed"])
+    seed_globals(seed)                                   # before any object is constructed (D5)
+    rng_log: Dict[str, Dict] = {"seeding": {"seeds": {k: seed for k in GLOBAL_RNGS}, "digests": digests(global_states())}}
+    run = Run(cfg, out_dir)
+    rng_log["after_run_construction"] = {"digests": digests(global_states())}
+    ref: Dict[str, object] = {}
+
+    def hook(phase: str) -> None:
+        if phase == "A" and not ref:
+            ref.update(global_states())
+            rng_log["reference_before_first_A_update"] = {"digests": digests(ref)}
+        elif phase == "B":
+            rng_log["before_first_B_update"] = {"digests": digests(global_states())}
+    run.phase_start_hook = hook
+    violations: List[Dict[str, str]] = []
+
+    def check(point: str) -> None:
+        now = global_states()
+        dg = digests(now)
+        rng_log[point] = {"digests": dg}
+        rd = rng_log["reference_before_first_A_update"]["digests"]
+        for k in GLOBAL_RNGS:
+            if dg[k] != rd[k]:
+                violations.append({"rng": k, "point": point})
+
     t0 = time.perf_counter()
     status = {"run": cfg["run"], "q": run.spec.q, "seed": run.seed, "mode": run.mode, "state": "running",
               "pid": os.getpid(), "cmd": cmd, "start_time": time.strftime("%Y-%m-%d %H:%M:%S"), "git": git_state()}
     write_json(os.path.join(out_dir, "status.json"), status)
     man = write_manifest(run, cfg, out_dir, cmd)
     g = man["git"]
-    man.update({"locked_protocol": {"path": os.path.relpath(PROTOCOL_PATH, ROOT), "sha256": proto_sha,
-                                    "version": proto["version"]},
-                "commit": g["commit"], "clean_tree": g["dirty"] is False, "q": run.spec.q, "seed": run.seed})
+    man.update({"locked_protocol": {"path": PROTOCOL_REL, "sha256": proto_sha, "version": proto["version"]},
+                "protocol_version": proto["version"], "commit": g["commit"], "clean_tree": g["dirty"] is False,
+                "q": run.spec.q, "seed": run.seed, "global_rng": rng_log})
     write_json(os.path.join(out_dir, "manifest.json"), man)
-    gcfg = proto["gates"]
     try:
         # ---- Phase A
         run.run_phase("A")
         torch.save(run.full_state("A"), os.path.join(out_dir, "state_end_A.pt"))
+        check("end_of_A")
         evA = {}
         for tier in (run.fin_cfg, run.dev_cfg):
             mf, bf = run.policy_fns()
@@ -212,15 +314,16 @@ def execute_locked(run: Run, cfg: Dict, proto: Dict, proto_sha: str, out_dir: st
             save_npz(ev, os.path.join(out_dir, f"gateA_{tier.name}.npz"))
             evA[tier.name] = ev
         scA = {t: {**e.scalars, **stage2_extra(e)} for t, e in evA.items()}
-        GA = gate_block("G-A", gcfg["G-A"]["all_must_hold"], scA["final"], scA["development"])
         smooth = smoothed_share(run, evA["final"])
-        # ---- freeze stage 2 (B2 machinery), as in run_v2_stagewise.execute for mode phase_B
+        check("after_G-A")
+        # ---- freeze stage 2 (B2 machinery)
         run.parent_ref = run.stage2_mapping()
         parent_actor = {k: v.clone() for k, v in run.agent.actor.state_dict().items()}
         run.agent.freeze_stage2_snapshot()
         # ---- Phase B
         run.run_phase("B")
         torch.save(run.full_state("B"), os.path.join(out_dir, "state_end_B.pt"))
+        check("end_of_B")
         run.agent.export_weights_npz(os.path.join(out_dir, "checkpoint_weights.npz"))
         evF = {}
         for tier in (run.fin_cfg, run.dev_cfg):
@@ -229,7 +332,6 @@ def execute_locked(run: Run, cfg: Dict, proto: Dict, proto_sha: str, out_dir: st
             save_npz(ev, os.path.join(out_dir, f"final_{tier.name}.npz"))
             evF[tier.name] = ev
         scF = {t: {**e.scalars, **stage2_extra(e)} for t, e in evF.items()}
-        GF = gate_block("G-F", gcfg["G-F"]["all_must_hold"], scF["final"], scF["development"])
         # ---- snapshot integrity (C5 drift test)
         now = run.stage2_mapping(run.agent.frozen)
         dt_ = {k: float(np.max(np.abs(now[k] - run.parent_ref[k]))) for k in ("mean", "alpha", "beta")}
@@ -241,10 +343,26 @@ def execute_locked(run: Run, cfg: Dict, proto: Dict, proto_sha: str, out_dir: st
         # ---- stage-1 decomposition (final tier, frozen stage 2)
         dec = decomposition(run, float(scF["final"]["e1_at_0"]), proto, run.fin_cfg, band_step)
         write_json(os.path.join(out_dir, "induced_band.json"), dec)
-        run_pass = bool(GA["pass"] and GF["pass"])
-        gates = {"q": run.spec.q, "seed": run.seed, "protocol_sha256": proto_sha, "commit": g["commit"],
-                 "clean_tree": g["dirty"] is False, "G-A": GA, "G-F": GF, "run_pass": run_pass,
-                 "outcome": "pass" if run_pass else ("stage2_failure" if not GA["pass"] else "fail_G-F"),
+        check("end_of_run")
+        vals = {"eta_final": float(scA["final"]["eta_T_over_dw"]), "eta_dev": float(scA["development"]["eta_T_over_dw"]),
+                "rmse": float(scA["final"]["stage2_rmse_pos_over_g2_0"]), "tail": float(scA["final"]["stage2_tail_mean_over_g2_0"]),
+                "gmax_final": float(scF["final"]["Gmax_full_over_dw"]), "gmax_dev": float(scF["development"]["Gmax_full_over_dw"]),
+                "s1": float(scF["final"]["stage1_rel_err_abs"])}
+        V = verdicts(vals, proto)
+        rng_ok = not violations
+        run_pass = bool(V["run_pass"] and rng_ok)
+        gates = {"protocol_version": proto["version"], "q": run.spec.q, "seed": run.seed, "protocol_sha256": proto_sha,
+                 "commit": g["commit"], "clean_tree": g["dirty"] is False, "metric_values": vals,
+                 "dev_tier_values": {"G-A": {"eta_T_over_dw": vals["eta_dev"],
+                                             "stage2_rmse_pos_over_g2_0": float(scA["development"]["stage2_rmse_pos_over_g2_0"]),
+                                             "stage2_tail_mean_over_g2_0": float(scA["development"]["stage2_tail_mean_over_g2_0"])},
+                                     "G-F": {"Gmax_full_over_dw": vals["gmax_dev"]},
+                                     "S1": {"stage1_rel_err_abs": float(scF["development"]["stage1_rel_err_abs"])}},
+                 "G-A": V["G-A"], "G-F": V["G-F"], "G-N": V["G-N"], "S1": V["S1"], "v1_0_outcome": V["v1_0_outcome"],
+                 "global_rng": {"status": "ok" if rng_ok else "violation", "violations": violations,
+                                "assertion_points": list(ASSERT_POINTS)},
+                 "gates_pass": V["run_pass"], "run_pass": run_pass,
+                 "outcome": V["outcome"] if rng_ok else "global_rng_violation",
                  "reported": {
                      "end_of_A": {"final": pick(scA["final"], REPORT_KEYS_A + ("stage2_peak_locfree_rel_err", "stage2_peak_locfree_argmax_d")),
                                   "development": pick(scA["development"], REPORT_KEYS_A + ("stage2_peak_locfree_rel_err", "stage2_peak_locfree_argmax_d")),
@@ -269,14 +387,21 @@ def execute_locked(run: Run, cfg: Dict, proto: Dict, proto_sha: str, out_dir: st
             w = csv.DictWriter(f, fieldnames=list(run.v2_history[0].keys()))
             w.writeheader()
             w.writerows(run.v2_history)
-        status.update({"state": "done", "end_time": time.strftime("%Y-%m-%d %H:%M:%S"), "exit_code": 0,
+        man["global_rng"] = rng_log
+        man["global_rng_status"] = gates["global_rng"]
+        write_json(os.path.join(out_dir, "manifest.json"), man)
+        code = 0 if rng_ok else RNG_VIOLATION_EXIT
+        status.update({"state": "done", "end_time": time.strftime("%Y-%m-%d %H:%M:%S"), "exit_code": code,
                        "final_global_update": run.global_u, "run_pass": run_pass, "outcome": gates["outcome"],
                        "total_wall_sec": time.perf_counter() - t0})
         write_json(os.path.join(out_dir, "status.json"), status)
-        print(f"[done] q={run.spec.q:g} seed={run.seed} G-A={GA['pass']} G-F={GF['pass']} outcome={gates['outcome']} "
-              f"wall={time.perf_counter() - t0:.1f}s", flush=True)
-        return 0
+        print(f"[done] q={run.spec.q:g} seed={run.seed} G-A={V['G-A']['pass']} G-F={V['G-F']['pass']} G-N={V['G-N']['pass']} "
+              f"global_rng={'ok' if rng_ok else violations} outcome={gates['outcome']} wall={time.perf_counter() - t0:.1f}s",
+              flush=True)
+        return code
     except Exception:
+        man["global_rng"] = rng_log
+        write_json(os.path.join(out_dir, "manifest.json"), man)
         status.update({"state": "failed", "end_time": time.strftime("%Y-%m-%d %H:%M:%S"),
                        "traceback": traceback.format_exc(), "updates_completed": run.global_u, "exit_code": 1})
         write_json(os.path.join(out_dir, "status.json"), status)
@@ -291,11 +416,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     out = a.out_dir
     if os.path.exists(os.path.join(out, "status.json")):
         raise ConfigError(f"{out} already holds status.json; not restarting")
-    os.makedirs(out, exist_ok=True)
     cfg = build_config(proto, a.q, a.seed, out)
+    os.makedirs(out, exist_ok=True)
     json.dump(cfg, open(os.path.join(out, "run_config.json"), "w"), indent=1)
-    run = Run(cfg, out)
-    return execute_locked(run, cfg, proto, sha256_file(PROTOCOL_PATH), out, " ".join(sys.argv))
+    return run_pipeline(cfg, proto, sha256_file(PROTOCOL_PATH), out, " ".join(sys.argv))
 
 
 if __name__ == "__main__":

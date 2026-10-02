@@ -1,0 +1,42 @@
+{
+ "q": 50,
+ "seed": 10501,
+ "steps": [
+  {
+   "step": "torch.nn.Linear(2, 64) (PyTorch default init)",
+   "torch_global_changed": true,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  },
+  {
+   "step": "agents.ppo_curriculum.BetaActor(...) with explicit generator",
+   "torch_global_changed": true,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  },
+  {
+   "step": "agents.ppo_curriculum.Critic(...) with explicit generator",
+   "torch_global_changed": true,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  },
+  {
+   "step": "agents.ppo_curriculum_v2.CurriculumPPOv2(...)",
+   "torch_global_changed": true,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  },
+  {
+   "step": "envs.curriculum_env.StartSampler(...)",
+   "torch_global_changed": false,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  },
+  {
+   "step": "run.run_v2_stagewise.Run(cfg) (complete)",
+   "torch_global_changed": true,
+   "numpy_global_changed": false,
+   "python_random_changed": false
+  }
+ ]
+}

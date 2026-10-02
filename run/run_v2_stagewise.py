@@ -287,6 +287,9 @@ class Run:
         self.weights_every = int(P["weights_every"])
         self.weights_dir = os.path.join(out_dir, "weights")
         self.full_state_at = {int(u) for u in cfg.get("full_state_at", [])}
+        # optional callable(phase) run immediately before the first update of each phase (after the
+        # phase-entry snapshot refresh); used by the locked entry point to take its global-RNG reference
+        self.phase_start_hook: Optional[Callable[[str], None]] = None
         self.lr_decay = cfg.get("lr_decay")
         dec = self.lr_decay
         self.lr_windows = {w["phase"]: w for w in (dec if isinstance(dec, list) else [dec])} if dec is not None else {}
@@ -453,6 +456,8 @@ class Run:
             v = P["verifier_timeout"]
             return int(v[phase]) if isinstance(v, dict) else int(v)
 
+        if self.phase_start_hook is not None:
+            self.phase_start_hook(phase)
         while local < cap:
             local += 1
             self.global_u += 1
