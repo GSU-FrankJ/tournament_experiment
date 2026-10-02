@@ -1,0 +1,298 @@
+{
+ "pilot": "pilot4_A",
+ "phase": "Acont",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "pilot4_A",
+  "--phase",
+  "Acont",
+  "--parent-pilot",
+  "phaseA_ext",
+  "--parent-arm",
+  "expected_ext",
+  "--parent-file",
+  "state_u01200.pt",
+  "--reward-mode",
+  "expected",
+  "--budget-overrides",
+  "{\"phase_caps\": {\"A\": 400, \"B\": 600, \"C\": 1000}}",
+  "--qs",
+  "50",
+  "60",
+  "--seeds",
+  "10501",
+  "10502",
+  "10503",
+  "10504",
+  "10505",
+  "10506",
+  "10507",
+  "10508",
+  "10509",
+  "10510",
+  "--arms",
+  "constant",
+  "decay",
+  "--workers",
+  "32"
+ ],
+ "workers": 32,
+ "nproc": 64,
+ "loadavg_at_start": [
+  0.77197265625,
+  0.92333984375,
+  0.6279296875
+ ],
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10501/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10501/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10502/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10502/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10503/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10503/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10504/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10504/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10505/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10505/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10506/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10506/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10507/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10507/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10509/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10509/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10510/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10510/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10501/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10501/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10502/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10502/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10503/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10503/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10504/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10504/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10505/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10505/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10506/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10506/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10507/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10507/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10508/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10508/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10509/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10509/decay",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10510/constant",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10510/decay"
+ ],
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10510/constant",
+   "returncode": 0,
+   "wall_sec": 76.84508436301257
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10510/decay",
+   "returncode": 0,
+   "wall_sec": 76.88565437699435
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10506/decay",
+   "returncode": 0,
+   "wall_sec": 77.15188829100225
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10501/constant",
+   "returncode": 0,
+   "wall_sec": 77.18811810197076
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10505/decay",
+   "returncode": 0,
+   "wall_sec": 77.49154155002907
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10509/constant",
+   "returncode": 0,
+   "wall_sec": 77.51204356504604
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10506/constant",
+   "returncode": 0,
+   "wall_sec": 77.52840964496136
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10503/constant",
+   "returncode": 0,
+   "wall_sec": 77.54143968201242
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10505/constant",
+   "returncode": 0,
+   "wall_sec": 77.6854263410205
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/constant",
+   "returncode": 0,
+   "wall_sec": 77.8097347880248
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10507/constant",
+   "returncode": 0,
+   "wall_sec": 77.93360170896631
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10501/constant",
+   "returncode": 0,
+   "wall_sec": 78.01741387497168
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10506/constant",
+   "returncode": 0,
+   "wall_sec": 78.02362325100694
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10502/decay",
+   "returncode": 0,
+   "wall_sec": 78.14251380896894
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10503/decay",
+   "returncode": 0,
+   "wall_sec": 78.24685268104076
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10501/decay",
+   "returncode": 0,
+   "wall_sec": 78.32697335601551
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10505/decay",
+   "returncode": 0,
+   "wall_sec": 78.35253480100073
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10506/decay",
+   "returncode": 0,
+   "wall_sec": 78.39409457700094
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10504/constant",
+   "returncode": 0,
+   "wall_sec": 78.45054790697759
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10502/constant",
+   "returncode": 0,
+   "wall_sec": 78.47180413099704
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10504/constant",
+   "returncode": 0,
+   "wall_sec": 78.48315564601216
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10504/decay",
+   "returncode": 0,
+   "wall_sec": 78.58304087800207
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10503/decay",
+   "returncode": 0,
+   "wall_sec": 78.66736258601304
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10501/decay",
+   "returncode": 0,
+   "wall_sec": 78.70398973097326
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10504/decay",
+   "returncode": 0,
+   "wall_sec": 78.71410303300945
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10509/decay",
+   "returncode": 0,
+   "wall_sec": 78.95391549100168
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10505/constant",
+   "returncode": 0,
+   "wall_sec": 79.12758470803965
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10502/decay",
+   "returncode": 0,
+   "wall_sec": 79.2896902349894
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10503/constant",
+   "returncode": 0,
+   "wall_sec": 79.39267676201416
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/decay",
+   "returncode": 0,
+   "wall_sec": 79.5862606120063
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10507/decay",
+   "returncode": 0,
+   "wall_sec": 85.9152846109937
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10502/constant",
+   "returncode": 0,
+   "wall_sec": 92.3382301160018
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10508/decay",
+   "returncode": 0,
+   "wall_sec": 46.589445574965794
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10510/constant",
+   "returncode": 0,
+   "wall_sec": 47.75659309903858
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10509/constant",
+   "returncode": 0,
+   "wall_sec": 47.810890539956745
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10508/constant",
+   "returncode": 0,
+   "wall_sec": 48.15390857699094
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10507/constant",
+   "returncode": 0,
+   "wall_sec": 53.57458698900882
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10507/decay",
+   "returncode": 0,
+   "wall_sec": 57.66900799196446
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10509/decay",
+   "returncode": 0,
+   "wall_sec": 61.899199458013754
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q60/seed10510/decay",
+   "returncode": 0,
+   "wall_sec": 64.37044529698323
+  }
+ ],
+ "state": "done",
+ "started": "20261002_012525",
+ "loadavg_at_end": [
+  41.74267578125,
+  19.9580078125,
+  7.9375
+ ]
+}
