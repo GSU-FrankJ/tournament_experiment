@@ -1,0 +1,22 @@
+{
+ "run": "locked_check2_phaseB_q60_s10503_B2_mean_decay",
+ "pilot": "locked_check2_phaseB",
+ "arm": "B2_mean_decay",
+ "q": 60,
+ "seed": 10503,
+ "mode": "phase_B",
+ "state": "done",
+ "pid": 1185850,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/run/run_v2_stagewise.py --config results/v2_T2_locked/locked_check2_phaseB/q60/seed10503/B2_mean_decay/run_config.json --out-dir results/v2_T2_locked/locked_check2_phaseB/q60/seed10503/B2_mean_decay",
+ "start_time": "2026-10-02 02:54:32",
+ "git": {
+  "commit": "5b07293adcfba16aa57745cb4bc9144846884e61",
+  "short": "5b07293",
+  "dirty": false
+ },
+ "end_time": "2026-10-02 02:56:19",
+ "total_wall_sec": 107.20824726601131,
+ "exit_code": 0,
+ "final_global_update": 2200
+}

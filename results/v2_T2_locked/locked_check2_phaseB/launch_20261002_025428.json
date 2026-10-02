@@ -1,0 +1,60 @@
+{
+ "pilot": "locked_check2_phaseB",
+ "phase": "B",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "locked_check2_phaseB",
+  "--root",
+  "results/v2_T2_locked",
+  "--phase",
+  "B",
+  "--parent-pilot",
+  "../v2_pilots/pilot4_A",
+  "--parent-arm",
+  "decay",
+  "--parent-file",
+  "state_u01600.pt",
+  "--reward-mode",
+  "expected",
+  "--qs",
+  "50",
+  "60",
+  "--seeds",
+  "10503",
+  "--arms",
+  "B2_mean_decay",
+  "--workers",
+  "2"
+ ],
+ "workers": 2,
+ "nproc": 64,
+ "loadavg_at_start": [
+  1.25341796875,
+  1.27392578125,
+  0.982421875
+ ],
+ "planned": [
+  "results/v2_T2_locked/locked_check2_phaseB/q50/seed10503/B2_mean_decay",
+  "results/v2_T2_locked/locked_check2_phaseB/q60/seed10503/B2_mean_decay"
+ ],
+ "runs": [
+  {
+   "out": "results/v2_T2_locked/locked_check2_phaseB/q60/seed10503/B2_mean_decay",
+   "returncode": 0,
+   "wall_sec": 111.22538926196285
+  },
+  {
+   "out": "results/v2_T2_locked/locked_check2_phaseB/q50/seed10503/B2_mean_decay",
+   "returncode": 0,
+   "wall_sec": 111.32733146101236
+  }
+ ],
+ "state": "done",
+ "started": "20261002_025428",
+ "loadavg_at_end": [
+  24.02294921875,
+  9.09716796875,
+  3.8232421875
+ ]
+}
