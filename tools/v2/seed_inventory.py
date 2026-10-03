@@ -8,7 +8,12 @@ contains "seed" (all integer values of that column), and the Phase 0 audit repor
 tournament_experiment tree (all worktrees included; .git and .venv skipped) plus the extra roots
 given on the command line.
 
-Usage: python tools/v2/seed_inventory.py --block 20501 20520 --out <csv> [--extra-root DIR ...]
+With ``--exclude SUFFIX ...`` every file whose path ends with one of the suffixes is skipped. The only
+intended use: a protocol that declares the block (``"seed_block": [...]``) would otherwise collide with
+itself, so the re-run at the lock commit excludes the declaring files and the stock scan (no ``--exclude``)
+is kept next to it to show that those declarations are the only hits.
+
+Usage: python tools/v2/seed_inventory.py --block 20501 20520 --out <csv> [--extra-root DIR ...] [--exclude SUFFIX ...]
 """
 
 from __future__ import annotations
@@ -29,7 +34,7 @@ KEY_RE = re.compile(r'"([A-Za-z_]*seed[A-Za-z_]*)"\s*:\s*(\[[^\]]*\]|-?\d+)')
 INT_RE = re.compile(r"-?\d+")
 
 
-def scan(roots):
+def scan(roots, exclude=()):
     found = defaultdict(set)          # seed -> set of (file, key)
     n_json = n_csv = 0
     for r in roots:
@@ -37,6 +42,8 @@ def scan(roots):
             dirs[:] = [x for x in dirs if x not in SKIP]
             for f in fs:
                 p = os.path.join(d, f)
+                if exclude and any(p.endswith(e) for e in exclude):
+                    continue
                 try:
                     if f.endswith(".json"):
                         n_json += 1
@@ -68,8 +75,11 @@ def main() -> int:
     p.add_argument("--block", type=int, nargs=2, required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--extra-root", nargs="*", default=[])
+    p.add_argument("--exclude", nargs="*", default=[], help="path suffixes of the files that declare the block itself")
     a = p.parse_args()
-    found, nj, nc = scan([str(TREE)] + a.extra_root)
+    found, nj, nc = scan([str(TREE)] + a.extra_root, tuple(a.exclude))
+    if a.exclude:
+        print("excluded (declaring files):", a.exclude)
     audit = ROOT / "reports" / "v2" / "phase0_audit.md"
     for line in open(audit):
         if "seed" in line.lower():

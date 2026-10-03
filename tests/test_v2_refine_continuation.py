@@ -4,8 +4,8 @@ Run:
     OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
     .venv/bin/python -m pytest tests/test_v2_refine_continuation.py -p no:cacheprovider -q
 
-Write the check record ``results/v2_refine/continuation_check.json`` (several minutes, run it in
-tmux):
+Write the v2.0 check record ``results/v2_T2_locked/v2_0/continuation_check_v2_0.json`` (several
+minutes, run it in tmux):
     .venv/bin/python tests/test_v2_refine_continuation.py --write
 
 Real frozen actors are the stage-2 actors of the v1.1 rehearsal parents (seed 10501) in the
@@ -13,12 +13,23 @@ canonical results worktree (read-only); a test that needs one is skipped only if
 absent. Every test also runs on a synthetic actor with random non-trivial output-head weights.
 The module under test must not import the verifier; this file may.
 
-Status of PROMPT.md 2.3 (ii) (table vs the verifier's stage-1 Q, final tier, limit 1e-6 DW):
-NOT MET on the production final tier. ``test_ii_final_tier_within_spec_tolerance`` keeps the
-literal assertion and is marked ``xfail(strict=True)``: it is a record of an open failure that
-needs a PI decision, not a pass. The measured numbers are in
-``results/v2_refine/continuation_check.json`` (keys ``spec_requirement``, ``table_vs_verifier``,
-``diagnosis``). Nothing here was loosened.
+Check (ii) of the continuation table (table against the verifier's stage-1 Q). The literal R1
+criterion (<= 1e-6 DW against the verifier's STANDARD final tier) was withdrawn by decision D3 of
+the v2.0 round: the standard final tier interpolates V_2 onto a state grid of step 2, and the gap
+it shows (3.229e-05 DW at q = 50, 1.960e-05 DW at q = 60, ``results/v2_refine/continuation_check.json``)
+is of the order of the dev - final differences that gate G-N exists for, while the table itself is
+converged to <= 5e-9 DW. It is replaced by three tests, pre-registered in D3:
+  (ii-a) ``test_ii_a_self_convergence``: halving the panel width and doubling the nodes per panel
+         changes the table by <= 1e-8 DW;
+  (ii-b) ``test_ii_b_refined_verifier_agreement``: on the refined verifier configuration (state
+         step 0.25, 64 Gauss-Legendre nodes) max over the effort grid of
+         |V(e - e1_hat) - (Q(0, e) + k e^2)| <= 1e-6 DW;
+  (ii-c) ``test_ii_c_training_side_sensitivity``: add the convergence difference profile (finest
+         rule minus default rule) to the table and recompute argmax_e [-k e^2 + V(e - e1_hat)]
+         on a 0.001-effort grid; the shift is <= 1e-3 e1*.
+The standard-tier gap and the stage-1 optimum shift it would imply if it were a table error are
+recorded by ``--write`` as a verifier numerics item (reported, not gated). The R1 record
+``results/v2_refine/continuation_check.json`` is never rewritten.
 """
 
 from __future__ import annotations
@@ -48,7 +59,7 @@ from run.run_final_dp_br import make_policy_fns  # noqa: E402
 from run.v2_rollout import expected_terminal_reward  # noqa: E402
 from utils import v2_continuation as vc  # noqa: E402
 from utils.dp_br_verifier import DEV_CONFIG, FINAL_CONFIG, VerifierConfig, verify  # noqa: E402
-from utils.theory_multistage import F_xi  # noqa: E402
+from utils.theory_multistage import F_xi, g1_two_stage  # noqa: E402
 from utils.v2_continuation import ContinuationTable, build_continuation_table  # noqa: E402
 
 CAN = Path("/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2")
@@ -56,11 +67,19 @@ PARENT_SEED = 10501
 W_H, W_L, K = 6.0, 2.0, 1.0 / 3500.0     # as-run values (reports/v2/phase0_audit.md section 2)
 E1_HAT = {50: 40.0, 60: 45.0}            # fixed stage-1 mean: it only fixes the opponent
 QS = (50, 60)
-FINAL_TOL_OVER_DW = 1e-6                 # PROMPT.md section 2.3 (ii), final tier
+FINAL_TOL_OVER_DW = 1e-6                 # R1 section 2.3 (ii) literal limit (now only the (ii-b) limit)
+II_A_TOL_OVER_DW = 1e-8                  # D3 (ii-a): self-convergence of the table
+II_B_TOL_OVER_DW = 1e-6                  # D3 (ii-b): refined-verifier agreement
+II_C_TOL_OVER_E1STAR = 1e-3              # D3 (ii-c): shift of the stage-1 optimum / e1*
+FINEST_RULE = (0.25, 24)                 # (panel width, nodes per panel): last rung of convergence_record
+E_FINE_STEP = 0.001                      # effort grid of (ii-c)
+REFINED_VERIFIER = VerifierConfig("final_refined_state_0.25", state_step=0.25, effort_step=0.5,
+                                  gl_half=64)
 MC_DRAWS = 10 ** 6
 MC_SEED = 91011
 Y_MC = (-80.0, -35.0, 0.0, 12.37, 65.0)
-OUT_JSON = ROOT / "results" / "v2_refine" / "continuation_check.json"
+OUT_JSON_R1 = ROOT / "results" / "v2_refine" / "continuation_check.json"          # R1 record, never rewritten
+OUT_JSON = ROOT / "results" / "v2_T2_locked" / "v2_0" / "continuation_check_v2_0.json"
 
 
 # ---------------------------------------------------------------------------
@@ -259,36 +278,120 @@ def test_i_table_agrees_with_monte_carlo(kind: str, q: int) -> None:
 # (ii) agreement with the verifier's stage-1 Q
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="PROMPT.md 2.3 (ii) NOT MET on the production final tier: verifier-side errors, "
-           "mainly its linear interpolation of stage-2 values on the D_2 grid (step 2.0, about "
-           "2e-5 DW) and, at q=50 also, its Gauss-Legendre rule (32 nodes per half interval, "
-           "about 1.3e-6 DW). Open for a PI decision; numbers in "
-           "results/v2_refine/continuation_check.json. The tolerance is NOT loosened; remove "
-           "this marker when the criterion is decided.")
-@pytest.mark.parametrize("q", QS)
-def test_ii_final_tier_within_spec_tolerance(q: int) -> None:
-    """SPEC REQUIREMENT: max |V(e - e1_hat) - (Q^ehat(0, e) + k e^2)| <= 1e-6 DW, final tier.
+_RULE_VALUES: Dict[Tuple[int, float, int], np.ndarray] = {}
 
-    Expected to FAIL (hence ``xfail(strict=True)``); the measured values are recorded in
-    ``results/v2_refine/continuation_check.json`` (``spec_requirement``). The causes sit on the
-    verifier side, visible in ``decomposition_over_dw``: its linear interpolation of stage-2
-    values on the D_2 grid (``A_minus_B``, the dominant term) and its Gauss-Legendre rule on
-    the kinked integrand (``A_minus_D``: the verifier's own nodes applied to the exact g, no
-    interpolation; above 1e-6 DW at q=50 only). The table's own quadrature error is about
-    1e-8 DW (``convergence``). The requirement is NOT loosened here (PROMPT.md: stop and
-    report); see also the refined-verifier-grid test below.
+
+def rule_values(q: int, panel_width: float, nodes_per_panel: int) -> np.ndarray:
+    """Parent-actor table values on the default y-grid under the given rule (cached)."""
+    key = (q, float(panel_width), int(nodes_per_panel))
+    if key not in _RULE_VALUES:
+        actor, spec = get_actor("parent", q), spec_for(q)
+        _RULE_VALUES[key] = vc.expected_continuation(actor, spec, 2, vc.y_grid_for(spec),
+                                                     panel_width, nodes_per_panel)
+    return _RULE_VALUES[key]
+
+
+def ii_a_value(q: int) -> Dict[str, Any]:
+    """(ii-a): max |table(default rule) - table(panel width halved, nodes doubled)| / DW."""
+    _, spec, table = get_table("parent", q)
+    half = rule_values(q, vc.DEFAULT_PANEL_WIDTH / 2.0, 2 * vc.DEFAULT_NODES_PER_PANEL)
+    val = float(np.abs(table.values - half).max() / spec.dw)
+    return {"from_rule": [vc.DEFAULT_PANEL_WIDTH, vc.DEFAULT_NODES_PER_PANEL],
+            "to_rule": [vc.DEFAULT_PANEL_WIDTH / 2.0, 2 * vc.DEFAULT_NODES_PER_PANEL],
+            "max_abs_change_over_dw": val, "threshold_over_dw": II_A_TOL_OVER_DW,
+            "pass": bool(val <= II_A_TOL_OVER_DW)}
+
+
+def effort_fine_grid() -> np.ndarray:
+    """Effort grid [0, 100] with step 0.001 (100001 points)."""
+    return np.arange(0, int(round(100.0 / E_FINE_STEP)) + 1) * E_FINE_STEP
+
+
+def stage1_argmax(spec: GameSpec, table: ContinuationTable, e1_hat: float,
+                  extra: Optional[np.ndarray] = None) -> float:
+    """argmax_e [-k e^2 + V(e - e1_hat) (+ extra(e))] on the 0.001 effort grid (first maximiser)."""
+    grid = effort_fine_grid()
+    obj = -spec.k * grid ** 2 + table.lookup(grid - e1_hat)
+    if extra is not None:
+        obj = obj + extra
+    return float(grid[int(np.argmax(obj))])
+
+
+def ii_c_value(q: int) -> Dict[str, Any]:
+    """(ii-c): shift of the stage-1 optimum when the convergence difference profile is added.
+
+    The profile is (table under the finest rule of ``FINEST_RULE``) - (default-rule table) at
+    every y-node; the shifted table is the default table plus that profile. The gated variant
+    fixes the opponent at ``E1_HAT[q]`` (as check (ii-b)); the variant with the opponent at e1*
+    is reported alongside.
+    """
+    _, spec, table = get_table("parent", q)
+    profile = rule_values(q, *FINEST_RULE) - table.values
+    shifted = ContinuationTable(table.y_grid, table.values + profile)
+    e1_star = float(g1_two_stage(spec.q, spec.w_h, spec.w_l, spec.k))
+    out: Dict[str, Any] = {"finest_rule": list(FINEST_RULE), "e1_star": e1_star,
+                           "profile_max_abs_over_dw": float(np.abs(profile).max() / spec.dw),
+                           "grid_step": E_FINE_STEP, "threshold_over_e1_star": II_C_TOL_OVER_E1STAR}
+    for label, opp in (("fixed_opponent", E1_HAT[q]), ("opponent_at_e1_star", e1_star)):
+        a0 = stage1_argmax(spec, table, opp)
+        a1 = stage1_argmax(spec, shifted, opp)
+        out[label] = {"opponent_mean": float(opp), "argmax_default": a0, "argmax_with_profile": a1,
+                      "shift": a1 - a0, "shift_over_e1_star": abs(a1 - a0) / e1_star,
+                      "pass": bool(abs(a1 - a0) <= II_C_TOL_OVER_E1STAR * e1_star)}
+    out["pass"] = bool(out["fixed_opponent"]["pass"])
+    return out
+
+
+def verifier_numerics_item(q: int, cfg: VerifierConfig) -> Dict[str, Any]:
+    """Standard-tier gap and the stage-1 optimum shift it would imply as a table error (reported).
+
+    delta(e) = (Q(0, e) + k e^2) - V(e - e1_hat) on the verifier's effort grid; adding delta
+    (linearly interpolated onto the 0.001 grid) to the table objective turns it into the
+    verifier's own stage-1 objective, so the shift of the argmax is how far the verifier's own
+    stage-1 optimum is from the table's on this tier.
     """
     agent = parent_agent(q)
     if agent is None:
         pytest.skip(f"parent state absent: {parent_path(q)}")
     spec = spec_for(q)
-    out = compare_with_verifier(agent, spec, E1_HAT[q], FINAL_CONFIG)
-    print(f"\nq={q} final tier: max|V - Q| = {out['max_abs_diff']:.4e} "
-          f"= {out['max_abs_diff_over_dw']:.3e} DW at e={out['argmax_effort']}")
-    assert out["valid"]
-    assert out["max_abs_diff_over_dw"] <= FINAL_TOL_OVER_DW, out["decomposition_over_dw"]
+    _, _, table = get_table("parent", q)
+    e1_hat = E1_HAT[q]
+    res = verify(verifier_policy(agent, spec, e1_hat), w_h=spec.w_h, w_l=spec.w_l, k=spec.k,
+                 q=spec.q, T=2, cfg=cfg)
+    grid_e = res.e_grid
+    delta = res.stages[1].q_mean_grid[0] + spec.k * grid_e ** 2 - table.lookup(grid_e - e1_hat)
+    extra = np.interp(effort_fine_grid(), grid_e, delta)
+    e1_star = float(g1_two_stage(spec.q, spec.w_h, spec.w_l, spec.k))
+    a0 = stage1_argmax(spec, table, e1_hat)
+    a1 = stage1_argmax(spec, table, e1_hat, extra)
+    return {"tier": cfg.name, "state_step": cfg.state_step, "gl_half": cfg.gl_half,
+            "valid": bool(res.valid), "max_abs_gap_over_dw": float(np.abs(delta).max() / spec.dw),
+            "argmax_gap_effort": float(grid_e[int(np.argmax(np.abs(delta)))]),
+            "opponent_mean": float(e1_hat), "e1_star": e1_star, "argmax_table": a0,
+            "argmax_if_gap_were_table_error": a1, "implied_shift": a1 - a0,
+            "implied_shift_over_e1_star": abs(a1 - a0) / e1_star, "gated": False}
+
+
+@pytest.mark.parametrize("q", QS)
+def test_ii_a_self_convergence(q: int) -> None:
+    """(ii-a) halving the panel width and doubling the nodes changes the table by <= 1e-8 DW."""
+    if parent_agent(q) is None:
+        pytest.skip(f"parent state absent: {parent_path(q)}")
+    out = ii_a_value(q)
+    print(f"\nq={q} (ii-a): {out['max_abs_change_over_dw']:.3e} DW")
+    assert out["pass"], out
+
+
+@pytest.mark.parametrize("q", QS)
+def test_ii_c_training_side_sensitivity(q: int) -> None:
+    """(ii-c) adding the finest-minus-default profile moves the stage-1 optimum <= 1e-3 e1*."""
+    if parent_agent(q) is None:
+        pytest.skip(f"parent state absent: {parent_path(q)}")
+    out = ii_c_value(q)
+    fx = out["fixed_opponent"]
+    print(f"\nq={q} (ii-c): profile {out['profile_max_abs_over_dw']:.3e} DW, shift "
+          f"{fx['shift']:.6f} = {fx['shift_over_e1_star']:.3e} e1* (limit {II_C_TOL_OVER_E1STAR:g})")
+    assert out["pass"], out
 
 
 @pytest.mark.parametrize("q", QS)
@@ -329,22 +432,22 @@ def test_ii_diag_stage2_values_identical(q: int, cfg: VerifierConfig) -> None:
 
 
 @pytest.mark.parametrize("q", QS)
-def test_ii_diag_identity_holds_on_refined_verifier_grid(q: int) -> None:
-    """With the verifier's state grid refined (step 0.25, 64 GL nodes) the identity is <= 1e-6 DW.
+def test_ii_b_refined_verifier_agreement(q: int) -> None:
+    """(ii-b) on the refined verifier (state step 0.25, 64 GL nodes) the identity is <= 1e-6 DW.
 
-    Causal check that the final-tier discrepancy comes from the verifier's interpolation of
-    stage-2 values on its D_2 grid and not from the table's quadrature (which does not depend
-    on the verifier grid): the discrepancy falls with the state step (measured 5.0e-7 DW at
-    q=50 and 4.1e-7 DW at q=60).
+    max over the effort grid of |V(e - e1_hat) - (Q(0, e) + k e^2)|. The discrepancy on the
+    standard final tier comes from the verifier's interpolation of stage-2 values on its D_2
+    grid and not from the table's quadrature (which does not depend on the verifier grid): it
+    falls with the state step (measured 5.0e-7 DW at q=50 and 4.1e-7 DW at q=60 here).
     """
     agent = parent_agent(q)
     if agent is None:
         pytest.skip(f"parent state absent: {parent_path(q)}")
     spec = spec_for(q)
-    fine = VerifierConfig("final_refined_state_0.25", state_step=0.25, effort_step=0.5, gl_half=64)
-    out = compare_with_verifier(agent, spec, E1_HAT[q], fine)
-    print(f"\nq={q} refined verifier grid: {out['max_abs_diff_over_dw']:.3e} DW")
-    assert out["max_abs_diff_over_dw"] <= FINAL_TOL_OVER_DW
+    out = compare_with_verifier(agent, spec, E1_HAT[q], REFINED_VERIFIER)
+    print(f"\nq={q} (ii-b) refined verifier grid: {out['max_abs_diff_over_dw']:.3e} DW")
+    assert out["valid"]
+    assert out["max_abs_diff_over_dw"] <= II_B_TOL_OVER_DW
 
 
 # ---------------------------------------------------------------------------
@@ -537,8 +640,12 @@ def batch_noise_record(actor: Any, spec: GameSpec, table: ContinuationTable
             "one_y_per_call_vs_table_over_dw": float(np.abs(single - ref).max() / spec.dw)}
 
 
-def write_check_record(path: Path = OUT_JSON) -> Dict[str, Any]:
-    """Compute and write the check record (convergence, timing, verifier comparison)."""
+def write_check_record(path: Path = OUT_JSON_R1) -> Dict[str, Any]:
+    """R1 record generator (kept for provenance; ``--write`` no longer calls it).
+
+    Wrote ``results/v2_refine/continuation_check.json`` in the R1 round under the literal
+    criterion; never call it with the default path again, that record must not be rewritten.
+    """
     rec: Dict[str, Any] = {
         "schema": "v2_refine_continuation_check/1",
         "generated_by": "tests/test_v2_refine_continuation.py --write",
@@ -651,9 +758,51 @@ def write_check_record(path: Path = OUT_JSON) -> Dict[str, Any]:
     return rec
 
 
+def write_check_record_v2_0(path: Path = OUT_JSON) -> Dict[str, Any]:
+    """Compute and write the v2.0 check record: (ii-a), (ii-b), (ii-c) and the verifier numerics item."""
+    rec: Dict[str, Any] = {
+        "schema": "v2_0_continuation_check/1",
+        "generated_by": "tests/test_v2_refine_continuation.py --write",
+        "decision": "D3 of the v2.0 round: the literal R1 criterion (<= 1e-6 DW against the standard "
+                    "final tier) is replaced by the tests (ii-a), (ii-b), (ii-c)",
+        "game": {"w_h": W_H, "w_l": W_L, "k": K, "dw": W_H - W_L, "T": 2},
+        "rule": {"panel_width": vc.DEFAULT_PANEL_WIDTH, "nodes_per_panel": vc.DEFAULT_NODES_PER_PANEL,
+                 "y_step": vc.DEFAULT_STEP, "finest_rule_panel_width_nodes": list(FINEST_RULE)},
+        "r1_record_unchanged": str(OUT_JSON_R1.relative_to(ROOT)),
+        "parents": {}, "ii_a": {}, "ii_b": {}, "ii_c": {}, "verifier_numerics": {},
+    }
+    t_total = time.time()
+    for q in QS:
+        spec = spec_for(q)
+        agent = parent_agent(q)
+        assert agent is not None, f"parent state absent: {parent_path(q)}"
+        rec["parents"][f"q{q}"] = {"path": str(parent_path(q)), "sha256": sha256_of(parent_path(q)),
+                                   "seed": PARENT_SEED, "e1_hat_fixed_opponent": E1_HAT[q]}
+        rec["ii_a"][f"q{q}"] = ii_a_value(q)
+        out_b = compare_with_verifier(agent, spec, E1_HAT[q], REFINED_VERIFIER)
+        rec["ii_b"][f"q{q}"] = {"verifier": {"state_step": REFINED_VERIFIER.state_step,
+                                             "effort_step": REFINED_VERIFIER.effort_step,
+                                             "gl_half": REFINED_VERIFIER.gl_half},
+                                "valid": out_b["valid"], "e1_hat": out_b["e1_hat"],
+                                "max_abs_diff_over_dw": out_b["max_abs_diff_over_dw"],
+                                "argmax_effort": out_b["argmax_effort"],
+                                "threshold_over_dw": II_B_TOL_OVER_DW,
+                                "pass": bool(out_b["valid"] and
+                                             out_b["max_abs_diff_over_dw"] <= II_B_TOL_OVER_DW)}
+        rec["ii_c"][f"q{q}"] = ii_c_value(q)
+        rec["verifier_numerics"][f"q{q}"] = {
+            cfg.name: verifier_numerics_item(q, cfg) for cfg in (FINAL_CONFIG, DEV_CONFIG)}
+    rec["all_pass"] = bool(all(rec[k][f"q{q}"]["pass"] for k in ("ii_a", "ii_b", "ii_c") for q in QS))
+    rec["wall_seconds_total"] = time.time() - t_total
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as fh:
+        json.dump(rec, fh, indent=2)
+    return rec
+
+
 if __name__ == "__main__":
     if "--write" in sys.argv:
-        out = write_check_record()
-        print(json.dumps(out["spec_requirement"], indent=2))
+        out = write_check_record_v2_0()
+        print(json.dumps({k: out[k] for k in ("ii_a", "ii_b", "ii_c", "verifier_numerics", "all_pass")}, indent=2))
     else:
         raise SystemExit(pytest.main([__file__, "-p", "no:cacheprovider", "-q"]))
