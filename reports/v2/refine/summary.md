@@ -39,3 +39,11 @@ Data: `results/v2_refine/` (per-run records and analysis tables are tracked; che
 5. **Report pack.** `docs/STATE.md` was edited and `reports/v2/summary.md` got an appended paragraph; the pack `reports/v2/t2_report` cites STATE.md by SHA-256 (T57), so that entry is stale until the documented pack rebuild (not done: out of scope).
 6. **Stray files.** Four early copies of this round's files (`utils/v2_continuation.py`, `agents/ppo_pathwise.py`, `tests/test_v2_refine_pathwise.py`, `tools/v2/refine_preflight.py`) were written by workers into the original session worktree `.claude/worktrees/t2-accuracy-refinement-r1-32d472` before the session was switched to `v2-t2-refine`; they are untracked duplicates there and were not deleted.
 7. **D1 flag reading.** "More than 2 of the 20 runs" for M2 is read as the 20 C-R1 runs pooled over both q, with per-q counts beside it (Addendum 1 item 2).
+
+## Addendum (2026-10-03, v2.0 round): the PI accepted this round
+
+Added by the v2.0 round; nothing above was changed. Source: decisions D1 and D3 of the PI's v2.0-round prompt (R1 accepted: protocol v2.0, re-rehearsal, then the confirmation).
+
+1. **Accepted with its deviations.** The 17 stage-1 re-runs (manifests with `dirty: true`, originals kept under `results/v2_refine/stage1/dirty_rerun`, re-runs bit-identical 17/17), the two analysis-side commits after the launches (run code unchanged since `32a8c21`) and the pooled reading of the D1 flag M2 are accepted as recorded in `01_preregistration.md` Addendum 1.
+2. **Only method 6 enters the protocol.** Only method 6 met the pre-registered criterion (`06_decision_inputs.md` section 1). No other R1 arm enters the protocol. Target-KL is not adopted either: it changes cost, not accuracy, and the protocol changes for accuracy only.
+3. **Check (ii) of the continuation table is settled** (item 1 above, "open as stated", is closed): the literal criterion (<= 1e-6 DW against the verifier's standard final tier) is replaced by the three pre-registered tests (ii-a) self-convergence, (ii-b) refined-verifier agreement and (ii-c) training-side sensitivity. Definitions and measured values: `protocols/v2_T2_locked_v2_0.md` section 4 and `results/v2_T2_locked/v2_0/continuation_check_v2_0.json`; the standard-tier gap is kept as a verifier numerics item (`results/v2_T2_locked/v2_0/verifier_numerics_note.md`).
