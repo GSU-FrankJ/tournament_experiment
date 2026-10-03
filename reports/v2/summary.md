@@ -218,3 +218,7 @@ Source: `results/v2_T2_locked/confirmation_analysis/` (pre-registered script, ru
 9. **Eight Pilot-4 2b manifests carry `dirty: true`**: resolved. A clean re-run of q60/10507 `B2_mean_constant` is bit-identical.
 10. **Rehearsal Check 1:** accepted (D1, v1.1 round).
 11. **Confirmation seed block 20501–20520:** confirmed and run; the confirmation passed.
+
+## R1 accuracy-refinement round (2026-10-03, branch v2-t2-refine)
+
+A follow-up round on the locked v1.1 pipeline, without changing the protocol: two diagnostics (clipped-Beta likelihood, verifier sensitivity) and six single-factor pilots (polishing, batch, target-KL, concentration annealing, deterministic-mean fine-tuning, expected continuation) on the development seeds, paired with the locked baseline. The unchanged entry point reproduces the rehearsal in 20/20 runs; among the six methods only the expected-continuation arm meets its pre-registered criterion at both q (S1 error, with 0.3x the across-seed spread of the signed error), under a check of the continuation table that is open as stated. Summary and reading order: `reports/v2/refine/summary.md`; decision inputs: `reports/v2/refine/06_decision_inputs.md`.

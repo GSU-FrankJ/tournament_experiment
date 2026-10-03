@@ -1,6 +1,21 @@
 # Project state
 
-Last updated: 2026-10-02
+Last updated: 2026-10-03
+
+## T=2 accuracy-refinement round R1 (2026-10-03, branch v2-t2-refine, not pushed)
+
+Done: P0-P4 of the R1 prompt on the development seeds. Two diagnostics (D1 clamp, D2 verifier sensitivity) and six
+single-factor pilots (stage 1: 8 arms, stage 2: 11 arms, 20 runs each) paired with the locked v1.1 baseline; the
+unchanged locked entry point reproduces rehearsal_v1_1 in 20/20 (C-R1). Code commit 32a8c21, pre-registration 6c902db,
+no run code changed afterwards. Start at reports/v2/refine/summary.md (reading order, headline numbers, decisions).
+Result: only method 6 (expected continuation, B_expcont) meets the pre-registered criterion at both q; check (ii) of its
+table is open as stated (final-tier verifier gap 3.2e-5 / 2.0e-5 DW vs 1e-6 DW; PI decided to keep it).
+Known issues: (ii) above; 17 stage-1 runs re-run because their manifest recorded a dirty tree (originals kept in
+results/v2_refine/stage1/dirty_rerun, bit-identical); the report pack T57 cites this file by SHA-256 and is stale until
+the documented rebuild; four stale early copies of round files sit untracked in the old session worktree
+.claude/worktrees/t2-accuracy-refinement-r1-32d472.
+Next: the PI decides the combination, protocol v2.0 and the next confirmation (seeds 30501-30520 are reserved and unused).
+Data: results/v2_refine/ (per-run records and analysis tables tracked; checkpoints, weights, train_history.json, D1 buffers not).
 
 ## T=2 v2 published to main (2026-10-03)
 
