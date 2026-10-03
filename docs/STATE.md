@@ -2,6 +2,16 @@
 
 Last updated: 2026-10-02
 
+## T=2 v2 published to main (2026-10-03)
+
+The complete T=2 v2 work (Phase 0 audit to the report pack) and the PI record are on main. Start at
+reports/v2/README.md: reading order of the study reports, the report pack (reports/v2/t2_report), the PI record
+(reports/v2/pi_record), and where the 2.9 GiB of arrays and checkpoints that are not in git are on vector2.
+Tags: t2-v2-lock-v1.0 (4bd2214), t2-v2-lock-v1.1 (431474d), t2-v2-confirmation (f6838ec),
+t2-v2-report-pack (28e14b5), t2-v2-main.
+Known issues: listed under "Known caveats" in reports/v2/README.md (42 pack-vs-report mismatches, 10 UNKNOWN
+values, 1 of 27 reproducibility checks fails literally and is accepted under D1).
+
 ## v2 T=2 protocol v1.1: fresh-seed confirmation PASSED (2026-10-02, branch v2-stagewise-pilots)
 
 Protocol v1.1 is locked at 431474d (protocols/v2_T2_locked_v1_1.json; LOCK record at 95c000e). The v1.1

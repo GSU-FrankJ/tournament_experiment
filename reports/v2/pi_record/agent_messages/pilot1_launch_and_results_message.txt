@@ -1,0 +1,77 @@
+Phase 2 approved. Starting with the seed check (1b), since it gates everything else.
+
+The only overlap is 10501. I'm checking where that hit comes from; I expect it to be only our own Phase 1/2 regression and smoke runs.
+
+Confirmed all ten hits for seed 10501 are approved Phase 1/2 runs under `results/v2_pilots/`, and seeds 10501–10510 don't overlap the Phase 0 inventory, so I'll proceed. Next I'll work on 1a: the new on-path rule and exact cell masses in `utils/v2_metrics.py`.
+
+Now updating the tests: a new `onoff_split` test, passing on-path and cell-mass tests (including a sample of real checkpoints), and the old node-PMF mismatch kept as a clearly named xfail.
+
+Tests pass. Next is 1c: log each random stream's exact generator position after every update, plus a divergence utility.
+
+All 53 tests pass, plus the 2 documented xfails. Committing the three changes, then re-running the suite and the C7 regression on the clean tree.
+
+Tests pass and C7 remains bit-exact at `89cd600` with a clean tree, so I'll leave the regression output uncommitted to keep that hash consistent across manifests. Checking load now, then launching Pilot 1 in tmux.
+
+Pilot 1 is now running with 40 single-threaded processes in tmux session `v2_pilot1` (load rising as expected on 64 cores). While that executes, I'll work on the §2 dReach reach-mask check.
+
+The reach-mask check found no gaps, only up to 2 extra boundary nodes due to the closed-vs-open interval mismatch, with a single case (q=50 s10224, dev tier) where dReach exceeds the reference-mask value by 1.41e-3·ΔW at a boundary node. Pilot 1 is still running, so I'll write up the mask-check report while waiting.
+
+The mask-check counts match the report. **Pilot 1 finished: 40/40.** Checking return codes, manifests, would-have-fired records and wall times.
+
+All 40 runs completed cleanly with consistent commits, fixed budgets, and no premature stop triggers. Now I'll run the analysis script to produce the final table, bootstrap CIs, learning curves, and σ scatter, re-evaluating weight exports and cross-checking u400 against each run's final row.
+
+`cv.update` resolves to the DataFrame method, not the column. Fixing it to `cv["update"]`.
+
+The weight-export re-evaluation matches each run's final checkpoint to within 1e-16, stage-1 drift is exactly 0 across all 160 checkpoints, and cell masses sum to 1.0. I'll now review the results in detail.
+
+The `learn` and `opp` streams desync in every pair between updates 11 and 73, while `env`, `start`, and `minibatch` stay synced. I'll now check the per-arm values and figures.
+
+I'll commit only the lightweight files—configs, manifests, status, summaries, CSVs, final JSON, plots, and analysis—while leaving the large NPZ arrays, `.pt` files, and train_history.json uncommitted on disk.
+
+Committing the regression output, which the pathspec skipped; then I'll write the Pilot 1 report.
+
+Now assembling the Pilot 1 report from the generated tables, adding the narrative, sources and the labeled interpretation section.
+
+The f-string treats the set braces as expressions. Switching to a plain template with placeholders.
+
+Pipes inside some metric labels break the markdown tables. Escaping them.
+
+Pilot 1 is done: all 40 runs completed and the analysis is written up. I've stopped and haven't chosen the reward estimator. The report is [reports/v2/pilot1_reward_estimator.md](reports/v2/pilot1_reward_estimator.md).
+
+**Setup before the pilot.** The three requested changes are in commit `89cd600`:
+- the new on-path rule (open support plus exact cell masses);
+- seeds 10501–10510;
+- a per-update log of each random stream's position.
+
+At that commit the tests show 53 passed and 2 expected failures, and the regression against the existing runner is still bit-exact. All 40 Pilot 1 manifests carry `89cd600` with a clean tree. The seeds are disjoint from the Phase 0 inventory; 10501 had only been used by this branch's own approved smoke and regression runs.
+
+**The pilot ran cleanly.**
+- **Launch:** 40 single-threaded processes in tmux; the machine has 64 cores, and load was 0.9 at launch and 18.5 at the end.
+- **Completion:** all 40 runs finished, with Phase A taking 41–63 s per run.
+- **Stop rule:** the existing Phase A stop rule would not have fired in any run.
+- **Parents:** every run saved its full-state end-of-Phase-A checkpoint, ready to be a parent for Pilots 2 and 3.
+
+**What the data show** (descriptive, `expected − sampled`):
+- **Stage-2 recovery:** `expected` is better in all 10 pairs at both q values, with bootstrap intervals that exclude zero. This holds for absolute peak error, RMSE, tail mean and tail max, η₂, and Δ₂ both on-path and off-path.
+- **Median final values:**
+
+| Metric | sampled, q=50 | expected, q=50 | sampled, q=60 | expected, q=60 |
+|---|---|---|---|---|
+| Signed peak error at d=0 | −0.40 | −0.13 | −0.47 | −0.10 |
+| η₂ | 0.043 | 0.0046 | 0.043 | 0.0018 |
+
+- **Metrics that depend on the untrained stage 1** (EXP_root, dReach, Ĝmax_full) are higher with `expected` in 8–10 of 10 pairs. With stage 1 untrained, these measure how badly the initial stage-1 action fits the learned stage 2, so they say little about the estimator. They become meaningful in Pilot 2.
+- **σ₂ near the peak is mostly lower with `expected`.** In the scatter of peak error against σ₂(0)/q, the two are strongly correlated within `sampled` (Spearman 0.87 at q=50, 0.93 at q=60) and weakly or negatively within `expected` (−0.45, −0.18).
+
+**One thing that changes what "paired" means.** The learner and opponent action streams desynchronize in every pair, between updates 11 and 73. This is the rejection-based Beta sampler identified in Phase 2. The shock, start/role and minibatch streams stay aligned for all 400 updates. So the pairing controls initialization and environment noise but not the action draws after the first few dozen updates. The sign consistency across all 10 pairs is therefore more robust than any single paired magnitude.
+
+**dReach reach-mask check** ([dreach_reach_mask_check.md](reports/v2/dreach_reach_mask_check.md)), over 168 evaluations:
+- The official reach mask has no holes inside the support.
+- It differs from the reference support only by including nodes that sit exactly on the support boundary: the verifier uses a closed interval, the reference an open one.
+- That changed dReach in 1 case, by +1.4e-3·ΔW.
+
+**Two small deviations:**
+- The learning curves use the weight exports saved every 25 updates. The training-time verifier checkpoints fall at different updates in different runs, so they can't be aligned across seeds. The two sources agree at update 400 to within 1e-16.
+- I committed only the lightweight run records. The full-state parent checkpoints, 107 MB of NPZ arrays and the training histories are on disk but not in git.
+
+Waiting for your choice of reward estimator.

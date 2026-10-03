@@ -1,0 +1,49 @@
+The T=2 v2 report pack is built and committed. No training was run, nothing was pushed, and there is no report prose. A full rebuild from the committed scripts gives the same files byte for byte, except the wall-time column in reevaluations.csv.
+
+Commits on claude/t2-v2-report-pack-f51a78, base cb0b541b3ba16c04a0fa5d1a465e9d94c635ed89:
+
+7062b5b feat: add T=2 v2 report-pack builder (tools/v2/report/)
+28e14b5 chore: add T=2 v2 report pack (reports/v2/t2_report/, 284 files)
+
+I folded my two earlier partial checkpoint commits (3d8f60e, 28bc1e4) into these two. They are still in the reflog.
+
+Items by status (111 items: 59 tables, 24 figures, 9 per-run tables, 19 key-number groups)
+
+status	n	ids
+found	8	T10, T36, T40, T52, D07, K01, K12, K14
+regenerated	12	F03, F05, F06, F08, F09, F18, F19, F24, T26, T35, D08, D09
+generated	75	all other tables, figures and per-run tables
+derived	16	K02–K11, K13, K15–K19
+missing	0	
+
+gaps.md has no missing items and 10 UNKNOWN values, nothing estimated:
+
+T09: the maximum residual of test_invariants (the test asserts ≤1e-12 ΔW but writes no values).
+T16 (4): test-suite results at cd760fd, 5d50a9d, 5b07293 and f6838ec (no report or log states them).
+T18 (2): commit and tree of the v1.0 and v1.1 pre-lock insurance runs (scratch runs, not kept).
+T57: impact of the clipped-Beta likelihood issue (no log counts clamp hits and no report discusses it).
+T59 (2): the Phase 2 opening-checks and Pilot 3 reports list no commands. The Pilot 3 launch-record argv is added as a separate row.
+
+consistency.md has 42 mismatches in 22,186 cells compared. The old reports are not edited.
+
+20 are data against prose. For example:
+protocol_v1_1_confirmation.md gives the confirmation end as 04:54:27, but the status files say 04:54:12.
+The same report says dev ≤ final "in nearly all runs": that holds for η₂ (39/40) but only 30/40 for Ĝmax.
+summary.md line 213 says desync within "tens to ~160 updates"; Pilot 4 §2b reaches 568.
+Nine in pilot4_stabilization.md: §1d (the "22% still falling" claim, the fitted-mean range, "clamp not binding", the bounds ≤0.06% and ≤0.004, residual location), §1a ("brackets the reference") and §1b (ACF "negative at lags 100–160").
+Others in phaseA_ext.md, pilot1_reward_estimator.md, pilot2_freeze.md and phase1_verifier.md.
+15 are in protocol_lock_and_rehearsal.md. It attributes lock-vs-Phase-1 differences of about 1e-16 to summation order. With both CSVs parsed exactly they are 0 in all 80 values. The differences come from tools/v2/locked_calibration.py reading with pandas' default float parser, which shifted 20 of 80 Phase 1 values by one ulp.
+7 are one-digit differences in report tables. Five are double rounding. I could not explain the other two: the T51 dReach CI and one T12 value.
+
+Evaluations (reevaluations.csv): 80 final-tier verifier evaluations on saved weights, 1.85 s wall in total. 40 give the T42 extension values at u800 and u1200, where no saved final-tier evaluation existed. The other 40 re-evaluate u400 and u1600 and reproduce the saved values exactly. There were no other forward passes.
+
+Checks I ran: I re-verified 8,797 recorded source hashes and found no differences. Every column has a dictionary entry (1,867 rows). All 24 figures are 7 in wide, with PDF and 300 dpi PNG, and I looked at each one.
+
+Things to know:
+
+Worktree: I wrote in the session worktree, not the canonical one, because a hook blocks writes into other worktrees. The canonical worktree is untouched (HEAD cb0b541). To bring the pack onto v2-stagewise-pilots:
+git -C /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2 merge --ff-only claude/t2-v2-report-pack-f51a78
+STATE.md: I did not update docs/STATE.md, because the task limited writes to the two locations. I added reports/v2/t2_report/.gitignore for the transient _build/ directory.
+Don't overclaim in the report:
+T18/K18 shows 27 named checks with 26 passing. The failure is v1.0 Check 1's literal all-RNG-state criterion, accepted under D1: training state is identical in 20/20 runs, global RNG states in 0/20.
+Pilot 3's end_state_actor_critic_opt_identical does not compare optimizer states, so it cannot support an optimizer-identity claim.
