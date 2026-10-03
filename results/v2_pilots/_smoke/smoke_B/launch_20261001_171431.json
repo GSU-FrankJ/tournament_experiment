@@ -1,0 +1,74 @@
+{
+ "pilot": "smoke_B",
+ "phase": "B",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "smoke_B",
+  "--phase",
+  "B",
+  "--parent-pilot",
+  "smoke_A",
+  "--parent-arm",
+  "sampled",
+  "--reward-mode",
+  "sampled",
+  "--qs",
+  "50",
+  "--seeds",
+  "10501",
+  "--arms",
+  "A_joint",
+  "B1_frozen_allnorm",
+  "B2_frozen_s1norm",
+  "B1_frozen_allnorm_mean",
+  "--workers",
+  "4",
+  "--root",
+  "results/v2_pilots/_smoke",
+  "--budget-overrides",
+  "{\"phase_caps\":{\"A\":40,\"B\":20,\"C\":1},\"warmup\":10,\"stability_every\":5,\"verifier_timeout\":5}"
+ ],
+ "workers": 4,
+ "nproc": 64,
+ "loadavg_at_start": [
+  2.38427734375,
+  2.29443359375,
+  1.52685546875
+ ],
+ "planned": [
+  "results/v2_pilots/_smoke/smoke_B/q50/seed10501/A_joint",
+  "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B1_frozen_allnorm",
+  "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B2_frozen_s1norm",
+  "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B1_frozen_allnorm_mean"
+ ],
+ "runs": [
+  {
+   "out": "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B1_frozen_allnorm",
+   "returncode": 0,
+   "wall_sec": 6.911256027000491
+  },
+  {
+   "out": "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B1_frozen_allnorm_mean",
+   "returncode": 0,
+   "wall_sec": 6.947556573024485
+  },
+  {
+   "out": "results/v2_pilots/_smoke/smoke_B/q50/seed10501/A_joint",
+   "returncode": 0,
+   "wall_sec": 7.269256653962657
+  },
+  {
+   "out": "results/v2_pilots/_smoke/smoke_B/q50/seed10501/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 7.555186670040712
+  }
+ ],
+ "state": "done",
+ "started": "20261001_171431",
+ "loadavg_at_end": [
+  2.59375,
+  2.33935546875,
+  1.5458984375
+ ]
+}

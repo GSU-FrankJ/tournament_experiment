@@ -1,0 +1,294 @@
+{
+ "pilot": "pilot3",
+ "phase": "B",
+ "argv": [
+  "tools/v2/launch_pilot.py",
+  "--pilot",
+  "pilot3",
+  "--phase",
+  "B",
+  "--parent-pilot",
+  "pilot1",
+  "--parent-arm",
+  "expected",
+  "--reward-mode",
+  "expected",
+  "--qs",
+  "50",
+  "60",
+  "--seeds",
+  "10501",
+  "10502",
+  "10503",
+  "10504",
+  "10505",
+  "10506",
+  "10507",
+  "10508",
+  "10509",
+  "10510",
+  "--arms",
+  "B2_frozen_s1norm",
+  "B2_frozen_s1norm_mean",
+  "--workers",
+  "40"
+ ],
+ "workers": 40,
+ "nproc": 64,
+ "loadavg_at_start": [
+  0.96533203125,
+  0.81103515625,
+  2.43212890625
+ ],
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10501/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10501/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10502/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10502/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10503/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10503/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10504/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10504/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10505/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10505/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10506/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10506/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10507/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10507/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10508/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10508/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10509/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10509/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10510/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10510/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10501/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10501/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10502/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10502/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10503/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10503/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10504/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10504/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10505/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10505/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10506/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10506/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10507/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10507/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10508/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10508/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10509/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10509/B2_frozen_s1norm_mean",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10510/B2_frozen_s1norm",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10510/B2_frozen_s1norm_mean"
+ ],
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10502/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 193.31045919604367
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10506/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 194.14874741097447
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10508/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 194.6314590020338
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10503/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 194.74548747000517
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10501/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 195.07101226702798
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10501/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.12524339399533
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10510/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.23237738094758
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10505/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.30453163100174
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10503/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 195.4593776180409
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10507/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 195.47223354299786
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10504/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 195.5175045990036
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10506/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.6556307830033
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10501/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.76657730701845
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10502/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 195.95336258900352
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10502/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 196.20021060697036
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10505/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 196.26834021898685
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10507/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 196.32772128097713
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10503/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 196.35622009902727
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10501/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 196.49150982999709
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10508/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 196.50565760297468
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10506/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 196.91808864101768
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10507/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 196.95541619800497
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10505/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.01554272702197
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10503/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.09871502203168
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10504/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.22056342998985
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10509/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.34857782704057
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10502/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.37388868199196
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10507/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 197.58057973103132
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10509/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 197.84817774698604
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10504/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 197.98258394299773
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10510/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 198.14436799898976
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10508/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 198.23209517705254
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10508/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 198.2989423959516
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10510/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 198.52957510895794
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10504/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 198.62095195101574
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10509/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 198.73326398199424
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q50/seed10506/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 199.359583389014
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10505/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 199.60277428897098
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10510/B2_frozen_s1norm_mean",
+   "returncode": 0,
+   "wall_sec": 199.7330252000247
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/tournament-v2-stagewise-pilots-f97609/results/v2_pilots/pilot3/q60/seed10509/B2_frozen_s1norm",
+   "returncode": 0,
+   "wall_sec": 199.8804364450043
+  }
+ ],
+ "state": "done",
+ "started": "20261001_233012",
+ "loadavg_at_end": [
+  61.189453125,
+  31.619140625,
+  14.36572265625
+ ]
+}

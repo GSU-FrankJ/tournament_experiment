@@ -1,6 +1,48 @@
 # Project state
 
-Last updated: 2026-08-19
+Last updated: 2026-10-02
+
+## v2 T=2 protocol v1.1: fresh-seed confirmation PASSED (2026-10-02, branch v2-stagewise-pilots)
+
+Protocol v1.1 is locked at 431474d (protocols/v2_T2_locked_v1_1.json; LOCK record at 95c000e). The v1.1
+re-rehearsal checks R1-R6 all passed. Confirmation q in {50, 60} x seeds 20501-20520 at f6838ec: 20/20 and
+20/20 primary passes (G-A, G-F, G-N) -> PASS. S1 passes 20/20 and 18/20.
+Report: reports/v2/protocol_v1_1_confirmation.md. Nothing may change after the confirmation; no T=3 work started.
+
+## v2 T=2 protocol locked + dress rehearsal (2026-10-02, branch v2-stagewise-pilots)
+
+Canonical worktree: .claude/worktrees/pilot-4-stabilization-fb99a2 on v2-stagewise-pilots (the original
+v2 worktree is detached at e0e8327). Locked protocol v1: protocols/v2_T2_locked.{json,md}, lock commit
+4bd2214, protocols/LOCK; entry point run/run_v2_T2_locked.py (refuses a modified protocol and any
+argument other than --q/--seed/--out-dir). Rehearsal of the 20 development-seed runs: G-A 20/20; G-F 9/10 (q50)
+and 8/10 (q60). Check 2 is bit-identical. Check 1: training state identical, but 3 process-global RNG states
+(never consumed) differ, so it fails literally; awaiting the owner. Cusp diagnostic done.
+Report: reports/v2/protocol_lock_and_rehearsal.md.
+Next: the owner decides on Check 1 and confirms seeds 20501-20520; then the confirmation runs (40 runs) in
+results/v2_T2_locked/confirmation/. NOT run yet.
+
+## v2 Pilot 4 stabilization round (2026-10-02, branch claude/pilot-4-stabilization-fb99a2)
+
+On top of v2-stagewise-pilots (e0e8327). Added an optional `lr_decay` window to run/run_v2_stagewise.py
+(existing lr_at linear form, 3e-4 -> 3e-5) and `--parent-file` to the launcher; launch commit c92ee74,
+C7 IDENTICAL. Ran 2a (Phase A u1200->1600 constant/decay, 40 runs; constant bit-identical to the
+extension) and 2b (Phase B B2+mean from u1600, constant/decay, 40 runs), plus analyses 1a-1d.
+Report: reports/v2/pilot4_stabilization.md; summary: reports/v2/summary.md.
+Known issues: 8 2b manifests dirty=true (untracked analysis files at launch); the 1d fits hit the step
+cap (floor is an upper bound); tests/test_registry_canonicalization.py fails on main too (data on disk).
+Next: owner sets the gate thresholds and locks the protocol; no formal/fresh-seed runs were done.
+Run data: this worktree's results/v2_pilots/ (parents copied from the v2-stagewise-pilots worktree).
+
+## v2 T=2 stagewise pilots (2026-10-01, branch v2-stagewise-pilots)
+
+Branch is based on 657f54a (the published two-stage archive), not main. The v2 runner
+`run/run_v2_stagewise.py` reproduces the existing T=2 runner bit-exactly with default flags (C7).
+Done: verifier upgrade (Gmax_full, invariants, on/off-path), Pilot 1 (reward estimator ->
+`expected` chosen), Pilot 2 (joint vs frozen -> B2 chosen), Pilot 3 (stochastic vs mean
+continuation), Phase A extension to 1600 updates. Index of reports: `reports/v2/summary.md`.
+Known issues / next steps: open-questions list in `reports/v2/summary.md`; Phase A budget and
+precision criterion are the owner's decision. Full-state checkpoints and NPZ arrays are on disk
+under `results/v2_pilots/` but not committed (size, gitignored .pt).
 
 ## Figure PDFs embed TrueType, not Type 3 (2026-08-19)
 

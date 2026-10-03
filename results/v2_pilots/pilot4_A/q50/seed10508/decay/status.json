@@ -1,0 +1,22 @@
+{
+ "run": "pilot4_A_q50_s10508_decay",
+ "pilot": "pilot4_A",
+ "arm": "decay",
+ "q": 50,
+ "seed": 10508,
+ "mode": "phase_A_continue",
+ "state": "done",
+ "pid": 1122676,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/decay/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_A/q50/seed10508/decay",
+ "start_time": "2026-10-02 01:25:31",
+ "git": {
+  "commit": "c92ee74277c08b617ce6d5b34ab70508b9675ced",
+  "short": "c92ee74",
+  "dirty": false
+ },
+ "end_time": "2026-10-02 01:26:44",
+ "total_wall_sec": 72.26577993098181,
+ "exit_code": 0,
+ "final_global_update": 1600
+}

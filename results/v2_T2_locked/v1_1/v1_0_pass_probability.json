@@ -1,0 +1,55 @@
+{
+ "source": "results/v2_T2_locked/rehearsal_analysis/gates_per_run.csv",
+ "per_q": {
+  "50": {
+   "n": 10,
+   "rehearsal_pass_rate": 0.9,
+   "mean_signed": -0.013535638755088734,
+   "sd_ddof1": 0.051526670338715844,
+   "sd_ddof0": 0.048882491554494534,
+   "p90_abs_err_linear_interp": 0.08891665169324595,
+   "per_run_pass_prob_normal_ddof1": 0.9395493191676583,
+   "per_run_pass_prob_normal_ddof0": 0.9514384112873102,
+   "per_run_pass_prob_normal_PI_inputs": 0.936741963865428,
+   "P_ge18_of_20_rate": 0.6769268051894661,
+   "P_ge18_of_20_normal_ddof1": 0.8830828811147329
+  },
+  "60": {
+   "n": 10,
+   "rehearsal_pass_rate": 0.8,
+   "mean_signed": -0.002106669666752743,
+   "sd_ddof1": 0.06976051934603773,
+   "sd_ddof0": 0.06618063956691575,
+   "p90_abs_err_linear_interp": 0.11429317653802275,
+   "per_run_pass_prob_normal_ddof1": 0.8480913694887107,
+   "per_run_pass_prob_normal_ddof0": 0.8690205759405506,
+   "per_run_pass_prob_normal_PI_inputs": 0.8467048656222865,
+   "P_ge18_of_20_rate": 0.20608471894847402,
+   "P_ge18_of_20_normal_ddof1": 0.39568621246800895
+  }
+ },
+ "pi_reference": {
+  "rate": {
+   "50": 0.9,
+   "60": 0.8
+  },
+  "mean": {
+   "50": -0.014,
+   "60": -0.002
+  },
+  "sd": {
+   "50": 0.052,
+   "60": 0.07
+  },
+  "p_rate": 0.14,
+  "p_normal": 0.35,
+  "p90_abs": {
+   "50": 0.089,
+   "60": 0.114
+  }
+ },
+ "P_both_rate_model": 0.13950427039615956,
+ "P_both_normal_ddof1": 0.3494237205236257,
+ "P_both_normal_ddof0": 0.4672639186262308,
+ "P_both_normal_PI_inputs": 0.33875525332718015
+}

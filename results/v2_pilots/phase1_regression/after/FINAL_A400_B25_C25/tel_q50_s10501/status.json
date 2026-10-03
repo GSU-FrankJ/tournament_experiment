@@ -1,0 +1,32 @@
+{
+ "run": "tel_q50_s10501",
+ "group": "FINAL_A400_B25_C25",
+ "q": 50,
+ "seed": 10501,
+ "state": "done",
+ "smoke": true,
+ "pid": 977740,
+ "host": "vector2",
+ "cmd": "run/run_final_dp_br_round3_dense.py --manifest results/v2_pilots/phase1_regression/manifest.json --group FINAL_A400_B25_C25 --q 50 --seed 10501 --smoke --smoke-phase-caps 40,40,40 --smoke-warmup 10 --smoke-stability-every 5 --smoke-timeout 10 --smoke-direct-rollout-episodes 2000 --smoke-direct-rollout-reps 1 --smoke-root results/v2_pilots/phase1_regression/after",
+ "start_time": "2026-10-01 16:43:07",
+ "git_commit": "1ad3805",
+ "thread_env": {
+  "OMP": "1",
+  "MKL": "1",
+  "OPENBLAS": "1"
+ },
+ "torch_threads": 1,
+ "end_time": "2026-10-01 16:43:20",
+ "stop_update": 120,
+ "stop_reason": "budget_exhausted",
+ "status_flags": {
+  "program_completed": true,
+  "numerically_valid": true,
+  "development_stopping_criterion_satisfied": false,
+  "development_stop_strictly_before_cap": false,
+  "final_overall_pass": false
+ },
+ "dreach_final_over_dw": 0.08612697616626425,
+ "total_wall_sec": 13.095382879022509,
+ "exit_code": 0
+}

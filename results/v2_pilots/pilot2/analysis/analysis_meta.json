@@ -1,0 +1,14 @@
+{
+ "weights_u1000_vs_final_checkpoint": {
+  "max_abs_diff_stage1_err": 9.80118763926896e-17,
+  "max_abs_diff_gmax": 9.8879238130678e-17,
+  "n": 60
+ },
+ "n_checkpoint_rows": 1260,
+ "stage1_drift_all_zero": true,
+ "frozen_cand_drift_all_zero": true,
+ "bootstrap": {
+  "resamples": 10000,
+  "seed": 20261001
+ }
+}

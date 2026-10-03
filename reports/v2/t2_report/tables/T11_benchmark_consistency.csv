@@ -1,0 +1,39 @@
+q,block,quantity,value,detail,computation
+50,MC terminal win probability,grid cells,756.0,"d: 21 nodes on [-200, 200] x e_i, e_j in {0, 20, 40, 60, 80, 100}",rows of benchmark_consistency.csv
+50,MC terminal win probability,draws per cell and player,200000.0,both players use the same draws,column n
+50,MC terminal win probability,interior cells (0 < F < 1),324.0,player i,count of 0 < F_i < 1
+50,MC terminal win probability,z mean over interior cells,0.04327796698955334,"player i; z = (p_hat - F)/SE, SE = sqrt(F(1 - F)/n)",mean of z_i
+50,MC terminal win probability,z SD over interior cells,1.01377543388432,player i; ddof = 1,SD of z_i
+50,MC terminal win probability,max |z| = max deviation over the MC standard error,4.541483010513495,"cell d=60, e_i=60, e_j=60, player j",max over cells and players of |z|
+50,MC terminal win probability,max |p_hat - F| over interior cells,0.0031400000000000317,both players,max |diff|
+50,MC terminal win probability,"cells with F in {0, 1}",432.0,player i,count
+50,MC terminal win probability,"max |p_hat - F| over cells with F in {0, 1}",0.0,both players,max |diff|
+50,MC terminal win probability,max |z_i + z_j|,2.326749903858172e-13,player j's outcome is the complement of player i's on the same draws (z_j = -z_i): not independent tests,max over cells
+50,recheck of the max-|z| cell,F at the recheck cell,0.08,"own gap -60, e_own 60, e_opp 60 (the max-|z| cell in the player's own perspective)",column F
+50,recheck of the max-|z| cell,replicates,40.0,200000 draws each (fresh streams),column reps
+50,recheck of the max-|z| cell,z mean,-0.006593804733959896,40 replicates,column z_mean
+50,recheck of the max-|z| cell,z SD (ddof = 1),1.1322681112741149,40 replicates,column z_sd
+50,recheck of the max-|z| cell,z mean over its SE,-0.03683127909033885,40 replicates,column z_mean_over_se
+50,recheck of the max-|z| cell,max |z|,2.382011960142284,40 replicates,column max_abs_z
+50,MC expected terminal reward,max |z| of the mean reward over cells with a random reward,4.614845043760786,"cell d=60, e_i=60, e_j=60, player i; r_bar = w_L + DW F - k e^2",max |r_z|
+50,MC expected terminal reward,cells with a constant reward,432.0,"player i (z undefined, NaN)",count of r_const_i
+50,MC expected terminal reward,max |r_hat - r_bar| over constant-reward cells,8.881784197001252e-16,both players,max |r_diff|
+60,MC terminal win probability,grid cells,756.0,"d: 21 nodes on [-220, 220] x e_i, e_j in {0, 20, 40, 60, 80, 100}",rows of benchmark_consistency.csv
+60,MC terminal win probability,draws per cell and player,200000.0,both players use the same draws,column n
+60,MC terminal win probability,interior cells (0 < F < 1),394.0,player i,count of 0 < F_i < 1
+60,MC terminal win probability,z mean over interior cells,-0.03575956181840528,"player i; z = (p_hat - F)/SE, SE = sqrt(F(1 - F)/n)",mean of z_i
+60,MC terminal win probability,z SD over interior cells,1.0240627398324065,player i; ddof = 1,SD of z_i
+60,MC terminal win probability,max |z| = max deviation over the MC standard error,3.830325310047652,"cell d=22, e_i=0, e_j=80, player i",max over cells and players of |z|
+60,MC terminal win probability,max |p_hat - F| over interior cells,0.002912777777777792,both players,max |diff|
+60,MC terminal win probability,"cells with F in {0, 1}",362.0,player i,count
+60,MC terminal win probability,"max |p_hat - F| over cells with F in {0, 1}",0.0,both players,max |diff|
+60,MC terminal win probability,max |z_i + z_j|,1.8411938640383596e-12,player j's outcome is the complement of player i's on the same draws (z_j = -z_i): not independent tests,max over cells
+60,recheck of the max-|z| cell,F at the recheck cell,0.13347222222222221,"own gap 22, e_own 0, e_opp 80 (the max-|z| cell in the player's own perspective)",column F
+60,recheck of the max-|z| cell,replicates,40.0,200000 draws each (fresh streams),column reps
+60,recheck of the max-|z| cell,z mean,-0.2338704729885442,40 replicates,column z_mean
+60,recheck of the max-|z| cell,z SD (ddof = 1),0.9739587698944663,40 replicates,column z_sd
+60,recheck of the max-|z| cell,z mean over its SE,-1.5186749069158674,40 replicates,column z_mean_over_se
+60,recheck of the max-|z| cell,max |z|,2.1200846938314215,40 replicates,column max_abs_z
+60,MC expected terminal reward,max |z| of the mean reward over cells with a random reward,3.7955775762867794,"cell d=22, e_i=0, e_j=80, player j; r_bar = w_L + DW F - k e^2",max |r_z|
+60,MC expected terminal reward,cells with a constant reward,362.0,"player i (z undefined, NaN)",count of r_const_i
+60,MC expected terminal reward,max |r_hat - r_bar| over constant-reward cells,8.881784197001252e-16,both players,max |r_diff|

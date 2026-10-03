@@ -1,0 +1,22 @@
+{
+ "run": "pilot4_B_q60_s10504_B2_mean_constant",
+ "pilot": "pilot4_B",
+ "arm": "B2_mean_constant",
+ "q": 60,
+ "seed": 10504,
+ "mode": "phase_B",
+ "state": "done",
+ "pid": 1122762,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_B/q60/seed10504/B2_mean_constant/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/pilot4_B/q60/seed10504/B2_mean_constant",
+ "start_time": "2026-10-02 01:25:32",
+ "git": {
+  "commit": "c92ee74277c08b617ce6d5b34ab70508b9675ced",
+  "short": "c92ee74",
+  "dirty": false
+ },
+ "end_time": "2026-10-02 01:27:57",
+ "total_wall_sec": 145.2011922749807,
+ "exit_code": 0,
+ "final_global_update": 2200
+}

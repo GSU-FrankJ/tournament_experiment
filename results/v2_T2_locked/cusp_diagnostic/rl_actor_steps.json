@@ -1,0 +1,22 @@
+{
+ "50": {
+  "phase_A_updates": 1600,
+  "rows_per_update": 512,
+  "minibatch": 256,
+  "epochs": 10,
+  "minibatches_per_update": 2,
+  "actor_steps_per_update": 20,
+  "actor_steps_all_A": 32000,
+  "actor_steps_last_400": 8000
+ },
+ "60": {
+  "phase_A_updates": 1600,
+  "rows_per_update": 512,
+  "minibatch": 256,
+  "epochs": 10,
+  "minibatches_per_update": 2,
+  "actor_steps_per_update": 20,
+  "actor_steps_all_A": 32000,
+  "actor_steps_last_400": 8000
+ }
+}
