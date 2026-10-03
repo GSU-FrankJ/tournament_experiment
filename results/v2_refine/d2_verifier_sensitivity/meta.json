@@ -1,0 +1,224 @@
+{
+ "schema": "d2_verifier_sensitivity/1",
+ "created": "2026-10-03 19:17:37",
+ "argv": [
+  "tools/v2/verifier_sensitivity.py",
+  "--out",
+  "results/v2_refine/d2_verifier_sensitivity",
+  "--workers",
+  "4"
+ ],
+ "command": "python tools/v2/verifier_sensitivity.py --out results/v2_refine/d2_verifier_sensitivity --workers 4 --qs 50 60 --tiers development final --families a b c d e",
+ "python": "/home/fjiang4/tournament_experiment/.venv/bin/python",
+ "smoke": false,
+ "commit": "6c902dbd5943597088151c75919406ce0e030de5",
+ "short": "6c902db",
+ "dirty": false,
+ "qs": [
+  50,
+  60
+ ],
+ "tiers": [
+  "development",
+  "final"
+ ],
+ "families": [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e"
+ ],
+ "workers": 4,
+ "protocol": "protocols/v2_T2_locked_v1_1.json",
+ "protocol_sha256": "21d85983f2a2bebc0998e99fcf665c2c729f060996c529fa3162b3d62222a40f",
+ "thresholds": {
+  "G-F": 0.01,
+  "G-A": 0.005,
+  "G-N_Gmax": 0.001,
+  "G-N_eta": 0.001
+ },
+ "games": {
+  "50": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "q": 50,
+   "T": 2,
+   "e_min": 0,
+   "e_max": 100,
+   "dw": 4.0,
+   "B": 200.0,
+   "recovery_step": 0.5,
+   "g1": 46.666666666666664,
+   "g2_0": 70.0
+  },
+  "60": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "q": 60,
+   "T": 2,
+   "e_min": 0,
+   "e_max": 100,
+   "dw": 4.0,
+   "B": 220.0,
+   "recovery_step": 0.5,
+   "g1": 38.888888888888886,
+   "g2_0": 58.33333333333333
+  }
+ },
+ "kernel_choice": {
+  "50": {
+   "h": 12.0,
+   "peak_err": -0.05999999999999923,
+   "distance": 7.7021722333370235e-16,
+   "table": {
+    "2.0": -0.009999999999995778,
+    "5.0": -0.025,
+    "10.0": -0.04999999999999959,
+    "12.0": -0.05999999999999923,
+    "20.0": -0.0999999999999997
+   },
+   "target": -0.06,
+   "source": "family (c) evaluation rows of this run"
+  },
+  "60": {
+   "h": 12.0,
+   "peak_err": -0.050000000000004104,
+   "distance": 0.009999999999995894,
+   "table": {
+    "2.0": -0.008333333333338017,
+    "5.0": -0.020833333333332253,
+    "10.0": -0.04166666666666572,
+    "12.0": -0.050000000000004104,
+    "20.0": -0.08333333333333376
+   },
+   "target": -0.06,
+   "source": "family (c) evaluation rows of this run"
+  }
+ },
+ "kernel_grid_step": 0.01,
+ "kernel_target": -0.06,
+ "tiers_config": {
+  "development": {
+   "name": "development",
+   "state_step": 4.0,
+   "effort_step": 1.0,
+   "gl_half": 16,
+   "grid_tol": 1e-09,
+   "mass_tol": 1e-10,
+   "pdl_tol_over_dw": 1e-10
+  },
+  "final": {
+   "name": "final",
+   "state_step": 2.0,
+   "effort_step": 0.5,
+   "gl_half": 32,
+   "grid_tol": 1e-09,
+   "mass_tol": 1e-10,
+   "pdl_tol_over_dw": 1e-10
+  }
+ },
+ "tiers_equal_protocol_record": {
+  "development": true,
+  "final": true
+ },
+ "n_evaluations": 152,
+ "n_errors": 0,
+ "n_clip_binds": 0,
+ "figures": [
+  "d2_family_a.png",
+  "d2_family_a.pdf",
+  "d2_family_b.png",
+  "d2_family_b.pdf",
+  "d2_family_c.png",
+  "d2_family_c.pdf",
+  "d2_family_d.png",
+  "d2_family_d.pdf",
+  "d2_family_e.png",
+  "d2_family_e.pdf"
+ ],
+ "confirmation_per_run": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/confirmation_analysis/per_run.csv",
+ "confirmation_per_run_sha256": "d4a77eb49963407a828e204e7b0830988f35e55e59c2d3528af5168cd7725f68",
+ "confirmation_reported_metrics": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/confirmation_analysis/reported_metrics.csv",
+ "versions": {
+  "numpy": "2.5.0",
+  "pandas": "3.0.3",
+  "python": "3.12.3"
+ },
+ "eval_wall_sec_sum": 1.9213601229130217,
+ "timing_by_tier": {
+  "development": {
+   "n": 76,
+   "eval_sec_mean": 0.007346868919404668,
+   "eval_sec_max": 0.0186390969902277,
+   "eval_sec_sum": 0.5583620378747548
+  },
+  "final": {
+   "n": 76,
+   "eval_sec_mean": 0.017934185329450885,
+   "eval_sec_max": 0.0315505060134455,
+   "eval_sec_sum": 1.3629980850382672
+  }
+ },
+ "numerical_floors_delta0": {
+  "q50_development": {
+   "Gmax_full_over_dw": 2.220446049250313e-16,
+   "Gmax_full_t": 2.0,
+   "Gmax_full_d": -16.0,
+   "eta_T_over_dw": 2.220446049250313e-16,
+   "EXP_root_over_dw": 0.0,
+   "dReach_over_dw": 2.220446049250313e-16,
+   "Deltamax_all_over_dw": 2.220446049250313e-16,
+   "dFull_over_dw": 2.220446049250313e-16,
+   "stage1_rel_err_signed": 0.0,
+   "stage2_peak_rel_err_signed": 0.0,
+   "stage2_rmse_pos_over_g2_0": 0.0,
+   "stage2_tail_mean_over_g2_0": 0.0
+  },
+  "q50_final": {
+   "Gmax_full_over_dw": 2.220446049250313e-16,
+   "Gmax_full_t": 2.0,
+   "Gmax_full_d": -24.0,
+   "eta_T_over_dw": 2.220446049250313e-16,
+   "EXP_root_over_dw": 0.0,
+   "dReach_over_dw": 2.220446049250313e-16,
+   "Deltamax_all_over_dw": 2.220446049250313e-16,
+   "dFull_over_dw": 2.220446049250313e-16,
+   "stage1_rel_err_signed": 0.0,
+   "stage2_peak_rel_err_signed": 0.0,
+   "stage2_rmse_pos_over_g2_0": 0.0,
+   "stage2_tail_mean_over_g2_0": 0.0
+  },
+  "q60_development": {
+   "Gmax_full_over_dw": 2.220446049250313e-16,
+   "Gmax_full_t": 2.0,
+   "Gmax_full_d": 40.0,
+   "eta_T_over_dw": 2.220446049250313e-16,
+   "EXP_root_over_dw": 0.0,
+   "dReach_over_dw": 2.220446049250313e-16,
+   "Deltamax_all_over_dw": 2.220446049250313e-16,
+   "dFull_over_dw": 2.220446049250313e-16,
+   "stage1_rel_err_signed": 0.0,
+   "stage2_peak_rel_err_signed": 0.0,
+   "stage2_rmse_pos_over_g2_0": 0.0,
+   "stage2_tail_mean_over_g2_0": 0.0
+  },
+  "q60_final": {
+   "Gmax_full_over_dw": 3.510543252760457e-07,
+   "Gmax_full_t": 1.0,
+   "Gmax_full_d": 0.0,
+   "eta_T_over_dw": 2.220446049250313e-16,
+   "EXP_root_over_dw": 3.510543252760457e-07,
+   "dReach_over_dw": 3.510543254980903e-07,
+   "Deltamax_all_over_dw": 3.510543252760457e-07,
+   "dFull_over_dw": 3.510543254980903e-07,
+   "stage1_rel_err_signed": 0.0,
+   "stage2_peak_rel_err_signed": 0.0,
+   "stage2_rmse_pos_over_g2_0": 0.0,
+   "stage2_tail_mean_over_g2_0": 0.0
+  }
+ },
+ "total_wall_sec": 7.778627466002945
+}
