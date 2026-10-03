@@ -18,9 +18,22 @@ C7). New behaviour, all behind flags recorded in ``manifest.json``:
                  both optimizers follow the existing phase-C linear form ``lr_at`` (round-3
                  runner); before local_first the record's schedule applies (default: none, i.e.
                  the record's schedule everywhere; refused in mode full)
+  mode phase_P   (R1 refinement, method 5) restore an end-of-A parent and run the pathwise
+                 terminal fine-tuning phase P: exact-gradient ascent on the conditional expected
+                 terminal payoff, both players executing the Beta mean (agents/ppo_pathwise.py)
   mode locked    the locked v2 T=2 pipeline (run/run_v2_T2_locked.py): phase A then, after the
                  caller freezes the stage-2 snapshot, phase B in the same process; flags must be
                  expected / frozen / stage1_rows / mean (frozen only takes effect in phase B)
+  R1 optional keys (all absent == the locked behaviour, bit-identical):
+    lr_decay          several contiguous windows per phase (piecewise linear); start_lr != ab_lr
+                      allowed for a window starting at local 1 of a continued phase (and for a
+                      later window of a multi-window phase)
+    budget_overrides  also episodes_per_update; phase_caps / verifier_timeout may carry key "P"
+    ppo_overrides     {"minibatch": int, "target_kl": float | null}
+    conc_anneal       {phase, local_first, local_last, scale_first, scale_last}: multiplicative
+                      concentration factor on the live actor AND the lagged opponent (phase_A_continue)
+    continuation_value_mode  "sampled" (default) | "expected" (stage-1 rows use the shock-integrated
+                      table value of the frozen stage-2 policy; frozen + mean only)
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -81,13 +94,19 @@ REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "mode",
 FLAG_KEYS = ("reward_mode", "stage2_update_mode", "adv_norm_scope", "continuation_action_mode")
 DEFAULT_FLAGS = {"reward_mode": "sampled", "stage2_update_mode": "joint",
                  "adv_norm_scope": "all_rows", "continuation_action_mode": "stochastic"}
-MODES = ("full", "phase_A", "phase_B", "phase_A_continue", "locked")
+MODES = ("full", "phase_A", "phase_B", "phase_A_continue", "locked", "phase_P")
 LOCKED_FLAGS = {"reward_mode": "expected", "stage2_update_mode": "frozen",
                 "adv_norm_scope": "stage1_rows", "continuation_action_mode": "mean"}
 MODE_PHASES = {"full": ("A", "B", "C"), "phase_A": ("A",), "phase_A_continue": ("A",), "phase_B": ("B",),
-               "locked": ("A", "B")}
+               "locked": ("A", "B"), "phase_P": ("P",)}
 OVERRIDE_KEYS = ("phase_caps", "warmup", "stability_every", "verifier_timeout",
-                 "direct_rollout_episodes", "direct_rollout_reps")
+                 "direct_rollout_episodes", "direct_rollout_reps", "episodes_per_update")
+PARENT_MODES = ("phase_B", "phase_A_continue", "phase_P")   # modes that restore a full-state parent
+CONTINUED_MODES = ("phase_A_continue", "phase_P")           # a window may start at local 1 with start_lr != ab_lr
+PPO_OVERRIDE_KEYS = ("minibatch", "target_kl")
+CONC_ANNEAL_KEYS = ("phase", "local_first", "local_last", "scale_first", "scale_last")
+CONT_VALUE_MODES = ("sampled", "expected")
+CONT_TABLE_STEP = 0.05
 RNG_NAMES = ("env", "learn", "opp", "start")   # + the minibatch stream held by the agent
 LR_DECAY_KEYS = ("phase", "start_lr", "end_lr", "local_first", "local_last")
 
@@ -114,6 +133,17 @@ def git_state() -> Dict[str, object]:
     except Exception:
         commit, dirty = "unknown", None
     return {"commit": commit, "short": commit[:7], "dirty": dirty}
+
+
+def _tree_equal(a: object, b: object) -> bool:
+    """Exact (bitwise for tensors) equality of nested dict / list / tuple / tensor structures."""
+    if isinstance(a, torch.Tensor):
+        return isinstance(b, torch.Tensor) and a.dtype == b.dtype and a.shape == b.shape and torch.equal(a, b)
+    if isinstance(a, dict):
+        return isinstance(b, dict) and a.keys() == b.keys() and all(_tree_equal(a[k], b[k]) for k in a)
+    if isinstance(a, (list, tuple)):
+        return isinstance(b, (list, tuple)) and len(a) == len(b) and all(_tree_equal(x, y) for x, y in zip(a, b))
+    return a == b
 
 
 def rng_position(g: np.random.Generator) -> str:
@@ -152,7 +182,7 @@ def validate_config(cfg: Dict) -> None:
         raise ConfigError("stage2_update_mode=frozen is only defined in mode phase_B")
     if mode == "locked" and (fl != LOCKED_FLAGS or not cfg["fixed_budget"]):
         raise ConfigError(f"mode locked requires flags {LOCKED_FLAGS} and fixed_budget true")
-    if mode in ("phase_A", "phase_A_continue") and fl["adv_norm_scope"] != "all_rows":
+    if mode in ("phase_A", "phase_A_continue", "phase_P") and fl["adv_norm_scope"] != "all_rows":
         raise ConfigError("phase_A has no stage-1 rows; adv_norm_scope must be all_rows")
     if not isinstance(cfg.get("full_state_at", []), list):
         raise ConfigError("full_state_at must be a list of global updates")
@@ -170,13 +200,49 @@ def validate_config(cfg: Dict) -> None:
                 raise ConfigError(f"lr_decay.phase {w['phase']!r} is not the phase run by mode {mode}")
             if not 1 <= int(w["local_first"]) < int(w["local_last"]):
                 raise ConfigError("lr_decay needs 1 <= local_first < local_last")
-        if len({w["phase"] for w in wins}) != len(wins):
-            raise ConfigError("lr_decay: at most one window per phase")
-    if mode in ("phase_B", "phase_A_continue"):
+        for ph in {w["phase"] for w in wins}:
+            seq = sorted((w for w in wins if w["phase"] == ph), key=lambda w: int(w["local_first"]))
+            for a_, b_ in zip(seq[:-1], seq[1:]):
+                if int(b_["local_first"]) != int(a_["local_last"]) + 1:
+                    raise ConfigError(f"lr_decay: the windows of phase {ph} must be contiguous and "
+                                      f"non-overlapping (local_first of the next = local_last + 1)")
+    if mode in PARENT_MODES:
         if not cfg["parent_checkpoint"] or not cfg["parent_sha256"]:
             raise ConfigError(f"{mode} needs parent_checkpoint and parent_sha256")
     elif cfg["parent_checkpoint"] is not None or cfg["parent_sha256"] is not None:
-        raise ConfigError("parent_checkpoint/parent_sha256 must be null unless mode=phase_B or phase_A_continue")
+        raise ConfigError("parent_checkpoint/parent_sha256 must be null unless mode=phase_B, "
+                          "phase_A_continue or phase_P")
+    # ---- R1 optional keys (absent == the locked behaviour)
+    ppo_ov = cfg.get("ppo_overrides")
+    if ppo_ov is not None:
+        if not isinstance(ppo_ov, dict) or set(ppo_ov) - set(PPO_OVERRIDE_KEYS):
+            raise ConfigError(f"ppo_overrides keys must be within {PPO_OVERRIDE_KEYS}")
+        mb, tk = ppo_ov.get("minibatch"), ppo_ov.get("target_kl")
+        if mb is not None and (not isinstance(mb, int) or isinstance(mb, bool) or mb < 1):
+            raise ConfigError("ppo_overrides.minibatch must be a positive int")
+        if tk is not None and (isinstance(tk, bool) or not isinstance(tk, (int, float)) or not tk > 0):
+            raise ConfigError("ppo_overrides.target_kl must be null or a positive number")
+        if mode == "full" and (mb is not None or tk is not None):
+            raise ConfigError("ppo_overrides are not allowed in mode full (regression mode)")
+    ca = cfg.get("conc_anneal")
+    if ca is not None:
+        if not isinstance(ca, dict) or set(ca) != set(CONC_ANNEAL_KEYS):
+            raise ConfigError(f"conc_anneal must have exactly {CONC_ANNEAL_KEYS}")
+        if mode != "phase_A_continue" or ca["phase"] != "A":
+            raise ConfigError("conc_anneal is defined for phase A of mode phase_A_continue only")
+        if not 1 <= int(ca["local_first"]) < int(ca["local_last"]):
+            raise ConfigError("conc_anneal needs 1 <= local_first < local_last")
+        if not (float(ca["scale_first"]) > 0 and float(ca["scale_last"]) > 0):
+            raise ConfigError("conc_anneal scales must be positive")
+    cvm = cfg.get("continuation_value_mode", "sampled")
+    if cvm not in CONT_VALUE_MODES:
+        raise ConfigError(f"continuation_value_mode {cvm!r} not in {CONT_VALUE_MODES}")
+    if cvm == "expected":
+        if fl["stage2_update_mode"] != "frozen" or fl["continuation_action_mode"] != "mean":
+            raise ConfigError("continuation_value_mode=expected requires stage2_update_mode=frozen "
+                              "and continuation_action_mode=mean")
+        if float(cfg["record"]["ppo"]["gamma"]) != 1.0 or float(cfg["record"]["ppo"]["gae_lambda"]) != 1.0:
+            raise ConfigError("continuation_value_mode=expected requires gamma = lambda = 1")
     bad = set(cfg["budget_overrides"]) - set(OVERRIDE_KEYS)
     if bad:
         raise ConfigError(f"unknown budget_overrides {sorted(bad)}")
@@ -213,6 +279,13 @@ class Run:
         self.versions_actual = versions_actual
         self.spec = strict_dataclass(GameSpec, rec["game"], "game")
         self.ppo_cfg = strict_dataclass(PPOConfig, rec["ppo"], "ppo")
+        self.ppo_overrides = copy.deepcopy(cfg.get("ppo_overrides") or {})
+        if self.ppo_overrides.get("minibatch") is not None:
+            self.ppo_cfg = dataclasses.replace(self.ppo_cfg, minibatch=int(self.ppo_overrides["minibatch"]))
+        self.target_kl = self.ppo_overrides.get("target_kl")
+        self.conc_anneal = copy.deepcopy(cfg.get("conc_anneal"))
+        self.cont_mode = cfg.get("continuation_value_mode", "sampled")
+        self.cont_table = None
         self.dev_cfg = strict_dataclass(VerifierConfig, rec["verifier"]["development"], "verifier.development")
         self.fin_cfg = strict_dataclass(VerifierConfig, rec["verifier"]["final"], "verifier.final")
         if self.dev_cfg != DEV_CONFIG or self.fin_cfg != FINAL_CONFIG:
@@ -232,12 +305,19 @@ class Run:
                 raise ConfigError(f"protocol.{k_} != game.{k_}")
         if float(rec["dw"]) != spec.dw or float(rec["B"]) != spec.B or float(rec["domain_half_stage2"]) != spec.domain_half(2):
             raise ConfigError("record dw/B/domain_half_stage2 inconsistent with game")
-        if int(P["phase_c_root"]) + int(P["phase_c_es"]) != int(P["episodes_per_update"]):
+        if int(P["phase_c_root"]) + int(P["phase_c_es"]) != int(P["episodes_per_update"]):   # the record itself
             raise ConfigError("phase_c_root + phase_c_es != episodes_per_update")
         if rec["smoke_overrides"]:
             raise ConfigError("embedded record carries smoke_overrides")
         ov = copy.deepcopy(cfg["budget_overrides"])
         P.update(ov)
+        if "C" in MODE_PHASES[self.mode] and int(P["phase_c_root"]) + int(P["phase_c_es"]) != int(P["episodes_per_update"]):
+            raise ConfigError("phase_c_root + phase_c_es != episodes_per_update")   # after an episodes_per_update override
+        if "P" in MODE_PHASES[self.mode] and isinstance(P["verifier_timeout"], dict) and "P" not in P["verifier_timeout"]:
+            raise ConfigError("verifier_timeout has no entry for phase P")
+        for ph in MODE_PHASES[self.mode]:
+            if ph not in P["phase_caps"]:
+                raise ConfigError(f"budget phase_caps has no entry for phase {ph}")
         self.overrides = ov
         self.P = P
         self.sched = sched
@@ -256,6 +336,7 @@ class Run:
                      "opp": _rng("opponent_action"), "start": _rng("starts_roles")}
         rng_mb = _rng("minibatch")
         self.agent = CurriculumPPOv2(self.ppo_cfg, self.torch_gen, rng_mb, device=rec["device"])
+        self.agent.target_kl = None if self.target_kl is None else float(self.target_kl)
         self.opt_ids = {"actor": id(self.agent.opt_actor), "critic": id(self.agent.opt_critic)}
         set_lr(self.agent, lr_at(sched, "A", 1))
         self.sampler = StartSampler(spec, P["es_bin_width"])
@@ -292,12 +373,22 @@ class Run:
         self.phase_start_hook: Optional[Callable[[str], None]] = None
         self.lr_decay = cfg.get("lr_decay")
         dec = self.lr_decay
-        self.lr_windows = {w["phase"]: w for w in (dec if isinstance(dec, list) else [dec])} if dec is not None else {}
-        for w in self.lr_windows.values():
-            if int(w["local_last"]) != int(P["phase_caps"][w["phase"]]):
+        self.lr_windows: Dict[str, List[Dict]] = {}
+        for w in ([] if dec is None else (dec if isinstance(dec, list) else [dec])):
+            self.lr_windows.setdefault(w["phase"], []).append(w)
+        for ph, seq in self.lr_windows.items():
+            seq.sort(key=lambda w: int(w["local_first"]))
+            if int(seq[-1]["local_last"]) != int(P["phase_caps"][ph]):
                 raise ConfigError("lr_decay.local_last must equal the phase cap")
-            if float(w["start_lr"]) != float(sched["ab_lr"]):
-                raise ConfigError("lr_decay.start_lr must equal lr_schedule.ab_lr")
+            first = seq[0]
+            if float(first["start_lr"]) != float(sched["ab_lr"]) and not (
+                    self.mode in CONTINUED_MODES and int(first["local_first"]) == 1):
+                raise ConfigError("lr_decay.start_lr must equal lr_schedule.ab_lr (a window starting at "
+                                  "local 1 of a continued phase may differ)")
+            if ph == "P" and int(first["local_first"]) != 1:
+                raise ConfigError("phase P has no record schedule: its lr window must start at local 1")
+        if "P" in MODE_PHASES[self.mode] and "P" not in self.lr_windows:
+            raise ConfigError("mode phase_P needs an lr_decay window for phase P")
 
     # ------------------------------------------------------------------ learning rate
     def lr_for(self, phase: str, local: int) -> float:
@@ -306,13 +397,38 @@ class Run:
         Inside the window (local_first <= local) the decay reuses ``lr_at``'s linear branch
         unchanged: lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first).
         """
-        dec = self.lr_windows.get(phase)
-        if dec is None or local < int(dec["local_first"]):
+        dec = None
+        for w in self.lr_windows.get(phase, ()):
+            if int(w["local_first"]) <= local <= int(w["local_last"]):
+                dec = w
+        if dec is None:
             return lr_at(self.sched, phase, local)
         lin = dict(self.sched, kind="linear", c_start_lr=float(dec["start_lr"]),
                    c_end_lr=float(dec["end_lr"]), c_local_first=int(dec["local_first"]),
                    linear_denominator=int(dec["local_last"]) - int(dec["local_first"]))
         return lr_at(lin, "C", local)
+
+    # ------------------------------------------------------------------ R1 helpers
+    def conc_scale_for(self, local: int) -> float:
+        """Concentration factor before local update ``local`` (linear between the anneal endpoints)."""
+        ca = self.conc_anneal
+        j0, j1 = int(ca["local_first"]), int(ca["local_last"])
+        s0, s1 = float(ca["scale_first"]), float(ca["scale_last"])
+        if local <= j0:
+            return s0
+        if local >= j1:
+            return s1
+        return s0 + (s1 - s0) * (local - j0) / (j1 - j0)
+
+    @staticmethod
+    def d1_policy_row_stats(batch: Dict, pol_rows: np.ndarray) -> Dict[str, object]:
+        """D1 columns over the learner's policy rows: min alpha / beta and counts below 1."""
+        a, b = batch["d1_buf"]["alpha"][pol_rows], batch["d1_buf"]["beta"][pol_rows]
+        n = int(a.size)
+        return {"d1_pol_n_rows": n,
+                "d1_pol_alpha_min": float(a.min()) if n else float("nan"),
+                "d1_pol_beta_min": float(b.min()) if n else float("nan"),
+                "d1_pol_n_alpha_lt1": int((a < 1.0).sum()), "d1_pol_n_beta_lt1": int((b < 1.0).sum())}
 
     # ------------------------------------------------------------------ policy functions
     def policy_fns(self) -> Tuple[Callable, Callable]:
@@ -436,6 +552,13 @@ class Run:
         would_fire: Optional[Dict] = None
         frozen = agent.frozen if (phase == "B" and self.flags["stage2_update_mode"] == "frozen") else None
         masked = frozen is not None
+        if frozen is not None and self.cont_mode == "expected":
+            from utils.v2_continuation import build_continuation_table   # R1 method 6 (lazy: default path never imports it)
+            t_ct = time.perf_counter()
+            self.cont_table = build_continuation_table(frozen, spec, stage=spec.T, step=CONT_TABLE_STEP)
+            self.costs_v2.add("continuation_table", time.perf_counter() - t_ct)
+        cont_table = self.cont_table if (frozen is not None and self.cont_mode == "expected") else None
+        save_locals = {u for u in (25, int(round(cap / 2 / 25.0)) * 25, cap) if 1 <= u <= cap}   # D1 buffers
         # mode locked runs A and B in one process; B rows carry extra drift columns -> one CSV per phase
         csv_path = os.path.join(self.out_dir, f"v2_checkpoints_{phase}.csv" if self.mode == "locked" else "v2_checkpoints.csv")
         os.makedirs(os.path.join(self.out_dir, "checkpoints"), exist_ok=True)
@@ -467,6 +590,10 @@ class Run:
             actor_lr, critic_lr = read_lr(agent)
             if id(agent.opt_actor) != self.opt_ids["actor"] or id(agent.opt_critic) != self.opt_ids["critic"]:
                 raise RuntimeError("optimizer object replaced")
+            if self.conc_anneal is not None and self.conc_anneal["phase"] == phase:
+                sc_ = self.conc_scale_for(local)
+                agent.actor.conc_scale = sc_      # live actor and lagged opponent; constant within the update
+                agent.opponent.conc_scale = sc_
             n_ep = int(P["episodes_per_update"])
             rng_start = self.rngs["start"]
             if phase == "A":
@@ -490,14 +617,19 @@ class Run:
                                      # one (phase A of mode locked) the default 'stochastic' applies,
                                      # which is what every other mode already validates to
                                      continuation_action_mode=(self.flags["continuation_action_mode"]
-                                                               if frozen is not None else "stochastic"))
+                                                               if frozen is not None else "stochastic"),
+                                     cont_table=cont_table)
             self.costs.add("train_rollout", time.perf_counter() - t_r)
             s1 = batch["stage"] == 1
+            pol_rows = s1 if masked else np.ones(s1.size, dtype=bool)
             adv_t = torch.as_tensor(batch["advantages"])
             adv_stats = {"adv_all_mean": float(adv_t.mean()), "adv_all_std": float(adv_t.std(unbiased=False)),
                          "adv_s1_mean": float(adv_t[torch.as_tensor(s1)].mean()) if s1.any() else float("nan"),
                          "adv_s1_std": float(adv_t[torch.as_tensor(s1)].std(unbiased=False)) if s1.any() else float("nan"),
                          "n_rows": int(s1.size), "n_s1_rows": int(s1.sum())}
+            pre_actor = ({f"actor_pre.{k_}": v_.detach().cpu().numpy().copy() for k_, v_ in agent.actor.state_dict().items()}
+                         if local in save_locals else None)   # the policy that generated this buffer (D1)
+            pre_scale = float(agent.actor.conc_scale)
             t_u = time.perf_counter()
             if masked:
                 norm_mask = s1 if self.flags["adv_norm_scope"] == "stage1_rows" else None
@@ -507,6 +639,15 @@ class Run:
                 diag = agent.update(batch["states"], batch["actions"], batch["logp"], batch["returns"],
                                     batch["advantages"])
             self.costs.add("train_update", time.perf_counter() - t_u)
+            if local in save_locals:   # D1 buffer of THIS update (collected before it); bookkeeping only
+                os.makedirs(os.path.join(self.out_dir, "d1_buffers"), exist_ok=True)
+                np.savez(os.path.join(self.out_dir, "d1_buffers", f"u{self.global_u:05d}.npz"),
+                         states=batch["states"], raw=batch["d1_buf"]["raw"], actions=batch["actions"],
+                         alpha=batch["d1_buf"]["alpha"], beta=batch["d1_buf"]["beta"], stage=batch["stage"],
+                         old_logp=batch["logp"], adv_raw=batch["advantages"], policy_mask=pol_rows,
+                         adv_norm_mean=np.float64(diag["adv_raw_mean"]), adv_norm_std=np.float64(diag["adv_raw_std"]),
+                         local=np.int64(local), global_update=np.int64(self.global_u),
+                         conc_scale_pre=np.float64(pre_scale), **pre_actor)
             actor_lr_after, critic_lr_after = read_lr(agent)
             if actor_lr_after != actor_lr or critic_lr_after != critic_lr:
                 raise RuntimeError("learning rate changed inside an update")
@@ -580,7 +721,10 @@ class Run:
                      "policy_loss": diag["policy_loss"], "value_loss": diag["value_loss"],
                      "update_wall_sec": time.perf_counter() - t_upd,
                      **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
-                     "rngpos_minibatch": rng_position(agent.rng_mb)}
+                     "rngpos_minibatch": rng_position(agent.rng_mb),
+                     # ---- R1 columns (new; excluded from bit-identity comparisons)
+                     "n_epochs_run": len(diag["kl_epochs"]), "conc_scale": float(agent.actor.conc_scale),
+                     **batch["d1"], **self.d1_policy_row_stats(batch, pol_rows)}
             self.v2_history.append(v2row)
             if reason is not None:
                 t_v = time.perf_counter()
@@ -710,6 +854,149 @@ class Run:
             self.phases_done.append(phase)
         return exit_reason
 
+    # ------------------------------------------------------------------ phase P (R1 method 5)
+    def run_pathwise_phase(self, phase: str = "P") -> str:
+        """Phase P: exact-gradient ascent on the conditional expected terminal payoff.
+
+        Both players execute the Beta mean (no action draw, no shock draw); the learner's gradient
+        flows through its mean into the actor (``agents/ppo_pathwise.py``). Only the ``start``
+        stream is consumed, with the same calls as phase A (bin-balanced exploring starts on D_T and
+        random roles). The lagged opponent is refreshed at the phase entry and every
+        ``snapshot_every`` global updates. The concentration head and the critic must be
+        bit-identical to the parent's at the end of the phase (checked, recorded in
+        ``phaseP_checks.json``; a violation raises).
+        """
+        from agents.ppo_pathwise import pathwise_step   # lazy: the default path never imports it
+        spec, P, agent, ppo_cfg = self.spec, self.P, self.agent, self.ppo_cfg
+        stage = spec.T
+        cap = int(P["phase_caps"][phase])
+        vt = P["verifier_timeout"]
+        if isinstance(vt, dict) and phase not in vt:
+            raise ConfigError(f"verifier_timeout has no entry for phase {phase}")
+        timeout = int(vt[phase]) if isinstance(vt, dict) else int(vt)
+        entry = self.global_u
+        local = 0
+        t_ph, c_ph = time.perf_counter(), time.process_time()
+        cost_before = dict(self.costs.t)
+        agent.refresh_snapshot()
+        self.snapshot_log.append({"update": self.global_u, "reason": f"phase_{phase}_entry"})
+        head0 = (agent.actor.out.weight[1].detach().clone(), agent.actor.out.bias[1].detach().clone())
+        critic0 = {k: v.detach().clone() for k, v in agent.critic.state_dict().items()}
+        opt_critic0 = copy.deepcopy(agent.opt_critic.state_dict())
+        csv_path = os.path.join(self.out_dir, f"v2_checkpoints_{phase}.csv")
+        os.makedirs(os.path.join(self.out_dir, "checkpoints"), exist_ok=True)
+        print(f"[phase {phase}] pathwise phase at global update {self.global_u}, cap {cap}, stage {stage}, "
+              f"lr(first)={self.lr_for(phase, 1):.6g}", flush=True)
+        if self.phase_start_hook is not None:
+            self.phase_start_hook(phase)
+        while local < cap:
+            local += 1
+            self.global_u += 1
+            t_upd = time.perf_counter()
+            lr_now = self.lr_for(phase, local)
+            set_lr(agent, lr_now)
+            actor_lr, critic_lr = read_lr(agent)
+            n_ep = int(P["episodes_per_update"])
+            rng_start = self.rngs["start"]
+            d0 = self.sampler.balanced(stage, n_ep, rng_start)
+            roles = rng_start.integers(0, 2, size=n_ep)
+            d_learner = np.where(roles == 0, d0, -d0).astype(float)
+            t_u = time.perf_counter()
+            diag = pathwise_step(agent, spec, d_learner, stage, max_grad_norm=ppo_cfg.max_grad_norm)
+            self.costs.add("train_update", time.perf_counter() - t_u)
+            self.total_episodes += n_ep
+            self.total_transitions += n_ep
+            snap = False
+            if self.global_u % int(P["snapshot_every"]) == 0:
+                agent.refresh_snapshot()
+                self.snapshot_log.append({"update": self.global_u, "reason": f"every_{P['snapshot_every']}"})
+                snap = True
+            if self.global_u in self.full_state_at:
+                torch.save(self.full_state(phase), os.path.join(self.out_dir, f"state_u{self.global_u:05d}.pt"))
+            if self.weights_every and self.global_u % self.weights_every == 0:
+                os.makedirs(self.weights_dir, exist_ok=True)
+                w_path = os.path.join(self.weights_dir, f"u{self.global_u:05d}.npz")
+                agent.export_weights_npz(w_path)
+                self.weights_log.append({"update": self.global_u, "phase": phase, "local": local,
+                                         "file": os.path.relpath(w_path, self.out_dir)})
+            self.history.append({"update": self.global_u, "phase": phase, "local": local, "actor_lr": actor_lr,
+                                 "critic_lr": critic_lr, "n_episodes": n_ep, "n_transitions": n_ep,
+                                 "n_minibatch_steps": 1, "snapshot_refreshed": snap, **diag})
+            self.v2_history.append({"update": self.global_u, "phase": phase, "local": local, "actor_lr": actor_lr,
+                                    **diag, "update_wall_sec": time.perf_counter() - t_upd,
+                                    **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
+                                    "rngpos_minibatch": rng_position(agent.rng_mb)})
+            reason = "timeout" if local % timeout == 0 else ("phase_end" if local == cap else None)
+            if reason is not None:
+                t_v = time.perf_counter()
+                ev, err = self.verify_candidate(self.dev_cfg)
+                dt = time.perf_counter() - t_v
+                self.costs.add("dev_verifier", dt)
+                res = ev.res if ev is not None else None
+                crit = None if res is None else res.full_delta_max[spec.T] / spec.dw
+                self.verifier_log.append({"update": self.global_u, "phase": phase, "local": local, "reason": reason,
+                                          "actor_lr": actor_lr, "valid": bool(res.valid) if res is not None else False,
+                                          "error": err, "criterion": "max_D2dev_Delta2_over_dw",
+                                          "criterion_value_over_dw": crit, "time_sec": dt,
+                                          "summary": None if res is None else res.summary()})
+                if ev is not None:
+                    t_w = time.perf_counter()
+                    row = {"run": self.cfg["run"], "pilot": self.cfg["pilot"], "arm": self.cfg["arm"], "q": spec.q,
+                           "seed": self.seed, "mode": self.mode, **self.flags, "stage1_status": "stage1_untrained",
+                           "update": self.global_u, "phase": phase, "local": local, "reason": reason,
+                           "phase_criterion": "max_D2dev_Delta2_over_dw", "phase_criterion_value_over_dw": crit,
+                           "loss": diag["loss"], "foc_abs_mean": diag["foc_abs_mean"], "foc_abs_max": diag["foc_abs_max"],
+                           "elapsed_phase_wall_sec": time.perf_counter() - t_ph, "verifier_sec": dt}
+                    row.update(ev.scalars)
+                    append_csv(csv_path, row)
+                    save_npz(ev, os.path.join(self.out_dir, "checkpoints", f"u{self.global_u:05d}.npz"))
+                    self.costs_v2.add("v2_outputs", time.perf_counter() - t_w)
+                    print(f"[u{self.global_u:>5} {phase}{local:>4}] verifier({reason}) valid={res.valid} "
+                          f"eta2/DW={crit:.5f} loss={diag['loss']:.5f} foc_mean={diag['foc_abs_mean']:.3e} "
+                          f"e2(0)={diag['e0']:.3f} lr={actor_lr:.3g}", flush=True)
+                else:
+                    print(f"[u{self.global_u:>5} {phase}{local:>4}] verifier({reason}) INVALID: {err}", flush=True)
+            elif local % 50 == 0:
+                print(f"[u{self.global_u:>5} {phase}{local:>4}] loss={diag['loss']:.5f} "
+                      f"foc_mean={diag['foc_abs_mean']:.3e} gn={diag['grad_norm_pre_clip']:.3e} "
+                      f"e2(0)={diag['e0']:.3f} lr={actor_lr:.3g}", flush=True)
+        # ---- end-of-phase assertions: concentration head and critic untouched (D3)
+        head_ok = bool(torch.equal(agent.actor.out.weight[1], head0[0]) and torch.equal(agent.actor.out.bias[1], head0[1]))
+        critic_ok = bool(all(torch.equal(v, critic0[k]) for k, v in agent.critic.state_dict().items()))
+        opt_ok = _tree_equal(opt_critic0["state"], agent.opt_critic.state_dict()["state"])   # moments and step counts (the lr is set per update)
+        self.phase_checks = {"concentration_head_bit_identical": head_ok, "critic_bit_identical": critic_ok,
+                             "critic_adam_state_bit_identical": opt_ok}
+        write_json(os.path.join(self.out_dir, f"phase{phase}_checks.json"), self.phase_checks)
+        if not head_ok:
+            raise RuntimeError("concentration head (actor.out row 1) changed during phase P")
+        self.visitation_by_phase[phase] = {}
+        self.would_fire[phase] = None
+        self.curriculum_log.append({"phase": phase, "entry_update": entry, "exit_update": self.global_u,
+                                    "local_updates": local, "cap": cap, "exit_reason": "budget_exhausted",
+                                    "active_stages": [stage], "lr_first": self.lr_for(phase, 1),
+                                    "lr_last": self.lr_for(phase, local), "episodes": local * int(P["episodes_per_update"]),
+                                    "transitions": local * int(P["episodes_per_update"]), "minibatch_steps": local,
+                                    "n_verifier_calls": sum(1 for v in self.verifier_log if v["phase"] == phase)})
+        print(f"[phase {phase}] exit at global update {self.global_u} after {local} local updates "
+              f"(head bit-identical={head_ok}, critic bit-identical={critic_ok})", flush=True)
+        self.phase_timing[phase] = {
+            "wall_sec": time.perf_counter() - t_ph, "process_cpu_sec": time.process_time() - c_ph,
+            "updates": local, "global_entry": entry, "global_exit": self.global_u,
+            "by_category_sec": {k_: v_ - cost_before.get(k_, 0.0) for k_, v_ in self.costs.t.items()}}
+        if not (self.phases_done and self.phases_done[-1] == phase):
+            self.phases_done.append(phase)
+        return "budget_exhausted"
+
+
+def record_restored_scale(run: Run, out_dir: str) -> None:
+    """Overwrite manifest ``conc_scale_initial`` with the scales carried by the restored parent state."""
+    man_path = os.path.join(out_dir, "manifest.json")
+    man = json.load(open(man_path))
+    man["conc_scale_initial"] = {"actor": float(run.agent.actor.conc_scale),
+                                 "opponent": float(run.agent.opponent.conc_scale),
+                                 "note": "after restoring the parent state, before the first update"}
+    write_json(man_path, man)
+
 
 def write_manifest(run: Run, cfg: Dict, out_dir: str, cmd: str) -> Dict:
     """Resolved run manifest (refusal of missing fields already happened in validate_config)."""
@@ -728,6 +1015,9 @@ def write_manifest(run: Run, cfg: Dict, out_dir: str, cmd: str) -> Dict:
         "flags": run.flags, "reward_mode": run.flags["reward_mode"],
         "stage2_update_mode": run.flags["stage2_update_mode"], "adv_norm_scope": run.flags["adv_norm_scope"],
         "continuation_action_mode": run.flags["continuation_action_mode"],
+        "continuation_value_mode": run.cont_mode, "ppo_overrides": run.ppo_overrides,
+        "target_kl": run.target_kl, "conc_anneal": run.conc_anneal,
+        "conc_scale_initial": {"actor": float(run.agent.actor.conc_scale), "opponent": float(run.agent.opponent.conc_scale)},
         "parent_checkpoint": cfg["parent_checkpoint"], "parent_sha256": cfg["parent_sha256"],
         "budget_overrides": run.overrides, "resolved_protocol": P,
         "resolved_config": {"game": dataclasses.asdict(spec), "ppo": dataclasses.asdict(run.ppo_cfg),
@@ -759,7 +1049,7 @@ def main() -> int:
     if os.path.exists(status_path):
         print(f"[refuse] {out_dir} already holds status.json; not restarting", flush=True)
         return 3
-    if cfg.get("mode") in ("phase_B", "phase_A_continue") and cfg.get("parent_checkpoint"):
+    if cfg.get("mode") in PARENT_MODES and cfg.get("parent_checkpoint"):
         if not os.path.exists(cfg["parent_checkpoint"]):
             raise ConfigError(f"parent checkpoint {cfg['parent_checkpoint']} not found")
         actual = sha256_file(cfg["parent_checkpoint"])
@@ -784,6 +1074,7 @@ def execute(run: Run, cfg: Dict, out_dir: str, cmd: str) -> int:
     try:
         if run.mode == "phase_B":
             run.restore(cfg["parent_checkpoint"])
+            record_restored_scale(run, out_dir)
             if run.phases_done != ["A"]:
                 raise ConfigError(f"parent phases_done {run.phases_done} != ['A']")
             run.parent_ref = run.stage2_mapping()
@@ -795,16 +1086,28 @@ def execute(run: Run, cfg: Dict, out_dir: str, cmd: str) -> int:
             phases = ["A"]
         elif run.mode == "phase_A_continue":
             run.restore(cfg["parent_checkpoint"])
-            if run.phases_done != ["A"]:
+            record_restored_scale(run, out_dir)
+            # an end-of-A state, or a mid-phase-A state (full_state_at) of an uninterrupted phase A
+            mid_phase_a = run.phases_done == [] and run.parent_state.get("phase_done") == "A"
+            if run.phases_done != ["A"] and not mid_phase_a:
                 raise ConfigError(f"parent phases_done {run.phases_done} != ['A']")
             phases = ["A"]
+        elif run.mode == "phase_P":
+            run.restore(cfg["parent_checkpoint"])
+            record_restored_scale(run, out_dir)
+            if run.phases_done != ["A"]:
+                raise ConfigError(f"parent phases_done {run.phases_done} != ['A']")
+            phases = ["P"]
         else:
             phases = ["A", "B", "C"]
         if run.mode == "full":
             PROTOCOL.clear()
             PROTOCOL.update(run.P)
         for ph in phases:
-            run.run_phase(ph)
+            if ph == "P":
+                run.run_pathwise_phase(ph)
+            else:
+                run.run_phase(ph)
             if run.mode != "full":
                 torch.save(run.full_state(ph), os.path.join(out_dir, f"state_end_{ph}.pt"))
         train_wall = time.perf_counter() - t_wall0
@@ -900,7 +1203,16 @@ def execute(run: Run, cfg: Dict, out_dir: str, cmd: str) -> int:
                    {"phase_timing": run.phase_timing, "would_have_fired": run.would_fire,
                     "fixed_budget": run.fixed, "costs": cs, "costs_v2": run.costs_v2.as_dict(),
                     "phases_done": run.phases_done,
-                    "final_global_update": run.global_u})
+                    "final_global_update": run.global_u,
+                    "conc_scale_final": {"actor": float(run.agent.actor.conc_scale),
+                                         "opponent": float(run.agent.opponent.conc_scale)},
+                    "continuation_table": None if run.cont_table is None else run.cont_table.meta,
+                    "phase_checks": getattr(run, "phase_checks", None)})
+        man_path = os.path.join(out_dir, "manifest.json")
+        man_now = json.load(open(man_path))
+        man_now["conc_scale_final"] = {"actor": float(run.agent.actor.conc_scale),
+                                       "opponent": float(run.agent.opponent.conc_scale)}
+        write_json(man_path, man_now)
         if run.v2_history:
             keys = list(run.v2_history[0].keys())
             import csv as _csv

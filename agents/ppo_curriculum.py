@@ -72,6 +72,9 @@ class BetaActor(nn.Module):
         self.out = nn.Linear(hidden, 2)
         self.c_min = float(c_min)
         self.mu_clamp = float(mu_clamp)
+        # R1 refinement: multiplicative concentration factor (1.0 = the locked behaviour; the
+        # multiplication is skipped at 1.0, so the default graph is operation-for-operation unchanged)
+        self.conc_scale: float = 1.0
         _orthogonal(self.l1, math.sqrt(2.0), gen)
         _orthogonal(self.l2, math.sqrt(2.0), gen)
         nn.init.zeros_(self.out.weight)
@@ -84,6 +87,8 @@ class BetaActor(nn.Module):
         z = self.out(h)
         mu = torch.clamp(torch.sigmoid(z[:, 0]), self.mu_clamp, 1.0 - self.mu_clamp)
         c = self.c_min + F.softplus(z[:, 1])
+        if self.conc_scale != 1.0:
+            c = c * self.conc_scale
         return mu * c, (1.0 - mu) * c
 
 
@@ -121,6 +126,7 @@ class CurriculumPPO:
                                            betas=cfg.adam_betas, eps=cfg.adam_eps,
                                            weight_decay=cfg.weight_decay)
         self.rng_mb = rng_minibatch
+        self.target_kl: Optional[float] = None   # R1: stop the epoch loop after an epoch with KL > target
         self.opponent: BetaActor = copy.deepcopy(self.actor)
         self.snapshot_refreshes: int = 0
         self.refresh_snapshot()
@@ -129,6 +135,7 @@ class CurriculumPPO:
     def refresh_snapshot(self) -> None:
         """Copy the current actor into the frozen opponent."""
         self.opponent.load_state_dict(self.actor.state_dict())
+        self.opponent.conc_scale = self.actor.conc_scale
         for p in self.opponent.parameters():
             p.requires_grad_(False)
         self.opponent.eval()
@@ -204,8 +211,11 @@ class CurriculumPPO:
         gnc: List[float] = []
         kl_epochs: List[float] = []
         steps = 0
+        stopped = False
         for _ in range(cfg.epochs):
-            perm = self.rng_mb.permutation(n)
+            perm = self.rng_mb.permutation(n)   # always drawn: stream position independent of target_kl
+            if stopped:
+                continue
             for start in range(0, n, cfg.minibatch):
                 idx = torch.as_tensor(perm[start:start + cfg.minibatch], device=dev)
                 alpha, beta = self.actor(st[idx])
@@ -243,6 +253,8 @@ class CurriculumPPO:
                 log_r = logp - olp
                 r = torch.exp(log_r)
                 kl_epochs.append(float(((r - 1.0) - log_r).mean().item()))
+            if self.target_kl is not None and kl_epochs[-1] > self.target_kl:
+                stopped = True
 
         with torch.no_grad():
             alpha, beta = self.actor(st)
@@ -252,7 +264,7 @@ class CurriculumPPO:
             conc_stats = (float(conc.min().item()), float(conc.mean().item()),
                           float(conc.max().item()))
 
-        return {
+        out = {
             "policy_loss": float(np.mean(pl)),
             "value_loss": float(np.mean(vl)),
             "entropy_minibatch_mean": float(np.mean(ent)),
@@ -272,6 +284,9 @@ class CurriculumPPO:
             "n_minibatch_steps": int(steps),
             "lr": float(self.opt_actor.param_groups[0]["lr"]),
         }
+        if self.target_kl is not None:
+            out["n_epochs_run"] = len(kl_epochs)
+        return out
 
     # ------------------------------------------------------------------ persistence
     def state(self) -> Dict[str, object]:
@@ -303,12 +318,15 @@ class CurriculumPPO:
         arrs = {f"actor.{k}": v.detach().cpu().numpy() for k, v in self.actor.state_dict().items()}
         arrs.update({f"critic.{k}": v.detach().cpu().numpy()
                      for k, v in self.critic.state_dict().items()})
+        if self.actor.conc_scale != 1.0:
+            # exact Python float (float64); mean_effort_numpy casts it to float32 as torch does
+            arrs["conc_scale"] = np.asarray(self.actor.conc_scale, dtype=np.float64)
         np.savez(path, **arrs)
 
 
 def mean_effort_numpy(weights: Dict[str, np.ndarray], obs: np.ndarray, c_min: float = 100.0,
-                      mu_clamp: float = 1e-6, e_min: float = 0.0, e_max: float = 100.0
-                      ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                      mu_clamp: float = 1e-6, e_min: float = 0.0, e_max: float = 100.0,
+                      conc_scale: Optional[float] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Framework-free float32 re-implementation of the actor for reload checks.
 
     Args:
@@ -318,10 +336,16 @@ def mean_effort_numpy(weights: Dict[str, np.ndarray], obs: np.ndarray, c_min: fl
         mu_clamp: Mean clamp.
         e_min: Lower effort bound.
         e_max: Upper effort bound.
+        conc_scale: Concentration factor of an annealed actor. ``None`` (default) reads the
+            ``conc_scale`` array of an exported ``.npz`` if ``weights`` carries one, else 1.0
+            (unscaled). Applied in float32 as torch does. The reload reproduces (alpha, beta) to
+            float32 rounding (rtol ~1e-6), as it always did; it is not a bitwise check.
 
     Returns:
         ``(effort_mean_float64, alpha_f32, beta_f32)``.
     """
+    if conc_scale is None:
+        conc_scale = float(weights["conc_scale"]) if "conc_scale" in weights else 1.0
     x = np.asarray(obs, dtype=np.float32)
     h = np.tanh(x @ weights["actor.l1.weight"].T + weights["actor.l1.bias"])
     h = np.tanh(h @ weights["actor.l2.weight"].T + weights["actor.l2.bias"])
@@ -329,6 +353,8 @@ def mean_effort_numpy(weights: Dict[str, np.ndarray], obs: np.ndarray, c_min: fl
     mu = np.clip(1.0 / (1.0 + np.exp(-z[:, 0])), mu_clamp, 1.0 - mu_clamp).astype(np.float32)
     zc = z[:, 1].astype(np.float32)
     c = (np.float32(c_min) + np.logaddexp(np.float32(0.0), zc)).astype(np.float32)
+    if conc_scale != 1.0:
+        c = (c * np.float32(conc_scale)).astype(np.float32)
     alpha = (mu * c).astype(np.float32)
     beta = ((np.float32(1.0) - mu) * c).astype(np.float32)
     mean = alpha.astype(float) / (alpha.astype(float) + beta.astype(float))

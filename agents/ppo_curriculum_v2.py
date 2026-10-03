@@ -108,8 +108,11 @@ class CurriculumPPOv2(CurriculumPPO):
         steps = 0
         actor_steps = 0
         skipped = 0
+        stopped = False
         for _ in range(cfg.epochs):
-            perm = self.rng_mb.permutation(n)
+            perm = self.rng_mb.permutation(n)   # always drawn: stream position independent of target_kl
+            if stopped:
+                continue
             for start in range(0, n, cfg.minibatch):
                 idx = torch.as_tensor(perm[start:start + cfg.minibatch], device=dev)
                 rows = idx[pm[idx]]
@@ -144,6 +147,8 @@ class CurriculumPPOv2(CurriculumPPO):
                 log_r = logp - olp[prow]
                 r = torch.exp(log_r)
                 kl_epochs.append(float(((r - 1.0) - log_r).mean().item()))
+            if self.target_kl is not None and kl_epochs[-1] > self.target_kl:
+                stopped = True
 
         with torch.no_grad():
             alpha, beta = self.actor(st[prow])
@@ -152,7 +157,7 @@ class CurriculumPPOv2(CurriculumPPO):
             conc = alpha + beta
             conc_stats = (float(conc.min().item()), float(conc.mean().item()), float(conc.max().item()))
 
-        return {
+        out = {
             "policy_loss": float(np.mean(pl)) if pl else float("nan"),
             "value_loss": float(np.mean(vl)),
             "entropy_minibatch_mean": float(np.mean(ent)) if ent else float("nan"),
@@ -176,6 +181,9 @@ class CurriculumPPOv2(CurriculumPPO):
             "n_actor_steps": int(actor_steps),
             "n_actor_steps_skipped_no_policy_rows": int(skipped),
         }
+        if self.target_kl is not None:
+            out["n_epochs_run"] = len(kl_epochs)
+        return out
 
     # ------------------------------------------------------------------ full state
     def full_state(self) -> Dict[str, object]:
@@ -185,6 +193,10 @@ class CurriculumPPOv2(CurriculumPPO):
         s["rng_minibatch"] = copy.deepcopy(self.rng_mb.bit_generator.state)
         s["frozen"] = (None if self.frozen is None else
                        {k: v.detach().cpu().clone() for k, v in self.frozen.state_dict().items()})
+        scales = {"actor": float(self.actor.conc_scale), "opponent": float(self.opponent.conc_scale),
+                  "frozen": None if self.frozen is None else float(self.frozen.conc_scale)}
+        if any(v is not None and v != 1.0 for v in scales.values()):
+            s["conc_scale"] = scales   # absent == every network unscaled (the locked behaviour)
         return s
 
     def load_full_state(self, s: Dict[str, object]) -> None:
@@ -199,8 +211,13 @@ class CurriculumPPOv2(CurriculumPPO):
         self.opt_critic.load_state_dict(s["opt_critic"])
         self.snapshot_refreshes = int(s["snapshot_refreshes"])
         self.rng_mb.bit_generator.state = copy.deepcopy(s["rng_minibatch"])
+        scales = s.get("conc_scale") or {}
+        self.actor.conc_scale = float(scales.get("actor", 1.0))
+        self.opponent.conc_scale = float(scales.get("opponent", 1.0))
         if s.get("frozen") is not None:
             self.freeze_stage2_snapshot()
             self.frozen.load_state_dict(s["frozen"])
+            fz = scales.get("frozen")
+            self.frozen.conc_scale = 1.0 if fz is None else float(fz)
         else:
             self.frozen = None
