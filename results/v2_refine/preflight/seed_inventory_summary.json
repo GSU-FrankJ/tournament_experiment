@@ -1,0 +1,111 @@
+{
+ "blocks": {
+  "10501-10510": {
+   "command": "/home/fjiang4/tournament_experiment/.venv/bin/python /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/tools/v2/seed_inventory.py --block 10501 10510 --out /tmp/refine_seed_inv_5z3uwbj2/seed_inventory_10501_10510.csv --extra-root /home/fjiang4/tournament_experiment_upload_20260927 /home/fjiang4/TEL_PPO",
+   "meaning": "0 = no collision, 1 = at least one seed of the block is recorded",
+   "returncode": 1
+  },
+  "30501-30520": {
+   "command": "/home/fjiang4/tournament_experiment/.venv/bin/python /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/tools/v2/seed_inventory.py --block 30501 30520 --out /tmp/refine_seed_inv_5z3uwbj2/seed_inventory_30501_30520.csv --extra-root /home/fjiang4/tournament_experiment_upload_20260927 /home/fjiang4/TEL_PPO",
+   "meaning": "0 = no collision, 1 = at least one seed of the block is recorded",
+   "returncode": 0
+  }
+ },
+ "detail_scan": {
+  "n_csv": 6802,
+  "n_distinct_seed_values": 288,
+  "n_json": 42243
+ },
+ "development_seeds_in_protocol": {
+  "equals_10501_to_10510": true,
+  "file": "protocols/v2_T2_locked_v1_1.json",
+  "key": "development_seeds",
+  "seeds": [
+   10501,
+   10502,
+   10503,
+   10504,
+   10505,
+   10506,
+   10507,
+   10508,
+   10509,
+   10510
+  ]
+ },
+ "extra_roots": [
+  "/home/fjiang4/tournament_experiment_upload_20260927",
+  "/home/fjiang4/TEL_PPO"
+ ],
+ "sources_10501_10510": {
+  "n_distinct_rel_paths_per_seed": {
+   "10501": 257,
+   "10502": 182,
+   "10503": 193,
+   "10504": 181,
+   "10505": 182,
+   "10506": 181,
+   "10507": 188,
+   "10508": 181,
+   "10509": 181,
+   "10510": 183
+  },
+  "n_distinct_seed_path_key": 1909,
+  "n_seeds_with_any_source": 10,
+  "role": "dev"
+ },
+ "sources_20501_20520": {
+  "n_distinct_rel_paths_per_seed": {
+   "20501": 26,
+   "20502": 26,
+   "20503": 26,
+   "20504": 25,
+   "20505": 25,
+   "20506": 26,
+   "20507": 26,
+   "20508": 25,
+   "20509": 26,
+   "20510": 27,
+   "20511": 25,
+   "20512": 25,
+   "20513": 25,
+   "20514": 25,
+   "20515": 26,
+   "20516": 25,
+   "20517": 25,
+   "20518": 25,
+   "20519": 25,
+   "20520": 26
+  },
+  "n_distinct_seed_path_key": 510,
+  "n_seeds_with_any_source": 20,
+  "role": "confirmation_info"
+ },
+ "sources_30501_30520": {
+  "n_distinct_rel_paths_per_seed": {
+   "30501": 0,
+   "30502": 0,
+   "30503": 0,
+   "30504": 0,
+   "30505": 0,
+   "30506": 0,
+   "30507": 0,
+   "30508": 0,
+   "30509": 0,
+   "30510": 0,
+   "30511": 0,
+   "30512": 0,
+   "30513": 0,
+   "30514": 0,
+   "30515": 0,
+   "30516": 0,
+   "30517": 0,
+   "30518": 0,
+   "30519": 0,
+   "30520": 0
+  },
+  "n_distinct_seed_path_key": 0,
+  "n_seeds_with_any_source": 0,
+  "role": "reserved"
+ }
+}

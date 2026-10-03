@@ -1,0 +1,389 @@
+{
+  "schema": "v2_refine_continuation_check/1",
+  "generated_by": "tests/test_v2_refine_continuation.py --write",
+  "game": {
+    "w_h": 6.0,
+    "w_l": 2.0,
+    "k": 0.00028571428571428574,
+    "dw": 4.0,
+    "T": 2
+  },
+  "integration_rule": {
+    "rule": "composite Gauss-Legendre in z (density-weighted), panels aligned at z=0 and z=+-2q, frozen actor evaluated directly at d=y+z (no interpolation of g)",
+    "panel_width": 1.0,
+    "nodes_per_panel": 6,
+    "y_step": 0.05
+  },
+  "parents": {
+    "q50": {
+      "path": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1/q50/seed10501/state_end_A.pt",
+      "sha256": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+      "seed": 10501,
+      "e1_hat_fixed_opponent": 40.0
+    },
+    "q60": {
+      "path": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1/q60/seed10501/state_end_A.pt",
+      "sha256": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+      "seed": 10501,
+      "e1_hat_fixed_opponent": 45.0
+    }
+  },
+  "timing": {
+    "q50_parent": {
+      "build_seconds_wall": 7.124836485949345,
+      "n_y": 4001,
+      "n_panels": 200,
+      "nodes_per_panel": 6,
+      "n_nodes": 1200,
+      "threads": 1
+    },
+    "q60_parent": {
+      "build_seconds_wall": 8.30389560997719,
+      "n_y": 4001,
+      "n_panels": 240,
+      "nodes_per_panel": 6,
+      "n_nodes": 1440,
+      "threads": 1
+    }
+  },
+  "convergence": {
+    "q50_parent": [
+      {
+        "from_panel_width": 2.0,
+        "from_nodes_per_panel": 3,
+        "to_panel_width": 1.0,
+        "to_nodes_per_panel": 6,
+        "n_nodes_from": 300,
+        "n_nodes_to": 1200,
+        "max_abs_change_over_dw": 2.1003418337883772e-08
+      },
+      {
+        "from_panel_width": 1.0,
+        "from_nodes_per_panel": 6,
+        "to_panel_width": 0.5,
+        "to_nodes_per_panel": 12,
+        "n_nodes_from": 1200,
+        "n_nodes_to": 4800,
+        "max_abs_change_over_dw": 4.760161709249644e-09
+      },
+      {
+        "from_panel_width": 0.5,
+        "from_nodes_per_panel": 12,
+        "to_panel_width": 0.25,
+        "to_nodes_per_panel": 24,
+        "n_nodes_from": 4800,
+        "n_nodes_to": 19200,
+        "max_abs_change_over_dw": 1.9181024546455205e-09
+      }
+    ],
+    "q50_synthetic": [
+      {
+        "from_panel_width": 2.0,
+        "from_nodes_per_panel": 3,
+        "to_panel_width": 1.0,
+        "to_nodes_per_panel": 6,
+        "n_nodes_from": 300,
+        "n_nodes_to": 1200,
+        "max_abs_change_over_dw": 1.6070219599484403e-08
+      },
+      {
+        "from_panel_width": 1.0,
+        "from_nodes_per_panel": 6,
+        "to_panel_width": 0.5,
+        "to_nodes_per_panel": 12,
+        "n_nodes_from": 1200,
+        "n_nodes_to": 4800,
+        "max_abs_change_over_dw": 4.364169692294695e-09
+      },
+      {
+        "from_panel_width": 0.5,
+        "from_nodes_per_panel": 12,
+        "to_panel_width": 0.25,
+        "to_nodes_per_panel": 24,
+        "n_nodes_from": 4800,
+        "n_nodes_to": 19200,
+        "max_abs_change_over_dw": 1.934821150517685e-09
+      }
+    ],
+    "q60_parent": [
+      {
+        "from_panel_width": 2.0,
+        "from_nodes_per_panel": 3,
+        "to_panel_width": 1.0,
+        "to_nodes_per_panel": 6,
+        "n_nodes_from": 360,
+        "n_nodes_to": 1440,
+        "max_abs_change_over_dw": 1.0837433839228083e-08
+      },
+      {
+        "from_panel_width": 1.0,
+        "from_nodes_per_panel": 6,
+        "to_panel_width": 0.5,
+        "to_nodes_per_panel": 12,
+        "n_nodes_from": 1440,
+        "n_nodes_to": 5760,
+        "max_abs_change_over_dw": 3.21946624914915e-09
+      },
+      {
+        "from_panel_width": 0.5,
+        "from_nodes_per_panel": 12,
+        "to_panel_width": 0.25,
+        "to_nodes_per_panel": 24,
+        "n_nodes_from": 5760,
+        "n_nodes_to": 23040,
+        "max_abs_change_over_dw": 1.0899220415083732e-09
+      }
+    ],
+    "q60_synthetic": [
+      {
+        "from_panel_width": 2.0,
+        "from_nodes_per_panel": 3,
+        "to_panel_width": 1.0,
+        "to_nodes_per_panel": 6,
+        "n_nodes_from": 360,
+        "n_nodes_to": 1440,
+        "max_abs_change_over_dw": 1.1530430499284705e-08
+      },
+      {
+        "from_panel_width": 1.0,
+        "from_nodes_per_panel": 6,
+        "to_panel_width": 0.5,
+        "to_nodes_per_panel": 12,
+        "n_nodes_from": 1440,
+        "n_nodes_to": 5760,
+        "max_abs_change_over_dw": 4.149801169361922e-09
+      },
+      {
+        "from_panel_width": 0.5,
+        "from_nodes_per_panel": 12,
+        "to_panel_width": 0.25,
+        "to_nodes_per_panel": 24,
+        "n_nodes_from": 5760,
+        "n_nodes_to": 23040,
+        "max_abs_change_over_dw": 1.8224310949221945e-09
+      }
+    ]
+  },
+  "table_vs_verifier": {
+    "development": {
+      "q50": {
+        "tier": "development",
+        "state_step": 4.0,
+        "effort_step": 1.0,
+        "gl_half": 16,
+        "valid": true,
+        "n_effort_nodes": 101,
+        "e1_hat": 40.0,
+        "max_abs_diff": 0.0005314012784221056,
+        "max_abs_diff_over_dw": 0.0001328503196055264,
+        "argmax_effort": 3.0,
+        "mean_signed_diff_over_dw": -2.8020482684495122e-05,
+        "stage2_values_vs_g_max_over_dw": 2.220446049250313e-16,
+        "decomposition_over_dw": {
+          "A_minus_C_total": 0.0001328503196055264,
+          "A_minus_B_interpolation_of_stage2_values": 0.00010621483367490026,
+          "B_minus_C_verifier_gl_on_interpolant": 5.9628461287930534e-05,
+          "A_minus_D_verifier_gl_nodes_on_exact_g": 8.718110179772864e-06
+        }
+      },
+      "q60": {
+        "tier": "development",
+        "state_step": 4.0,
+        "effort_step": 1.0,
+        "gl_half": 16,
+        "valid": true,
+        "n_effort_nodes": 101,
+        "e1_hat": 45.0,
+        "max_abs_diff": 0.00034044343360495333,
+        "max_abs_diff_over_dw": 8.511085840123833e-05,
+        "argmax_effort": 16.0,
+        "mean_signed_diff_over_dw": -2.2132586264153076e-05,
+        "stage2_values_vs_g_max_over_dw": 2.220446049250313e-16,
+        "decomposition_over_dw": {
+          "A_minus_C_total": 8.511085840123833e-05,
+          "A_minus_B_interpolation_of_stage2_values": 6.376058964518982e-05,
+          "B_minus_C_verifier_gl_on_interpolant": 3.5621150449527406e-05,
+          "A_minus_D_verifier_gl_nodes_on_exact_g": 6.5833161202455415e-06
+        }
+      }
+    },
+    "final": {
+      "q50": {
+        "tier": "final",
+        "state_step": 2.0,
+        "effort_step": 0.5,
+        "gl_half": 32,
+        "valid": true,
+        "n_effort_nodes": 201,
+        "e1_hat": 40.0,
+        "max_abs_diff": 0.00012917774204357357,
+        "max_abs_diff_over_dw": 3.229443551089339e-05,
+        "argmax_effort": 22.0,
+        "mean_signed_diff_over_dw": -7.137438284399719e-06,
+        "stage2_values_vs_g_max_over_dw": 2.220446049250313e-16,
+        "decomposition_over_dw": {
+          "A_minus_C_total": 3.229443551089339e-05,
+          "A_minus_B_interpolation_of_stage2_values": 2.6568391968795346e-05,
+          "B_minus_C_verifier_gl_on_interpolant": 7.159994211747289e-06,
+          "A_minus_D_verifier_gl_nodes_on_exact_g": 1.3083229037924582e-06
+        },
+        "spec_tolerance_over_dw": 1e-06,
+        "meets_spec_tolerance": false
+      },
+      "q60": {
+        "tier": "final",
+        "state_step": 2.0,
+        "effort_step": 0.5,
+        "gl_half": 32,
+        "valid": true,
+        "n_effort_nodes": 201,
+        "e1_hat": 45.0,
+        "max_abs_diff": 7.840875718923002e-05,
+        "max_abs_diff_over_dw": 1.9602189297307504e-05,
+        "argmax_effort": 21.5,
+        "mean_signed_diff_over_dw": -5.658549963301416e-06,
+        "stage2_values_vs_g_max_over_dw": 2.220446049250313e-16,
+        "decomposition_over_dw": {
+          "A_minus_C_total": 1.9602189297307504e-05,
+          "A_minus_B_interpolation_of_stage2_values": 1.594393024706431e-05,
+          "B_minus_C_verifier_gl_on_interpolant": 6.751302356500233e-06,
+          "A_minus_D_verifier_gl_nodes_on_exact_g": 8.52660606565081e-07
+        },
+        "spec_tolerance_over_dw": 1e-06,
+        "meets_spec_tolerance": false
+      }
+    }
+  },
+  "batch_noise_probe": {
+    "q50_parent": {
+      "n_probe_nodes": 201,
+      "all_probe_nodes_one_call_vs_table_over_dw": 2.220446049250313e-16,
+      "one_y_per_call_vs_table_over_dw": 8.881784197001252e-16
+    },
+    "q60_parent": {
+      "n_probe_nodes": 201,
+      "all_probe_nodes_one_call_vs_table_over_dw": 1.1102230246251565e-15,
+      "one_y_per_call_vs_table_over_dw": 1.3322676295501878e-15
+    }
+  },
+  "diagnosis": {
+    "verifier_grid_sweep_max_abs_diff_over_dw": {
+      "q50": {
+        "state_step_4.0": {
+          "gl_half_16": 0.00013777052000008005,
+          "gl_half_32": 0.00013866398010731196,
+          "gl_half_64": 0.00011110611443543306,
+          "gl_half_128": 0.00010729663117770016
+        },
+        "state_step_2.0": {
+          "gl_half_16": 3.839061243449127e-05,
+          "gl_half_32": 3.229443551089339e-05,
+          "gl_half_64": 3.169617420095694e-05,
+          "gl_half_128": 2.7431660828303173e-05
+        },
+        "state_step_1.0": {
+          "gl_half_16": 1.5801607885723712e-05,
+          "gl_half_32": 8.525529649583419e-06,
+          "gl_half_64": 7.684081041681168e-06,
+          "gl_half_128": 7.478723970222312e-06
+        },
+        "state_step_0.5": {
+          "gl_half_16": 1.0278297763899324e-05,
+          "gl_half_32": 2.9742969579471534e-06,
+          "gl_half_64": 1.6249282225322403e-06,
+          "gl_half_128": 1.7924301759508765e-06
+        },
+        "state_step_0.25": {
+          "gl_half_16": 8.936332134057423e-06,
+          "gl_half_32": 1.6911170751532367e-06,
+          "gl_half_64": 4.981767257605796e-07,
+          "gl_half_128": 4.80201604813324e-07
+        }
+      },
+      "q60": {
+        "state_step_4.0": {
+          "gl_half_16": 9.167483897043471e-05,
+          "gl_half_32": 8.06217529535358e-05,
+          "gl_half_64": 6.641587840794383e-05,
+          "gl_half_128": 6.541812013660664e-05
+        },
+        "state_step_2.0": {
+          "gl_half_16": 2.6013784393486006e-05,
+          "gl_half_32": 1.9602189297307504e-05,
+          "gl_half_64": 1.8645000262496048e-05,
+          "gl_half_128": 1.623134025108275e-05
+        },
+        "state_step_1.0": {
+          "gl_half_16": 1.028645418355012e-05,
+          "gl_half_32": 5.116889417511317e-06,
+          "gl_half_64": 4.6118731612532216e-06,
+          "gl_half_128": 4.198804329114125e-06
+        },
+        "state_step_0.5": {
+          "gl_half_16": 7.220627627924081e-06,
+          "gl_half_32": 2.0005816933066356e-06,
+          "gl_half_64": 1.239112209061588e-06,
+          "gl_half_128": 1.057771316759215e-06
+        },
+        "state_step_0.25": {
+          "gl_half_16": 6.783574210689203e-06,
+          "gl_half_32": 1.0902808876833703e-06,
+          "gl_half_64": 4.1004767326047187e-07,
+          "gl_half_128": 2.787347336274948e-07
+        }
+      }
+    },
+    "conclusion": "Facts only; the numbers are the evidence. Table side: the change under rule refinement is in `convergence` (units DW). Verifier side: `table_vs_verifier.*.decomposition_over_dw` splits the discrepancy into A_minus_B (the verifier's linear interpolation of stage-2 values on its D_2 grid), A_minus_D (the verifier's Gauss-Legendre nodes applied to the exact g, no interpolation) and B_minus_C (its rule on the interpolant). The verifier's stage-2 values equal g2 at its nodes to float rounding (`stage2_values_vs_g_max_over_dw`). The sweep shows the total as a function of the verifier's state_step and gl_half. Which terms exceed the spec tolerance is in `spec_requirement.final_tier_terms_over_dw`.",
+    "float32_batch_noise_hypothesis": {
+      "claim_tested": "the change of the table under rule refinement (`convergence`) is float32 noise from the batch composition of the actor forward pass",
+      "probe": "`batch_noise_probe`: same rule, V recomputed with other batch compositions",
+      "max_batch_noise_over_dw": 1.3322676295501878e-15,
+      "smallest_last_rung_change_over_dw": 1.0899220415083732e-09,
+      "change_decreases_at_every_refinement": {
+        "q50_parent": true,
+        "q50_synthetic": true,
+        "q60_parent": true,
+        "q60_synthetic": true
+      },
+      "verdict": "REJECTED: probe noise is below 1% of the smallest last-rung change and the change shrinks at every refinement, so the changes are quadrature differences, not batch noise"
+    }
+  },
+  "spec_requirement": {
+    "statement": "PROMPT.md 2.3 (ii): on the final tier max |V(e-e1_hat) - (Q + k e^2)| <= 1e-6 DW",
+    "met": false,
+    "status": "NOT_MET (open: needs a PI decision; nothing was loosened)",
+    "final_tier_max_abs_diff_over_dw": {
+      "q50": 3.229443551089339e-05,
+      "q60": 1.9602189297307504e-05
+    },
+    "dev_tier_max_abs_diff_over_dw": {
+      "q50": 0.0001328503196055264,
+      "q60": 8.511085840123833e-05
+    },
+    "final_tier_terms_over_dw": {
+      "q50": {
+        "total": 3.229443551089339e-05,
+        "verifier_stage2_interpolation_A_minus_B": 2.6568391968795346e-05,
+        "verifier_gl_nodes_on_exact_g_A_minus_D": 1.3083229037924582e-06,
+        "interpolation_alone_exceeds_spec": true,
+        "gl_rule_alone_exceeds_spec": true
+      },
+      "q60": {
+        "total": 1.9602189297307504e-05,
+        "verifier_stage2_interpolation_A_minus_B": 1.594393024706431e-05,
+        "verifier_gl_nodes_on_exact_g_A_minus_D": 8.52660606565081e-07,
+        "interpolation_alone_exceeds_spec": true,
+        "gl_rule_alone_exceeds_spec": false
+      }
+    },
+    "options_for_pi": {
+      "a_literal_production_final_tier": "fails (see final_tier_max_abs_diff_over_dw)",
+      "b_refined_verifier_grid_state_step_0.25_gl_half_64_over_dw": {
+        "q50": 4.981767257605796e-07,
+        "q60": 4.1004767326047187e-07
+      },
+      "c_restated_tolerance": "any value above final_tier_max_abs_diff_over_dw"
+    }
+  },
+  "wall_seconds_total": 670.0174803733826
+}

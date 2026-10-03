@@ -1,0 +1,39 @@
+q,metric,n,min,median,max,source_file,source_column
+50,stage-1 signed relative error,20,-0.07694002371739529,0.0011098084044815033,0.08619467224992025,confirmation_analysis/per_run.csv,stage1_rel_err_signed
+60,stage-1 signed relative error,20,-0.11346618790898923,-0.0017499669432623323,0.15301575456220293,confirmation_analysis/per_run.csv,stage1_rel_err_signed
+50,stage-1 absolute relative error (S1),20,0.004057616531106539,0.0377617976706733,0.08619467224992025,confirmation_analysis/per_run.csv,s1
+60,stage-1 absolute relative error (S1),20,0.001422434965101717,0.04548384801419597,0.15301575456220293,confirmation_analysis/per_run.csv,s1
+50,"stage-2 peak error, signed (d = 0)",20,-0.08072088344918821,-0.060823994013519414,-0.006489846272958135,confirmation_analysis/reported_metrics.csv,A_stage2_peak_rel_err_signed
+60,"stage-2 peak error, signed (d = 0)",20,-0.10870654550754333,-0.05947740896192959,-0.02498240180224928,confirmation_analysis/reported_metrics.csv,A_stage2_peak_rel_err_signed
+50,"stage-2 peak error, location-free",20,-0.08072088344918821,-0.060649099291319536,-0.004308920128862529,confirmation_analysis/reported_metrics.csv,A_stage2_peak_locfree_rel_err
+60,"stage-2 peak error, location-free",20,-0.10870654550754333,-0.059281157940711794,-0.020540144552294838,confirmation_analysis/reported_metrics.csv,A_stage2_peak_locfree_rel_err
+50,RMSE_pos / e2*(0),20,0.014363052467220019,0.021802203037562033,0.034027366082162544,confirmation_analysis/per_run.csv,rmse
+60,RMSE_pos / e2*(0),20,0.013891229113520078,0.018157450838351262,0.03756361790426436,confirmation_analysis/per_run.csv,rmse
+50,tail mean / e2*(0),20,0.004996280257492458,0.008870489203444607,0.012152284076971949,confirmation_analysis/per_run.csv,tail
+60,tail mean / e2*(0),20,0.006130887724602691,0.009395480231960449,0.01378241658920269,confirmation_analysis/per_run.csv,tail
+50,tail max (effort units),20,2.079265562394744,2.5324643343079956,3.511349962520527,confirmation_analysis/reported_metrics.csv,A_stage2_tail_max
+60,tail max (effort units),20,1.6309920212506324,2.115445276642842,3.747512740016612,confirmation_analysis/reported_metrics.csv,A_stage2_tail_max
+50,"eta_2 / DW, final tier",20,0.0008039543782183411,0.0013647190116411467,0.003289687083657178,confirmation_analysis/per_run.csv,eta_final
+60,"eta_2 / DW, final tier",20,0.00043215819555719737,0.0007875857502303574,0.0023180313015970233,confirmation_analysis/per_run.csv,eta_final
+50,"eta_2 / DW, development tier",20,0.0006745678682875678,0.0011989920752030203,0.0032708109282276743,confirmation_analysis/per_run.csv,eta_dev
+60,"eta_2 / DW, development tier",20,0.00040392668950162136,0.0007221684736038458,0.00228345634894489,confirmation_analysis/per_run.csv,eta_dev
+50,eta_2 dev - final,20,-0.0002610275601494516,-7.203674120714876e-05,0.0,confirmation_analysis/per_run.csv,eta_dev_minus_final
+60,eta_2 dev - final,20,-0.0002249619750220866,-7.054637713194145e-05,1.1102230246251565e-16,confirmation_analysis/per_run.csv,eta_dev_minus_final
+50,"Gmax_full / DW, final tier",20,0.000917337009186503,0.0015267961100812744,0.003289687083657178,confirmation_analysis/per_run.csv,gmax_final
+60,"Gmax_full / DW, final tier",20,0.00044710499834998974,0.0009341192948798538,0.0036375715402290343,confirmation_analysis/per_run.csv,gmax_final
+50,"Gmax_full / DW, development tier",20,0.0007116607041871559,0.0014701224690618075,0.0032708109282276743,confirmation_analysis/per_run.csv,gmax_dev
+60,"Gmax_full / DW, development tier",20,0.00040392668950162136,0.0008370274768080277,0.0036485991682045915,confirmation_analysis/per_run.csv,gmax_dev
+50,Gmax_full dev - final,20,-0.0002610275601494516,-1.860152406740756e-05,2.9432482791968972e-05,confirmation_analysis/per_run.csv,gmax_dev_minus_final
+60,Gmax_full dev - final,20,-0.0002249619750220866,-4.071784728054695e-06,2.057775968389297e-05,confirmation_analysis/per_run.csv,gmax_dev_minus_final
+50,EXP_root / DW (final tier),20,0.00015683857519510624,0.0006926889274740389,0.0027350852459396835,confirmation_analysis/reported_metrics.csv,B_EXP_root_over_dw
+60,EXP_root / DW (final tier),20,9.253265744824102e-05,0.00045131887604193954,0.0036375715402290343,confirmation_analysis/reported_metrics.csv,B_EXP_root_over_dw
+50,dReach / DW (final tier),20,0.0009819042743627326,0.001961431479463982,0.003759619127293834,confirmation_analysis/reported_metrics.csv,B_dReach_over_dw
+60,dReach / DW (final tier),20,0.0005164721900069447,0.0011936385832715946,0.005505110064366603,confirmation_analysis/reported_metrics.csv,B_dReach_over_dw
+50,Deltamax_all / DW (final tier),20,0.0008039543782183411,0.0014756833605273356,0.003289687083657178,confirmation_analysis/reported_metrics.csv,B_Deltamax_all_over_dw
+60,Deltamax_all / DW (final tier),20,0.00043215819555719737,0.0008897079816883036,0.0031870787627695796,confirmation_analysis/reported_metrics.csv,B_Deltamax_all_over_dw
+50,dFull / DW (final tier),20,0.0009819042743627326,0.001961431479463982,0.003759619127293834,confirmation_analysis/reported_metrics.csv,B_dFull_over_dw
+60,dFull / DW (final tier),20,0.0005164721900069447,0.0011936385832715946,0.005505110064366603,confirmation_analysis/reported_metrics.csv,B_dFull_over_dw
+50,"sigma_effort at d = 0, stage 2",20,2.637711018469656,2.83641635095462,3.116975977977867,confirmation_analysis/reported_metrics.csv,A_sigma_effort_at_0_t2
+60,"sigma_effort at d = 0, stage 2",20,2.7706986367180866,2.9407240832207897,3.537524899141855,confirmation_analysis/reported_metrics.csv,A_sigma_effort_at_0_t2
+50,e1_hat(0),20,43.07613222652155,46.718457725542464,50.689084704996276,confirmation_analysis/reported_metrics.csv,B_e1_at_0
+60,e1_hat(0),20,34.476314914650416,38.82083461887313,44.83950156630789,confirmation_analysis/reported_metrics.csv,B_e1_at_0
