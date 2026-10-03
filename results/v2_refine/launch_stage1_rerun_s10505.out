@@ -1,0 +1,76 @@
+8 run(s) of wave stage1; record /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/launch_20261003_195014.json
+{
+ "B_base": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_polish1": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_polish2": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_batch": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_batch_mb256": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_kl005": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_kl010": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_expcont": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ }
+}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl005", "returncode": 0, "wall_sec": 35.45367358397925}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl010", "returncode": 0, "wall_sec": 62.37126037402777}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish2", "returncode": 0, "wall_sec": 98.18313747999491}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_base", "returncode": 0, "wall_sec": 98.95453958702274}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish1", "returncode": 0, "wall_sec": 99.68282619700767}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_expcont", "returncode": 0, "wall_sec": 105.40137794200564}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch", "returncode": 0, "wall_sec": 129.2158172809868}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch_mb256", "returncode": 0, "wall_sec": 349.216233324958}
+LAUNCHER_EXIT=0

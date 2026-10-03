@@ -1,0 +1,22 @@
+{
+ "run": "v2refine_stage2_q50_s10501_A_base",
+ "pilot": "v2_refine_stage2",
+ "arm": "A_base",
+ "q": 50,
+ "seed": 10501,
+ "mode": "phase_A_continue",
+ "state": "done",
+ "pid": 2227879,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_base/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_base",
+ "start_time": "2026-10-03 19:28:44",
+ "git": {
+  "commit": "6e99e01acb90f1368cf80c96016884470a6f8d9b",
+  "short": "6e99e01",
+  "dirty": false
+ },
+ "end_time": "2026-10-03 19:29:37",
+ "total_wall_sec": 52.71945647103712,
+ "exit_code": 0,
+ "final_global_update": 1600
+}

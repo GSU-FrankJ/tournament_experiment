@@ -1,0 +1,97 @@
+{
+ "phase_timing": {
+  "B": {
+   "wall_sec": 160.87602626800071,
+   "process_cpu_sec": 160.308738177,
+   "updates": 600,
+   "global_entry": 1600,
+   "global_exit": 2200,
+   "by_category_sec": {
+    "train_rollout": 3.4375056347926147,
+    "train_update": 146.6070822753245,
+    "stability_check": 0.04680716397706419,
+    "dev_verifier": 0.28430530487094074
+   }
+  }
+ },
+ "would_have_fired": {
+  "B": {
+   "global_update": 1750,
+   "local_update": 150,
+   "rule": "k_phase"
+  }
+ },
+ "fixed_budget": true,
+ "costs": {
+  "seconds": {
+   "train_rollout": 3.4375056347926147,
+   "train_update": 146.6070822753245,
+   "stability_check": 0.04680716397706419,
+   "dev_verifier": 0.28430530487094074
+  },
+  "count": {
+   "train_rollout": 600,
+   "train_update": 600,
+   "stability_check": 30,
+   "dev_verifier": 21
+  },
+  "training_wall_sec": 160.9862351079937,
+  "training_sec": 150.04458791011712,
+  "train_rollout_sec": 3.4375056347926147,
+  "train_update_sec": 146.6070822753245,
+  "stability_sec": 0.04680716397706419,
+  "dev_verifier_sec": 0.28430530487094074,
+  "dev_verifier_calls": 21,
+  "final_eval_sec": 0.0,
+  "total_wall_sec": 161.7466452459921,
+  "total_process_cpu_sec": 161.09138561499998,
+  "total_episodes": 1126400,
+  "total_transitions": 1433600,
+  "total_updates": 2200,
+  "minibatch_steps": 24000
+ },
+ "costs_v2": {
+  "seconds": {
+   "continuation_table": 9.440414264972787,
+   "v2_outputs": 0.12252697005169466,
+   "final_eval_v2": 0.7594546919572167
+  },
+  "count": {
+   "continuation_table": 1,
+   "v2_outputs": 21,
+   "final_eval_v2": 1
+  }
+ },
+ "phases_done": [
+  "A",
+  "B"
+ ],
+ "final_global_update": 2200,
+ "conc_scale_final": {
+  "actor": 1.0,
+  "opponent": 1.0
+ },
+ "continuation_table": {
+  "schema": "v2_continuation_table/1",
+  "rule": "composite Gauss-Legendre in z, panels aligned at z=0 and z=+-2q; frozen actor evaluated directly at d=y+z (no interpolation of g)",
+  "stage": 2,
+  "q": 60.0,
+  "w_h": 6.0,
+  "w_l": 2.0,
+  "k": 0.00028571428571428574,
+  "dw": 4.0,
+  "e_min": 0.0,
+  "e_max": 100.0,
+  "step_requested": 0.05,
+  "step_actual": 0.04999999999999716,
+  "n_y": 4001,
+  "panel_width": 1.0,
+  "nodes_per_panel": 6,
+  "n_panels": 240,
+  "n_nodes": 1440,
+  "weight_sum": 1.0,
+  "conc_scale": 1.0,
+  "build_seconds": 9.440397221012972
+ },
+ "phase_checks": null
+}

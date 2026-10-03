@@ -1,0 +1,312 @@
+220 run(s) of wave stage2; record /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/launch_20261003_192840.json
+{
+ "A_base": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_polish1": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_polish2": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_batch": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_batch_mb256": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_kl005": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_kl010": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_anneal2": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_anneal4": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_ctrl200": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "A_detmean": {
+  "n": 20,
+  "valid": 20,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ }
+}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_detmean", "returncode": 0, "wall_sec": 8.102193580998573}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_kl005", "returncode": 0, "wall_sec": 21.589007942995522}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_detmean", "returncode": 0, "wall_sec": 7.449176765978336}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_kl005", "returncode": 0, "wall_sec": 38.002659036021214}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_ctrl200", "returncode": 0, "wall_sec": 39.11041102197487}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_kl010", "returncode": 0, "wall_sec": 42.48988863697741}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_polish2", "returncode": 0, "wall_sec": 48.675986997026484}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_anneal4", "returncode": 0, "wall_sec": 49.13843045203248}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_anneal2", "returncode": 0, "wall_sec": 49.47016067605}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_ctrl200", "returncode": 0, "wall_sec": 41.76217529998394}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_polish1", "returncode": 0, "wall_sec": 50.13170728599653}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_anneal2", "returncode": 0, "wall_sec": 50.1829590210109}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_polish1", "returncode": 0, "wall_sec": 51.18960009102011}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_anneal4", "returncode": 0, "wall_sec": 53.2146026979899}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_polish2", "returncode": 0, "wall_sec": 55.15114285098389}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_base", "returncode": 0, "wall_sec": 57.612333174969535}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_detmean", "returncode": 0, "wall_sec": 7.215507784974761}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_base", "returncode": 0, "wall_sec": 65.03218235605163}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_kl010", "returncode": 0, "wall_sec": 66.10322917799931}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_ctrl200", "returncode": 0, "wall_sec": 26.02535574499052}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_kl005", "returncode": 0, "wall_sec": 31.516978252970148}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_polish1", "returncode": 0, "wall_sec": 51.1122845900245}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_base", "returncode": 0, "wall_sec": 60.13509623496793}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_batch", "returncode": 0, "wall_sec": 90.48438928002724}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_batch", "returncode": 0, "wall_sec": 91.48927299998468}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_kl010", "returncode": 0, "wall_sec": 42.46591041103238}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_polish2", "returncode": 0, "wall_sec": 53.7386804909911}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_detmean", "returncode": 0, "wall_sec": 7.274054640962277}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_anneal2", "returncode": 0, "wall_sec": 50.51254633901408}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_kl005", "returncode": 0, "wall_sec": 39.73681212798692}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_anneal4", "returncode": 0, "wall_sec": 59.85039167100331}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_polish1", "returncode": 0, "wall_sec": 55.748410561005585}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_base", "returncode": 0, "wall_sec": 60.173449482012074}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_polish2", "returncode": 0, "wall_sec": 60.36902462504804}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_ctrl200", "returncode": 0, "wall_sec": 32.4410268170177}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_batch", "returncode": 0, "wall_sec": 81.62747809995199}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_kl010", "returncode": 0, "wall_sec": 53.21228084998438}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_detmean", "returncode": 0, "wall_sec": 8.670222693006508}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_batch", "returncode": 0, "wall_sec": 77.43841123499442}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_anneal2", "returncode": 0, "wall_sec": 56.987497430003714}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_polish2", "returncode": 0, "wall_sec": 50.16205650701886}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_base", "returncode": 0, "wall_sec": 55.96937574102776}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_polish1", "returncode": 0, "wall_sec": 56.54824655799894}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_anneal4", "returncode": 0, "wall_sec": 59.668104365991894}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_kl005", "returncode": 0, "wall_sec": 43.40225481899688}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_ctrl200", "returncode": 0, "wall_sec": 33.891889498976525}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_kl010", "returncode": 0, "wall_sec": 45.64500425296137}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_anneal2", "returncode": 0, "wall_sec": 48.70825266599422}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_detmean", "returncode": 0, "wall_sec": 10.552583386015613}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_anneal4", "returncode": 0, "wall_sec": 51.81034078297671}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_kl005", "returncode": 0, "wall_sec": 36.26082176301861}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_polish1", "returncode": 0, "wall_sec": 53.24785567098297}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_base", "returncode": 0, "wall_sec": 59.0329796319711}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_polish2", "returncode": 0, "wall_sec": 56.09186971298186}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_ctrl200", "returncode": 0, "wall_sec": 37.80902031698497}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_batch", "returncode": 0, "wall_sec": 91.68887086299947}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_kl010", "returncode": 0, "wall_sec": 43.78676891402574}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10501/A_batch_mb256", "returncode": 0, "wall_sec": 196.74747472599847}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_anneal4", "returncode": 0, "wall_sec": 51.19483508099802}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_detmean", "returncode": 0, "wall_sec": 9.202166114991996}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10502/A_batch_mb256", "returncode": 0, "wall_sec": 208.32849731703755}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_polish1", "returncode": 0, "wall_sec": 50.40658450999763}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_kl005", "returncode": 0, "wall_sec": 29.303546987997834}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_batch", "returncode": 0, "wall_sec": 78.35480558004929}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_anneal2", "returncode": 0, "wall_sec": 72.02984837000258}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_ctrl200", "returncode": 0, "wall_sec": 33.41656612296356}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_base", "returncode": 0, "wall_sec": 67.55672151595354}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_kl010", "returncode": 0, "wall_sec": 41.87420853396179}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_detmean", "returncode": 0, "wall_sec": 8.953925146954134}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_polish2", "returncode": 0, "wall_sec": 74.82040493399836}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_kl005", "returncode": 0, "wall_sec": 25.852940585988108}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_anneal2", "returncode": 0, "wall_sec": 52.33081213099649}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10504/A_batch_mb256", "returncode": 0, "wall_sec": 176.6856940780417}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_anneal4", "returncode": 0, "wall_sec": 55.6188387760194}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_base", "returncode": 0, "wall_sec": 50.15804937802022}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_batch", "returncode": 0, "wall_sec": 83.11713835102273}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_polish2", "returncode": 0, "wall_sec": 51.881222078052815}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_ctrl200", "returncode": 0, "wall_sec": 33.21160124900052}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10503/A_batch_mb256", "returncode": 0, "wall_sec": 215.41295220697066}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_polish1", "returncode": 0, "wall_sec": 65.07567945099436}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_kl010", "returncode": 0, "wall_sec": 51.86126488202717}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_kl005", "returncode": 0, "wall_sec": 30.99217907898128}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_detmean", "returncode": 0, "wall_sec": 9.92324912402546}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_anneal4", "returncode": 0, "wall_sec": 51.432009165990166}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_anneal2", "returncode": 0, "wall_sec": 56.41020121902693}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_base", "returncode": 0, "wall_sec": 52.495286050019786}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_ctrl200", "returncode": 0, "wall_sec": 30.19657349801855}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_batch", "returncode": 0, "wall_sec": 78.35249479900813}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_polish1", "returncode": 0, "wall_sec": 55.74508922098903}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_kl010", "returncode": 0, "wall_sec": 47.93306387402117}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_polish2", "returncode": 0, "wall_sec": 63.47503395698732}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_detmean", "returncode": 0, "wall_sec": 7.845607586961705}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_anneal2", "returncode": 0, "wall_sec": 54.77172228303971}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10506/A_batch_mb256", "returncode": 0, "wall_sec": 168.67218501697062}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_batch", "returncode": 0, "wall_sec": 73.29340704903007}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_anneal4", "returncode": 0, "wall_sec": 61.64410172303906}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10505/A_batch_mb256", "returncode": 0, "wall_sec": 214.32185852102702}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_kl005", "returncode": 0, "wall_sec": 38.022006966988556}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_polish1", "returncode": 0, "wall_sec": 60.74495762505103}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_base", "returncode": 0, "wall_sec": 64.26413214101922}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_ctrl200", "returncode": 0, "wall_sec": 40.01131875597639}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_anneal4", "returncode": 0, "wall_sec": 52.866039148007985}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_polish2", "returncode": 0, "wall_sec": 67.37259089999134}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_detmean", "returncode": 0, "wall_sec": 9.796664298977703}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_kl010", "returncode": 0, "wall_sec": 60.83625421702163}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_kl005", "returncode": 0, "wall_sec": 34.27530948695494}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_batch", "returncode": 0, "wall_sec": 76.05523800902301}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_anneal2", "returncode": 0, "wall_sec": 67.3757376029971}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_polish2", "returncode": 0, "wall_sec": 53.197304903005715}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_base", "returncode": 0, "wall_sec": 55.178341842023656}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10507/A_batch_mb256", "returncode": 0, "wall_sec": 183.71799951803405}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_ctrl200", "returncode": 0, "wall_sec": 33.72362044802867}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_anneal2", "returncode": 0, "wall_sec": 54.86014724697452}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_polish1", "returncode": 0, "wall_sec": 67.598148502002}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_detmean", "returncode": 0, "wall_sec": 9.450858288968448}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_kl010", "returncode": 0, "wall_sec": 58.63056797796162}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_kl005", "returncode": 0, "wall_sec": 30.517496554995887}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_anneal4", "returncode": 0, "wall_sec": 53.799315307987854}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_base", "returncode": 0, "wall_sec": 51.35970910702599}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_ctrl200", "returncode": 0, "wall_sec": 30.840312574000563}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_batch", "returncode": 0, "wall_sec": 91.82095661503263}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_polish2", "returncode": 0, "wall_sec": 58.25810990098398}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_kl010", "returncode": 0, "wall_sec": 50.69034049002221}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_polish1", "returncode": 0, "wall_sec": 69.18217186100082}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10508/A_batch_mb256", "returncode": 0, "wall_sec": 200.54002469801344}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_detmean", "returncode": 0, "wall_sec": 9.476923159032594}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_batch", "returncode": 0, "wall_sec": 67.52885777701158}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_kl005", "returncode": 0, "wall_sec": 34.538660856022034}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_anneal2", "returncode": 0, "wall_sec": 59.91829223703826}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_polish1", "returncode": 0, "wall_sec": 49.14245015697088}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_polish2", "returncode": 0, "wall_sec": 52.13641044695396}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_anneal4", "returncode": 0, "wall_sec": 72.13146057102131}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_ctrl200", "returncode": 0, "wall_sec": 30.308867006970104}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_base", "returncode": 0, "wall_sec": 63.5916435639956}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_kl010", "returncode": 0, "wall_sec": 46.48216248297831}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_detmean", "returncode": 0, "wall_sec": 7.785720207961276}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10510/A_batch_mb256", "returncode": 0, "wall_sec": 174.88432762603043}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_kl005", "returncode": 0, "wall_sec": 33.993488330976106}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_batch", "returncode": 0, "wall_sec": 78.61947782203788}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q50/seed10509/A_batch_mb256", "returncode": 0, "wall_sec": 212.1656582329888}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_anneal4", "returncode": 0, "wall_sec": 57.941640235017985}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_ctrl200", "returncode": 0, "wall_sec": 30.937118957052007}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_anneal2", "returncode": 0, "wall_sec": 70.48838237096788}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_polish2", "returncode": 0, "wall_sec": 55.28904500696808}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_base", "returncode": 0, "wall_sec": 62.08358167699771}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_polish1", "returncode": 0, "wall_sec": 65.05034749599872}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_kl010", "returncode": 0, "wall_sec": 56.635639502026606}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_detmean", "returncode": 0, "wall_sec": 7.293747008021455}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_anneal4", "returncode": 0, "wall_sec": 51.91168495605234}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_kl005", "returncode": 0, "wall_sec": 36.15465280500939}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_polish1", "returncode": 0, "wall_sec": 52.47686665400397}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_anneal2", "returncode": 0, "wall_sec": 69.52541098900838}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_base", "returncode": 0, "wall_sec": 66.5276222259854}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_batch", "returncode": 0, "wall_sec": 89.33271316601895}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_polish2", "returncode": 0, "wall_sec": 56.11217535700416}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_kl010", "returncode": 0, "wall_sec": 49.775611390010454}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_ctrl200", "returncode": 0, "wall_sec": 40.645288127008826}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_detmean", "returncode": 0, "wall_sec": 8.107434328005183}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10502/A_batch_mb256", "returncode": 0, "wall_sec": 170.3410103499773}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_batch", "returncode": 0, "wall_sec": 71.20420241798274}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_anneal2", "returncode": 0, "wall_sec": 61.036387007974554}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_polish1", "returncode": 0, "wall_sec": 49.250364560983144}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_anneal4", "returncode": 0, "wall_sec": 61.2328217359609}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10501/A_batch_mb256", "returncode": 0, "wall_sec": 215.60998101398582}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_kl005", "returncode": 0, "wall_sec": 38.86945354100317}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_base", "returncode": 0, "wall_sec": 60.079637654998805}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_ctrl200", "returncode": 0, "wall_sec": 31.438402731961105}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_polish2", "returncode": 0, "wall_sec": 59.08400129398797}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_detmean", "returncode": 0, "wall_sec": 6.265043119958136}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_kl010", "returncode": 0, "wall_sec": 48.98921853303909}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_anneal4", "returncode": 0, "wall_sec": 52.22431163897272}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_kl005", "returncode": 0, "wall_sec": 32.40418625500752}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_batch", "returncode": 0, "wall_sec": 84.4176720380201}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_anneal2", "returncode": 0, "wall_sec": 61.135719156998675}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_ctrl200", "returncode": 0, "wall_sec": 30.12189957202645}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_polish1", "returncode": 0, "wall_sec": 52.49413322698092}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10503/A_batch_mb256", "returncode": 0, "wall_sec": 191.78884280798957}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_polish2", "returncode": 0, "wall_sec": 54.13518581702374}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_base", "returncode": 0, "wall_sec": 68.00714234600309}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_kl010", "returncode": 0, "wall_sec": 52.820673542970326}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_detmean", "returncode": 0, "wall_sec": 8.550768441986293}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_anneal2", "returncode": 0, "wall_sec": 60.33271190099185}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_kl005", "returncode": 0, "wall_sec": 26.901285469008144}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_batch", "returncode": 0, "wall_sec": 71.75154239899712}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_polish2", "returncode": 0, "wall_sec": 51.52579608204542}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10504/A_batch_mb256", "returncode": 0, "wall_sec": 183.18545933900168}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_base", "returncode": 0, "wall_sec": 61.14813826198224}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_anneal4", "returncode": 0, "wall_sec": 69.58972643100424}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_ctrl200", "returncode": 0, "wall_sec": 34.146543998038396}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_kl010", "returncode": 0, "wall_sec": 42.06462230702164}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_polish1", "returncode": 0, "wall_sec": 66.61213960801251}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_detmean", "returncode": 0, "wall_sec": 5.872909035999328}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_kl005", "returncode": 0, "wall_sec": 30.685020131990314}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_anneal2", "returncode": 0, "wall_sec": 58.253148286021315}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_anneal4", "returncode": 0, "wall_sec": 59.42169230396394}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_base", "returncode": 0, "wall_sec": 50.031828273960855}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_batch", "returncode": 0, "wall_sec": 79.3131756769726}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_ctrl200", "returncode": 0, "wall_sec": 36.61261405196274}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_polish2", "returncode": 0, "wall_sec": 58.305304262030404}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10505/A_batch_mb256", "returncode": 0, "wall_sec": 188.49630232300842}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_kl010", "returncode": 0, "wall_sec": 48.999438515049405}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_polish1", "returncode": 0, "wall_sec": 67.81623335002223}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_detmean", "returncode": 0, "wall_sec": 8.773234978027176}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_anneal4", "returncode": 0, "wall_sec": 54.74462621600833}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_anneal2", "returncode": 0, "wall_sec": 58.63152636302402}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_kl005", "returncode": 0, "wall_sec": 32.73345728602726}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_polish1", "returncode": 0, "wall_sec": 56.093817730026785}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_batch", "returncode": 0, "wall_sec": 78.7966411979869}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_polish2", "returncode": 0, "wall_sec": 55.78868349298136}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_ctrl200", "returncode": 0, "wall_sec": 29.60095062397886}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_kl010", "returncode": 0, "wall_sec": 42.175192348018754}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_base", "returncode": 0, "wall_sec": 64.4924067039974}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_anneal2", "returncode": 0, "wall_sec": 50.509122187970206}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_anneal4", "returncode": 0, "wall_sec": 48.49538018199382}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10507/A_batch_mb256", "returncode": 0, "wall_sec": 169.48365514696343}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10506/A_batch_mb256", "returncode": 0, "wall_sec": 202.79735786805395}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_batch", "returncode": 0, "wall_sec": 71.15593258698937}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10508/A_batch_mb256", "returncode": 0, "wall_sec": 191.51534791401355}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10509/A_batch_mb256", "returncode": 0, "wall_sec": 168.89175052696373}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage2/q60/seed10510/A_batch_mb256", "returncode": 0, "wall_sec": 163.0981341819861}
+LAUNCHER_EXIT=0

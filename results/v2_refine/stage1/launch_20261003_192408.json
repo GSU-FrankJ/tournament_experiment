@@ -1,0 +1,1317 @@
+{
+ "wave": "stage1",
+ "dry_run": false,
+ "argv": [
+  "tools/v2/launch_refine.py",
+  "--wave",
+  "stage1",
+  "--workers",
+  "20",
+  "--code-commit",
+  "6c902db"
+ ],
+ "started": "20261003_192408",
+ "workers": 20,
+ "nproc": 64,
+ "loadavg_at_start": [
+  4.58740234375,
+  10.63134765625,
+  6.89453125
+ ],
+ "disk_free_bytes": 2316310945792,
+ "disk_total_bytes": 5952313540608,
+ "head": "655b14c6747d9eaa776851cf46740ca0140a7c2d",
+ "code_commit": "6c902db",
+ "status_porcelain": [
+  "?? results/v2_refine/c7/branchpoint_f02a256/",
+  "?? results/v2_refine/c7/code_check/",
+  "?? results/v2_refine/d1_smoke/",
+  "?? results/v2_refine/d2_smoke/",
+  "?? results/v2_refine/launch_parents_A.out",
+  "?? results/v2_refine/launch_stage1.out",
+  "?? results/v2_refine/parents_A/",
+  "?? results/v2_refine/stage1/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10501/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10502/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10503/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10504/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10505/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10506/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10507/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10508/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10509/weights/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q50/seed10510/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10501/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10502/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10503/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10504/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10505/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10506/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10507/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10508/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10509/weights/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/band_sweep.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/checkpoint_weights.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/checkpoints/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/d1_buffers/",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/final_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/final_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/gateA_development.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/gateA_final.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/phase_A_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/phase_B_exit_arrays.npz",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/train_history.json",
+  "?? results/v2_refine/v11_reproduction/q60/seed10510/weights/"
+ ],
+ "code_commit_resolved": "6c902dbd5943597088151c75919406ce0e030de5",
+ "diff_stat_code_commit_to_head": "reports/v2/refine/03_d2_verifier_sensitivity.md    |  789 +++++++\n results/v2_refine/d2_run.out                       |    2 +\n .../d2_verifier_sensitivity/detection_limits.csv   |  109 +\n .../d2_verifier_sensitivity/evaluations.csv        |  153 ++\n .../family_e_confirmation.csv                      |   11 +\n .../figures/d2_family_a.pdf                        |  Bin 0 -> 70253 bytes\n .../figures/d2_family_a.png                        |  Bin 0 -> 119747 bytes\n .../figures/d2_family_b.pdf                        |  Bin 0 -> 70374 bytes\n .../figures/d2_family_b.png                        |  Bin 0 -> 128151 bytes\n .../figures/d2_family_c.pdf                        |  Bin 0 -> 69137 bytes\n .../figures/d2_family_c.png                        |  Bin 0 -> 113423 bytes\n .../figures/d2_family_d.pdf                        |  Bin 0 -> 68263 bytes\n .../figures/d2_family_d.png                        |  Bin 0 -> 97561 bytes\n .../figures/d2_family_e.pdf                        |  Bin 0 -> 69134 bytes\n .../figures/d2_family_e.png                        |  Bin 0 -> 101109 bytes\n results/v2_refine/d2_verifier_sensitivity/fits.csv |   73 +\n .../v2_refine/d2_verifier_sensitivity/meta.json    |  224 ++\n .../v2_refine/d2_verifier_sensitivity/paired.csv   |   77 +\n results/v2_refine/launch_v11_repro.out             |   22 +\n .../v11_reproduction/launch_20261003_191700.json   |  166 ++\n .../v11_reproduction/q50/seed10501/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10501/gates.json      |  251 ++\n .../q50/seed10501/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10501/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10501/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10501/status.json     |   21 +\n .../q50/seed10501/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10501/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10501/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10501/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10502/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10502/gates.json      |  251 ++\n .../q50/seed10502/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10502/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10502/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10502/status.json     |   21 +\n .../q50/seed10502/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10502/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10502/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10502/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10503/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10503/gates.json      |  251 ++\n .../q50/seed10503/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10503/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10503/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10503/status.json     |   21 +\n .../q50/seed10503/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10503/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10503/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10503/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10504/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10504/gates.json      |  251 ++\n .../q50/seed10504/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10504/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10504/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10504/status.json     |   21 +\n .../q50/seed10504/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10504/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10504/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10504/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10505/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10505/gates.json      |  251 ++\n .../q50/seed10505/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10505/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10505/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10505/status.json     |   21 +\n .../q50/seed10505/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10505/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10505/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10505/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10506/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10506/gates.json      |  251 ++\n .../q50/seed10506/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10506/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10506/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10506/status.json     |   21 +\n .../q50/seed10506/v2_checkpoints_A.csv             |   18 +\n .../q50/seed10506/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10506/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10506/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10507/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10507/gates.json      |  251 ++\n .../q50/seed10507/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10507/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10507/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10507/status.json     |   21 +\n .../q50/seed10507/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10507/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10507/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10507/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10508/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10508/gates.json      |  251 ++\n .../q50/seed10508/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10508/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10508/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10508/status.json     |   21 +\n .../q50/seed10508/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10508/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10508/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10508/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10509/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10509/gates.json      |  251 ++\n .../q50/seed10509/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10509/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10509/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10509/status.json     |   21 +\n .../q50/seed10509/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10509/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10509/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10509/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q50/seed10510/drift_test.json |    9 +\n .../v11_reproduction/q50/seed10510/gates.json      |  251 ++\n .../q50/seed10510/induced_band.json                |   25 +\n .../v11_reproduction/q50/seed10510/manifest.json   |  528 +++++\n .../v11_reproduction/q50/seed10510/run_config.json |  189 ++\n .../v11_reproduction/q50/seed10510/status.json     |   21 +\n .../q50/seed10510/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10510/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10510/v2_run_summary.json              |   71 +\n .../v11_reproduction/q50/seed10510/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10501/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10501/gates.json      |  251 ++\n .../q60/seed10501/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10501/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10501/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10501/status.json     |   21 +\n .../q60/seed10501/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10501/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10501/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10501/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10502/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10502/gates.json      |  251 ++\n .../q60/seed10502/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10502/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10502/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10502/status.json     |   21 +\n .../q60/seed10502/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10502/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10502/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10502/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10503/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10503/gates.json      |  251 ++\n .../q60/seed10503/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10503/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10503/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10503/status.json     |   21 +\n .../q60/seed10503/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10503/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10503/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10503/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10504/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10504/gates.json      |  251 ++\n .../q60/seed10504/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10504/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10504/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10504/status.json     |   21 +\n .../q60/seed10504/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10504/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10504/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10504/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10505/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10505/gates.json      |  251 ++\n .../q60/seed10505/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10505/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10505/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10505/status.json     |   21 +\n .../q60/seed10505/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10505/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10505/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10505/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10506/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10506/gates.json      |  251 ++\n .../q60/seed10506/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10506/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10506/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10506/status.json     |   21 +\n .../q60/seed10506/v2_checkpoints_A.csv             |   18 +\n .../q60/seed10506/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10506/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10506/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10507/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10507/gates.json      |  251 ++\n .../q60/seed10507/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10507/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10507/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10507/status.json     |   21 +\n .../q60/seed10507/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10507/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10507/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10507/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10508/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10508/gates.json      |  251 ++\n .../q60/seed10508/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10508/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10508/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10508/status.json     |   21 +\n .../q60/seed10508/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10508/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10508/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10508/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10509/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10509/gates.json      |  251 ++\n .../q60/seed10509/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10509/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10509/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10509/status.json     |   21 +\n .../q60/seed10509/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10509/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10509/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10509/v2_updates.csv  | 2201 ++++++++++++++++++\n .../v11_reproduction/q60/seed10510/drift_test.json |    9 +\n .../v11_reproduction/q60/seed10510/gates.json      |  251 ++\n .../q60/seed10510/induced_band.json                |   25 +\n .../v11_reproduction/q60/seed10510/manifest.json   |  528 +++++\n .../v11_reproduction/q60/seed10510/run_config.json |  189 ++\n .../v11_reproduction/q60/seed10510/status.json     |   21 +\n .../q60/seed10510/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10510/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10510/v2_run_summary.json              |   71 +\n .../v11_reproduction/q60/seed10510/v2_updates.csv  | 2201 ++++++++++++++++++\n results/v2_refine/v11_reproduction_checks.json     | 2398 ++++++++++++++++++++\n 221 files changed, 70706 insertions(+)",
+ "n_planned": 160,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_expcont",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_polish1",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_polish2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_batch",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_batch_mb256",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_kl005",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_kl010",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_expcont"
+ ],
+ "validation": {
+  "per_arm": {
+   "B_base": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_polish1": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_polish2": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_batch": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_batch_mb256": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_kl005": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_kl010": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   },
+   "B_expcont": {
+    "n": 20,
+    "valid": 20,
+    "fail_new_keys_only": 0,
+    "fail_other": 0,
+    "errors": [],
+    "window_problems": 0
+   }
+  },
+  "n_invalid": 0
+ },
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_kl005",
+   "returncode": 0,
+   "wall_sec": 41.51515185995959
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_kl005",
+   "returncode": 0,
+   "wall_sec": 46.662477757025044
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_kl010",
+   "returncode": 0,
+   "wall_sec": 78.47979279997526
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_kl005",
+   "returncode": 0,
+   "wall_sec": 47.59450848196866
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_kl010",
+   "returncode": 0,
+   "wall_sec": 98.27317582903197
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_polish2",
+   "returncode": 0,
+   "wall_sec": 121.78456187201664
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_polish2",
+   "returncode": 0,
+   "wall_sec": 122.40341892297147
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_base",
+   "returncode": 0,
+   "wall_sec": 123.25257263099775
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_base",
+   "returncode": 0,
+   "wall_sec": 127.05907933600247
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_base",
+   "returncode": 0,
+   "wall_sec": 129.05367089400534
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_polish1",
+   "returncode": 0,
+   "wall_sec": 129.9480628040037
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_polish2",
+   "returncode": 0,
+   "wall_sec": 137.20152525498997
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_expcont",
+   "returncode": 0,
+   "wall_sec": 141.00550379103515
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_expcont",
+   "returncode": 0,
+   "wall_sec": 143.2910250549903
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_kl010",
+   "returncode": 0,
+   "wall_sec": 87.95656401698943
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_polish1",
+   "returncode": 0,
+   "wall_sec": 167.1316595930257
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_batch",
+   "returncode": 0,
+   "wall_sec": 170.75034045998473
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl005",
+   "returncode": 0,
+   "wall_sec": 46.26342696300708
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_polish1",
+   "returncode": 0,
+   "wall_sec": 176.02882705401862
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_batch",
+   "returncode": 0,
+   "wall_sec": 194.06119911296992
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_batch",
+   "returncode": 0,
+   "wall_sec": 207.82197836996056
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl010",
+   "returncode": 0,
+   "wall_sec": 91.061189072032
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl005",
+   "returncode": 0,
+   "wall_sec": 46.67763582896441
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_expcont",
+   "returncode": 0,
+   "wall_sec": 145.98730145697482
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_base",
+   "returncode": 0,
+   "wall_sec": 146.48277056298684
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_polish2",
+   "returncode": 0,
+   "wall_sec": 124.51032232196303
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_kl010",
+   "returncode": 0,
+   "wall_sec": 77.55745478195604
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_polish1",
+   "returncode": 0,
+   "wall_sec": 139.064094262023
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_expcont",
+   "returncode": 0,
+   "wall_sec": 130.07253763801418
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish1",
+   "returncode": 0,
+   "wall_sec": 127.83749298698967
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_base",
+   "returncode": 0,
+   "wall_sec": 130.7142202410032
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_polish2",
+   "returncode": 0,
+   "wall_sec": 118.78480652399594
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_kl005",
+   "returncode": 0,
+   "wall_sec": 43.31951341498643
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch",
+   "returncode": 0,
+   "wall_sec": 167.29777701495914
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_expcont",
+   "returncode": 0,
+   "wall_sec": 125.24794531502994
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_base",
+   "returncode": 0,
+   "wall_sec": 118.78613821300678
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_kl010",
+   "returncode": 0,
+   "wall_sec": 77.96082204999402
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_kl005",
+   "returncode": 0,
+   "wall_sec": 54.0923062840011
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch",
+   "returncode": 0,
+   "wall_sec": 179.91980580904055
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_polish2",
+   "returncode": 0,
+   "wall_sec": 126.53714312898228
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_polish1",
+   "returncode": 0,
+   "wall_sec": 148.2563413530006
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_polish1",
+   "returncode": 0,
+   "wall_sec": 137.04985617299099
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_base",
+   "returncode": 0,
+   "wall_sec": 150.17887111898744
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_kl010",
+   "returncode": 0,
+   "wall_sec": 102.37331102200551
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_expcont",
+   "returncode": 0,
+   "wall_sec": 163.031748619047
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_polish2",
+   "returncode": 0,
+   "wall_sec": 152.6401134679909
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_batch",
+   "returncode": 0,
+   "wall_sec": 187.62278440402588
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_batch",
+   "returncode": 0,
+   "wall_sec": 173.14477746299235
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_base",
+   "returncode": 0,
+   "wall_sec": 128.50007551396266
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_kl005",
+   "returncode": 0,
+   "wall_sec": 54.04540611000266
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_polish1",
+   "returncode": 0,
+   "wall_sec": 127.2284285990172
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_expcont",
+   "returncode": 0,
+   "wall_sec": 152.25071408197982
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10501/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 485.498015720048
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_polish2",
+   "returncode": 0,
+   "wall_sec": 139.29847524600336
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_kl010",
+   "returncode": 0,
+   "wall_sec": 80.03861663601128
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10502/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 522.3386514070444
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_kl005",
+   "returncode": 0,
+   "wall_sec": 62.27672646997962
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_batch",
+   "returncode": 0,
+   "wall_sec": 182.0728728280519
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_kl010",
+   "returncode": 0,
+   "wall_sec": 86.98725398001261
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_base",
+   "returncode": 0,
+   "wall_sec": 138.16009277798003
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10503/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 522.8816578739788
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_polish1",
+   "returncode": 0,
+   "wall_sec": 149.5750587200164
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_expcont",
+   "returncode": 0,
+   "wall_sec": 152.52749033400323
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_polish2",
+   "returncode": 0,
+   "wall_sec": 147.5414071379928
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_kl005",
+   "returncode": 0,
+   "wall_sec": 56.05794530798448
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_expcont",
+   "returncode": 0,
+   "wall_sec": 140.5394512109924
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 495.7053526150412
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_polish1",
+   "returncode": 0,
+   "wall_sec": 142.6986793919932
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_base",
+   "returncode": 0,
+   "wall_sec": 145.7469792199554
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_batch",
+   "returncode": 0,
+   "wall_sec": 182.07274477597093
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_kl010",
+   "returncode": 0,
+   "wall_sec": 96.38060655799927
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_kl005",
+   "returncode": 0,
+   "wall_sec": 49.90932042396162
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_polish2",
+   "returncode": 0,
+   "wall_sec": 173.50352295394987
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10505/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 507.7247553660418
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_expcont",
+   "returncode": 0,
+   "wall_sec": 139.002124191029
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_kl010",
+   "returncode": 0,
+   "wall_sec": 78.7549245239934
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_base",
+   "returncode": 0,
+   "wall_sec": 142.27440041402588
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_polish1",
+   "returncode": 0,
+   "wall_sec": 138.69227591896197
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_polish2",
+   "returncode": 0,
+   "wall_sec": 150.50365671201143
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_batch",
+   "returncode": 0,
+   "wall_sec": 210.51266387000214
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_kl005",
+   "returncode": 0,
+   "wall_sec": 62.09026657702634
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_polish1",
+   "returncode": 0,
+   "wall_sec": 127.81389755097916
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_batch",
+   "returncode": 0,
+   "wall_sec": 198.54938398703234
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_base",
+   "returncode": 0,
+   "wall_sec": 145.1860946820234
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_kl010",
+   "returncode": 0,
+   "wall_sec": 80.50953180901706
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_polish2",
+   "returncode": 0,
+   "wall_sec": 126.92817170801573
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10506/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 539.8033653569873
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_expcont",
+   "returncode": 0,
+   "wall_sec": 167.52894502796698
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_kl005",
+   "returncode": 0,
+   "wall_sec": 58.38869357301155
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10507/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 542.7338483009953
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_base",
+   "returncode": 0,
+   "wall_sec": 132.28165045601781
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_expcont",
+   "returncode": 0,
+   "wall_sec": 145.32078241097042
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_kl010",
+   "returncode": 0,
+   "wall_sec": 89.56378910504282
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_polish2",
+   "returncode": 0,
+   "wall_sec": 143.4317793000373
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_batch",
+   "returncode": 0,
+   "wall_sec": 206.52984043798642
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_kl005",
+   "returncode": 0,
+   "wall_sec": 51.22509412304498
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_polish1",
+   "returncode": 0,
+   "wall_sec": 171.76820169598795
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10508/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 532.0194022379583
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_polish1",
+   "returncode": 0,
+   "wall_sec": 133.61593306902796
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_base",
+   "returncode": 0,
+   "wall_sec": 135.1938584689633
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_batch",
+   "returncode": 0,
+   "wall_sec": 183.90455570199993
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_polish2",
+   "returncode": 0,
+   "wall_sec": 135.34052312700078
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_kl010",
+   "returncode": 0,
+   "wall_sec": 87.74370585998986
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_expcont",
+   "returncode": 0,
+   "wall_sec": 164.4295447699842
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_kl005",
+   "returncode": 0,
+   "wall_sec": 43.44310727901757
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_batch",
+   "returncode": 0,
+   "wall_sec": 177.8776997619425
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_kl010",
+   "returncode": 0,
+   "wall_sec": 64.1096375399502
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_expcont",
+   "returncode": 0,
+   "wall_sec": 142.09073061298113
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10509/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 537.0177746349946
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_polish1",
+   "returncode": 0,
+   "wall_sec": 130.9253115580068
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_base",
+   "returncode": 0,
+   "wall_sec": 136.78451939398656
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_polish2",
+   "returncode": 0,
+   "wall_sec": 127.04881571198348
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_kl005",
+   "returncode": 0,
+   "wall_sec": 41.56710894301068
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_base",
+   "returncode": 0,
+   "wall_sec": 121.61581946595106
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_polish1",
+   "returncode": 0,
+   "wall_sec": 120.39477386197541
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_polish2",
+   "returncode": 0,
+   "wall_sec": 118.4010209160042
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_expcont",
+   "returncode": 0,
+   "wall_sec": 128.92273021198343
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_batch",
+   "returncode": 0,
+   "wall_sec": 164.92280190298334
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_kl010",
+   "returncode": 0,
+   "wall_sec": 71.62606462399708
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10501/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 484.2214965079911
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10510/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 550.2906115960213
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_kl005",
+   "returncode": 0,
+   "wall_sec": 41.32406528695719
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_batch",
+   "returncode": 0,
+   "wall_sec": 148.26922486699186
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_polish1",
+   "returncode": 0,
+   "wall_sec": 109.28841476998059
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_kl010",
+   "returncode": 0,
+   "wall_sec": 68.1712310090079
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_base",
+   "returncode": 0,
+   "wall_sec": 112.74631506198784
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_expcont",
+   "returncode": 0,
+   "wall_sec": 121.53109957900597
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_polish2",
+   "returncode": 0,
+   "wall_sec": 112.78982244501822
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_kl005",
+   "returncode": 0,
+   "wall_sec": 37.177084298979025
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10502/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 452.25422634900315
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_batch",
+   "returncode": 0,
+   "wall_sec": 146.1372094359831
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_kl010",
+   "returncode": 0,
+   "wall_sec": 62.16745056898799
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_kl005",
+   "returncode": 0,
+   "wall_sec": 36.3773792500142
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_polish2",
+   "returncode": 0,
+   "wall_sec": 109.20203711400973
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_base",
+   "returncode": 0,
+   "wall_sec": 115.12661428499268
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_expcont",
+   "returncode": 0,
+   "wall_sec": 117.74896971799899
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_polish1",
+   "returncode": 0,
+   "wall_sec": 119.24209829501342
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_kl010",
+   "returncode": 0,
+   "wall_sec": 65.19111424399307
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_base",
+   "returncode": 0,
+   "wall_sec": 108.49111923598684
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_batch",
+   "returncode": 0,
+   "wall_sec": 148.01722876698477
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_polish1",
+   "returncode": 0,
+   "wall_sec": 109.19103142200038
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_polish2",
+   "returncode": 0,
+   "wall_sec": 109.79241270100465
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_expcont",
+   "returncode": 0,
+   "wall_sec": 118.07665061496664
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10503/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 486.6130412479979
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_kl005",
+   "returncode": 0,
+   "wall_sec": 33.43874275399139
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_batch",
+   "returncode": 0,
+   "wall_sec": 144.7523246879573
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_polish1",
+   "returncode": 0,
+   "wall_sec": 104.1082502969657
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10504/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 438.8786520109861
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_base",
+   "returncode": 0,
+   "wall_sec": 108.86758121300954
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_polish2",
+   "returncode": 0,
+   "wall_sec": 107.84924293297809
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_expcont",
+   "returncode": 0,
+   "wall_sec": 118.01264388498385
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_kl010",
+   "returncode": 0,
+   "wall_sec": 55.5091554709943
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_batch",
+   "returncode": 0,
+   "wall_sec": 138.96771074901335
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10505/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 424.54053104599006
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10506/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 391.8750812159851
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_expcont",
+   "returncode": 0,
+   "wall_sec": 128.61962600203697
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10507/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 385.6905123250326
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10508/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 364.68599493202055
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10509/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 356.778622770973
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q60/seed10510/B_batch_mb256",
+   "returncode": 0,
+   "wall_sec": 338.06769840599736
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  3.58203125,
+  14.93115234375,
+  21.4892578125
+ ]
+}

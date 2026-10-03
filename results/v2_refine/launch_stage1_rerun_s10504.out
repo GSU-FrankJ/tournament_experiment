@@ -1,0 +1,58 @@
+6 run(s) of wave stage1; record /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/launch_20261003_195054.json
+{
+ "B_polish1": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_batch": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_batch_mb256": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_kl005": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_kl010": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ },
+ "B_expcont": {
+  "n": 1,
+  "valid": 1,
+  "fail_new_keys_only": 0,
+  "fail_other": 0,
+  "errors": [],
+  "window_problems": 0
+ }
+}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl005", "returncode": 0, "wall_sec": 36.54748875001678}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_kl010", "returncode": 0, "wall_sec": 66.0281865010038}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_polish1", "returncode": 0, "wall_sec": 97.07793438702356}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_expcont", "returncode": 0, "wall_sec": 106.52262627700111}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch", "returncode": 0, "wall_sec": 125.58407756499946}
+{"out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1/q50/seed10504/B_batch_mb256", "returncode": 0, "wall_sec": 337.10662470699754}
+LAUNCHER_EXIT=0
