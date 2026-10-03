@@ -273,8 +273,16 @@ def test_flags_with_fewer_than_20_runs_missing_gradient_and_per_phase_per_q():
     prp = pd.concat([_prp([0.0] * 5, phase="A"), _prp([0.01] * 5, phase="B"),
                      _prp([0.0] * 5, q=60, phase="A")], ignore_index=True)
     out = D.evaluate_flags(prp, pd.DataFrame())
-    got = {(r.q, r.phase): r.M1_outcome for r in out.itertuples()}
+    got = {(r.q, r.phase): r.M1_outcome for r in out.itertuples() if r.q != "all"}
     assert got == {(50, "A"): "not exceeded", (50, "B"): "exceeded", (60, "A"): "not exceeded"}
+    pooled = {r.phase: (r.n_runs, r.M1_outcome) for r in out.itertuples() if r.q == "all"}
+    assert pooled == {"A": (10, "not exceeded"), "B": (5, "exceeded")}      # pooled over q ("the 20 runs")
+    # M2 pooled over q: 2 + 1 runs above 1% in different q make 3 > 2, while each q alone does not
+    prp2 = pd.concat([_prp([0.0] * 10, q=50, phase="A"), _prp([0.0] * 10, q=60, phase="A")], ignore_index=True)
+    g50, g60 = _grad([0.02] * 2 + [0.0] * 8, q=50, phase="A"), _grad([0.02] * 1 + [0.0] * 9, q=60, phase="A")
+    o2 = D.evaluate_flags(prp2, pd.concat([g50, g60], ignore_index=True))
+    m2 = {r.q: r.M2_outcome for r in o2.itertuples()}
+    assert m2 == {50: "not exceeded", 60: "not exceeded", "all": "exceeded"}
 
 
 # ====================================================================== synthetic run roots

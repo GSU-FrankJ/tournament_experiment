@@ -559,7 +559,12 @@ def evaluate_flags(prp: pd.DataFrame, grad: pd.DataFrame) -> pd.DataFrame:
     Runs without gradient data are not counted as exceeding; their number is reported.
     """
     rows = []
-    for key, g in prp.groupby(["group", "q", "phase"], sort=True):
+    # per (group, q, phase), then the same flags pooled over q ("all": the literal "of the 20 runs")
+    parts = [(key, g, (grad["q"] == key[1]) if len(grad) and "q" in grad.columns else None)
+             for key, g in prp.groupby(["group", "q", "phase"], sort=True)]
+    for key, g in prp.groupby(["group", "phase"], sort=True):
+        parts.append(((key[0], "all", key[1]), g, None))
+    for key, g, qmask in parts:
         k3 = dict(zip(["group", "q", "phase"], key))
         n_runs = int(len(g))
         med = float(g["pol_frac"].median())
@@ -568,8 +573,10 @@ def evaluate_flags(prp: pd.DataFrame, grad: pd.DataFrame) -> pd.DataFrame:
                    M1_max_run_fraction=float(g["pol_frac"].max()),
                    M1_outcome="exceeded" if med > M1_THRESHOLD else "not exceeded")
         if len(grad) and "share" in grad.columns:
-            gg = grad[(grad["group"] == key[0]) & (grad["q"] == key[1]) & (grad["phase"] == key[2])]
-            per_run = gg.dropna(subset=["share"]).groupby(["arm", "seed"])["share"].max()
+            gg = grad[(grad["group"] == key[0]) & (grad["phase"] == key[2])]
+            if key[1] != "all":
+                gg = gg[gg["q"] == key[1]]
+            per_run = gg.dropna(subset=["share"]).groupby(["arm", "q", "seed"])["share"].max()
             cl_all = gg.get("clamped_over_all", pd.Series(dtype=float))
             max_cl = float(cl_all.max()) if cl_all.notna().any() else np.nan
         else:
@@ -770,7 +777,7 @@ def write_report(out: Path, report_path: Path, command: str, roots: Sequence[Tup
     for _, r in t["d1_flags"].iterrows():
         note = f" Note: {r['note']}." if isinstance(r["note"], str) and r["note"] else ""
         L.append(
-            f"- {r['group']}, q = {_f(r['q'])}, phase {r['phase']} ({int(r['n_runs'])} runs): "
+            f"- {r['group']}, q = {r['q']}, phase {r['phase']} ({int(r['n_runs'])} runs): "
             f"M1 {r['M1_outcome']} (median over runs = {_f(r['M1_median_over_runs'])}, threshold "
             f"{_f(r['M1_threshold'])}, {int(r['M1_runs_above_threshold'])} run(s) above, max run "
             f"fraction {_f(r['M1_max_run_fraction'])}); M2 {r['M2_outcome']} "
