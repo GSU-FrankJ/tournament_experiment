@@ -1,0 +1,5 @@
+check,file,present,tool,mode,arm,n,n_identical,ALL,failing_fields,first_difference,n_snapshot_refresh_counter_differs,window
+parents_A,results/v2_refine/parents_A_checks.json,True,tools/v2/cr1_compare.py,parentsA,,20,20,True,,,0,1 1600
+stage1_base,results/v2_refine/stage1_base_checks.json,True,tools/v2/cr1_compare.py,stage1_base,B_base,20,20,True,,,0,1601 2200
+stage2_base,results/v2_refine/stage2_base_checks.json,True,tools/v2/cr1_compare.py,stage2_base,A_base,20,20,True,,,20,1201 1600
+C-R1,results/v2_refine/v11_reproduction_checks.json,True,tools/v2/cr1_compare.py,cr1,,20,20,True,,,0,1 1000000000

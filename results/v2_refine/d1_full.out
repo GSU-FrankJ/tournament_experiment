@@ -1,0 +1,63 @@
+/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/tools/v2/d1_clamp_analysis.py:678: DtypeWarning: Columns (0: arm) have mixed types. Specify dtype option on import or set low_memory=False.
+  return pd.read_csv(path, keep_default_na=False, na_values=[""])
+               group   q phase  n_runs  M1_median_over_runs   M1_outcome  M2_runs_share_above_threshold  M2_n_runs_with_gradient_data   M2_outcome
+       stage1/B_base  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+       stage1/B_base  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_batch  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_batch  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+stage1/B_batch_mb256  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+stage1/B_batch_mb256  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_expcont  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_expcont  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_kl005  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_kl005  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_kl010  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+      stage1/B_kl010  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_polish1  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_polish1  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_polish2  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage1/B_polish2  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    stage2/A_anneal2  50     A      10             0.000669 not exceeded                              0                            10 not exceeded
+    stage2/A_anneal2  60     A      10             0.000830 not exceeded                              1                            10 not exceeded
+    stage2/A_anneal4  50     A      10             0.000303 not exceeded                              1                            10 not exceeded
+    stage2/A_anneal4  60     A      10             0.000273 not exceeded                              1                            10 not exceeded
+       stage2/A_base  50     A      10             0.002056     exceeded                              3                            10     exceeded
+       stage2/A_base  60     A      10             0.003186     exceeded                              0                            10 not exceeded
+      stage2/A_batch  50     A      10             0.001774     exceeded                              0                            10 not exceeded
+      stage2/A_batch  60     A      10             0.003103     exceeded                              0                            10 not exceeded
+stage2/A_batch_mb256  50     A      10             0.001299     exceeded                              0                            10 not exceeded
+stage2/A_batch_mb256  60     A      10             0.002380     exceeded                              0                            10 not exceeded
+    stage2/A_ctrl200  50     A      10             0.001685     exceeded                              1                            10 not exceeded
+    stage2/A_ctrl200  60     A      10             0.003398     exceeded                              1                            10 not exceeded
+      stage2/A_kl005  50     A      10             0.002180     exceeded                              1                            10 not exceeded
+      stage2/A_kl005  60     A      10             0.002505     exceeded                              0                            10 not exceeded
+      stage2/A_kl010  50     A      10             0.001863     exceeded                              1                            10 not exceeded
+      stage2/A_kl010  60     A      10             0.003435     exceeded                              0                            10 not exceeded
+    stage2/A_polish1  50     A      10             0.001621     exceeded                              0                            10 not exceeded
+    stage2/A_polish1  60     A      10             0.002832     exceeded                              1                            10 not exceeded
+    stage2/A_polish2  50     A      10             0.002231     exceeded                              1                            10 not exceeded
+    stage2/A_polish2  60     A      10             0.002993     exceeded                              1                            10 not exceeded
+    v11_reproduction  50     A      10             0.001001     exceeded                              2                            10 not exceeded
+    v11_reproduction  50     B      10             0.000000 not exceeded                              0                            10 not exceeded
+    v11_reproduction  60     A      10             0.001643     exceeded                              1                            10 not exceeded
+    v11_reproduction  60     B      10             0.000000 not exceeded                              0                            10 not exceeded
+       stage1/B_base all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+      stage1/B_batch all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+stage1/B_batch_mb256 all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+    stage1/B_expcont all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+      stage1/B_kl005 all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+      stage1/B_kl010 all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+    stage1/B_polish1 all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+    stage1/B_polish2 all     B      20             0.000000 not exceeded                              0                            20 not exceeded
+    stage2/A_anneal2 all     A      20             0.000830 not exceeded                              1                            20 not exceeded
+    stage2/A_anneal4 all     A      20             0.000273 not exceeded                              2                            20 not exceeded
+       stage2/A_base all     A      20             0.002920     exceeded                              3                            20     exceeded
+      stage2/A_batch all     A      20             0.002524     exceeded                              0                            20 not exceeded
+stage2/A_batch_mb256 all     A      20             0.001752     exceeded                              0                            20 not exceeded
+    stage2/A_ctrl200 all     A      20             0.002524     exceeded                              2                            20 not exceeded
+      stage2/A_kl005 all     A      20             0.002505     exceeded                              1                            20 not exceeded
+      stage2/A_kl010 all     A      20             0.002727     exceeded                              1                            20 not exceeded
+    stage2/A_polish1 all     A      20             0.002344     exceeded                              1                            20 not exceeded
+    stage2/A_polish2 all     A      20             0.002993     exceeded                              2                            20 not exceeded
+    v11_reproduction all     A      20             0.001385     exceeded                              3                            20     exceeded
+    v11_reproduction all     B      20             0.000000 not exceeded                              0                            20 not exceeded

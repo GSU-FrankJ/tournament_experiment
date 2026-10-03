@@ -1,0 +1,9 @@
+gate,metric,threshold
+G-A,eta_T_over_dw,0.005
+G-A,stage2_rmse_pos_over_g2_0,0.05
+G-A,stage2_tail_mean_over_g2_0,0.02
+G-F,Gmax_full_over_dw,0.01
+G-N,eta_T_over_dw_dev_minus_final_abs,0.001
+G-N,Gmax_full_over_dw_dev_minus_final_abs,0.001
+S1,stage1_rel_err_abs,0.1
+0929 target (reported only),|stage1_rel_err_signed|,0.05

@@ -1,0 +1,19 @@
+file,group,q,phase,n_runs,M1_median_over_runs,M1_threshold,M1_outcome,M2_runs_share_above_threshold,M2_runs_needed_more_than,M2_max_share,M2_outcome
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_base,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_batch,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_batch_mb256,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_expcont,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_kl005,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_kl010,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_polish1,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage1/B_polish2,all,B,20,0.0,0.001,not exceeded,0,2,0.0,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_anneal2,all,A,20,0.000830078125,0.001,not exceeded,1,2,0.0107839841281249,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_anneal4,all,A,20,0.0002734375,0.001,not exceeded,2,2,0.0205941454529064,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_base,all,A,20,0.0029199218749999,0.001,exceeded,3,2,0.0329933607538581,exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_batch,all,A,20,0.0025244140625,0.001,exceeded,0,2,0.008156054633658,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_batch_mb256,all,A,20,0.0017523193359375,0.001,exceeded,0,2,0.0089806437133015,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_ctrl200,all,A,20,0.0025244140625,0.001,exceeded,2,2,0.0190484292788143,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_kl005,all,A,20,0.0025048828125,0.001,exceeded,1,2,0.0621011867958801,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_kl010,all,A,20,0.00272705078125,0.001,exceeded,1,2,0.0500903591155619,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_polish1,all,A,20,0.00234375,0.001,exceeded,1,2,0.0112750686187281,not exceeded
+results/v2_refine/d1_clamp/d1_flags.csv,stage2/A_polish2,all,A,20,0.0029931640625,0.001,exceeded,2,2,0.0180701039597092,not exceeded
