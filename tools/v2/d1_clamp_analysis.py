@@ -698,6 +698,11 @@ def write_report(out: Path, report_path: Path, command: str, roots: Sequence[Tup
         "- Roots: " + "; ".join(f"`{lab}` = `{p}`" for lab, p in roots) + ".",
         f"- Runs analysed: {len(runs)} (`{rel}/d1_runs.csv`); run-like directories skipped",
         f"  for lack of `v2_updates.csv`: {len(skipped)}.",
+        *([f"- Runs without D1 columns by construction (a pathwise phase P draws no action): "
+           f"{int((runs['n_rows_without_d1'] > 0).sum())} of {len(runs)} runs "
+           f"(arms: {', '.join(sorted(set(runs.loc[runs['n_rows_without_d1'] > 0, 'arm'].astype(str))))}); "
+           "they are counted in 'Runs analysed' but contribute no rows to any table."]
+          if (runs["n_rows_without_d1"] > 0).any() else []),
         f"- A raw draw is a clamp hit when it is below {CLAMP:g} (lo) or above 1 - {CLAMP:g} (hi).",
         "  Counts come from the `d1_*` columns of `v2_updates.csv` (raw `rng.beta` output before",
         "  the clip).",
@@ -774,6 +779,22 @@ def write_report(out: Path, report_path: Path, command: str, roots: Sequence[Tup
           f"among learner policy rows exceeds {M1_THRESHOLD:g} (strict). M2: the gradient share of",
           f"the clamped rows exceeds {M2_SHARE_THRESHOLD:.0%} at any saved update in more than",
           f"{M2_MAX_RUNS} of the runs (strict; evaluated with the number of runs available).", ""]
+    headline = t["d1_flags"][t["d1_flags"]["group"] == "v11_reproduction"]
+    if len(headline):
+        hl = ["## 0. Headline: the locked pipeline (the C-R1 runs, group `v11_reproduction`)", "",
+              f"Source: `{rel}/d1_flags.csv`, `{rel}/d1_by_group.csv` (descriptive; no fix applied). Rows for q = `all` "
+              "pool both q (the pre-registered reading 'of the 20 runs'); the rows per q are shown beside them.", ""]
+        for _, r in headline.iterrows():
+            hl.append(f"- q = {r['q']}, phase {r['phase']} ({int(r['n_runs'])} runs): M1 {r['M1_outcome']} "
+                      f"(median over runs of the clamp fraction among learner policy rows = "
+                      f"{_f(r['M1_median_over_runs'])} against {_f(r['M1_threshold'])}); M2 {r['M2_outcome']} "
+                      f"({int(r['M2_runs_share_above_threshold'])} of {int(r['M2_n_runs_with_gradient_data'])} "
+                      f"runs have a clamped-row gradient share above {_f(r['M2_share_threshold'])} at a saved "
+                      f"update, needs more than {int(r['M2_runs_needed_more_than'])}; max share "
+                      f"{_f(r['M2_max_share'])}).")
+        hl.append("")
+        k = L.index("## 1. Data and definitions")
+        L[k:k] = hl
     for _, r in t["d1_flags"].iterrows():
         note = f" Note: {r['note']}." if isinstance(r["note"], str) and r["note"] else ""
         L.append(
