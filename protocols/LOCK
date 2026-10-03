@@ -28,3 +28,24 @@
  },
  "rule": "nothing in protocols/, the entry point, the pipeline code or the analysis script changes after this lock without a new version number and a stated reason"
 }
+{
+ "protocol": "protocols/v2_T2_locked_v2_0.json",
+ "protocol_version": "2.0",
+ "lock_commit": "1d6d4d00736b265a18ae71b91ecb77b19e4915b9",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "protocol_md_sha256": "efbb4f5af832494b8b2f7e992d3b05b178a2570861b0959cb4135687d3a95937",
+ "entry_point": "run/run_v2_T2_locked.py",
+ "entry_point_sha256_at_lock": "b276a2ce5e1b6439f32d34bc980968a1482c787645b4afb0ccbfb8c00773c356",
+ "analysis_script": "tools/v2/confirmation_analysis_v2_0.py",
+ "analysis_script_sha256": "9cdbaf7c1fe85787ae99a8abdd3bab5987bd3b7e3742c6a1564ac80bf0c5fa90",
+ "continuation_module": "utils/v2_continuation.py",
+ "continuation_module_sha256": "513fef4b304e46606fd2bc436c628c90a4893b36979a454cb00924163bb50b4a",
+ "date": "2026-10-03",
+ "reason": "PI decisions D1-D5 of the v2.0 round, after the R1 round and before any confirmation seed: expected continuation in Phase B (R1 arm B_expcont, method 6); check (ii) of the continuation table settled by three tests; gate G-S (stage-1 error <= 0.05) added to run pass; seed block 30501-30520",
+ "supersedes": {
+  "protocol": "protocols/v2_T2_locked_v1_1.json",
+  "protocol_version": "1.1",
+  "lock_commit": "431474d18259ff7534520b8a6d52616beb36c800"
+ },
+ "rule": "nothing in protocols/, the entry point, the pipeline code, utils/v2_continuation.py or the analysis script changes after this lock without a new version number and a stated reason"
+}
