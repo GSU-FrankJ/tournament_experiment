@@ -98,3 +98,25 @@ git worktree add -B v2-t2-r2b /home/fjiang4/tournament_experiment/.claude/worktr
 ```
 
 So `v2-t2-r2b` starts at `b55d389`, the commit `main` will have after the fast-forward (the tree is identical). `main` stays for the owner to fast-forward and push; nothing in R2b depends on it. The pack refresh of 1.2 remains undone.
+
+## Addendum 2 (2026-10-04, after the R2b pilots, from the conformance audit against the prompt)
+
+Nothing above was changed. This addendum closes three record gaps of section 1.4 / the preamble ("every command, hash and `ls-remote` output") and states what is still open for the owner.
+
+1. **The 1.4 commit.** `b55d38907b02106a6e874d3b60622e4e5b7c9d5d` (`docs: record v2.0 publication status and the R2b P0 housekeeping`, 2026-10-04T06:17:13+00:00, parent `e89b61d`); it is the head of `v2-t2-refine` and `origin/v2-t2-refine`, and the target of the tag `t2-v2-main-v2.0` (the placeholder "the commit that adds this file" in the tag description resolves to it). Its `git diff --stat e89b61d b55d389`, verbatim:
+
+```
+ docs/STATE.md                            |  2 +
+ reports/v2/README.md                     |  4 ++
+ reports/v2/protocol_v2_0_confirmation.md |  4 ++
+ reports/v2/refine_r2b/00_housekeeping.md | 75 ++++++++++++++++++++++++++++++++
+ reports/v2/summary.md                    |  4 ++
+ 5 files changed, 89 insertions(+)
+```
+
+   There are no deletions: the four addenda are pure insertions. `git diff --stat f02a256 b55d389 -- reports/v2/t2_report tools/v2/report` is empty (the pack and its builder are the v1.1 originals).
+2. **Commands that were not logged verbatim.** The scratch-copy command of the pack rebuild (an `rsync` into a scratch directory) and the tmux session of the rebuild were not recorded literally when they were run, and are not reconstructed here (a reconstructed command would be a false record). Their effect is recorded: the two tracebacks above, and that the tracked pack and builder are unchanged.
+3. **State on 2026-10-04 (`git rev-parse`, `git rev-list --count`).** `main` = `d1b84437d3be32daf40a58d77e044201b7ba09d0` locally and `f02a256095dcaa69dffbd011718d337f84183890` on `origin`; `v2-t2-refine` = `b55d38907b02...`; `f02a256..b55d389` is 24 commits and `d1b8443..f02a256` 52.
+4. **Still open, owner-side (no experiment and no locked file involved).**
+   - **Section 1.6, `main`:** in `/home/fjiang4/tournament_experiment`: `git status --porcelain` shows no tracked modification; `git fetch origin`; `git merge --ff-only origin/main`; `git merge --ff-only v2-t2-refine`; `git rev-parse main` must print `b55d38907b02106a6e874d3b60622e4e5b7c9d5d`; then `git push origin main` (fast-forward `f02a256 -> b55d389`, no force) and `git ls-remote origin refs/heads/main`. `v2-t2-r2b` needs no rebase (its base is `b55d389`).
+   - **Section 1.2, report-pack refresh:** either waived (the prompt itself keeps the pack the v1.1 pack and defers a v2.0 pack) or a builder repair authorised beyond "change nothing else": the rename in `sec_stage1.py`; the learning-rate windows as `{phase: [window]}` in `sec_locked_a._schedule`; the v1.0 / v1.1 protocols evaluated through a pinned v1.x entry point and `L.load_protocol()` pinned to the v1.1 protocol (the call at `sec_locked_a.py:811` now returns the v2.0 protocol); the allowed-diff rule widened to the module-hash cells of the 11 `manifest.csv` rows that carry the `sec_stage1.py` hash; rebuild at a settled head (T05 counts `reports/v2/*.md` and T57 hashes `docs/STATE.md`, both of which R2b changed).
