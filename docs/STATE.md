@@ -2,6 +2,14 @@
 
 Last updated: 2026-10-04
 
+## T=2 terminal-stage follow-up round R2b (2026-10-04, branch v2-t2-r2b, not pushed)
+
+Done: P0 housekeeping on `v2-t2-refine` (§1.2 report-pack refresh NOT done: the builder fails for two reasons unrelated to the rename; §1.6 was run by the owner and repaired afterwards); P1 code for three mechanisms (peak-focused starts `start_weights`, censored likelihood `clamp_likelihood`, pathwise epochs x minibatches `pathwise_epochs` / `pathwise_minibatch`; all defaults bit-identical, C7 and the v2.0 lock-commit comparison in the suite) with 92 new tests, pre-registration, C-R2 (unchanged v2.0 entry point reproduces `rehearsal_v2_0` in 20/20), read-only diagnostic of q=50 seed 30510, two pilot waves (120 runs, 120/120 exit 0, launch checks 120/120, manifests `d581b3c` clean), pre-registered analysis, reports. Code commit `1ff99bd`; the run code did not change afterwards.
+Result: no arm meets both parts of the pre-registered criterion. Peak-focused starts at share 0.50 meet part (a) at both q (CI excludes 0, 8 / 7 of 10 seeds improve) and fail part (b): 3 of 10 q=60 runs that passed G-A under the baseline fail the G-A tail-mean limit. Censored likelihood and the pathwise arms (20 steps per update) do not separate from their comparators (pathwise LR 3e-4 is worse than its PPO control at q=50). Under the pre-registered rules none of H1-H4 is supported for seed 30510 (the rules also fire on 5 passing runs).
+Start at `reports/v2/refine_r2b/summary.md` (reading order, table, deviations); decision inputs `05_decision_inputs.md`; data `results/v2_refine_r2b/`.
+Known issues: `test_registry_canonicalization` fails as before; run `pytest tests`, not a bare `pytest` (a bare run collects `experiments/*/tests` and breaks two test modules); the P0 pack refresh is open; local `main` is not fast-forwarded and nothing of R2b is pushed (the owner pushes the branch).
+Next: the owner decides (whether to confirm `A_peak50` or an intermediate share, anything about mechanism 3, a combination, a v2.1). No combination, no v2.1, no fresh seed (40501-40520 reserved) and no T=3 work was started.
+
 ## T=2 protocol v2.0: re-rehearsal and fresh-seed confirmation (2026-10-04, branch v2-t2-refine, not pushed)
 
 Done: protocol v2.0 locked at `1d6d4d0` (v1.1 + expected continuation in Phase B + gate G-S ≤ 0.05; seed block 30501-30520; record `f2d616c`); re-rehearsal on the development seeds R1-R6 pass, R7 false as the checks tool computed it and accepted as met by owner decision D-R7 (C7 against the canonical reference IDENTICAL including `checkpoint.pt`); confirmation launched at `d2e377d`: **PASS**, q=50 19/20, q=60 20/20 (rule: at least 18 of 20 at each q), 40/40 exit 0. The one failed run is q=50 seed 30510, a Phase-A stage-2 failure.

@@ -1,0 +1,63 @@
+# R2b terminal-stage follow-up round: summary
+
+Branch `v2-t2-r2b` (not pushed; the owner pushes it), development seeds 10501-10510 x q in {50, 60}. The round tested three mechanisms for the stage-2 peak at the end of Phase A, one at a time, paired with the existing v2.0 / R1 runs, and diagnosed the failed run q=50 seed 30510 read-only. **It stops here: nothing is decided, nothing is combined, no protocol v2.1, no fresh seed (40501-40520 stay reserved), no T = 3.** Every number below is read from the file named next to it.
+
+## Reading order
+
+| file | content |
+|---|---|
+| `00_housekeeping.md` | P0 publication housekeeping, what was done, what failed (report-pack refresh), what the owner did (§1.6) |
+| `01_preregistration.md` | arms, hypotheses, metrics, criterion, implementation notes, verification state; Addendum 1 records what happened before the launches |
+| `02_seed30510_diagnostic.md` | P2: read-only diagnostic of q=50 seed 30510 with figures |
+| `03_pilot_waveA.md` | wave A: peak-focused starts, censored likelihood |
+| `04_pilot_waveP.md` | wave P: pathwise terminal fine-tuning with 20 steps per update |
+| `05_decision_inputs.md` | one row per mechanism arm, then labelled observations |
+
+## What was checked before the pilots
+
+- **C-R2 (§2.4): the unchanged v2.0 entry point run from this branch reproduces `rehearsal_v2_0` in 20/20** (48 compared fields per run, `results/v2_refine_r2b/v20_reproduction_checks.json`; controls in `cr2_negative_controls.txt`). C7 is bit-exact (test `test_new_keys_at_default_equal_the_c7_reference`).
+- Full suite on the code commit `1ff99bd`: 444 passed, 1 failed (the known `test_registry_canonicalization`), 2 xfailed (`results/v2_refine_r2b/code_pytest_full.txt`). `tests/test_v2_r2b.py` has 53 tests, `tests/test_v2_r2b_gaps.py` 29, `tests/test_v2_r2b_diag.py` 10; the full suite on the commit `7632f8d` (the last commit that changes code, tools or tests) gives **483 passed, 1 failed (the same known test), 2 xfailed** (`results/v2_refine_r2b/final_pytest_full.txt`).
+- Independent adversarial review of the P1 diff (four lenses with skeptics and a 69-mutant mutation pass): no defect in the code that changes a default or a result; one real bookkeeping defect (phase-P step counters logged 1 step per update instead of 20) fixed before the code commit; 30 test gaps found by the mutation pass, 27 closed by 29 added tests (`01_preregistration.md` section 8 and Addendum 1).
+- Pilot launch checks: 120 of 120 runs exit 0, every manifest `dirty: false` at `d581b3c`, each config equals the on-disk R1 comparator config apart from the pre-registered keys, wave-P parent SHA-256 equals `parents.csv` (`results/v2_refine_r2b/launch_checks.json`, `tools/v2/r2b_launch_checks.py`).
+
+## P2: what the diagnostic found (q=50 seed 30510)
+
+Full report: `02_seed30510_diagnostic.md`. The owner's four numbers reproduce (peak error -0.1458; eta_2 on-path 0.00580 against off-path 0.000819; smoothed-game share 0.279).
+
+- **Under the pre-registered rules, none of H1-H4 is supported** (label "none of H1-H4 (early or unstable departure)"): H1 fails because the run touches the pack's median at one export (u = 825: S = -0.0582 against p10_pack(S, 1600) = -0.0810); H2 fails because the departure is at update 900, not from 1225 on (`u_leave` = 900), and H3 because only 1 export (875) precedes it in the band (16 are needed); H4 fails because the peak height is low (L below p10 at all 16 exports 1225-1600).
+- **The literal rules discriminate poorly**: H2 is "supported" for 5 of the other 39 confirmation runs, all of which passed G-A (q=50 seeds 30505 and 30520; q=60 seeds 30515, 30519, 30520; table in section 7.1 of the report).
+- **Descriptive facts (not pre-registered readings, section 7.2 and 2.4):** seed 30510 has the lowest final peak error of all 40 confirmation runs and a late level (mean over updates 900-1600) of -0.1362 against -0.0620, the median over the other q=50 seeds; it is not a late event in the LR-decay window; its concentration alpha+beta at d=0 leaves the other seeds' band at update 125 and never returns, the actor gradient norm at 150 and sigma_2(0) at 175; whether this is cause or co-symptom cannot be decided from the files (section 8 lists the experiments that would, none was run); the d=0 gap is 10.2 effort units, of which smoothing predicts 2.85 (share 0.279); the sampling of starts (peak-set share 0.1002 against 0.1000 by design) shows no difference.
+
+## P3-P4: the pilots (arm - comparator, |peak error|; negative = better)
+
+Criterion (pre-registered, descriptive): (a) the 95% bootstrap CI of the mean paired difference excludes 0 on the improving side at both q; (b) no run that passed G-A and its G-N part under the comparator fails it under the arm. Source of every cell: `05_decision_inputs.md`, `results/v2_refine_r2b/analysis/criterion.csv`, `tail.csv`.
+
+| mechanism / arm | comparator | q=50 mean [95% CI] | q=60 mean [95% CI] | (a) | (b) | |peak| <= 0.05 (arm / comparator), q50, q60 |
+|---|---|---|---|---|---|---|
+| 1 `A_peak25` (share 0.25) | `A_base` (R1 `parents_A`) | -0.0119 [-0.0367, 0.0083] | -0.0012 [-0.0170, 0.0133] | not met | holds | 4 / 2, 5 / 5 |
+| 1 `A_peak50` (share 0.50) | `A_base` | -0.0235 [-0.0415, -0.0038] | -0.0118 [-0.0227, -0.0010] | **met** | **violated**: q60 seeds 10503, 10504, 10510 fail the G-A tail-mean limit (0.0204, 0.0212, 0.0221 > 0.02; baseline 0.0092, 0.0103, 0.0086) | 8 / 2, 8 / 5 |
+| 2 `A_censored` | `A_base` | -0.0002 [-0.0172, 0.0157] | -0.0056 [-0.0131, 0.0019] | not met | holds | 3 / 2, 6 / 5 |
+| 3 `P20_lr3e-5` (pathwise, 20 steps) | `A_ctrl200` (PPO, 3e-5) | -0.0026 [-0.0115, 0.0058] | +0.0006 [-0.0080, 0.0108] | not met | holds | 2 / 5, 2 / 3 |
+| 3 `P20_lr3e-4` | `A_ctrl200_lr3e-4` (PPO, 3e-4) | +0.0127 [0.0001, 0.0268] | +0.0029 [-0.0108, 0.0151] | not met (worse at q50) | holds | 2 / 6, 1 / 7 |
+| control `A_ctrl200_lr3e-4` | parent u1600 candidate | -0.0190 [-0.0333, -0.0043] | -0.0004 [-0.0100, 0.0091] | not met (q60) | violated: q50 seed 10510 (eta_2/DW 0.0055 > 0.005) | 6 / 2, 7 / 5 |
+
+Observations (labelled as such in `05_decision_inputs.md`; each restates a table):
+
+- **Peak-focused starts at share 0.50 improve the peak at both q** (8 of 10 and 7 of 10 seeds improve; the number of runs with |peak error| <= 0.05 rises from 2 to 8 at q=50 and from 5 to 8 at q=60; the maximum |peak error| over the seeds falls from 0.122 to 0.068 and from 0.092 to 0.058), **and in 3 of the 10 q=60 runs the G-A tail-mean limit is crossed**. The tables show what accompanies it: the learner's stage-2 starts in the peak set are 0.500 of all (0.100 / 0.091 by design in the baseline), the mean stage-2 effort on |d| >= 2q is 1.01 / 1.13 effort units against 0.57 / 0.57, and the raw draws clipped at the Beta clamp per run fall from about 11,400 / 3,700 to about 0.1 / 0 (`03_pilot_waveA.md` section 6). The share 0.25 arm moves in the same direction with smaller changes and does not meet part (a).
+- **Censored likelihood**: both CIs contain 0. 2 of the 20 runs never have a flagged row and equal their baseline exactly; in the others the `learn` stream first differs from the baseline's at an update between 191 and 1,164 (the first buffer with a flagged row; `analysis/rng_divergence_A.csv`).
+- **Pathwise fine-tuning with 20 steps per update does not beat the matched PPO control at either LR** (the LR 3e-4 arm is worse at q=50), at 17 s against 27-28 s per run for the same 4,000 optimiser steps. Pathwise states are not compared per update with R1's `A_detmean` log (different time basis for e(0) / FOC residual; `01_preregistration.md` section 4.3); the end-of-phase offline objective is in `04_pilot_waveP.md` section 6.
+- **The new PPO control `A_ctrl200_lr3e-4` improves the peak at q=50 against the parent candidate and against R1's `A_ctrl200`** (-0.0190 [-0.0333, -0.0043]; -0.0187 [-0.0298, -0.0072]), with one G-A failure (eta_2) among 20: a higher LR over the same 200 updates is a confound that the pathwise arms must be read against, and it is the matched control for `P20_lr3e-4`.
+- Eligibility (D2): mechanisms 1 and 2 are PPO-internal and eligible for a v2.1 if they meet the criterion; mechanism 3 is model-based and ablation / diagnostic only. **No arm meets both parts of the criterion**; `A_peak50` meets part (a) and fails part (b) by one G-A component.
+
+## Deviations and open items
+
+1. **P0 §1.2 (report-pack refresh of T05 / T56 / T57) was not done**: the builder failed for two reasons not related to the rename (`00_housekeeping.md`). The locked files and the pack are unchanged.
+2. **§1.6**: `main` was not fast-forwarded by the P0 step; the owner ran §1.6, which left the R2b worktree on a wrong base; I repaired it on request (`00_housekeeping.md`, addendum). The R2b branch is based on `b55d389` (head of `v2-t2-refine` after the P0 commits). `main` and the tags are the owner's.
+3. The literal H1-H4 rules classify seed 30510 as none of the four (see above). They were fixed before any diagnostic output existed, and the pre-registration states which of the diagnostic agent's own results the author had seen before committing it; the rules were not changed (`01_preregistration.md` section 5).
+4. Commit order: the code commit `1ff99bd` precedes C-R2 and every run; later commits before the launches add the diagnostic tool, results records, tests and the pre-registration addendum (`git diff --stat 1ff99bd HEAD -- run agents utils envs protocols` is empty); the analysis tool `7632f8d` was committed after the runs, as in R1. Pilot runs record `d581b3c`.
+5. A bare `pytest` (without `tests`) collects `experiments/*/tests` and breaks the collection of two existing test files; use `pytest tests`.
+6. The pre-registered statistics are paired differences of 10 development seeds per q: CIs are wide, and an interval that contains 0 does not show that a mechanism has no effect. No fresh seed was used; whether `A_peak50`, which fails part (b) by the tail-mean limit, or an intermediate share should be confirmed is the owner's decision, as is everything about mechanism 3.
+
+## Files
+
+Code: `utils/beta_tail.py`, `envs/curriculum_env.py`, `agents/ppo_curriculum*.py`, `agents/ppo_pathwise.py`, `run/v2_rollout.py`, `run/run_v2_stagewise.py`, `tools/v2/launch_refine.py`; tools `tools/v2/{cr2_compare,r2b_parents,r2b_launch_checks,diag_seed30510,refine_r2b_analysis}.py`; tests `tests/test_v2_r2b*.py`. Results: `results/v2_refine_r2b/` (parents, preflight, `v20_reproduction*`, `diag_30510/`, `waveA/`, `waveP/`, `analysis/`, launch records and checks); heavy files (checkpoints, weights, D1 buffers, train histories) are on this machine and untracked.
