@@ -334,3 +334,29 @@ def test_censored_phase_b_run_end_to_end(p_parent, tmp_path):
     assert execute(run, cfg, d, "pytest") == 0
     rows = [r for r in run.v2_history if r.get("phase") == "B"]
     assert rows and all(r["n_clamped_rows_learner"] == 3 and r["n_censored_rows"] == 3 for r in rows)
+
+
+# ---------------------------------------------------------------- added after the conformance audit
+@pytest.mark.parametrize("q", [50, 60])
+def test_bin_balanced_equals_an_inline_copy_of_the_original_balanced(q):
+    """The original ``balanced``: a bin by ``rng.integers``, then the position by ``rng.random`` (no other draw). The
+    sampler is compared with this inline copy (not with itself), values and final stream state."""
+    sp = StartSampler(spec_for(q), 10.0)
+    r1, r2 = np.random.default_rng(7), np.random.default_rng(7)
+    got = sp.balanced(2, 257, r1)
+    e = sp.bin_edges(2)
+    b = r2.integers(0, e.size - 1, size=257)
+    u = r2.random(257)
+    assert np.array_equal(got, e[b] + u * (e[b + 1] - e[b])) and r1.bit_generator.state == r2.bit_generator.state
+
+
+def test_masked_update_with_all_rows_and_no_flags_equals_the_original_update():
+    """A_censored's single-change property: a buffer without flagged rows takes the original update, and the masked
+    branch with every row in the policy loss and no flags gives the same weights, optimiser state and stream."""
+    spec = spec_for(50)
+    a1, a2 = _agent(), _agent()
+    buf = _buffer(a1, spec)
+    d1 = a1.update(*buf)
+    d2 = a2.update(*buf, policy_mask=np.ones(512, dtype=bool))
+    assert tree_equal(T._full(a1), T._full(a2))
+    assert d1["policy_loss"] == d2["policy_loss"] and d1["kl_epochs"] == d2["kl_epochs"]
