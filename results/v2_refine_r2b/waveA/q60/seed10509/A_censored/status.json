@@ -1,0 +1,22 @@
+{
+ "run": "v2refine_r2b_waveA_q60_s10509_A_censored",
+ "pilot": "v2_refine_r2b_waveA",
+ "arm": "A_censored",
+ "q": 60,
+ "seed": 10509,
+ "mode": "phase_A",
+ "state": "done",
+ "pid": 2808766,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10509/A_censored/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10509/A_censored",
+ "start_time": "2026-10-04 08:22:25",
+ "git": {
+  "commit": "d581b3ccff15083132611143238f130bb8800bb2",
+  "short": "d581b3c",
+  "dirty": false
+ },
+ "end_time": "2026-10-04 08:25:22",
+ "total_wall_sec": 176.98772905097576,
+ "exit_code": 0,
+ "final_global_update": 1600
+}

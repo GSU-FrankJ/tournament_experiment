@@ -1,0 +1,22 @@
+{
+ "run": "v2refine_r2b_waveA_q50_s10504_A_peak25",
+ "pilot": "v2_refine_r2b_waveA",
+ "arm": "A_peak25",
+ "q": 50,
+ "seed": 10504,
+ "mode": "phase_A",
+ "state": "done",
+ "pid": 2794193,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10504/A_peak25/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10504/A_peak25",
+ "start_time": "2026-10-04 08:18:05",
+ "git": {
+  "commit": "d581b3ccff15083132611143238f130bb8800bb2",
+  "short": "d581b3c",
+  "dirty": false
+ },
+ "end_time": "2026-10-04 08:21:16",
+ "total_wall_sec": 190.6645073890104,
+ "exit_code": 0,
+ "final_global_update": 1600
+}

@@ -1,0 +1,487 @@
+{
+ "schema": "v2_run_manifest/1",
+ "base_commit": "657f54a",
+ "git": {
+  "commit": "d581b3ccff15083132611143238f130bb8800bb2",
+  "short": "d581b3c",
+  "dirty": false
+ },
+ "pilot": "v2_refine_r2b_waveP",
+ "arm": "P20_lr3e-5",
+ "run": "v2refine_r2b_waveP_q50_s10502_P20_lr3e-5",
+ "q": 50,
+ "seed": 10502,
+ "seed_namespaces": {
+  "init": [
+   10502,
+   50,
+   0
+  ],
+  "env_noise": [
+   10502,
+   50,
+   1
+  ],
+  "learner_action": [
+   10502,
+   50,
+   2
+  ],
+  "opponent_action": [
+   10502,
+   50,
+   3
+  ],
+  "starts_roles": [
+   10502,
+   50,
+   4
+  ],
+  "minibatch": [
+   10502,
+   50,
+   5
+  ]
+ },
+ "mode": "phase_P",
+ "fixed_budget": true,
+ "flags": {
+  "reward_mode": "expected",
+  "stage2_update_mode": "joint",
+  "adv_norm_scope": "all_rows",
+  "continuation_action_mode": "stochastic"
+ },
+ "reward_mode": "expected",
+ "stage2_update_mode": "joint",
+ "adv_norm_scope": "all_rows",
+ "continuation_action_mode": "stochastic",
+ "continuation_value_mode": "sampled",
+ "ppo_overrides": {
+  "minibatch": 256,
+  "target_kl": null
+ },
+ "target_kl": null,
+ "conc_anneal": null,
+ "start_weights": null,
+ "clamp_likelihood": "density",
+ "pathwise_epochs": 10,
+ "pathwise_minibatch": 256,
+ "conc_scale_initial": {
+  "actor": 1.0,
+  "opponent": 1.0,
+  "note": "after restoring the parent state, before the first update"
+ },
+ "parent_checkpoint": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1/q50/seed10502/state_end_A.pt",
+ "parent_sha256": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+ "budget_overrides": {
+  "phase_caps": {
+   "A": 1600,
+   "B": 600,
+   "C": 1000,
+   "P": 200
+  },
+  "verifier_timeout": {
+   "A": 100,
+   "B": 25,
+   "C": 25,
+   "P": 50
+  },
+  "episodes_per_update": 512
+ },
+ "resolved_protocol": {
+  "w_h": 6,
+  "w_l": 2,
+  "k": 0.00028571428571428574,
+  "e_min": 0,
+  "e_max": 100,
+  "episodes_per_update": 512,
+  "phase_caps": {
+   "A": 1600,
+   "B": 600,
+   "C": 1000,
+   "P": 200
+  },
+  "warmup": 100,
+  "stability_every": 20,
+  "drift_thr": 0.01,
+  "kl_thr": 0.01,
+  "stability_consecutive": 2,
+  "verifier_timeout": {
+   "A": 100,
+   "B": 25,
+   "C": 25,
+   "P": 50
+  },
+  "k_phase": 3,
+  "k_stop": 1,
+  "phase_thr_over_dw": {
+   "A": 0.02,
+   "B": 0.02,
+   "C": 0.01
+  },
+  "conc_thr": 0.04,
+  "snapshot_every": 20,
+  "es_bin_width": 10,
+  "phase_c_root": 256,
+  "phase_c_es": 256,
+  "final_thr_over_dw": 0.01,
+  "refine_thr_over_dw": 0.002,
+  "sensitivity_thr_over_dw": 0.03,
+  "dense_conc_step": 0.05,
+  "recovery_step": 0.5,
+  "direct_rollout_episodes": 200000,
+  "direct_rollout_reps": 3,
+  "direct_rollout_seed_base": 9005000,
+  "rng_namespaces": {
+   "init": 0,
+   "env_noise": 1,
+   "learner_action": 2,
+   "opponent_action": 3,
+   "starts_roles": 4,
+   "minibatch": 5
+  },
+  "weights_every": 25
+ },
+ "resolved_config": {
+  "game": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "q": 50,
+   "T": 2,
+   "e_min": 0,
+   "e_max": 100
+  },
+  "ppo": {
+   "hidden": 64,
+   "lr": 0.0003,
+   "adam_betas": [
+    0.9,
+    0.999
+   ],
+   "adam_eps": 1e-08,
+   "weight_decay": 0,
+   "clip_eps": 0.2,
+   "value_coef": 0.5,
+   "entropy_coef": 0,
+   "max_grad_norm": 0.5,
+   "epochs": 10,
+   "minibatch": 256,
+   "gamma": 1,
+   "gae_lambda": 1,
+   "c_min": 100,
+   "mu_clamp": 1e-06,
+   "action_clamp": 1e-06,
+   "adv_norm_eps": 1e-08
+  },
+  "verifier": {
+   "development": {
+    "name": "development",
+    "state_step": 4,
+    "effort_step": 1,
+    "gl_half": 16,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   },
+   "final": {
+    "name": "final",
+    "state_step": 2,
+    "effort_step": 0.5,
+    "gl_half": 32,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   }
+  },
+  "lr_schedule": {
+   "kind": "constant",
+   "actor_and_critic": true,
+   "ab_lr": 0.0003,
+   "c_start_lr": 0.0003,
+   "c_end_lr": 0.0003,
+   "c_budget_updates": 1000,
+   "c_local_first": 1,
+   "c_local_last": 1000,
+   "linear_denominator": 999,
+   "apply_before_each_update": true,
+   "constant_within_update": true,
+   "preserve_adam_state": true
+  },
+  "lr_decay": [
+   {
+    "phase": "P",
+    "start_lr": 3e-05,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 200
+   }
+  ]
+ },
+ "grids": {
+  "development": {
+   "stage_grid_points": {
+    "1": 1,
+    "2": 101
+   },
+   "state_step": 4,
+   "effort_step": 1,
+   "effort_grid_points": 101,
+   "gl_half": 16,
+   "D2_half": 200.0
+  },
+  "final": {
+   "stage_grid_points": {
+    "1": 1,
+    "2": 201
+   },
+   "state_step": 2,
+   "effort_step": 0.5,
+   "effort_grid_points": 201,
+   "gl_half": 32,
+   "D2_half": 200.0
+  },
+  "recovery": {
+   "step": 0.5,
+   "D2_half": 200.0
+  }
+ },
+ "verifier_cadence": {
+  "warmup": 100,
+  "stability_every": 20,
+  "stability_consecutive": 2,
+  "verifier_timeout": {
+   "A": 100,
+   "B": 25,
+   "C": 25,
+   "P": 50
+  },
+  "drift_thr": 0.01,
+  "kl_thr": 0.01
+ },
+ "versions": {
+  "python": "3.12.3",
+  "torch": "2.5.1+cu121",
+  "numpy": "2.5.0"
+ },
+ "thread_env": {
+  "OMP": "1",
+  "MKL": "1",
+  "OPENBLAS": "1"
+ },
+ "torch_threads": 1,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/run/run_v2_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/P20_lr3e-5/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/P20_lr3e-5",
+ "record_source_run": "v2refine_r2b_waveP_q50_s10502_P20_lr3e-5",
+ "input_config": {
+  "schema": "v2_run_config/1",
+  "base_commit": "657f54a",
+  "pilot": "v2_refine_r2b_waveP",
+  "arm": "P20_lr3e-5",
+  "arm_definition": "mechanism 3: phase P, 200 updates, E=10 x minibatch 256 (20 exact-gradient steps per update), LR constant 3e-5",
+  "run": "v2refine_r2b_waveP_q50_s10502_P20_lr3e-5",
+  "q": 50,
+  "seed": 10502,
+  "mode": "phase_P",
+  "fixed_budget": true,
+  "flags": {
+   "reward_mode": "expected",
+   "stage2_update_mode": "joint",
+   "adv_norm_scope": "all_rows",
+   "continuation_action_mode": "stochastic"
+  },
+  "parent_checkpoint": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1/q50/seed10502/state_end_A.pt",
+  "parent_sha256": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+  "record": {
+   "run": "v2refine_r2b_waveP_q50_s10502_P20_lr3e-5",
+   "q": 50,
+   "seed": 10502,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/P20_lr3e-5"
+  },
+  "threads_per_process": {
+   "torch": 1,
+   "OMP": 1,
+   "MKL": 1,
+   "OPENBLAS": 1
+  },
+  "budget_overrides": {
+   "phase_caps": {
+    "A": 1600,
+    "B": 600,
+    "C": 1000,
+    "P": 200
+   },
+   "verifier_timeout": {
+    "A": 100,
+    "B": 25,
+    "C": 25,
+    "P": 50
+   },
+   "episodes_per_update": 512
+  },
+  "ppo_overrides": {
+   "minibatch": 256,
+   "target_kl": null
+  },
+  "continuation_value_mode": "sampled",
+  "conc_anneal": null,
+  "lr_decay": [
+   {
+    "phase": "P",
+    "start_lr": 3e-05,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 200
+   }
+  ],
+  "full_state_at": [],
+  "start_weights": null,
+  "clamp_likelihood": "density",
+  "pathwise_epochs": 10,
+  "pathwise_minibatch": 256
+ },
+ "conc_scale_final": {
+  "actor": 1.0,
+  "opponent": 1.0
+ }
+}
