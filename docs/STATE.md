@@ -24,6 +24,7 @@ the documented rebuild; four stale early copies of round files sit untracked in 
 .claude/worktrees/t2-accuracy-refinement-r1-32d472.
 Next: the PI decides the combination, protocol v2.0 and the next confirmation (seeds 30501-30520 are reserved and unused).
 Data: results/v2_refine/ (per-run records and analysis tables tracked; checkpoints, weights, train_history.json, D1 buffers not).
+Addendum (2026-10-04): the "not pushed" wording above was true on 2026-10-03. The branch has since been pushed: `origin/v2-t2-refine` is at `155cdec` (`git rev-parse origin/v2-t2-refine`), the head of this round. The v2.0 commits made after it (lock `1d6d4d0`, LOCK record `f2d616c`, records `d2e377d`, `85c294e`, the tool fix `3fedaa2`, the report) are not pushed.
 
 ## T=2 v2 published to main (2026-10-03)
 
