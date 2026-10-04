@@ -73,3 +73,28 @@ This session is isolated to one worktree and its tooling refuses every git opera
 - `cd /home/fjiang4/tournament_experiment && git status --porcelain`: `Refusing to run it — a worktree-isolated session's git operations must target its own worktree.` (`git -C <primary>` is refused the same way.)
 
 So the precondition (`git status --porcelain` in the primary checkout shows no tracked modification), `git merge --ff-only origin/main`, `git merge --ff-only v2-t2-refine` and the check `git rev-parse main` == head of `v2-t2-refine` could not be run here, and were not worked around (no script, no redirected git). Nothing was pushed in this step: not `main`, not the tags, not the new housekeeping commit. `origin/main` is still `f02a256`; local `main` in the primary checkout was not touched. Commands for the person who runs it in the primary checkout are in the hand-over message of this round. P1 to P4 need the branch `v2-t2-r2b` from `main` after this step and have not been started.
+
+## Addendum (2026-10-04, after the P0 stop): what section 1.6 actually produced, and the base of `v2-t2-r2b`
+
+The person who owns the round ran section 1.6 in a terminal after the stop above. What the repository showed afterwards (`git ls-remote origin ...`, `git rev-parse`, `git worktree list`, run from the `v2-t2-refine` worktree):
+
+```
+b55d38907b02106a6e874d3b60622e4e5b7c9d5d	refs/heads/v2-t2-refine
+f02a256095dcaa69dffbd011718d337f84183890	refs/heads/main
+32e68cfd117372b76edff70c2545da02434c539a	refs/tags/t2-v2-lock-v2.0        (^{} = 1d6d4d00736b265a18ae71b91ecb77b19e4915b9)
+4724ca007e7ebcb0fe2d0e1a95ce11b9b483fb87	refs/tags/t2-v2-confirmation-v2.0 (^{} = d2e377d0da702e8e162662f74576d1bff5b42a56)
+53ae8c321a41b00d844c12696cecfedf95eb2ef4	refs/tags/t2-v2-main-v2.0        (^{} = b55d38907b02106a6e874d3b60622e4e5b7c9d5d)
+```
+
+- Pushed: `v2-t2-refine` (`b55d389`) and the three tags, each peeling to the intended commit.
+- **Not done:** `main` was not fast-forwarded: `origin/main` is still `f02a256` and local `main` is still `d1b8443` (76 commits behind `b55d389`; `f02a256` is an ancestor of `b55d389`, so a fast-forward is possible).
+- The worktree `v2-t2-r2b` had been created inside the `r7-canonical-reference-checks-bd0e75` worktree and on branch `v2-t2-r2b` = `d1b8443`, which contains none of the v2.0 code. The branch had no commits of its own (`git rev-list --count b55d389..v2-t2-r2b` = 0).
+
+Decision of the owner (asked in the session): repair it from this session, without touching `main` (local or remote). Done:
+
+```
+git worktree remove /home/fjiang4/tournament_experiment/.claude/worktrees/r7-canonical-reference-checks-bd0e75/.claude/worktrees/v2-t2-r2b      (no --force: it was clean)
+git worktree add -B v2-t2-r2b /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b b55d389     (branch reset from d1b8443 to b55d389)
+```
+
+So `v2-t2-r2b` starts at `b55d389`, the commit `main` will have after the fast-forward (the tree is identical). `main` stays for the owner to fast-forward and push; nothing in R2b depends on it. The pack refresh of 1.2 remains undone.
