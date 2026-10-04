@@ -28,7 +28,8 @@ R5  Manifests. v2.0 protocol hash and version, the launch commit, clean_tree tru
 R6  tools/v2/confirmation_analysis_v2_0.py runs on the rehearsal root and its recomputed verdicts agree
     with gates.json in every run (it also writes the paired comparison with rehearsal_v1_1).
 R7  At the launch commit: full test suite passes except the known test_registry_canonicalization failure
-    (no other failure, no error); C7 bit-exact.
+    (no other failure, no error); C7 bit-exact against C7_REF, the reference run in the canonical
+    worktree.
 
 Usage: python tools/v2/v2_0_rehearsal_checks.py --launch-commit <sha>
        [--root DIR] [--qs 50 60] [--seeds 10501 ...] [--out FILE] [--skip-r7]  (the last four: dry checks only)
@@ -58,6 +59,9 @@ import cr1_compare as C  # noqa: E402
 LK = ROOT / "results" / "v2_T2_locked"
 REH = LK / "rehearsal_v2_0"
 V11 = C.REF_DEFAULT                                       # canonical rehearsal_v1_1
+# C7 reference run: its checkpoint.pt is gitignored, so it exists only in the canonical worktree
+C7_REF = (C.CANONICAL_ROOT / "results" / "v2_pilots" / "phase1_regression" / "before"
+          / "FINAL_A400_B25_C25" / "tel_q50_s10501")
 PILOT = ROOT / "results" / "v2_refine" / "stage1"
 OUT = LK / "rehearsal_v2_0_checks.json"
 AN_OUT = LK / "rehearsal_v2_0_analysis"
@@ -237,9 +241,8 @@ def run_check_7(launch_commit: str) -> Dict[str, Any]:
             subprocess.run([PY, "-B", "run/run_v2_stagewise.py", "--config",
                             "results/v2_pilots/phase2_regression/run_config.json", "--out-dir", str(c7dir)],
                            cwd=ROOT, env=env, capture_output=True, text=True)
-        c = subprocess.run([PY, "tools/v2/compare_runs.py",
-                            "results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501",
-                            str(c7dir)], cwd=ROOT, capture_output=True, text=True)
+        c = subprocess.run([PY, "tools/v2/compare_runs.py", str(C7_REF), str(c7dir)],
+                           cwd=ROOT, capture_output=True, text=True)
         (c7dir.parent / f"v2_full_{launch_commit[:7]}.compare.txt").write_text(c.stdout)
         c7_ok = c.stdout.strip().endswith("IDENTICAL")
         man = json.load(open(c7dir / "manifest.json"))
@@ -247,6 +250,7 @@ def run_check_7(launch_commit: str) -> Dict[str, Any]:
                              and man["git"]["dirty"] is False),
                 "pytest_summary": summ[-1] if summ else None, "pytest_failed": failed, "pytest_errors": errors,
                 "c7_identical": c7_ok, "c7_commit": man["git"]["short"], "c7_dirty": man["git"]["dirty"],
+                "c7_reference": str(C7_REF),
                 "pytest_log": "results/v2_T2_locked/rehearsal_v2_0_pytest.txt"}
     except Exception as exc:  # noqa: BLE001 - recorded as a failed check
         return {"pass": False, "error": f"{type(exc).__name__}: {exc}"}
