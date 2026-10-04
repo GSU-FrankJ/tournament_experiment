@@ -94,7 +94,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-5_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -122,10 +122,10 @@ Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-5_optimisation.csv`.
 
 Pathwise loss, FOC residual, steps and the offline objective (mean over the 10 seeds):
 
-| arm | q | n_steps_total |
-|---|---|---|
-| P20_lr3e-5 | 50 | 4000 |
-| P20_lr3e-5 | 60 | 4000 |
+| arm | q | n_steps_total | loss_first20_mean | loss_last20_mean | foc_logged_mean_last20 | gn_pre_clip_last20_mean | J_offline_start | J_offline_end | foc_offline_end_mean | foc_offline_end_max |
+|---|---|---|---|---|---|---|---|---|---|---|
+| P20_lr3e-5 | 50 | 4000 | -3.759 | -3.767 | 0.0004081 | 0.005511 | 3.769 | 3.767 | 0.0003927 | 0.001109 |
+| P20_lr3e-5 | 60 | 4000 | -3.829 | -3.823 | 0.0003424 | 0.004173 | 3.821 | 3.824 | 0.0003368 | 0.001006 |
 
 Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-5_pathwise.csv`.
 
@@ -174,7 +174,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-4_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -202,10 +202,10 @@ Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-4_optimisation.csv`.
 
 Pathwise loss, FOC residual, steps and the offline objective (mean over the 10 seeds):
 
-| arm | q | n_steps_total |
-|---|---|---|
-| P20_lr3e-4 | 50 | 4000 |
-| P20_lr3e-4 | 60 | 4000 |
+| arm | q | n_steps_total | loss_first20_mean | loss_last20_mean | foc_logged_mean_last20 | gn_pre_clip_last20_mean | J_offline_start | J_offline_end | foc_offline_end_mean | foc_offline_end_max |
+|---|---|---|---|---|---|---|---|---|---|---|
+| P20_lr3e-4 | 50 | 4000 | -3.759 | -3.765 | 0.0003955 | 0.00539 | 3.769 | 3.767 | 0.0004253 | 0.001268 |
+| P20_lr3e-4 | 60 | 4000 | -3.829 | -3.823 | 0.0003233 | 0.00365 | 3.821 | 3.824 | 0.000319 | 0.0009097 |
 
 Source: `results/v2_refine_r2b/analysis/waveP_P20_lr3e-4_pathwise.csv`.
 
@@ -250,7 +250,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveP_A_ctrl200_lr3e-4_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -280,7 +280,7 @@ Source: `results/v2_refine_r2b/analysis/waveP_A_ctrl200_lr3e-4_optimisation.csv`
 
 A_ctrl200_lr3e-4 minus parent_u1600: seed-level paired differences of |peak error| (negative = better) (`reports/v2/refine_r2b/figures/waveP_A_ctrl200_lr3e-4_vs_parent_u1600.png`, `reports/v2/refine_r2b/figures/waveP_A_ctrl200_lr3e-4_vs_parent_u1600.pdf`).
 
-Notable events of this arm (computed): q50/10510 fails G-A or its G-N part: eta_2/DW 0.005501 > 0.005; q50/10510 has a POSITIVE signed peak error (0.0009158): for this run the difference of |peak error| is not the negative of the difference of the signed error
+Notable events of this arm (computed): q50/10510 fails G-A or its G-N part: eta_2/DW 0.005501 > 0.005; q50/10510 has a POSITIVE signed peak error (0.0009158): for this run the difference of |peak error| is not the negative of the difference of the signed error; q50/10510: the smoothed-game share (-31.17) is not meaningful, the observed d = 0 gap is -0.0641 effort units (a near-zero or negative denominator drives the mean and CI of that metric)
 
 
 ## 4. Cross-arm tables
@@ -666,248 +666,248 @@ Source: `results/v2_refine_r2b/analysis/waveP_metric_smoothed_share_peak_gap_d0.
 
 ### Seed-level values
 
-| comparison | arm | comparator | q | seed | arm_abs_peak | comparator_abs_peak | diff | improved | tied | d1_flagged_L_s2 | d1_first_flagged_update | censored_rows_total | censored_first_update |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10501 | 0.09316 | 0.1162 | -0.02308 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10502 | 0.06834 | 0.06608 | 0.002261 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10503 | 0.04585 | 0.04496 | 0.0008881 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10504 | 0.06373 | 0.04559 | 0.01814 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10505 | 0.06504 | 0.07869 | -0.01365 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10506 | 0.07178 | 0.09842 | -0.02664 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10507 | 0.06792 | 0.06865 | -0.0007264 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10508 | 0.05232 | 0.04729 | 0.005032 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10509 | 0.0428 | 0.04534 | -0.002537 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10510 | 0.05539 | 0.04157 | 0.01383 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10501 | 0.05711 | 0.05882 | -0.001707 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10502 | 0.04377 | 0.04368 | 8.976e-05 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10503 | 0.05853 | 0.07097 | -0.01244 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10504 | 0.06707 | 0.06254 | 0.004528 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10505 | 0.06594 | 0.04636 | 0.01958 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10506 | 0.04735 | 0.06761 | -0.02026 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10507 | 0.05573 | 0.05814 | -0.002411 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10508 | 0.07405 | 0.08125 | -0.007197 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10509 | 0.06799 | 0.07629 | -0.008301 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10510 | 0.05233 | 0.01813 | 0.0342 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10501 | 0.08612 | 0.07622 | 0.009894 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10502 | 0.06125 | 0.04253 | 0.01872 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10503 | 0.05372 | 0.0426 | 0.01112 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10504 | 0.05813 | 0.06242 | -0.00429 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10505 | 0.05889 | 0.07125 | -0.01236 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10506 | 0.06511 | 0.08326 | -0.01815 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10507 | 0.06751 | 0.02709 | 0.04041 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10508 | 0.04264 | 0.0387 | 0.003936 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10509 | 0.04551 | 0.02083 | 0.02468 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10510 | 0.05439 | 0.0009158 | 0.05348 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10501 | 0.05404 | 0.06676 | -0.01272 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10502 | 0.04625 | 0.04361 | 0.002644 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10503 | 0.05475 | 0.04976 | 0.004986 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10504 | 0.0534 | 0.03869 | 0.01472 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10505 | 0.06137 | 0.07506 | -0.01369 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10506 | 0.05381 | 0.01783 | 0.03598 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10507 | 0.05255 | 0.04554 | 0.007003 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10508 | 0.07115 | 0.1138 | -0.0427 | True | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10509 | 0.05921 | 0.049 | 0.01022 | False | False | n/a | n/a | n/a | n/a |
-| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10510 | 0.05195 | 0.0296 | 0.02235 | False | False | n/a | n/a | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10501 | 0.07622 | 0.1222 | -0.046 | True | False | 1.539e+04 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10502 | 0.04253 | 0.06803 | -0.0255 | True | False | 0 | n/a | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10503 | 0.0426 | 0.02357 | 0.01903 | False | False | 251 | 1602 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10504 | 0.06242 | 0.07125 | -0.008829 | True | False | 4 | 1662 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10505 | 0.07125 | 0.05432 | 0.01693 | False | False | 6 | 1610 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10506 | 0.08326 | 0.09843 | -0.01517 | True | False | 1573 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10507 | 0.02709 | 0.05776 | -0.03066 | True | False | 16 | 1603 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10508 | 0.0387 | 0.06563 | -0.02693 | True | False | 8585 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10509 | 0.02083 | 0.03538 | -0.01455 | True | False | 2639 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10510 | 0.0009158 | 0.05937 | -0.05845 | True | False | 1 | 1693 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10501 | 0.06676 | 0.04693 | 0.01984 | False | False | 2041 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10502 | 0.04361 | 0.03193 | 0.01168 | False | False | 2 | 1659 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10503 | 0.04976 | 0.07216 | -0.0224 | True | False | 1301 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10504 | 0.03869 | 0.04855 | -0.009862 | True | False | 16 | 1605 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10505 | 0.07506 | 0.07591 | -0.000858 | True | False | 2672 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10506 | 0.01783 | 0.04289 | -0.02506 | True | False | 1 | 1682 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10507 | 0.04554 | 0.05151 | -0.005968 | True | False | 2 | 1695 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10508 | 0.1138 | 0.09174 | 0.02211 | False | False | 607 | 1602 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10509 | 0.049 | 0.05088 | -0.00188 | True | False | 181 | 1601 | n/a | n/a |
-| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10510 | 0.0296 | 0.02097 | 0.008628 | False | False | 568 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10501 | 0.09316 | 0.1222 | -0.02907 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10502 | 0.06834 | 0.06803 | 0.0003102 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10503 | 0.04585 | 0.02357 | 0.02228 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10504 | 0.06373 | 0.07125 | -0.007518 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10505 | 0.06504 | 0.05432 | 0.01072 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10506 | 0.07178 | 0.09843 | -0.02664 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10507 | 0.06792 | 0.05776 | 0.01016 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10508 | 0.05232 | 0.06563 | -0.01332 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10509 | 0.0428 | 0.03538 | 0.007422 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10510 | 0.05539 | 0.05937 | -0.003973 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10501 | 0.05711 | 0.04693 | 0.01018 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10502 | 0.04377 | 0.03193 | 0.01185 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10503 | 0.05853 | 0.07216 | -0.01363 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10504 | 0.06707 | 0.04855 | 0.01852 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10505 | 0.06594 | 0.07591 | -0.009972 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10506 | 0.04735 | 0.04289 | 0.004456 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10507 | 0.05573 | 0.05151 | 0.004219 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10508 | 0.07405 | 0.09174 | -0.01769 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10509 | 0.06799 | 0.05088 | 0.01711 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10510 | 0.05233 | 0.02097 | 0.03136 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10501 | 0.08612 | 0.1222 | -0.03611 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10502 | 0.06125 | 0.06803 | -0.006775 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10503 | 0.05372 | 0.02357 | 0.03015 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10504 | 0.05813 | 0.07125 | -0.01312 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10505 | 0.05889 | 0.05432 | 0.004572 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10506 | 0.06511 | 0.09843 | -0.03332 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10507 | 0.06751 | 0.05776 | 0.00975 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10508 | 0.04264 | 0.06563 | -0.023 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10509 | 0.04551 | 0.03538 | 0.01013 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10510 | 0.05439 | 0.05937 | -0.004973 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10501 | 0.05404 | 0.04693 | 0.007116 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10502 | 0.04625 | 0.03193 | 0.01433 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10503 | 0.05475 | 0.07216 | -0.01742 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10504 | 0.0534 | 0.04855 | 0.004853 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10505 | 0.06137 | 0.07591 | -0.01454 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10506 | 0.05381 | 0.04289 | 0.01092 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10507 | 0.05255 | 0.05151 | 0.001034 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10508 | 0.07115 | 0.09174 | -0.02059 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10509 | 0.05921 | 0.05088 | 0.008336 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10510 | 0.05195 | 0.02097 | 0.03098 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10501 | 0.1162 | 0.1222 | -0.005988 | True | False | 1.521e+04 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10502 | 0.06608 | 0.06803 | -0.001951 | True | False | 0 | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10503 | 0.04496 | 0.02357 | 0.02139 | False | False | 337 | 1602 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10504 | 0.04559 | 0.07125 | -0.02566 | True | False | 8 | 1615 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10505 | 0.07869 | 0.05432 | 0.02437 | False | False | 7 | 1638 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10506 | 0.09842 | 0.09843 | -7.966e-06 | True | False | 1633 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10507 | 0.06865 | 0.05776 | 0.01089 | False | False | 5 | 1603 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10508 | 0.04729 | 0.06563 | -0.01835 | True | False | 8799 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10509 | 0.04534 | 0.03538 | 0.009959 | False | False | 2789 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10510 | 0.04157 | 0.05937 | -0.0178 | True | False | 1 | 1693 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10501 | 0.05882 | 0.04693 | 0.01189 | False | False | 1974 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10502 | 0.04368 | 0.03193 | 0.01176 | False | False | 2 | 1770 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10503 | 0.07097 | 0.07216 | -0.001192 | True | False | 1403 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10504 | 0.06254 | 0.04855 | 0.01399 | False | False | 14 | 1605 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10505 | 0.04636 | 0.07591 | -0.02956 | True | False | 2845 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10506 | 0.06761 | 0.04289 | 0.02472 | False | False | 0 | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10507 | 0.05814 | 0.05151 | 0.00663 | False | False | 5 | 1622 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10508 | 0.08125 | 0.09174 | -0.01049 | True | False | 573 | 1602 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10509 | 0.07629 | 0.05088 | 0.02541 | False | False | 180 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10510 | 0.01813 | 0.02097 | -0.002842 | True | False | 516 | 1601 | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10501 | 0.09601 | 0.1222 | -0.02621 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10502 | 0.06803 | 0.06803 | 5.622e-06 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10503 | 0.03433 | 0.02357 | 0.01076 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10504 | 0.06043 | 0.07125 | -0.01082 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10505 | 0.05513 | 0.05432 | 0.0008129 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10506 | 0.07456 | 0.09843 | -0.02387 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10507 | 0.04892 | 0.05776 | -0.008839 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10508 | 0.04423 | 0.06563 | -0.0214 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10509 | 0.04833 | 0.03538 | 0.01295 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10510 | 0.05965 | 0.05937 | 0.0002805 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10501 | 0.04804 | 0.04693 | 0.00111 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10502 | 0.03831 | 0.03193 | 0.006381 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10503 | 0.06864 | 0.07216 | -0.003522 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10504 | 0.06066 | 0.04855 | 0.01211 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10505 | 0.07563 | 0.07591 | -0.0002851 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10506 | 0.04262 | 0.04289 | -0.0002688 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10507 | 0.05565 | 0.05151 | 0.004143 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10508 | 0.07278 | 0.09174 | -0.01895 | True | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10509 | 0.05449 | 0.05088 | 0.003617 | False | False | n/a | n/a | n/a | n/a |
-| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10510 | 0.04906 | 0.02097 | 0.02809 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10501 | 0.09316 | 0.09601 | -0.002856 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10502 | 0.06834 | 0.06803 | 0.0003046 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10503 | 0.04585 | 0.03433 | 0.01152 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10504 | 0.06373 | 0.06043 | 0.003297 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10505 | 0.06504 | 0.05513 | 0.009903 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10506 | 0.07178 | 0.07456 | -0.002779 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10507 | 0.06792 | 0.04892 | 0.019 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10508 | 0.05232 | 0.04423 | 0.008088 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10509 | 0.0428 | 0.04833 | -0.005529 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10510 | 0.05539 | 0.05965 | -0.004254 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10501 | 0.05711 | 0.04804 | 0.009074 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10502 | 0.04377 | 0.03831 | 0.005468 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10503 | 0.05853 | 0.06864 | -0.01011 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10504 | 0.06707 | 0.06066 | 0.006411 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10505 | 0.06594 | 0.07563 | -0.009687 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10506 | 0.04735 | 0.04262 | 0.004725 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10507 | 0.05573 | 0.05565 | 7.616e-05 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10508 | 0.07405 | 0.07278 | 0.001267 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10509 | 0.06799 | 0.05449 | 0.01349 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10510 | 0.05233 | 0.04906 | 0.003271 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10501 | 0.08612 | 0.09601 | -0.009892 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10502 | 0.06125 | 0.06803 | -0.00678 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10503 | 0.05372 | 0.03433 | 0.01939 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10504 | 0.05813 | 0.06043 | -0.002303 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10505 | 0.05889 | 0.05513 | 0.003759 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10506 | 0.06511 | 0.07456 | -0.009452 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10507 | 0.06751 | 0.04892 | 0.01859 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10508 | 0.04264 | 0.04423 | -0.001593 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10509 | 0.04551 | 0.04833 | -0.002818 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10510 | 0.05439 | 0.05965 | -0.005253 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10501 | 0.05404 | 0.04804 | 0.006006 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10502 | 0.04625 | 0.03831 | 0.007945 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10503 | 0.05475 | 0.06864 | -0.01389 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10504 | 0.0534 | 0.06066 | -0.007256 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10505 | 0.06137 | 0.07563 | -0.01426 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10506 | 0.05381 | 0.04262 | 0.01119 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10507 | 0.05255 | 0.05565 | -0.003109 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10508 | 0.07115 | 0.07278 | -0.001635 | True | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10509 | 0.05921 | 0.05449 | 0.004719 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10510 | 0.05195 | 0.04906 | 0.002889 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10501 | 0.09316 | 0.07622 | 0.01693 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10502 | 0.06834 | 0.04253 | 0.02581 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10503 | 0.04585 | 0.0426 | 0.00325 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10504 | 0.06373 | 0.06242 | 0.00131 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10505 | 0.06504 | 0.07125 | -0.006215 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10506 | 0.07178 | 0.08326 | -0.01148 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10507 | 0.06792 | 0.02709 | 0.04083 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10508 | 0.05232 | 0.0387 | 0.01362 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10509 | 0.0428 | 0.02083 | 0.02197 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10510 | 0.05539 | 0.0009158 | 0.05448 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10501 | 0.05711 | 0.06676 | -0.009654 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10502 | 0.04377 | 0.04361 | 0.0001666 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10503 | 0.05853 | 0.04976 | 0.00877 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10504 | 0.06707 | 0.03869 | 0.02838 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10505 | 0.06594 | 0.07506 | -0.009114 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10506 | 0.04735 | 0.01783 | 0.02952 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10507 | 0.05573 | 0.04554 | 0.01019 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10508 | 0.07405 | 0.1138 | -0.0398 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10509 | 0.06799 | 0.049 | 0.01899 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10510 | 0.05233 | 0.0296 | 0.02273 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10501 | 0.08612 | 0.1162 | -0.03012 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10502 | 0.06125 | 0.06608 | -0.004824 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10503 | 0.05372 | 0.04496 | 0.008756 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10504 | 0.05813 | 0.04559 | 0.01254 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10505 | 0.05889 | 0.07869 | -0.0198 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10506 | 0.06511 | 0.09842 | -0.03331 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10507 | 0.06751 | 0.06865 | -0.001139 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10508 | 0.04264 | 0.04729 | -0.004648 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10509 | 0.04551 | 0.04534 | 0.000174 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10510 | 0.05439 | 0.04157 | 0.01283 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10501 | 0.05404 | 0.05882 | -0.004775 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10502 | 0.04625 | 0.04368 | 0.002567 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10503 | 0.05475 | 0.07097 | -0.01622 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10504 | 0.0534 | 0.06254 | -0.009139 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10505 | 0.06137 | 0.04636 | 0.01501 | False | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10506 | 0.05381 | 0.06761 | -0.0138 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10507 | 0.05255 | 0.05814 | -0.005596 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10508 | 0.07115 | 0.08125 | -0.0101 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10509 | 0.05921 | 0.07629 | -0.01708 | True | False | n/a | n/a | n/a | n/a |
-| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10510 | 0.05195 | 0.01813 | 0.03382 | False | False | n/a | n/a | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10501 | 0.07622 | 0.1162 | -0.04001 | True | False | 1.539e+04 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10502 | 0.04253 | 0.06608 | -0.02354 | True | False | 0 | n/a | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10503 | 0.0426 | 0.04496 | -0.002362 | True | False | 251 | 1602 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10504 | 0.06242 | 0.04559 | 0.01683 | False | False | 4 | 1662 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10505 | 0.07125 | 0.07869 | -0.007436 | True | False | 6 | 1610 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10506 | 0.08326 | 0.09842 | -0.01516 | True | False | 1573 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10507 | 0.02709 | 0.06865 | -0.04155 | True | False | 16 | 1603 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10508 | 0.0387 | 0.04729 | -0.008584 | True | False | 8585 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10509 | 0.02083 | 0.04534 | -0.02451 | True | False | 2639 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10510 | 0.0009158 | 0.04157 | -0.04065 | True | False | 1 | 1693 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10501 | 0.06676 | 0.05882 | 0.007947 | False | False | 2041 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10502 | 0.04361 | 0.04368 | -7.683e-05 | True | False | 2 | 1659 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10503 | 0.04976 | 0.07097 | -0.02121 | True | False | 1301 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10504 | 0.03869 | 0.06254 | -0.02386 | True | False | 16 | 1605 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10505 | 0.07506 | 0.04636 | 0.0287 | False | False | 2672 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10506 | 0.01783 | 0.06761 | -0.04978 | True | False | 1 | 1682 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10507 | 0.04554 | 0.05814 | -0.0126 | True | False | 2 | 1695 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10508 | 0.1138 | 0.08125 | 0.0326 | False | False | 607 | 1602 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10509 | 0.049 | 0.07629 | -0.02729 | True | False | 181 | 1601 | n/a | n/a |
-| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10510 | 0.0296 | 0.01813 | 0.01147 | False | False | 568 | 1601 | n/a | n/a |
+| comparison | arm | comparator | q | seed | arm_abs_peak | comparator_abs_peak | diff | improved | tied | d1_flagged_L_s2 | d1_first_flagged_update |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10501 | 0.09316 | 0.1162 | -0.02308 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10502 | 0.06834 | 0.06608 | 0.002261 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10503 | 0.04585 | 0.04496 | 0.0008881 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10504 | 0.06373 | 0.04559 | 0.01814 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10505 | 0.06504 | 0.07869 | -0.01365 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10506 | 0.07178 | 0.09842 | -0.02664 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10507 | 0.06792 | 0.06865 | -0.0007264 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10508 | 0.05232 | 0.04729 | 0.005032 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10509 | 0.0428 | 0.04534 | -0.002537 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 50 | 10510 | 0.05539 | 0.04157 | 0.01383 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10501 | 0.05711 | 0.05882 | -0.001707 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10502 | 0.04377 | 0.04368 | 8.976e-05 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10503 | 0.05853 | 0.07097 | -0.01244 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10504 | 0.06707 | 0.06254 | 0.004528 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10505 | 0.06594 | 0.04636 | 0.01958 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10506 | 0.04735 | 0.06761 | -0.02026 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10507 | 0.05573 | 0.05814 | -0.002411 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10508 | 0.07405 | 0.08125 | -0.007197 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10509 | 0.06799 | 0.07629 | -0.008301 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-5 | A_ctrl200 | 60 | 10510 | 0.05233 | 0.01813 | 0.0342 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10501 | 0.08612 | 0.07622 | 0.009894 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10502 | 0.06125 | 0.04253 | 0.01872 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10503 | 0.05372 | 0.0426 | 0.01112 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10504 | 0.05813 | 0.06242 | -0.00429 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10505 | 0.05889 | 0.07125 | -0.01236 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10506 | 0.06511 | 0.08326 | -0.01815 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10507 | 0.06751 | 0.02709 | 0.04041 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10508 | 0.04264 | 0.0387 | 0.003936 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10509 | 0.04551 | 0.02083 | 0.02468 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 50 | 10510 | 0.05439 | 0.0009158 | 0.05348 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10501 | 0.05404 | 0.06676 | -0.01272 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10502 | 0.04625 | 0.04361 | 0.002644 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10503 | 0.05475 | 0.04976 | 0.004986 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10504 | 0.0534 | 0.03869 | 0.01472 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10505 | 0.06137 | 0.07506 | -0.01369 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10506 | 0.05381 | 0.01783 | 0.03598 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10507 | 0.05255 | 0.04554 | 0.007003 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10508 | 0.07115 | 0.1138 | -0.0427 | True | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10509 | 0.05921 | 0.049 | 0.01022 | False | False | n/a | n/a |
+| ablation vs matched control | P20_lr3e-4 | A_ctrl200_lr3e-4 | 60 | 10510 | 0.05195 | 0.0296 | 0.02235 | False | False | n/a | n/a |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10501 | 0.07622 | 0.1222 | -0.046 | True | False | 1.539e+04 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10502 | 0.04253 | 0.06803 | -0.0255 | True | False | 0 | n/a |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10503 | 0.0426 | 0.02357 | 0.01903 | False | False | 251 | 1602 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10504 | 0.06242 | 0.07125 | -0.008829 | True | False | 4 | 1662 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10505 | 0.07125 | 0.05432 | 0.01693 | False | False | 6 | 1610 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10506 | 0.08326 | 0.09843 | -0.01517 | True | False | 1573 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10507 | 0.02709 | 0.05776 | -0.03066 | True | False | 16 | 1603 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10508 | 0.0387 | 0.06563 | -0.02693 | True | False | 8585 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10509 | 0.02083 | 0.03538 | -0.01455 | True | False | 2639 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 50 | 10510 | 0.0009158 | 0.05937 | -0.05845 | True | False | 1 | 1693 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10501 | 0.06676 | 0.04693 | 0.01984 | False | False | 2041 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10502 | 0.04361 | 0.03193 | 0.01168 | False | False | 2 | 1659 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10503 | 0.04976 | 0.07216 | -0.0224 | True | False | 1301 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10504 | 0.03869 | 0.04855 | -0.009862 | True | False | 16 | 1605 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10505 | 0.07506 | 0.07591 | -0.000858 | True | False | 2672 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10506 | 0.01783 | 0.04289 | -0.02506 | True | False | 1 | 1682 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10507 | 0.04554 | 0.05151 | -0.005968 | True | False | 2 | 1695 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10508 | 0.1138 | 0.09174 | 0.02211 | False | False | 607 | 1602 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10509 | 0.049 | 0.05088 | -0.00188 | True | False | 181 | 1601 |
+| vs baseline | A_ctrl200_lr3e-4 | parent_u1600 | 60 | 10510 | 0.0296 | 0.02097 | 0.008628 | False | False | 568 | 1601 |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10501 | 0.09316 | 0.1222 | -0.02907 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10502 | 0.06834 | 0.06803 | 0.0003102 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10503 | 0.04585 | 0.02357 | 0.02228 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10504 | 0.06373 | 0.07125 | -0.007518 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10505 | 0.06504 | 0.05432 | 0.01072 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10506 | 0.07178 | 0.09843 | -0.02664 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10507 | 0.06792 | 0.05776 | 0.01016 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10508 | 0.05232 | 0.06563 | -0.01332 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10509 | 0.0428 | 0.03538 | 0.007422 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 50 | 10510 | 0.05539 | 0.05937 | -0.003973 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10501 | 0.05711 | 0.04693 | 0.01018 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10502 | 0.04377 | 0.03193 | 0.01185 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10503 | 0.05853 | 0.07216 | -0.01363 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10504 | 0.06707 | 0.04855 | 0.01852 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10505 | 0.06594 | 0.07591 | -0.009972 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10506 | 0.04735 | 0.04289 | 0.004456 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10507 | 0.05573 | 0.05151 | 0.004219 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10508 | 0.07405 | 0.09174 | -0.01769 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10509 | 0.06799 | 0.05088 | 0.01711 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-5 | parent_u1600 | 60 | 10510 | 0.05233 | 0.02097 | 0.03136 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10501 | 0.08612 | 0.1222 | -0.03611 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10502 | 0.06125 | 0.06803 | -0.006775 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10503 | 0.05372 | 0.02357 | 0.03015 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10504 | 0.05813 | 0.07125 | -0.01312 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10505 | 0.05889 | 0.05432 | 0.004572 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10506 | 0.06511 | 0.09843 | -0.03332 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10507 | 0.06751 | 0.05776 | 0.00975 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10508 | 0.04264 | 0.06563 | -0.023 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10509 | 0.04551 | 0.03538 | 0.01013 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 50 | 10510 | 0.05439 | 0.05937 | -0.004973 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10501 | 0.05404 | 0.04693 | 0.007116 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10502 | 0.04625 | 0.03193 | 0.01433 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10503 | 0.05475 | 0.07216 | -0.01742 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10504 | 0.0534 | 0.04855 | 0.004853 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10505 | 0.06137 | 0.07591 | -0.01454 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10506 | 0.05381 | 0.04289 | 0.01092 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10507 | 0.05255 | 0.05151 | 0.001034 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10508 | 0.07115 | 0.09174 | -0.02059 | True | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10509 | 0.05921 | 0.05088 | 0.008336 | False | False | n/a | n/a |
+| vs parent u1600 candidate | P20_lr3e-4 | parent_u1600 | 60 | 10510 | 0.05195 | 0.02097 | 0.03098 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10501 | 0.1162 | 0.1222 | -0.005988 | True | False | 1.521e+04 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10502 | 0.06608 | 0.06803 | -0.001951 | True | False | 0 | n/a |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10503 | 0.04496 | 0.02357 | 0.02139 | False | False | 337 | 1602 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10504 | 0.04559 | 0.07125 | -0.02566 | True | False | 8 | 1615 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10505 | 0.07869 | 0.05432 | 0.02437 | False | False | 7 | 1638 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10506 | 0.09842 | 0.09843 | -7.966e-06 | True | False | 1633 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10507 | 0.06865 | 0.05776 | 0.01089 | False | False | 5 | 1603 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10508 | 0.04729 | 0.06563 | -0.01835 | True | False | 8799 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10509 | 0.04534 | 0.03538 | 0.009959 | False | False | 2789 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 50 | 10510 | 0.04157 | 0.05937 | -0.0178 | True | False | 1 | 1693 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10501 | 0.05882 | 0.04693 | 0.01189 | False | False | 1974 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10502 | 0.04368 | 0.03193 | 0.01176 | False | False | 2 | 1770 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10503 | 0.07097 | 0.07216 | -0.001192 | True | False | 1403 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10504 | 0.06254 | 0.04855 | 0.01399 | False | False | 14 | 1605 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10505 | 0.04636 | 0.07591 | -0.02956 | True | False | 2845 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10506 | 0.06761 | 0.04289 | 0.02472 | False | False | 0 | n/a |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10507 | 0.05814 | 0.05151 | 0.00663 | False | False | 5 | 1622 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10508 | 0.08125 | 0.09174 | -0.01049 | True | False | 573 | 1602 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10509 | 0.07629 | 0.05088 | 0.02541 | False | False | 180 | 1601 |
+| vs parent u1600 candidate | A_ctrl200 | parent_u1600 | 60 | 10510 | 0.01813 | 0.02097 | -0.002842 | True | False | 516 | 1601 |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10501 | 0.09601 | 0.1222 | -0.02621 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10502 | 0.06803 | 0.06803 | 5.622e-06 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10503 | 0.03433 | 0.02357 | 0.01076 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10504 | 0.06043 | 0.07125 | -0.01082 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10505 | 0.05513 | 0.05432 | 0.0008129 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10506 | 0.07456 | 0.09843 | -0.02387 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10507 | 0.04892 | 0.05776 | -0.008839 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10508 | 0.04423 | 0.06563 | -0.0214 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10509 | 0.04833 | 0.03538 | 0.01295 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 50 | 10510 | 0.05965 | 0.05937 | 0.0002805 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10501 | 0.04804 | 0.04693 | 0.00111 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10502 | 0.03831 | 0.03193 | 0.006381 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10503 | 0.06864 | 0.07216 | -0.003522 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10504 | 0.06066 | 0.04855 | 0.01211 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10505 | 0.07563 | 0.07591 | -0.0002851 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10506 | 0.04262 | 0.04289 | -0.0002688 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10507 | 0.05565 | 0.05151 | 0.004143 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10508 | 0.07278 | 0.09174 | -0.01895 | True | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10509 | 0.05449 | 0.05088 | 0.003617 | False | False | n/a | n/a |
+| vs parent u1600 candidate | A_detmean | parent_u1600 | 60 | 10510 | 0.04906 | 0.02097 | 0.02809 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10501 | 0.09316 | 0.09601 | -0.002856 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10502 | 0.06834 | 0.06803 | 0.0003046 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10503 | 0.04585 | 0.03433 | 0.01152 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10504 | 0.06373 | 0.06043 | 0.003297 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10505 | 0.06504 | 0.05513 | 0.009903 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10506 | 0.07178 | 0.07456 | -0.002779 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10507 | 0.06792 | 0.04892 | 0.019 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10508 | 0.05232 | 0.04423 | 0.008088 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10509 | 0.0428 | 0.04833 | -0.005529 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 50 | 10510 | 0.05539 | 0.05965 | -0.004254 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10501 | 0.05711 | 0.04804 | 0.009074 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10502 | 0.04377 | 0.03831 | 0.005468 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10503 | 0.05853 | 0.06864 | -0.01011 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10504 | 0.06707 | 0.06066 | 0.006411 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10505 | 0.06594 | 0.07563 | -0.009687 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10506 | 0.04735 | 0.04262 | 0.004725 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10507 | 0.05573 | 0.05565 | 7.616e-05 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10508 | 0.07405 | 0.07278 | 0.001267 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10509 | 0.06799 | 0.05449 | 0.01349 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-5 | A_detmean | 60 | 10510 | 0.05233 | 0.04906 | 0.003271 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10501 | 0.08612 | 0.09601 | -0.009892 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10502 | 0.06125 | 0.06803 | -0.00678 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10503 | 0.05372 | 0.03433 | 0.01939 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10504 | 0.05813 | 0.06043 | -0.002303 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10505 | 0.05889 | 0.05513 | 0.003759 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10506 | 0.06511 | 0.07456 | -0.009452 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10507 | 0.06751 | 0.04892 | 0.01859 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10508 | 0.04264 | 0.04423 | -0.001593 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10509 | 0.04551 | 0.04833 | -0.002818 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 50 | 10510 | 0.05439 | 0.05965 | -0.005253 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10501 | 0.05404 | 0.04804 | 0.006006 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10502 | 0.04625 | 0.03831 | 0.007945 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10503 | 0.05475 | 0.06864 | -0.01389 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10504 | 0.0534 | 0.06066 | -0.007256 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10505 | 0.06137 | 0.07563 | -0.01426 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10506 | 0.05381 | 0.04262 | 0.01119 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10507 | 0.05255 | 0.05565 | -0.003109 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10508 | 0.07115 | 0.07278 | -0.001635 | True | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10509 | 0.05921 | 0.05449 | 0.004719 | False | False | n/a | n/a |
+| vs R1 A_detmean (one step per update) | P20_lr3e-4 | A_detmean | 60 | 10510 | 0.05195 | 0.04906 | 0.002889 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10501 | 0.09316 | 0.07622 | 0.01693 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10502 | 0.06834 | 0.04253 | 0.02581 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10503 | 0.04585 | 0.0426 | 0.00325 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10504 | 0.06373 | 0.06242 | 0.00131 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10505 | 0.06504 | 0.07125 | -0.006215 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10506 | 0.07178 | 0.08326 | -0.01148 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10507 | 0.06792 | 0.02709 | 0.04083 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10508 | 0.05232 | 0.0387 | 0.01362 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10509 | 0.0428 | 0.02083 | 0.02197 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 50 | 10510 | 0.05539 | 0.0009158 | 0.05448 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10501 | 0.05711 | 0.06676 | -0.009654 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10502 | 0.04377 | 0.04361 | 0.0001666 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10503 | 0.05853 | 0.04976 | 0.00877 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10504 | 0.06707 | 0.03869 | 0.02838 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10505 | 0.06594 | 0.07506 | -0.009114 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10506 | 0.04735 | 0.01783 | 0.02952 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10507 | 0.05573 | 0.04554 | 0.01019 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10508 | 0.07405 | 0.1138 | -0.0398 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10509 | 0.06799 | 0.049 | 0.01899 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-5 | A_ctrl200_lr3e-4 | 60 | 10510 | 0.05233 | 0.0296 | 0.02273 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10501 | 0.08612 | 0.1162 | -0.03012 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10502 | 0.06125 | 0.06608 | -0.004824 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10503 | 0.05372 | 0.04496 | 0.008756 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10504 | 0.05813 | 0.04559 | 0.01254 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10505 | 0.05889 | 0.07869 | -0.0198 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10506 | 0.06511 | 0.09842 | -0.03331 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10507 | 0.06751 | 0.06865 | -0.001139 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10508 | 0.04264 | 0.04729 | -0.004648 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10509 | 0.04551 | 0.04534 | 0.000174 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 50 | 10510 | 0.05439 | 0.04157 | 0.01283 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10501 | 0.05404 | 0.05882 | -0.004775 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10502 | 0.04625 | 0.04368 | 0.002567 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10503 | 0.05475 | 0.07097 | -0.01622 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10504 | 0.0534 | 0.06254 | -0.009139 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10505 | 0.06137 | 0.04636 | 0.01501 | False | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10506 | 0.05381 | 0.06761 | -0.0138 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10507 | 0.05255 | 0.05814 | -0.005596 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10508 | 0.07115 | 0.08125 | -0.0101 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10509 | 0.05921 | 0.07629 | -0.01708 | True | False | n/a | n/a |
+| vs PPO control at the other LR | P20_lr3e-4 | A_ctrl200 | 60 | 10510 | 0.05195 | 0.01813 | 0.03382 | False | False | n/a | n/a |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10501 | 0.07622 | 0.1162 | -0.04001 | True | False | 1.539e+04 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10502 | 0.04253 | 0.06608 | -0.02354 | True | False | 0 | n/a |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10503 | 0.0426 | 0.04496 | -0.002362 | True | False | 251 | 1602 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10504 | 0.06242 | 0.04559 | 0.01683 | False | False | 4 | 1662 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10505 | 0.07125 | 0.07869 | -0.007436 | True | False | 6 | 1610 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10506 | 0.08326 | 0.09842 | -0.01516 | True | False | 1573 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10507 | 0.02709 | 0.06865 | -0.04155 | True | False | 16 | 1603 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10508 | 0.0387 | 0.04729 | -0.008584 | True | False | 8585 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10509 | 0.02083 | 0.04534 | -0.02451 | True | False | 2639 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 50 | 10510 | 0.0009158 | 0.04157 | -0.04065 | True | False | 1 | 1693 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10501 | 0.06676 | 0.05882 | 0.007947 | False | False | 2041 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10502 | 0.04361 | 0.04368 | -7.683e-05 | True | False | 2 | 1659 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10503 | 0.04976 | 0.07097 | -0.02121 | True | False | 1301 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10504 | 0.03869 | 0.06254 | -0.02386 | True | False | 16 | 1605 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10505 | 0.07506 | 0.04636 | 0.0287 | False | False | 2672 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10506 | 0.01783 | 0.06761 | -0.04978 | True | False | 1 | 1682 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10507 | 0.04554 | 0.05814 | -0.0126 | True | False | 2 | 1695 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10508 | 0.1138 | 0.08125 | 0.0326 | False | False | 607 | 1602 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10509 | 0.049 | 0.07629 | -0.02729 | True | False | 181 | 1601 |
+| vs R1 A_ctrl200 (LR 3e-5) | A_ctrl200_lr3e-4 | A_ctrl200 | 60 | 10510 | 0.0296 | 0.01813 | 0.01147 | False | False | 568 | 1601 |
 
 Source: `results/v2_refine_r2b/analysis/waveP_seed_level.csv`.
 
@@ -1005,14 +1005,14 @@ Source: `results/v2_refine_r2b/analysis/waveP_pathwise.csv`.
 
 Mean over the 10 seeds:
 
-| arm | q | n_steps_total | n_minibatch_steps_total | gn_pre_clip_max |
-|---|---|---|---|---|
-| A_detmean | 50 | 200 | 200 | n/a |
-| A_detmean | 60 | 200 | 200 | n/a |
-| P20_lr3e-4 | 50 | 4000 | 4000 | 0.1024 |
-| P20_lr3e-4 | 60 | 4000 | 4000 | 0.07277 |
-| P20_lr3e-5 | 50 | 4000 | 4000 | 0.06567 |
-| P20_lr3e-5 | 60 | 4000 | 4000 | 0.04256 |
+| arm | q | n_steps_total | n_minibatch_steps_total | loss_first20_mean | loss_last20_mean | foc_logged_mean_last20 | foc_logged_max_last20 | gn_pre_clip_last20_mean | gn_pre_clip_max | J_offline_start | J_offline_end | foc_offline_end_mean | foc_offline_end_max |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A_detmean | 50 | 200 | 200 | -3.759 | -3.764 | 0.0004593 | 0.002354 | 0.009191 | n/a | 3.769 | 3.765 | 0.0004384 | 0.001348 |
+| A_detmean | 60 | 200 | 200 | -3.829 | -3.823 | 0.0003866 | 0.001877 | 0.007159 | n/a | 3.821 | 3.823 | 0.0003742 | 0.001126 |
+| P20_lr3e-4 | 50 | 4000 | 4000 | -3.759 | -3.765 | 0.0003955 | 0.002417 | 0.00539 | 0.1024 | 3.769 | 3.767 | 0.0004253 | 0.001268 |
+| P20_lr3e-4 | 60 | 4000 | 4000 | -3.829 | -3.823 | 0.0003233 | 0.001903 | 0.00365 | 0.07277 | 3.821 | 3.824 | 0.000319 | 0.0009097 |
+| P20_lr3e-5 | 50 | 4000 | 4000 | -3.759 | -3.767 | 0.0004081 | 0.002523 | 0.005511 | 0.06567 | 3.769 | 3.767 | 0.0003927 | 0.001109 |
+| P20_lr3e-5 | 60 | 4000 | 4000 | -3.829 | -3.823 | 0.0003424 | 0.001995 | 0.004173 | 0.04256 | 3.821 | 3.824 | 0.0003368 | 0.001006 |
 
 Source: `results/v2_refine_r2b/analysis/waveP_pathwise_mean.csv`.
 
@@ -1113,15 +1113,19 @@ Offline objective and FOC residual at every weight export (update 1600 = the par
 
 Source: `results/v2_refine_r2b/analysis/waveP_offline_trajectory.csv`.
 
-Logged loss and FOC residual per update (rolling mean over 20 updates, mean over seeds; CSV `waveP_logged_trajectory.csv`):
+Figure of the offline objective J and the offline FOC residual at the weight exports for all five wave-P-type arms (the table above is its data):
 
 ![Wave P: offline objective and FOC residual at the weight exports, all arms](figures/waveP_offline_trajectory.png)
 
 Wave P: offline objective and FOC residual at the weight exports, all arms (`reports/v2/refine_r2b/figures/waveP_offline_trajectory.png`, `reports/v2/refine_r2b/figures/waveP_offline_trajectory.pdf`).
 
+Logged loss and FOC residual per update of the pathwise arms (rolling mean over 20 updates, mean over seeds; the time bases of `pathwise_update` and R1's `pathwise_step` differ, see above):
+
 ![Wave P: logged loss and FOC residual of the pathwise arms (time bases differ, see text)](figures/waveP_logged_trajectory.png)
 
 Wave P: logged loss and FOC residual of the pathwise arms (time bases differ, see text) (`reports/v2/refine_r2b/figures/waveP_logged_trajectory.png`, `reports/v2/refine_r2b/figures/waveP_logged_trajectory.pdf`).
+
+Source: `results/v2_refine_r2b/analysis/waveP_logged_trajectory.csv`.
 
 
 ### RNG divergence from the matched PPO control
@@ -1194,7 +1198,7 @@ Source: `results/v2_refine_r2b/analysis/waveP_rng.csv` (first update at which ea
 
 ### Optimisation diagnostics and cost per run
 
-Median over the complete runs of the per-run diagnostics (KL and clip fraction exist for PPO runs only; `n_minibatch_steps_total` is the number of optimiser steps of the phase. The column `n_actor_steps_total` of the R1 extraction is left out: it counts only updates that took the masked update path, which is not every update of an `A_censored` run).
+Median over the complete runs of the per-run diagnostics (KL and clip fraction exist for PPO runs only; `n_minibatch_steps_total` is the number of optimiser steps of the phase. The column `n_actor_steps_total` of the R1 extraction is left out: it counts only updates that took the masked update path, which is not every update of a PPO run with flagged rows).
 
 | wave | arm | q | n_complete | median_kl_mean | median_clip_frac_mean | median_gn_actor_mean | median_gn_actor_max | median_n_minibatch_steps_total | median_n_epochs_run_mean | median_adv_all_std_mean | median_phase_wall_sec |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -1219,18 +1223,18 @@ Source: `results/v2_refine_r2b/analysis/waveP_optimisation.csv`.
 | stage2 | P20_lr3e-4 | 20 | 16.63 | 17.87 | 16.47 | 0 | 1.024e+05 | 200 | 4000 | 0.08317 | 0.6249 | 0.6249 | n/a | 0.5861 |
 | stage2 | A_ctrl200_lr3e-4 | 20 | 28.38 | 29.51 | 27.51 | 0.6655 | 1.024e+05 | 200 | 4000 | 0.1419 | 1.066 | 1.066 | n/a | n/a |
 
-Source: `results/v2_refine_r2b/analysis/waveP_cost.csv` (mean over the complete runs of both q; wall time is machine-load dependent (wave A, wave P and the R1 runs were not run under the same load)).
+Source: `results/v2_refine_r2b/analysis/waveP_cost.csv` (mean over the complete runs of both q; wall time is machine-load dependent (wave A and wave P ran together, up to 40 processes, load average 6 to 43; the R1 runs on 2026-10-03)).
 
 
 ## 5. Anomalies
 
-The extraction recorded anomalies (`anomalies` / `anomalies_r2b` columns of `per_run.csv`) in 0 + 0 of 100 rows of the arms of this report (done or reference rows: 100; every run exited 0). Notable events computed from the tables, per arm:
+The extraction recorded anomalies in 0 (`anomalies` column of `per_run.csv`) and 0 (`anomalies_r2b`, a column that exists only when it is non-empty) of the 120 rows of the arms of this report plus the `parent_u1600` rows (100 runs with status done, every one exited 0, and 20 `parent_u1600` reference rows read from the rehearsal `gates.json`). Notable events computed from the tables, per arm:
 
 - `A_ctrl200`: none.
 - `A_detmean`: none.
 - `P20_lr3e-5`: none.
 - `P20_lr3e-4`: none.
-- `A_ctrl200_lr3e-4`: q50/10510 fails G-A or its G-N part: eta_2/DW 0.005501 > 0.005; q50/10510 has a POSITIVE signed peak error (0.0009158): for this run the difference of |peak error| is not the negative of the difference of the signed error
+- `A_ctrl200_lr3e-4`: q50/10510 fails G-A or its G-N part: eta_2/DW 0.005501 > 0.005; q50/10510 has a POSITIVE signed peak error (0.0009158): for this run the difference of |peak error| is not the negative of the difference of the signed error; q50/10510: the smoothed-game share (-31.17) is not meaningful, the observed d = 0 gap is -0.0641 effort units (a near-zero or negative denominator drives the mean and CI of that metric)
 
 
 ## 6. Commands

@@ -86,7 +86,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveA_A_peak25_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -114,12 +114,12 @@ Source: `results/v2_refine_r2b/analysis/waveA_A_peak25_optimisation.csv`.
 
 Start sampling, clamp counts and stage-2 profile (mean over the 10 seeds; baseline for comparison):
 
-| arm | q | peak_visit_share | peak_visit_design_share | d1_flagged_L_s2 | d1_flagged_L_s2_in | censored_rows_total | tail2q_mean_e2hat | tail2q_mean_abs_err_over_g2_0 | offpath_delta2_max_over_dw | onpath_delta2_max_over_dw |
-|---|---|---|---|---|---|---|---|---|---|---|
-| A_base | 50 | 0.09995 | 0.1 | 1.144e+04 | 0 | n/a | 0.569 | 0.008129 | 0.00049 | 0.001621 |
-| A_base | 60 | 0.091 | 0.09091 | 3707 | 0 | n/a | 0.5675 | 0.009729 | 0.0003069 | 0.0008865 |
-| A_peak25 | 50 | 0.2502 | 0.1 | 2779 | 0 | n/a | 0.7011 | 0.01002 | 0.0004466 | 0.001653 |
-| A_peak25 | 60 | 0.2503 | 0.09091 | 2463 | 0 | n/a | 0.7478 | 0.01282 | 0.0004034 | 0.0007072 |
+| arm | q | peak_visit_share | peak_visit_design_share | d1_flagged_L_s2 | d1_flagged_L_s2_in | tail2q_mean_e2hat | tail2q_mean_abs_err_over_g2_0 | offpath_delta2_max_over_dw | onpath_delta2_max_over_dw |
+|---|---|---|---|---|---|---|---|---|---|
+| A_base | 50 | 0.09995 | 0.1 | 1.144e+04 | 0 | 0.569 | 0.008129 | 0.00049 | 0.001621 |
+| A_base | 60 | 0.091 | 0.09091 | 3707 | 0 | 0.5675 | 0.009729 | 0.0003069 | 0.0008865 |
+| A_peak25 | 50 | 0.2502 | 0.1 | 2779 | 0 | 0.7011 | 0.01002 | 0.0004466 | 0.001653 |
+| A_peak25 | 60 | 0.2503 | 0.09091 | 2463 | 0 | 0.7478 | 0.01282 | 0.0004034 | 0.0007072 |
 
 Source: `results/v2_refine_r2b/analysis/waveA_A_peak25_specifics.csv`.
 
@@ -162,7 +162,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveA_A_peak50_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -190,12 +190,12 @@ Source: `results/v2_refine_r2b/analysis/waveA_A_peak50_optimisation.csv`.
 
 Start sampling, clamp counts and stage-2 profile (mean over the 10 seeds; baseline for comparison):
 
-| arm | q | peak_visit_share | peak_visit_design_share | d1_flagged_L_s2 | d1_flagged_L_s2_in | censored_rows_total | tail2q_mean_e2hat | tail2q_mean_abs_err_over_g2_0 | offpath_delta2_max_over_dw | onpath_delta2_max_over_dw |
-|---|---|---|---|---|---|---|---|---|---|---|
-| A_base | 50 | 0.09995 | 0.1 | 1.144e+04 | 0 | n/a | 0.569 | 0.008129 | 0.00049 | 0.001621 |
-| A_base | 60 | 0.091 | 0.09091 | 3707 | 0 | n/a | 0.5675 | 0.009729 | 0.0003069 | 0.0008865 |
-| A_peak50 | 50 | 0.5002 | 0.1 | 0.1 | 0 | n/a | 1.005 | 0.01436 | 0.0006544 | 0.0012 |
-| A_peak50 | 60 | 0.5002 | 0.09091 | 0 | 0 | n/a | 1.13 | 0.01937 | 0.0004914 | 0.0006508 |
+| arm | q | peak_visit_share | peak_visit_design_share | d1_flagged_L_s2 | d1_flagged_L_s2_in | tail2q_mean_e2hat | tail2q_mean_abs_err_over_g2_0 | offpath_delta2_max_over_dw | onpath_delta2_max_over_dw |
+|---|---|---|---|---|---|---|---|---|---|
+| A_base | 50 | 0.09995 | 0.1 | 1.144e+04 | 0 | 0.569 | 0.008129 | 0.00049 | 0.001621 |
+| A_base | 60 | 0.091 | 0.09091 | 3707 | 0 | 0.5675 | 0.009729 | 0.0003069 | 0.0008865 |
+| A_peak50 | 50 | 0.5002 | 0.1 | 0.1 | 0 | 1.005 | 0.01436 | 0.0006544 | 0.0012 |
+| A_peak50 | 60 | 0.5002 | 0.09091 | 0 | 0 | 1.13 | 0.01937 | 0.0004914 | 0.0006508 |
 
 Source: `results/v2_refine_r2b/analysis/waveA_A_peak50_specifics.csv`.
 
@@ -238,7 +238,7 @@ Tail statistics of the arm and of its criterion comparator:
 
 Source: `results/v2_refine_r2b/analysis/waveA_A_censored_tail.csv`.
 
-Other metrics against the criterion comparator:
+Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; `k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the notable events if there is one, dominates its mean and CI):
 
 | metric | q50 mean diff [95% CI] | q60 mean diff [95% CI] |
 |---|---|---|
@@ -687,12 +687,12 @@ Source: `results/v2_refine_r2b/analysis/waveA_specifics_mean.csv`.
 | stage2 | A_censored | 60 | start | 10 | 0 | 10 | 1 | n/a | n/a | n/a | 0 |
 | stage2 | A_censored | 60 | minibatch | 10 | 0 | 10 | 1 | n/a | n/a | n/a | 0 |
 
-Source: `results/v2_refine_r2b/analysis/waveA_rng.csv` (`peak_focused` draws its bins with `rng.random`, `balanced` with `rng.integers`: the `start` stream differs from the baseline from the first update by construction; `A_censored` diverges at the first update whose buffer holds a flagged row).
+Source: `results/v2_refine_r2b/analysis/waveA_rng.csv` (`peak_focused` draws its bins with `rng.random`, `balanced` with `rng.integers`: the `start` stream differs from the baseline from the first update by construction; for `A_censored` the `learn` and `opp` streams first differ a few updates after the first update whose buffer holds a flagged row (their position depends on the policy's draws; `d1_first_flagged_update` is in `waveA_specifics.csv`)).
 
 
 ### Optimisation diagnostics and cost per run
 
-Median over the complete runs of the per-run diagnostics (KL and clip fraction exist for PPO runs only; `n_minibatch_steps_total` is the number of optimiser steps of the phase. The column `n_actor_steps_total` of the R1 extraction is left out: it counts only updates that took the masked update path, which is not every update of an `A_censored` run).
+Median over the complete runs of the per-run diagnostics (KL and clip fraction exist for PPO runs only; `n_minibatch_steps_total` is the number of optimiser steps of the phase. The column `n_actor_steps_total` of the R1 extraction is left out: it counts only updates that took the masked update path, which is not every update of a PPO run with flagged rows).
 
 | wave | arm | q | n_complete | median_kl_mean | median_clip_frac_mean | median_gn_actor_mean | median_gn_actor_max | median_n_minibatch_steps_total | median_n_epochs_run_mean | median_adv_all_std_mean | median_phase_wall_sec |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -707,19 +707,19 @@ Median over the complete runs of the per-run diagnostics (KL and clip fraction e
 
 Source: `results/v2_refine_r2b/analysis/waveA_optimisation.csv`.
 
-| wave | arm | n_runs | mean_phase_wall_sec | mean_total_wall_sec | mean_train_update_sec | mean_train_rollout_sec | mean_phase_episodes | mean_phase_local_updates | mean_n_minibatch_steps_total | mean_wall_sec_per_update | phase_wall_ratio_vs_base | wall_per_update_ratio_vs_base | wall_ratio_vs_matched_control |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| stage2 | A_base | 20 | 199.4 | 200.2 | 193.3 | 4.715 | 8.192e+05 | 1600 | 3.2e+04 | 0.1246 | 1 | 1 | n/a |
-| stage2 | A_peak25 | 20 | 183 | 183.9 | 177.2 | 4.373 | 8.192e+05 | 1600 | 3.2e+04 | 0.1144 | 0.9179 | 0.9179 | n/a |
-| stage2 | A_peak50 | 20 | 184.9 | 185.8 | 179 | 4.409 | 8.192e+05 | 1600 | 3.2e+04 | 0.1156 | 0.9274 | 0.9274 | n/a |
-| stage2 | A_censored | 20 | 211.6 | 212.5 | 205.5 | 4.842 | 8.192e+05 | 1600 | 3.2e+04 | 0.1323 | 1.061 | 1.061 | n/a |
+| wave | arm | n_runs | mean_phase_wall_sec | mean_total_wall_sec | mean_train_update_sec | mean_train_rollout_sec | mean_phase_episodes | mean_phase_local_updates | mean_n_minibatch_steps_total | mean_wall_sec_per_update | phase_wall_ratio_vs_base | wall_per_update_ratio_vs_base |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| stage2 | A_base | 20 | 199.4 | 200.2 | 193.3 | 4.715 | 8.192e+05 | 1600 | 3.2e+04 | 0.1246 | 1 | 1 |
+| stage2 | A_peak25 | 20 | 183 | 183.9 | 177.2 | 4.373 | 8.192e+05 | 1600 | 3.2e+04 | 0.1144 | 0.9179 | 0.9179 |
+| stage2 | A_peak50 | 20 | 184.9 | 185.8 | 179 | 4.409 | 8.192e+05 | 1600 | 3.2e+04 | 0.1156 | 0.9274 | 0.9274 |
+| stage2 | A_censored | 20 | 211.6 | 212.5 | 205.5 | 4.842 | 8.192e+05 | 1600 | 3.2e+04 | 0.1323 | 1.061 | 1.061 |
 
-Source: `results/v2_refine_r2b/analysis/waveA_cost.csv` (mean over the complete runs of both q; wall time is machine-load dependent (wave A, wave P and the R1 runs were not run under the same load)).
+Source: `results/v2_refine_r2b/analysis/waveA_cost.csv` (mean over the complete runs of both q; wall time is machine-load dependent (wave A and wave P ran together, up to 40 processes, load average 6 to 43; the R1 runs on 2026-10-03)).
 
 
 ## 5. Anomalies
 
-The extraction recorded anomalies (`anomalies` / `anomalies_r2b` columns of `per_run.csv`) in 0 + 0 of 80 rows of the arms of this report (done or reference rows: 80; every run exited 0). Notable events computed from the tables, per arm:
+The extraction recorded anomalies in 0 (`anomalies` column of `per_run.csv`) and 0 (`anomalies_r2b`, a column that exists only when it is non-empty) of the 100 rows of the arms of this report plus the `parent_u1600` rows (80 runs with status done, every one exited 0, and 20 `parent_u1600` reference rows read from the rehearsal `gates.json`). Notable events computed from the tables, per arm:
 
 - `A_base`: the R1 `parents_A` baseline; its end-of-A state equals the rehearsal's in 20/20 (`parents_A_checks.json`, recorded in `parents.csv`).
 - `A_peak25`: none.
