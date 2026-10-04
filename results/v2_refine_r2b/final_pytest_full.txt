@@ -1,0 +1,100 @@
+..........F............................................................. [ 14%]
+........................................................................ [ 29%]
+........................................................................ [ 44%]
+........................................................................ [ 59%]
+........................................................................ [ 74%]
+........................................................................ [ 88%]
+............................................xx........                   [100%]
+=================================== FAILURES ===================================
+________________________ test_registry_canonicalization ________________________
+
+    def test_registry_canonicalization():
+        runs, df, conv, dup_warnings = _load()
+    
+        # 1. zero duplicate identities
+        keys = [(r.experiment, r.method, r.q, r.seed, r.ablation, r.weight_variant) for r in runs]
+        assert len(keys) == len(set(keys)), "duplicate run identities present"
+        assert not dup_warnings, f"duplicate-identity guard fired: {dup_warnings}"
+        print(f"[V1] duplicate run identities: 0 (guard warnings: 0) across {len(runs)} runs")
+    
+        # Registry path lookup for source-tag verification
+        path_of = {
+            (r.experiment, r.method, r.q, r.seed, r.ablation): r.path
+            for r in runs
+            if r.method in ("TEL-PPO", "PPO") and r.weight_variant == "baseline"
+        }
+    
+        base = conv[
+            (conv["method"].isin(["TEL-PPO", "PPO"]))
+            & (conv["ablation"] == "baseline")
+            & (conv["weight_variant"] == "baseline")
+        ]
+    
+        for exp, spec in CANONICAL.items():
+            for q in spec["qs"]:
+                cell = base[(base["experiment"] == exp) & (base["q"] == q)]
+                seeds = sorted(cell["seed"].tolist())
+    
+                # 2. exactly 5 seeds
+                assert set(seeds) == EXPECTED_SEEDS, f"{exp} q={q}: seeds {seeds}"
+    
+                # 3. post-fix tags only: the promoted baseline rows must come from
+                # files registered under the approved tag
+                srcs = []
+                for s in seeds:
+                    p = path_of.get((exp, "TEL-PPO", q, s, spec["tag"])) or path_of.get(
+                        (exp, "PPO", q, s, spec["tag"])
+                    )
+                    assert p is not None, f"{exp} q={q} seed {s}: no registry run with tag '{spec['tag']}'"
+                    srcs.append(os.path.basename(p))
+                if spec["tag"] != "baseline":
+                    assert all(spec["tag"] in s for s in srcs), f"{exp} q={q}: wrong source files {srcs}"
+    
+                # 4. verified stop on every seed
+                reasons = sorted(set(cell["stop_reason"].tolist()))
+                assert reasons == ["exploitability"], f"{exp} q={q}: stop_reasons {reasons}"
+    
+                upds = {int(r["seed"]): int(r["convergence_update"]) for _, r in cell.iterrows()}
+                print(
+                    f"[V1] {exp:<18} q={int(q):<3} tag={spec['tag']:<16} seeds={seeds} "
+                    f"stop=exploitability conv_update={[upds[s] for s in sorted(upds)]}"
+                )
+    
+        # two_players Set 2 still present as a separate variant (not pooled):
+        # 15 r5 PPO runs (3 q x 5 seeds) + 15 r5 gradient runs (legacy Set-2 rows
+        # are dropped by the promotion)
+        set2 = conv[
+            (conv["experiment"] == "two_players")
+            & (conv["weight_variant"] == "wh8_wl4")
+            & (conv["ablation"] == "baseline")
+        ]
+        n_ppo = len(set2[set2["method"].isin(["TEL-PPO", "PPO"])])
+        n_grad = len(set2[set2["method"] == "Gradient"])
+        assert n_ppo == 15, f"expected 15 Set-2 PPO runs, got {n_ppo}"
+>       assert n_grad == 15, f"expected 15 Set-2 gradient runs, got {n_grad}"
+E       AssertionError: expected 15 Set-2 gradient runs, got 0
+E       assert 0 == 15
+
+tests/test_registry_canonicalization.py:115: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[V1] duplicate run identities: 0 (guard warnings: 0) across 593 runs
+[V1] three_players      q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[47, 50, 52, 44, 47]
+[V1] three_players      q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[88, 113, 113, 119, 123]
+[V1] different_cost     q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[138, 136, 109, 122, 96]
+[V1] different_cost     q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[145, 124, 120, 127, 141]
+[V1] different_ability  q=35  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[100, 160, 109, 120, 157]
+[V1] different_ability  q=55  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[91, 81, 84, 120, 90]
+[V1] two_players        q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 99, 139, 49, 99]
+[V1] two_players        q=45  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 79, 109, 79, 119]
+[V1] two_players        q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 119, 99, 109, 129]
+=============================== warnings summary ===============================
+tests/test_v2_refine_d2.py::test_process_pool_equals_inline
+tests/test_v2_refine_d2.py::test_process_pool_equals_inline
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=2813631) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_registry_canonicalization.py::test_registry_canonicalization
+1 failed, 483 passed, 2 xfailed, 2 warnings in 863.92s (0:14:23)
+EXIT=1
