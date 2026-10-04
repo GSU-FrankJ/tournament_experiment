@@ -1,0 +1,5 @@
+self-compare (same directory twice): ALL = True | fields compared: 48
+reference vs the C-R2 run of the same (q, seed): ALL = True
+other seed (q50 10501 vs 10502): ALL = False | failing fields: 40 | first difference: state_end_A.pt:actor
+other q (q50 vs q60, seed 10501): ALL = False | failing fields: 40
+new run without continuation_table.npz: ALL = False | continuation_table field: False
