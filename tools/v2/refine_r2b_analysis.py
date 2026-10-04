@@ -239,6 +239,10 @@ def extract(ctx: R2bCtx, qs: Sequence[int], seeds: Sequence[int], workers: int
             df[c] = df[c].astype(object)
             m = ex[c].notna()
             df.loc[m, c] = ex.loc[m, c].astype(object)
+            try:                                              # numeric columns stay numeric (rng_div_* mix strings and ints)
+                df[c] = pd.to_numeric(df[c])
+            except (ValueError, TypeError):
+                pass
         else:
             df[c] = ex[c]
     df = R.prepare(df)
@@ -453,12 +457,13 @@ def optimisation_block(doc: R.Doc, res: Result, arms: Sequence[str], cost_key: s
     doc.p("Median over the complete runs of the per-run diagnostics (KL and clip fraction exist for PPO runs only; "
           "`n_minibatch_steps_total` is the number of optimiser steps of the phase. The column `n_actor_steps_total` of the R1 "
           "extraction is left out: it counts only updates that took the masked update path, which is not every update of "
-          "an `A_censored` run).")
+          "a PPO run with flagged rows).")
     doc.table(o[o.arm.isin(arms)].drop(columns=["n_actor_steps_total", "median_n_actor_steps_total"], errors="ignore"),
               f"{name}_optimisation")
-    doc.table(res.tabs[cost_key].drop(columns=["mean_n_actor_steps_total"], errors="ignore"), f"{name}_cost",
-              note="mean over the complete runs of both q; wall time is machine-load dependent (wave A, wave P and the R1 "
-                   "runs were not run under the same load)")
+    doc.table(res.tabs[cost_key].drop(columns=["mean_n_actor_steps_total"], errors="ignore").dropna(axis=1, how="all"),
+              f"{name}_cost",
+              note="mean over the complete runs of both q; wall time is machine-load dependent (wave A and wave P ran together, "
+                   "up to 40 processes, load average 6 to 43; the R1 runs on 2026-10-03)")
 
 
 CRIT: Dict[str, Tuple[str, str]] = {a: (b, lab) for a, b, lab in COMPS_A + COMPS_P if lab in R.CRITERION_LABELS}
@@ -515,6 +520,12 @@ def arm_notable(df: pd.DataFrame, arm: str, base: str) -> List[str]:
         if float(r.stage2_peak_rel_err_signed) > 0:
             out.append(f"q{int(r.q)}/{int(r.seed)} has a POSITIVE signed peak error ({R._g(float(r.stage2_peak_rel_err_signed))}): "
                        "for this run the difference of |peak error| is not the negative of the difference of the signed error")
+    for r in g.itertuples():
+        share, gap = getattr(r, "smoothed_share_peak_gap_d0", float("nan")), getattr(r, "observed_gap_d0", float("nan"))
+        if pd.notna(share) and pd.notna(gap) and (float(gap) <= 0 or abs(float(share)) > 5):
+            out.append(f"q{int(r.q)}/{int(r.seed)}: the smoothed-game share ({R._g(float(share))}) is not meaningful, the "
+                       f"observed d = 0 gap is {R._g(float(gap))} effort units (a near-zero or negative denominator drives the "
+                       "mean and CI of that metric)")
     b = df[(df.arm == base) & df.complete].set_index(["q", "seed"])
     ties = [f"q{int(r.q)}/{int(r.seed)}" for r in g.itertuples()
             if (int(r.q), int(r.seed)) in b.index and float(b.loc[(int(r.q), int(r.seed)), PRIMARY]) == float(getattr(r, PRIMARY))]
@@ -541,7 +552,12 @@ def arm_section(doc: R.Doc, res: Result, arm: str, comps: Sequence[Tuple[str, st
     t = res.tabs["tail"]
     doc.p("Tail statistics of the arm and of its criterion comparator:")
     doc.table(t[t.arm.isin([arm, base])], f"{wave}_{arm}_tail")
-    doc.p("Other metrics against the criterion comparator:")
+    doc.p("Other metrics against the criterion comparator (mean difference arm - comparator with the 95% CI of the mean; "
+          "`k/10 better` counts seeds with a smaller value, an improvement for the error, tail and gate metrics; the signed "
+          "peak error, sigma_2(0) and the smoothed-game share have no direction and show no count; because the signed peak "
+          "errors are negative, a POSITIVE difference of the signed error is an improvement. The smoothed-game share is a "
+          "ratio whose denominator is the observed d = 0 gap, so a run with a near-zero or negative gap, listed under the "
+          "notable events if there is one, dominates its mean and CI):")
     doc.table(other_metrics_table(paired, arm, base, label), f"{wave}_{arm}_metrics")
     o = res.tabs["optimisation"]
     doc.p("Optimisation diagnostics (median over the runs):")
@@ -552,7 +568,8 @@ def arm_section(doc: R.Doc, res: Result, arm: str, comps: Sequence[Tuple[str, st
                 "censored_rows_total", "tail2q_mean_e2hat", "tail2q_mean_abs_err_over_g2_0", "offpath_delta2_max_over_dw",
                 "onpath_delta2_max_over_dw"]
         sp = df[df.arm.isin([BASE_A, arm]) & df.complete][[c for c in cols + ["seed"] if c in df.columns]]
-        gm = sp.groupby(["arm", "q"]).mean(numeric_only=True).reset_index().drop(columns=["seed"], errors="ignore")
+        gm = (sp.groupby(["arm", "q"]).mean(numeric_only=True).reset_index().drop(columns=["seed"], errors="ignore")
+              .dropna(axis=1, how="all"))
         doc.p("Start sampling, clamp counts and stage-2 profile (mean over the 10 seeds; baseline for comparison):")
         doc.table(gm, f"{wave}_{arm}_specifics")
     elif arm in PATHWISE:
@@ -600,13 +617,15 @@ def arm_index(res: Result, arms: Sequence[str]) -> pd.DataFrame:
 def anomalies_block(doc: R.Doc, res: Result, arms: Sequence[str]) -> None:
     """Anomalies of the wave: the tool's own column plus computed notable events."""
     df = res.df
-    sub = df[df.arm.isin(arms)]
+    sub = df[df.arm.isin(list(arms) + [PARENT])]
     n_an = int(sub["anomalies"].fillna("").astype(str).str.len().gt(0).sum()) if "anomalies" in sub else 0
     n_an2 = int(sub["anomalies_r2b"].fillna("").astype(str).str.len().gt(0).sum()) if "anomalies_r2b" in sub else 0
-    n_done = int((sub["status"] == "done").sum()) + int((sub["status"] == "reference").sum())
-    doc.p(f"The extraction recorded anomalies (`anomalies` / `anomalies_r2b` columns of `per_run.csv`) in {n_an} + {n_an2} of "
-          f"{len(sub)} rows of the arms of this report (done or reference rows: {n_done}; every run exited 0). Notable events "
-          "computed from the tables, per arm:")
+    n_done = int((sub["status"] == "done").sum())
+    n_ref = int((sub["status"] == "reference").sum())
+    doc.p(f"The extraction recorded anomalies in {n_an} (`anomalies` column of `per_run.csv`) and {n_an2} (`anomalies_r2b`, "
+          f"a column that exists only when it is non-empty) of the {len(sub)} rows of the arms of this report plus the "
+          f"`{PARENT}` rows ({n_done} runs with status done, every one exited 0, and {n_ref} `{PARENT}` reference rows read "
+          "from the rehearsal `gates.json`). Notable events computed from the tables, per arm:")
     for arm in arms:
         if arm == BASE_A:
             doc.lines.append("- `A_base`: the R1 `parents_A` baseline; its end-of-A state equals the rehearsal's in 20/20 "
@@ -751,7 +770,8 @@ def cross_arm_tables(doc: R.Doc, res: Result, comps: Sequence[Tuple[str, str, st
             doc.table(sub, f"{wave}_metric_{m}")
     doc.h(3, "Seed-level values")
     st = res.tabs["seed_table"]
-    doc.table(st[st.arm.isin(crit_arms + (R1_PAIR if wave == "waveP" else []))], f"{wave}_seed_level")
+    doc.table(st[st.arm.isin(crit_arms + (R1_PAIR if wave == "waveP" else []))].dropna(axis=1, how="all"),
+              f"{wave}_seed_level")
 
 
 def write_wave_a(res: Result, args: argparse.Namespace) -> Path:
@@ -796,8 +816,9 @@ def write_wave_a(res: Result, args: argparse.Namespace) -> Path:
     doc.h(3, "RNG divergence from the baseline")
     doc.table(res.tabs["rng_divergence_A"], "waveA_rng",
               note="`peak_focused` draws its bins with `rng.random`, `balanced` with `rng.integers`: the `start` stream differs "
-                   "from the baseline from the first update by construction; `A_censored` diverges at the first update whose "
-                   "buffer holds a flagged row")
+                   "from the baseline from the first update by construction; for `A_censored` the `learn` and `opp` streams "
+                   "first differ a few updates after the first update whose buffer holds a flagged row (their position "
+                   "depends on the policy's draws; `d1_first_flagged_update` is in `waveA_specifics.csv`)")
     optimisation_block(doc, res, [BASE_A] + ARMS_A, "cost_A", "waveA")
     doc.h(2, "5. Anomalies")
     anomalies_block(doc, res, [BASE_A] + ARMS_A)
@@ -860,12 +881,15 @@ def write_wave_p(res: Result, args: argparse.Namespace) -> Path:
     doc.table(tr, "waveP_offline_trajectory")
     lt = logged_trajectory(args)
     lt.to_csv(Path(args.out) / "waveP_logged_trajectory.csv", index=False)
-    doc.p("Logged loss and FOC residual per update (rolling mean over 20 updates, mean over seeds; CSV "
-          "`waveP_logged_trajectory.csv`):")
+    doc.p("Figure of the offline objective J and the offline FOC residual at the weight exports for all five wave-P-type "
+          "arms (the table above is its data):")
     doc.figures([("Wave P: offline objective and FOC residual at the weight exports, all arms",
-                  fig_wavep_offline(fig_dir, res.traj)),
-                 ("Wave P: logged loss and FOC residual of the pathwise arms (time bases differ, see text)",
+                  fig_wavep_offline(fig_dir, res.traj))], fig_dir, rep_dir)
+    doc.p("Logged loss and FOC residual per update of the pathwise arms (rolling mean over 20 updates, mean over seeds; the "
+          "time bases of `pathwise_update` and R1's `pathwise_step` differ, see above):")
+    doc.figures([("Wave P: logged loss and FOC residual of the pathwise arms (time bases differ, see text)",
                   fig_wavep_logged(fig_dir, lt))], fig_dir, rep_dir)
+    doc.p(f"Source: `{R._rel(Path(args.out) / 'waveP_logged_trajectory.csv')}`.")
     doc.h(3, "RNG divergence from the matched PPO control")
     rng = res.df[res.df.arm.isin(ARMS_P) & res.df.complete][
         ["arm", "q", "seed"] + [c for c in res.df.columns if c.startswith("rng_div_")]]
@@ -944,9 +968,13 @@ def mech_rows(res: Result) -> pd.DataFrame:
                     row[f"q{q} {key}: max|peak|, n<=0.05, n eta>0.004"] = (
                         f"{R._g(t['max_abs_peak_error'])}, {t['n_abs_peak_le_0.05']}, {t['n_eta_over_0.004']}")
         cc = cost[w][cost[w].arm == arm]
+        cb = cost[w][cost[w].arm == base]
         if len(cc):
             row["mean phase wall sec/run"] = float(cc["mean_phase_wall_sec"].iloc[0])
             row["mean optimiser steps/run"] = cc["mean_n_minibatch_steps_total"].iloc[0]
+        if len(cb):
+            row["comparator: wall sec/run, optimiser steps/run"] = (
+                f"{R._g(float(cb['mean_phase_wall_sec'].iloc[0]))}, {R._g(float(cb['mean_n_minibatch_steps_total'].iloc[0]))}")
         row["protocol eligibility (D2)"] = elig
         rows.append(row)
     return pd.DataFrame(rows)
@@ -1015,7 +1043,10 @@ def write_decision(res: Result, args: argparse.Namespace) -> Path:
           "the improving side at both q; (b) no run that passed G-A and its G-N part under the comparator fails it under the "
           "arm. The comparator is the baseline `parents_A` (wave A) or the PPO control with the same LR (wave P). Tail "
           "columns: max |peak error| over the 10 seeds, number of runs with |peak error| <= 0.05, number with eta_2/DW > "
-          "0.004. Protocol eligibility is the statement of D2 of the round; this report decides nothing.")
+          "0.004. Cost per run is the mean wall time of the phase and the optimiser steps of the arm and of its comparator; "
+          "wall time depends on the machine load (wave A and wave P ran together, up to 40 processes, load average 6 to 43; "
+          "the R1 comparators ran on 2026-10-03), so only the step counts are comparable across arms. Protocol "
+          "eligibility is the statement of D2 of the round; this report decides nothing.")
     method_block(doc)
     doc.table(mech_rows(res), "decision_inputs")
     doc.h(2, "Observations (labelled: descriptive, computed from the tables above)")
