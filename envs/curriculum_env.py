@@ -109,6 +109,38 @@ class StartSampler:
         u = rng.random(n)
         return edges[b] + u * (edges[b + 1] - edges[b])
 
+    def peak_set(self, t: int, half_width: float) -> np.ndarray:
+        """Boolean mask over the bins of D_t: bins whose interval intersects (-half_width, half_width)."""
+        edges = self.bin_edges(t)
+        return (edges[:-1] < half_width) & (edges[1:] > -half_width)
+
+    def peak_bin_probs(self, t: int, half_width: float, share: float) -> np.ndarray:
+        """Bin probabilities of the peak-focused scheme: ``share`` spread uniformly over the peak set,
+        ``1 - share`` uniformly over the other bins (the bin-balanced scheme gives every bin 1/n_bins)."""
+        if not 0.0 < share < 1.0:
+            raise ValueError(f"peak share must lie in (0, 1); got {share}")
+        m = self.peak_set(t, half_width)
+        n_peak, n = int(m.sum()), int(m.size)
+        if n_peak == 0 or n_peak == n:
+            raise ValueError(f"peak half-width {half_width} gives {n_peak} peak bins of {n} on D_{t}")
+        return np.where(m, share / n_peak, (1.0 - share) / (n - n_peak))
+
+    def peak_focused(self, t: int, n: int, rng: np.random.Generator, half_width: float,
+                     share: float) -> np.ndarray:
+        """Draw n gaps with a share of the episodes in the peak set (R2b mechanism 1).
+
+        One ``rng.random(n)`` call is mapped through the inverse CDF of the bin probabilities to the
+        bin; the start inside the bin is uniform from a second ``rng.random(n)`` call, as in
+        :meth:`balanced`. (``balanced`` draws its bins with ``rng.integers``, so the two schemes use
+        the ``start`` stream differently: the streams desynchronise at the first update.)
+        """
+        edges = self.bin_edges(t)
+        cdf = np.cumsum(self.peak_bin_probs(t, half_width, share))
+        cdf[-1] = 1.0
+        b = np.minimum(np.searchsorted(cdf, rng.random(n), side="right"), edges.size - 2)
+        u = rng.random(n)
+        return edges[b] + u * (edges[b + 1] - edges[b])
+
     @staticmethod
     def root(n: int) -> np.ndarray:
         """n root gaps (all zero)."""

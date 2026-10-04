@@ -30,10 +30,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from agents.ppo_curriculum import BetaActor, CurriculumPPO
+from utils.beta_tail import row_log_prob
 
 
 def masked_actor_loss(actor: BetaActor, st: torch.Tensor, ac: torch.Tensor, olp: torch.Tensor,
-                      adv: torch.Tensor, rows: torch.Tensor, clip_eps: float):
+                      adv: torch.Tensor, rows: torch.Tensor, clip_eps: float,
+                      side: Optional[torch.Tensor] = None, clamp_c: float = 0.0):
     """Clipped-surrogate actor loss over ``rows`` only.
 
     Args:
@@ -41,13 +43,16 @@ def masked_actor_loss(actor: BetaActor, st: torch.Tensor, ac: torch.Tensor, olp:
         st, ac, olp, adv: Full-buffer tensors (states, actions, old log-probs, normalized adv).
         rows: Long tensor of row indices that enter the loss.
         clip_eps: PPO clip.
+        side: R2b censored likelihood: full-buffer int tensor in {-1, 0, +1} (clamped raw draws);
+            ``None`` (default) = the plain Beta density for every row.
+        clamp_c: ``action_clamp`` (used with ``side``).
 
     Returns:
         ``(loss, ratio, entropy_mean)``.
     """
     alpha, beta = actor(st[rows])
     dist = torch.distributions.Beta(alpha, beta)
-    logp = dist.log_prob(ac[rows])
+    logp = dist.log_prob(ac[rows]) if side is None else row_log_prob(alpha, beta, ac[rows], side[rows], clamp_c)
     ratio = torch.exp(logp - olp[rows])
     a_mb = adv[rows]
     surr1 = ratio * a_mb
@@ -75,9 +80,20 @@ class CurriculumPPOv2(CurriculumPPO):
     def update(self, states: np.ndarray, actions: np.ndarray, old_logp: np.ndarray,
                returns: np.ndarray, advantages_raw: np.ndarray,
                policy_mask: Optional[np.ndarray] = None,
-               norm_mask: Optional[np.ndarray] = None) -> Dict[str, object]:
-        """PPO update; the original update when both masks are None (see module docstring)."""
-        if policy_mask is None and norm_mask is None:
+               norm_mask: Optional[np.ndarray] = None,
+               clamp_side: Optional[np.ndarray] = None) -> Dict[str, object]:
+        """PPO update; the original update when both masks are None (see module docstring).
+
+        ``clamp_side`` (R2b, ``clamp_likelihood="censored"``): int array in {-1, 0, +1} per row, the
+        side on which the raw Beta draw was clamped. Rows flagged -1 / +1 use the censored log-mass
+        (``utils.beta_tail``) in every log-prob of the update (the ratio, the KL diagnostics); the
+        ``old_logp`` of the buffer must have been computed the same way. With ``None`` or an all-zero
+        array nothing changes: the call is dispatched exactly as without the argument (bit-identical).
+        """
+        side_np = None
+        if clamp_side is not None and np.any(np.asarray(clamp_side) != 0):
+            side_np = np.asarray(clamp_side, dtype=np.int8)
+        if policy_mask is None and norm_mask is None and side_np is None:
             return super().update(states, actions, old_logp, returns, advantages_raw)
         cfg = self.cfg
         dev = self.device
@@ -86,6 +102,7 @@ class CurriculumPPOv2(CurriculumPPO):
         olp = torch.as_tensor(np.asarray(old_logp, dtype=np.float32), device=dev)
         ret = torch.as_tensor(np.asarray(returns, dtype=np.float32), device=dev)
         adv_raw = torch.as_tensor(np.asarray(advantages_raw, dtype=np.float32), device=dev)
+        side = None if side_np is None else torch.as_tensor(side_np, device=dev)
         n = st.shape[0]
         pm = torch.ones(n, dtype=torch.bool) if policy_mask is None else torch.as_tensor(np.asarray(policy_mask, bool))
         nm = torch.ones(n, dtype=torch.bool) if norm_mask is None else torch.as_tensor(np.asarray(norm_mask, bool))
@@ -118,7 +135,7 @@ class CurriculumPPOv2(CurriculumPPO):
                 rows = idx[pm[idx]]
                 if rows.numel() > 0:
                     actor_loss, ratio, entropy = masked_actor_loss(self.actor, st, ac, olp, adv, rows,
-                                                                   cfg.clip_eps)
+                                                                   cfg.clip_eps, side, cfg.action_clamp)
                     loss_a = actor_loss - cfg.entropy_coef * entropy
                     self.opt_actor.zero_grad(set_to_none=True)
                     loss_a.backward()
@@ -143,7 +160,8 @@ class CurriculumPPOv2(CurriculumPPO):
                 steps += 1
             with torch.no_grad():
                 alpha, beta = self.actor(st[prow])
-                logp = torch.distributions.Beta(alpha, beta).log_prob(ac[prow])
+                logp = (torch.distributions.Beta(alpha, beta).log_prob(ac[prow]) if side is None
+                        else row_log_prob(alpha, beta, ac[prow], side[prow], cfg.action_clamp))
                 log_r = logp - olp[prow]
                 r = torch.exp(log_r)
                 kl_epochs.append(float(((r - 1.0) - log_r).mean().item()))
@@ -183,6 +201,8 @@ class CurriculumPPOv2(CurriculumPPO):
         }
         if self.target_kl is not None:
             out["n_epochs_run"] = len(kl_epochs)
+        if side is not None:
+            out["n_censored_rows"] = int((side != 0).sum().item())
         return out
 
     # ------------------------------------------------------------------ full state

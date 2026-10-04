@@ -34,6 +34,20 @@ C7). New behaviour, all behind flags recorded in ``manifest.json``:
                       concentration factor on the live actor AND the lagged opponent (phase_A_continue)
     continuation_value_mode  "sampled" (default) | "expected" (stage-1 rows use the shock-integrated
                       table value of the frozen stage-2 policy; frozen + mean only)
+  R2b optional keys (all absent == the locked behaviour, bit-identical):
+    start_weights     {"scheme": "bin_balanced"} (default) | {"scheme": "peak_focused",
+                      "peak_half_width": h, "peak_share": s}: a share s of the exploring starts of the
+                      final stage in the bins that intersect (-h, h) (modes phase_A, phase_A_continue,
+                      phase_P); one rng.random(n) mapped through the bin CDF, then the usual within-bin
+                      draw, so the ``start`` stream desynchronises from bin_balanced by construction
+    clamp_likelihood  "density" (default) | "censored": the log-prob of a learner row whose raw Beta draw
+                      was clamped is the censored log-mass of the clamped event, in the rollout and in
+                      every log-prob of the update (utils/beta_tail.py; modes phase_A, phase_A_continue,
+                      phase_B)
+    pathwise_epochs, pathwise_minibatch   mode phase_P: E passes over the rows, minibatches of M rows,
+                      one exact-gradient step per minibatch (defaults 1 and null = the R1 single
+                      full-batch step; with E = 10, M = 256 and 512 rows: 20 steps, the minibatch
+                      stream drawn as the PPO update draws it)
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -80,7 +94,7 @@ from run.run_final_dp_br import PROTOCOL, Costs, dense_grid, final_evaluation, m
 from run.run_final_dp_br_round3_dense import (  # noqa: E402
     LR_SCHEDULE_REQUIRED_KEYS, PROTOCOL_REQUIRED_KEYS, ConfigError, lr_at, read_lr, set_lr,
     strict_dataclass, strict_keys)
-from run.v2_rollout import CONT_MODES, REWARD_MODES, collect_batch_v2  # noqa: E402
+from run.v2_rollout import CLAMP_LIKELIHOODS, CONT_MODES, REWARD_MODES, collect_batch_v2  # noqa: E402
 from utils.dp_br_verifier import (  # noqa: E402
     DEV_CONFIG, FINAL_CONFIG, DomainError, VerifierConfig, VerifierResult, beta_std_norm,
     concentration_stats, effort_grid, stage_grid, stage_result_arrays)
@@ -109,6 +123,11 @@ CONT_VALUE_MODES = ("sampled", "expected")
 CONT_TABLE_STEP = 0.05
 RNG_NAMES = ("env", "learn", "opp", "start")   # + the minibatch stream held by the agent
 LR_DECAY_KEYS = ("phase", "start_lr", "end_lr", "local_first", "local_last")
+# R2b optional keys (absent == the locked behaviour, bit-identical)
+START_SCHEMES = ("bin_balanced", "peak_focused")
+PEAK_START_KEYS = ("scheme", "peak_half_width", "peak_share")
+START_MODES = ("phase_A", "phase_A_continue", "phase_P")        # modes whose phases draw exploring starts
+CLAMP_MODES = ("phase_A", "phase_A_continue", "phase_B")        # modes whose phases sample learner actions
 
 
 def sha256_file(path: str) -> str:
@@ -243,6 +262,36 @@ def validate_config(cfg: Dict) -> None:
                               "and continuation_action_mode=mean")
         if float(cfg["record"]["ppo"]["gamma"]) != 1.0 or float(cfg["record"]["ppo"]["gae_lambda"]) != 1.0:
             raise ConfigError("continuation_value_mode=expected requires gamma = lambda = 1")
+    # ---- R2b optional keys (absent == the locked behaviour)
+    sw = cfg.get("start_weights")
+    if sw is not None:
+        if not isinstance(sw, dict) or sw.get("scheme") not in START_SCHEMES:
+            raise ConfigError(f"start_weights.scheme must be one of {START_SCHEMES}")
+        if mode not in START_MODES:
+            raise ConfigError(f"start_weights is defined for modes {START_MODES} only (not {mode})")
+        if sw["scheme"] == "bin_balanced":
+            if set(sw) != {"scheme"}:
+                raise ConfigError("start_weights scheme bin_balanced takes no other key")
+        else:
+            if set(sw) != set(PEAK_START_KEYS):
+                raise ConfigError(f"start_weights peak_focused must have exactly {PEAK_START_KEYS}")
+            hw, sh = sw["peak_half_width"], sw["peak_share"]
+            if isinstance(hw, bool) or not isinstance(hw, (int, float)) or not hw > 0:
+                raise ConfigError("start_weights.peak_half_width must be a positive number")
+            if isinstance(sh, bool) or not isinstance(sh, (int, float)) or not 0.0 < sh < 1.0:
+                raise ConfigError("start_weights.peak_share must lie in (0, 1)")
+    cl = cfg.get("clamp_likelihood", "density")
+    if cl not in CLAMP_LIKELIHOODS:
+        raise ConfigError(f"clamp_likelihood {cl!r} not in {CLAMP_LIKELIHOODS}")
+    if cl != "density" and mode not in CLAMP_MODES:
+        raise ConfigError(f"clamp_likelihood={cl} is defined for modes {CLAMP_MODES} only (not {mode})")
+    pe, pm = cfg.get("pathwise_epochs", 1), cfg.get("pathwise_minibatch")
+    if isinstance(pe, bool) or not isinstance(pe, int) or pe < 1:
+        raise ConfigError("pathwise_epochs must be a positive int")
+    if pm is not None and (isinstance(pm, bool) or not isinstance(pm, int) or pm < 1):
+        raise ConfigError("pathwise_minibatch must be null or a positive int")
+    if (pe != 1 or pm is not None) and mode != "phase_P":
+        raise ConfigError("pathwise_epochs / pathwise_minibatch are defined for mode phase_P only")
     bad = set(cfg["budget_overrides"]) - set(OVERRIDE_KEYS)
     if bad:
         raise ConfigError(f"unknown budget_overrides {sorted(bad)}")
@@ -286,6 +335,11 @@ class Run:
         self.conc_anneal = copy.deepcopy(cfg.get("conc_anneal"))
         self.cont_mode = cfg.get("continuation_value_mode", "sampled")
         self.cont_table = None
+        # R2b: peak-focused starts, censored likelihood of clamped draws, phase-P optimiser budget
+        self.start_weights = copy.deepcopy(cfg.get("start_weights"))
+        self.clamp_likelihood = cfg.get("clamp_likelihood", "density")
+        self.pathwise_epochs = int(cfg.get("pathwise_epochs", 1))
+        self.pathwise_minibatch = cfg.get("pathwise_minibatch")
         self.dev_cfg = strict_dataclass(VerifierConfig, rec["verifier"]["development"], "verifier.development")
         self.fin_cfg = strict_dataclass(VerifierConfig, rec["verifier"]["final"], "verifier.final")
         if self.dev_cfg != DEV_CONFIG or self.fin_cfg != FINAL_CONFIG:
@@ -342,6 +396,12 @@ class Run:
         self.sampler = StartSampler(spec, P["es_bin_width"])
         if self.sampler.n_bins(2) != int(rec["es_bins_stage2"]):
             raise ConfigError("es bins differ from record")
+        if self.start_weights is not None and self.start_weights["scheme"] == "peak_focused":
+            try:   # the peak set must be a non-empty proper subset of the bins of the final stage
+                self.sampler.peak_bin_probs(spec.T, float(self.start_weights["peak_half_width"]),
+                                            float(self.start_weights["peak_share"]))
+            except ValueError as exc:
+                raise ConfigError(f"start_weights: {exc}") from exc
         # ---- run state
         self.costs = Costs()
         self.costs_v2 = Costs()   # v2-only bookkeeping, kept out of final_eval.json
@@ -407,6 +467,15 @@ class Run:
                    c_end_lr=float(dec["end_lr"]), c_local_first=int(dec["local_first"]),
                    linear_denominator=int(dec["local_last"]) - int(dec["local_first"]))
         return lr_at(lin, "C", local)
+
+    # ------------------------------------------------------------------ R2b helpers
+    def draw_starts(self, stage: int, n: int) -> np.ndarray:
+        """Exploring starts on D_stage from the ``start`` stream: bin-balanced (the locked scheme, the
+        default) or, with ``start_weights = {scheme: peak_focused, ...}``, peak-focused."""
+        sw, rng = self.start_weights, self.rngs["start"]
+        if sw is None or sw["scheme"] == "bin_balanced":
+            return self.sampler.balanced(stage, n, rng)
+        return self.sampler.peak_focused(stage, n, rng, float(sw["peak_half_width"]), float(sw["peak_share"]))
 
     # ------------------------------------------------------------------ R1 helpers
     def conc_scale_for(self, local: int) -> float:
@@ -598,14 +667,14 @@ class Run:
             rng_start = self.rngs["start"]
             if phase == "A":
                 t0 = np.full(n_ep, spec.T)
-                d0 = self.sampler.balanced(spec.T, n_ep, rng_start)
+                d0 = self.draw_starts(spec.T, n_ep)
             elif phase == "B":
                 t0 = np.ones(n_ep, dtype=int)
                 d0 = np.zeros(n_ep)
             else:
                 nr, ne = int(P["phase_c_root"]), int(P["phase_c_es"])
                 t0 = np.concatenate([np.ones(nr, dtype=int), np.full(ne, spec.T)])
-                d0 = np.concatenate([np.zeros(nr), self.sampler.balanced(spec.T, ne, rng_start)])
+                d0 = np.concatenate([np.zeros(nr), self.draw_starts(spec.T, ne)])
                 perm = rng_start.permutation(n_ep)
                 t0, d0 = t0[perm], d0[perm]
             roles = rng_start.integers(0, 2, size=n_ep)
@@ -618,7 +687,7 @@ class Run:
                                      # which is what every other mode already validates to
                                      continuation_action_mode=(self.flags["continuation_action_mode"]
                                                                if frozen is not None else "stochastic"),
-                                     cont_table=cont_table)
+                                     cont_table=cont_table, clamp_likelihood=self.clamp_likelihood)
             self.costs.add("train_rollout", time.perf_counter() - t_r)
             s1 = batch["stage"] == 1
             pol_rows = s1 if masked else np.ones(s1.size, dtype=bool)
@@ -631,13 +700,17 @@ class Run:
                          if local in save_locals else None)   # the policy that generated this buffer (D1)
             pre_scale = float(agent.actor.conc_scale)
             t_u = time.perf_counter()
+            side = batch["clamp_side"] if self.clamp_likelihood == "censored" else None
             if masked:
                 norm_mask = s1 if self.flags["adv_norm_scope"] == "stage1_rows" else None
                 diag = agent.update(batch["states"], batch["actions"], batch["logp"], batch["returns"],
-                                    batch["advantages"], policy_mask=s1, norm_mask=norm_mask)
-            else:
+                                    batch["advantages"], policy_mask=s1, norm_mask=norm_mask, clamp_side=side)
+            elif side is None:
                 diag = agent.update(batch["states"], batch["actions"], batch["logp"], batch["returns"],
                                     batch["advantages"])
+            else:   # R2b: censored likelihood (same update; the flagged rows use the censored log-mass)
+                diag = agent.update(batch["states"], batch["actions"], batch["logp"], batch["returns"],
+                                    batch["advantages"], clamp_side=side)
             self.costs.add("train_update", time.perf_counter() - t_u)
             if local in save_locals:   # D1 buffer of THIS update (collected before it); bookkeeping only
                 os.makedirs(os.path.join(self.out_dir, "d1_buffers"), exist_ok=True)
@@ -725,6 +798,9 @@ class Run:
                      # ---- R1 columns (new; excluded from bit-identity comparisons)
                      "n_epochs_run": len(diag["kl_epochs"]), "conc_scale": float(agent.actor.conc_scale),
                      **batch["d1"], **self.d1_policy_row_stats(batch, pol_rows)}
+            if self.clamp_likelihood == "censored":   # R2b columns (absent in every other run)
+                v2row["n_censored_rows"] = int(diag.get("n_censored_rows", 0))
+                v2row["n_clamped_rows_learner"] = int((batch["clamp_side"] != 0).sum())
             self.v2_history.append(v2row)
             if reason is not None:
                 t_v = time.perf_counter()
@@ -859,14 +935,18 @@ class Run:
         """Phase P: exact-gradient ascent on the conditional expected terminal payoff.
 
         Both players execute the Beta mean (no action draw, no shock draw); the learner's gradient
-        flows through its mean into the actor (``agents/ppo_pathwise.py``). Only the ``start``
-        stream is consumed, with the same calls as phase A (bin-balanced exploring starts on D_T and
-        random roles). The lagged opponent is refreshed at the phase entry and every
+        flows through its mean into the actor (``agents/ppo_pathwise.py``). The ``start`` stream is
+        consumed with the same calls as phase A (exploring starts on D_T through :meth:`draw_starts`,
+        bin-balanced unless ``start_weights`` says otherwise, and random roles). The minibatch stream
+        is untouched in the R1 form (``pathwise_epochs == 1``, no ``pathwise_minibatch``); with
+        epochs x minibatches it advances by one permutation per epoch, as the PPO update does, and
+        ``n_minibatch_steps`` of a history row is the number of exact-gradient steps of that update.
+        The lagged opponent is refreshed at the phase entry and every
         ``snapshot_every`` global updates. The concentration head and the critic must be
         bit-identical to the parent's at the end of the phase (checked, recorded in
         ``phaseP_checks.json``; a violation raises).
         """
-        from agents.ppo_pathwise import pathwise_step   # lazy: the default path never imports it
+        from agents.ppo_pathwise import pathwise_step, pathwise_update   # lazy: the default path never imports it
         spec, P, agent, ppo_cfg = self.spec, self.P, self.agent, self.ppo_cfg
         stage = spec.T
         cap = int(P["phase_caps"][phase])
@@ -898,11 +978,16 @@ class Run:
             actor_lr, critic_lr = read_lr(agent)
             n_ep = int(P["episodes_per_update"])
             rng_start = self.rngs["start"]
-            d0 = self.sampler.balanced(stage, n_ep, rng_start)
+            d0 = self.draw_starts(stage, n_ep)
             roles = rng_start.integers(0, 2, size=n_ep)
             d_learner = np.where(roles == 0, d0, -d0).astype(float)
             t_u = time.perf_counter()
-            diag = pathwise_step(agent, spec, d_learner, stage, max_grad_norm=ppo_cfg.max_grad_norm)
+            if self.pathwise_epochs == 1 and self.pathwise_minibatch is None:
+                diag = pathwise_step(agent, spec, d_learner, stage, max_grad_norm=ppo_cfg.max_grad_norm)   # R1
+            else:   # R2b: matched optimiser budget (epochs x minibatches of exact-gradient steps)
+                n_steps_batch = n_ep if self.pathwise_minibatch is None else int(self.pathwise_minibatch)
+                diag = pathwise_update(agent, spec, d_learner, stage, self.pathwise_epochs, n_steps_batch,
+                                       max_grad_norm=ppo_cfg.max_grad_norm)
             self.costs.add("train_update", time.perf_counter() - t_u)
             self.total_episodes += n_ep
             self.total_transitions += n_ep
@@ -921,7 +1006,8 @@ class Run:
                                          "file": os.path.relpath(w_path, self.out_dir)})
             self.history.append({"update": self.global_u, "phase": phase, "local": local, "actor_lr": actor_lr,
                                  "critic_lr": critic_lr, "n_episodes": n_ep, "n_transitions": n_ep,
-                                 "n_minibatch_steps": 1, "snapshot_refreshed": snap, **diag})
+                                 "n_minibatch_steps": int(diag.get("n_steps", 1)), "snapshot_refreshed": snap,
+                                 **diag})
             self.v2_history.append({"update": self.global_u, "phase": phase, "local": local, "actor_lr": actor_lr,
                                     **diag, "update_wall_sec": time.perf_counter() - t_upd,
                                     **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
@@ -975,7 +1061,9 @@ class Run:
                                     "local_updates": local, "cap": cap, "exit_reason": "budget_exhausted",
                                     "active_stages": [stage], "lr_first": self.lr_for(phase, 1),
                                     "lr_last": self.lr_for(phase, local), "episodes": local * int(P["episodes_per_update"]),
-                                    "transitions": local * int(P["episodes_per_update"]), "minibatch_steps": local,
+                                    "transitions": local * int(P["episodes_per_update"]),
+                                    "minibatch_steps": sum(int(h["n_minibatch_steps"]) for h in self.history
+                                                           if h["phase"] == phase),
                                     "n_verifier_calls": sum(1 for v in self.verifier_log if v["phase"] == phase)})
         print(f"[phase {phase}] exit at global update {self.global_u} after {local} local updates "
               f"(head bit-identical={head_ok}, critic bit-identical={critic_ok})", flush=True)
@@ -1017,6 +1105,8 @@ def write_manifest(run: Run, cfg: Dict, out_dir: str, cmd: str) -> Dict:
         "continuation_action_mode": run.flags["continuation_action_mode"],
         "continuation_value_mode": run.cont_mode, "ppo_overrides": run.ppo_overrides,
         "target_kl": run.target_kl, "conc_anneal": run.conc_anneal,
+        "start_weights": run.start_weights, "clamp_likelihood": run.clamp_likelihood,
+        "pathwise_epochs": run.pathwise_epochs, "pathwise_minibatch": run.pathwise_minibatch,
         "conc_scale_initial": {"actor": float(run.agent.actor.conc_scale), "opponent": float(run.agent.opponent.conc_scale)},
         "parent_checkpoint": cfg["parent_checkpoint"], "parent_sha256": cfg["parent_sha256"],
         "budget_overrides": run.overrides, "resolved_protocol": P,

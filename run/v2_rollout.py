@@ -27,6 +27,14 @@ locked pipeline unchanged):
   - ``batch["d1"]``: clamp-hit counts of the raw ``rng.beta`` draws (before the clip), per stage and
     per player, and for the learner at the final stage split by |d| < 2q; ``batch["d1_buf"]``: the
     raw draws and the (alpha, beta) of the learner rows, aligned with ``states``. Bookkeeping only.
+
+R2b additions (defaults leave every draw, stored value and return unchanged):
+  - ``batch["clamp_side"]``: per learner row, -1 / +1 when the raw draw fell below ``c`` / above
+    ``1 - c`` (the stored action is then the clipped value), else 0; rows whose action is the frozen
+    Beta mean are never flagged. No random number is drawn for it.
+  - ``clamp_likelihood="censored"``: the stored log-prob of a flagged row is the censored log-mass
+    of the clamped event (``utils.beta_tail``) instead of the Beta density at the clipped value;
+    ``"density"`` (default) is the original ``agent.log_prob`` call.
 """
 
 from __future__ import annotations
@@ -41,6 +49,7 @@ from utils.theory_multistage import F_xi
 
 REWARD_MODES = ("sampled", "expected")
 CONT_MODES = ("stochastic", "mean")
+CLAMP_LIKELIHOODS = ("density", "censored")
 
 
 def _draw(agent: CurriculumPPO, alpha: np.ndarray, beta: np.ndarray, rng: np.random.Generator):
@@ -63,10 +72,12 @@ def collect_batch_v2(spec: GameSpec, agent: CurriculumPPO, t0: np.ndarray, d0: n
                      gamma: float, lam: float, bin_width: float,
                      reward_mode: str = "sampled", frozen: Optional[BetaActor] = None,
                      continuation_action_mode: str = "stochastic",
-                     cont_table=None) -> Dict[str, object]:
+                     cont_table=None, clamp_likelihood: str = "density") -> Dict[str, object]:
     """Roll complete learner episodes (see module docstring for the flags)."""
     if reward_mode not in REWARD_MODES or continuation_action_mode not in CONT_MODES:
         raise ValueError(f"bad flags {reward_mode!r} {continuation_action_mode!r}")
+    if clamp_likelihood not in CLAMP_LIKELIHOODS:
+        raise ValueError(f"clamp_likelihood {clamp_likelihood!r} not in {CLAMP_LIKELIHOODS}")
     if continuation_action_mode == "mean" and frozen is None:
         raise ValueError("continuation_action_mode='mean' requires a frozen stage-T actor")
     if cont_table is not None and (frozen is None or continuation_action_mode != "mean"
@@ -133,12 +144,21 @@ def collect_batch_v2(spec: GameSpec, agent: CurriculumPPO, t0: np.ndarray, d0: n
             rew = expected_terminal_reward(spec, dL, e_L, e_O)
         else:
             rew = stage_reward(spec, t, e_L, d_next)
-        logp = agent.log_prob(a_L, b_L, act_L)
+        # side of the clamp of every stored learner action (-1 raw draw below c, +1 above 1 - c); a row
+        # whose stored action is the frozen Beta mean (the draw was discarded) is never flagged
+        side_L = np.zeros(idx.size, dtype=np.int8)
+        if not (use_frozen and continuation_action_mode == "mean"):
+            side_L[lo_L] = -1
+            side_L[hi_L] = 1
+        if clamp_likelihood == "censored":
+            logp = agent.log_prob(a_L, b_L, act_L, clamp_side=side_L)
+        else:
+            logp = agent.log_prob(a_L, b_L, act_L)
         val = agent.value(obs_L)
         rewards[idx, t] = rew
         values[idx, t] = val
         per_stage[t] = {"idx": idx, "obs": obs_L, "act": act_L, "logp": logp, "val": val,
-                        "raw": raw_L, "alpha": a_L, "beta": b_L, "y": e_L - e_O}
+                        "raw": raw_L, "alpha": a_L, "beta": b_L, "y": e_L - e_O, "side": side_L}
         effort_by_stage[t] = float(e_L.mean())
         if t >= 2:
             for src_name, src_mask in (("root_path", t0[idx] == 1), ("direct_es", t0[idx] == t)):
@@ -177,6 +197,7 @@ def collect_batch_v2(spec: GameSpec, agent: CurriculumPPO, t0: np.ndarray, d0: n
         "mean_effort_by_stage": effort_by_stage,
         "visitation": visitation,
         "d1": d1,
+        "clamp_side": np.concatenate([per_stage[t]["side"] for t in sorted(per_stage)]),
         "d1_buf": {"raw": np.concatenate([per_stage[t]["raw"] for t in sorted(per_stage)]),
                    "alpha": np.concatenate([per_stage[t]["alpha"] for t in sorted(per_stage)]),
                    "beta": np.concatenate([per_stage[t]["beta"] for t in sorted(per_stage)])},

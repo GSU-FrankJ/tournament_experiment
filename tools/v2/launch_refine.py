@@ -11,6 +11,9 @@ Waves (``--wave``):
   stage2     Phase-A continuation arms (``phase_A_continue`` from
              ``parents_A/.../state_u01200.pt``) plus the method-5 pair (parent = rehearsal_v1_1
              ``state_end_A.pt``) into ``<root>/stage2/q{q}/seed{s}/<arm>``.
+  r2b_v20_repro  C-R2 (round R2b): the UNCHANGED v2.0 ``run/run_v2_T2_locked.py --q Q --seed S`` into
+             ``<root>/v20_reproduction/q{Q}/seed{S}`` (root defaults to ``results/v2_refine_r2b``);
+             ``r2b_waveA`` / ``r2b_waveP`` are the R2b pilot waves (see ``R2B_*`` below).
 
 Every config carries the record of the locked protocol (``protocols/v2_T2_locked_v1_1.json``)
 and every new key explicitly (defaults written out). The arm tables below are module constants
@@ -55,7 +58,8 @@ DEFAULT_SEEDS = tuple(range(10501, 10511))
 MAX_WORKERS = 40
 WAVES = ("v11_repro", "parents_A", "stage1", "stage2")
 WAVE_DIR = {"v11_repro": "v11_reproduction", "parents_A": "parents_A", "stage1": "stage1",
-            "stage2": "stage2"}
+            "stage2": "stage2", "r2b_waveA": "waveA", "r2b_waveP": "waveP",
+            "r2b_v20_repro": "v20_reproduction"}
 PLACEHOLDER_SHA = "<sha256 computed at launch>"
 
 LOCKED_FLAGS = {"reward_mode": "expected", "stage2_update_mode": "frozen",
@@ -125,6 +129,42 @@ STAGE2_ARMS: Dict[str, Dict[str, Any]] = {
 }
 ARMS: Dict[str, Dict[str, Dict[str, Any]]] = {
     "parents_A": PARENTS_A_ARMS, "stage1": STAGE1_ARMS, "stage2": STAGE2_ARMS}
+
+# ---- round R2b (PROMPT.md D2, D3 and section 4): three one-change mechanisms on the development seeds.
+# Wave A = full Phase A from scratch (the baseline is R1's parents_A); wave P = 200 updates from the
+# rehearsal_v1_1 end-of-A state (comparators: R1's A_ctrl200 and A_detmean, plus the new control
+# A_ctrl200_lr3e-4). Every R2b config writes the four new keys explicitly (defaults written out).
+R2B_WAVES = ("r2b_waveA", "r2b_waveP")
+R2B_REPRO = "r2b_v20_repro"      # C-R2: the UNCHANGED run/run_v2_T2_locked.py (v2.0) into <root>/v20_reproduction
+R2B_ROOT = ROOT / "results" / "v2_refine_r2b"
+R2B_DEFAULTS: Dict[str, Any] = {"start_weights": None, "clamp_likelihood": "density",
+                                "pathwise_epochs": 1, "pathwise_minibatch": None}
+PEAK_HALF_WIDTH = 20
+PATHWISE_EPOCHS, PATHWISE_MINIBATCH = 10, 256      # 20 steps per update at 512 rows (= PPO's 20 actor steps)
+R2B_WAVEA_ARMS: Dict[str, Dict[str, Any]] = {
+    "A_peak25": {"r2b": {"start_weights": {"scheme": "peak_focused", "peak_half_width": PEAK_HALF_WIDTH,
+                                           "peak_share": 0.25}},
+                 "definition": "mechanism 1: peak-focused exploring starts, peak set = bins intersecting "
+                               "(-20, 20), share 0.25 of the episodes (bin-balanced: 0.10 / 0.091)"},
+    "A_peak50": {"r2b": {"start_weights": {"scheme": "peak_focused", "peak_half_width": PEAK_HALF_WIDTH,
+                                           "peak_share": 0.50}},
+                 "definition": "mechanism 1: peak-focused exploring starts, share 0.50"},
+    "A_censored": {"r2b": {"clamp_likelihood": "censored"},
+                   "definition": "mechanism 2: censored log-mass for clamped Beta draws (rollout and update)"},
+}
+R2B_WAVEP_ARMS: Dict[str, Dict[str, Any]] = {
+    "P20_lr3e-5": {"kind": "pathwise", "lr": [(LR1, LR1, 1, 200)],
+                   "r2b": {"pathwise_epochs": PATHWISE_EPOCHS, "pathwise_minibatch": PATHWISE_MINIBATCH},
+                   "definition": "mechanism 3: phase P, 200 updates, E=10 x minibatch 256 (20 exact-gradient "
+                                 "steps per update), LR constant 3e-5"},
+    "P20_lr3e-4": {"kind": "pathwise", "lr": [(LR0, LR0, 1, 200)],
+                   "r2b": {"pathwise_epochs": PATHWISE_EPOCHS, "pathwise_minibatch": PATHWISE_MINIBATCH},
+                   "definition": "mechanism 3: as P20_lr3e-5 with LR constant 3e-4"},
+    "A_ctrl200_lr3e-4": {"kind": "ctrl200", "lr": [(LR0, LR0, 1, 200)], "r2b": {},
+                         "definition": "new control: 200 PPO updates at constant LR 3e-4 from the baseline "
+                                       "u1600 state (locked Phase-A flags)"},
+}
+R2B_ARMS: Dict[str, Dict[str, Dict[str, Any]]] = {"r2b_waveA": R2B_WAVEA_ARMS, "r2b_waveP": R2B_WAVEP_ARMS}
 V11_ARMS: Tuple[str, ...] = ("locked",)
 METHOD_ARMS: Dict[str, Dict[str, Tuple[str, ...]]] = {
     "1 polish": {"stage1": ("B_polish1", "B_polish2"), "stage2": ("A_polish1", "A_polish2")},
@@ -165,6 +205,24 @@ EXPECTED_DIFFS: Dict[str, Dict[str, Tuple[str, FrozenSet[str]]]] = {
         "A_detmean": ("A_ctrl200", frozenset({"mode", "lr_decay", "budget_overrides.phase_caps.A",
                                               "budget_overrides.phase_caps.P",
                                               "budget_overrides.verifier_timeout"})),
+    },
+}
+
+
+# ---- R2b: pre-registered differences between an arm and its comparator config. The comparator is the
+# R1 builder's own config for the same (q, seed) (parents_A's A_parent, stage2's A_detmean / A_ctrl200)
+# with the four R2b keys written at their defaults; ``pilot`` differs by wave and is an identity key here.
+IDENTITY_KEYS_R2B = IDENTITY_KEYS | {"pilot"}
+R2B_EXPECTED_DIFFS: Dict[str, Dict[str, Tuple[str, FrozenSet[str]]]] = {
+    "r2b_waveA": {
+        "A_peak25": ("A_parent", frozenset({"start_weights"})),
+        "A_peak50": ("A_parent", frozenset({"start_weights"})),
+        "A_censored": ("A_parent", frozenset({"clamp_likelihood"})),
+    },
+    "r2b_waveP": {
+        "P20_lr3e-5": ("A_detmean", frozenset({"pathwise_epochs", "pathwise_minibatch"})),
+        "P20_lr3e-4": ("A_detmean", frozenset({"pathwise_epochs", "pathwise_minibatch", "lr_decay"})),
+        "A_ctrl200_lr3e-4": ("A_ctrl200", frozenset({"lr_decay"})),
     },
 }
 
@@ -237,6 +295,24 @@ def arm_diff(cfg_a: Dict[str, Any], cfg_b: Dict[str, Any]) -> FrozenSet[str]:
     return frozenset(flatten_diff(cfg_a, cfg_b)) - IDENTITY_KEYS
 
 
+def r2b_comparator_config(wave: str, q: int, seed: int, root: Path, require_parents: bool = False) -> Dict[str, Any]:
+    """Comparator config of an R2b wave (see ``R2B_EXPECTED_DIFFS``): the R1 builder's own output with
+    the R2b defaults written out. All arms of a wave share one comparator arm per table row."""
+    root = Path(root).resolve()
+    out: Dict[str, Dict[str, Any]] = {}
+    for arm, (ref, _) in R2B_EXPECTED_DIFFS[wave].items():
+        if ref not in out:
+            job = (build_parents_a(ref, q, seed, root) if wave == "r2b_waveA"
+                   else build_stage2(ref, q, seed, root, require_parents))
+            out[ref] = _with_r2b_keys(job.cfg, {})
+    return out
+
+
+def r2b_arm_diff(cfg: Dict[str, Any], ref_cfg: Dict[str, Any]) -> FrozenSet[str]:
+    """Differing config keys of an R2b arm and its comparator, identity keys (incl. ``pilot``) removed."""
+    return frozenset(flatten_diff(cfg, ref_cfg)) - IDENTITY_KEYS_R2B
+
+
 def lr_window_problems(cfg: Dict[str, Any]) -> List[str]:
     """Consistency of the lr_decay windows with the phase caps (the DESIGN.md rules)."""
     probs: List[str] = []
@@ -289,14 +365,30 @@ def _lr_windows(settings: Dict[str, Any], phase: str,
     return [_window(w, phase) for w in settings["lr"]]
 
 
-def build_parents_a(arm: str, q: int, seed: int, root: Path) -> Job:
-    """Phase-A parent run (mode phase_A, locked window 1201-1600, full state at update 1200)."""
-    st = {**DEFAULT_SETTINGS, **PARENTS_A_ARMS[arm]}
-    out = str(root / "parents_A" / f"q{q}" / f"seed{seed}")
-    cfg = _base_config("parents_A", arm, q, seed, out, "phase_A", PHASE_A_FLAGS, st)
+def _with_r2b_keys(cfg: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:
+    """Write the four R2b keys explicitly (defaults, then the arm's own values)."""
+    cfg.update(copy.deepcopy(R2B_DEFAULTS))
+    cfg.update(copy.deepcopy(overrides))
+    return cfg
+
+
+def build_parents_a(arm: str, q: int, seed: int, root: Path,
+                    table: Optional[Dict[str, Dict[str, Any]]] = None, wave: str = "parents_A") -> Job:
+    """Phase-A parent run (mode phase_A, locked window 1201-1600, full state at update 1200).
+
+    The R2b wave-A arms are built by this function too (``table=R2B_WAVEA_ARMS``,
+    ``wave="r2b_waveA"``): the same config plus the four R2b keys, the arm's own value set.
+    """
+    arms = PARENTS_A_ARMS if table is None else table
+    st = {**DEFAULT_SETTINGS, **arms[arm]}
+    out = str(root / WAVE_DIR[wave] / f"q{q}" / f"seed{seed}" / ("" if wave == "parents_A" else arm))
+    out = out.rstrip("/")
+    cfg = _base_config(wave, arm, q, seed, out, "phase_A", PHASE_A_FLAGS, st)
     cfg["budget_overrides"] = {"episodes_per_update": int(st["episodes_per_update"])}
     cfg["lr_decay"] = _lr_windows(st, "A", _locked_window("A"))
     cfg["full_state_at"] = [1200]
+    if wave in R2B_WAVES:
+        _with_r2b_keys(cfg, st.get("r2b", {}))
     return Job(cfg, out)
 
 
@@ -313,19 +405,26 @@ def build_stage1(arm: str, q: int, seed: int, root: Path, require_parents: bool)
     return Job(cfg, out)
 
 
-def build_stage2(arm: str, q: int, seed: int, root: Path, require_parents: bool) -> Job:
+def build_stage2(arm: str, q: int, seed: int, root: Path, require_parents: bool,
+                 table: Optional[Dict[str, Dict[str, Any]]] = None, wave: str = "stage2") -> Job:
     """Phase-A continuation arm (or a method-5 arm) with the Phase-A flags.
 
     The ``continue`` arms start from ``parents_A/.../state_u01200.pt``, a state taken inside a
     phase_A run: ``phase_done == 'A'`` but ``phases_done == []`` (it is appended when the phase
     ends), on a snapshot refresh (1200 % 20 == 0). The runner has to accept such a parent in mode
     phase_A_continue; the end-to-end section of ``tests/test_v2_refine_tools.py`` runs this path.
+
+    The R2b wave-P arms are built by this function too (``table=R2B_WAVEP_ARMS``,
+    ``wave="r2b_waveP"``; kinds ``pathwise`` = ``detmean`` with the R2b optimiser-budget keys, and
+    ``ctrl200``): the same config plus the four R2b keys.
     """
-    st = {**DEFAULT_SETTINGS, **STAGE2_ARMS[arm]}
+    arms = STAGE2_ARMS if table is None else table
+    st = {**DEFAULT_SETTINGS, **arms[arm]}
     kind = st["kind"]
-    out = str(root / "stage2" / f"q{q}" / f"seed{seed}" / arm)
-    mode = "phase_P" if kind == "detmean" else "phase_A_continue"
-    cfg = _base_config("stage2", arm, q, seed, out, mode, PHASE_A_FLAGS, st)
+    out = str(root / WAVE_DIR[wave] / f"q{q}" / f"seed{seed}" / arm)
+    pathwise = kind in ("detmean", "pathwise")
+    mode = "phase_P" if pathwise else "phase_A_continue"
+    cfg = _base_config(wave, arm, q, seed, out, mode, PHASE_A_FLAGS, st)
     if kind == "continue":
         parent = str(root / "parents_A" / f"q{q}" / f"seed{seed}" / PARENT_U1200)
     else:
@@ -333,16 +432,18 @@ def build_stage2(arm: str, q: int, seed: int, root: Path, require_parents: bool)
     cfg["parent_checkpoint"] = parent
     cfg["parent_sha256"] = _parent_sha(parent, require_parents)
     bo: Dict[str, Any] = {"phase_caps": dict({"continue": STAGE2_CAPS, "ctrl200": CTRL_CAPS,
-                                              "detmean": DETMEAN_CAPS}[kind])}
-    if kind == "detmean":
+                                              "detmean": DETMEAN_CAPS, "pathwise": DETMEAN_CAPS}[kind])}
+    if pathwise:
         bo["verifier_timeout"] = dict(DETMEAN_VERIFIER_TIMEOUT)
     bo["episodes_per_update"] = int(st["episodes_per_update"])
     cfg["budget_overrides"] = bo
-    phase = "P" if kind == "detmean" else "A"
+    phase = "P" if pathwise else "A"
     cfg["lr_decay"] = _lr_windows(st, phase, _window((LR0, LR1, 1, 400), "A"))
     cfg["conc_anneal"] = (None if st["scale_last"] is None else
                           {"phase": "A", "local_first": 1, "local_last": 400,
                            "scale_first": 1.0, "scale_last": float(st["scale_last"])})
+    if wave in R2B_WAVES:
+        _with_r2b_keys(cfg, st.get("r2b", {}))
     return Job(cfg, out)
 
 
@@ -350,6 +451,13 @@ def build_v11_repro(q: int, seed: int, root: Path) -> Job:
     """C-R1 stub: the locked entry point writes its own run_config.json."""
     out = str(root / "v11_reproduction" / f"q{q}" / f"seed{seed}")
     return Job({"locked_entry_point": True, "wave": "v11_repro", "q": q, "seed": int(seed),
+                "run": f"v2T2locked_q{q}_s{seed}", "arm": "locked"}, out)
+
+
+def build_v20_repro(q: int, seed: int, root: Path) -> Job:
+    """C-R2 stub: the unchanged v2.0 locked entry point writes its own run_config.json."""
+    out = str(root / WAVE_DIR[R2B_REPRO] / f"q{q}" / f"seed{seed}")
+    return Job({"locked_entry_point": True, "wave": R2B_REPRO, "q": q, "seed": int(seed),
                 "run": f"v2T2locked_q{q}_s{seed}", "arm": "locked"}, out)
 
 
@@ -367,9 +475,22 @@ def build_configs(wave: str, qs: Sequence[int], seeds: Sequence[int],
         require_parents: raise when a parent checkpoint is missing; when False a missing parent
             gets a placeholder SHA-256 (dry runs before the parents exist).
     """
-    if wave not in WAVES:
-        raise ValueError(f"wave {wave!r} not in {WAVES}")
+    if wave not in WAVES + R2B_WAVES + (R2B_REPRO,):
+        raise ValueError(f"wave {wave!r} not in {WAVES + R2B_WAVES + (R2B_REPRO,)}")
     root = Path(root).resolve()
+    if wave == R2B_REPRO:
+        if arms:
+            raise ValueError(f"wave {wave} has no arms")
+        return [build_v20_repro(q, s, root) for q in qs for s in seeds]
+    if wave in R2B_WAVES:
+        arm_table = R2B_ARMS[wave]
+        arms = tuple(arm_table if arms is None else arms)
+        bad = [a for a in arms if a not in arm_table]
+        if bad:
+            raise ValueError(f"arms {bad} not valid for wave {wave}: {list(arm_table)}")
+        return [build_parents_a(a, q, s, root, arm_table, wave) if wave == "r2b_waveA"
+                else build_stage2(a, q, s, root, require_parents, arm_table, wave)
+                for q in qs for s in seeds for a in arms]
     table = V11_ARMS if wave == "v11_repro" else tuple(ARMS[wave])
     arms = tuple(table if arms is None else arms)
     bad = [a for a in arms if a not in table]
@@ -406,7 +527,8 @@ def job_command(cfg: Dict[str, Any], out_dir: str) -> List[str]:
 
 
 # --------------------------------------------------------------------------- validation (dry run)
-NEW_TOP_KEYS = ("ppo_overrides", "continuation_value_mode", "conc_anneal")
+NEW_TOP_KEYS = ("ppo_overrides", "continuation_value_mode", "conc_anneal",
+                "start_weights", "clamp_likelihood", "pathwise_epochs", "pathwise_minibatch")
 
 
 def legacy_projection(cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -553,23 +675,25 @@ def check_no_previous_run(jobs: Sequence[Job]) -> List[str]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """CLI entry (see the module docstring)."""
     p = argparse.ArgumentParser(description="R1 wave launcher", allow_abbrev=False)
-    p.add_argument("--wave", choices=WAVES, required=True)
+    p.add_argument("--wave", choices=WAVES + R2B_WAVES + (R2B_REPRO,), required=True)
     p.add_argument("--qs", type=int, nargs="+", default=list(DEFAULT_QS))
     p.add_argument("--seeds", type=int, nargs="+", default=list(DEFAULT_SEEDS))
     p.add_argument("--arms", nargs="+", default=None, help="default: all arms of the wave")
     p.add_argument("--workers", type=int, default=20, help=f"at most {MAX_WORKERS}")
-    p.add_argument("--root", default=str(DEFAULT_ROOT))
+    p.add_argument("--root", default=None,
+                   help="results root (default: results/v2_refine for the R1 waves, "
+                        "results/v2_refine_r2b for the R2b waves)")
     p.add_argument("--code-commit", default=None, help="SHA of the code commit (recorded)")
     p.add_argument("--dry-run", action="store_true", help="write configs + dryrun record, validate")
     p.add_argument("--no-validate", action="store_true", help="skip validate_config (tests)")
     a = p.parse_args(argv)
     if not 1 <= a.workers <= MAX_WORKERS:
         p.error(f"--workers must be in 1..{MAX_WORKERS}; got {a.workers}")
-    if a.wave == "v11_repro" and a.arms:
-        p.error("wave v11_repro has no arms")
+    if a.wave in ("v11_repro", R2B_REPRO) and a.arms:
+        p.error(f"wave {a.wave} has no arms")
     if any(sd not in DEFAULT_SEEDS for sd in a.seeds):   # D1/section 7: nothing outside 10501-10510
         p.error(f"seeds must be development seeds {DEFAULT_SEEDS[0]}-{DEFAULT_SEEDS[-1]}; got {a.seeds}")
-    root = Path(a.root).resolve()
+    root = Path(a.root or (R2B_ROOT if a.wave in R2B_WAVES + (R2B_REPRO,) else DEFAULT_ROOT)).resolve()
     try:
         jobs = build_configs(a.wave, a.qs, a.seeds, a.arms, root, require_parents=not a.dry_run)
     except (ValueError, FileNotFoundError) as exc:
@@ -579,7 +703,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         p.error(f"{len(busy)} out dir(s) already hold a run (status.json or run.log), "
                 f"e.g. {busy[0]}")
     validation: Dict[str, Any] = {}
-    if not a.no_validate and a.wave != "v11_repro":
+    if not a.no_validate and a.wave not in ("v11_repro", R2B_REPRO):
         rows = validate_jobs(jobs)
         validation = {"per_arm": summarize_validation(rows),
                       "n_invalid": sum(1 for r in rows if not r["ok"])}

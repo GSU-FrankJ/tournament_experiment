@@ -159,10 +159,21 @@ class CurriculumPPO:
         return np.clip(a, c, 1.0 - c).astype(np.float32)
 
     @torch.no_grad()
-    def log_prob(self, alpha: np.ndarray, beta: np.ndarray, actions: np.ndarray) -> np.ndarray:
-        """Beta log-density of stored actions (float32 torch)."""
-        dist = torch.distributions.Beta(torch.as_tensor(alpha), torch.as_tensor(beta))
-        return dist.log_prob(torch.as_tensor(actions)).cpu().numpy()
+    def log_prob(self, alpha: np.ndarray, beta: np.ndarray, actions: np.ndarray,
+                 clamp_side: Optional[np.ndarray] = None) -> np.ndarray:
+        """Beta log-density of stored actions (float32 torch).
+
+        With ``clamp_side`` (R2b, ``clamp_likelihood="censored"``: int array in {-1, 0, +1}) the rows
+        flagged -1 / +1 get the censored log-mass of ``A <= c`` / ``A >= 1 - c`` (``utils.beta_tail``)
+        instead of the density at the clipped value. ``None`` (default) is the original call.
+        """
+        if clamp_side is None:
+            dist = torch.distributions.Beta(torch.as_tensor(alpha), torch.as_tensor(beta))
+            return dist.log_prob(torch.as_tensor(actions)).cpu().numpy()
+        from utils.beta_tail import row_log_prob   # lazy: the default path never imports it
+        return row_log_prob(torch.as_tensor(alpha), torch.as_tensor(beta), torch.as_tensor(actions),
+                            torch.as_tensor(np.asarray(clamp_side, dtype=np.int8)),
+                            self.cfg.action_clamp).cpu().numpy()
 
     @torch.no_grad()
     def value(self, obs: np.ndarray) -> np.ndarray:

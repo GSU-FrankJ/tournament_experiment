@@ -59,7 +59,7 @@ if TYPE_CHECKING:  # typing only; keeps this module importable while the agents 
     from envs.curriculum_env import GameSpec
 
 __all__ = ["torch_F_xi", "torch_f_xi", "effort_mean", "expected_payoff", "foc_residual",
-           "pathwise_loss", "pathwise_step"]
+           "pathwise_loss", "pathwise_step", "pathwise_update"]
 
 
 def torch_F_xi(x: torch.Tensor, q: float) -> torch.Tensor:
@@ -216,3 +216,47 @@ def pathwise_step(agent: "CurriculumPPO", spec: "GameSpec", d_learner: np.ndarra
         "foc_abs_max": float(foc.max().item()),
         "e0": float(e0.item()),
     }
+
+
+def pathwise_update(agent: "CurriculumPPO", spec: "GameSpec", d_learner: np.ndarray, stage: int,
+                    epochs: int, minibatch: int, max_grad_norm: float = 0.5) -> Dict[str, float]:
+    """One phase-P update with a matched optimiser budget (R2b mechanism 3).
+
+    ``epochs`` passes over the rows; each pass draws one fresh permutation from the agent's minibatch
+    stream (``agent.rng_mb.permutation(n)``, exactly as the PPO update draws it, so the stream stays
+    aligned with a PPO control on the same number of rows) and takes one :func:`pathwise_step` per
+    minibatch of ``minibatch`` rows on the existing actor Adam (head restore per step as in
+    :func:`pathwise_step`). With 512 rows, ``epochs = 10`` and ``minibatch = 256`` that is 20 steps,
+    the number of actor steps of one PPO update.
+
+    The runner calls :func:`pathwise_step` directly (no permutation, no stream use) when
+    ``epochs == 1`` and no minibatch is configured: that is the R1 behaviour, unchanged.
+
+    Returns:
+        Python floats: ``loss`` (mean over the steps), ``grad_norm_pre_clip`` and
+        ``grad_norm_pre_clip_max`` (mean and max pre-clip gradient norm over the steps), ``foc_abs_mean``
+        / ``foc_abs_max`` / ``e0`` (all rows, evaluated AFTER the last step: mean and max of
+        ``|dR/de|``, and the learner mean effort at d = 0), ``n_steps``.
+    """
+    d = np.asarray(d_learner, dtype=float).reshape(-1)
+    n = d.size
+    if epochs < 1 or minibatch < 1:
+        raise ValueError(f"epochs and minibatch must be positive; got {epochs}, {minibatch}")
+    losses, norms = [], []
+    for _ in range(epochs):
+        perm = agent.rng_mb.permutation(n)
+        for start in range(0, n, minibatch):
+            out = pathwise_step(agent, spec, d[perm[start:start + minibatch]], stage, max_grad_norm)
+            losses.append(out["loss"])
+            norms.append(out["grad_norm_pre_clip"])
+    with torch.no_grad():
+        dev = agent.device
+        obs_l = torch.as_tensor(spec.encode_obs(stage, d), device=dev)
+        obs_o = torch.as_tensor(spec.encode_obs(stage, -d), device=dev)
+        d_t = torch.as_tensor(d, dtype=torch.float64, device=dev)
+        foc = foc_residual(spec, d_t, effort_mean(agent.actor, obs_l, spec),
+                           effort_mean(agent.opponent, obs_o, spec)).abs()
+        e0 = effort_mean(agent.actor, torch.as_tensor(spec.encode_obs(stage, np.zeros(1)), device=dev), spec)[0]
+    return {"loss": float(np.mean(losses)), "grad_norm_pre_clip": float(np.mean(norms)),
+            "grad_norm_pre_clip_max": float(np.max(norms)), "foc_abs_mean": float(foc.mean().item()),
+            "foc_abs_max": float(foc.max().item()), "e0": float(e0.item()), "n_steps": len(losses)}
