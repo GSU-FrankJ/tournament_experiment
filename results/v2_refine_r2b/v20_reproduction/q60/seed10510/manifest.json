@@ -1,0 +1,568 @@
+{
+ "schema": "v2_run_manifest/1",
+ "base_commit": "657f54a",
+ "git": {
+  "commit": "1ff99bd402f5f155beae2865a07ff94f1e756046",
+  "short": "1ff99bd",
+  "dirty": false
+ },
+ "pilot": "v2_T2_locked",
+ "arm": "locked",
+ "run": "v2T2locked_q60_s10510",
+ "q": 60,
+ "seed": 10510,
+ "seed_namespaces": {
+  "init": [
+   10510,
+   60,
+   0
+  ],
+  "env_noise": [
+   10510,
+   60,
+   1
+  ],
+  "learner_action": [
+   10510,
+   60,
+   2
+  ],
+  "opponent_action": [
+   10510,
+   60,
+   3
+  ],
+  "starts_roles": [
+   10510,
+   60,
+   4
+  ],
+  "minibatch": [
+   10510,
+   60,
+   5
+  ]
+ },
+ "mode": "locked",
+ "fixed_budget": true,
+ "flags": {
+  "reward_mode": "expected",
+  "stage2_update_mode": "frozen",
+  "adv_norm_scope": "stage1_rows",
+  "continuation_action_mode": "mean"
+ },
+ "reward_mode": "expected",
+ "stage2_update_mode": "frozen",
+ "adv_norm_scope": "stage1_rows",
+ "continuation_action_mode": "mean",
+ "continuation_value_mode": "expected",
+ "ppo_overrides": {},
+ "target_kl": null,
+ "conc_anneal": null,
+ "start_weights": null,
+ "clamp_likelihood": "density",
+ "pathwise_epochs": 1,
+ "pathwise_minibatch": null,
+ "conc_scale_initial": {
+  "actor": 1.0,
+  "opponent": 1.0
+ },
+ "parent_checkpoint": null,
+ "parent_sha256": null,
+ "budget_overrides": {},
+ "resolved_protocol": {
+  "w_h": 6,
+  "w_l": 2,
+  "k": 0.00028571428571428574,
+  "e_min": 0,
+  "e_max": 100,
+  "episodes_per_update": 512,
+  "phase_caps": {
+   "A": 1600,
+   "B": 600,
+   "C": 1000
+  },
+  "warmup": 100,
+  "stability_every": 20,
+  "drift_thr": 0.01,
+  "kl_thr": 0.01,
+  "stability_consecutive": 2,
+  "verifier_timeout": {
+   "A": 100,
+   "B": 25,
+   "C": 25
+  },
+  "k_phase": 3,
+  "k_stop": 1,
+  "phase_thr_over_dw": {
+   "A": 0.02,
+   "B": 0.02,
+   "C": 0.01
+  },
+  "conc_thr": 0.04,
+  "snapshot_every": 20,
+  "es_bin_width": 10,
+  "phase_c_root": 256,
+  "phase_c_es": 256,
+  "final_thr_over_dw": 0.01,
+  "refine_thr_over_dw": 0.002,
+  "sensitivity_thr_over_dw": 0.03,
+  "dense_conc_step": 0.05,
+  "recovery_step": 0.5,
+  "direct_rollout_episodes": 200000,
+  "direct_rollout_reps": 3,
+  "direct_rollout_seed_base": 9005000,
+  "rng_namespaces": {
+   "init": 0,
+   "env_noise": 1,
+   "learner_action": 2,
+   "opponent_action": 3,
+   "starts_roles": 4,
+   "minibatch": 5
+  },
+  "weights_every": 25
+ },
+ "resolved_config": {
+  "game": {
+   "w_h": 6,
+   "w_l": 2,
+   "k": 0.00028571428571428574,
+   "q": 60,
+   "T": 2,
+   "e_min": 0,
+   "e_max": 100
+  },
+  "ppo": {
+   "hidden": 64,
+   "lr": 0.0003,
+   "adam_betas": [
+    0.9,
+    0.999
+   ],
+   "adam_eps": 1e-08,
+   "weight_decay": 0,
+   "clip_eps": 0.2,
+   "value_coef": 0.5,
+   "entropy_coef": 0,
+   "max_grad_norm": 0.5,
+   "epochs": 10,
+   "minibatch": 256,
+   "gamma": 1,
+   "gae_lambda": 1,
+   "c_min": 100,
+   "mu_clamp": 1e-06,
+   "action_clamp": 1e-06,
+   "adv_norm_eps": 1e-08
+  },
+  "verifier": {
+   "development": {
+    "name": "development",
+    "state_step": 4,
+    "effort_step": 1,
+    "gl_half": 16,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   },
+   "final": {
+    "name": "final",
+    "state_step": 2,
+    "effort_step": 0.5,
+    "gl_half": 32,
+    "grid_tol": 1e-09,
+    "mass_tol": 1e-10,
+    "pdl_tol_over_dw": 1e-10
+   }
+  },
+  "lr_schedule": {
+   "kind": "constant",
+   "actor_and_critic": true,
+   "ab_lr": 0.0003,
+   "c_start_lr": 0.0003,
+   "c_end_lr": 0.0003,
+   "c_budget_updates": 1000,
+   "c_local_first": 1,
+   "c_local_last": 1000,
+   "linear_denominator": 999,
+   "apply_before_each_update": true,
+   "constant_within_update": true,
+   "preserve_adam_state": true
+  },
+  "lr_decay": [
+   {
+    "phase": "A",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1201,
+    "local_last": 1600
+   },
+   {
+    "phase": "B",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 600
+   }
+  ]
+ },
+ "grids": {
+  "development": {
+   "stage_grid_points": {
+    "1": 1,
+    "2": 111
+   },
+   "state_step": 4,
+   "effort_step": 1,
+   "effort_grid_points": 101,
+   "gl_half": 16,
+   "D2_half": 220.0
+  },
+  "final": {
+   "stage_grid_points": {
+    "1": 1,
+    "2": 221
+   },
+   "state_step": 2,
+   "effort_step": 0.5,
+   "effort_grid_points": 201,
+   "gl_half": 32,
+   "D2_half": 220.0
+  },
+  "recovery": {
+   "step": 0.5,
+   "D2_half": 220.0
+  }
+ },
+ "verifier_cadence": {
+  "warmup": 100,
+  "stability_every": 20,
+  "stability_consecutive": 2,
+  "verifier_timeout": {
+   "A": 100,
+   "B": 25,
+   "C": 25
+  },
+  "drift_thr": 0.01,
+  "kl_thr": 0.01
+ },
+ "versions": {
+  "python": "3.12.3",
+  "torch": "2.5.1+cu121",
+  "numpy": "2.5.0"
+ },
+ "thread_env": {
+  "OMP": "1",
+  "MKL": "1",
+  "OPENBLAS": "1"
+ },
+ "torch_threads": 1,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/run/run_v2_T2_locked.py --q 60 --seed 10510 --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10510",
+ "record_source_run": "v2T2locked_q60_s10510",
+ "input_config": {
+  "schema": "v2_run_config/1",
+  "base_commit": "657f54a",
+  "pilot": "v2_T2_locked",
+  "arm": "locked",
+  "run": "v2T2locked_q60_s10510",
+  "q": 60,
+  "seed": 10510,
+  "mode": "locked",
+  "fixed_budget": true,
+  "flags": {
+   "reward_mode": "expected",
+   "stage2_update_mode": "frozen",
+   "adv_norm_scope": "stage1_rows",
+   "continuation_action_mode": "mean"
+  },
+  "continuation_value_mode": "expected",
+  "parent_checkpoint": null,
+  "parent_sha256": null,
+  "record": {
+   "run": "v2T2locked_q60_s10510",
+   "q": 60,
+   "seed": 10510,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 60,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 220,
+   "domain_half_stage2": 220,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 44,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10510"
+  },
+  "threads_per_process": {
+   "torch": 1,
+   "OMP": 1,
+   "MKL": 1,
+   "OPENBLAS": 1
+  },
+  "budget_overrides": {},
+  "lr_decay": [
+   {
+    "phase": "A",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1201,
+    "local_last": 1600
+   },
+   {
+    "phase": "B",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 600
+   }
+  ],
+  "full_state_at": []
+ },
+ "locked_protocol": {
+  "path": "protocols/v2_T2_locked_v2_0.json",
+  "sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+  "version": "2.0"
+ },
+ "protocol_version": "2.0",
+ "commit": "1ff99bd402f5f155beae2865a07ff94f1e756046",
+ "clean_tree": true,
+ "global_rng": {
+  "seeding": {
+   "seeds": {
+    "torch_global": 10510,
+    "numpy_global": 10510,
+    "python_random": 10510
+   },
+   "digests": {
+    "torch_global": "0a11a5f62bee67159a3a7baec1aee689b4fcc60b049f5467919b52d03fe7ee96",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "after_run_construction": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "reference_before_first_A_update": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "end_of_A": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "after_G-A": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "before_B_entry": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "before_first_B_update": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "end_of_B": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  },
+  "end_of_run": {
+   "digests": {
+    "torch_global": "70bcd9643504f66e2731c49aa518d22e52f8e1ddad1ce977eb59316e8bc26942",
+    "numpy_global": "5911bbbd722bf17f5cf2ab3f3f965ff1ade11deed21e7c7613b005af268f1569",
+    "python_random": "b75be1c1ab4270cf874b46cd0cb20dce2ed29626b70d5463742cf95a92809e68"
+   }
+  }
+ },
+ "continuation_table": {
+  "file": "continuation_table.npz",
+  "npz_sha256": "ca645fd67a97de2e6a8241629ead3d1f7df989ebdb9c51fa539d50580e6fd200",
+  "rule": {
+   "stage": 2,
+   "step_requested": 0.05,
+   "step_actual": 0.04999999999999716,
+   "n_y": 4001,
+   "panel_width": 1.0,
+   "nodes_per_panel": 6,
+   "n_panels": 240,
+   "n_nodes": 1440,
+   "weight_sum": 1.0,
+   "conc_scale": 1.0,
+   "q": 60.0,
+   "e_min": 0.0,
+   "e_max": 100.0
+  },
+  "build_seconds": 9.837865891982801,
+  "training_rng_digest_at_phase_B_entry": "4620ea947c231fb7430a0a9312bec547aea5e4b1a3ec3f02b679fbc407b59ace",
+  "rng_unchanged_by_build": {
+   "training": true,
+   "torch_global": true,
+   "numpy_global": true,
+   "python_random": true
+  }
+ },
+ "global_rng_status": {
+  "status": "ok",
+  "violations": [],
+  "assertion_points": [
+   "end_of_A",
+   "after_G-A",
+   "end_of_B",
+   "end_of_run",
+   "table_build"
+  ]
+ }
+}

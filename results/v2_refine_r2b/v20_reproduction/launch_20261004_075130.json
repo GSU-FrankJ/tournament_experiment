@@ -1,0 +1,162 @@
+{
+ "wave": "r2b_v20_repro",
+ "dry_run": false,
+ "argv": [
+  "tools/v2/launch_refine.py",
+  "--wave",
+  "r2b_v20_repro",
+  "--workers",
+  "20",
+  "--code-commit",
+  "1ff99bd"
+ ],
+ "started": "20261004_075130",
+ "workers": 20,
+ "nproc": 64,
+ "loadavg_at_start": [
+  11.31103515625,
+  10.43505859375,
+  9.32421875
+ ],
+ "disk_free_bytes": 2244763426816,
+ "disk_total_bytes": 5952313540608,
+ "head": "1ff99bd402f5f155beae2865a07ff94f1e756046",
+ "code_commit": "1ff99bd",
+ "status_porcelain": [
+  "?? results/v2_refine_r2b/"
+ ],
+ "code_commit_resolved": "1ff99bd402f5f155beae2865a07ff94f1e756046",
+ "diff_stat_code_commit_to_head": "",
+ "n_planned": 20,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10501",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10502",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10503",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10504",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10505",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10506",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10507",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10508",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10509",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10510",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10501",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10502",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10503",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10504",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10505",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10506",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10507",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10508",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10509",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10510"
+ ],
+ "validation": {},
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10509",
+   "returncode": 0,
+   "wall_sec": 346.8522142599686
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10502",
+   "returncode": 0,
+   "wall_sec": 348.0552884389763
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10503",
+   "returncode": 0,
+   "wall_sec": 348.34263229597127
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10506",
+   "returncode": 0,
+   "wall_sec": 354.2047062339843
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10504",
+   "returncode": 0,
+   "wall_sec": 354.930337222002
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10501",
+   "returncode": 0,
+   "wall_sec": 355.3660492430208
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10504",
+   "returncode": 0,
+   "wall_sec": 355.48737313295715
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10505",
+   "returncode": 0,
+   "wall_sec": 356.8094855709933
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10508",
+   "returncode": 0,
+   "wall_sec": 357.0219704839983
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10503",
+   "returncode": 0,
+   "wall_sec": 358.00000870099757
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10501",
+   "returncode": 0,
+   "wall_sec": 358.0041034879978
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10510",
+   "returncode": 0,
+   "wall_sec": 359.5456011579954
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10507",
+   "returncode": 0,
+   "wall_sec": 360.103591741994
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10508",
+   "returncode": 0,
+   "wall_sec": 365.07096828200156
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10510",
+   "returncode": 0,
+   "wall_sec": 365.105770298047
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10502",
+   "returncode": 0,
+   "wall_sec": 365.8640058180317
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10505",
+   "returncode": 0,
+   "wall_sec": 366.04558399302186
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q60/seed10506",
+   "returncode": 0,
+   "wall_sec": 366.5635051399586
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10507",
+   "returncode": 0,
+   "wall_sec": 377.6414112820057
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/v20_reproduction/q50/seed10509",
+   "returncode": 0,
+   "wall_sec": 379.33354106300976
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  23.9462890625,
+  22.21826171875,
+  15.34375
+ ]
+}
