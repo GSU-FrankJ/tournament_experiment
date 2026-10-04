@@ -1,0 +1,2 @@
+record,argv,workers,nproc,loadavg at start,loadavg at end,free disk (TB),head,code commit,state,runs finished / return code 0
+results/v2_refine_r2b/waveA/launch_20261004_081801.json,tools/v2/launch_refine.py --wave r2b_waveA --workers 30 --code-commit 0fa2196,30,64,"[6.4, 7.25, 9.33]","[16.52, 25.81, 19.24]",2.24,d581b3c,0fa2196,done,60 / 60
