@@ -1,0 +1,22 @@
+{
+ "run": "tel_q50_s10501",
+ "pilot": "phase2_regression",
+ "arm": "full_defaults",
+ "q": 50,
+ "seed": 10501,
+ "mode": "full",
+ "state": "done",
+ "pid": 2593106,
+ "host": "vector2",
+ "cmd": "run/run_v2_stagewise.py --config results/v2_pilots/phase2_regression/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_pilots/phase2_regression/v2_full_3fedaa2",
+ "start_time": "2026-10-04 04:53:22",
+ "git": {
+  "commit": "3fedaa2a28e53455fc0b11a0bc17b8a366ca9dfa",
+  "short": "3fedaa2",
+  "dirty": false
+ },
+ "end_time": "2026-10-04 04:53:37",
+ "total_wall_sec": 15.20942340005422,
+ "exit_code": 0,
+ "final_global_update": 120
+}

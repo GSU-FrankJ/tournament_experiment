@@ -1,0 +1,16 @@
+{
+ "pass": true,
+ "pytest_summary": "1 failed, 391 passed, 2 xfailed, 2 warnings in 803.07s (0:13:23)",
+ "pytest_failed": [
+  "tests/test_registry_canonicalization.py::test_registry_canonicalization"
+ ],
+ "pytest_errors": [],
+ "c7_identical": true,
+ "c7_commit": "3fedaa2",
+ "c7_dirty": false,
+ "c7_reference": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501",
+ "pytest_log": "results/v2_T2_locked/rehearsal_v2_0_pytest.txt",
+ "driver": "results/v2_T2_locked/rehearsal_v2_0_checks/tool_fix_rerun/driver.py",
+ "launch_commit_argument": "3fedaa2a28e53455fc0b11a0bc17b8a366ca9dfa"
+}
+EXIT=0
