@@ -1,0 +1,25 @@
+{
+ "root": "results/v2_T2_locked/confirmation_v2_0",
+ "seeds": [
+  30501,
+  30520
+ ],
+ "rule": "each q >= 18 of 20 runs pass; both q",
+ "per_q": {
+  "50": true,
+  "60": true
+ },
+ "overall": "PASS",
+ "n_agreement_rows": 40,
+ "n_all_agree": 40,
+ "n_expected": 40,
+ "n_completed": 40,
+ "n_missing": 0,
+ "n_failed_exception": 0,
+ "n_incomplete": 0,
+ "n_global_rng_violation": 0,
+ "n_clean_tree": 40,
+ "commits": [
+  "d2e377d0da702e8e162662f74576d1bff5b42a56"
+ ]
+}

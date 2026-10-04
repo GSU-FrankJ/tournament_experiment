@@ -1,0 +1,29 @@
+{
+ "root": "results/v2_T2_locked/confirmation_v2_0",
+ "seeds": [
+  30501,
+  30520
+ ],
+ "rule": "each q >= 18 of 20 runs pass; both q",
+ "per_q": {
+  "50": true,
+  "60": true
+ },
+ "overall": "PASS",
+ "n_agreement_rows": 40,
+ "n_all_agree": 40,
+ "n_expected": 40,
+ "n_completed": 40,
+ "n_missing": 0,
+ "n_failed_exception": 0,
+ "n_incomplete": 0,
+ "n_global_rng_violation": 0,
+ "n_clean_tree": 40,
+ "commits": [
+  "d2e377d0da702e8e162662f74576d1bff5b42a56"
+ ]
+}
+    q  n_expected  n_completed  n_missing  n_failed_exception  n_incomplete  n_global_rng_violation  n_pass  pass_rate   cp95_lo   cp95_hi         rule  q_passes_rule  n_G-A_pass  n_G-F_pass  n_G-N_pass  n_G-S_pass  n_S1_0.10_pass  n_v1_1_run_pass  n_v1_0_run_pass
+0  50          20           20          0                   0             0                       0      19       0.95  0.751267  0.998735  >= 18 of 20           True          19          20          20          20              20               19               19
+1  60          20           20          0                   0             0                       0      20       1.00  0.831567  1.000000  >= 18 of 20           True          20          20          20          20              20               20               20
+rc=0

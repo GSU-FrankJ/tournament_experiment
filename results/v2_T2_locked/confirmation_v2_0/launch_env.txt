@@ -1,0 +1,17 @@
+nproc: 64
+uptime: 04:24:47 up 5 days, 12:05,  8 users,  load average: 6.93, 6.99, 6.45
+df: /dev/md0        5.5T  3.1T  2.1T  61% /home
+launch_commit: d2e377d0da702e8e162662f74576d1bff5b42a56
+lock_commit: 1d6d4d00736b265a18ae71b91ecb77b19e4915b9
+git diff --name-only <lock> HEAD, outside results/:
+  protocols/LOCK
+git diff --name-only <lock> HEAD: 270 paths in total, 269 under results/
+git diff --stat <lock> HEAD (last line, full stat in launch_diff_stat.txt):
+ 270 files changed, 73432 insertions(+)
+git status --porcelain outside results/: []
+free -g:
+               total        used        free      shared  buff/cache   available
+Mem:             754          25         437           0         296         728
+workers: 20 (xargs -P 20), one thread each (OMP/MKL/OPENBLAS_NUM_THREADS=1 set inline per job)
+jobs: 40 (q in {50, 60} x seeds 30501-30520), jobs.txt tracked since the lock record commit f2d616c
+prelaunch problems: none

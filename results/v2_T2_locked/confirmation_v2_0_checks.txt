@@ -1,0 +1,35 @@
+manifest_protocol_sha256    : ['6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3']
+gates_protocol_sha256       : ['6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3']
+manifest_version            : ['2.0']
+manifest_commit             : ['d2e377d0da702e8e162662f74576d1bff5b42a56']
+manifest_clean_tree         : ['True']
+gates_clean_tree            : ['True']
+gates_commit                : ['d2e377d0da702e8e162662f74576d1bff5b42a56']
+status                      : ['done']
+exit_code                   : ['0']
+global_rng_status           : ['ok']
+rows with an error reading the records: []
+v2.0 protocol sha256 expected         : 6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3
+launch commit expected                : d2e377d0da702e8e162662f74576d1bff5b42a56
+manifests with protocol sha == expected: 40/40
+manifests with commit == launch commit : 40/40
+manifests with clean_tree true         : 40/40
+table sha present and equal to disk    : 40/40
+gates.json protocol sha == expected  : 40/40
+exit_code 0 and state done            : 40/40
+crashed dir present                    : False
+launcher.out lines / rc=0 lines        : 40 / 40
+launcher.out distinct (q, seed) jobs   : 40
+
+analysis A (pre-registered invocation) vs analysis B (with --compare-root): common files
+  agreement.csv            byte-identical: True
+  distributions.csv        byte-identical: True
+  exp_vs_s1.csv            byte-identical: True
+  exp_vs_s1_fit.csv        byte-identical: True
+  pass_counts.csv          byte-identical: True
+  per_run.csv              byte-identical: True
+  reported_metrics.csv     byte-identical: True
+  s1_summary.csv           byte-identical: True
+  tables.md                byte-identical: False
+  verdict.json             byte-identical: False
+  verdict.json keys only in B: ['compare_root']; all shared keys equal: True
