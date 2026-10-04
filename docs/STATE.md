@@ -10,6 +10,8 @@ Settled this round: check (ii) of the continuation table, open in the R1 section
 Known issues: the checks tool's C7 reference path was a defect (fixed in `3fedaa2` after the confirmation; R7 re-run record in `results/v2_T2_locked/rehearsal_v2_0_checks/tool_fix_rerun/`); `test_registry_canonicalization` fails as before; the Phase-A clamp flags M1/M2 are recorded, not fixed; `tests/test_v2_locked.py` is replaced by `tests/test_v2_locked_v2_0.py` and the report-pack builder still reads the old path; the report pack (T57 cites this file by SHA-256, T05 counts `reports/v2/*.md`) is stale until the documented rebuild (out of scope); nothing from the v2.0 round is pushed.
 Next: the PI decides (push and tags, the report-pack rebuild, what follows the confirmation). No T=3 work and no stage-2 follow-up was started.
 
+Addendum (2026-10-04, P0 of round R2b): the v2.0 commits are no longer unpushed. `origin/v2-t2-refine` is at `e89b61d` (pushed on 2026-10-04; `git ls-remote origin v2-t2-refine`). Annotated tags for the publication: `t2-v2-lock-v2.0` -> `1d6d4d0` (the v2.0 lock commit), `t2-v2-confirmation-v2.0` -> `d2e377d` (the confirmation launch commit) and `t2-v2-main-v2.0` -> the commit that adds `reports/v2/refine_r2b/00_housekeeping.md` (the head of `v2-t2-refine` after the P0 housekeeping commits). The fast-forward of `main` and the push of `main` and the tags are recorded in `reports/v2/refine_r2b/00_housekeeping.md`. The "not pushed" wording above is left as written; it was true when it was written.
+
 ## T=2 accuracy-refinement round R1 (2026-10-03, branch v2-t2-refine, not pushed)
 
 Done: P0-P4 of the R1 prompt on the development seeds. Two diagnostics (D1 clamp, D2 verifier sensitivity) and six
