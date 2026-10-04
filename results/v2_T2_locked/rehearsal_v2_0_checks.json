@@ -1,0 +1,381 @@
+{
+ "launch_commit": "f2d616cc921e2c6be46c48336d31372dbbf58481",
+ "v2_0_protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+ "reference_v1_1": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1",
+ "pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/stage1",
+ "n_expected": 20,
+ "R1": {
+  "pass": true,
+  "n_identical": 20,
+  "n": 20,
+  "failing_fields": [],
+  "first_differences": [],
+  "details": "rehearsal_v2_0_checks_R1_details.csv",
+  "snapshot_refreshes": [
+   {
+    "q": 50,
+    "seed": 10501,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10502,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10503,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10504,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10505,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10506,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10507,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10508,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10509,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10510,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10501,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10502,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10503,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10504,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10505,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10506,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10507,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10508,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10509,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10510,
+    "ref": 82,
+    "new": 82,
+    "equal": true
+   }
+  ]
+ },
+ "R2": {
+  "pass": true,
+  "n_identical": 20,
+  "n": 20,
+  "failing_fields": [],
+  "first_differences": [],
+  "details": "rehearsal_v2_0_checks_R2_details.csv",
+  "snapshot_refreshes_reported_separately": [
+   {
+    "q": 50,
+    "seed": 10501,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10502,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10503,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10504,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10505,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10506,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10507,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10508,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10509,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 50,
+    "seed": 10510,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10501,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10502,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10503,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10504,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10505,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10506,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10507,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10508,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10509,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   },
+   {
+    "q": 60,
+    "seed": 10510,
+    "ref": 113,
+    "new": 113,
+    "equal": true
+   }
+  ]
+ },
+ "R6": {
+  "pass": true,
+  "returncode": 0,
+  "n_agree": 20,
+  "n": 20,
+  "max_abs_value_diff": 0.0,
+  "output": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0_analysis",
+  "stderr_tail": ""
+ },
+ "R3": {
+  "pass": true,
+  "n_pass": 20,
+  "n": 20,
+  "R3b": {
+   "pass": true,
+   "pooled_n_G-S_pass": 20,
+   "needed": 19,
+   "per_q": {
+    "50": {
+     "n_runs": 10,
+     "n_G-S_pass": 10,
+     "n": 10,
+     "mean_signed": -0.01181102534156414,
+     "sd_ddof1": 0.017849854300316905,
+     "per_run_pass_prob": 0.9835333526142319,
+     "P_ge_k_of_n": 0.9958733577727633,
+     "meets_probability": true
+    },
+    "60": {
+     "n_runs": 10,
+     "n_G-S_pass": 10,
+     "n": 10,
+     "mean_signed": 0.0009060316963757569,
+     "sd_ddof1": 0.01874192681106968,
+     "per_run_pass_prob": 0.992294489768529,
+     "P_ge_k_of_n": 0.9995272279276824,
+     "meets_probability": true
+    }
+   },
+   "source": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0_analysis/rehearsal_safety.json"
+  }
+ },
+ "R4": {
+  "pass": true,
+  "n_ok": 20,
+  "n": 20
+ },
+ "R5": {
+  "pass": true,
+  "n_ok": 20,
+  "n": 20
+ },
+ "R7": {
+  "pass": false,
+  "pytest_summary": "1 failed, 391 passed, 2 xfailed, 2 warnings in 757.28s (0:12:37)",
+  "pytest_failed": [
+   "tests/test_registry_canonicalization.py::test_registry_canonicalization"
+  ],
+  "pytest_errors": [],
+  "c7_identical": false,
+  "c7_commit": "f2d616c",
+  "c7_dirty": false,
+  "pytest_log": "results/v2_T2_locked/rehearsal_v2_0_pytest.txt",
+  "pytest_passed": 391,
+  "pytest_known_failure_only": true,
+  "c7_tool": false,
+  "c7_tool_error": "FileNotFoundError: [Errno 2] No such file or directory: 'results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501/checkpoint.pt' -- raised by torch.load in tools/v2/compare_runs.py after the six other compared files had compared with 0 differences. The reference directory exists in this worktree, but its checkpoint.pt (a gitignored *.pt) does not; the six other compared reference files are byte-identical to the canonical copies. The tool's compare stdout therefore has no checkpoint.pt line and no IDENTICAL line (results/v2_pilots/phase2_regression/v2_full_f2d616c.compare.txt).",
+  "c7_canonical_reference": "IDENTICAL",
+  "c7_canonical_reference_record": "results/v2_T2_locked/rehearsal_v2_0_checks/c7_canonical_reference.txt",
+  "owner_decision": "D-R7 accepted (owner, 2026-10-04): R7 is met on the canonical-reference comparison; the literal failure is a reference-path defect of the checks tool, not of the pipeline (precedent: Check 1 of the v1.0 lock round). The tool is not edited before the confirmation.",
+  "amended": "keys pytest_passed, pytest_known_failure_only, c7_tool, c7_tool_error, c7_canonical_reference, c7_canonical_reference_record, owner_decision and this key were appended on 2026-10-04 after the tool run; every other key, including R7.pass and ALL_PASS, is the tool's own output. The tool's original file is kept byte for byte at results/v2_T2_locked/rehearsal_v2_0_checks/rehearsal_v2_0_checks.tool_output.json (SHA-256 981724df27daaa0ff3f3514e07b8d9308d21e1751e849b2282eea60190d1b57f)."
+ },
+ "ALL_PASS": false
+}

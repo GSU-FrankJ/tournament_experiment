@@ -1,0 +1,21 @@
+nproc: 64
+uptime:  23:37:12 up 5 days,  7:17,  7 users,  load average: 2.31, 1.98, 1.84
+df: /dev/md0        5.5T  3.1T  2.2T  60% /home
+free -g:
+               total        used        free      shared  buff/cache   available
+Mem:             754          16         509           0         233         738
+launch_commit: f2d616cc921e2c6be46c48336d31372dbbf58481
+lock_commit: 1d6d4d00736b265a18ae71b91ecb77b19e4915b9
+git diff --name-only <lock> HEAD:
+protocols/LOCK
+results/v2_T2_locked/confirmation_v2_0/jobs.txt
+results/v2_T2_locked/launch_one_v2_0.sh
+results/v2_T2_locked/rehearsal_v2_0/jobs.txt
+results/v2_T2_locked/v2_0/seed_inventory.csv
+results/v2_T2_locked/v2_0/seed_inventory.out
+results/v2_T2_locked/v2_0/seed_inventory_stock.csv
+results/v2_T2_locked/v2_0/seed_inventory_stock.out
+git diff --stat <lock> HEAD (last line):
+ 8 files changed, 756 insertions(+)
+git status --porcelain outside results/: []
+workers: 20 (xargs -P), one thread each (OMP/MKL/OPENBLAS_NUM_THREADS=1 set inline per job)

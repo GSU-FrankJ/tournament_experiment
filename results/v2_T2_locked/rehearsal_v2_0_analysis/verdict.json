@@ -1,0 +1,38 @@
+{
+ "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+ "seeds": [
+  10501,
+  10510
+ ],
+ "rule": "each q >= 18 of 20 runs pass; both q",
+ "per_q": {
+  "50": false,
+  "60": false
+ },
+ "overall": "not applicable (rule needs 20 seeds per q)",
+ "n_agreement_rows": 20,
+ "n_all_agree": 20,
+ "n_expected": 20,
+ "n_completed": 20,
+ "n_missing": 0,
+ "n_failed_exception": 0,
+ "n_incomplete": 0,
+ "n_global_rng_violation": 0,
+ "n_clean_tree": 20,
+ "commits": [
+  "f2d616cc921e2c6be46c48336d31372dbbf58481"
+ ],
+ "rehearsal_safety": {
+  "pass": true,
+  "pooled_n_G-S_pass": 20,
+  "per_q_P": {
+   "50": 0.9958733577727633,
+   "60": 0.9995272279276824
+  }
+ },
+ "paired_root": {
+  "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1",
+  "label": "rehearsal_v1_1",
+  "n_pairs": 20
+ }
+}

@@ -1,0 +1,84 @@
+C7 against the canonical reference -- owner decision D-R7 (2026-10-04), step 1
+==============================================================================
+written (UTC)      : 2026-10-04T04:23:05Z
+host               : vector2
+worktree           : /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine
+branch             : v2-t2-refine
+commit (HEAD)      : f2d616cc921e2c6be46c48336d31372dbbf58481
+commit == f2d616c  : True
+git status --porcelain -- . ':(exclude)results'  : (empty)
+git status --porcelain: 3734 entries, all untracked under results/: True
+
+What is compared: C7 = the v2 runner at its default flags reproduces, bit for bit (training side), the
+pre-refactor reference run tel_q50_s10501 (config results/v2_pilots/phase2_regression/run_config.json).
+Compared files (tools/v2/compare_runs.py, unchanged): train_history.json, final_eval.json, arrays.npz,
+checkpoint_weights.npz, phase_A_exit_arrays.npz, phase_B_exit_arrays.npz, checkpoint.pt
+(actor/critic/opponent and both optimizer states).
+
+Reference run (canonical worktree, the only place its checkpoint.pt exists):
+  /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501
+Candidate B (primary): fresh run at the launch commit, this session:
+  /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0_checks/c7_candidate_f2d616c
+Candidate A (secondary): the candidate written by the checks tool's own R7 attempt at the same commit:
+  /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_pilots/phase2_regression/v2_full_f2d616c
+
+Commands
+  candidate B run (tmux session c7run, same invocation as run_check_7 in tools/v2/v2_0_rehearsal_checks.py):
+    cd /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 /home/fjiang4/tournament_experiment/.venv/bin/python -B run/run_v2_stagewise.py \
+      --config results/v2_pilots/phase2_regression/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0_checks/c7_candidate_f2d616c
+    started 2026-10-04T04:21:37Z  finished 2026-10-04T04:21:58Z
+    run output: results/v2_T2_locked/rehearsal_v2_0_checks/c7_candidate_f2d616c.run.out
+  comparison (cwd = the worktree):
+    /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/compare_runs.py <reference> <candidate>
+
+Candidate A manifest: commit f2d616cc921e2c6be46c48336d31372dbbf58481  dirty=False
+Candidate B manifest: commit f2d616cc921e2c6be46c48336d31372dbbf58481  dirty=False
+
+SHA-256 of every compared file
+  file                         reference (canonical)                                              candidate B                                                        candidate A                                                       
+  train_history.json           5b01d51361b7f4c7b9c494578cc2684eb2207f881886bdc30e2695d5b15ed964  84614a3cd12c60f7af8c6d798f87e9a6c0a46cb8786fc99040444b9c895f15cc  28725fad5d3e29cb70442b049449ab3a4b3bb296468642e3bf1b83c3ac57c038
+  final_eval.json              f157bef7119277b08a3fd04d68b913aef70f90055c388da56e16a7ea8b939fdd  da61723af1497f92426d9c59bc3eea60e28700fd38384ea0bac46beb01f63333  a4ad68886c60cdca518e089d64bfdcf0d1fc071a218d0745fc11b55baccc6d1b
+  arrays.npz                   5cc38215a47e233ff33d6eeed24148298899a198c1d5dc48b8af3ad135ed9027  5cc38215a47e233ff33d6eeed24148298899a198c1d5dc48b8af3ad135ed9027  5cc38215a47e233ff33d6eeed24148298899a198c1d5dc48b8af3ad135ed9027
+  checkpoint_weights.npz       79d0fc0c83f0385c697a2ee7abfaa3263f09cefce7566bca28c0e19242748e13  79d0fc0c83f0385c697a2ee7abfaa3263f09cefce7566bca28c0e19242748e13  79d0fc0c83f0385c697a2ee7abfaa3263f09cefce7566bca28c0e19242748e13
+  phase_A_exit_arrays.npz      a15df2598e436218184dcb1dc4b6e4aab70673f20b9bc89e86b42497238c1485  a15df2598e436218184dcb1dc4b6e4aab70673f20b9bc89e86b42497238c1485  a15df2598e436218184dcb1dc4b6e4aab70673f20b9bc89e86b42497238c1485
+  phase_B_exit_arrays.npz      259ff4dd5e14509a103ccd2601ef5559adb9e30ae9becf8be6daa60a7f1ce071  259ff4dd5e14509a103ccd2601ef5559adb9e30ae9becf8be6daa60a7f1ce071  259ff4dd5e14509a103ccd2601ef5559adb9e30ae9becf8be6daa60a7f1ce071
+  checkpoint.pt                2eb8bb338348c1cedbfbf04a2b4ecc3b2264c11905ffeeabc2007f7841d94374  a808b5b91bf5ae43676666d0e967dbc28fc82052054237411a7e5d7274201e51  a808b5b91bf5ae43676666d0e967dbc28fc82052054237411a7e5d7274201e51
+  Byte level: arrays.npz, checkpoint_weights.npz, phase_A_exit_arrays.npz and phase_B_exit_arrays.npz are
+  byte-identical in the reference and both candidates. train_history.json and final_eval.json differ in bytes
+  only in the fields compare_runs.py excludes (timings, paths; 0 differing leaves below). checkpoint.pt differs
+  in bytes because the candidates' file carries three top-level keys the older reference lacks (frozen,
+  rng_minibatch, snapshot_refreshes; checked with torch.load, cfg equal); compare_runs.py compares only actor,
+  critic, opponent and the two optimizer states. Candidates A and B have the same checkpoint.pt bytes.
+
+------------------------------------------------------------------------------
+Comparison A (secondary, the tool-produced candidate)
+$ /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/compare_runs.py /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501 /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_pilots/phase2_regression/v2_full_f2d616c
+returncode: 0
+stderr: (empty)
+stdout:
+train_history.json: 0 differing leaves; excluded keys: ['time_sec']
+final_eval.json: 0 differing leaves; excluded keys: ['config_ref', 'dev_verifier_sec', 'final_eval_sec', 'path', 'seconds', 'stability_sec', 'time_sec', 'total_process_cpu_sec', 'total_wall_sec', 'train_rollout_sec', 'train_update_sec', 'training_sec', 'training_wall_sec', 'weights_npz']
+arrays.npz: 90 arrays, 0 differ []
+checkpoint_weights.npz: 12 arrays, 0 differ []
+phase_A_exit_arrays.npz: 41 arrays, 0 differ []
+phase_B_exit_arrays.npz: 41 arrays, 0 differ []
+checkpoint.pt: 0 differing tensors (actor/critic/opponent/optimizer states)
+IDENTICAL
+
+(candidate A verdict: IDENTICAL)
+
+------------------------------------------------------------------------------
+Comparison B (PRIMARY, fresh run)
+$ /home/fjiang4/tournament_experiment/.venv/bin/python tools/v2/compare_runs.py /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501 /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0_checks/c7_candidate_f2d616c
+returncode: 0
+stderr: (empty)
+stdout:
+train_history.json: 0 differing leaves; excluded keys: ['time_sec']
+final_eval.json: 0 differing leaves; excluded keys: ['config_ref', 'dev_verifier_sec', 'final_eval_sec', 'path', 'seconds', 'stability_sec', 'time_sec', 'total_process_cpu_sec', 'total_wall_sec', 'train_rollout_sec', 'train_update_sec', 'training_sec', 'training_wall_sec', 'weights_npz']
+arrays.npz: 90 arrays, 0 differ []
+checkpoint_weights.npz: 12 arrays, 0 differ []
+phase_A_exit_arrays.npz: 41 arrays, 0 differ []
+phase_B_exit_arrays.npz: 41 arrays, 0 differ []
+checkpoint.pt: 0 differing tensors (actor/critic/opponent/optimizer states)
+IDENTICAL

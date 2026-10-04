@@ -1,0 +1,20 @@
+[phase A] entry at global update 0, cap 40, active stages [2], lr(first)=0.0003
+[u   10 A  10] verifier(warmup_forced) valid=True max_D2dev_Delta2_over_dw=0.15081 EXP/DW=0.02600 dReach/DW=0.15013 dFull/DW=0.1514 C=0.0494 elig=False consec=0 | lr=0.0003 kl=0.0070 e1(0)=49.41 e2(0)=45.61
+[u   20 A  20] verifier(timeout) valid=True max_D2dev_Delta2_over_dw=0.13252 EXP/DW=0.02515 dReach/DW=0.12672 dFull/DW=0.1329 C=0.0491 elig=False consec=0 | lr=0.0003 kl=0.0069 e1(0)=48.77 e2(0)=42.36
+[u   30 A  30] verifier(timeout) valid=True max_D2dev_Delta2_over_dw=0.11147 EXP/DW=0.02593 dReach/DW=0.11088 dFull/DW=0.1116 C=0.0484 elig=False consec=0 | lr=0.0003 kl=0.0041 e1(0)=48.06 e2(0)=39.34
+[u   40 A  40] verifier(timeout) valid=True max_D2dev_Delta2_over_dw=0.09321 EXP/DW=0.02918 dReach/DW=0.08888 dFull/DW=0.0932 C=0.0475 elig=False consec=0 | lr=0.0003 kl=0.0064 e1(0)=47.04 e2(0)=35.57
+[phase A] exit at global update 40 after 40 local updates: budget_exhausted (lr last 0.0003)
+[phase B] entry at global update 40, cap 40, active stages [1, 2], lr(first)=0.0003
+[u   50 B  10] verifier(warmup_forced) valid=True exp_root_over_dw=0.02986 EXP/DW=0.02986 dReach/DW=0.08023 dFull/DW=0.1121 C=0.0495 elig=False consec=0 | lr=0.0003 kl=0.0059 e1(0)=48.22 e2(0)=35.42
+[u   60 B  20] verifier(timeout) valid=True exp_root_over_dw=0.02711 EXP/DW=0.02711 dReach/DW=0.09368 dFull/DW=0.1123 C=0.0494 elig=False consec=0 | lr=0.0003 kl=0.0002 e1(0)=46.79 e2(0)=37.38
+[u   70 B  30] verifier(timeout) valid=True exp_root_over_dw=0.02546 EXP/DW=0.02546 dReach/DW=0.09973 dFull/DW=0.1300 C=0.0492 elig=False consec=0 | lr=0.0003 kl=0.0065 e1(0)=45.02 e2(0)=39.12
+[u   80 B  40] verifier(timeout) valid=True exp_root_over_dw=0.02556 EXP/DW=0.02556 dReach/DW=0.10087 dFull/DW=0.1234 C=0.0492 elig=False consec=0 | lr=0.0003 kl=0.0006 e1(0)=45.58 e2(0)=38.92
+[phase B] exit at global update 80 after 40 local updates: budget_exhausted (lr last 0.0003)
+[phase C] entry at global update 80, cap 40, active stages [1, 2], lr(first)=0.0003
+[u   90 C  10] verifier(warmup_forced) valid=True dreach_over_dw=0.0946 EXP/DW=0.02691 dReach/DW=0.09460 dFull/DW=0.1066 C=0.0491 elig=False consec=0 | lr=0.0003 kl=0.0095 e1(0)=44.80 e2(0)=37.22
+[u  100 C  20] verifier(timeout) valid=True dreach_over_dw=0.09136 EXP/DW=0.02796 dReach/DW=0.09136 dFull/DW=0.0973 C=0.0490 elig=False consec=0 | lr=0.0003 kl=0.0039 e1(0)=43.87 e2(0)=36.28
+[u  110 C  30] verifier(timeout) valid=True dreach_over_dw=0.08721 EXP/DW=0.03025 dReach/DW=0.08721 dFull/DW=0.0909 C=0.0488 elig=False consec=0 | lr=0.0003 kl=0.0021 e1(0)=43.01 e2(0)=34.60
+[u  120 C  40] verifier(timeout) valid=True dreach_over_dw=0.08537 EXP/DW=0.03019 dReach/DW=0.08537 dFull/DW=0.0877 C=0.0489 elig=False consec=0 | lr=0.0003 kl=0.0080 e1(0)=44.28 e2(0)=34.51
+[phase C] exit at global update 120 after 40 local updates: budget_exhausted (lr last 0.0003)
+[done] mode=full u120 wall=15.1s phases={'A': 3.4, 'B': 6.1, 'C': 4.7}
+EXIT=0

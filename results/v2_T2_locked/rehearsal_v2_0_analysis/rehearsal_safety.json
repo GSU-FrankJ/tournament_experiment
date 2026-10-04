@@ -1,0 +1,35 @@
+{
+ "condition": {
+  "G-S_pass_at_least_of_20": 19,
+  "normal_model_probability_at_least_per_q": 0.9,
+  "normal_model": "signed stage-1 error ~ N(mean, SD) fitted per q to that q's 10 rehearsal runs (SD with ddof = 1); a run passes G-S iff |error| <= the G-S threshold; G-A, G-F and G-N treated as passing; probability = P(Binomial(20, p_q) >= 18)"
+ },
+ "G-S_threshold": 0.05,
+ "n_expected": 20,
+ "n_completed": 20,
+ "pooled_n_G-S_pass": 20,
+ "pooled_needed": 19,
+ "per_q": {
+  "50": {
+   "n_runs": 10,
+   "n_G-S_pass": 10,
+   "n": 10,
+   "mean_signed": -0.01181102534156414,
+   "sd_ddof1": 0.017849854300316905,
+   "per_run_pass_prob": 0.9835333526142319,
+   "P_ge_k_of_n": 0.9958733577727633,
+   "meets_probability": true
+  },
+  "60": {
+   "n_runs": 10,
+   "n_G-S_pass": 10,
+   "n": 10,
+   "mean_signed": 0.0009060316963757569,
+   "sd_ddof1": 0.01874192681106968,
+   "per_run_pass_prob": 0.992294489768529,
+   "P_ge_k_of_n": 0.9995272279276824,
+   "meets_probability": true
+  }
+ },
+ "pass": true
+}
