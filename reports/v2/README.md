@@ -28,6 +28,7 @@ Entry point for the T=2 v2 report. Everything a reader needs is reachable from t
    | 9 | [pilot4_stabilization.md](pilot4_stabilization.md) | Pilot 4: stabilization round, analyses 1a-1d and runs 2a and 2b (80 runs) |
    | 10 | [protocol_lock_and_rehearsal.md](protocol_lock_and_rehearsal.md) | v1.0 lock, development-seed rehearsal, cusp diagnostic, Check 1 addendum |
    | 11 | [protocol_v1_1_confirmation.md](protocol_v1_1_confirmation.md) | v1.1 lock, re-rehearsal, fresh-seed confirmation |
+   | 12 | [protocol_v2_0_confirmation.md](protocol_v2_0_confirmation.md) | v2.0 lock (expected continuation in Phase B, gate G-S), re-rehearsal, fresh-seed confirmation (seeds 30501-30520), deviations |
 
 3. [summary.md](summary.md): running summary across the studies.
 4. [t2_report/README.md](t2_report/README.md): the report pack. 111 items (tables T01-T59, figures F01-F24, per-run tables D01-D09, key numbers K01-K19), each with source paths and SHA-256, the building script and its transformations. `manifest.csv` lists the items, `data_dictionary.csv` documents every column, `gaps.md`, `consistency.md` and `reevaluations.csv` list what is missing, what disagrees with the reports and what was recomputed. T05 and T57 count the files of `reports/v2/*.md` and T57 cites `docs/STATE.md` by SHA-256, so they and their entries in `manifest.csv` and `provenance/` were rebuilt once this index and the STATE.md section existed (the commit that follows the index in `git log -- reports/v2/t2_report`); the rest of the pack is as tagged `t2-v2-report-pack`.
@@ -81,6 +82,8 @@ Annotated tags (all on `main`'s history):
 | `t2-v2-report-pack` | `28e14b5` | the report pack as first built (builder at `7062b5b`); T05, T57 and their source entries were refreshed afterwards, see above |
 | `t2-v2-main` | the last commit of the publication (index, PI record, pack refresh) | state of `main` after the T=2 v2 publication |
 
+Not tagged and not on `main` (branch `v2-t2-refine`, not pushed): the lock of protocol v2.0 (expected continuation in Phase B, gate G-S) `1d6d4d0`; its LOCK record `f2d616c`; the launch commit of the v2.0 confirmation (40 runs, seeds 30501-30520) `d2e377d`; the checks-tool fix `3fedaa2`. Report: [protocol_v2_0_confirmation.md](protocol_v2_0_confirmation.md).
+
 Other commits: the v2 work starts from `657f54a` (tip of PR #7); the v2 line was merged into `main` by `8667672`; the LOCK record of v1.1 is `95c000e`. Launch commits of the studies:
 
 | study | launch commit | report |
@@ -93,6 +96,8 @@ Other commits: the v2 work starts from `657f54a` (tip of PR #7); the v2 line was
 | v1.0 rehearsal and Check 2 | `5b07293` | [protocol_lock_and_rehearsal.md](protocol_lock_and_rehearsal.md) |
 | v1.1 re-rehearsal | `95c000e` | [protocol_v1_1_confirmation.md](protocol_v1_1_confirmation.md) |
 | confirmation | `f6838ec` | [protocol_v1_1_confirmation.md](protocol_v1_1_confirmation.md) |
+| v2.0 re-rehearsal | `f2d616c` | [protocol_v2_0_confirmation.md](protocol_v2_0_confirmation.md) |
+| v2.0 confirmation | `d2e377d` | [protocol_v2_0_confirmation.md](protocol_v2_0_confirmation.md) |
 
 ## Known caveats
 

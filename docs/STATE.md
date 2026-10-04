@@ -1,6 +1,14 @@
 # Project state
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
+
+## T=2 protocol v2.0: re-rehearsal and fresh-seed confirmation (2026-10-04, branch v2-t2-refine, not pushed)
+
+Done: protocol v2.0 locked at `1d6d4d0` (v1.1 + expected continuation in Phase B + gate G-S ≤ 0.05; seed block 30501-30520; record `f2d616c`); re-rehearsal on the development seeds R1-R6 pass, R7 false as the checks tool computed it and accepted as met by owner decision D-R7 (C7 against the canonical reference IDENTICAL including `checkpoint.pt`); confirmation launched at `d2e377d`: **PASS**, q=50 19/20, q=60 20/20 (rule: at least 18 of 20 at each q), 40/40 exit 0. The one failed run is q=50 seed 30510, a Phase-A stage-2 failure.
+Start at `reports/v2/protocol_v2_0_confirmation.md` (verdict, lock, check (ii), re-rehearsal, per-run tables, deviations). Data: `results/v2_T2_locked/confirmation_v2_0*`, `rehearsal_v2_0*`, `v2_0/`.
+Settled this round: check (ii) of the continuation table, open in the R1 section below, was closed before the lock by decision D3 ((ii-a) to (ii-c) all pass, `results/v2_T2_locked/v2_0/continuation_check_v2_0.json`); the four stale early copies mentioned in the R1 section below (named in `reports/v2/refine/summary.md` item 6) were recorded in `results/v2_T2_locked/v2_0/stray_files_record.json` and deleted.
+Known issues: the checks tool's C7 reference path was a defect (fixed in `3fedaa2` after the confirmation; R7 re-run record in `results/v2_T2_locked/rehearsal_v2_0_checks/tool_fix_rerun/`); `test_registry_canonicalization` fails as before; the Phase-A clamp flags M1/M2 are recorded, not fixed; `tests/test_v2_locked.py` is replaced by `tests/test_v2_locked_v2_0.py` and the report-pack builder still reads the old path; the report pack (T57 cites this file by SHA-256, T05 counts `reports/v2/*.md`) is stale until the documented rebuild (out of scope); nothing from the v2.0 round is pushed.
+Next: the PI decides (push and tags, the report-pack rebuild, what follows the confirmation). No T=3 work and no stage-2 follow-up was started.
 
 ## T=2 accuracy-refinement round R1 (2026-10-03, branch v2-t2-refine, not pushed)
 
