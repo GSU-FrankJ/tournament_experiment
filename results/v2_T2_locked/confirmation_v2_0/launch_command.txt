@@ -1,0 +1,15 @@
+Launch command of the v2.0 confirmation (40 runs, seeds 30501-30520).
+
+Recorded after the launch (2026-10-04, same day), copied from the command line that was issued at 2026-10-04T04:24:54Z from the
+worktree /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine at HEAD d2e377d. launch_env.txt, launch_diff_stat.txt
+and launch_time_utc.txt (04:24:47Z) were written by a pre-launch script a few seconds earlier; they do not hold the tmux command.
+The rehearsal was launched the same way (jobs file results/v2_T2_locked/rehearsal_v2_0/jobs.txt, root results/v2_T2_locked/rehearsal_v2_0).
+
+tmux session name: confirm_v2_0
+
+tmux new-session -d -s confirm_v2_0 "cd /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine && cat results/v2_T2_locked/confirmation_v2_0/jobs.txt | xargs -P 20 -L 1 bash results/v2_T2_locked/launch_one_v2_0.sh results/v2_T2_locked/confirmation_v2_0"
+
+Each job is `bash results/v2_T2_locked/launch_one_v2_0.sh <root> <q> <seed>` (jobs.txt holds "<q> <seed>" per line, so xargs -L 1
+appends them after the root); the launcher sets OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1 inline, runs
+/home/fjiang4/tournament_experiment/.venv/bin/python -B run/run_v2_T2_locked.py --q <q> --seed <seed> --out-dir <root>/q<q>/seed<seed>
+and appends "q<q> s<seed> rc=<exit code>" to <root>/launcher.out.

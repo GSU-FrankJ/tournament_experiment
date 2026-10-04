@@ -1,0 +1,49 @@
+The checks tool's C7 comparison at f2d616c, repeated (D-R7, step 4 of the follow-up; the tool had kept only stdout)
+====================================================================================================
+written (UTC): 2026-10-04T05:12:38Z
+worktree     : /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine
+cwd of the call: the worktree. Command (as run_check_7 built it):
+  python tools/v2/compare_runs.py results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501 results/v2_pilots/phase2_regression/v2_full_f2d616c
+returncode: 1
+
+stdout:
+train_history.json: 0 differing leaves; excluded keys: ['time_sec']
+final_eval.json: 0 differing leaves; excluded keys: ['config_ref', 'dev_verifier_sec', 'final_eval_sec', 'path', 'seconds', 'stability_sec', 'time_sec', 'total_process_cpu_sec', 'total_wall_sec', 'train_rollout_sec', 'train_update_sec', 'training_sec', 'training_wall_sec', 'weights_npz']
+arrays.npz: 90 arrays, 0 differ []
+checkpoint_weights.npz: 12 arrays, 0 differ []
+phase_A_exit_arrays.npz: 41 arrays, 0 differ []
+phase_B_exit_arrays.npz: 41 arrays, 0 differ []
+
+stderr (full):
+Traceback (most recent call last):
+  File "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/tools/v2/compare_runs.py", line 76, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/tools/v2/compare_runs.py", line 60, in main
+    ca = torch.load(f"{da}/checkpoint.pt", weights_only=False)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fjiang4/tournament_experiment/.venv/lib/python3.12/site-packages/torch/serialization.py", line 1319, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fjiang4/tournament_experiment/.venv/lib/python3.12/site-packages/torch/serialization.py", line 659, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fjiang4/tournament_experiment/.venv/lib/python3.12/site-packages/torch/serialization.py", line 640, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501/checkpoint.pt'
+
+SHA-256 of the seven compared reference files, this worktree against the canonical worktree
+  this worktree : /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501
+  canonical     : /home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_pilots/phase1_regression/before/FINAL_A400_B25_C25/tel_q50_s10501
+  file                         this worktree                                                      canonical                                                          equal
+  train_history.json           5b01d51361b7f4c7b9c494578cc2684eb2207f881886bdc30e2695d5b15ed964   5b01d51361b7f4c7b9c494578cc2684eb2207f881886bdc30e2695d5b15ed964   True
+  final_eval.json              f157bef7119277b08a3fd04d68b913aef70f90055c388da56e16a7ea8b939fdd   f157bef7119277b08a3fd04d68b913aef70f90055c388da56e16a7ea8b939fdd   True
+  arrays.npz                   5cc38215a47e233ff33d6eeed24148298899a198c1d5dc48b8af3ad135ed9027   5cc38215a47e233ff33d6eeed24148298899a198c1d5dc48b8af3ad135ed9027   True
+  checkpoint_weights.npz       79d0fc0c83f0385c697a2ee7abfaa3263f09cefce7566bca28c0e19242748e13   79d0fc0c83f0385c697a2ee7abfaa3263f09cefce7566bca28c0e19242748e13   True
+  phase_A_exit_arrays.npz      a15df2598e436218184dcb1dc4b6e4aab70673f20b9bc89e86b42497238c1485   a15df2598e436218184dcb1dc4b6e4aab70673f20b9bc89e86b42497238c1485   True
+  phase_B_exit_arrays.npz      259ff4dd5e14509a103ccd2601ef5559adb9e30ae9becf8be6daa60a7f1ce071   259ff4dd5e14509a103ccd2601ef5559adb9e30ae9becf8be6daa60a7f1ce071   True
+  checkpoint.pt                ABSENT                                                             2eb8bb338348c1cedbfbf04a2b4ecc3b2264c11905ffeeabc2007f7841d94374   False
+
+Reading: the six tracked files are byte-identical to the canonical copies; checkpoint.pt (gitignored *.pt) is absent in this worktree,
+so torch.load raises FileNotFoundError after the six comparisons above. The pipeline is not involved.
