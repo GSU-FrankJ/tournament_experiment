@@ -1,6 +1,15 @@
 # Project state
 
-Last updated: 2026-10-04
+Last updated: 2026-10-05
+
+## T=2 sampler pilot R2c (2026-10-05, branch v2-t2-r2c, not pushed)
+
+Done: P0 (pushed `v2-t2-r2b` to `origin`; `main` NOT fast-forwarded because the primary checkout shows ` M SESSION_STATE.md`, the §1.2 skip rule; the D1 waivers recorded; branch and worktree `.claude/worktrees/v2-t2-r2c` from `62ecc436`); P1 (`start_weights.local_first` in `run/run_v2_stagewise.py`, wave `r2c_waveS` and C-R3 wave in `tools/v2/launch_refine.py`, the analysis tool with the mechanical selection rule `tools/v2/refine_r2c_analysis.py`, the launch checks with the D2 prefix identities `tools/v2/r2c_launch_checks.py`, 81 new tests; full suite 567 passed, 1 failed = the known registry test, 2 xfailed; independent review, no blocker; code commit `58c26716`; C-R3: the unchanged v2.0 entry point reproduces `rehearsal_v2_0` in 20/20); P2 (80 runs, 4 arms x 20, all exit 0, launch checks 80/80 incl. the prefix identities 20/20 for each late arm).
+Result: no arm is selected. All four arms hold part (b); `A_peak35`, `A_peak40` and `A_peak50_late800` meet part (a) at q=50 and none meets it at q=60 (every CI of the paired difference contains 0; means -0.0054, -0.0065, -0.0059, +0.0002). An independent recomputation from `per_run.csv` agrees with the tool. The round stopped after the pilot report (D3, §3): no protocol v2.1, lock, re-rehearsal or confirmation; seeds 40501-40520 unused.
+Start at `reports/v2/refine_r2c/summary.md` (reading order, checks, result table, deviations); selection `03_selection.md`; data `results/v2_refine_r2c/`.
+Known issues: `test_registry_canonicalization` fails as before; run `pytest tests`, not a bare `pytest`; `main` is not fast-forwarded (local `d1b8443`, `origin/main` `f02a256`; commands in `reports/v2/refine_r2c/00_housekeeping.md`); the R2b report-pack refresh stays waived (builder diagnosis carried there); `v2-t2-r2c` is local only (§4.6 push belongs to the lock round, not reached).
+Next: the owner decides. No arm was added, no rule relaxed, no combination tried.
+Addendum to the R2b section below: its "not pushed" is stale; `v2-t2-r2b` (`62ecc436`) was pushed to `origin` on 2026-10-05 (R2c P0 §1.1).
 
 ## T=2 terminal-stage follow-up round R2b (2026-10-04, branch v2-t2-r2b, not pushed)
 
