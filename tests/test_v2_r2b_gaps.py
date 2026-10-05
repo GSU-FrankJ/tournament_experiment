@@ -239,9 +239,9 @@ def test_phase_loops_draw_their_starts_through_run_draw_starts(monkeypatch, p_pa
     calls = []
     orig = Run.draw_starts
 
-    def rec(self, stage, n):
+    def rec(self, stage, n, local=1):
         calls.append((stage, n))
-        return orig(self, stage, n)
+        return orig(self, stage, n, local)
 
     monkeypatch.setattr(Run, "draw_starts", rec)
     cfg = base_config()

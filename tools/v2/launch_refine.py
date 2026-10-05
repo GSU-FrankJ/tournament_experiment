@@ -14,6 +14,9 @@ Waves (``--wave``):
   r2b_v20_repro  C-R2 (round R2b): the UNCHANGED v2.0 ``run/run_v2_T2_locked.py --q Q --seed S`` into
              ``<root>/v20_reproduction/q{Q}/seed{S}`` (root defaults to ``results/v2_refine_r2b``);
              ``r2b_waveA`` / ``r2b_waveP`` are the R2b pilot waves (see ``R2B_*`` below).
+  r2c_waveS  R2c pilot wave S: four start-distribution arms, full Phase A from scratch, into
+             ``<root>/waveS/q{q}/seed{s}/<arm>`` (root defaults to ``results/v2_refine_r2c``; see ``R2C_*``);
+             ``r2c_v20_repro`` is C-R3, the UNCHANGED v2.0 entry point into ``<root>/v20_reproduction``.
 
 Every config carries the record of the locked protocol (``protocols/v2_T2_locked_v1_1.json``)
 and every new key explicitly (defaults written out). The arm tables below are module constants
@@ -59,7 +62,8 @@ MAX_WORKERS = 40
 WAVES = ("v11_repro", "parents_A", "stage1", "stage2")
 WAVE_DIR = {"v11_repro": "v11_reproduction", "parents_A": "parents_A", "stage1": "stage1",
             "stage2": "stage2", "r2b_waveA": "waveA", "r2b_waveP": "waveP",
-            "r2b_v20_repro": "v20_reproduction"}
+            "r2b_v20_repro": "v20_reproduction", "r2c_waveS": "waveS",
+            "r2c_v20_repro": "v20_reproduction"}
 PLACEHOLDER_SHA = "<sha256 computed at launch>"
 
 LOCKED_FLAGS = {"reward_mode": "expected", "stage2_update_mode": "frozen",
@@ -165,6 +169,38 @@ R2B_WAVEP_ARMS: Dict[str, Dict[str, Any]] = {
                                        "u1600 state (locked Phase-A flags)"},
 }
 R2B_ARMS: Dict[str, Dict[str, Dict[str, Any]]] = {"r2b_waveA": R2B_WAVEA_ARMS, "r2b_waveP": R2B_WAVEP_ARMS}
+
+# ---- round R2c (prompt D2): four start-distribution arms, one factor each, PPO-internal. Full Phase A from
+# scratch (the same config as R1's parents_A plus the four R2b keys, ``start_weights`` being the only value
+# that differs); baseline = R1's parents_A, paired by (q, seed). ``local_first`` is written explicitly in all
+# four arms: the local updates before it draw bin-balanced (bit-identical to the locked run), the others
+# draw peak-focused.
+R2C_WAVES = ("r2c_waveS",)
+R2C_REPRO = "r2c_v20_repro"      # C-R3: the UNCHANGED run/run_v2_T2_locked.py (v2.0) into <root>/v20_reproduction
+R2C_ROOT = ROOT / "results" / "v2_refine_r2c"
+REPRO_WAVES = (R2B_REPRO, R2C_REPRO)
+
+
+def _peak_start(share: float, local_first: int) -> Dict[str, Any]:
+    """The ``start_weights`` value of a wave-S arm (half-width 20, as in R2b)."""
+    return {"scheme": "peak_focused", "peak_half_width": PEAK_HALF_WIDTH, "peak_share": share,
+            "local_first": local_first}
+
+
+R2C_WAVE_S_ARMS: Dict[str, Dict[str, Any]] = {
+    "A_peak35": {"r2b": {"start_weights": _peak_start(0.35, 1)},
+                 "definition": "start-distribution arm: peak-focused exploring starts from update 1, "
+                               "share 0.35 (bin-balanced: 0.10 / 0.091)"},
+    "A_peak40": {"r2b": {"start_weights": _peak_start(0.40, 1)},
+                 "definition": "start-distribution arm: peak-focused exploring starts from update 1, share 0.40"},
+    "A_peak50_late400": {"r2b": {"start_weights": _peak_start(0.50, 1201)},
+                         "definition": "start-distribution arm: bin-balanced for updates 1-1200, "
+                                       "peak-focused with share 0.50 from update 1201 (the last 400)"},
+    "A_peak50_late800": {"r2b": {"start_weights": _peak_start(0.50, 801)},
+                         "definition": "start-distribution arm: bin-balanced for updates 1-800, "
+                                       "peak-focused with share 0.50 from update 801 (the last 800)"},
+}
+R2C_ARMS: Dict[str, Dict[str, Dict[str, Any]]] = {"r2c_waveS": R2C_WAVE_S_ARMS}
 V11_ARMS: Tuple[str, ...] = ("locked",)
 METHOD_ARMS: Dict[str, Dict[str, Tuple[str, ...]]] = {
     "1 polish": {"stage1": ("B_polish1", "B_polish2"), "stage2": ("A_polish1", "A_polish2")},
@@ -224,6 +260,11 @@ R2B_EXPECTED_DIFFS: Dict[str, Dict[str, Tuple[str, FrozenSet[str]]]] = {
         "P20_lr3e-4": ("A_detmean", frozenset({"pathwise_epochs", "pathwise_minibatch", "lr_decay"})),
         "A_ctrl200_lr3e-4": ("A_ctrl200", frozenset({"lr_decay"})),
     },
+}
+# R2c: the four wave-S arms differ from the R1 builder's own parents_A config (R2b keys at their defaults)
+# in start_weights only.
+R2C_EXPECTED_DIFFS: Dict[str, Dict[str, Tuple[str, FrozenSet[str]]]] = {
+    "r2c_waveS": {arm: ("A_parent", frozenset({"start_weights"})) for arm in R2C_WAVE_S_ARMS},
 }
 
 
@@ -300,9 +341,10 @@ def r2b_comparator_config(wave: str, q: int, seed: int, root: Path, require_pare
     the R2b defaults written out. All arms of a wave share one comparator arm per table row."""
     root = Path(root).resolve()
     out: Dict[str, Dict[str, Any]] = {}
-    for arm, (ref, _) in R2B_EXPECTED_DIFFS[wave].items():
+    table = R2C_EXPECTED_DIFFS if wave in R2C_EXPECTED_DIFFS else R2B_EXPECTED_DIFFS
+    for arm, (ref, _) in table[wave].items():
         if ref not in out:
-            job = (build_parents_a(ref, q, seed, root) if wave == "r2b_waveA"
+            job = (build_parents_a(ref, q, seed, root) if wave in ("r2b_waveA", "r2c_waveS")
                    else build_stage2(ref, q, seed, root, require_parents))
             out[ref] = _with_r2b_keys(job.cfg, {})
     return out
@@ -387,7 +429,7 @@ def build_parents_a(arm: str, q: int, seed: int, root: Path,
     cfg["budget_overrides"] = {"episodes_per_update": int(st["episodes_per_update"])}
     cfg["lr_decay"] = _lr_windows(st, "A", _locked_window("A"))
     cfg["full_state_at"] = [1200]
-    if wave in R2B_WAVES:
+    if wave in R2B_WAVES + R2C_WAVES:
         _with_r2b_keys(cfg, st.get("r2b", {}))
     return Job(cfg, out)
 
@@ -454,10 +496,10 @@ def build_v11_repro(q: int, seed: int, root: Path) -> Job:
                 "run": f"v2T2locked_q{q}_s{seed}", "arm": "locked"}, out)
 
 
-def build_v20_repro(q: int, seed: int, root: Path) -> Job:
-    """C-R2 stub: the unchanged v2.0 locked entry point writes its own run_config.json."""
-    out = str(root / WAVE_DIR[R2B_REPRO] / f"q{q}" / f"seed{seed}")
-    return Job({"locked_entry_point": True, "wave": R2B_REPRO, "q": q, "seed": int(seed),
+def build_v20_repro(q: int, seed: int, root: Path, wave: str = R2B_REPRO) -> Job:
+    """C-R2 / C-R3 stub: the unchanged v2.0 locked entry point writes its own run_config.json."""
+    out = str(root / WAVE_DIR[wave] / f"q{q}" / f"seed{seed}")
+    return Job({"locked_entry_point": True, "wave": wave, "q": q, "seed": int(seed),
                 "run": f"v2T2locked_q{q}_s{seed}", "arm": "locked"}, out)
 
 
@@ -475,13 +517,21 @@ def build_configs(wave: str, qs: Sequence[int], seeds: Sequence[int],
         require_parents: raise when a parent checkpoint is missing; when False a missing parent
             gets a placeholder SHA-256 (dry runs before the parents exist).
     """
-    if wave not in WAVES + R2B_WAVES + (R2B_REPRO,):
-        raise ValueError(f"wave {wave!r} not in {WAVES + R2B_WAVES + (R2B_REPRO,)}")
+    all_waves = WAVES + R2B_WAVES + R2C_WAVES + REPRO_WAVES
+    if wave not in all_waves:
+        raise ValueError(f"wave {wave!r} not in {all_waves}")
     root = Path(root).resolve()
-    if wave == R2B_REPRO:
+    if wave in REPRO_WAVES:
         if arms:
             raise ValueError(f"wave {wave} has no arms")
-        return [build_v20_repro(q, s, root) for q in qs for s in seeds]
+        return [build_v20_repro(q, s, root, wave) for q in qs for s in seeds]
+    if wave in R2C_WAVES:
+        arm_table = R2C_ARMS[wave]
+        arms = tuple(arm_table if arms is None else arms)
+        bad = [a for a in arms if a not in arm_table]
+        if bad:
+            raise ValueError(f"arms {bad} not valid for wave {wave}: {list(arm_table)}")
+        return [build_parents_a(a, q, s, root, arm_table, wave) for q in qs for s in seeds for a in arms]
     if wave in R2B_WAVES:
         arm_table = R2B_ARMS[wave]
         arms = tuple(arm_table if arms is None else arms)
@@ -675,25 +725,31 @@ def check_no_previous_run(jobs: Sequence[Job]) -> List[str]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """CLI entry (see the module docstring)."""
     p = argparse.ArgumentParser(description="R1 wave launcher", allow_abbrev=False)
-    p.add_argument("--wave", choices=WAVES + R2B_WAVES + (R2B_REPRO,), required=True)
+    p.add_argument("--wave", choices=WAVES + R2B_WAVES + R2C_WAVES + REPRO_WAVES, required=True)
     p.add_argument("--qs", type=int, nargs="+", default=list(DEFAULT_QS))
     p.add_argument("--seeds", type=int, nargs="+", default=list(DEFAULT_SEEDS))
     p.add_argument("--arms", nargs="+", default=None, help="default: all arms of the wave")
     p.add_argument("--workers", type=int, default=20, help=f"at most {MAX_WORKERS}")
     p.add_argument("--root", default=None,
                    help="results root (default: results/v2_refine for the R1 waves, "
-                        "results/v2_refine_r2b for the R2b waves)")
+                        "results/v2_refine_r2b for the R2b waves, results/v2_refine_r2c for the R2c waves)")
     p.add_argument("--code-commit", default=None, help="SHA of the code commit (recorded)")
     p.add_argument("--dry-run", action="store_true", help="write configs + dryrun record, validate")
     p.add_argument("--no-validate", action="store_true", help="skip validate_config (tests)")
     a = p.parse_args(argv)
     if not 1 <= a.workers <= MAX_WORKERS:
         p.error(f"--workers must be in 1..{MAX_WORKERS}; got {a.workers}")
-    if a.wave in ("v11_repro", R2B_REPRO) and a.arms:
+    if a.wave in ("v11_repro",) + REPRO_WAVES and a.arms:
         p.error(f"wave {a.wave} has no arms")
     if any(sd not in DEFAULT_SEEDS for sd in a.seeds):   # D1/section 7: nothing outside 10501-10510
         p.error(f"seeds must be development seeds {DEFAULT_SEEDS[0]}-{DEFAULT_SEEDS[-1]}; got {a.seeds}")
-    root = Path(a.root or (R2B_ROOT if a.wave in R2B_WAVES + (R2B_REPRO,) else DEFAULT_ROOT)).resolve()
+    if a.wave in R2C_WAVES + (R2C_REPRO,):
+        default_root = R2C_ROOT
+    elif a.wave in R2B_WAVES + (R2B_REPRO,):
+        default_root = R2B_ROOT
+    else:
+        default_root = DEFAULT_ROOT
+    root = Path(a.root or default_root).resolve()
     try:
         jobs = build_configs(a.wave, a.qs, a.seeds, a.arms, root, require_parents=not a.dry_run)
     except (ValueError, FileNotFoundError) as exc:
@@ -703,7 +759,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         p.error(f"{len(busy)} out dir(s) already hold a run (status.json or run.log), "
                 f"e.g. {busy[0]}")
     validation: Dict[str, Any] = {}
-    if not a.no_validate and a.wave not in ("v11_repro", R2B_REPRO):
+    if not a.no_validate and a.wave not in ("v11_repro",) + REPRO_WAVES:
         rows = validate_jobs(jobs)
         validation = {"per_arm": summarize_validation(rows),
                       "n_invalid": sum(1 for r in rows if not r["ok"])}

@@ -707,7 +707,7 @@ def test_r2b_configs_validate(planned):
 
 def test_r2b_waves_do_not_change_the_r1_launcher_tables():
     assert L.WAVES == ("v11_repro", "parents_A", "stage1", "stage2")
-    assert set(L.WAVE_DIR) == set(L.WAVES) | set(L.R2B_WAVES) | {L.R2B_REPRO}
+    assert set(L.WAVE_DIR) == set(L.WAVES) | set(L.R2B_WAVES) | {L.R2B_REPRO} | set(L.R2C_WAVES) | {L.R2C_REPRO}
 
 
 def test_c_r2_wave_is_the_unchanged_locked_entry_point(tmp_path):

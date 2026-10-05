@@ -48,6 +48,10 @@ C7). New behaviour, all behind flags recorded in ``manifest.json``:
                       one exact-gradient step per minibatch (defaults 1 and null = the R1 single
                       full-batch step; with E = 10, M = 256 and 512 rows: 20 steps, the minibatch
                       stream drawn as the PPO update draws it)
+  R2c optional key of start_weights (peak_focused only; absent == 1 == the R2b behaviour):
+    local_first       L >= 1: the local updates before L draw bin-balanced (the same calls on the same
+                      ``start`` stream as without start_weights, so those updates are bit-identical to
+                      the locked run), the updates from L on draw peak-focused
   fixed_budget   no early exit; the update at which the existing phase rule would have fired is
                  recorded; the verifier keeps the existing cadence
   flags          reward_mode {sampled, expected}; stage2_update_mode {joint, frozen};
@@ -126,6 +130,7 @@ LR_DECAY_KEYS = ("phase", "start_lr", "end_lr", "local_first", "local_last")
 # R2b optional keys (absent == the locked behaviour, bit-identical)
 START_SCHEMES = ("bin_balanced", "peak_focused")
 PEAK_START_KEYS = ("scheme", "peak_half_width", "peak_share")
+PEAK_START_OPTIONAL = ("local_first",)                          # R2c: first local update of the peak-focused draw
 START_MODES = ("phase_A", "phase_A_continue", "phase_P")        # modes whose phases draw exploring starts
 CLAMP_MODES = ("phase_A", "phase_A_continue", "phase_B")        # modes whose phases sample learner actions
 
@@ -273,13 +278,17 @@ def validate_config(cfg: Dict) -> None:
             if set(sw) != {"scheme"}:
                 raise ConfigError("start_weights scheme bin_balanced takes no other key")
         else:
-            if set(sw) != set(PEAK_START_KEYS):
-                raise ConfigError(f"start_weights peak_focused must have exactly {PEAK_START_KEYS}")
+            if not set(PEAK_START_KEYS) <= set(sw) <= set(PEAK_START_KEYS) | set(PEAK_START_OPTIONAL):
+                raise ConfigError(f"start_weights peak_focused must have exactly {PEAK_START_KEYS} "
+                                  f"(and optionally {PEAK_START_OPTIONAL})")
             hw, sh = sw["peak_half_width"], sw["peak_share"]
             if isinstance(hw, bool) or not isinstance(hw, (int, float)) or not hw > 0:
                 raise ConfigError("start_weights.peak_half_width must be a positive number")
             if isinstance(sh, bool) or not isinstance(sh, (int, float)) or not 0.0 < sh < 1.0:
                 raise ConfigError("start_weights.peak_share must lie in (0, 1)")
+            lf = sw.get("local_first", 1)
+            if isinstance(lf, bool) or not isinstance(lf, int) or lf < 1:
+                raise ConfigError("start_weights.local_first must be an int >= 1")
     cl = cfg.get("clamp_likelihood", "density")
     if cl not in CLAMP_LIKELIHOODS:
         raise ConfigError(f"clamp_likelihood {cl!r} not in {CLAMP_LIKELIHOODS}")
@@ -469,11 +478,16 @@ class Run:
         return lr_at(lin, "C", local)
 
     # ------------------------------------------------------------------ R2b helpers
-    def draw_starts(self, stage: int, n: int) -> np.ndarray:
+    def draw_starts(self, stage: int, n: int, local: int = 1) -> np.ndarray:
         """Exploring starts on D_stage from the ``start`` stream: bin-balanced (the locked scheme, the
-        default) or, with ``start_weights = {scheme: peak_focused, ...}``, peak-focused."""
+        default) or, with ``start_weights = {scheme: peak_focused, ...}``, peak-focused.
+
+        ``local`` is the phase-local update the draw belongs to. With ``start_weights.local_first = L``
+        (default 1) the updates before L draw bin-balanced, exactly as without ``start_weights`` (same
+        calls on the same stream), and the updates from L on draw peak-focused.
+        """
         sw, rng = self.start_weights, self.rngs["start"]
-        if sw is None or sw["scheme"] == "bin_balanced":
+        if sw is None or sw["scheme"] == "bin_balanced" or local < int(sw.get("local_first", 1)):
             return self.sampler.balanced(stage, n, rng)
         return self.sampler.peak_focused(stage, n, rng, float(sw["peak_half_width"]), float(sw["peak_share"]))
 
@@ -667,14 +681,14 @@ class Run:
             rng_start = self.rngs["start"]
             if phase == "A":
                 t0 = np.full(n_ep, spec.T)
-                d0 = self.draw_starts(spec.T, n_ep)
+                d0 = self.draw_starts(spec.T, n_ep, local)
             elif phase == "B":
                 t0 = np.ones(n_ep, dtype=int)
                 d0 = np.zeros(n_ep)
             else:
                 nr, ne = int(P["phase_c_root"]), int(P["phase_c_es"])
                 t0 = np.concatenate([np.ones(nr, dtype=int), np.full(ne, spec.T)])
-                d0 = np.concatenate([np.zeros(nr), self.draw_starts(spec.T, ne)])
+                d0 = np.concatenate([np.zeros(nr), self.draw_starts(spec.T, ne, local)])
                 perm = rng_start.permutation(n_ep)
                 t0, d0 = t0[perm], d0[perm]
             roles = rng_start.integers(0, 2, size=n_ep)
@@ -978,7 +992,7 @@ class Run:
             actor_lr, critic_lr = read_lr(agent)
             n_ep = int(P["episodes_per_update"])
             rng_start = self.rngs["start"]
-            d0 = self.draw_starts(stage, n_ep)
+            d0 = self.draw_starts(stage, n_ep, local)
             roles = rng_start.integers(0, 2, size=n_ep)
             d_learner = np.where(roles == 0, d0, -d0).astype(float)
             t_u = time.perf_counter()
