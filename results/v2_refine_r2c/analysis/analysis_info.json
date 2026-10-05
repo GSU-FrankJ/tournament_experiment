@@ -1,0 +1,39 @@
+{
+ "boot_seed": 20261005,
+ "n_boot": 10000,
+ "arms": [
+  "A_peak35",
+  "A_peak40",
+  "A_peak50_late400",
+  "A_peak50_late800"
+ ],
+ "reference_arms": [
+  "R2b_A_peak25",
+  "R2b_A_peak50"
+ ],
+ "roots": {
+  "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c",
+  "wave_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS",
+  "r1_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine",
+  "ref_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1",
+  "r2b_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b",
+  "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/analysis",
+  "reports": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/reports/v2/refine_r2c"
+ },
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ]
+}

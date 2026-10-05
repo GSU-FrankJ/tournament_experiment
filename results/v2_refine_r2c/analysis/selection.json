@@ -1,0 +1,216 @@
+{
+ "rule": "Criterion per arm (as in R1/R2b): (a) the 95% percentile bootstrap CI of the mean paired difference of the absolute signed peak error against parents_A excludes 0 in the improving direction at BOTH q; (b) no run that passed G-A and its G-N part under the baseline fails it under the arm. Bootstrap: 10,000 resamples, numpy.random.default_rng(20261005), one fresh generator per (q, statistic) in table order.\n\nSelection rule. Among the arms meeting (a) and (b): the largest total number of runs with |peak error| <= 0.05 over both q; tie -> the smaller mean |peak error| over both q; further tie -> the smaller change from the locked sampler (later local_first, then smaller share). The selected arm's start_weights is the one pipeline change of v2.1. No arm meets (a) and (b): write the pilot reports and stop. Do not relax the rule, do not add arms.",
+ "interpretation": [
+  "|peak error| is the primary metric `stage2_peak_rel_err_abs` of the end-of-A last iterate (final tier).",
+  "\"Runs with |peak error| <= 0.05\" is the count, over the 20 runs of the arm (both q), with primary <= 0.05 (inclusive: a run with exactly 0.05 counts).",
+  "\"Mean |peak error| over both q\" is the mean of the primary metric over all 20 runs of the arm.",
+  "An arm is complete iff all 20 planned runs are done and all 10 paired differences per q are finite; an arm that is not complete cannot be selected (it is recorded, never skipped). Arms are compared on the same footing.",
+  "Eligible = (a) met at both q and (b) holds (b_status = holds: no violation and nothing pending) and complete.",
+  "The tie-break key of the last step is (-local_first, share) ascending, local_first read from the arm's start_weights (default 1) and share from its peak_share. If the first two arms of the ranking agree in all four key components the rule gives no answer: nothing is selected and the tie is reported (the arm name is never used to decide).",
+  "R2b's A_peak25 and A_peak50 appear in the cross-arm tables as reference rows only; they are never inputs of the selection."
+ ],
+ "sort_key_description": "sort key (ascending) = (-number of runs with |peak error| <= 0.05 over both q, mean |peak error| over both q, -local_first, share)",
+ "boot_seed": 20261005,
+ "n_boot": 10000,
+ "roots": {
+  "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c",
+  "wave_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS",
+  "r1_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine",
+  "ref_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2/results/v2_T2_locked/rehearsal_v1_1",
+  "r2b_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b",
+  "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/analysis",
+  "reports": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/reports/v2/refine_r2c"
+ },
+ "arms": [
+  {
+   "arm": "A_peak35",
+   "complete": true,
+   "not_done_runs": [],
+   "a": {
+    "q50": {
+     "n_pairs": 10,
+     "mean": -0.030807618933465897,
+     "ci_lo": -0.04864333055947894,
+     "ci_hi": -0.013548782604701765,
+     "met": true
+    },
+    "q60": {
+     "n_pairs": 10,
+     "mean": -0.0053995343293155515,
+     "ci_lo": -0.016390924359458856,
+     "ci_hi": 0.007136952848453439,
+     "met": false
+    }
+   },
+   "a_met": false,
+   "b_status": "holds",
+   "b_violations": [],
+   "b_pending": [],
+   "n_runs_complete": {
+    "q50": 10,
+    "q60": 10
+   },
+   "n_abs_peak_le_0.05": {
+    "q50": 8,
+    "q60": 5
+   },
+   "n_abs_peak_le_0.05_total": 13,
+   "mean_abs_peak_error": 0.04136761069034183,
+   "local_first": 1,
+   "share": 0.35,
+   "ineligible_reasons": [
+    "(a) not met at q60"
+   ],
+   "eligible": false
+  },
+  {
+   "arm": "A_peak40",
+   "complete": true,
+   "not_done_runs": [],
+   "a": {
+    "q50": {
+     "n_pairs": 10,
+     "mean": -0.023521242132037566,
+     "ci_lo": -0.03972864165542581,
+     "ci_hi": -0.007711948791485902,
+     "met": true
+    },
+    "q60": {
+     "n_pairs": 10,
+     "mean": -0.006522795988830117,
+     "ci_lo": -0.018721551646694687,
+     "ci_hi": 0.0065406417352052975,
+     "met": false
+    }
+   },
+   "a_met": false,
+   "b_status": "holds",
+   "b_violations": [],
+   "b_pending": [],
+   "n_runs_complete": {
+    "q50": 10,
+    "q60": 10
+   },
+   "n_abs_peak_le_0.05": {
+    "q50": 7,
+    "q60": 5
+   },
+   "n_abs_peak_le_0.05_total": 12,
+   "mean_abs_peak_error": 0.04444916826129872,
+   "local_first": 1,
+   "share": 0.4,
+   "ineligible_reasons": [
+    "(a) not met at q60"
+   ],
+   "eligible": false
+  },
+  {
+   "arm": "A_peak50_late400",
+   "complete": true,
+   "not_done_runs": [],
+   "a": {
+    "q50": {
+     "n_pairs": 10,
+     "mean": -0.014302397373782883,
+     "ci_lo": -0.030246158500523992,
+     "ci_hi": 0.0005320671038088943,
+     "met": false
+    },
+    "q60": {
+     "n_pairs": 10,
+     "mean": -0.005867769935009456,
+     "ci_lo": -0.017860516599028976,
+     "ci_hi": 0.005828722852735351,
+     "met": false
+    }
+   },
+   "a_met": false,
+   "b_status": "holds",
+   "b_violations": [],
+   "b_pending": [],
+   "n_runs_complete": {
+    "q50": 10,
+    "q60": 10
+   },
+   "n_abs_peak_le_0.05": {
+    "q50": 5,
+    "q60": 5
+   },
+   "n_abs_peak_le_0.05_total": 10,
+   "mean_abs_peak_error": 0.04938610366733638,
+   "local_first": 1201,
+   "share": 0.5,
+   "ineligible_reasons": [
+    "(a) not met at q50, q60"
+   ],
+   "eligible": false
+  },
+  {
+   "arm": "A_peak50_late800",
+   "complete": true,
+   "not_done_runs": [],
+   "a": {
+    "q50": {
+     "n_pairs": 10,
+     "mean": -0.0177795490817231,
+     "ci_lo": -0.033523120471976996,
+     "ci_hi": -0.0013304196281990074,
+     "met": true
+    },
+    "q60": {
+     "n_pairs": 10,
+     "mean": 0.00016816852652968214,
+     "ci_lo": -0.015590479177411805,
+     "ci_hi": 0.015090662634214089,
+     "met": false
+    }
+   },
+   "a_met": false,
+   "b_status": "holds",
+   "b_violations": [],
+   "b_pending": [],
+   "n_runs_complete": {
+    "q50": 10,
+    "q60": 10
+   },
+   "n_abs_peak_le_0.05": {
+    "q50": 7,
+    "q60": 1
+   },
+   "n_abs_peak_le_0.05_total": 8,
+   "mean_abs_peak_error": 0.050665497044135845,
+   "local_first": 801,
+   "share": 0.5,
+   "ineligible_reasons": [
+    "(a) not met at q60"
+   ],
+   "eligible": false
+  }
+ ],
+ "ranking": [],
+ "ineligible": {
+  "A_peak35": [
+   "(a) not met at q60"
+  ],
+  "A_peak40": [
+   "(a) not met at q60"
+  ],
+  "A_peak50_late400": [
+   "(a) not met at q50, q60"
+  ],
+  "A_peak50_late800": [
+   "(a) not met at q60"
+  ]
+ },
+ "selected": null,
+ "selected_start_weights": null,
+ "outcome": "none_eligible",
+ "decided_by": null,
+ "reason": "No arm meets both parts of the criterion with a complete set of runs. A_peak35: (a) not met at q60; A_peak40: (a) not met at q60; A_peak50_late400: (a) not met at q50, q60; A_peak50_late800: (a) not met at q60.",
+ "all_arms_complete": true,
+ "incomplete_arms": [],
+ "reference_arms_excluded_from_selection": [
+  "R2b_A_peak25",
+  "R2b_A_peak50"
+ ]
+}

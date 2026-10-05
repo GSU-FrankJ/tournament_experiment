@@ -1,0 +1,4193 @@
+{
+ "summary": {
+  "tool": "tools/v2/r2c_launch_checks.py",
+  "code_commit": "58c2671649407cf0611adf7564ff6d88e0ba3a73",
+  "head": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+  "roots": {
+   "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c",
+   "r1_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine",
+   "wave_dirname": "waveS"
+  },
+  "allowed_after_code": [
+   "results/",
+   "reports/v2/refine_r2c/"
+  ],
+  "arms": [
+   "A_peak35",
+   "A_peak40",
+   "A_peak50_late400",
+   "A_peak50_late800"
+  ],
+  "prefix_bounds": {
+   "A_peak50_late400": 1200,
+   "A_peak50_late800": 800
+  },
+  "n_runs": 80,
+  "n_runs_ok": 80,
+  "checks": {
+   "C1": {
+    "n": 80,
+    "n_pass": 80
+   },
+   "C2": {
+    "n": 80,
+    "n_pass": 80
+   },
+   "C3": {
+    "n": 80,
+    "n_pass": 80
+   },
+   "C4": {
+    "n": 80,
+    "n_pass": 80
+   },
+   "C5": {
+    "n": 40,
+    "n_pass": 40
+   }
+  },
+  "all_pass": true
+ },
+ "runs": [
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10501/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10501/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10501/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10501/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10502/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10502/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10502/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10502/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10503/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10503/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10503/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10503/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10504/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10504/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10504/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10504/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10505/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10505/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10505/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10505/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10506/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10506/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10506/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10506/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10507/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10507/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10507/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10507/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10508/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10508/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10508/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10508/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10509/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10509/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10509/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10509/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10510/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10510/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10510/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q50/seed10510/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10501/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10501/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10501/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10501/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10502/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10502/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10502/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10502/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10503/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10503/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10503/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10503/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10504/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10504/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10504/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10504/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10505/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10505/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10505/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10505/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10506/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10506/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10506/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10506/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10507/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10507/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10507/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10507/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10508/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10508/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10508/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10508/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10509/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10509/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10509/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10509/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak35",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10510/A_peak35",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.35,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak40",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10510/A_peak40",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.4,
+      "local_first": 1
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "required": false,
+     "first_diff_update": 25,
+     "ok": true,
+     "problems": []
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late400",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10510/A_peak50_late400",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 1201
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 1200,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 48,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 1225
+     },
+     "state": {
+      "identical": true,
+      "n_fields": 23,
+      "differing_fields": [],
+      "first_difference": null,
+      "global_rng_identical": false
+     },
+     "v2_updates": {
+      "n_rows_ref": 1200,
+      "n_rows_new": 1200,
+      "n_identical": 1200,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  },
+  {
+   "arm": "A_peak50_late800",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2c/results/v2_refine_r2c/waveS/q60/seed10510/A_peak50_late800",
+   "checks": {
+    "C1": {
+     "ok": true,
+     "problems": [],
+     "manifest_commit": "3ad1b07d8268e1e5fc0259455f0fd4863367743d",
+     "manifest_dirty": false
+    },
+    "C2": {
+     "ok": true,
+     "problems": [],
+     "config_diff_vs_r1": [
+      "start_weights"
+     ]
+    },
+    "C3": {
+     "ok": true,
+     "problems": [],
+     "start_weights": {
+      "scheme": "peak_focused",
+      "peak_half_width": 20,
+      "peak_share": 0.5,
+      "local_first": 801
+     }
+    },
+    "C4": {
+     "ok": true,
+     "problems": []
+    },
+    "C5": {
+     "bound": 800,
+     "exports": {
+      "prefix_ok": true,
+      "n_prefix": 32,
+      "missing": [],
+      "extra": [],
+      "differing": [],
+      "n_differing_in_prefix": 0,
+      "first_diff_update": 825
+     },
+     "v2_updates": {
+      "n_rows_ref": 800,
+      "n_rows_new": 800,
+      "n_identical": 800,
+      "n_columns": 47,
+      "columns_only_in_one": []
+     },
+     "ok": true,
+     "problems": [],
+     "required": true
+    }
+   },
+   "ok": true
+  }
+ ]
+}

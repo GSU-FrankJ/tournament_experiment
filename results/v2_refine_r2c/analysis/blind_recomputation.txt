@@ -1,0 +1,9 @@
+rows by arm: {'A_base': 20, 'A_peak35': 20, 'A_peak40': 20, 'A_peak50_late400': 20, 'A_peak50_late800': 20, 'R2b_A_peak25': 20, 'R2b_A_peak50': 20, 'parent_u1600': 20}
+status values: {'done': 140, 'reference': 20}
+A_peak35           a50 -0.03081 [-0.04864,-0.01355] met | a60 -0.00540 [-0.01639,+0.00714] not | b_viol=[] | n<=0.05 8+5=13 | mean|peak| 0.04137 | eligible=False
+A_peak40           a50 -0.02352 [-0.03973,-0.00771] met | a60 -0.00652 [-0.01872,+0.00654] not | b_viol=[] | n<=0.05 7+5=12 | mean|peak| 0.04445 | eligible=False
+A_peak50_late400   a50 -0.01430 [-0.03025,+0.00053] not | a60 -0.00587 [-0.01786,+0.00583] not | b_viol=[] | n<=0.05 5+5=10 | mean|peak| 0.04939 | eligible=False
+A_peak50_late800   a50 -0.01778 [-0.03352,-0.00133] met | a60 +0.00017 [-0.01559,+0.01509] not | b_viol=[] | n<=0.05 7+1=8 | mean|peak| 0.05067 | eligible=False
+eligible (ranked): [] -> selected: None
+tool selected: None | outcome: none_eligible
+tool inputs agree with the blind recomputation to 1e-12 for all four arms
