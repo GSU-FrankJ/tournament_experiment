@@ -127,3 +127,57 @@ $ git diff --stat f02a256 6a8f4492 -- :/protocols
  protocols/v2_T2_locked_v2_0.md   | 148 +++++++
  3 files changed, 989 insertions(+)
 ```
+
+## 5. Merge, tag and push (2026-10-06)
+
+Commits of the publication on `t2-refine-pack`, on top of `6a8f4492` (`git log --oneline 6a8f4492..HEAD` at the time of the tag, plus the commits that follow it):
+
+```
+978ca39d docs: add the T=2 refinement publication folder reports/t2_refine_100526     (tagged t2-refine-100526)
+20788cee feat: add the remaining evidence items and --sums to the refinement pack builder
+d19c5649 docs: add 2026-10-06 correction addenda to the R1 and R2c summaries
+4cdf60a2 feat: add the T=2 refinement evidence-pack builder and stage-1 figure
+2dcff5cf docs: add the T=2 refinement publication addenda to the v2 index, summary and STATE   (after the tag, prompt section 5 item 5)
+<this log and pi_record/SHA256SUMS: the last commit>
+```
+
+Before the push, `git ls-remote origin main t2-refine-pack t2-refine-100526 v2-t2-refine v2-t2-r2b v2-t2-r2c` listed `main` at `f02a256095dcaa69dffbd011718d337f84183890` and the three round branches at the heads of section 1.1; neither `t2-refine-pack` nor the tag existed on `origin`. `git merge-base --is-ancestor f02a2560 HEAD` returned 0, so `main` moves by a fast-forward.
+
+As the owner decided in 1.3, `main` is advanced by pushing `t2-refine-pack` to it; the primary checkout is not used. The tag was created on the head of the folder commit and checked:
+
+```
+$ git tag -a t2-refine-100526 -m "T=2 refinement work (R1, v2.0, R2b, R2c): publication folder reports/t2_refine_100526 (summary report, PI record, evidence pack, fact-check)" 978ca39d
+$ git cat-file -t t2-refine-100526
+tag
+$ git rev-parse t2-refine-100526^{}
+978ca39d66b87ae9b8f21d27a2b419f61f26703b
+```
+
+Pushes (plain pushes, no force, each command on its own):
+
+```
+$ git push origin t2-refine-pack:main
+To https://github.com/GSU-FrankJ/tournament_experiment.git
+   f02a2560..978ca39d  t2-refine-pack -> main
+$ git push origin t2-refine-pack
+ * [new branch]        t2-refine-pack -> t2-refine-pack
+$ git push origin t2-refine-100526
+ * [new tag]           t2-refine-100526 -> t2-refine-100526
+```
+
+`git ls-remote` after these pushes:
+
+```
+$ git ls-remote origin main t2-refine-pack refs/tags/t2-refine-100526 refs/tags/t2-refine-100526^{} v2-t2-refine v2-t2-r2b v2-t2-r2c
+978ca39d66b87ae9b8f21d27a2b419f61f26703b	refs/heads/main
+978ca39d66b87ae9b8f21d27a2b419f61f26703b	refs/heads/t2-refine-pack
+62ecc436b80d15e4740f310e2e6c72c708c1624c	refs/heads/v2-t2-r2b
+6a8f4492c40da86609278eeddfde6e0d2f96a962	refs/heads/v2-t2-r2c
+b55d38907b02106a6e874d3b60622e4e5b7c9d5d	refs/heads/v2-t2-refine
+435978699aa8d2527f763181c987cef3972fac19	refs/tags/t2-refine-100526
+978ca39d66b87ae9b8f21d27a2b419f61f26703b	refs/tags/t2-refine-100526^{}
+```
+
+Then the addenda of prompt section 5 item 5 were committed (`2dcff5cf`: one row in the reading order of `reports/v2/README.md`, one dated paragraph in `reports/v2/summary.md`, a dated section in `docs/STATE.md`), and this section and the regenerated `pi_record/SHA256SUMS` are the last commit; `main` and `t2-refine-pack` are pushed once more, as fast-forwards (`git ls-remote origin main` then equals `git rev-parse HEAD` of the publication worktree; the tag stays on `978ca39d`, the commit that holds the folder as it was fact-checked).
+
+Not done, and left to the owner: the fast-forward of the primary checkout's local `main` (`d1b8443`; the commands and the caution about untracked `experiments/` files are in 1.3). Nothing in the primary checkout was changed and git was not run there; its files were only listed, sized and hashed for the caution in 1.3.
