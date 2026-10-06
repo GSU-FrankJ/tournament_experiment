@@ -51,3 +51,11 @@ Added by the v2.0 round; nothing above was changed. Source: decisions D1 and D3 
 ## Addendum (2026-10-04): pushed state
 
 The "not pushed" wording in this summary (and in `docs/STATE.md`, R1 section) was true on 2026-10-03. The branch has since been pushed: `origin/v2-t2-refine` is at `155cdec` (`git rev-parse origin/v2-t2-refine`), the head of this round. The original lines are unchanged.
+
+## Addendum (2026-10-06): three statements of this round corrected by the fact-check of the publication
+
+Added by the publication `reports/t2_refine_100526`; nothing above or in the other files of this round was changed. The independent fact-check of that publication (`reports/t2_refine_100526/pi_record/01_factcheck.md`) found three statements of this round's reports that differ from the evidence they cite. No decision of the round depends on them.
+
+1. **Reading-order table above, row 03: "D2: 152 perturbed closed-form candidates on both tiers".** D2 has 38 closed-form candidates, each evaluated at both q (50, 60) on both verifier tiers: 152 evaluations (rows), 0 errors (`03_d2_verifier_sensitivity.md`, "evaluations (rows) / errors | 152 / 0"; `results/v2_refine/d2_verifier_sensitivity/evaluations.csv`).
+2. **`06_decision_inputs.md`, annealing paragraph: "-0.0766 [-1.026, 0.837]" (scale 4, q = 50).** The lower end of the interval in `results/v2_refine/analysis/stage2_annealing.csv` (row `A_anneal4`, `observed_gap_d0`, q = 50) is -1.0254895, which rounds to -1.025 at four significant digits. The other values of that sentence are unchanged.
+3. **`01_preregistration.md` section 4 item 6 (and the verifier numerics note of the v2.0 round): "the difference falls by about 4x per halving of the verifier state step".** In the sweep of `results/v2_refine/continuation_check.json` (`diagnosis.verifier_grid_sweep_max_abs_diff_over_dw`, 32 Gauss-Legendre nodes per half interval, state step 4 → 2 → 1 → 0.5 → 0.25) the ratios between successive steps are 4.29, 3.79, 2.87 and 1.76 at q = 50 and 4.11, 3.83, 2.56 and 1.83 at q = 60. "About 4x" holds for the first two halvings. The sweep values themselves were reported correctly.

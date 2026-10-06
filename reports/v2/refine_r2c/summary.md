@@ -61,3 +61,7 @@ What this round does not show: whether any share or timing would meet the criter
 ## Files
 
 Code: `run/run_v2_stagewise.py` (`local_first`, `Run.draw_starts(stage, n, local)`), `tools/v2/launch_refine.py` (wave `r2c_waveS`, wave `r2c_v20_repro`), `tools/v2/r2c_launch_checks.py`, `tools/v2/refine_r2c_analysis.py`; tests `tests/test_v2_r2c.py` (41), `tests/test_v2_r2c_tools.py` (16), `tests/test_v2_r2c_analysis.py` (24). Reused unchanged: `tools/v2/cr2_compare.py`, `tools/v2/refine_analysis.py`, `tools/v2/refine_r2b_analysis.py`.
+
+## Addendum (2026-10-06): one figure corrected by the fact-check of the publication
+
+Added by the publication `reports/t2_refine_100526`; nothing above was changed. The independent fact-check of that publication (`reports/t2_refine_100526/pi_record/01_factcheck.md`) recomputed the figures of the observation "Part (b) holds for all four arms" (above) from `results/v2_refine_r2c/analysis/tail.csv`: the largest G-A tail mean / e2*(0) of `A_peak35` at q = 60 is 0.019374, which is 3.13% below the limit 0.02, and that of `A_peak50_late800` at q = 50 is 0.019143, which is 4.29% below it. The text above says "3.2% and 4.3%". The tail means themselves (0.0194, 0.0191) and the conclusion (below the limit at both q) are unchanged.
