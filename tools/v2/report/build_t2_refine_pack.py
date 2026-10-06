@@ -20,6 +20,8 @@ Usage:
   python tools/v2/report/build_t2_refine_pack.py --out <scratch>      # build elsewhere
   python tools/v2/report/build_t2_refine_pack.py --check-against reports/t2_refine_100526
       # build into a temporary directory and compare it byte for byte with an existing pack (exit 1 on a difference)
+  python tools/v2/report/build_t2_refine_pack.py --sums reports/t2_refine_100526/pi_record
+      # write pi_record/SHA256SUMS
 """
 
 from __future__ import annotations
@@ -87,6 +89,12 @@ ITEMS: List[Item] = [
     _c("PL-07", "R1 continuation-table check (literal criterion, refined verifier, table convergence)", R1, "results/v2_refine/continuation_check.json"),
     _c("PL-08", "Locked protocol v1.1 (JSON), the baseline of the v2.0 change", V20, "protocols/v2_T2_locked_v1_1.json"),
     _c("PL-09", "G-S pass-probability record used for the G-S admission rule", V20, f"{V2L}/v2_0/v2_0_pass_probability.json"),
+    _c("PL-10", "Seed inventory before the block 30501-30520 appeared in any record: summary", V20, f"{V2L}/v2_0/seed_inventory_pre_lock.out"),
+    _c("PL-11", "Seed inventory before the block appeared in any record: all recorded seed values", V20, f"{V2L}/v2_0/seed_inventory_pre_lock.csv"),
+    _c("PL-12", "Seed inventory at the lock commit, protocol declaration excluded: summary", V20, f"{V2L}/v2_0/seed_inventory.out"),
+    _c("PL-13", "Seed inventory at the lock commit, stock scan: summary (hits = the protocol's own declaration)", V20, f"{V2L}/v2_0/seed_inventory_stock.out"),
+    _c("PL-14", "Seed inventory at the lock commit, stock scan: all rows", V20, f"{V2L}/v2_0/seed_inventory_stock.csv"),
+    _c("PL-15", "Continuation-table check (ii) as settled in v2.0: tool output", V20, f"{V2L}/v2_0/continuation_check_v2_0.out"),
     # ---- v2.0 confirmation and rehearsal
     _c("CF-01", "v2.0 confirmation verdict (seeds 30501-30520)", V20, f"{V2L}/confirmation_v2_0_analysis/verdict.json"),
     _c("CF-02", "v2.0 confirmation pass counts with exact Clopper-Pearson CIs", V20, f"{V2L}/confirmation_v2_0_analysis/pass_counts.csv"),
@@ -108,6 +116,11 @@ ITEMS: List[Item] = [
     _c("CF-18", "v2.0 vs v1.1 on fresh seeds: distribution comparison", V20, f"{V2L}/confirmation_v2_0_analysis_vs_v1_1/compare_distributions.csv"),
     _c("CF-19", "v2.0 re-rehearsal: per-run gates and metrics", V20, f"{V2L}/rehearsal_v2_0_analysis/per_run.csv"),
     _c("CF-20", "Seed inventory at the v2.0 lock (disjointness of the seed block)", V20, f"{V2L}/v2_0/seed_inventory.csv"),
+    _c("CF-21", "R7 re-run at the checks-tool fix commit 3fedaa2 (pass = true)", V20, f"{V2L}/rehearsal_v2_0_checks/tool_fix_rerun/r7_result.json"),
+    _c("CF-22", "v2.0 re-rehearsal: G-S safety condition (normal model, probabilities per q)", V20, f"{V2L}/rehearsal_v2_0_analysis/rehearsal_safety.json"),
+    _c("CF-23", "Record of the four stray R1 files (hashes and diffs) found in a sibling worktree", V20, f"{V2L}/v2_0/stray_files_record.json"),
+    _c("CF-24", "Full-suite log at the v2.0 launch tree (391 passed, 1 failed, 2 xfailed)", V20, f"{V2L}/rehearsal_v2_0_pytest.txt"),
+    _c("CF-25", "Full-suite log before the v2.0 lock", V20, f"{V2L}/v2_0/fullsuite_prelock.txt"),
     # ---- R1
     _c("R1-01", "R1 decision inputs: one row per (method, arm)", R1, f"{R1A}/decision_inputs.csv"),
     _c("R1-02", "R1 stage-1 criterion per arm", R1, f"{R1A}/stage1_criterion.csv"),
@@ -120,7 +133,7 @@ ITEMS: List[Item] = [
     _c("R1-09", "C-R1: the unchanged v1.1 entry point reproduces rehearsal_v1_1 (20/20)", R1, "results/v2_refine/v11_reproduction_checks.json"),
     _c("R1-10", "D1 clamp flags M1 / M2 per group, q and phase", R1, "results/v2_refine/d1_clamp/d1_flags.csv"),
     _c("R1-11", "D2 detection limits per family, gate and q", R1, "results/v2_refine/d2_verifier_sensitivity/detection_limits.csv"),
-    _c("R1-12", "D2 per-candidate evaluations (152 perturbed closed-form candidates)", R1, "results/v2_refine/d2_verifier_sensitivity/evaluations.csv"),
+    _c("R1-12", "D2 per-candidate evaluations (152 rows: 38 closed-form candidates x 2 q x 2 tiers)", R1, "results/v2_refine/d2_verifier_sensitivity/evaluations.csv"),
     _c("R1-13", "D2 fits of the verifier response", R1, "results/v2_refine/d2_verifier_sensitivity/fits.csv"),
     _c("R1-14", "D2 family-e confirmation", R1, "results/v2_refine/d2_verifier_sensitivity/family_e_confirmation.csv"),
     _c("R1-15", "parents_A end-of-A state reproduces rehearsal_v1_1 (20/20)", R1, "results/v2_refine/parents_A_checks.json"),
@@ -149,6 +162,13 @@ ITEMS: List[Item] = [
     _c("R1-38", "R1 stage-2 dispersion ratios", R1, f"{R1A}/stage2_dispersion.csv"),
     _c("R1-39", "R1 stage-1 arm summary", R1, f"{R1A}/stage1_arm_summary.csv"),
     _c("R1-40", "R1 stage-2 arm summary", R1, f"{R1A}/stage2_arm_summary.csv"),
+    _c("R1-41", "D1: alpha < 1 / beta < 1 learner policy rows per group, q and phase", R1, "results/v2_refine/d1_clamp/d1_alpha_beta_lt1.csv"),
+    _c("R1-42", "D1: saved-buffer statistics (clamped policy rows)", R1, "results/v2_refine/d1_clamp/d1_buffers.csv"),
+    _c("R1-43", "D1: log density minus log censored mass at clamped rows, by group", R1, "results/v2_refine/d1_clamp/d1_logdiff_by_group.csv"),
+    _c("R1-44", "D1: clamped-row gradient share per buffer (the basis of M2)", R1, "results/v2_refine/d1_clamp/d1_gradient_share.csv"),
+    _c("R1-45", "Smoothed-game prediction e_pred(d) (definition used by the annealing analysis)", R1, "tools/v2/pilot1_smoothed_game.py"),
+    _c("R1-46", "R1 re-runs of 17 stage-1 runs: bit-identical to the superseded originals", R1, "results/v2_refine/stage1_dirty_rerun_comparison.json"),
+    _c("R1-47", "R1 full-suite log (328 passed, 1 failed, 4 xfailed)", R1, "results/v2_refine/code_pytest_full.txt"),
     # ---- R2b
     _c("R2B-01", "R2b decision inputs: one row per mechanism arm", R2B, f"{R2BA}/decision_inputs.csv"),
     _c("R2B-02", "R2b criterion parts (a) / (b) per arm", R2B, f"{R2BA}/criterion.csv"),
@@ -179,6 +199,8 @@ ITEMS: List[Item] = [
     _c("R2B-27", "Seed-30510 diagnostic: D1 clamp counts, phase A", R2B, f"{R2BD}/tables/tab_d1_clamp_counts_phaseA_sum.csv"),
     _c("R2B-28", "Seed-30510 diagnostic: optimisation, trailing-25 band, q = 50", R2B, f"{R2BD}/tables/tab_opt_trailing25_band_q50.csv"),
     _c("R2B-29", "R2b analysis of the peak-set visitation and clamp counts (wave A)", R2B, f"{R2BA}/waveA_specifics.csv"),
+    _c("R2B-30", "R2b full-suite log at the code commit (444 passed, 1 failed, 2 xfailed)", R2B, "results/v2_refine_r2b/code_pytest_full.txt"),
+    _c("R2B-31", "R2b full-suite log after the audit (486 passed, 1 failed, 2 xfailed)", R2B, "results/v2_refine_r2b/post_audit_pytest_full.txt"),
     # ---- R2c
     _c("R2C-01", "R2c: one row per run (wave S, baseline, R2b reference arms)", R2C, f"{R2CA}/per_run.csv"),
     _c("R2C-02", "R2c criterion parts (a) / (b) per arm", R2C, f"{R2CA}/criterion.csv"),
@@ -193,6 +215,7 @@ ITEMS: List[Item] = [
     _c("R2C-11", "R2c gate counts", R2C, f"{R2CA}/gate_counts.csv"),
     _c("R2C-12", "R2c wave-S specifics, mean over seeds (peak-set visitation, clamp counts)", R2C, f"{R2CA}/waveS_specifics_mean.csv"),
     _c("R2C-13", "R2c wave-S optimisation diagnostics and cost", R2C, f"{R2CA}/waveS_optimisation.csv"),
+    _c("R2C-14", "R2c full-suite log at the code commit (567 passed, 1 failed, 2 xfailed)", R2C, "results/v2_refine_r2c/code_pytest_full.txt"),
     # ---- round reports (copies)
     _c("RR-01", "R1 summary report", R1, "reports/v2/refine/summary.md"),
     _c("RR-02", "R1 decision inputs report", R1, "reports/v2/refine/06_decision_inputs.md"),
@@ -207,6 +230,10 @@ ITEMS: List[Item] = [
     _c("RR-11", "R2b seed-30510 diagnostic report", R2B, "reports/v2/refine_r2b/02_seed30510_diagnostic.md"),
     _c("RR-12", "R2c housekeeping record (main not fast-forwarded; D1 waivers)", R2C, "reports/v2/refine_r2c/00_housekeeping.md"),
     _c("RR-13", "R2b housekeeping record (report-pack refresh failure diagnosis)", R2B, "reports/v2/refine_r2b/00_housekeeping.md"),
+    _c("RR-14", "R1 D1 report: clamp of the raw Beta draws", R1, "reports/v2/refine/02_d1_clamp.md"),
+    _c("RR-15", "R1 D2 report: sensitivity of the DP-BR verifier", R1, "reports/v2/refine/03_d2_verifier_sensitivity.md"),
+    _c("RR-16", "R2b wave-A report (peak-focused starts, censored likelihood)", R2B, "reports/v2/refine_r2b/03_pilot_waveA.md"),
+    _c("RR-17", "R2b wave-P report (pathwise terminal fine-tuning, matched controls)", R2B, "reports/v2/refine_r2b/04_pilot_waveP.md"),
     # ---- large or untracked files: referenced, not copied
     _r("UT-01", "D1 per-row clamped draws (large, tracked)", R1, "results/v2_refine/d1_clamp/d1_clamped_rows.csv"),
     _r("UT-02", "D1 clamp fraction by local update (large, tracked)", R1, "results/v2_refine/d1_clamp/d1_clamp_fraction_by_local.csv"),
@@ -397,7 +424,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--out", default=str(DEFAULT_OUT), help="output folder (default reports/t2_refine_100526)")
     ap.add_argument("--check-against", default=None,
                     help="rebuild into a temporary directory and compare with this existing pack (exit 1 on a difference)")
+    ap.add_argument("--sums", default=None, metavar="DIR",
+                    help="only write DIR/SHA256SUMS (sha256sum -c format, every file under DIR except the sums file); "
+                         "used for pi_record/")
     a = ap.parse_args(argv)
+    if a.sums:
+        write_sums(Path(a.sums))
+        print(f"wrote {Path(a.sums) / 'SHA256SUMS'}")
+        return 0
     if a.check_against:
         tmp = Path(tempfile.mkdtemp(prefix="t2_refine_pack_check_"))
         rows = build(tmp)
