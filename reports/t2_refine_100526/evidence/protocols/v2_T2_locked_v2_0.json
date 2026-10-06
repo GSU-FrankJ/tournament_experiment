@@ -1,0 +1,820 @@
+{
+ "schema": "v2_T2_locked_protocol/2.0",
+ "version": "2.0",
+ "name": "v2 T=2 stagewise protocol (locked, v2.0)",
+ "date": "2026-10-03",
+ "base_commit": "657f54a",
+ "q_values": [
+  50,
+  60
+ ],
+ "pipeline": {
+  "entry_point": "run/run_v2_T2_locked.py",
+  "mode": "locked",
+  "fixed_budget": true,
+  "flags": {
+   "reward_mode": "expected",
+   "stage2_update_mode": "frozen",
+   "adv_norm_scope": "stage1_rows",
+   "continuation_action_mode": "mean",
+   "continuation_value_mode": "expected"
+  },
+  "flags_note": "stage2_update_mode=frozen, adv_norm_scope and continuation_action_mode take effect only in Phase B (after the freeze); Phase A trains stage 2 alone with all rows normalized and stochastic actions; continuation_value_mode=expected also takes effect only in Phase B: the stage-1 rows use the shock-integrated table value of the frozen stage-2 policy instead of the sampled continuation (requires frozen + mean + gamma = lambda = 1)",
+  "phase_A": {
+   "updates": 1600,
+   "active_stages": [
+    2
+   ],
+   "starts": "bin-balanced exploring starts on D_2 (es_bin_width 10)",
+   "lr": "constant 0.0003 for local updates 1-1200, then linear 0.0003 -> 3e-05 over local 1201-1600"
+  },
+  "freeze": "frozen stage-2 snapshot = deep copy of the actor at the end of Phase A (B2 machinery; no grad, no optimizer)",
+  "phase_B": {
+   "updates": 600,
+   "active_stages": [
+    1
+   ],
+   "starts": "root (t=1, d=0)",
+   "adv_norm_scope": "stage1_rows",
+   "continuation_action_mode": "mean",
+   "opponent": "lagged copy of the actor, refreshed every 20 global updates",
+   "lr": "linear 0.0003 -> 3e-05 over local updates 1-600",
+   "continuation_value_mode": "expected"
+  },
+  "lr_decay": [
+   {
+    "phase": "A",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1201,
+    "local_last": 1600
+   },
+   {
+    "phase": "B",
+    "start_lr": 0.0003,
+    "end_lr": 3e-05,
+    "local_first": 1,
+    "local_last": 600
+   }
+  ],
+  "lr_form": "lr(j) = start + (end - start) * (j - local_first) / (local_last - local_first), applied to actor and critic before each update, constant within an update, Adam state preserved (run/run_final_dp_br_round3_dense.py:lr_at, kind 'linear'; run/run_v2_stagewise.py:Run.lr_for)",
+  "not_used": [
+   "joint training",
+   "Phase C",
+   "tail averaging"
+  ],
+  "evaluated_candidate": "last iterate, Beta mean: stage 2 at the end of A (frozen), stage 1 at the end of B",
+  "unchanged": [
+   "RNG streams and samplers (numpy PCG64 streams from SeedSequence([seed, q, namespace]))",
+   "on-path rule: open interval |d - drift| < 2q with exact cell masses",
+   "e~1 residual-band method on the final tier"
+  ],
+  "outputs": [
+   "manifest.json (commit, clean-tree flag, protocol SHA-256, q, seed)",
+   "gates.json",
+   "v2_checkpoints_A.csv, v2_checkpoints_B.csv + checkpoints/u*.npz (per verifier call)",
+   "weights/u*.npz (every 25 updates)",
+   "state_end_A.pt, state_end_B.pt (full state)",
+   "train_history.json, v2_updates.csv, v2_run_summary.json",
+   "gateA_{final,development}.npz, final_{final,development}.npz, drift_test.json, induced_band.json + sweep NPZ",
+   "gates.json (v1.1): G-A, G-F, G-N, run_pass, S1, v1_0_outcome, global_rng, protocol_version 1.1",
+   "manifest.json (v1.1): global-RNG seeds and digests",
+   "continuation_table.npz (Phase B table: y_grid, values)",
+   "gates.json (v2.0; replaces the v1.1 entry above): G-A, G-F, G-N, G-S, run_pass (v2.0), S1 (0.10), v1_1_outcome, v1_0_outcome, continuation_table, global_rng, protocol_version 2.0",
+   "manifest.json (v2.0; replaces the v1.1 entry above): continuation-table record (rule, build seconds, NPZ SHA-256)"
+  ],
+  "entry_point_reads": "protocols/v2_T2_locked_v2_0.json",
+  "continuation_table": {
+   "mode": "expected",
+   "stage": 2,
+   "applies_to": "Phase B, stage-1 rows only: stage-1 return = r_1 + V2~(y), y = e_1 - e_1^opp (both efforts as executed, float64); stage-1 advantage = that return - V(s_1); stage-2 rows, their critic targets and every random draw are unchanged (shocks are still drawn); the opponent's stage-1 action stays sampled",
+   "implemented_at_commit": "32a8c21",
+   "run_as_pilot_arm": "B_expcont (reports/v2/refine/01_preregistration.md section 4 item 6)",
+   "definition": "V2~(y) = E_z[g_2(y + z)], g_2(d) = w_l + DW F_xi(d + e_hat_2(d) - e_hat_2(-d)) - k e_hat_2(d)^2, e_hat_2 the frozen stage-2 Beta mean on the float path of continuation_action_mode=mean, z = eps_L - eps_O with density (2q - |z|)/(4 q^2) on [-2q, 2q]",
+   "built": "once at Phase-B entry from the frozen stage-2 snapshot, by run/run_v2_stagewise.py:Run.run_phase calling utils.v2_continuation.build_continuation_table (step = run_v2_stagewise.CONT_TABLE_STEP, default rule); single-threaded, no RNG draw",
+   "module": "utils/v2_continuation.py",
+   "module_sha256_at_lock": "513fef4b304e46606fd2bc436c628c90a4893b36979a454cb00924163bb50b4a",
+   "rule": {
+    "integration": "composite Gauss-Legendre in z against the triangular density (2q - |z|)/(4 q^2) on [-2q, 2q]; weights include the density and sum to 1 to rounding",
+    "panel_width": 1.0,
+    "nodes_per_panel": 6,
+    "panel_alignment": "panels aligned at z = 0 and z = +-2q: each half interval is split into ceil(2q / panel_width) equal panels",
+    "n_panels": {
+     "50": 200,
+     "60": 240
+    },
+    "n_nodes": {
+     "50": 1200,
+     "60": 1440
+    },
+    "actor_evaluation": "the frozen actor is evaluated directly at the quadrature nodes d = y + z; g is never interpolated",
+    "y_grid": {
+     "range": "symmetric on [-e_range, e_range] (e_range = e_max - e_min = 100), contains 0",
+     "step": 0.05,
+     "n_nodes": 4001
+    },
+    "dtype": "float64",
+    "lookup": "linear interpolation; refuses y outside the grid by more than edge_tolerance x max(1, grid span)",
+    "edge_tolerance": 1e-09,
+    "max_points_per_chunk": 524288,
+    "numerical_constants_note": "edge_tolerance and max_points_per_chunk are checked by the entry point against utils/v2_continuation.py; the 1e-9 inside the ceil() of the panel count and of the y-grid size is a literal of the module (pinned by its SHA-256); the chunk size only batches the actor evaluation (measured effect below 2e-15 DW, results/v2_refine/continuation_check.json key batch_noise_probe)"
+   },
+   "entry_point_refuses_other_values": "the JSON rule must equal run/run_v2_T2_locked.py:LOCKED_TABLE_RULE, utils/v2_continuation.py defaults and run_v2_stagewise.CONT_TABLE_STEP must equal it (numerical parameters compared: panel_width, nodes_per_panel, y step, stage, dtype, edge_tolerance, max_points_per_chunk), and the table that is built is checked against it at the first Phase-B update",
+   "table_file": "continuation_table.npz in the run directory: arrays y_grid and values (float64), written as an NPZ with fixed zip timestamps so that equal tables give equal file hashes",
+   "recorded_in": "manifest.json (key continuation_table) and gates.json (key continuation_table): rule parameters of the table that was built, build seconds, SHA-256 of continuation_table.npz",
+   "rng": "the build draws from no RNG: the five training streams, the torch generator and the three process-global RNGs are compared between Phase-B entry and the first Phase-B update; a moved training stream aborts the run, a moved global RNG is a global-RNG violation (exit code 5)",
+   "check_ii": {
+    "settled_by": "D3 of the v2.0 round",
+    "tests": "tests/test_v2_refine_continuation.py",
+    "record": "results/v2_T2_locked/v2_0/continuation_check_v2_0.json",
+    "parents": "end-of-A states of the v1.1 rehearsal, seed 10501, both q (SHA-256 in the record)",
+    "fixed_stage1_opponent_mean": {
+     "50": 40.0,
+     "60": 45.0
+    },
+    "finest_rule": {
+     "panel_width": 0.25,
+     "nodes_per_panel": 24
+    },
+    "ii_a": "halving the panel width and doubling the nodes per panel changes the table by <= 1e-8 DW",
+    "ii_b": "refined verifier (state step 0.25, 64 Gauss-Legendre nodes), both q: max over the effort grid of |V2~(e - e1_hat(0)) - (Q1(0, e) + k e^2)| <= 1e-6 DW",
+    "ii_c": "adding the convergence difference profile (finest rule minus default rule) to the table moves argmax_e [-k e^2 + V2~(e - e1_hat(0))] on a 0.001-effort grid by <= 1e-3 e1*"
+   }
+  }
+ },
+ "gates": {
+  "G-A": {
+   "stage": "end of Phase A",
+   "candidate": "stage-2 last iterate (Beta mean of the live actor at global u1600)",
+   "tier": "final",
+   "all_must_hold": [
+    {
+     "metric": "eta_T_over_dw",
+     "op": "<=",
+     "threshold": 0.005,
+     "definition": "eta_2 / DW = max over the full final-tier D_2 grid of the one-step deviation gap Delta_2(d), divided by DW (utils.dp_br_verifier.verify -> full_delta_max[2]; utils.v2_metrics.evaluate scalar 'eta_T_over_dw')"
+    },
+    {
+     "metric": "stage2_rmse_pos_over_g2_0",
+     "op": "<=",
+     "threshold": 0.05,
+     "definition": "sqrt(mean over the recovery grid nodes with |d| < 2q of (e_hat_2(d) - e2*(d))^2) / e2*(0); recovery grid = symmetric grid on D_2 with step 'recovery_step' = 0.5 (utils.v2_metrics.recovery_metrics; independent of the verifier tier)"
+    },
+    {
+     "metric": "stage2_tail_mean_over_g2_0",
+     "op": "<=",
+     "threshold": 0.02,
+     "definition": "mean of e_hat_2(d) over the recovery grid nodes with |d| >= 2q, divided by e2*(0) (utils.v2_metrics.recovery_metrics; independent of the verifier tier)"
+    }
+   ]
+  },
+  "G-F": {
+   "stage": "end of Phase B",
+   "candidate": "full last iterate: live actor at t=1 (global u2200), frozen stage-2 snapshot at t=2",
+   "tier": "final",
+   "all_must_hold": [
+    {
+     "metric": "Gmax_full_over_dw",
+     "op": "<=",
+     "threshold": 0.01,
+     "definition": "max over stages t and final-tier grid nodes d of G_t(d) = V_t^BR(d) - V_t^mean(d), divided by DW (utils.v2_metrics.evaluate scalar 'Gmax_full_over_dw')"
+    }
+   ]
+  },
+  "run_outcome": "pass iff G-A, G-F, G-N and G-S all pass; a run failing G-A is a stage-2 failure: its Phase B is still executed and reported, and the run counts as failed; a run with a global-RNG violation (hardening) or any nonzero exit counts as failed; S1 at 0.10, the v1.1 outcome (G-A, G-F, G-N) and the v1.0 outcome are reported only",
+  "dev_tier": "G-A and G-F use the final tier; G-N compares development and final tier; every gate and reported metric is also reported on the development tier",
+  "G-N": {
+   "stage": "end of Phase A (eta_2) and end of Phase B (Gmax_full)",
+   "candidate": "as in G-A and G-F",
+   "tier": "development vs final",
+   "all_must_hold": [
+    {
+     "metric": "eta_T_over_dw_dev_minus_final_abs",
+     "op": "<=",
+     "threshold": 0.001,
+     "definition": "|eta_T_over_dw(development) - eta_T_over_dw(final)| of the G-A candidate at the end of Phase A"
+    },
+    {
+     "metric": "Gmax_full_over_dw_dev_minus_final_abs",
+     "op": "<=",
+     "threshold": 0.001,
+     "definition": "|Gmax_full_over_dw(development) - Gmax_full_over_dw(final)| of the G-F candidate at the end of Phase B"
+    }
+   ]
+  },
+  "comparison": "every '<=' is inclusive; values compared at full float64 precision, no rounding",
+  "G-S": {
+   "stage": "end of Phase B",
+   "candidate": "stage-1 last iterate: Beta mean of the live actor at t=1, d=0 (global u2200)",
+   "tier": "final",
+   "all_must_hold": [
+    {
+     "metric": "stage1_rel_err_abs",
+     "op": "<=",
+     "threshold": 0.05,
+     "definition": "|e_hat_1(0) - e1*(0)| / e1*(0) (utils.v2_metrics.recovery_metrics 'stage1_rel_err_signed', absolute value); the v1.1 secondary criterion S1 with the threshold 0.05 (the 0929 target); e1* is the closed form and enters the evaluation only"
+    }
+   ]
+  }
+ },
+ "reported_not_gated": {
+  "stage2": [
+   "stage2_peak_rel_err_signed",
+   "stage2_peak_locfree_rel_err (+ argmax d)",
+   "stage2_sym_err_max",
+   "stage2_tail_max",
+   "DeltaT_over_dw_on_max",
+   "DeltaT_over_dw_off_max",
+   "sigma_effort_at_0_t2",
+   "smoothed_share_peak_gap_d0 (Pilot-1 method: 400 equal-probability nodes per Beta at d=0)"
+  ],
+  "stage1_and_full": [
+   "EXP_root_over_dw",
+   "dReach_over_dw",
+   "Deltamax_all_over_dw",
+   "dFull_over_dw",
+   "stage-1 decomposition: learning (e_hat_1 - e~1)/e1*, inherited (e~1 - e1*)/e1*, with residual bands",
+   "sigma_effort_at_0_t1"
+  ],
+  "numerics": "dev-tier minus final-tier difference of every gate and reported metric"
+ },
+ "peak_error": "not gated; reported with its decomposition (smoothed-game share; Pilot 4 section 1d floor)",
+ "stage1_decomposition": {
+  "method": "e~1 = argmin_e Delta_1(e; e_hat_2) on the final tier, band = {e: Delta_1 <= min + floor}",
+  "floor": "max(Delta_1(e1*; e2*) on the final tier, 1e-12 DW)",
+  "step": 0.01,
+  "sweep_range": "anchored at e1*, covering [min(0.4 e1*, e_hat_1 - 2), max(1.7 e1*, e_hat_1 + 2)]",
+  "functions": "utils.v2_metrics.stage1_residual_sweep / sweep_grid / induced_band"
+ },
+ "confirmation": {
+  "status": "pre-registered; executed in the v2.0 round only if the re-rehearsal checks R1-R7 (results/v2_T2_locked/rehearsal_v2_0_checks.json) all pass",
+  "q_values": [
+   50,
+   60
+  ],
+  "n_seeds": 20,
+  "seeds_used_for_both_q": true,
+  "seed_block_status": "set by the PI (v2.0 round, D5); used for both q",
+  "disjointness_check": "tools/v2/seed_inventory.py before the block appeared in any JSON/CSV seed record: results/v2_T2_locked/v2_0/seed_inventory_pre_lock.csv (0 collisions among 305 recorded seed values); re-run at the lock commit with the files that declare the block excluded (--exclude): results/v2_T2_locked/v2_0/seed_inventory.csv; the stock scan at the lock commit finds only those declarations: results/v2_T2_locked/v2_0/seed_inventory_stock.out",
+  "pass_rule": "for each q, at least 18 of 20 runs pass (G-A and G-F and G-N and G-S); the confirmation passes iff both q pass; each q's pass rate is reported with an exact Clopper-Pearson 95% CI",
+  "reporting": "every run is reported, failures included; nothing changes after the lock",
+  "seed_block": [
+   30501,
+   30502,
+   30503,
+   30504,
+   30505,
+   30506,
+   30507,
+   30508,
+   30509,
+   30510,
+   30511,
+   30512,
+   30513,
+   30514,
+   30515,
+   30516,
+   30517,
+   30518,
+   30519,
+   30520
+  ],
+  "analysis_script": "tools/v2/confirmation_analysis_v2_0.py",
+  "crash_rule": "infrastructure kill (OOM, disk full, process killed): move the run directory to confirmation_v2_0/crashed/q{q}/seed{s}_attempt1/ and re-run once into the original path; a second infrastructure failure stops the round and that run is not counted either way; any other nonzero exit (pipeline exception, global-RNG violation) counts as a failed run",
+  "root": "results/v2_T2_locked/confirmation_v2_0",
+  "rehearsal": {
+   "root": "results/v2_T2_locked/rehearsal_v2_0",
+   "q_values": [
+    50,
+    60
+   ],
+   "seeds": "development_seeds (10501-10510)",
+   "safety_condition": {
+    "G-S_pass_at_least_of_20": 19,
+    "normal_model_probability_at_least_per_q": 0.9,
+    "normal_model": "signed stage-1 error ~ N(mean, SD) fitted per q to that q's 10 rehearsal runs (SD with ddof = 1); a run passes G-S iff |error| <= the G-S threshold; G-A, G-F and G-N treated as passing; probability = P(Binomial(20, p_q) >= 18)"
+   }
+  }
+ },
+ "development_seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "records": {
+  "50": {
+   "run": null,
+   "q": 50,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  },
+  "60": {
+   "run": null,
+   "q": 60,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 60,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 220,
+   "domain_half_stage2": 220,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 44,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  }
+ },
+ "record_sources": {
+  "50": "experiments/two_stage_q50_precision_20260924/manifest.json",
+  "60": "experiments/two_stage_confirmation_T2_20260922/manifest.json"
+ },
+ "threads_per_process": {
+  "torch": 1,
+  "OMP": 1,
+  "MKL": 1,
+  "OPENBLAS": 1
+ },
+ "known_issues": [
+  "tests/test_registry_canonicalization.py fails on main and on this branch (paper registry vs data on disk; 'expected 15 Set-2 gradient runs, got 0'); pre-existing, unrelated to v2; test and data unchanged",
+  "Phase A clamp flags (R1 diagnostic D1): M1 is exceeded in Phase A (median over runs of the clamp fraction among learner policy rows 0.001385 pooled over both q, hits only on rows with |d| >= 2q of the final stage) and not in Phase B; M2 is exceeded in Phase A in the pooled reading (3 of 20 runs with a clamped-row gradient share above 1%, maximum 0.02353) and not in Phase B. Recorded, not fixed (Phase A is unchanged in v2.0): results/v2_refine/d1_clamp/d1_flags.csv, reports/v2/refine/02_d1_clamp.md",
+  "verifier numerics (check (ii)): the verifier's standard final tier carries a stage-1 Q interpolation gap against the table of 3.229e-05 DW (q=50) and 1.96e-05 DW (q=60); it bounds the precision of the verifier's own e~1 on that tier; reported, not gated: results/v2_T2_locked/v2_0/verifier_numerics_note.md",
+  "utils/v2_continuation.py is byte-identical to its version at 32a8c21; its module docstring still calls check (ii) open (it predates decision D3) - protocols/v2_T2_locked_v2_0.md and results/v2_T2_locked/v2_0/continuation_check_v2_0.json supersede it"
+ ],
+ "change_log": [
+  {
+   "from": "0929 plan development targets (5% stage-1 error, 5% stage-2 peak error)",
+   "to": "gates G-A and G-F above; peak error reported, not gated",
+   "when": "2026-10-02, before any confirmation run",
+   "evidence": [
+    "reports/v2/pilot4_stabilization.md section 6 (distribution tables)",
+    "reports/v2/pilot4_stabilization.md section 2b (stability, decay vs constant)",
+    "reports/v2/pilot4_stabilization.md section 1d (representation floor, peak-gap decomposition)"
+   ]
+  },
+  {
+   "version": "1.1",
+   "change": "stage-1 criterion |e_hat_1(0) - e1*(0)|/e1*(0) <= 0.10 moved from G-F to the secondary criterion S1 (no pass rule)",
+   "why": "all 3 v1.0 rehearsal failures were on this criterion while Gmax_full/DW was 0.0021-0.0023; the 0.10 threshold came from Pilot 4 distributions with a constant-LR Phase A parent; the locked pipeline's distribution has a heavier upper tail",
+   "evidence": [
+    "reports/v2/protocol_lock_and_rehearsal.md sections 4.3-4.5",
+    "results/v2_T2_locked/rehearsal_analysis/gates_per_run.csv",
+    "results/v2_T2_locked/v1_1/v1_0_pass_probability.json (tools/v2/v1_0_pass_probability.py)"
+   ],
+   "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+  },
+  {
+   "version": "1.1",
+   "change": "gate G-N added: |dev - final| of eta_2 and of Gmax_full, each <= 0.001 DW",
+   "why": "numerical refinement check; in the v1.0 rehearsal the dev - final differences were at most 2.2e-4 DW",
+   "evidence": [
+    "reports/v2/protocol_lock_and_rehearsal.md section 4.5",
+    "results/v2_T2_locked/rehearsal_analysis/gate_distributions.csv"
+   ],
+   "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+  },
+  {
+   "version": "1.1",
+   "change": "hardening of the process-global RNGs (seeded with the run seed; reference state; assertions; digests)",
+   "why": "rehearsal Check 1: three unseeded, never-consumed process-global RNG states differed between processes",
+   "evidence": [
+    "reports/v2/protocol_lock_and_rehearsal.md section 4.1 and addendum",
+    "results/v2_T2_locked/rehearsal_analysis/check1_phaseA_vs_stitched.csv"
+   ],
+   "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+  },
+  {
+   "version": "1.1",
+   "change": "training-relevant state defined for every bit-identity check; confirmation seed block confirmed; v1.0 outcome reported only; pass-rate CIs exact",
+   "why": "owner decisions D1 and D4 of the v1.1 round",
+   "evidence": [
+    "reports/v2/protocol_lock_and_rehearsal.md addendum"
+   ],
+   "decided_by": "PI, after the development-seed rehearsal and before any confirmation seed was run"
+  },
+  {
+   "version": "2.0",
+   "change": "Phase B runs with continuation_value_mode=expected: for the stage-1 rows only, the sampled continuation in the stage-1 return is replaced by the table value V2~(y), y = e1 - e1_opp, built once at Phase-B entry from the frozen stage-2 Beta mean by utils/v2_continuation.py with the R1 default rule (composite Gauss-Legendre, 6 nodes per panel, panels of width 1 aligned at z = 0 and z = +-2q, y-grid step 0.05, float64, linear interpolation). Phase A is unchanged",
+   "why": "the only R1 arm that met the pre-registered criterion at both q (method 6, arm B_expcont): paired difference (arm - B_base) of |relative stage-1 error| -0.02386 [-0.04061, -0.009831] (q=50) and -0.03783 [-0.06321, -0.01472] (q=60); across-seed SD of the signed error 0.3464x and 0.2687x the baseline's; mean per-pair ratio of the stage-1 advantage SD 0.0656 and 0.0531; Phase-B wall time 1.084x (including the table build). No other R1 arm enters the protocol; target-KL changes cost, not accuracy, and is not adopted",
+   "evidence": [
+    "reports/v2/refine/04_pilot_stage1.md",
+    "reports/v2/refine/06_decision_inputs.md section 1",
+    "results/v2_refine/analysis/stage1_criterion.csv",
+    "results/v2_refine/analysis/stage1_dispersion.csv",
+    "results/v2_refine/analysis/stage1_adv_ratio.csv",
+    "results/v2_refine/analysis/stage1_cost.csv",
+    "reports/v2/refine/01_preregistration.md section 4 item 6 and Addendum 1"
+   ],
+   "decided_by": "PI, after the R1 round and before any confirmation seed was run"
+  },
+  {
+   "version": "2.0",
+   "change": "the pipeline code changed at 32a8c21 (R1 flags, every new key at its default behaves as before)",
+   "why": "needed to run the expected continuation; v1.1 is unaffected: the unchanged v1.1 entry point reproduces rehearsal_v1_1 in 20/20 runs on the changed code (C-R1), and parents_A, B_base and A_base reproduce it in 20/20 each",
+   "evidence": [
+    "results/v2_refine/v11_reproduction_checks.json",
+    "results/v2_refine/parents_A_checks.json",
+    "results/v2_refine/stage1_base_checks.json",
+    "results/v2_refine/stage2_base_checks.json",
+    "results/v2_refine/c7/code_check.compare.txt"
+   ],
+   "decided_by": "PI, after the R1 round and before any confirmation seed was run"
+  },
+  {
+   "version": "2.0",
+   "change": "check (ii) of the continuation table settled: the literal R1 criterion (<= 1e-6 DW against the verifier's standard final tier) is replaced by (ii-a) self-convergence <= 1e-8 DW, (ii-b) refined-verifier agreement <= 1e-6 DW (state step 0.25, 64 Gauss-Legendre nodes) and (ii-c) training-side sensitivity: shift of the stage-1 optimum <= 1e-3 e1* when the convergence difference profile is added",
+   "why": "the standard final tier interpolates V2 onto a state grid of step 2; the gap it shows (3.229e-05 DW at q=50, 1.96e-05 DW at q=60) is of the order of the dev - final differences G-N exists for, while the table is converged: (ii-a) 4.76e-09 / 3.22e-09 DW, (ii-b) 4.98e-07 / 4.1e-07 DW, (ii-c) shift of the stage-1 optimum 2.14e-05 / 0 e1* (q=50 / q=60; limit 1e-3). Verifier numerics item (reported, not gated): the standard-tier gap 3.229e-05 / 1.96e-05 DW would imply a stage-1 optimum shift of 0.00214 / 0.00342 e1* if it were a table error",
+   "evidence": [
+    "results/v2_T2_locked/v2_0/continuation_check_v2_0.json",
+    "results/v2_T2_locked/v2_0/verifier_numerics_note.md",
+    "results/v2_refine/continuation_check.json",
+    "tests/test_v2_refine_continuation.py"
+   ],
+   "decided_by": "PI, after the R1 round and before any confirmation seed was run"
+  },
+  {
+   "version": "2.0",
+   "change": "gate G-S added: |e_hat_1(0) - e1*(0)| / e1*(0) <= 0.05 on the end-of-B last iterate (the v1.1 secondary criterion S1 with threshold 0.05, the 0929 target); run pass = G-A and G-F and G-N and G-S",
+   "why": "threshold evidence from the locked pipeline's own distribution before any confirmation seed: arm B_expcont on the development seeds (the v2.0 rehearsal must reproduce it bit-identically: check R2): 10/10 and 10/10 within 0.05, max |error| 0.04069 (q=50) and 0.03144 (q=60), signed error mean -0.01181 / 0.000906, SD (ddof=1) 0.01785 / 0.01874. Normal model (G-A, G-F, G-N treated as passing): P(>= 18 of 20 fresh runs pass G-S) = 0.9959 (q=50) and 0.9995 (q=60). S1 at 0.10, the v1.1 outcome and the v1.0 outcome are reported for every run and decide nothing. Safety condition on the v2.0 rehearsal: >= 19/20 under G-S and a recomputed normal-model probability >= 0.90 at each q",
+   "evidence": [
+    "results/v2_T2_locked/v2_0/v2_0_pass_probability.json (tools/v2/v2_0_pass_probability.py)",
+    "results/v2_refine/analysis/stage1_per_run.csv"
+   ],
+   "decided_by": "PI, after the R1 round and before any confirmation seed was run"
+  },
+  {
+   "version": "2.0",
+   "change": "confirmation seed block 30501-30520, used for both q (40 runs); pass rule per q >= 18 of 20 runs pass (G-A, G-F, G-N, G-S), both q, exact Clopper-Pearson 95% CIs",
+   "why": "seeds reserved and unused; the inventory of every seed value recorded in the tournament_experiment tree (305 distinct values in 47088 json and 8782 csv files) found 0 collisions with the block, taken before the block appeared in any JSON or CSV seed record (the block had been reserved and unused since the R1 pre-flight: reports/v2/refine/00_preflight.md, results/v2_refine/preflight/seed_inventory_30501_30520.out)",
+   "evidence": [
+    "results/v2_T2_locked/v2_0/seed_inventory_pre_lock.csv",
+    "results/v2_T2_locked/v2_0/seed_inventory_pre_lock.out",
+    "tools/v2/seed_inventory.py"
+   ],
+   "decided_by": "PI, after the R1 round and before any confirmation seed was run"
+  }
+ ],
+ "evidence": {
+  "reward_mode=expected": "reports/v2/pilot1_reward_estimator.md",
+  "frozen B2 (adv_norm_scope=stage1_rows)": "reports/v2/pilot2_freeze.md",
+  "continuation_action_mode=mean": "reports/v2/pilot3_continuation_mode.md; decision D1 (Pilot 4 round)",
+  "Phase A 1600 updates": "reports/v2/phaseA_ext.md; decision D2 (Pilot 4 round)",
+  "Phase A end decay u1201-1600": "reports/v2/pilot4_stabilization.md section 2a",
+  "Phase B decay": "reports/v2/pilot4_stabilization.md section 2b",
+  "no joint training, no Phase C": "reports/v2/pilot2_freeze.md; decision D3 (Pilot 4 round)",
+  "no sampler change": "reports/v2/phase2_infra.md section 2; decision D4 (Pilot 4 round)",
+  "e~1 residual band": "reports/v2/pilot2_freeze.md section 6",
+  "on-path rule": "reports/v2/dreach_reach_mask_check.md",
+  "gate thresholds": "reports/v2/pilot4_stabilization.md section 6",
+  "C7 regression": "reports/v2/phase2_infra.md section 3",
+  "v1.1 changes": "reports/v2/protocol_lock_and_rehearsal.md sections 4.1, 4.3-4.5 and addendum; reports/v2/protocol_v1_1_confirmation.md",
+  "v2.0 changes": "reports/v2/refine/06_decision_inputs.md; reports/v2/refine/04_pilot_stage1.md; reports/v2/refine/summary.md; reports/v2/protocol_v2_0_confirmation.md"
+ },
+ "supersedes": {
+  "version": "1.1",
+  "file": "protocols/v2_T2_locked_v1_1.json",
+  "lock_commit": "431474d",
+  "sha256": "21d85983f2a2bebc0998e99fcf665c2c729f060996c529fa3162b3d62222a40f"
+ },
+ "secondary": {
+  "S1": {
+   "criterion": {
+    "metric": "stage1_rel_err_abs",
+    "op": "<=",
+    "threshold": 0.1,
+    "definition": "|e_hat_1(0) - e1*(0)| / e1*(0) (utils.v2_metrics.recovery_metrics 'stage1_rel_err_signed', absolute value)"
+   },
+   "part_of_run_pass": false,
+   "pass_rule": null,
+   "report_per_run": "value and pass/fail",
+   "report_per_q": [
+    "S1 pass count out of the seeds, exact Clopper-Pearson 95% CI",
+    "mean signed stage-1 relative error with 95% percentile bootstrap CI",
+    "median and SD of the signed stage-1 relative error"
+   ]
+  },
+  "bootstrap": {
+   "resamples": 10000,
+   "seed": 20261002,
+   "rng": "numpy.random.default_rng(seed)",
+   "method": "percentile 95% CI of the mean over seeds; one bootstrap stream per (q, statistic) in table order"
+  },
+  "binomial_ci": "exact Clopper-Pearson 95% (scipy.stats.beta quantiles)"
+ },
+ "v1_0_outcome_reported": {
+  "definition": "G-A and the v1.0 G-F (Gmax_full_over_dw <= 0.01 AND stage1_rel_err_abs <= 0.10)",
+  "role": "reported only; decides nothing"
+ },
+ "training_relevant_state": {
+  "compared": [
+   "actor, critic, lagged opponent, frozen stage-2 snapshot (Phase B), both Adam states",
+   "the five training RNG streams (env, learn, opp, start, minibatch) and the torch generator",
+   "all weight exports and the final weights",
+   "training histories and per-update logs, without their wall-clock fields",
+   "checkpoint metrics, gate-metric values, and the evaluation outputs (gateA_*.npz, final_*.npz, induced_band.json, band_sweep.npz, drift_test.json)",
+   "the continuation table (continuation_table.npz, Phase B): y_grid and values, bit for bit"
+  ],
+  "excluded": [
+   "verdict fields",
+   "manifests",
+   "the process-global RNG states (torch global, numpy legacy global, Python random)"
+  ],
+  "decided": "2026-10-02, owner decision D1 of the v1.1 round (reports/v2/protocol_lock_and_rehearsal.md, addendum)"
+ },
+ "global_rng_hardening": {
+  "seeding": "at the start of the pipeline function (run_v2_T2_locked.run_pipeline), before any object is constructed: torch.manual_seed(seed), np.random.seed(seed), random.seed(seed) with the run seed; seeds recorded in the manifest",
+  "reference_state": "each RNG's state immediately before the first Phase A update (Run.phase_start_hook at phase A); the post-seed state is also recorded, with whether anything between seeding and the reference drew from each RNG",
+  "assertion_points": [
+   "end_of_A",
+   "after_G-A",
+   "end_of_B",
+   "end_of_run"
+  ],
+  "assertion": "each of the three states equals its reference state at every assertion point",
+  "on_violation": "record the RNG and the point in gates.json; the run finishes and writes all outputs, then the entry point exits with a nonzero code (5); the run counts as failed",
+  "digests": "SHA-256 of each RNG state at seeding, at the reference point and at each assertion point, in the manifest",
+  "training": "no change to training-relevant state (checked by the re-rehearsal R1)"
+ },
+ "v1_1_outcome_reported": {
+  "definition": "G-A and G-F and G-N (the v1.1 run outcome)",
+  "role": "reported only; decides nothing"
+ }
+}

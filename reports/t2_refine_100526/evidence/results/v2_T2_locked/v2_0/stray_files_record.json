@@ -1,0 +1,54 @@
+{
+ "old_worktree": "/home/fjiang4/tournament_experiment/.claude/worktrees/t2-accuracy-refinement-r1-32d472",
+ "old_worktree_head": "f02a256095dcaa69dffbd011718d337f84183890",
+ "old_worktree_branch": "claude/t2-accuracy-refinement-r1-32d472",
+ "git_status_porcelain_untracked_all": [
+  "?? agents/ppo_pathwise.py",
+  "?? tests/test_v2_refine_pathwise.py",
+  "?? tools/v2/refine_preflight.py",
+  "?? utils/v2_continuation.py"
+ ],
+ "compared_with": "git show 155cdec:<path> in /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine",
+ "files": [
+  {
+   "path": "utils/v2_continuation.py",
+   "sha256": "4af50d84e50632ea520afc2bee11425b0b661e797dc6e61f6d77441e78530c0e",
+   "bytes": 12415,
+   "lines": 278,
+   "tracked_sha256_at_155cdec": "513fef4b304e46606fd2bc436c628c90a4893b36979a454cb00924163bb50b4a",
+   "tracked_bytes_at_155cdec": 12745,
+   "byte_identical_to_155cdec": false,
+   "git_diff_stat_vs_155cdec": "{a => b}/utils/v2_continuation.py | 6 +-----\n 1 file changed, 1 insertion(+), 5 deletions(-)",
+   "git_diff_numstat_vs_155cdec": "1\t5\t{a => b}/utils/v2_continuation.py"
+  },
+  {
+   "path": "agents/ppo_pathwise.py",
+   "sha256": "e244d5fa8fcfbcba734217589af40ac8f0f1b864820ae97536c7e4d9c4c44579",
+   "bytes": 9736,
+   "lines": 218,
+   "tracked_sha256_at_155cdec": "e244d5fa8fcfbcba734217589af40ac8f0f1b864820ae97536c7e4d9c4c44579",
+   "tracked_bytes_at_155cdec": 9736,
+   "byte_identical_to_155cdec": true
+  },
+  {
+   "path": "tests/test_v2_refine_pathwise.py",
+   "sha256": "a9d61299e82620f71af8936d47bf9d77654a2793d03a4d4bf9ca3e5bf63ffd40",
+   "bytes": 19600,
+   "lines": 420,
+   "tracked_sha256_at_155cdec": "a9d61299e82620f71af8936d47bf9d77654a2793d03a4d4bf9ca3e5bf63ffd40",
+   "tracked_bytes_at_155cdec": 19600,
+   "byte_identical_to_155cdec": true
+  },
+  {
+   "path": "tools/v2/refine_preflight.py",
+   "sha256": "1f4aa8a63f07be33679c69439da9318b16357426d7ca6eaf60e085ecdbbee073",
+   "bytes": 35732,
+   "lines": 680,
+   "tracked_sha256_at_155cdec": "74f9288e84e06aac2c21cd2681c0f141e55a8bd86a03d193895ecc344f3c7043",
+   "tracked_bytes_at_155cdec": 40178,
+   "byte_identical_to_155cdec": false,
+   "git_diff_stat_vs_155cdec": "{a => b}/tools/v2/refine_preflight.py | 83 ++++-------------------------------\n 1 file changed, 8 insertions(+), 75 deletions(-)",
+   "git_diff_numstat_vs_155cdec": "8\t75\t{a => b}/tools/v2/refine_preflight.py"
+  }
+ ]
+}

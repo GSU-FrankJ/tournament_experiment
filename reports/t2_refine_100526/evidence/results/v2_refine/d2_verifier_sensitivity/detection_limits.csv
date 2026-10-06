@@ -1,0 +1,109 @@
+family,q,tier,criterion,metric,threshold,side,perturbation_name,x_name,x_at_limit,n_points_side,max_abs_pert_on_grid,max_value_on_grid,reached,limit,limit_str,p_at_limit,value_at_limit,bracket_lo
+a,50,development,G-F,Gmax_full_over_dw,0.01,neg,delta_stage1,delta_stage1,,7,0.15,0.0058763894167266,False,,not reached on the grid,,,none
+a,50,development,G-F,Gmax_full_over_dw,0.01,pos,delta_stage1,delta_stage1,,7,0.15,0.0073605173532785,False,,not reached on the grid,,,none
+a,50,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,13,0.15,0.0073605173532785,False,,not reached on the grid,,,none
+a,50,development,G-A,eta_T_over_dw,0.005,neg,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,development,G-A,eta_T_over_dw,0.005,pos,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,development,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,13,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,final,G-F,Gmax_full_over_dw,0.01,neg,delta_stage1,delta_stage1,,7,0.15,0.0058925372381788,False,,not reached on the grid,,,none
+a,50,final,G-F,Gmax_full_over_dw,0.01,pos,delta_stage1,delta_stage1,,7,0.15,0.0071701074323557,False,,not reached on the grid,,,none
+a,50,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,13,0.15,0.0071701074323557,False,,not reached on the grid,,,none
+a,50,final,G-A,eta_T_over_dw,0.005,neg,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,final,G-A,eta_T_over_dw,0.005,pos,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,final,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,13,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,neg,delta_stage1,delta_stage1,,7,0.15,7.543266632279973e-05,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,pos,delta_stage1,delta_stage1,,7,0.15,0.00019040992092279971,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage1,delta_stage1,,13,0.15,0.00019040992092279971,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,neg,delta_stage1,delta_stage1,,7,0.15,0.0,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,pos,delta_stage1,delta_stage1,,7,0.15,0.0,False,,not reached on the grid,,,none
+a,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage1,delta_stage1,,13,0.15,0.0,False,,not reached on the grid,,,none
+a,60,development,G-F,Gmax_full_over_dw,0.01,neg,delta_stage1,delta_stage1,,7,0.15,0.0030339734908608,False,,not reached on the grid,,,none
+a,60,development,G-F,Gmax_full_over_dw,0.01,pos,delta_stage1,delta_stage1,,7,0.15,0.0031921824732279,False,,not reached on the grid,,,none
+a,60,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,13,0.15,0.0031921824732279,False,,not reached on the grid,,,none
+a,60,development,G-A,eta_T_over_dw,0.005,neg,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,development,G-A,eta_T_over_dw,0.005,pos,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,development,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,13,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,final,G-F,Gmax_full_over_dw,0.01,neg,delta_stage1,delta_stage1,,7,0.15,0.0030824859923272,False,,not reached on the grid,,,none
+a,60,final,G-F,Gmax_full_over_dw,0.01,pos,delta_stage1,delta_stage1,,7,0.15,0.0032470912454052,False,,not reached on the grid,,,none
+a,60,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,13,0.15,0.0032470912454052,False,,not reached on the grid,,,none
+a,60,final,G-A,eta_T_over_dw,0.005,neg,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,final,G-A,eta_T_over_dw,0.005,pos,delta_stage1,delta_stage1,,7,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,final,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,13,0.15,2.220446049250313e-16,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,neg,delta_stage1,delta_stage1,,7,0.15,5.030174276499989e-05,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,pos,delta_stage1,delta_stage1,,7,0.15,5.490877217730018e-05,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage1,delta_stage1,,13,0.15,5.490877217730018e-05,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,neg,delta_stage1,delta_stage1,,7,0.15,0.0,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,pos,delta_stage1,delta_stage1,,7,0.15,0.0,False,,not reached on the grid,,,none
+a,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage1,delta_stage1,,13,0.15,0.0,False,,not reached on the grid,,,none
+b,50,development,G-F,Gmax_full_over_dw,0.01,neg,delta_stage2,delta_stage2,-0.15,7,0.15,0.0156705882352941,True,0.15,0.15,-0.15,0.0156705882352941,0.1
+b,50,development,G-F,Gmax_full_over_dw,0.01,pos,delta_stage2,delta_stage2,0.1,7,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666667,0.05
+b,50,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage2,delta_stage2,0.1,13,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666667,0.05
+b,50,development,G-A,eta_T_over_dw,0.005,neg,delta_stage2,delta_stage2,-0.1,7,0.15,0.0156705882352941,True,0.1,0.1,-0.1,0.0080032941176471,0.05
+b,50,development,G-A,eta_T_over_dw,0.005,pos,delta_stage2,delta_stage2,0.1,7,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666667,0.05
+b,50,development,G-A,eta_T_over_dw,0.005,any,delta_stage2,delta_stage2,-0.1,13,0.15,0.0262499999999999,True,0.1,0.1,-0.1,0.0080032941176471,0.05
+b,50,final,G-F,Gmax_full_over_dw,0.01,neg,delta_stage2,delta_stage2,-0.15,7,0.15,0.0156705882352941,True,0.15,0.15,-0.15,0.0156705882352941,0.1
+b,50,final,G-F,Gmax_full_over_dw,0.01,pos,delta_stage2,delta_stage2,0.1,7,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666666,0.05
+b,50,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage2,delta_stage2,0.1,13,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666666,0.05
+b,50,final,G-A,eta_T_over_dw,0.005,neg,delta_stage2,delta_stage2,-0.1,7,0.15,0.0156705882352941,True,0.1,0.1,-0.1,0.0080032941176471,0.05
+b,50,final,G-A,eta_T_over_dw,0.005,pos,delta_stage2,delta_stage2,0.1,7,0.15,0.0262499999999999,True,0.1,0.1,0.1,0.0116666666666666,0.05
+b,50,final,G-A,eta_T_over_dw,0.005,any,delta_stage2,delta_stage2,-0.1,13,0.15,0.0262499999999999,True,0.1,0.1,-0.1,0.0080032941176471,0.05
+b,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,neg,delta_stage2,delta_stage2,,7,0.15,2.081704807050007e-05,False,,not reached on the grid,,,none
+b,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,pos,delta_stage2,delta_stage2,,7,0.15,1.0061396160665481e-16,False,,not reached on the grid,,,none
+b,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage2,delta_stage2,,13,0.15,2.081704807050007e-05,False,,not reached on the grid,,,none
+b,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,neg,delta_stage2,delta_stage2,,7,0.15,2.081704807050007e-05,False,,not reached on the grid,,,none
+b,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,pos,delta_stage2,delta_stage2,,7,0.15,1.0061396160665481e-16,False,,not reached on the grid,,,none
+b,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage2,delta_stage2,,13,0.15,2.081704807050007e-05,False,,not reached on the grid,,,none
+b,60,development,G-F,Gmax_full_over_dw,0.01,neg,delta_stage2,delta_stage2,,7,0.15,0.0083545560747663,False,,not reached on the grid,,,none
+b,60,development,G-F,Gmax_full_over_dw,0.01,pos,delta_stage2,delta_stage2,0.15,7,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage2,delta_stage2,0.15,13,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,development,G-A,eta_T_over_dw,0.005,neg,delta_stage2,delta_stage2,-0.15,7,0.15,0.0083545560747663,True,0.15,0.15,-0.15,0.0083545560747663,0.1
+b,60,development,G-A,eta_T_over_dw,0.005,pos,delta_stage2,delta_stage2,0.15,7,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,development,G-A,eta_T_over_dw,0.005,any,delta_stage2,delta_stage2,-0.15,13,0.15,0.010641891891892,True,0.15,0.15,-0.15,0.0083545560747663,0.1
+b,60,final,G-F,Gmax_full_over_dw,0.01,neg,delta_stage2,delta_stage2,,7,0.15,0.0083545560747663,False,,not reached on the grid,,,none
+b,60,final,G-F,Gmax_full_over_dw,0.01,pos,delta_stage2,delta_stage2,0.15,7,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage2,delta_stage2,0.15,13,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,final,G-A,eta_T_over_dw,0.005,neg,delta_stage2,delta_stage2,-0.15,7,0.15,0.0083545560747663,True,0.15,0.15,-0.15,0.0083545560747663,0.1
+b,60,final,G-A,eta_T_over_dw,0.005,pos,delta_stage2,delta_stage2,0.15,7,0.15,0.010641891891892,True,0.15,0.15,0.15,0.010641891891892,0.1
+b,60,final,G-A,eta_T_over_dw,0.005,any,delta_stage2,delta_stage2,-0.15,13,0.15,0.010641891891892,True,0.15,0.15,-0.15,0.0083545560747663,0.1
+b,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,neg,delta_stage2,delta_stage2,,7,0.15,1.5548387625600015e-05,False,,not reached on the grid,,,none
+b,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,pos,delta_stage2,delta_stage2,,7,0.15,3.510543250540011e-07,False,,not reached on the grid,,,none
+b,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage2,delta_stage2,,13,0.15,1.5548387625600015e-05,False,,not reached on the grid,,,none
+b,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,neg,delta_stage2,delta_stage2,,7,0.15,1.5548387625600015e-05,False,,not reached on the grid,,,none
+b,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,pos,delta_stage2,delta_stage2,,7,0.15,1.2107531632832122e-07,False,,not reached on the grid,,,none
+b,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage2,delta_stage2,,13,0.15,1.5548387625600015e-05,False,,not reached on the grid,,,none
+c,50,development,G-F,Gmax_full_over_dw,0.01,any,kernel_h,induced_peak_error,,5,20.0,0.0026691764705881,False,,not reached on the grid,,,none
+c,50,development,G-A,eta_T_over_dw,0.005,any,kernel_h,induced_peak_error,,5,20.0,0.0026691764705881,False,,not reached on the grid,,,none
+c,50,final,G-F,Gmax_full_over_dw,0.01,any,kernel_h,induced_peak_error,,5,20.0,0.0026691764705882,False,,not reached on the grid,,,none
+c,50,final,G-A,eta_T_over_dw,0.005,any,kernel_h,induced_peak_error,,5,20.0,0.0026691764705882,False,,not reached on the grid,,,none
+c,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,kernel_h,induced_peak_error,,5,20.0,0.00023080469716839998,False,,not reached on the grid,,,none
+c,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,kernel_h,induced_peak_error,,5,20.0,0.00023080469716839998,False,,not reached on the grid,,,none
+c,60,development,G-F,Gmax_full_over_dw,0.01,any,kernel_h,induced_peak_error,,5,20.0,0.0012440139378797,False,,not reached on the grid,,,none
+c,60,development,G-A,eta_T_over_dw,0.005,any,kernel_h,induced_peak_error,,5,20.0,0.0012440139378797,False,,not reached on the grid,,,none
+c,60,final,G-F,Gmax_full_over_dw,0.01,any,kernel_h,induced_peak_error,,5,20.0,0.0013851083852544,False,,not reached on the grid,,,none
+c,60,final,G-A,eta_T_over_dw,0.005,any,kernel_h,induced_peak_error,,5,20.0,0.0013851083852544,False,,not reached on the grid,,,none
+c,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,kernel_h,induced_peak_error,,5,20.0,0.00014109444737469981,False,,not reached on the grid,,,none
+c,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,kernel_h,induced_peak_error,,5,20.0,0.00014109444737469981,False,,not reached on the grid,,,none
+d,50,development,G-F,Gmax_full_over_dw,0.01,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,50,development,G-A,eta_T_over_dw,0.005,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,50,final,G-F,Gmax_full_over_dw,0.01,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,50,final,G-A,eta_T_over_dw,0.005,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,tau,tau,,4,2.0,0.0,False,,not reached on the grid,,,none
+d,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,tau,tau,,4,2.0,0.0,False,,not reached on the grid,,,none
+d,60,development,G-F,Gmax_full_over_dw,0.01,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,60,development,G-A,eta_T_over_dw,0.005,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,60,final,G-F,Gmax_full_over_dw,0.01,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,60,final,G-A,eta_T_over_dw,0.005,any,tau,tau,,4,2.0,0.0002857142857142,False,,not reached on the grid,,,none
+d,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,tau,tau,,4,2.0,0.0,False,,not reached on the grid,,,none
+d,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,tau,tau,,4,2.0,0.0,False,,not reached on the grid,,,none
+e,50,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,3,0.15,0.0068480112227748,False,,not reached on the grid,,,none
+e,50,development,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,3,0.15,0.0007423162178644,False,,not reached on the grid,,,none
+e,50,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,3,0.15,0.0068131962161046,False,,not reached on the grid,,,none
+e,50,final,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,3,0.15,0.0009731209150328,False,,not reached on the grid,,,none
+e,50,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage1,delta_stage1,,3,0.15,0.0001829834096161,False,,not reached on the grid,,,none
+e,50,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage1,delta_stage1,,3,0.15,0.00023080469716839998,False,,not reached on the grid,,,none
+e,60,development,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,3,0.15,0.00322661722127,False,,not reached on the grid,,,none
+e,60,development,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,3,0.15,0.0004088785046729,False,,not reached on the grid,,,none
+e,60,final,G-F,Gmax_full_over_dw,0.01,any,delta_stage1,delta_stage1,,3,0.15,0.0031964884791675,False,,not reached on the grid,,,none
+e,60,final,G-A,eta_T_over_dw,0.005,any,delta_stage1,delta_stage1,,3,0.15,0.0004797201309563,False,,not reached on the grid,,,none
+e,60,dev-final,G-N_Gmax,|dev - final| of Gmax_full_over_dw,0.001,any,delta_stage1,delta_stage1,,3,0.15,3.9893213416500014e-05,False,,not reached on the grid,,,none
+e,60,dev-final,G-N_eta,|dev - final| of eta_T_over_dw,0.001,any,delta_stage1,delta_stage1,,3,0.15,7.084162628340001e-05,False,,not reached on the grid,,,none

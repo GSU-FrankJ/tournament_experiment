@@ -1,0 +1,182 @@
+{
+  "ii_a": {
+    "q50": {
+      "from_rule": [
+        1.0,
+        6
+      ],
+      "to_rule": [
+        0.5,
+        12
+      ],
+      "max_abs_change_over_dw": 4.760161709249644e-09,
+      "threshold_over_dw": 1e-08,
+      "pass": true
+    },
+    "q60": {
+      "from_rule": [
+        1.0,
+        6
+      ],
+      "to_rule": [
+        0.5,
+        12
+      ],
+      "max_abs_change_over_dw": 3.21946624914915e-09,
+      "threshold_over_dw": 1e-08,
+      "pass": true
+    }
+  },
+  "ii_b": {
+    "q50": {
+      "verifier": {
+        "state_step": 0.25,
+        "effort_step": 0.5,
+        "gl_half": 64
+      },
+      "valid": true,
+      "e1_hat": 40.0,
+      "max_abs_diff_over_dw": 4.981767257605796e-07,
+      "argmax_effort": 4.0,
+      "threshold_over_dw": 1e-06,
+      "pass": true
+    },
+    "q60": {
+      "verifier": {
+        "state_step": 0.25,
+        "effort_step": 0.5,
+        "gl_half": 64
+      },
+      "valid": true,
+      "e1_hat": 45.0,
+      "max_abs_diff_over_dw": 4.1004767326047187e-07,
+      "argmax_effort": 1.5,
+      "threshold_over_dw": 1e-06,
+      "pass": true
+    }
+  },
+  "ii_c": {
+    "q50": {
+      "finest_rule": [
+        0.25,
+        24
+      ],
+      "e1_star": 46.666666666666664,
+      "profile_max_abs_over_dw": 3.949794602498002e-09,
+      "grid_step": 0.001,
+      "threshold_over_e1_star": 0.001,
+      "fixed_opponent": {
+        "opponent_mean": 40.0,
+        "argmax_default": 50.137,
+        "argmax_with_profile": 50.136,
+        "shift": -0.0009999999999976694,
+        "shift_over_e1_star": 2.1428571428521487e-05,
+        "pass": true
+      },
+      "opponent_at_e1_star": {
+        "opponent_mean": 46.666666666666664,
+        "argmax_default": 47.306000000000004,
+        "argmax_with_profile": 47.306000000000004,
+        "shift": 0.0,
+        "shift_over_e1_star": 0.0,
+        "pass": true
+      },
+      "pass": true
+    },
+    "q60": {
+      "finest_rule": [
+        0.25,
+        24
+      ],
+      "e1_star": 38.888888888888886,
+      "profile_max_abs_over_dw": 3.913036228375688e-09,
+      "grid_step": 0.001,
+      "threshold_over_e1_star": 0.001,
+      "fixed_opponent": {
+        "opponent_mean": 45.0,
+        "argmax_default": 36.862,
+        "argmax_with_profile": 36.862,
+        "shift": 0.0,
+        "shift_over_e1_star": 0.0,
+        "pass": true
+      },
+      "opponent_at_e1_star": {
+        "opponent_mean": 38.888888888888886,
+        "argmax_default": 38.829,
+        "argmax_with_profile": 38.829,
+        "shift": 0.0,
+        "shift_over_e1_star": 0.0,
+        "pass": true
+      },
+      "pass": true
+    }
+  },
+  "verifier_numerics": {
+    "q50": {
+      "final": {
+        "tier": "final",
+        "state_step": 2.0,
+        "gl_half": 32,
+        "valid": true,
+        "max_abs_gap_over_dw": 3.229443551089339e-05,
+        "argmax_gap_effort": 22.0,
+        "opponent_mean": 40.0,
+        "e1_star": 46.666666666666664,
+        "argmax_table": 50.137,
+        "argmax_if_gap_were_table_error": 50.037,
+        "implied_shift": -0.10000000000000142,
+        "implied_shift_over_e1_star": 0.0021428571428571733,
+        "gated": false
+      },
+      "development": {
+        "tier": "development",
+        "state_step": 4.0,
+        "gl_half": 16,
+        "valid": true,
+        "max_abs_gap_over_dw": 0.0001328503196055264,
+        "argmax_gap_effort": 3.0,
+        "opponent_mean": 40.0,
+        "e1_star": 46.666666666666664,
+        "argmax_table": 50.137,
+        "argmax_if_gap_were_table_error": 49.743,
+        "implied_shift": -0.39399999999999835,
+        "implied_shift_over_e1_star": 0.008442857142857108,
+        "gated": false
+      }
+    },
+    "q60": {
+      "final": {
+        "tier": "final",
+        "state_step": 2.0,
+        "gl_half": 32,
+        "valid": true,
+        "max_abs_gap_over_dw": 1.9602189297307504e-05,
+        "argmax_gap_effort": 21.5,
+        "opponent_mean": 45.0,
+        "e1_star": 38.888888888888886,
+        "argmax_table": 36.862,
+        "argmax_if_gap_were_table_error": 36.729,
+        "implied_shift": -0.13300000000000267,
+        "implied_shift_over_e1_star": 0.003420000000000069,
+        "gated": false
+      },
+      "development": {
+        "tier": "development",
+        "state_step": 4.0,
+        "gl_half": 16,
+        "valid": true,
+        "max_abs_gap_over_dw": 8.511085840123833e-05,
+        "argmax_gap_effort": 16.0,
+        "opponent_mean": 45.0,
+        "e1_star": 38.888888888888886,
+        "argmax_table": 36.862,
+        "argmax_if_gap_were_table_error": 36.543,
+        "implied_shift": -0.3190000000000026,
+        "implied_shift_over_e1_star": 0.008202857142857211,
+        "gated": false
+      }
+    }
+  },
+  "all_pass": true
+}
+EXIT=0

@@ -1,0 +1,1872 @@
+{
+ "tool": "tools/v2/r2b_launch_checks.py",
+ "code_commit": "0fa2196",
+ "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b",
+ "r1_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine",
+ "parents": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/parents.csv",
+ "n": 120,
+ "n_ok": 120,
+ "ALL": true,
+ "runs": [
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10501/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10501/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10501/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10502/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10502/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10502/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10503/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10503/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10503/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10504/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10504/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10504/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10505/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10505/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10505/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10506/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10506/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10506/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10507/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10507/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10507/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10508/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10508/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10508/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10509/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10509/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10509/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10510/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10510/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q50/seed10510/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10501/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10501/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10501/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10502/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10502/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10502/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10503/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10503/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10503/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10504/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10504/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10504/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10505/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10505/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10505/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10506/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10506/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10506/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10507/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10507/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10507/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10508/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10508/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10508/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10509/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10509/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10509/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak25",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10510/A_peak25",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_peak50",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10510/A_peak50",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "start_weights"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveA",
+   "arm": "A_censored",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveA/q60/seed10510/A_censored",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "clamp_likelihood"
+   ],
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10501/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "parent_sha256_csv": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10501/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "parent_sha256_csv": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10501/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "parent_sha256_csv": "1b7eb86879b31f5343e2afeeaa183c1783dcae4fd63ebc122632601bc0082bc2",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "parent_sha256_csv": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "parent_sha256_csv": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10502/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "parent_sha256_csv": "3867eec41b948b2980f6f3014c41efd0c3bc29cc95ce8c745da1b7d77bdb3bcc",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10503/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "parent_sha256_csv": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10503/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "parent_sha256_csv": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10503/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "parent_sha256_csv": "61466a5395d29dde5f746e78efbb5e7d7510db51a4592b9ecae00df4a6f3f209",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10504/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "parent_sha256_csv": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10504/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "parent_sha256_csv": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10504/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "parent_sha256_csv": "e0cac13bc743785d07bd6f74d02964ef0450d29ddb82b209ddaa9c67f3ebe7d0",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10505/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "parent_sha256_csv": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10505/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "parent_sha256_csv": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10505/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "parent_sha256_csv": "bbea224987273cea1ad25c89b2b068202d8f657fdb61f184db9bb215c55b3d7b",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10506/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "parent_sha256_csv": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10506/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "parent_sha256_csv": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10506/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "parent_sha256_csv": "8e108dc6e8a738f0c337b514c289e980a84cc2b1c27f72363b13d29f36aa1cb6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10507/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "parent_sha256_csv": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10507/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "parent_sha256_csv": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10507/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "parent_sha256_csv": "80e23aa46d768a4b731653d90798f4e140d24d58660f650c204d1c98a46c11ea",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10508/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "parent_sha256_csv": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10508/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "parent_sha256_csv": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10508/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "parent_sha256_csv": "410fb01b5a135467e9cbac81067a52c86e92ee236a44c1fc7eb5782e00510213",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10509/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "parent_sha256_csv": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10509/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "parent_sha256_csv": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10509/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "parent_sha256_csv": "6116b23196f8c0278d714a594f564fef8036d34bfdae0df7dedf160fa5362ea6",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10510/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "parent_sha256_csv": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10510/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "parent_sha256_csv": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 50,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q50/seed10510/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "parent_sha256_csv": "c68e23c893345fd8812fcc01d9228e5c9a8edd39bfe9cf808f6f00b3f9aaa4fb",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10501/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "parent_sha256_csv": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10501/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "parent_sha256_csv": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10501,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10501/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "parent_sha256_csv": "fce4fdb1ed84538b022a4296ec1447242233051e2be33354a2382765147d3411",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10502/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "parent_sha256_csv": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10502/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "parent_sha256_csv": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10502,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10502/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "parent_sha256_csv": "b05dd265c6f5f11a7b362215a2eb9ae879d42dd086d32172eacf9ded004a3133",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10503/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "parent_sha256_csv": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10503/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "parent_sha256_csv": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10503,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10503/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "parent_sha256_csv": "3571b7c48660f1c67ef1156b98798d13032aa894c37bdd0806b5e117edf6de6c",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10504/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "parent_sha256_csv": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10504/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "parent_sha256_csv": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10504,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10504/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "parent_sha256_csv": "d25af3f9dc76307b297fdfd10fa1beec06b3c209b806c8095ff27b8edeca3532",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10505/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "parent_sha256_csv": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10505/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "parent_sha256_csv": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10505,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10505/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "parent_sha256_csv": "d6829b8463ac7b7e558ab640e213c33ea82cac4b74f389db5d8665783a1fbdda",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10506/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "parent_sha256_csv": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10506/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "parent_sha256_csv": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10506,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10506/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "parent_sha256_csv": "79a829e85e27fec396e0c727337fcf1d7cfbb742f28b8cd3b878c6cf5a9580ba",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10507/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "parent_sha256_csv": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10507/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "parent_sha256_csv": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10507,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10507/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "parent_sha256_csv": "b04be9e13a6f3690641c82337e715dd1202529b087d0e9a9154cf2e48264c862",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10508/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "parent_sha256_csv": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10508/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "parent_sha256_csv": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10508,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10508/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "parent_sha256_csv": "7ab7e8bdc710a5abcf51e98556becf2491ee9c0cf57550e75f5012eba1ea80c5",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10509/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "parent_sha256_csv": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10509/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "parent_sha256_csv": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10509,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10509/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "parent_sha256_csv": "0fc3893b5210551681a47aefc66c4fc2b28f0a9605c37bdfcc0ebf0709376882",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-5",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10510/P20_lr3e-5",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "parent_sha256_csv": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "P20_lr3e-4",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10510/P20_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay",
+    "pathwise_epochs",
+    "pathwise_minibatch"
+   ],
+   "parent_sha256_manifest": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "parent_sha256_csv": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "ok": true,
+   "problems": []
+  },
+  {
+   "wave": "r2b_waveP",
+   "arm": "A_ctrl200_lr3e-4",
+   "q": 60,
+   "seed": 10510,
+   "run_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-r2b/results/v2_refine_r2b/waveP/q60/seed10510/A_ctrl200_lr3e-4",
+   "manifest_commit": "d581b3ccff15083132611143238f130bb8800bb2",
+   "manifest_dirty": false,
+   "config_diff_vs_r1": [
+    "lr_decay"
+   ],
+   "parent_sha256_manifest": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "parent_sha256_csv": "816011319ac0c90daa2de647325e2d7940370634bc30421ef88d508d643e8ac2",
+   "ok": true,
+   "problems": []
+  }
+ ]
+}

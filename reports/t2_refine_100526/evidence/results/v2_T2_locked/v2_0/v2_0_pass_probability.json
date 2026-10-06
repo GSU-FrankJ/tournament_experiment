@@ -1,0 +1,56 @@
+{
+ "source": "results/v2_refine/analysis/stage1_per_run.csv",
+ "arm": "B_expcont",
+ "threshold": 0.05,
+ "rule": ">= 18 of 20 fresh runs pass G-S",
+ "per_q": {
+  "50": {
+   "n": 10,
+   "n_within_threshold": 10,
+   "max_abs_err": 0.0406919994074133,
+   "mean_signed": -0.01181102534156412,
+   "sd_ddof1": 0.017849854300316853,
+   "sd_ddof0": 0.01693385864734574,
+   "per_run_pass_prob_normal_ddof1": 0.9835333526142322,
+   "per_run_pass_prob_normal_ddof0": 0.9878080765595729,
+   "P_ge18_of_20_normal_ddof1": 0.9958733577727635,
+   "P_ge18_of_20_normal_ddof0": 0.9982313579565592
+  },
+  "60": {
+   "n": 10,
+   "n_within_threshold": 10,
+   "max_abs_err": 0.0314414474441367,
+   "mean_signed": 0.0009060316963757503,
+   "sd_ddof1": 0.018741926811069648,
+   "sd_ddof0": 0.017780152938946903,
+   "per_run_pass_prob_normal_ddof1": 0.9922944897685292,
+   "per_run_pass_prob_normal_ddof0": 0.9950225261162738,
+   "P_ge18_of_20_normal_ddof1": 0.9995272279276824,
+   "P_ge18_of_20_normal_ddof0": 0.9998680606853838
+  }
+ },
+ "pi_reference": {
+  "P_ge18_of_20": {
+   "50": 0.996,
+   "60": 0.9995
+  },
+  "within_0.05": {
+   "50": 10,
+   "60": 10
+  },
+  "max_abs_err": {
+   "50": 0.0407,
+   "60": 0.0314
+  },
+  "mean_signed": {
+   "50": -0.0118,
+   "60": 0.0009
+  },
+  "sd_ddof1": {
+   "50": 0.0178,
+   "60": 0.0187
+  }
+ },
+ "P_both_normal_ddof1": 0.9954025366616435,
+ "P_both_normal_ddof0": 0.998099651995362
+}
