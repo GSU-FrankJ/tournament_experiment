@@ -1,6 +1,13 @@
 # Project state
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
+
+## T=2 refinement publication (2026-10-06, branch t2-refine-pack, pushed to `main`)
+
+Done: R1, the v2.0 lock and confirmation, R2b and R2c are published as one folder, `reports/t2_refine_100526/`: index `README.md`, summary report `100526report.md` (English, with a one-page Chinese summary), PI record `pi_record/`, evidence pack `evidence/` and `figures/` (180 items, each with source path, SHA-256 and source commit; `python tools/v2/report/build_t2_refine_pack.py --check-against reports/t2_refine_100526` reproduces it byte for byte) and the fact-check ledger `pi_record/01_factcheck.md` (nine reviewing agents, 1488 statements, then a second pass on the corrections). The PI's decisions (publication prompt D1): the four rounds are closed as reported; the locked T=2 solver is protocol v2.0 and there is no v2.1; method 5 is closed as negative at matched budgets; the censored likelihood is not adopted; the peak-focused start distribution is not adopted at T=2 and is carried as a design input for the T=3 terminal stage.
+Corrections found by the fact-check are dated addenda in `reports/v2/refine/summary.md` (152 evaluations = 38 candidates; one interval end; the "4x per halving" wording) and `reports/v2/refine_r2c/summary.md` (3.13% and 4.29%); no protocol, locked file or pipeline code changed.
+Known issues: the PI's note `Multistage100226.docx` and the delivered prompts 12-14 were not available (prompts 15 and 16 are transcriptions); the primary checkout's local `main` was not touched because the worktree guard refuses git there, `origin/main` was advanced by pushing `t2-refine-pack`, and the commands for the local `main` (with a caution about untracked `experiments/` files) are in `reports/t2_refine_100526/pi_record/00_publication_log.md` section 1.3; the fact-check was done by agents, not by a human reviewer.
+Next: nothing for T=2 (stopped, awaiting the PI); the T=3 questions are listed in section 8 of the report.
 
 ## T=2 sampler pilot R2c (2026-10-05, branch v2-t2-r2c, not pushed)
 
