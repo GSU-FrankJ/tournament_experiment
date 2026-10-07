@@ -1,0 +1,109 @@
+# MS-R3 pre-registration
+
+Date: 2026-10-07. Branch `ms-r3` (from `origin/ms-r2` = `e8eb9a08`). Prompt: `reports/ms/r3/pi_record/20_ms_r3_prompt.md`; `§` and `D#` refer to it. This file fixes, before any pilot run, the actor variants, the arms, the identities, the measures, the criterion, the secondary analyses and the quadrature check, the predictions, the offline work and its premise check, the reference roots, the tests and the launch plan. Nothing in it changes after the launch except through a dated addendum. It is part of the **code commit** (the commit that adds this file together with the code, the tests and the reports 00-03 and 01/01b; the offline outputs under `results/ms_r3/` follow in the next commit, results only, as the repository's commit rules separate code from results); the code commit's hash is the `--code-commit` argument of the launch and is recorded in the launch record and in `reports/ms/r3/04_pilot.md`.
+
+Provenance: every number cites a path. Premise (the PI's post-hoc reading and the items 1-3 of the preamble, reproduced from `results/ms_r2/analysis/per_run.csv`): `reports/ms/r3/01_supervised_screen.md` section 4. Offline work: `reports/ms/r3/01_supervised_screen.md`, `01b_rl_actor_diagnostics.md`. Host and roots: `reports/ms/r3/00_housekeeping.md`.
+
+## 1. The question and the design
+
+MS-R2 lowered sigma_2(0) as designed and the smoothing part with it, but the learned tie effort did not follow (the remainder rose in every cell; no row of the primary criterion was met). The PI's new reading, post hoc and tested here: the tie deficit is set mainly by the actor's resolution at the kink of the equilibrium tent e2*(d). The round replaces only the actor (the critic keeps its architecture and input): a ReLU actor (`relu`) and a tanh actor on a ten times finer d input (`t10`) against the current actor (`t1`, the control), crossed with the start sampler (bin-balanced / stratified) and the terminal-stage noise landing (s in {1, 16}). Stage structure, schedule, samplers, checks, gates, the verifier and the evaluation are those of MS-R2's `NL_*` arms; the closed form enters evaluation and reporting only (and the offline supervised screen, an evaluation-side diagnostic), never a run.
+
+## 2. The actor variants (D2), as implemented
+
+| key | hidden activation | d component of the actor's input |
+|---|---|---|
+| `t1` (no key) | tanh, tanh | d / ((t - 1) B) |
+| `relu` | ReLU, ReLU | d / ((t - 1) B) |
+| `t10` | tanh, tanh | 10 * d / ((t - 1) B); the stage feature (column 0) is not scaled |
+
+Implementation (a single place, behind a new attribute; absent = the locked actor, bit for bit):
+
+- `agents/ppo_curriculum.py`: `ACTOR_VARIANTS`, `D_FEATURE_SCALE_T10 = 10.0`; `BetaActor.variant` (default `"t1"`: the forward of `t1` is the unchanged code path; `relu` / `t10` go through `BetaActor._hidden_variant`); `CurriculumPPO.set_actor_variant(v)` (live actor and lagged opponent; `refresh_snapshot` copies the variant to the opponent); `export_weights_npz` writes an `actor_variant` string entry only for a non-`t1` actor (every earlier export has none); `mean_effort_numpy(..., variant=None)` reads that entry (absent = `t1`), applies the variant's forward, and raises `ValueError` for an unknown variant; it never falls back to the tanh d / B forward for an export that names another variant.
+- `agents/ppo_curriculum_v2.py`: `full_state` carries `actor_variant` when it differs from `t1`; `load_full_state` restores it before the frozen snapshot is rebuilt.
+- `run/run_ms_stagewise.py`: two new optional config keys. `actor_variant` (`"relu"` or `"t10"`; `"t1"` is refused so that a `t1` run writes no variant field anywhere) is applied after the agent is built (before any update); the manifest of a `relu` / `t10` run records it; the frozen snapshot is a deep copy of the live actor and carries it; the full state records it. `init_digest: true` makes the manifest record `init_state_sha256`, the SHA-256 of the initial actor and critic weights (before any update, no RNG): check C-INIT.
+- `tools/ms/replay_dev_rule.py:build_actor` reads `actor_variant` from the export and builds that forward (or raises for an unknown name); `tools/ms/residual_asymmetry_example.py` (MS-R1) refuses a non-`t1` export. The loaders of `tools/v2/` are unchanged and are not used on MS-R3 exports. `tools/ms/r2_*` loaders go through `build_actor`.
+- **Initial weights.** The variants add no generator call: `l1` and `l2` are drawn orthogonal with gain sqrt(2) from the explicit torch generator in the same order as the current actor, the output layer is zero, and the critic is drawn after the actor, so for a (q, seed) the initial weights of actor and critic are identical across `t1`, `relu` and `t10` (C-INIT; test `tests/test_ms_r3_actor.py::test_initial_weights_are_identical_across_variants_for_a_q_seed`).
+- Tested without the new keys: the current tree and a checkout of `e8eb9a08` end in the same state (reduced `NL_st_s16`, `NL_bb_s4` and an `MS_s35a5` rule run: state files, every weight export, `ms_updates.csv`, check rows, no new column) and with `init_digest: true` only the manifest differs (`tests/test_ms_r3_actor.py`).
+
+## 3. Schedule (D3) and arms (D4)
+
+Schedule: unchanged from MS-R2 D2 (terminal stage fixed 2800 updates: local 1-2000 LR 3e-4, scale 1; 2001-2200 LR 3e-4, scale ramped 1 -> s with the form of `Run.conc_scale_for` (first 2001, last 2200); 2201-2400 LR 3e-4, scale s; 2401-2800 LR linear 3e-4 -> 3e-5; stage 1 fixed 600 updates, LR linear 3e-4 -> 3e-5, scale reset to 1 at the phase entry; for s = 1 no scale is ever set). The scale is set on the live actor and the lagged opponent, carried by the refresh and the frozen snapshot.
+
+Twelve arms, 20 runs each (q in {50, 60} x seeds 10501-10510); names `{actor}_{bb|st}_s{1|16}`:
+
+| actor | starts | s = 1 | s = 16 |
+|---|---|---|---|
+| `t1` | bin-balanced (`StartSampler.balanced`) | `t1_bb_s1` | `t1_bb_s16` |
+| `t1` | stratified (lambda_P 0.35, alpha_global 0.5, EMA beta 0.5, near-tie half-width 20, lambda_T the bin-balanced tail share, the MS-R1 global-block sampler at every update: the `NL_st` settings) | `t1_st_s1` | `t1_st_s16` |
+| `relu` | both | `relu_bb_s1`, `relu_st_s1` | `relu_bb_s16`, `relu_st_s16` |
+| `t10` | both | `t10_bb_s1`, `t10_st_s1` | `t10_bb_s16`, `t10_st_s16` |
+
+The four `t1` arms are MS-R2's `NL_bb_s1`, `NL_bb_s16`, `NL_st_s1`, `NL_st_s16` re-run on the new code (C-MS5). All twelve configs carry `noise_report` (reporting columns) and `init_digest`; the stratified arms carry `fixed_global_sampler`; the s = 16 arms carry `conc_scale_schedule`; `relu` / `t10` arms carry `actor_variant`. For each (starts, s) the configs of the three actors differ only in the arm label and the variant key (`tests/test_ms_r3_launcher.py`). Config builder `tools/ms/ms_configs.py` (`R3_*`, kept apart from the earlier tables); wave `r3` of `tools/ms/launch_ms_r1.py` (default root `results/ms_r3`, output `results/ms_r3/pilot/q{q}/seed{s}/<arm>`; the optional `--actors` filter drops the arms of a variant that the premise check rejects). As in MS-R2: no development stop, no classification-driven change of the sampler, no polishing; the checks every K = 25 are recorded; the would-fire record uses `reports/ms/r1/prereg_parameters.json` (SHA-256 `0fbfc01857c5abe339ab1926361cd57d6e988da20e754fd6dea3ffa4e076b406`; K = 25, M = 3, rho_2 = 0.05, rho_1 = 0.03, eps = 0.005, tau = 0.02, concentration limit 0.04, EMA weight 0.5, near-tie half-width 20) and decides nothing.
+
+## 4. Identities and checks (`tools/ms/r3_launch_checks.py`; any failure is a stop-and-report)
+
+"Equal" has the meaning of MS-R2 section 4 (weight exports, the per-update series of `ms_updates.csv` with the five stream positions `rngpos_*`, the common columns of the check rows; wall-clock columns and the `run` / `arm` labels excluded; a missing file is a failure, never a skip). C-MS5 compares more (below).
+
+- **Usual:** status exit 0; manifest at the launch commit with `clean_tree`; files complete; process-global RNG assertions; start shares per stratum within 3 binomial standard errors (stratified arms; the tail share lambda_T in force at every update).
+- **Scale:** the applied scale equals the D3 schedule at every terminal-stage update and is 1.0 throughout stage 1; every exported `conc_scale` equals the table at that update.
+- **C-INIT:** `manifest.json` `init_state_sha256` is present in every run and identical across all arms run for the same (q, seed) (so across actor variants, starts and s).
+- **C-NL:** within each (actor, starts, q, seed) the s = 16 run equals the s = 1 run bit for bit through update 2001 and its `u02025` export differs: 3 x 2 x 20 = 120 comparisons.
+- **C-MS5:** each `t1` arm equals the corresponding MS-R2 `NL_*` arm bit for bit over the whole run: every array of every weight export, the whole per-update series, the five stream positions after every update, the common columns of the check rows of both stages, every array of the freeze files, the bin maps and the stage-1 table, and the gate values: 4 x 20 = 80 comparisons.
+- **C-R6** (before the launch): the unchanged `run/run_v2_T2_locked.py` from `ms-r3`, q in {50, 60} x seeds 10501-10510, into `results/ms_r3/v20_reproduction/`, compared with `rehearsal_v2_0` by `tools/v2/cr2_compare.py`: 20 of 20 identical, or stop.
+
+## 5. What is measured (D5)
+
+As MS-R2 D4 at the terminal freeze (both tiers) and along the run from local update 1800 to 2800, plus: R0 at the freeze on both tiers and R0 / |peak| against the linearised 2k / (2k + a), a = DW / (4 q^2); the location-free peak and its argmax d; the symmetry error max |e_hat_2(d) - e_hat_2(-d)| over |d| < 2q on the recovery grid; w_eff = gap / (e2*(0) / 2q) in units of d; the first-layer weights on the d input in units of d / B (ten times the stored weight for `t10`), max |w| and the distribution at every weight export; per-stratum errors (near-tie / middle / tail x d < 0 / d > 0); the decomposition and sigma_2(0); along the run R0, R, Delta_2, C_2, w_eff and the PPO diagnostics per segment (training 1-2000, ramp 2001-2200, hold 2201-2400, decay 2401-2800); stage 1 (G-S, S1, G-F, G-N(Gmax), the stage-1 error, R_1) paired against the same starts' and s's `t1` arm and against `rehearsal_v2_0`. Every item is reported (`reports/ms/r3/04_pilot.md` and `05_decision_inputs.md`) and the key figures are embedded.
+
+## 6. Criterion, comparisons, predictions (D6; descriptive, not gates)
+
+**Primary** (`tools/ms/r3_analysis.py` -> `results/ms_r3/analysis/criterion.csv`, recomputed by the independent `tools/ms/r3_blind_criterion.py`): for each variant v in {`relu`, `t10`}, each starts and each s in {1, 16}: |peak error| at the terminal freeze, paired by (q, seed) against the `t1` arm with the same starts and s (8 rows). (a) The 95 % percentile bootstrap interval (10,000 resamples, a fresh `numpy.random.default_rng(20261008)` per (q, statistic), in table order) of the mean paired difference lies below 0 at both q. (b) No run that passes G-A with its G-N(eta) part under `t1` fails it under v.
+
+**Secondary**, descriptive, same pairing and bootstrap: the paired changes of the gap, the smoothing part, the remainder, sigma_2(0), RMSE_pos, tail mean, eta_2, R0, R and w_eff; within each (actor, starts) the noise-landing effect s = 16 against s = 1 (the C-NL pairs) with the transmission ratio (change of the gap) / (change of the smoothing part) (1 = the whole smoothing reduction reached the gap; the ratio is written without the minus sign that the literal MS-R2 formula had, as MS-R2 decision 10); the interaction (v_s16 - v_s1) - (t1_s16 - t1_s1) on |peak| and on the gap; the starts effect within each actor; every arm against `parents_A` with MS-R1's criterion; the stage-1 comparisons of section 5.
+
+**The quadrature check** (the post-hoc model of the preamble, written down before the runs). Per (actor, starts, q), from arm means: F^2 = gap(s1)^2 - smoothing(s1)^2 (if negative: F = 0, flagged); quadrature prediction gap(s16) = sqrt(F^2 + smoothing(s16)^2); additive prediction gap(s16) = gap(s1) - (smoothing(s1) - smoothing(s16)); the observed gap(s16) is reported next to both, and which is closer (`quadrature_check.csv`).
+
+**Predictions, written before the launch.** (P1) `relu` and `t10` have lower |peak| than `t1` at s = 1 under both starts. (P2) For `relu` and `t10` at s = 1 the remainder is small against the smoothing part (e_hat_2(0) close to e_sigma(0)). (P3) For `relu` and `t10` the noise landing transmits (transmission ratio near 1), so that at s = 16 |peak| approaches the smoothing floor sigma_2(0) / (sqrt(pi) q) relative to e2*(0) (in MS-R2 at s = 16 about 0.7 % at q = 50 and 0.6 % at q = 60, against an observed |peak| of 4.0-5.6 %). (P4) RMSE_pos is lower for `relu` and `t10`. The RL fit will be worse than the supervised screen; these are expectations, not tests. No selection rule follows; the decision is the PI's.
+
+## 7. Offline work (§2.3) and the premise check (§2.5)
+
+`tools/ms/r3_supervised_screen.py` (results `results/ms_r3/supervised_screen/`, report `01_supervised_screen.md`): the real `BetaActor` of each variant, initialised as the runner does for (q, seed), fit to the closed-form tent by MSE in effort units at the RL terminal-stage budget (56,000 Adam steps; LR 3e-4 for 48,000 then linear to 3e-5 over 8,000; minibatch 256; the record's betas, eps and gradient-norm clip), starts drawn bin-balanced or stratified (lambda_P 0.35, near-tie half-width 20, alpha 0), 10 seeds x q x starts per variant, plus the extended `t1` bin-balanced cell (224,000 steps). `tools/ms/r3_actor_diagnostics.py` (report `01b_rl_actor_diagnostics.md`): first-layer d-weights and w_eff at every existing MS-R1 and MS-R2 export. Preamble reproduction: `01_supervised_screen.md` section 4 (script `reports/ms/r3/report_scripts/preamble_numbers.py`).
+
+**Premise check** (bin-balanced starts, 56,000 steps): (i) the median tip deficit of `t1` is at least 1.0 effort unit at both q; (ii) for each variant, its median tip deficit is at most half that of `t1` at both q. If (i) fails, or both variants fail (ii): stop and report. If one variant fails (ii): its four arms are dropped from P2 (launcher `--actors`). The stratified cells are reported, not gated. **Outcome:** [FILLED AT THE CODE COMMIT: see `reports/ms/r3/01_supervised_screen.md` section 3 and `results/ms_r3/supervised_screen/premise_check.json`].
+
+## 8. Reference roots (D7; every tool takes them as explicit arguments and records them)
+
+| name | path |
+|---|---|
+| MS-R2 pilot (C-MS5, section 2.3 (b)) | `/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot` (this worktree) |
+| MS-R1 pilot | `/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot` (this worktree) |
+| MS-R1 base wave (`MS_base`) | `/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base` |
+| `parents_A` | `/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A` |
+| `rehearsal_v2_0` | `/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0` |
+| canonical worktree for C7 | `/home/fjiang4/tournament_experiment/.claude/worktrees/pilot-4-stabilization-fb99a2` |
+
+## 9. Choices where the prompt is silent (fixed here, before the launch)
+
+1. **Implementation location (D2):** the variants live in `agents/ppo_curriculum.py` behind the `BetaActor.variant` attribute (default `"t1"`), not in a new module; the default path is the untouched code (the forward of `t1` is the original three lines), proved by the `e8eb9a08` identity tests of section 2.
+2. **How the variant is selected:** by the optional runner key `actor_variant` (`relu` / `t10`; absent for `t1`; the value `"t1"` is refused), set after the agent is built and before any update. A plain attribute, not a `PPOConfig` field, so that the logged configuration of every earlier run is unchanged.
+3. **C-INIT (§3.2) is evaluated on a hash recorded by the runner** (`init_state_sha256` in `manifest.json`, enabled by `init_digest: true` on all twelve arms), not on an update-0 export (the runner exports every 25 updates). The hash covers actor and critic state dicts (sorted names, float32 bytes) before any update, no RNG is consumed. The key is a recording key, not a variant field: it changes only the manifest.
+4. **C-INIT scope:** the initial weights depend on (q, seed) only, so the digest must be identical across all twelve arms of a (q, seed), not only across the three actors of one (starts, s).
+5. **C-MS5** compares more than the prompt's list needs to name: also the bin maps and the stage-1 continuation table, and `train_history`-independent state is not compared (`.pt` state files are untracked and not compared).
+6. **Bootstrap seed 20261008** is used for every interval of the MS-R3 tools, also in the descriptive tables (MS-R2 used 20261007).
+7. **Pairing for the starts effect** (stratified minus bin-balanced within an actor and s) is by (q, seed), as the interaction of MS-R2.
+8. **Stage-1 comparison** against `rehearsal_v2_0` is by (q, seed) and descriptive; the `t1` stage-1 pairs measure the effect of the variant on stage 1 through the stage-2 policy that stage 1 is trained against and through the shared actor.
+9. **The location-free peak** is the maximum over the recovery grid of the learned e_hat_2(d) (whatever its location), compared with e2*(0); its argmax d is where the learned kink sits. The symmetry error is max |e_hat_2(d) - e_hat_2(-d)| over |d| < 2q on that grid (`r3_analysis.py` defines the grid it reads from the final-tier freeze file).
+10. **Segments** of the analysis are those of MS-R2 (training 1-2000, ramp 2001-2200, hold 2201-2400, decay 2401-2800).
+11. **w_eff of a run** uses the verifier's `e2_at_0` and `g2_at_0` (gap = g2_at_0 - e2_at_0), as the MS-R2 decomposition; along the run it is computed at every check from the check row's gap.
+
+## 10. Tests and review (filled at the code commit)
+
+[FILLED AT THE CODE COMMIT: the full-suite summary line, the new test files and counts, the independent review's highest severity and dispositions (`reports/ms/r3/03_checks.md`).]
+
+## 11. Launch plan
+
+After the pre-registration commit is pushed (`git push origin ms-r3:ms-r3`, new branch, no force), and if every test, check and the review are clean and the premise check passed, from a clean tree at its head, in tmux, root `results/ms_r3`:
+
+    python tools/ms/launch_ms_r1.py --wave r3 --params reports/ms/r1/prereg_parameters.json --workers 40 --code-commit <code commit> [--actors <the actors kept by the premise check>]
+
+(240 runs: twelve arms x 20, or fewer when a variant is dropped; one launch record `results/ms_r3/pilot/launch_<stamp>.json` with nproc, load, free disk, HEAD, `git diff --stat <code commit> HEAD`, `git status --porcelain` and the parameter file's SHA-256; at most 40 single-threaded workers; crash rule: an infrastructure kill is re-run once after moving the first attempt to `results/ms_r3/pilot/crashed/`, any other non-zero exit counts as a failed run and is reported). Nothing is edited or committed in the worktree while the launcher is still starting runs. Post-launch checks: `python tools/ms/r3_launch_checks.py --root results/ms_r3/pilot --ms-r2-pilot-root <MS-R2 pilot root> --code-commit <HEAD at launch> --out results/ms_r3/pilot/launch_checks.json`. Analysis: `python tools/ms/r3_analysis.py ...`, then `python tools/ms/r3_blind_criterion.py --analysis-dir results/ms_r3/analysis`. Stop after the section 4.3 push.
