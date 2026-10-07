@@ -115,8 +115,13 @@ class StageController:
     """Block / landing / freeze state machine of one stage (see the module docstring)."""
 
     def __init__(self, rule: StageRule, lr_linear: LrLinear,
-                 lr_legacy: Optional[Callable[[int], float]] = None):
+                 lr_legacy: Optional[Callable[[int], float]] = None, legacy_global_sampler: bool = False):
         self.rule = rule
+        if legacy_global_sampler and rule.enabled:
+            raise ValueError("legacy_global_sampler is defined for the legacy (fixed-budget) controller only")
+        # MS-R2: the legacy controller draws every start from the sampler of a global block (alpha_global, the focus
+        # rho_bar); a constructor argument, not a StageRule field, so that the logged rule parameters of MS-R1 are unchanged
+        self.legacy_global_sampler = bool(legacy_global_sampler)
         self.lr_linear = lr_linear
         self.lr_legacy = lr_legacy
         if rule.enabled:
@@ -187,6 +192,8 @@ class StageController:
         """Block type, alpha and focus for the next update."""
         r = self.rule
         if not r.enabled:
+            if self.legacy_global_sampler:   # MS-R2: alpha_global and the focus of a global block, no classification
+                return self._current_setting()
             return SamplerSetting("legacy", 0.0, None)
         if self.mode == "land":
             assert self._land_setting is not None

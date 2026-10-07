@@ -10,6 +10,10 @@ Waves (``--wave``):
              budget-matched control ``MS_base2400`` (addendum A1 of 2026-10-07) x 20 runs = 120 runs into
              ``<root>/pilot/q{q}/seed{s}/<arm>``.
 
+  r2         MS-R2 (prompt D3): the six arms ``NL_{bb,st}_s{1,4,16}`` (terminal stage fixed 2800 with a noise landing,
+             crossed with the start sampler) x 20 runs = 120 runs into ``<root>/pilot/q{q}/seed{s}/<arm>``; the default
+             root of this wave is ``results/ms_r2`` (``--root`` overrides it).
+
 Every config is the full ``ms_run_config/1`` (every key written out); the rule / sampler parameters come from
 ``--params`` (the pre-registered JSON file; default: the D4 / D5 defaults, recorded as such) and the file's SHA-256
 is recorded. ``--dry-run`` writes the configs and ``dryrun_<stamp>.json`` and validates every config (the
@@ -48,10 +52,12 @@ import ms_configs as mc  # noqa: E402
 
 PY = sys.executable
 DEFAULT_ROOT = ROOT / "results" / "ms_r1"
+DEFAULT_ROOT_R2 = ROOT / "results" / "ms_r2"
 MAX_WORKERS = 40
-WAVES = ("base", "v20_repro", "pilot")
-WAVE_DIR = {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot"}
-WAVE_ARMS = {"base": ("MS_base",), "v20_repro": (), "pilot": mc.PILOT_ARMS + (mc.CONTROL_2400_ARM,)}
+WAVES = ("base", "v20_repro", "pilot", "r2")
+WAVE_DIR = {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot", "r2": "pilot"}
+WAVE_ARMS = {"base": ("MS_base",), "v20_repro": (), "pilot": mc.PILOT_ARMS + (mc.CONTROL_2400_ARM,),
+             "r2": mc.R2_ARMS}
 RUN_CODE_PATHS = ("run", "utils", "envs", "agents", "protocols")      # what the runs execute (addendum A1)
 
 
@@ -60,6 +66,11 @@ class Job(NamedTuple):
 
     cfg: Dict[str, Any]
     out_dir: str
+
+
+def default_root(wave: str) -> Path:
+    """The results root of a wave when ``--root`` is not given (``results/ms_r2`` for MS-R2, else ``results/ms_r1``)."""
+    return (DEFAULT_ROOT_R2 if wave == "r2" else DEFAULT_ROOT).resolve()
 
 
 def load_params(path: Optional[str]) -> Dict[str, Any]:
@@ -218,7 +229,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--arms", nargs="+", default=None, help="default: all arms of the wave")
     p.add_argument("--params", default=None, help="pre-registered rule / sampler parameters (JSON); default D4/D5")
     p.add_argument("--workers", type=int, default=20, help=f"at most {MAX_WORKERS}")
-    p.add_argument("--root", default=str(DEFAULT_ROOT), help="results root (default results/ms_r1)")
+    p.add_argument("--root", default=None, help="results root (default results/ms_r1; results/ms_r2 for wave r2)")
     p.add_argument("--code-commit", default=None, help="SHA of the code commit (recorded)")
     p.add_argument("--dry-run", action="store_true", help="write configs + dryrun record, validate")
     a = p.parse_args(argv)
@@ -228,7 +239,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         p.error("wave v20_repro has no arms")
     if any(sd not in mc.DEFAULT_SEEDS for sd in a.seeds):   # D1: nothing outside 10501-10510
         p.error(f"seeds must be development seeds {mc.DEFAULT_SEEDS[0]}-{mc.DEFAULT_SEEDS[-1]}; got {a.seeds}")
-    root = Path(a.root).resolve()
+    root = Path(a.root).resolve() if a.root else default_root(a.wave)
     try:
         params = load_params(a.params)
         jobs = build_jobs(a.wave, a.qs, a.seeds, a.arms, root, params)

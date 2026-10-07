@@ -27,6 +27,7 @@ PROTOCOL_PATH = ROOT / PROTOCOL_REL
 DEFAULT_QS = (50, 60)
 DEFAULT_SEEDS = tuple(range(10501, 10511))
 PILOT = "ms_r1"
+PILOT_R2 = "ms_r2"
 
 #: arm -> start-weights settings (D6). lambda_P None = the bin-balanced near-tie share n_near / n_bins.
 ARMS: Dict[str, Dict[str, Any]] = {
@@ -48,6 +49,21 @@ ARMS: Dict[str, Dict[str, Any]] = {
     "MS_s35a5": {"scheme": "stratified_priority", "lambda_P": 0.35, "alpha_global": 0.5, "rule_enabled": True,
                  "definition": "lambda_P 0.35, alpha_global 0.5"},
 }
+#: MS-R2 (prompt D3): terminal stage fixed 2800 with a noise landing, crossed with the start sampler. ``r2.scale`` is the
+#: end value s of the concentration scale (1 = no scale is ever set, the key is absent); ``r2.stratified`` selects the
+#: sampler of an MS-R1 global block (lambda_P 0.35, alpha_global 0.5) under the fixed budget.
+R2_SCALES = (1, 4, 16)
+R2_ARMS = tuple(f"NL_{k}_s{s}" for k in ("bb", "st") for s in R2_SCALES)
+R2_ARM_TABLE: Dict[str, Dict[str, Any]] = {}     # kept apart from ARMS: the MS-R1 arm table is unchanged
+for _kind in ("bb", "st"):
+    for _s in R2_SCALES:
+        R2_ARM_TABLE[f"NL_{_kind}_s{_s}"] = {
+            "scheme": "bin_balanced" if _kind == "bb" else "stratified_priority",
+            **({} if _kind == "bb" else {"lambda_P": 0.35, "alpha_global": 0.5}),
+            "rule_enabled": False, "legacy_pipeline": "LEGACY_PIPELINE_NL", "round": PILOT_R2,
+            "r2": {"scale": float(_s), "stratified": _kind == "st"},
+            "definition": f"MS-R2 {'bin-balanced' if _kind == 'bb' else 'MS_s35a5-style stratified'} starts, fixed 2800 "
+                          f"(LR 3e-4 to 2400, decay 2401-2800), concentration scale 1 -> {_s} over 2001-2200, held to 2800"}
 PILOT_ARMS = ("MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
 #: the budget-matched control of addendum A1: launched in the pilot wave, in the same root as the rule arms
 CONTROL_2400_ARM = "MS_base2400"
@@ -74,8 +90,17 @@ LEGACY_PIPELINE_2400: Dict[str, Dict[str, Any]] = {
     "lr_windows": {"2": [{"first": 2001, "last": 2400, "start": 3e-4, "end": 3e-5}],
                    "1": [{"first": 1, "last": 600, "start": 3e-4, "end": 3e-5}]},
 }
+#: MS-R2 (D2): terminal stage fixed 2800, LR constant 3e-4 to local 2400, linear 3e-4 -> 3e-5 over 2401-2800; stage 1 as MS_base
+LEGACY_PIPELINE_NL: Dict[str, Dict[str, Any]] = {
+    "budgets": {"2": 2800, "1": 600},
+    "lr_windows": {"2": [{"first": 2401, "last": 2800, "start": 3e-4, "end": 3e-5}],
+                   "1": [{"first": 1, "last": 600, "start": 3e-4, "end": 3e-5}]},
+}
+#: MS-R2 (D2): concentration scale 1 at update 2001, s at 2200 (linear), s afterwards
+CONC_RAMP_FIRST, CONC_RAMP_LAST = 2001, 2200
 LEGACY_PIPELINES: Dict[str, Dict[str, Dict[str, Any]]] = {"LEGACY_PIPELINE": LEGACY_PIPELINE,
-                                                          "LEGACY_PIPELINE_2400": LEGACY_PIPELINE_2400}
+                                                          "LEGACY_PIPELINE_2400": LEGACY_PIPELINE_2400,
+                                                          "LEGACY_PIPELINE_NL": LEGACY_PIPELINE_NL}
 
 
 def sha256_file(path: Path) -> str:
@@ -127,15 +152,16 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
     Returns:
         The config dict (not validated; ``run.run_ms_stagewise.validate_config`` does that).
     """
-    if arm not in ARMS:
-        raise KeyError(f"unknown arm {arm!r}; arms are {sorted(ARMS)}")
+    if arm not in ARMS and arm not in R2_ARM_TABLE:
+        raise KeyError(f"unknown arm {arm!r}; arms are {sorted(ARMS) + sorted(R2_ARM_TABLE)}")
     if q not in proto["q_values"]:
         raise KeyError(f"q={q} not in the protocol's q_values {proto['q_values']}")
     prm = copy.deepcopy(DEFAULT_PARAMS if params is None else params)
-    a = ARMS[arm]
+    a = ARMS[arm] if arm in ARMS else R2_ARM_TABLE[arm]
     rec0 = proto["records"][str(q)]
     rec = copy.deepcopy(rec0)
-    run_name = f"msr1_q{q}_s{seed}_{arm}"
+    pilot_tag = a.get("round", PILOT)
+    run_name = f"{'msr2' if pilot_tag == PILOT_R2 else 'msr1'}_q{q}_s{seed}_{arm}"
     rec.update(seed=int(seed), run=run_name, output_dir=out_dir)
     if T != 2:
         rec["game"]["T"] = int(T)
@@ -169,7 +195,7 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
         pipeline["budgets"] = copy.deepcopy(legacy["budgets"])
         pipeline["lr_windows"] = copy.deepcopy(legacy["lr_windows"])
     cfg: Dict[str, Any] = {
-        "schema": SCHEMA, "base_commit": proto["base_commit"], "pilot": PILOT, "arm": arm, "run": run_name,
+        "schema": SCHEMA, "base_commit": proto["base_commit"], "pilot": pilot_tag, "arm": arm, "run": run_name,
         "q": int(q), "seed": int(seed), "record": rec,
         "protocol_ref": {"path": PROTOCOL_REL, "sha256": sha256_file(protocol_path)},
         "record_sha256": sha256_json(rec0),
@@ -183,9 +209,18 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
     }
     if sw["scheme"] == "stratified_priority":
         cfg["derived"] = derive_start_info(spec, sw, bin_w)
+    if "r2" in a:                               # MS-R2: the optional runner keys (absent for every MS-R1 arm)
+        cfg["noise_report"] = True
+        if a["r2"]["stratified"]:
+            cfg["fixed_global_sampler"] = True
+        if a["r2"]["scale"] != 1.0:
+            cfg["conc_scale_schedule"] = {"stage": int(spec.T), "local_first": CONC_RAMP_FIRST,
+                                          "local_last": CONC_RAMP_LAST, "scale_first": 1.0,
+                                          "scale_last": float(a["r2"]["scale"])}
     return cfg
 
 
-__all__ = ["ARMS", "PILOT_ARMS", "CONTROL_2400_ARM", "DEFAULT_PARAMS", "LEGACY_PIPELINE", "LEGACY_PIPELINE_2400",
+__all__ = ["ARMS", "PILOT_ARMS", "R2_ARMS", "R2_ARM_TABLE", "R2_SCALES", "CONTROL_2400_ARM", "DEFAULT_PARAMS", "LEGACY_PIPELINE",
+           "LEGACY_PIPELINE_2400", "LEGACY_PIPELINE_NL", "CONC_RAMP_FIRST", "CONC_RAMP_LAST", "PILOT_R2",
            "build_config", "load_protocol",
            "REPORT_NEAR_TIE_HALF_WIDTH", "DEFAULT_QS", "DEFAULT_SEEDS", "sha256_file", "sha256_json"]

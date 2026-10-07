@@ -16,6 +16,23 @@ Legacy settings (``rule.enabled = false``, ``start_weights = {scheme: bin_balanc
 v2.0's LR windows) make the terminal-stage phase consume every stream exactly as v2.0's Phase A
 (``run/run_v2_stagewise.py`` mode phase_A): check C-MS1.
 
+MS-R2 optional config keys (all absent == the MS-R1 behaviour, bit for bit):
+  conc_scale_schedule  {stage, local_first, local_last, scale_first, scale_last}: the concentration scale of the
+                       Beta actor (``BetaActor.conc_scale``; the mean does not depend on it) is, before local
+                       update j of ``stage``, scale_first for j <= local_first, linear in j up to scale_last at
+                       local_last, scale_last afterwards (the form of ``run_v2_stagewise.Run.conc_scale_for``). It
+                       is set on the live actor and the lagged opponent before every update with j > local_first
+                       (constant within the update) and reset to 1.0 at the entry of every other phase (before
+                       the phase-entry snapshot refresh); the snapshot refresh and the frozen snapshot carry it.
+  fixed_global_sampler true: with ``rule.enabled = false`` and ``stratified_priority`` starts, every terminal-stage
+                       update draws from the sampler of an MS-R1 global block (alpha = alpha_global, focus = the
+                       EMA of the per-bin residual map, updated at every valid check); no classification, no
+                       polishing, the fixed budget and LR windows of the legacy arm.
+  noise_report         true: reporting columns (closed form allowed, never read by anything): ``conc_scale`` per
+                       update in ms_updates.csv; ``conc_scale, sigma_0, e_sigma_0, g2_0, smoothing, remainder,
+                       gap, R0`` at every check of the terminal stage (T = 2); the decomposition and R0 on both
+                       tiers in the freeze record.
+
 Outputs in --out-dir: run_config.json, manifest.json, status.json, ms_checks_stage{t}.csv,
 ms_binmaps_stage{t}.npz, ms_updates.csv, rule_log.json, gates.json, state_end_stage{t}.pt,
 continuation_table_stage{t}.npz (t = T-1 ... 1), freeze_stage{t}_{final,development}.npz, weights/,
@@ -69,6 +86,7 @@ from run.v2_rollout import collect_batch_v2  # noqa: E402
 from utils.dp_br_verifier import (  # noqa: E402
     DEV_CONFIG, FINAL_CONFIG, DomainError, VerifierConfig, concentration_stats)
 from utils.ms_continuation import build_table  # noqa: E402
+from utils.ms_noise import tie_noise_report, tie_residual_R0  # noqa: E402
 from utils.ms_residual import StageDiag, invalid_diag, stage_diag  # noqa: E402
 from utils.ms_rule import StageController, StageRule  # noqa: E402
 from utils.theory_multistage import validate_two_stage_params  # noqa: E402
@@ -78,7 +96,9 @@ SCHEMA = "ms_run_config/1"
 REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "record", "protocol_ref",
             "record_sha256", "protocol_gates", "threads_per_process", "pipeline", "start_weights", "rule",
             "clamp_likelihood", "full_state_at")
-OPTIONAL = ("derived",)
+OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report")
+CONC_SCHEDULE_KEYS = ("stage", "local_first", "local_last", "scale_first", "scale_last")
+CHECK_NOISE = ("conc_scale", "sigma_0", "e_sigma_0", "g2_0", "smoothing", "remainder", "gap", "R0")
 START_SCHEMES = ("bin_balanced", "stratified_priority")
 STRAT_KEYS = ("scheme", "lambda_P", "alpha_global", "alpha_polish", "ema_beta", "near_tie_half_width")
 STRAT_OPTIONAL = ("lambda_T",)
@@ -165,6 +185,30 @@ def validate_config(cfg: Dict[str, Any]) -> None:
         raise ConfigError(f"protocol_gates must have exactly {GATE_SECTIONS}")
     spec = strict_dataclass(GameSpec, rec["game"], "game")
     bin_w = float(rec["protocol"]["es_bin_width"])
+    # ---- MS-R2 optional keys (absent == the MS-R1 behaviour)
+    cs = cfg.get("conc_scale_schedule")
+    if cs is not None:
+        if not isinstance(cs, dict) or set(cs) != set(CONC_SCHEDULE_KEYS):
+            raise ConfigError(f"conc_scale_schedule must have exactly {CONC_SCHEDULE_KEYS}")
+        if isinstance(cs["stage"], bool) or not isinstance(cs["stage"], int) or not 1 <= cs["stage"] <= T:
+            raise ConfigError(f"conc_scale_schedule.stage must be an int in 1..{T}")
+        for k_ in ("local_first", "local_last"):
+            if isinstance(cs[k_], bool) or not isinstance(cs[k_], int):
+                raise ConfigError(f"conc_scale_schedule.{k_} must be an int")
+        if not 1 <= cs["local_first"] < cs["local_last"]:
+            raise ConfigError("conc_scale_schedule needs 1 <= local_first < local_last")
+        if not (_num(cs["scale_first"]) and _num(cs["scale_last"]) and cs["scale_first"] > 0 and cs["scale_last"] > 0):
+            raise ConfigError("conc_scale_schedule scales must be positive numbers")
+    if "noise_report" in cfg:
+        if not isinstance(cfg["noise_report"], bool):
+            raise ConfigError("noise_report must be a bool")
+        if cfg["noise_report"] and T != 2:
+            raise ConfigError("noise_report is defined for T = 2 (the closed-form tie value) only")
+    if "fixed_global_sampler" in cfg:
+        if cfg["fixed_global_sampler"] is not True:
+            raise ConfigError("fixed_global_sampler, if present, must be true")
+        if cfg["rule"]["enabled"] is not False or cfg["start_weights"].get("scheme") != "stratified_priority":
+            raise ConfigError("fixed_global_sampler needs rule.enabled = false and stratified_priority starts")
     # ---- start weights
     sw = cfg["start_weights"]
     if not isinstance(sw, dict) or sw.get("scheme") not in START_SCHEMES:
@@ -342,6 +386,9 @@ class MSRun:
             else REPORT_NEAR_TIE_HALF_WIDTH
         self.derived = derive_start_info(spec, self.start_weights, P["es_bin_width"]) if self.stratified else {}
         self.rule_cfg = copy.deepcopy(cfg["rule"])
+        self.conc_sched = copy.deepcopy(cfg.get("conc_scale_schedule"))
+        self.fixed_global = bool(cfg.get("fixed_global_sampler", False))
+        self.noise_report = bool(cfg.get("noise_report", False))
         self.stage_rules = {t: self._stage_rule(t) for t in range(1, self.T + 1)}
         # ---- run state
         self.costs = Costs()
@@ -388,6 +435,19 @@ class MSRun:
                 return lr_at(self.sched, "A", j)
             return self.lr_linear(dec["start"], dec["end"], dec["first"], dec["last"], j)
         return fn
+
+    def conc_scale_for(self, local: int) -> float:
+        """Concentration scale before local update ``local`` of the scheduled stage (the form of
+        ``run_v2_stagewise.Run.conc_scale_for``: ``scale_first`` up to ``local_first``, linear, ``scale_last`` from
+        ``local_last``)."""
+        cs = self.conc_sched
+        j0, j1 = int(cs["local_first"]), int(cs["local_last"])
+        s0, s1 = float(cs["scale_first"]), float(cs["scale_last"])
+        if local <= j0:
+            return s0
+        if local >= j1:
+            return s1
+        return s0 + (s1 - s0) * (local - j0) / (j1 - j0)
 
     def _stage_rule(self, t: int) -> StageRule:
         rc = self.rule_cfg
@@ -473,7 +533,8 @@ class MSRun:
         T = self.T
         rule = self.stage_rules[t]
         ctl = StageController(rule, self.lr_linear,
-                              None if rule.enabled else self._legacy_lr(t))
+                              None if rule.enabled else self._legacy_lr(t),
+                              legacy_global_sampler=bool(self.fixed_global and t >= 2))
         n_ep = int(P["episodes_per_update"])
         bin_w = float(P["es_bin_width"])
         table_next = self.tables.get(t) if t < T else None
@@ -486,6 +547,8 @@ class MSRun:
         entry = self.global_u
         t_ph, c_ph = time.perf_counter(), time.process_time()
         cost_before = dict(self.costs.t)
+        if self.conc_sched is not None and int(self.conc_sched["stage"]) != t:
+            agent.actor.conc_scale = 1.0          # MS-R2: the scale of the scheduled stage ends with its phase
         agent.refresh_snapshot()
         self.snapshot_log.append({"update": self.global_u, "reason": f"phase_stage{t}_entry"})
         csv_path = os.path.join(self.out_dir, f"ms_checks_stage{t}.csv")
@@ -524,6 +587,11 @@ class MSRun:
             actor_lr, critic_lr = read_lr(agent)
             if id(agent.opt_actor) != self.opt_ids["actor"] or id(agent.opt_critic) != self.opt_ids["critic"]:
                 raise RuntimeError("optimizer object replaced")
+            if self.conc_sched is not None and int(self.conc_sched["stage"]) == t \
+                    and local > int(self.conc_sched["local_first"]):
+                sc_ = self.conc_scale_for(local)
+                agent.actor.conc_scale = sc_      # live actor and lagged opponent; constant within the update
+                agent.opponent.conc_scale = sc_
             setting = ctl.sampler_setting()
             bid, btype = ctl.block_label()
             rng_start = self.rngs["start"]
@@ -597,7 +665,8 @@ class MSRun:
                               **n_start, **batch["d1"], "p_digest": self._digest(probs),
                               "update_wall_sec": time.perf_counter() - t_upd,
                               **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
-                              "rngpos_minibatch": rng_position(agent.rng_mb)})
+                              "rngpos_minibatch": rng_position(agent.rng_mb),
+                              **({"conc_scale": float(agent.actor.conc_scale)} if self.noise_report else {})})
             p_used = probs
             step = ctl.after_update(local, diag_fn)
             if step.check is not None:
@@ -612,7 +681,19 @@ class MSRun:
                 row.update({k: v for k, v in step.check.items() if k in CHECK_COLS})
                 if ev is not None:
                     row.update({k: ev.scalars[k] for k in CHECK_REPORT if k in ev.scalars})
-                append_csv(csv_path, {c: row[c] for c in CHECK_COLS})
+                cols = CHECK_COLS
+                if self.noise_report and t == T:
+                    cols = CHECK_COLS + CHECK_NOISE
+                    row.update({c: float("nan") for c in CHECK_NOISE})
+                    row["conc_scale"] = float(agent.actor.conc_scale)
+                    if ev is not None:
+                        mean_fn_, beta_fn_ = self.policy_fns()
+                        rep_ = tie_noise_report(mean_fn_, beta_fn_, spec, t, g2_0=float(ev.scalars["g2_at_0"]),
+                                                e_hat_0=float(ev.scalars["e2_at_0"]))
+                        row.update({"sigma_0": rep_["sigma_0"], "e_sigma_0": rep_["e_sigma_0"], "g2_0": rep_["g2_0"],
+                                    "smoothing": rep_["smoothing"], "remainder": rep_["remainder"], "gap": rep_["gap"],
+                                    "R0": tie_residual_R0(ev.res, t)})
+                append_csv(csv_path, {c: row[c] for c in cols})
                 if t >= 2:
                     maps["update"].append(self.global_u)
                     maps["local"].append(local)
@@ -684,6 +765,16 @@ class MSRun:
                               "rho_bins_development": [None if not np.isfinite(x) else float(x) for x in tiers["development"][1].rho_bins]}
         if spec.T == 2 and t == spec.T:
             fz["smoothed_game"] = smoothed_share(self, tiers["final"][0])
+            if self.noise_report:
+                mean_fn_, beta_fn_ = self.policy_fns()
+                nz = tie_noise_report(mean_fn_, beta_fn_, spec, t, g2_0=float(scal["final"]["g2_at_0"]),
+                                         e_hat_0=float(scal["final"]["e2_at_0"]))
+                nz["smoothing_over_gaussian_formula"] = nz["smoothing"] / (
+                    nz["g2_0"] * nz["sigma_0"] / (np.sqrt(np.pi) * spec.q))
+                nz["conc_scale"] = float(self.agent.actor.conc_scale)
+                nz["R0_final"] = tie_residual_R0(tiers["final"][0].res, t)
+                nz["R0_development"] = tie_residual_R0(tiers["development"][0].res, t)
+                fz["noise"] = nz
         check(f"after_freeze_eval_stage{t}")
         self.scal_freeze[t] = scal
         # ---- freeze the snapshot (deep copy: no grad, eval, referenced by no optimizer)
@@ -820,6 +911,8 @@ def write_manifest(run: MSRun, cfg: Dict[str, Any], out_dir: str, cmd: str, git:
         "start_weights": run.start_weights, "derived": run.derived, "rule": run.rule_cfg,
         "clamp_likelihood": cfg["clamp_likelihood"], "pipeline": cfg["pipeline"],
         "resolved_protocol": P, "lr_schedule": run.sched,
+        "conc_scale_schedule": run.conc_sched, "fixed_global_sampler": run.fixed_global,
+        "noise_report": run.noise_report,
         "resolved_config": {"game": {k: getattr(spec, k) for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")},
                             "ppo": run.rec["ppo"], "verifier": run.rec["verifier"]},
         "versions": run.versions_actual, "thread_env": run.thread_env, "torch_threads": torch.get_num_threads(),
