@@ -3,7 +3,7 @@
 of ``tools/ms/r2_stop_candidates.py`` (``<dir>/tables/*.csv`` and the per-run CSVs); no number is typed by hand.
 
 Usage (repository root):
-    python reports/ms/r2/report_scripts/stop_tables.py --dir results/ms_r2/stop_calibration --block spearman|freeze|jcheck|diag|fire|facts
+    python reports/ms/r2/report_scripts/stop_tables.py --dir results/ms_r2/stop_calibration --block spearman|freeze|jcheck|diag|fire|facts|freeze_arm|spearman_arm|fire_arm
 """
 
 from __future__ import annotations
@@ -113,7 +113,65 @@ def block_facts(d: Path) -> str:
     return "\n".join(lines)
 
 
-BLOCKS = {"spearman": block_spearman, "freeze": block_freeze, "jcheck": block_jcheck, "diag": block_diag, "fire": block_fire, "facts": block_facts}
+def _arm_key(g: str):
+    """Sort key: sampler (bb before st), then s."""
+    arm = g.split("/")[-1]
+    return (arm.split("_")[1], int(arm.rsplit("_s", 1)[1]))
+
+
+def block_freeze_arm(d: Path) -> str:
+    """Median [min, max] at the freeze per arm (pilot calibration only): C1, |c2|, the C2 floor, C3 and |peak|."""
+    b = _t(d, "b_freeze")
+    b = b[b.group != "all"]
+    cands = ["C1", "C2 (|c2|)", "C2 floor", "C3", "|peak|"]
+    rows = []
+    for g in sorted(b.group.unique(), key=_arm_key):
+        for q in (50, 60):
+            r = {"arm": g.split("/")[-1], "q": q}
+            for c in cands:
+                x = b[(b.group == g) & (b.q == q) & (b.candidate == c)]
+                r[c] = f"{x['median'].iloc[0]:.4f} [{x['min'].iloc[0]:.4f}, {x['max'].iloc[0]:.4f}]" if len(x) else "n/a"
+            rows.append(r)
+    return _md(pd.DataFrame(rows))
+
+
+def block_spearman_arm(d: Path) -> str:
+    """Pooled Spearman correlation with |peak| and with RMSE_pos per arm (all exports with u >= 400), candidates C1, C2, C3."""
+    a = _t(d, "a_spearman")
+    a = a[(a.group != "all") & (a.subset == "all")]
+    rows = []
+    for g in sorted(a.group.unique(), key=_arm_key):
+        for q in (50, 60):
+            r = {"arm": g.split("/")[-1], "q": q}
+            for tgt in ("|peak|", "RMSE_pos"):
+                for c in ("C1", "C2", "C3"):
+                    x = a[(a.group == g) & (a.q == q) & (a.candidate == c) & (a.target == tgt)]
+                    r[f"{c} vs {tgt}"] = f"{x.spearman_pooled.iloc[0]:.3f}" if len(x) else "n/a"
+            rows.append(r)
+    return _md(pd.DataFrame(rows))
+
+
+def block_fire_arm(d: Path) -> str:
+    """Fire per arm for one grid threshold per candidate (C1 0.03, C2 0.01, C3 0.05): grid rows shown for illustration, none is selected."""
+    f = _t(d, "fire")
+    f = f[f.group != "all"]
+    rows = []
+    for cand, th in (("C1", 0.03), ("C2", 0.01), ("C3", 0.05)):
+        for g in sorted(f.group.unique(), key=_arm_key):
+            for q in (50, 60):
+                x = f[(f.candidate == cand) & (np.isclose(f.theta, th)) & (f.group == g) & (f.q == q)]
+                if x.empty:
+                    continue
+                r = x.iloc[0]
+                rows.append({"candidate": LABEL.get(cand, cand), "theta": f"{th:g}", "arm": g.split("/")[-1], "q": q, "fired": f"{int(r.n_fired)}/{int(r.n_runs)}",
+                             "fire update median": "-" if not np.isfinite(r.fire_u_median) else f"{r.fire_u_median:.0f}",
+                             "|peak| at fire (median)": "-" if not np.isfinite(r.abs_peak_at_fire_median) else f"{r.abs_peak_at_fire_median:.4f}",
+                             "|peak| at the end, same runs (median)": "-" if not np.isfinite(r.abs_peak_at_end_median) else f"{r.abs_peak_at_end_median:.4f}"})
+    return _md(pd.DataFrame(rows))
+
+
+BLOCKS = {"spearman": block_spearman, "freeze": block_freeze, "jcheck": block_jcheck, "diag": block_diag, "fire": block_fire, "facts": block_facts,
+          "freeze_arm": block_freeze_arm, "spearman_arm": block_spearman_arm, "fire_arm": block_fire_arm}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

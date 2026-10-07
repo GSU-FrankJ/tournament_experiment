@@ -43,3 +43,11 @@ embedded record (protocols/v2_T2_locked_v2_0.json records[50].versions): python 
 ```
 
 No job of this session was running (`ps` shows no `run_ms*` / `run_v2*` / `pytest` process, no tmux server); the load average of 11 is other users' work. Nothing was killed.
+
+## 2. P2 housekeeping addendum (2026-10-07)
+
+- **Launch** (tmux session `ms_r2_pilot`): `python tools/ms/launch_ms_r1.py --wave r2 --params reports/ms/r1/prereg_parameters.json --workers 40 --code-commit 99857513daf88ee2813430da7390e19c985385a3` from HEAD `9b93b50c` (`results/ms_r2/pilot/launch_20261007_094801.json`: 64 cores, load average 14.8 / 13.7 / 13.6 at the start, 1.01e12 of 5.95e12 bytes free, `diff_stat_run_code_to_head` empty, `status_porcelain` 840 untracked files under `results/ms_r1/pilot`, state `done`, 120 planned and 120 finished, no non-zero exit). Each run took 555-711 s of wall time. Nothing was changed between the launch and the end of the pilot (a clean tree outside `results/`).
+- **Roots used** (explicit arguments, recorded in `results/ms_r2/analysis/analysis_info.json`): MS-R1 pilot `results/ms_r1/pilot` of this worktree; `parents_A` and `rehearsal_v2_0` in `.claude/worktrees/v2-t2-refine/results/`; calibration `results/ms_r1/calibration`. The `MS_base` wave of MS-R1 is not needed by this round's analysis.
+- **Results committed** in three commits after the pilot (rules of `reports/ms/README.md`): `75533f2e` (13 files per run of the 120 runs, the launch record and `launch_checks.json`: 1562 files, 235 MB; not tracked: `.pt`, `train_history.json`, weight exports, `freeze_stage*_*.npz`, `band_sweep.npz`, `run.log`), `a37cdd58` (`results/ms_r2/analysis/`), `2227fc3a` (`results/ms_r2/stop_calibration_pilot/`).
+- **Departures from the prompt:** none beyond those recorded in `summary.md` (the P1 ones: the flag moved to a constructor argument, the C-MS4 `p_digest_next` rule, the transmission sign). Report-only blocks that D5 does not list are labelled in `04_pilot.md` (`sampler`, `window`) and `05_decision_inputs.md` (`tie_effort`, `directions`, `side_by_side`).
+- **Not touched:** `main`, tags, the local refs of the other worktrees, the files of the constrained list of the prompt.

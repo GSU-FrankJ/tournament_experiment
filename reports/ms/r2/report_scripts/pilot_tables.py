@@ -317,12 +317,114 @@ def block_budget() -> str:
     return _md(pd.DataFrame(rows))
 
 
+def block_sampler() -> str:
+    """What the stratified sampler adds at each s: paired (q, seed) differences NL_st_s - NL_bb_s (descriptive; not a D5 table).
+
+    Computed here from ``per_run.csv`` (no CSV of the analysis tool holds it): the mean of the per-seed difference with the 95 %
+    percentile bootstrap interval, 10,000 resamples, a fresh ``default_rng(20261007)`` per (q, statistic) in table order.
+    """
+    per = _per_run()
+    per = per[per.status == "done"]
+    stats = [("smoothing", "smoothing part", 3), ("remainder", "remainder", 3), ("gap", "gap", 3), ("stage2_peak_rel_err_abs", "abs(peak error)", 4),
+             ("stage2_rmse_pos_over_g2_0", "RMSE_pos/e2*(0)", 4), ("stage2_tail_mean_over_g2_0", "tail mean/e2*(0)", 4)]
+    rows = []
+    for sv in (1, 4, 16):
+        for col, lab, p in stats:
+            cells = {"s": sv, "metric": lab}
+            for q in QS:
+                a = per[(per.arm == f"NL_st_s{sv}") & (per.q == q)].set_index("seed")[col]
+                b = per[(per.arm == f"NL_bb_s{sv}") & (per.q == q)].set_index("seed")[col]
+                d = (a - b.reindex(a.index)).dropna().to_numpy(dtype=float)
+                rng = np.random.default_rng(20261007)
+                bs = d[rng.integers(0, len(d), size=(10000, len(d)))].mean(axis=1)
+                lo, hi = np.percentile(bs, [2.5, 97.5])
+                cells[f"q={q}: mean [95% CI] (st - bb)"] = _ci(d.mean(), lo, hi, p)
+                cells[f"q={q}: seeds lower"] = f"{int((d < 0).sum())}/{len(d)}"
+            rows.append(cells)
+    return _md(pd.DataFrame(rows))
+
+
+def block_window() -> str:
+    """Supplement (post hoc, not pre-registered): the paired changes of the decomposition averaged over the last eight checks.
+
+    The window is the checks at updates 2625-2800 of ``trajectory_checks.csv`` (the LR falls from 1.5e-4 at update 2625 to 3e-5 at 2800), averaged per run; then the
+    arm - (same sampler, s = 1) difference per (q, seed), mean with the 95 % percentile bootstrap interval (10,000 resamples, a fresh
+    ``default_rng(20261007)`` per (q, statistic) in table order). It exists because the freeze is one checkpoint per run.
+    """
+    t = _read("trajectory_checks.csv")
+    t = t[(t.status == "done") & t.arm.isin(ARMS) & (t["update"] >= 2625)]
+    w = t.groupby(["arm", "q", "seed"])[["smoothing", "remainder", "gap", "stage2_peak_rel_err_abs"]].mean().reset_index()
+    stats = [("smoothing", "smoothing part", 3), ("remainder", "remainder", 3), ("gap", "gap", 3), ("stage2_peak_rel_err_abs", "abs(peak error)", 4)]
+    rows = []
+    for arm in [a for a in ARMS if not a.endswith("_s1")]:
+        base = arm.rsplit("_s", 1)[0] + "_s1"
+        for col, lab, p in stats:
+            cells = {"arm": f"`{arm}`", "baseline": f"`{base}`", "metric (mean of the 8 checks)": lab}
+            for q in QS:
+                a = w[(w.arm == arm) & (w.q == q)].set_index("seed")[col]
+                b = w[(w.arm == base) & (w.q == q)].set_index("seed")[col]
+                d = (a - b.reindex(a.index)).dropna().to_numpy(dtype=float)
+                rng = np.random.default_rng(20261007)
+                bs = d[rng.integers(0, len(d), size=(10000, len(d)))].mean(axis=1)
+                lo, hi = np.percentile(bs, [2.5, 97.5])
+                cells[f"q={q}: mean [95% CI] (arm - baseline)"] = _ci(d.mean(), lo, hi, p)
+                cells[f"q={q}: seeds lower"] = f"{int((d < 0).sum())}/{len(d)}"
+            rows.append(cells)
+    return _md(pd.DataFrame(rows))
+
+
+def block_side_by_side() -> str:
+    """The six arms and the references in one table (means over the ten seeds; `rehearsal_v2_0` stands for the `parents_A` candidate)."""
+    per = _per_run()
+    per = per[per.status == "done"]
+    rows = []
+    for arm in ARMS + ["MS_base2400", "MS_s35a5", "rehearsal_v2_0"]:
+        for q in QS:
+            g = per[(per.arm == arm) & (per.q == q)]
+            if g.empty:
+                continue
+            rows.append({"arm": arm, "q": q, "mean abs(peak)": f"{g['stage2_peak_rel_err_abs'].mean():.4f}", "abs(peak)<=0.05": f"{int((g['stage2_peak_rel_err_abs'] <= 0.05).sum())}/{len(g)}",
+                         "sigma_2(0)": f"{g['sigma_2_0'].mean():.3f}", "smoothing part": f"{g['smoothing'].mean():.3f}", "remainder": f"{g['remainder'].mean():.3f}",
+                         "gap": f"{g['gap'].mean():.3f}", "RMSE_pos/e2*(0)": f"{g['stage2_rmse_pos_over_g2_0'].mean():.4f}",
+                         "tail mean/e2*(0)": f"{g['stage2_tail_mean_over_g2_0'].mean():.4f}", "eta2/DW": f"{g['eta_T_over_dw'].mean():.5f}",
+                         "R0 (median)": f"{g['t2_R0_final'].median():.4f}", "R (median)": f"{g['t2_R_final'].median():.4f}"})
+    return _md(pd.DataFrame(rows))
+
+
+def block_directions() -> str:
+    """Over the eight (arm, q) cells of the secondary table: how many changes against s = 1 are negative, and how many intervals exclude 0."""
+    t = _read("paired_secondary.csv")
+    t = t[t.arm.isin([a for a in ARMS if not a.endswith("_s1")])]
+    rows = []
+    for m, lab in SECONDARY:
+        x = t[t.metric == m]
+        if x.empty:
+            continue
+        rows.append({"metric": lab, "cells": len(x), "mean change < 0": int((x["mean"] < 0).sum()), "interval below 0": int((x.ci_mean_hi < 0).sum()),
+                     "interval above 0": int((x.ci_mean_lo > 0).sum()), "range of the mean changes": f"{x['mean'].min():+.4f} to {x['mean'].max():+.4f}"})
+    return _md(pd.DataFrame(rows))
+
+
+def block_tie_effort() -> str:
+    """Mean tie effort at the freeze: the closed form e*(0), the smoothed target e_sigma(0) and the learned e_hat_2(0) (effort units)."""
+    per = _per_run()
+    per = per[per.status == "done"]
+    rows = []
+    for arm in ARMS:
+        for q in QS:
+            g = per[(per.arm == arm) & (per.q == q)]
+            rows.append({"arm": arm, "q": q, "e*(0)": f"{g['g2_at_0'].mean():.2f}", "e_sigma(0)": f"{g['smoothed_e_pred_0'].mean():.2f}",
+                         "e_hat_2(0)": f"{g['e2_at_0'].mean():.2f}", "e_hat_2(0) seed SD": f"{g['e2_at_0'].std(ddof=1):.2f}"})
+    return _md(pd.DataFrame(rows))
+
+
 BLOCKS: Dict[str, Callable[[], str]] = {
     "checks": block_checks, "launch": block_launch, "primary": block_primary, "overview": block_overview, "decomp": block_decomp,
     "predictions": block_predictions, "secondary": block_secondary, "transmission": block_transmission, "interaction": block_interaction,
     "vs_parents": block_vs_parents, "refs": block_refs, "segments": block_segments, "trajectory": block_trajectory,
     "strata_mid": block_strata, "strata_near": block_strata_near, "strata_tail": block_strata_tail, "stage1": block_stage1,
-    "gates": block_gates, "shares": block_shares, "budget": block_budget}
+    "gates": block_gates, "shares": block_shares, "budget": block_budget, "sampler": block_sampler, "window": block_window,
+    "side_by_side": block_side_by_side, "directions": block_directions, "tie_effort": block_tie_effort}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -333,12 +435,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--analysis", default=str(A))
     p.add_argument("--pilot", default=str(P))
     p.add_argument("--list", action="store_true")
+    p.add_argument("--arm", default=None, help="keep only the table rows whose first cell is this arm")
     a = p.parse_args(argv)
     A, P = Path(a.analysis), Path(a.pilot)
     if a.list or not a.block:
         print("\n".join(BLOCKS))
         return 0
-    print(BLOCKS[a.block]())
+    text = BLOCKS[a.block]()
+    if a.arm:
+        lines = text.split("\n")
+        keep = lines[:2] + [ln for ln in lines[2:] if ln.split("|")[1].strip().strip("`") == a.arm]
+        text = "\n".join(keep)
+    print(text)
     return 0
 
 

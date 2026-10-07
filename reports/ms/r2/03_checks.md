@@ -54,3 +54,21 @@ The premise holds and the stop condition is not met: `reports/ms/r2/01_decomposi
 ## 4. Provenance of the tools
 
 `tools/ms/r2_decomposition.py`, `r2_stop_candidates.py`, `r2_analysis.py`, `r2_blind_criterion.py`, `r2_launch_checks.py` and the extended `launch_ms_r1.py` / `ms_configs.py` are in the code commit; the formulas shared by the runner and the tools are `utils/ms_noise.py`. The independent blind recomputation (`r2_blind_criterion.py`) imports nothing from `tools/ms/` (checked by an AST scan in the tests and by the reviewer).
+
+## 5. P2: launch checks, identities, analysis, blind recomputation, pilot calibration (2026-10-07)
+
+Run after the pilot (`results/ms_r2/pilot`, launched 09:48:01 from HEAD `9b93b50c` on code commit `99857513`; no file under `run`, `utils`, `envs`, `agents`, `protocols`, `tools` or `tests` differs between the two, so the suite record of section 1 is the record of the code that ran). Tables: `python reports/ms/r2/report_scripts/pilot_tables.py --block checks`.
+
+| check | result | path |
+|---|---|---|
+| status exit 0 / manifest at the launch commit, clean tree / files complete / global-RNG assertions / tail-share coverage | 120/120 each | `results/ms_r2/pilot/launch_checks.json` (`base.n_ok_per_check`; `base.all_ok` true) |
+| start shares per stratum within 3 binomial SE | 360 tests, 0 flagged (1.0 expected by chance) | `launch_checks.json`, `base.start_share_tests` |
+| applied scale equals the D2 table at every terminal-stage update and is 1.0 throughout stage 1 (schedule and exported scales) | 120/120 | `launch_checks.json`, `scale`, `summary.scale_ok` |
+| C-NL (s = 4 and 16 against s = 1 through update 2001; the `u02025` export differs) | 80/80 | `summary.C_NL_pass` |
+| C-MS3 (`NL_bb_s1` against MS-R1 `MS_base2400` through 2001; `u02025` differs) | 20/20 | `summary.C_MS3_pass` |
+| C-MS4 (`NL_st_s1` against MS-R1 `MS_s35a5` through 2001 or before its first polishing block; `p_digest_next` not compared where the reference polishes) | 20/20 | `summary.C_MS4_pass` |
+| analysis tool: decomposition against the runner's own record (`rule_log.json` `stages[2].freeze.noise`; 1e-9 absolute for gap, smoothing, remainder, `e_sigma`, `e_2*(0)`, `e_hat`; 1e-5 relative for sigma and the smoothing / formula ratio) | no flag raised: the `flags` column of `per_run.csv` is empty in all 200 rows | `results/ms_r2/analysis/per_run.csv`, `analysis_info.json` |
+| independent recomputation of `criterion.csv` and the `interaction.csv` summary from `per_run.csv` (`tools/ms/r2_blind_criterion.py`, imports nothing from `tools/ms/`) | "ALL 220 numbers agree ... to 1e-12 (floats) / exactly (counts, flags, lists)" | `results/ms_r2/analysis/blind_recomputation.txt` |
+| replay of the stop candidates on the 120 pilot runs (D6): every export matched with a logged check row | 13,440 exports of 120 runs, 13,440 matched, 0 invalid, 0 errors, 0 mismatches; maximum absolute difference 0 in the D3 quantities and in the closed-form columns | `results/ms_r2/stop_calibration_pilot/validation_summary.csv`, `manifest.json` (tool SHA-256 `deed0e2b71146ac2...`, same as P1) |
+
+All checks pass; no stop condition of the prompt was met. The checks are those of prompt section 3.2; no check was added.
