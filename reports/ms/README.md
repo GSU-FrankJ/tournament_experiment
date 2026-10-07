@@ -6,9 +6,9 @@ The multistage line takes the settled T=2 baseline (protocol v2.0: conditional e
 
 | round | branch | status | start here |
 |---|---|---|---|
-| MS-R1 | `ms-r1` (from `origin/main` `4dc604de`) | P1 done and pushed (code, tests, C-R4 and C-MS1 passed, calibration, pre-registration); gate G1: waiting for the PI's "proceed P2" | `reports/ms/r1/02_preregistration.md` (design, parameters, arms, criterion), `reports/ms/r1/01_calibration.md` (what the v2.0 exports say about the rule), `reports/ms/r1/03_checks.md` (reproduction checks, tests, review) |
+| MS-R1 | `ms-r1` (from `origin/main` `4dc604de`) | done: P1 (code, tests, C-R4 and C-MS1, calibration, pre-registration), P2 (120-run pilot, C-MS2 20/20, analysis, reports); **STOP after the §4.3 push**, no criterion arm met, next round is the PI's decision | `reports/ms/r1/summary.md` (headline numbers, deviations, commands), `reports/ms/r1/05_decision_inputs.md` (arms side by side), `reports/ms/r1/04_pilot.md` (all tables), `reports/ms/r1/02_preregistration.md` (design; Addendum 1 = the G1 decision and the arm `MS_base2400`) |
 
-Files of the round (`reports/ms/r1/`): `pi_record/17_ms_r1_prompt.md` (the round's prompt, verbatim), `00_housekeeping.md`, `01_calibration.md`, `02_preregistration.md`, `prereg_parameters.json` (the pre-registered parameter file), `03_checks.md`, `figures/` (calibration figures), `report_scripts/` (the two small scripts behind the base-wave tables). The pilot reports (`04_pilot.md`, `05_decision_inputs.md`, `summary.md`) follow the pilot.
+Files of the round (`reports/ms/r1/`): `pi_record/17_ms_r1_prompt.md` (the round's prompt, verbatim), `00_housekeeping.md`, `01_calibration.md`, `02_preregistration.md`, `prereg_parameters.json` (the pre-registered parameter file), `03_checks.md`, `figures/` (calibration figures), `report_scripts/` (the two small scripts behind the base-wave tables). The pilot reports are `04_pilot.md`, `05_decision_inputs.md` and `summary.md`; `pi_record/18_g1_reply.md` is the PI's reply at gate G1 (verbatim) and `report_scripts/pilot_tables.py` generates the tables of the pilot reports from the analysis CSVs.
 
 ## Code of the line
 
@@ -18,7 +18,7 @@ Files of the round (`reports/ms/r1/`): `pi_record/17_ms_r1_prompt.md` (the round
 | `run/ms_rollout.py`, `utils/ms_continuation.py` | stage-t rollout for t < T, nested expected-continuation tables |
 | `utils/ms_residual.py`, `utils/ms_rule.py` | first-order / second-order residual metrics (D3), the development stop rule state machine (D4) |
 | `envs/curriculum_env.py` | `StartSampler` additions: strata, `stratified_priority` (D5) |
-| `tools/ms/` | `ms_configs.py`, `launch_ms_r1.py` (waves `base`, `v20_repro`, `pilot`), `cms1_compare.py`, `launch_checks.py`, `replay_dev_rule.py` (offline calibration), `r1_analysis.py` and `blind_criterion.py` (pilot analysis), `residual_asymmetry_example.py` |
+| `tools/ms/` | `ms_configs.py` (arms incl. the budget-matched control `MS_base2400`), `launch_ms_r1.py` (waves `base`, `v20_repro`, `pilot` = five rule arms + `MS_base2400`), `cms1_compare.py`, `launch_checks.py` (post-launch checks and C-MS2), `replay_dev_rule.py` (offline calibration), `r1_analysis.py` and `blind_criterion.py` (pilot analysis), `residual_asymmetry_example.py` |
 | `tests/test_ms_*.py` | the tests of all of the above |
 
 ## Reference roots (untracked; explicit arguments to every tool)

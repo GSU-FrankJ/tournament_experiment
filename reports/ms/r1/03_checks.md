@@ -74,3 +74,40 @@ Four agents wrote the tests / calibration / analysis code (their reports are sum
 ## 5. What changed after the checks
 
 Nothing in `run/`, `utils/`, `envs/`, `agents/`, `tools/`, `tests/` or `protocols/` after commit `c95a2af4`. `git diff --stat c95a2af4 <code commit> -- . ':(exclude)reports' ':(exclude)results' ':(exclude)docs'` is recorded in `02_preregistration.md` section 9.
+
+---
+
+# Addendum 1 (2026-10-07): P2 checks
+
+Nothing above is edited.
+
+## 6. Tests after the addendum code (`9b719715`)
+
+Full suite `pytest tests` on the final tree (2026-10-07 05:21-05:49, tmux): `1 failed, 932 passed, 2 xfailed, 2 warnings in 1651.91s (0:27:31)`; the failure is the known `tests/test_registry_canonicalization.py::test_registry_canonicalization`. 932 = 881 (P1) + 51 new tests (C-MS2 with tampered copies and the CLI, the real LR schedule of `MS_base2400`, the launcher with 120 runs and the arm's config, the 7-arm analysis, the secondary table and its blind recomputation, A3 (a)-(d)). Independent read-only review of the diff by an agent that did not write it: highest severity MINOR (four findings, all fixed before the commit; listed in `02_preregistration.md` Addendum 1, section A.7).
+
+## 7. Launch checks of the pilot wave (`results/ms_r1/pilot/launch_checks.json`)
+
+```
+python tools/ms/launch_checks.py --root results/ms_r1/pilot --arms MS_rule MS_s25a0 MS_s25a5 MS_s35a0 MS_s35a5 MS_base2400 \
+    --code-commit f969d55026b59edaaaac34be633b42b447f9af3c --out results/ms_r1/pilot/launch_checks.json \
+    --cms2-ref /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A --cms2-arm MS_base2400
+all_ok true; status 120, manifest 120, files 120, global_rng 120, tail_share_coverage 120 (of 120)
+start-share tests: 1860, flagged (|z| > 3) 3, expected under the null 5.02
+C-MS2 (MS_base2400 against parents_A through update 1201) identical 20/20 ALL=True
+```
+
+Launch record `results/ms_r1/pilot/launch_20261007_055045.json`: 120 runs, 40 workers, all exit 0, HEAD `f969d550`, `git diff --stat c95a2af4 HEAD -- run utils envs agents protocols` empty, `git status --porcelain` empty, parameter file SHA-256 `0fbfc01857c5abe339ab1926361cd57d6e988da20e754fd6dea3ffa4e076b406`, wall per run 503-654 s (median 550 s). The three flagged start-share tests are q = 60 seeds 10506 (`MS_s25a0`, `MS_s25a5`: landing window, middle stratum, z = -3.13, -3.00) and 10507 (`MS_rule`: polishing block, near-tie stratum, z = -3.10).
+
+C-MS2 detail (the tool and its negative controls are `tools/ms/launch_checks.py:cms2_run` and `tests/test_ms_cms1.py`): through update 1201 the 48 weight exports `u0025 ... u1200`, the per-update series of updates 1..1201 (including the learning rate: 3e-4 at update 1201 on both sides) and the five stream positions after every update are equal bit for bit in 20 of 20 runs, and the export `u1225` differs from `parents_A`'s in 20 of 20.
+
+## 8. Analysis and blind recomputation
+
+```
+python tools/ms/r1_analysis.py --base-root <P1 worktree>/results/ms_r1/base --pilot-root results/ms_r1/pilot \
+    --parents-root .../v2_refine/parents_A --rehearsal-root .../v2_T2_locked/rehearsal_v2_0 \
+    --calibration-root results/ms_r1/calibration --out results/ms_r1/analysis        # exit 0: every planned run is done
+python tools/ms/blind_criterion.py --analysis-dir results/ms_r1/analysis
+ALL 255 numbers agree with criterion.csv and criterion_vs_MS_base2400.csv to 1e-12 (floats) / exactly (counts, flags, lists)
+```
+
+(`results/ms_r1/analysis/blind_recomputation.txt`; the blind script imports nothing from the analysis tool.)

@@ -125,3 +125,34 @@ $ git ls-remote origin refs/heads/ms-r1 refs/heads/main
 ```
 
 (`ms-r1` at this push is the commit `171a5cea`, the pre-registration commit; this section is added in the next commit, which is pushed as a fast-forward and is the head of the branch for the PI to read.)
+
+---
+
+# Addendum 1 (2026-10-07): P2 housekeeping
+
+Nothing above is edited. P2 started after the PI's "proceed P2" at gate G1 (`pi_record/18_g1_reply.md`, verbatim).
+
+## 2.1 Work tree and branch
+
+This session works in the session worktree `.claude/worktrees/p2-gate-ms-base2400-e41857`, whose branch `claude/p2-gate-ms-base2400-e41857` was at `4dc604de` (the head of `origin/main`, an ancestor of `ms-r1`; the local `main` of the primary checkout is behind it). The branch `ms-r1` is checked out in the P1 worktree (`.claude/worktrees/ms-r1-multistage-development-afebf2`), so it cannot be checked out here; the session branch was fast-forwarded onto it and pushed to `origin/ms-r1` (fast-forward, no force):
+
+```
+$ git merge-base --is-ancestor HEAD ms-r1 && git merge --ff-only ms-r1     # 4dc604de -> 21139215
+$ git push origin HEAD:ms-r1                                               # 21139215..f969d550, after the addendum
+```
+
+Consequence for the owner: the local ref `ms-r1` of the P1 worktree is behind `origin/ms-r1` (it stays at `21139215`); `git merge --ff-only origin/ms-r1` in that worktree brings it up. The P1 worktree also holds the untracked arrays of the `MS_base` wave (`results/ms_r1/base/**/freeze_stage*_*.npz`, weights, `train_history.json`) that the analysis reads (`--base-root`, recorded). The primary checkout's `main` was not touched (the P1 deviation stands: seven untracked `experiments/two_stage_E1_q50_p_20260923/*` files collide with tracked paths); no tag was created.
+
+## 2.2 Commits of P2 (`git log --oneline 21139215..`)
+
+| commit | content |
+|---|---|
+| `9b719715` | code: `MS_base2400`, the per-arm legacy pipeline, C-MS2, the secondary table, A3 analysis, the blind recomputation of both tables, tests (`tools/ms/` and `tests/test_ms_*.py` only) |
+| `f969d550` | addendum 1 to `02_preregistration.md` and the PI's G1 reply `pi_record/18_g1_reply.md`; pushed before any pilot run |
+| later commits | `results/ms_r1/pilot/` and `results/ms_r1/analysis/` (lightweight records, one commit each), then the reports of this folder (the commit that adds `04_pilot.md`, `05_decision_inputs.md`, `summary.md`, this addendum, `reports/ms/README.md`, `docs/STATE.md`, `report_scripts/pilot_tables.py`) |
+
+`git diff c95a2af4 HEAD -- run utils envs agents protocols` is empty at every commit of P2.
+
+## 2.3 Environment at the launch
+
+nproc 64; load average 11.6 / 12.1 / 12.4 at 05:50 (other users' jobs), 20.7 / 40.8 / 42.2 at the end; free disk 1020 GB; Python 3.12.3, torch 2.5.1+cu121, numpy 2.5.0 (the versions of the record; every run checks them and the manifests carry them); no other job of this session was running; nothing was killed. The independent code reviewer ran one `MS_base2400` run (q = 50, seed 10501) in a scratch directory outside `results/` before the addendum was committed; it was not used for anything.
