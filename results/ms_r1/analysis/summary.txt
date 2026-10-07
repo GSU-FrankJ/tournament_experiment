@@ -1,0 +1,59 @@
+MS-R1 analysis (prompt section 3.2)
+command: tools/ms/r1_analysis.py --base-root /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base --pilot-root results/ms_r1/pilot --parents-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A --rehearsal-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0 --calibration-root results/ms_r1/calibration --out results/ms_r1/analysis
+independent check: python tools/ms/blind_criterion.py --analysis-dir <the --out directory>
+roots: base=/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base | pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot | parents_A=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A | rehearsal_v2_0=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0
+bootstrap: 10000 resamples, numpy.random.default_rng(20261006), one fresh generator per (q, statistic)
+
+== PRE-REGISTERED CRITERION: pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it ==
+primary metric stage2_peak_rel_err_abs of the frozen terminal-stage candidate; (a) CI of the mean paired difference arm - parents_A below 0 at BOTH q; (b) no run passing G-A with its G-N eta part under parents_A fails it under the arm
+MS_base     a50 +0.00000 [+0.00000,+0.00000] n=10/10 not | a60 +0.00000 [+0.00000,+0.00000] n=10/10 not | b: holds | overall: not met
+MS_base2400 a50 -0.01256 [-0.02850,+0.00138] n=10/10 not | a60 -0.00848 [-0.01929,+0.00410] n=10/10 not | b: holds | overall: not met
+MS_rule     a50 -0.00976 [-0.03918,+0.01921] n=10/10 not | a60 +0.00185 [-0.01557,+0.01927] n=10/10 not | b: holds | overall: not met
+MS_s25a0    a50 -0.02602 [-0.04563,-0.00756] n=10/10 met | a60 -0.00756 [-0.02704,+0.01193] n=10/10 not | b: holds | overall: not met
+MS_s25a5    a50 -0.02268 [-0.03694,-0.00529] n=10/10 met | a60 -0.00989 [-0.02381,+0.00215] n=10/10 not | b: holds | overall: not met
+MS_s35a0    a50 -0.02772 [-0.05029,-0.00499] n=10/10 met | a60 -0.01623 [-0.03227,+0.00104] n=10/10 not | b: violated (q50/10508) | overall: not met
+MS_s35a5    a50 -0.03132 [-0.05160,-0.01082] n=10/10 met | a60 -0.00989 [-0.02350,+0.00114] n=10/10 not | b: holds | overall: not met
+NOTE: An interval that contains 0 with 10 seeds does not show that a mechanism has no effect (descriptive: the criterion is the pre-registered statement, nothing else is a test).
+
+== SECONDARY (descriptive, not the criterion): rule arms minus the budget-matched control MS_base2400 ==
+same metric; (a) CI of the mean paired difference arm - MS_base2400 below 0 at BOTH q; (b) no run passing G-A with its G-N eta part under MS_base2400 fails it under the arm (criterion_vs_MS_base2400.csv, paired_vs_MS_base2400.csv)
+MS_rule     a50 +0.00280 [-0.02581,+0.03270] n=10/10 not | a60 +0.01034 [-0.01207,+0.03061] n=10/10 not | b: holds | overall: not met
+MS_s25a0    a50 -0.01346 [-0.03116,+0.00396] n=10/10 not | a60 +0.00093 [-0.01317,+0.01612] n=10/10 not | b: holds | overall: not met
+MS_s25a5    a50 -0.01013 [-0.02439,+0.00528] n=10/10 not | a60 -0.00140 [-0.01351,+0.00995] n=10/10 not | b: holds | overall: not met
+MS_s35a0    a50 -0.01516 [-0.03934,+0.00710] n=10/10 not | a60 -0.00775 [-0.02282,+0.00764] n=10/10 not | b: violated (q50/10508) | overall: not met
+MS_s35a5    a50 -0.01876 [-0.03856,+0.00180] n=10/10 not | a60 -0.00140 [-0.01557,+0.01080] n=10/10 not | b: holds | overall: not met
+NOTE: An interval that contains 0 with 10 seeds does not show that a mechanism has no effect (descriptive: the criterion is the pre-registered statement, nothing else is a test).
+
+== RUN STATUS ==
+every planned run of every arm and comparator is done
+
+== DESCRIPTIVE (not pre-registered; per arm and q) ==
+arm             q       n <=0.05     signed  signed CI (contains 0?) tailmean gate_pass    t2_upd   budg_f    fire smooth
+MS_base         50     10      2   -0.06560 [-0.08283,-0.04970] no    0.0081        10      1600        0       0  0.602
+MS_base         60     10      5   -0.05335 [-0.06598,-0.04118] no    0.0097        10      1600        0       0  0.615
+MS_base         both   20      7   -0.05947 [-0.07058,-0.04919] no    0.0089        20      1600        0       0  0.609
+MS_base2400     50     10      5   -0.05304 [-0.07099,-0.03636] no    0.0069        10      2400        0       0  1.554
+MS_base2400     60     10      7   -0.04486 [-0.05811,-0.03391] no    0.0085        10      2400        0       0  0.628
+MS_base2400     both   20     12   -0.04895 [-0.06048,-0.03866] no    0.0077        20      2400        0       0  1.091
+MS_rule         50     10      5   -0.05584 [-0.07535,-0.03636] no    0.0072        10      2400       10       0  1.389
+MS_rule         60     10      5   -0.05520 [-0.06687,-0.04444] no    0.0089        10      2400       10       0  0.504
+MS_rule         both   20     10   -0.05552 [-0.06688,-0.04437] no    0.0081        20      2400       20       0  0.947
+MS_s25a0        50     10      8   -0.03958 [-0.04835,-0.03074] no    0.0073        10      2400       10       0  0.849
+MS_s25a0        60     10      6   -0.04579 [-0.05755,-0.03440] no    0.0082        10      2400       10       0  0.636
+MS_s25a0        both   20     14   -0.04268 [-0.04999,-0.03540] no    0.0077        20      2400       20       0  0.743
+MS_s25a5        50     10      7   -0.04291 [-0.05522,-0.03175] no    0.0079        10      2400       10       0  0.802
+MS_s25a5        60     10      7   -0.04346 [-0.04962,-0.03777] no    0.0091        10      2400       10       0  0.588
+MS_s25a5        both   20     14   -0.04319 [-0.04998,-0.03662] no    0.0085        20      2400       20       0  0.695
+MS_s35a0        50     10      7   -0.03788 [-0.04861,-0.02723] no    0.0079         9      2400       10       0  1.371
+MS_s35a0        60     10      8   -0.03708 [-0.04844,-0.02514] no    0.0091        10      2400       10       0 -15.289
+MS_s35a0        both   20     15   -0.03748 [-0.04513,-0.02952] no    0.0085        19      2400       20       0 -6.959
+MS_s35a5        50     10      8   -0.03428 [-0.04298,-0.02592] no    0.0078        10      2400       10       0  0.982
+MS_s35a5        60     10      8   -0.04346 [-0.05048,-0.03753] no    0.0089        10      2400       10       0  0.584
+MS_s35a5        both   20     16   -0.03887 [-0.04481,-0.03331] no    0.0084        20      2400       20       0  0.783
+parents_A       50     10      2   -0.06560 [-0.08283,-0.04970] no    0.0081        10      1600        0       0    nan
+parents_A       60     10      5   -0.05335 [-0.06598,-0.04118] no    0.0097        10      1600        0       0    nan
+parents_A       both   20      7   -0.05947 [-0.07058,-0.04919] no    0.0089        20      1600        0       0    nan
+rehearsal_v2_0  50     10      2   -0.06560 [-0.08283,-0.04970] no    0.0081        10      1600        0       0  0.602
+rehearsal_v2_0  60     10      5   -0.05335 [-0.06598,-0.04118] no    0.0097        10      1600        0       0  0.615
+rehearsal_v2_0  both   20      7   -0.05947 [-0.07058,-0.04919] no    0.0089        20      1600        0       0  0.609
+(columns after the arm are descriptive; the paired tables, rule, budget, tail, decomposition and stage-1 CSVs are descriptive as well)

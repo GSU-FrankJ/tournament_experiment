@@ -1,0 +1,280 @@
+blind recomputation of criterion.csv from per_run.csv (independent of tools/ms/r1_analysis.py)
+per_run.csv  sha256 1584ae545836911dc6071b9fdcc52f6edac4011a859e37b46456ecdd79c52d0c
+criterion.csv sha256 4e393a751bac43cfb345fd1169539b2f01f727652adc593c34050a5c5a30701d
+criterion_vs_MS_base2400.csv sha256 19c025b6d5054e5f147dc282b5507ee763b838c771cc9fef0746eb3ee2821737 (secondary, descriptive; baseline MS_base2400)
+protocol /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json sha256 6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3; thresholds {'eta': 0.005, 'rmse': 0.05, 'tail': 0.02, 'n_eta': 0.001}
+roots (analysis_info.json, roots_id c764afd35936): {'base': '/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base', 'calibration': '/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/calibration', 'parents': '/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A', 'pilot': '/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot', 'rehearsal': '/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0'}
+bootstrap: 10000 resamples, numpy.random.default_rng(20261006), one fresh generator per (q, statistic); tolerance 1e-12
+qs [50, 60]; rows by arm: {'MS_base': 20, 'MS_base2400': 20, 'MS_rule': 20, 'MS_s25a0': 20, 'MS_s25a5': 20, 'MS_s35a0': 20, 'MS_s35a5': 20, 'parents_A': 20, 'rehearsal_v2_0': 20}
+status values: {'done': 180}
+MS_base a50 +0.00000 [+0.00000,+0.00000] n=10 not | a60 +0.00000 [+0.00000,+0.00000] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool= 0 blind= 0 |diff|=0 ok
+  ci_mean_lo_q50     tool= 0 blind= 0 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0 blind= 0 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool= 0 blind= 0 |diff|=0 ok
+  ci_mean_lo_q60     tool= 0 blind= 0 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0 blind= 0 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+MS_base2400 a50 -0.01256 [-0.02850,+0.00138] n=10 not | a60 -0.00848 [-0.01929,+0.00410] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.012557579937823018 blind=-0.012557579937823018 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.028499850423600259 blind=-0.028499850423600259 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0013776686920069121 blind= 0.0013776686920069121 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0084845804703447807 blind=-0.0084845804703447807 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.019287475191118824 blind=-0.019287475191118824 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0041037760324332383 blind= 0.0041037760324332383 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+MS_rule a50 -0.00976 [-0.03918,+0.01921] n=10 not | a60 +0.00185 [-0.01557,+0.01927] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.0097596238771916338 blind=-0.0097596238771916338 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.039180733590547384 blind=-0.039180733590547384 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.019207543760197 blind= 0.019207543760197 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool= 0.0018545133610223283 blind= 0.0018545133610223283 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.015571166306465578 blind=-0.015571166306465578 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.019271409728326337 blind= 0.019271409728326337 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+MS_s25a0 a50 -0.02602 [-0.04563,-0.00756] n=10 met | a60 -0.00756 [-0.02704,+0.01193] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.026020030015312133 blind=-0.026020030015312133 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.045634794788747539 blind=-0.045634794788747539 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.0075613665268140472 blind=-0.0075613665268140472 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0075560551991136317 blind=-0.0075560551991136317 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.027039947048118636 blind=-0.027039947048118636 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.011931964581012908 blind= 0.011931964581012908 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+MS_s25a5 a50 -0.02268 [-0.03694,-0.00529] n=10 met | a60 -0.00989 [-0.02381,+0.00215] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.022684441000948165 blind=-0.022684441000948165 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.0369403906379452 blind=-0.0369403906379452 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.0052873916909276829 blind=-0.0052873916909276829 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0098862268956686952 blind=-0.0098862268956686952 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.023809629554383094 blind=-0.023809629554383094 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0021543458528240048 blind= 0.0021543458528240048 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+MS_s35a0 a50 -0.02772 [-0.05029,-0.00499] n=10 met | a60 -0.01623 [-0.03227,+0.00104] n=10 not | b_viol=[q50/10508] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.02772029051153424 blind=-0.02772029051153424 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.050287053154000977 blind=-0.050287053154000977 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.0049921231608196356 blind=-0.0049921231608196356 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.016233964944269961 blind=-0.016233964944269961 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.032270409676535029 blind=-0.032270409676535029 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.001042035756220979 blind= 0.001042035756220979 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10508' blind='q50/10508' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=1 blind=1 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+MS_s35a5 a50 -0.03132 [-0.05160,-0.01082] n=10 met | a60 -0.00989 [-0.02350,+0.00114] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.031319855732955301 blind=-0.031319855732955301 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.051601826213136311 blind=-0.051601826213136311 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.010815313964429309 blind=-0.010815313964429309 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0098867475596661324 blind=-0.0098867475596661324 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.023499614468363773 blind=-0.023499614468363773 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0011353564561121918 blind= 0.0011353564561121918 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+secondary table criterion_vs_MS_base2400.csv: baseline MS_base2400, every MS arm except MS_base, MS_base2400
+[vs MS_base2400] MS_rule a50 +0.00280 [-0.02581,+0.03270] n=10 not | a60 +0.01034 [-0.01207,+0.03061] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool= 0.0027979560606313826 blind= 0.0027979560606313826 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.025805898723766887 blind=-0.025805898723766887 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.032697566175629994 blind= 0.032697566175629994 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool= 0.010339093831367106 blind= 0.010339093831367106 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.012071602917885782 blind=-0.012071602917885782 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.030610105309126858 blind= 0.030610105309126858 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+[vs MS_base2400] MS_s25a0 a50 -0.01346 [-0.03116,+0.00396] n=10 not | a60 +0.00093 [-0.01317,+0.01612] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.013462450077489113 blind=-0.013462450077489113 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.031161470477711416 blind=-0.031161470477711416 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.003963740806084976 blind= 0.003963740806084976 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool= 0.00092852527123115226 blind= 0.00092852527123115226 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.013166063386068268 blind=-0.013166063386068268 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.016117170742285553 blind= 0.016117170742285553 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+[vs MS_base2400] MS_s25a5 a50 -0.01013 [-0.02439,+0.00528] n=10 not | a60 -0.00140 [-0.01351,+0.00995] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.010126861063125148 blind=-0.010126861063125148 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.024393888419534916 blind=-0.024393888419534916 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0052795254285492102 blind= 0.0052795254285492102 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0014016464253239144 blind=-0.0014016464253239144 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.013509853363629443 blind=-0.013509853363629443 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0099472081992727137 blind= 0.0099472081992727137 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+[vs MS_base2400] MS_s35a0 a50 -0.01516 [-0.03934,+0.00710] n=10 not | a60 -0.00775 [-0.02282,+0.00764] n=10 not | b_viol=[q50/10508] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.015162710573711219 blind=-0.015162710573711219 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.039336642767917415 blind=-0.039336642767917415 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0070991519033404673 blind= 0.0070991519033404673 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0077493844739251801 blind=-0.0077493844739251801 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.022818778817656742 blind=-0.022818778817656742 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0076431041218989748 blind= 0.0076431041218989748 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10508' blind='q50/10508' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=1 blind=1 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+[vs MS_base2400] MS_s35a5 a50 -0.01876 [-0.03856,+0.00180] n=10 not | a60 -0.00140 [-0.01557,+0.01080] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.018762275795132288 blind=-0.018762275795132288 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.038563754214661829 blind=-0.038563754214661829 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0017968628178366135 blind= 0.0017968628178366135 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0014021670893213524 blind=-0.0014021670893213524 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.015569124998393693 blind=-0.015569124998393693 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.010798587102455411 blind= 0.010798587102455411 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+decision_inputs.csv: runs with |peak error| <= 0.05
+  MS_base         q=50    tool=2 blind=2 ok
+  MS_base         q=60    tool=5 blind=5 ok
+  MS_base         q=both  tool=7 blind=7 ok
+  MS_base2400     q=50    tool=5 blind=5 ok
+  MS_base2400     q=60    tool=7 blind=7 ok
+  MS_base2400     q=both  tool=12 blind=12 ok
+  MS_rule         q=50    tool=5 blind=5 ok
+  MS_rule         q=60    tool=5 blind=5 ok
+  MS_rule         q=both  tool=10 blind=10 ok
+  MS_s25a0        q=50    tool=8 blind=8 ok
+  MS_s25a0        q=60    tool=6 blind=6 ok
+  MS_s25a0        q=both  tool=14 blind=14 ok
+  MS_s25a5        q=50    tool=7 blind=7 ok
+  MS_s25a5        q=60    tool=7 blind=7 ok
+  MS_s25a5        q=both  tool=14 blind=14 ok
+  MS_s35a0        q=50    tool=7 blind=7 ok
+  MS_s35a0        q=60    tool=8 blind=8 ok
+  MS_s35a0        q=both  tool=15 blind=15 ok
+  MS_s35a5        q=50    tool=8 blind=8 ok
+  MS_s35a5        q=60    tool=8 blind=8 ok
+  MS_s35a5        q=both  tool=16 blind=16 ok
+  parents_A       q=50    tool=2 blind=2 ok
+  parents_A       q=60    tool=5 blind=5 ok
+  parents_A       q=both  tool=7 blind=7 ok
+  rehearsal_v2_0  q=50    tool=2 blind=2 ok
+  rehearsal_v2_0  q=60    tool=5 blind=5 ok
+  rehearsal_v2_0  q=both  tool=7 blind=7 ok
+
+ALL 255 numbers agree with criterion.csv and criterion_vs_MS_base2400.csv to 1e-12 (floats) / exactly (counts, flags, lists)
