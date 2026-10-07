@@ -1,6 +1,14 @@
 # Project state
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
+
+## Multistage round MS-R1, P1 (2026-10-07, branch ms-r1, pushed; gate G1)
+
+Done: P0 (housekeeping; the work is in this session's worktree on `ms-r1`, the local `main` of the primary checkout was not fast-forwarded because seven untracked files collide with tracked paths), P1: the T-generic runner `run/run_ms_stagewise.py` (one stage per phase, nested expected-continuation tables, development stop rule with a first-order residual, coverage-constrained stratified starts, targeted polishing, landing and freeze), 314 new tests (all pass; pre-existing suites unchanged at 567 passed, 1 known failure, 2 xfailed), the two reproduction checks on real runs at `c95a2af4`: **C-R4 20/20 identical** (unchanged v2.0 entry point vs `rehearsal_v2_0`), **C-MS1 20/20 identical** (terminal stage of the 20 `MS_base` runs vs `parents_A`, also vs `rehearsal_v2_0`), the offline calibration on the 60 v2.0 runs (replay bit-identical to their own logs; `reports/ms/r1/01_calibration.md`), the pre-registration (`reports/ms/r1/02_preregistration.md`, parameters `reports/ms/r1/prereg_parameters.json`), independent review (no blocker or major).
+Result of the calibration that shapes the pilot: the first-order residual R is large on v2.0 trajectories (median 0.088 at u1600, minimum 0.044), amplified about 3.3x on the d < 0 side at q = 50 (1.95x at q = 60) by the best-response map; with the default rho = 0.03 the stop fires in 0 of 60 trajectories and the localized (polishing) branch is practically unreachable, so the terminal-stage rho is pre-registered at 0.05 (the one departure from the D4/D5 defaults); the stop is expected to rarely fire, most terminal-stage runs end by the cap (2000 updates plus the 400-update landing).
+Known issues: the `MS_base` wave was launched without `--params` (its would-fire record carries rho_2 = 0.03; recomputed at the pre-registered thresholds in `reports/ms/r1/03_checks.md`; training unaffected); `test_registry_canonicalization` fails as before; run `pytest tests`, not a bare `pytest`.
+Next: nothing until the PI replies "proceed P2" (the pilot: five rule arms x 20 runs; then analysis, reports, push). No fresh seeds, no lock, no confirmation, no T=3 experiment.
+Index: `reports/ms/README.md`.
 
 ## T=2 refinement publication (2026-10-06, branch t2-refine-pack, pushed to `main`)
 
