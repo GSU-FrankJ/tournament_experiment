@@ -111,3 +111,17 @@ tmux 3.4 (no server running at the start)
 Packages against `requirements.lock` (compared through `importlib.metadata`; `pip` is not installed in the venv): all 53 locked packages are installed at exactly the locked version (mismatches: none). Installed but not in the lock: `iniconfig 2.3.0`, `lxml 6.1.1`, `pluggy 1.6.0`, `pygments 2.21.0`, `pytest 9.1.1`, `python-docx 1.2.0`, `scipy 1.18.0` (`scipy` is used by the existing evaluation code, e.g. `utils/v2_metrics.py` and the Spearman tables of the calibration). The environment equals the one recorded in the v2.0 record (`versions`: python 3.12.3, torch 2.5.1+cu121, numpy 2.5.0), which every run of this round checks at start.
 
 No other job of this user's session was running (`ps` showed no `run_v2*` / `run_ms*` process); the load average of 11-12 is other users' and sessions' work. Nothing was killed.
+
+## 1.4 Push after P1 (§2.7)
+
+`ms-r1` was pushed to `origin` as a new branch after the pre-registration was committed (fast-forward, no force; nothing else was pushed; `main` and the tags were not touched):
+
+```
+$ git push origin ms-r1:ms-r1
+ * [new branch]        ms-r1 -> ms-r1
+$ git ls-remote origin refs/heads/ms-r1 refs/heads/main
+4dc604de9b2800d5dba99dfafe95696f630ab4b1	refs/heads/main
+171a5ceabad9a4042c10492f557ddb0d8623277f	refs/heads/ms-r1
+```
+
+(`ms-r1` at this push is the commit `171a5cea`, the pre-registration commit; this section is added in the next commit, which is pushed as a fast-forward and is the head of the branch for the PI to read.)
