@@ -217,6 +217,8 @@ class CurriculumPPOv2(CurriculumPPO):
                   "frozen": None if self.frozen is None else float(self.frozen.conc_scale)}
         if any(v is not None and v != 1.0 for v in scales.values()):
             s["conc_scale"] = scales   # absent == every network unscaled (the locked behaviour)
+        if self.actor.variant != "t1":
+            s["actor_variant"] = self.actor.variant     # MS-R3; absent == "t1" (the locked actor)
         return s
 
     def load_full_state(self, s: Dict[str, object]) -> None:
@@ -234,6 +236,7 @@ class CurriculumPPOv2(CurriculumPPO):
         scales = s.get("conc_scale") or {}
         self.actor.conc_scale = float(scales.get("actor", 1.0))
         self.opponent.conc_scale = float(scales.get("opponent", 1.0))
+        self.set_actor_variant(str(s.get("actor_variant", "t1")))
         if s.get("frozen") is not None:
             self.freeze_stage2_snapshot()
             self.frozen.load_state_dict(s["frozen"])

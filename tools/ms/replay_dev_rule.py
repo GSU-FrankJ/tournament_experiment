@@ -64,7 +64,7 @@ REPO = Path(__file__).resolve().parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from agents.ppo_curriculum import BetaActor  # noqa: E402
+from agents.ppo_curriculum import ACTOR_VARIANTS, BetaActor  # noqa: E402
 from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
 from run.run_final_dp_br import dense_grid, make_policy_fns  # noqa: E402
 from utils.dp_br_verifier import (  # noqa: E402
@@ -189,7 +189,7 @@ def load_export(path: str) -> Dict[str, np.ndarray]:
 
 def build_actor(arrays: Mapping[str, np.ndarray], hidden: int = 64, c_min: float = 100.0,
                 mu_clamp: float = 1e-6) -> BetaActor:
-    """``BetaActor`` carrying exactly the exported float32 weights (and ``conc_scale`` if exported).
+    """``BetaActor`` carrying exactly the exported float32 weights (and ``conc_scale`` / ``actor_variant`` if exported).
 
     The forward pass of the returned module is the one of training (torch float32), hence bit-identical.
     """
@@ -201,6 +201,11 @@ def build_actor(arrays: Mapping[str, np.ndarray], hidden: int = 64, c_min: float
     net.load_state_dict(sd)
     if "conc_scale" in arrays:
         net.conc_scale = float(arrays["conc_scale"])
+    if "actor_variant" in arrays:                       # MS-R3: never rebuild a relu / t10 export as the tanh d / B actor
+        variant = str(np.asarray(arrays["actor_variant"]))
+        if variant not in ACTOR_VARIANTS:
+            raise ValueError(f"unknown actor variant {variant!r} in the export; known: {ACTOR_VARIANTS}")
+        net.variant = variant
     net.eval()
     return net
 

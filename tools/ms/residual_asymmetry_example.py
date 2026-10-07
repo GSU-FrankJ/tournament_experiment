@@ -60,6 +60,8 @@ def main() -> int:
         spec = GameSpec(**{k: game[k] for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")})
         z = np.load(Path(a.root_v2) / a.run / f"q{q}" / f"seed{seed}" / "weights" / f"u{a.u:05d}.npz")
         net = BetaActor(64, 100.0, 1e-6, torch.Generator().manual_seed(0))
+        if "actor_variant" in z.files:    # MS-R3: this MS-R1 example rebuilds the tanh d / B actor only
+            raise ValueError(f"export of actor variant {str(z['actor_variant'])!r}: this tool reads t1 exports only")
         net.load_state_dict({k[6:]: torch.as_tensor(z[k]) for k in z.files if k.startswith("actor.")})
         net.eval()
         mf, bf = make_policy_fns(_Shim(net), spec)

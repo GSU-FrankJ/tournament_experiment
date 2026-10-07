@@ -5,6 +5,10 @@ The v2.0 record is embedded from ``protocols/v2_T2_locked_v2_0.json`` (``records
 carries every key explicitly (defaults written out). The rule / sampler parameters come from a
 parameters dict (``DEFAULT_PARAMS`` = the defaults of D4/D5; the pre-registered set is passed in with
 ``--params`` by the launcher), so that the code does not change when a calibrated value does.
+
+MS-R2 adds the six ``NL_*`` arms (``R2_ARM_TABLE``); MS-R3 adds the twelve ``{t1,relu,t10}_{bb,st}_s{1,16}`` arms
+(``R3_ARM_TABLE``): the settings of an ``NL_*`` arm plus ``init_digest`` and, for the ``relu`` / ``t10`` actors,
+``actor_variant``. The three tables are kept apart.
 """
 
 from __future__ import annotations
@@ -14,7 +18,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -28,6 +32,9 @@ DEFAULT_QS = (50, 60)
 DEFAULT_SEEDS = tuple(range(10501, 10511))
 PILOT = "ms_r1"
 PILOT_R2 = "ms_r2"
+PILOT_R3 = "ms_r3"
+#: prefix of the run name (``<prefix>_q<q>_s<seed>_<arm>``) by round tag
+RUN_PREFIX: Dict[str, str] = {PILOT: "msr1", PILOT_R2: "msr2", PILOT_R3: "msr3"}
 
 #: arm -> start-weights settings (D6). lambda_P None = the bin-balanced near-tie share n_near / n_bins.
 ARMS: Dict[str, Dict[str, Any]] = {
@@ -64,6 +71,28 @@ for _kind in ("bb", "st"):
             "r2": {"scale": float(_s), "stratified": _kind == "st"},
             "definition": f"MS-R2 {'bin-balanced' if _kind == 'bb' else 'MS_s35a5-style stratified'} starts, fixed 2800 "
                           f"(LR 3e-4 to 2400, decay 2401-2800), concentration scale 1 -> {_s} over 2001-2200, held to 2800"}
+#: MS-R3 (prompt D2-D4): actor variant x starts x noise landing, 12 arms ``{actor}_{bb|st}_s{1|16}``. Each entry is a copy
+#: of the MS-R2 ``NL_{bb|st}_s{s}`` entry (same sampler settings, same fixed-2800 schedule and ramp, so the shared builder
+#: block below writes the same optional keys) with the MS-R3 round tag and an ``r3`` block: ``init_digest`` is written for
+#: all twelve arms and ``actor_variant`` for the ``relu`` / ``t10`` actors only (the ``t1`` arms are the MS-R2 arms re-run
+#: on the new code and carry no variant key).
+R3_ACTORS = ("t1", "relu", "t10")
+R3_SCALES = (1, 16)
+R3_ARMS = tuple(f"{a}_{k}_s{s}" for a in R3_ACTORS for k in ("bb", "st") for s in R3_SCALES)
+R3_ARM_TABLE: Dict[str, Dict[str, Any]] = {}     # kept apart from ARMS and R2_ARM_TABLE: both are unchanged
+R3_ACTOR_TEXT = {"t1": "the locked tanh actor on d / B (control)", "relu": "ReLU hidden units on d / B",
+                 "t10": "tanh hidden units on 10 d / B (the stage feature is not scaled)"}
+for _actor in R3_ACTORS:
+    for _kind in ("bb", "st"):
+        for _s in R3_SCALES:
+            R3_ARM_TABLE[f"{_actor}_{_kind}_s{_s}"] = {
+                **copy.deepcopy(R2_ARM_TABLE[f"NL_{_kind}_s{_s}"]), "round": PILOT_R3,
+                "r3": {"actor": _actor, "kind": _kind},
+                "definition": f"MS-R3 {_actor} actor ({R3_ACTOR_TEXT[_actor]}), "
+                              f"{'bin-balanced' if _kind == 'bb' else 'MS_s35a5-style stratified'} starts, terminal stage as "
+                              f"NL_{_kind}_s{_s} of MS-R2 (fixed 2800, concentration scale 1 -> {_s} over 2001-2200)"}
+#: each ``t1`` arm is the MS-R2 arm of the same starts and s re-run on the new code (check C-MS5)
+R3_MS_R2_REFERENCE: Dict[str, str] = {f"t1_{_k}_s{_s}": f"NL_{_k}_s{_s}" for _k in ("bb", "st") for _s in R3_SCALES}
 PILOT_ARMS = ("MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
 #: the budget-matched control of addendum A1: launched in the pilot wave, in the same root as the rule arms
 CONTROL_2400_ARM = "MS_base2400"
@@ -143,7 +172,7 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
         proto: The locked v2.0 protocol (dict).
         q: Noise half-width, in ``proto['q_values']``.
         seed: Run seed.
-        arm: One of :data:`ARMS`.
+        arm: One of :data:`ARMS`, :data:`R2_ARM_TABLE` or :data:`R3_ARM_TABLE`.
         out_dir: Output directory (recorded in the embedded record, as the locked entry point does).
         params: Rule / sampler parameters (default :data:`DEFAULT_PARAMS`).
         protocol_path: The protocol file (its SHA-256 is recorded).
@@ -152,16 +181,16 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
     Returns:
         The config dict (not validated; ``run.run_ms_stagewise.validate_config`` does that).
     """
-    if arm not in ARMS and arm not in R2_ARM_TABLE:
-        raise KeyError(f"unknown arm {arm!r}; arms are {sorted(ARMS) + sorted(R2_ARM_TABLE)}")
+    if arm not in ARMS and arm not in R2_ARM_TABLE and arm not in R3_ARM_TABLE:
+        raise KeyError(f"unknown arm {arm!r}; arms are {sorted(ARMS) + sorted(R2_ARM_TABLE) + sorted(R3_ARM_TABLE)}")
     if q not in proto["q_values"]:
         raise KeyError(f"q={q} not in the protocol's q_values {proto['q_values']}")
     prm = copy.deepcopy(DEFAULT_PARAMS if params is None else params)
-    a = ARMS[arm] if arm in ARMS else R2_ARM_TABLE[arm]
+    a = ARMS[arm] if arm in ARMS else (R2_ARM_TABLE[arm] if arm in R2_ARM_TABLE else R3_ARM_TABLE[arm])
     rec0 = proto["records"][str(q)]
     rec = copy.deepcopy(rec0)
     pilot_tag = a.get("round", PILOT)
-    run_name = f"{'msr2' if pilot_tag == PILOT_R2 else 'msr1'}_q{q}_s{seed}_{arm}"
+    run_name = f"{RUN_PREFIX[pilot_tag]}_q{q}_s{seed}_{arm}"
     rec.update(seed=int(seed), run=run_name, output_dir=out_dir)
     if T != 2:
         rec["game"]["T"] = int(T)
@@ -217,10 +246,58 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
             cfg["conc_scale_schedule"] = {"stage": int(spec.T), "local_first": CONC_RAMP_FIRST,
                                           "local_last": CONC_RAMP_LAST, "scale_first": 1.0,
                                           "scale_last": float(a["r2"]["scale"])}
+    if "r3" in a:                               # MS-R3: the optional actor keys (absent for every earlier arm)
+        cfg["init_digest"] = True
+        if a["r3"]["actor"] != "t1":            # a t1 arm writes no variant key: absence means the locked actor
+            cfg["actor_variant"] = a["r3"]["actor"]
     return cfg
 
 
+def r3_arm_parts(arm: str) -> Tuple[str, str, int]:
+    """``(actor, kind, s)`` of an MS-R3 arm: ``kind`` is ``"bb"`` (bin-balanced) or ``"st"`` (stratified), ``s`` the end
+    value of the concentration scale (1 or 16).
+
+    Raises:
+        KeyError: If ``arm`` is not an MS-R3 arm.
+    """
+    e = R3_ARM_TABLE[arm]
+    return e["r3"]["actor"], e["r3"]["kind"], int(e["r2"]["scale"])
+
+
+def r2_equivalent(arm: str) -> str:
+    """The MS-R2 arm ``NL_{kind}_s{s}`` with the same starts and s as an MS-R3 arm (for a ``t1`` arm: its C-MS5 reference)."""
+    _, kind, s = r3_arm_parts(arm)
+    return f"NL_{kind}_s{s}"
+
+
+def r3_arms_of(actors: Optional[Sequence[str]] = None) -> Tuple[str, ...]:
+    """The MS-R3 arms of the given actors (default: all three), in table order.
+
+    Raises:
+        ValueError: If a name is not one of :data:`R3_ACTORS`.
+    """
+    keep = R3_ACTORS if actors is None else tuple(actors)
+    bad = [x for x in keep if x not in R3_ACTORS]
+    if bad:
+        raise ValueError(f"unknown actor(s) {bad}; the actors are {list(R3_ACTORS)}")
+    return tuple(a for a in R3_ARMS if R3_ARM_TABLE[a]["r3"]["actor"] in keep)
+
+
+def parse_actors(text: str) -> Tuple[str, ...]:
+    """The ``--actors`` comma list (``"t1,relu,t10"`` or a subset) as a tuple in the canonical order of :data:`R3_ACTORS`.
+
+    Raises:
+        ValueError: If a name (also an empty one) is not one of :data:`R3_ACTORS`.
+    """
+    names = [x.strip() for x in text.split(",")]
+    bad = [x for x in names if x not in R3_ACTORS]
+    if bad:
+        raise ValueError(f"unknown actor(s) {bad} in --actors {text!r}; the actors are {list(R3_ACTORS)}")
+    return tuple(a for a in R3_ACTORS if a in names)
+
+
 __all__ = ["ARMS", "PILOT_ARMS", "R2_ARMS", "R2_ARM_TABLE", "R2_SCALES", "CONTROL_2400_ARM", "DEFAULT_PARAMS", "LEGACY_PIPELINE",
-           "LEGACY_PIPELINE_2400", "LEGACY_PIPELINE_NL", "CONC_RAMP_FIRST", "CONC_RAMP_LAST", "PILOT_R2",
-           "build_config", "load_protocol",
+           "LEGACY_PIPELINE_2400", "LEGACY_PIPELINE_NL", "CONC_RAMP_FIRST", "CONC_RAMP_LAST", "PILOT_R2", "PILOT_R3",
+           "RUN_PREFIX", "R3_ACTORS", "R3_ARMS", "R3_ARM_TABLE", "R3_SCALES", "R3_MS_R2_REFERENCE", "r3_arm_parts",
+           "r2_equivalent", "r3_arms_of", "parse_actors", "build_config", "load_protocol",
            "REPORT_NEAR_TIE_HALF_WIDTH", "DEFAULT_QS", "DEFAULT_SEEDS", "sha256_file", "sha256_json"]

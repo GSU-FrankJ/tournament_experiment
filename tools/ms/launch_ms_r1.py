@@ -13,6 +13,11 @@ Waves (``--wave``):
   r2         MS-R2 (prompt D3): the six arms ``NL_{bb,st}_s{1,4,16}`` (terminal stage fixed 2800 with a noise landing,
              crossed with the start sampler) x 20 runs = 120 runs into ``<root>/pilot/q{q}/seed{s}/<arm>``; the default
              root of this wave is ``results/ms_r2`` (``--root`` overrides it).
+  r3         MS-R3 (prompt D2-D4): the twelve arms ``{t1,relu,t10}_{bb,st}_s{1,16}`` (actor variant x start sampler x noise
+             landing; the terminal stage of the MS-R2 ``NL_*`` arms) x 20 runs = 240 runs into
+             ``<root>/pilot/q{q}/seed{s}/<arm>``; the default root of this wave is ``results/ms_r3``. ``--actors
+             t1,relu,t10`` (wave r3 only; default all three) plans the arms of the listed actors only: the premise check
+             of the round may drop a variant, and then its four arms are not run.
 
 Every config is the full ``ms_run_config/1`` (every key written out); the rule / sampler parameters come from
 ``--params`` (the pre-registered JSON file; default: the D4 / D5 defaults, recorded as such) and the file's SHA-256
@@ -28,6 +33,8 @@ Examples (inside tmux):
   python tools/ms/launch_ms_r1.py --wave base --workers 20 --code-commit <sha>
   python tools/ms/launch_ms_r1.py --wave pilot --params reports/ms/r1/prereg_parameters.json --workers 40 \
       --code-commit <sha> --dry-run --root /tmp/somewhere
+  python tools/ms/launch_ms_r1.py --wave r3 --params reports/ms/r1/prereg_parameters.json --workers 40 \
+      --code-commit <sha> [--actors t1,relu,t10]
 """
 
 from __future__ import annotations
@@ -53,11 +60,12 @@ import ms_configs as mc  # noqa: E402
 PY = sys.executable
 DEFAULT_ROOT = ROOT / "results" / "ms_r1"
 DEFAULT_ROOT_R2 = ROOT / "results" / "ms_r2"
+DEFAULT_ROOT_R3 = ROOT / "results" / "ms_r3"
 MAX_WORKERS = 40
-WAVES = ("base", "v20_repro", "pilot", "r2")
-WAVE_DIR = {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot", "r2": "pilot"}
+WAVES = ("base", "v20_repro", "pilot", "r2", "r3")
+WAVE_DIR = {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot", "r2": "pilot", "r3": "pilot"}
 WAVE_ARMS = {"base": ("MS_base",), "v20_repro": (), "pilot": mc.PILOT_ARMS + (mc.CONTROL_2400_ARM,),
-             "r2": mc.R2_ARMS}
+             "r2": mc.R2_ARMS, "r3": mc.R3_ARMS}
 RUN_CODE_PATHS = ("run", "utils", "envs", "agents", "protocols")      # what the runs execute (addendum A1)
 
 
@@ -69,8 +77,9 @@ class Job(NamedTuple):
 
 
 def default_root(wave: str) -> Path:
-    """The results root of a wave when ``--root`` is not given (``results/ms_r2`` for MS-R2, else ``results/ms_r1``)."""
-    return (DEFAULT_ROOT_R2 if wave == "r2" else DEFAULT_ROOT).resolve()
+    """The results root of a wave when ``--root`` is not given (``results/ms_r2`` for MS-R2, ``results/ms_r3`` for
+    MS-R3, else ``results/ms_r1``)."""
+    return {"r2": DEFAULT_ROOT_R2, "r3": DEFAULT_ROOT_R3}.get(wave, DEFAULT_ROOT).resolve()
 
 
 def load_params(path: Optional[str]) -> Dict[str, Any]:
@@ -85,10 +94,21 @@ def load_params(path: Optional[str]) -> Dict[str, Any]:
 
 
 def build_jobs(wave: str, qs: Sequence[int], seeds: Sequence[int], arms: Optional[Sequence[str]], root: Path,
-               params: Dict[str, Any]) -> List[Job]:
-    """All jobs of a wave (configs are built, not written)."""
+               params: Dict[str, Any], actors: Optional[Sequence[str]] = None) -> List[Job]:
+    """All jobs of a wave (configs are built, not written).
+
+    ``actors`` (wave ``r3`` only; default all three) restricts the wave to the arms of the listed actors; ``arms`` must
+    then lie among them.
+
+    Raises:
+        ValueError: If ``actors`` is given for another wave or names an unknown actor, or an arm is not in the wave.
+    """
     proto = mc.load_protocol()
     allowed = WAVE_ARMS[wave]
+    if actors is not None:
+        if wave != "r3":
+            raise ValueError(f"--actors is defined for wave r3 only (wave {wave})")
+        allowed = mc.r3_arms_of(actors)
     chosen = tuple(arms) if arms else allowed
     bad = [a for a in chosen if a not in allowed]
     if bad:
@@ -229,7 +249,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--arms", nargs="+", default=None, help="default: all arms of the wave")
     p.add_argument("--params", default=None, help="pre-registered rule / sampler parameters (JSON); default D4/D5")
     p.add_argument("--workers", type=int, default=20, help=f"at most {MAX_WORKERS}")
-    p.add_argument("--root", default=None, help="results root (default results/ms_r1; results/ms_r2 for wave r2)")
+    p.add_argument("--actors", default=None,
+                   help="wave r3 only: comma list, a subset of t1,relu,t10 (default all three): only the arms of these "
+                        "actors are planned")
+    p.add_argument("--root", default=None,
+                   help="results root (default results/ms_r1; results/ms_r2 for wave r2, results/ms_r3 for wave r3)")
     p.add_argument("--code-commit", default=None, help="SHA of the code commit (recorded)")
     p.add_argument("--dry-run", action="store_true", help="write configs + dryrun record, validate")
     a = p.parse_args(argv)
@@ -241,8 +265,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         p.error(f"seeds must be development seeds {mc.DEFAULT_SEEDS[0]}-{mc.DEFAULT_SEEDS[-1]}; got {a.seeds}")
     root = Path(a.root).resolve() if a.root else default_root(a.wave)
     try:
+        actors = mc.parse_actors(a.actors) if a.actors is not None else None
         params = load_params(a.params)
-        jobs = build_jobs(a.wave, a.qs, a.seeds, a.arms, root, params)
+        jobs = build_jobs(a.wave, a.qs, a.seeds, a.arms, root, params, actors)
     except (ValueError, KeyError, FileNotFoundError) as exc:
         p.error(str(exc))
     busy = check_no_previous_run(jobs)
@@ -262,6 +287,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     record: Dict[str, Any] = {
         "wave": a.wave, "dry_run": bool(a.dry_run), "argv": list(sys.argv if argv is None else argv),
         "started": stamp, "workers": a.workers, **host_record(wave_dir), **git_record(a.code_commit),
+        **({"actors": list(mc.R3_ACTORS if actors is None else actors)} if a.wave == "r3" else {}),
         "params_file": a.params,
         "params_sha256": mc.sha256_file(Path(a.params)) if a.params else "defaults (D4/D5)",
         "params": params, "n_planned": len(jobs), "planned": [j.out_dir for j in jobs],

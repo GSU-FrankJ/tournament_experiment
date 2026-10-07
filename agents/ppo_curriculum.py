@@ -62,6 +62,10 @@ def _orthogonal(layer: nn.Linear, gain: float, gen: torch.Generator) -> None:
     nn.init.zeros_(layer.bias)
 
 
+ACTOR_VARIANTS = ("t1", "relu", "t10")
+D_FEATURE_SCALE_T10 = 10.0     # the d component of the actor input is multiplied by this in the "t10" variant
+
+
 class BetaActor(nn.Module):
     """Mean/concentration Beta actor."""
 
@@ -75,6 +79,10 @@ class BetaActor(nn.Module):
         # R1 refinement: multiplicative concentration factor (1.0 = the locked behaviour; the
         # multiplication is skipped at 1.0, so the default graph is operation-for-operation unchanged)
         self.conc_scale: float = 1.0
+        # MS-R3: actor variant. "t1" = the locked tanh actor on d / B (the default path below is untouched);
+        # "relu" / "t10" are set by CurriculumPPO.set_actor_variant after construction, so the initial
+        # weights are drawn by exactly the same generator calls whatever the variant.
+        self.variant: str = "t1"
         _orthogonal(self.l1, math.sqrt(2.0), gen)
         _orthogonal(self.l2, math.sqrt(2.0), gen)
         nn.init.zeros_(self.out.weight)
@@ -82,14 +90,28 @@ class BetaActor(nn.Module):
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Return (alpha, beta), each of shape (N,)."""
-        h = torch.tanh(self.l1(x))
-        h = torch.tanh(self.l2(h))
+        if self.variant != "t1":
+            h = self._hidden_variant(x)
+        else:
+            h = torch.tanh(self.l1(x))
+            h = torch.tanh(self.l2(h))
         z = self.out(h)
         mu = torch.clamp(torch.sigmoid(z[:, 0]), self.mu_clamp, 1.0 - self.mu_clamp)
         c = self.c_min + F.softplus(z[:, 1])
         if self.conc_scale != 1.0:
             c = c * self.conc_scale
         return mu * c, (1.0 - mu) * c
+
+    def _hidden_variant(self, x: torch.Tensor) -> torch.Tensor:
+        """Hidden layers of the MS-R3 variants (``relu``: ReLU units; ``t10``: tanh on ``10 d / B``)."""
+        if self.variant == "t10":
+            x = x * x.new_tensor([1.0, D_FEATURE_SCALE_T10])      # the stage feature (column 0) is not scaled
+            act = torch.tanh
+        elif self.variant == "relu":
+            act = torch.relu
+        else:
+            raise ValueError(f"unknown actor variant {self.variant!r}")
+        return act(self.l2(act(self.l1(x))))
 
 
 class Critic(nn.Module):
@@ -131,11 +153,25 @@ class CurriculumPPO:
         self.snapshot_refreshes: int = 0
         self.refresh_snapshot()
 
+    # ------------------------------------------------------------------ MS-R3 actor variant
+    def set_actor_variant(self, variant: str) -> None:
+        """Set the actor variant of the live actor and the lagged opponent (call before any update).
+
+        Args:
+            variant: ``"t1"`` (the locked actor), ``"relu"`` or ``"t10"``. The initial weights are not touched
+                (they were drawn at construction with the same generator calls for every variant).
+        """
+        if variant not in ACTOR_VARIANTS:
+            raise ValueError(f"unknown actor variant {variant!r}; known: {ACTOR_VARIANTS}")
+        self.actor.variant = variant
+        self.opponent.variant = variant
+
     # ------------------------------------------------------------------ snapshot
     def refresh_snapshot(self) -> None:
         """Copy the current actor into the frozen opponent."""
         self.opponent.load_state_dict(self.actor.state_dict())
         self.opponent.conc_scale = self.actor.conc_scale
+        self.opponent.variant = self.actor.variant
         for p in self.opponent.parameters():
             p.requires_grad_(False)
         self.opponent.eval()
@@ -332,12 +368,15 @@ class CurriculumPPO:
         if self.actor.conc_scale != 1.0:
             # exact Python float (float64); mean_effort_numpy casts it to float32 as torch does
             arrs["conc_scale"] = np.asarray(self.actor.conc_scale, dtype=np.float64)
+        if self.actor.variant != "t1":
+            arrs["actor_variant"] = np.asarray(self.actor.variant)    # absent = "t1", as in every earlier export
         np.savez(path, **arrs)
 
 
 def mean_effort_numpy(weights: Dict[str, np.ndarray], obs: np.ndarray, c_min: float = 100.0,
                       mu_clamp: float = 1e-6, e_min: float = 0.0, e_max: float = 100.0,
-                      conc_scale: Optional[float] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                      conc_scale: Optional[float] = None, variant: Optional[str] = None
+                      ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Framework-free float32 re-implementation of the actor for reload checks.
 
     Args:
@@ -351,15 +390,26 @@ def mean_effort_numpy(weights: Dict[str, np.ndarray], obs: np.ndarray, c_min: fl
             ``conc_scale`` array of an exported ``.npz`` if ``weights`` carries one, else 1.0
             (unscaled). Applied in float32 as torch does. The reload reproduces (alpha, beta) to
             float32 rounding (rtol ~1e-6), as it always did; it is not a bitwise check.
+        variant: MS-R3 actor variant (``"t1"``, ``"relu"``, ``"t10"``). ``None`` (default) reads the
+            ``actor_variant`` entry of an export if present, else ``"t1"`` (the tanh actor on d / B,
+            as every earlier export). An unknown variant raises ``ValueError``; the reload never
+            falls back to the tanh forward for an export that names another variant.
 
     Returns:
         ``(effort_mean_float64, alpha_f32, beta_f32)``.
     """
     if conc_scale is None:
         conc_scale = float(weights["conc_scale"]) if "conc_scale" in weights else 1.0
+    if variant is None:
+        variant = str(np.asarray(weights["actor_variant"])) if "actor_variant" in weights else "t1"
+    if variant not in ACTOR_VARIANTS:
+        raise ValueError(f"unknown actor variant {variant!r}; known: {ACTOR_VARIANTS}")
     x = np.asarray(obs, dtype=np.float32)
-    h = np.tanh(x @ weights["actor.l1.weight"].T + weights["actor.l1.bias"])
-    h = np.tanh(h @ weights["actor.l2.weight"].T + weights["actor.l2.bias"])
+    if variant == "t10":
+        x = (x * np.array([1.0, D_FEATURE_SCALE_T10], dtype=np.float32)).astype(np.float32)
+    act = (lambda a: np.maximum(a, np.float32(0.0))) if variant == "relu" else np.tanh
+    h = act(x @ weights["actor.l1.weight"].T + weights["actor.l1.bias"])
+    h = act(h @ weights["actor.l2.weight"].T + weights["actor.l2.bias"])
     z = h @ weights["actor.out.weight"].T + weights["actor.out.bias"]
     mu = np.clip(1.0 / (1.0 + np.exp(-z[:, 0])), mu_clamp, 1.0 - mu_clamp).astype(np.float32)
     zc = z[:, 1].astype(np.float32)

@@ -33,6 +33,17 @@ MS-R2 optional config keys (all absent == the MS-R1 behaviour, bit for bit):
                        gap, R0`` at every check of the terminal stage (T = 2); the decomposition and R0 on both
                        tiers in the freeze record.
 
+MS-R3 optional config keys (absent == the MS-R2 behaviour, bit for bit):
+  actor_variant        "relu" (ReLU hidden units) or "t10" (tanh units on 10 * d / ((t - 1) B); the stage feature is
+                       not scaled): the actor of the whole run (``BetaActor.variant``; the initial weights are drawn
+                       by the same generator calls as the locked actor, so they are identical across variants).
+                       Absent == "t1", the locked tanh actor on d / ((t - 1) B); "t1" is not accepted as a value so
+                       that a t1 run writes no variant field anywhere. The variant is set on the live actor and the
+                       lagged opponent before the first update and carried by every snapshot, weight export
+                       (``actor_variant`` entry) and full state.
+  init_digest          true: ``manifest.json`` records ``init_state_sha256``, the SHA-256 of the initial actor and
+                       critic weights (before any update; check C-INIT).
+
 Outputs in --out-dir: run_config.json, manifest.json, status.json, ms_checks_stage{t}.csv,
 ms_binmaps_stage{t}.npz, ms_updates.csv, rule_log.json, gates.json, state_end_stage{t}.pt,
 continuation_table_stage{t}.npz (t = T-1 ... 1), freeze_stage{t}_{final,development}.npz, weights/,
@@ -96,7 +107,7 @@ SCHEMA = "ms_run_config/1"
 REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "record", "protocol_ref",
             "record_sha256", "protocol_gates", "threads_per_process", "pipeline", "start_weights", "rule",
             "clamp_likelihood", "full_state_at")
-OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report")
+OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report", "actor_variant", "init_digest")
 CONC_SCHEDULE_KEYS = ("stage", "local_first", "local_last", "scale_first", "scale_last")
 CHECK_NOISE = ("conc_scale", "sigma_0", "e_sigma_0", "g2_0", "smoothing", "remainder", "gap", "R0")
 START_SCHEMES = ("bin_balanced", "stratified_priority")
@@ -204,6 +215,10 @@ def validate_config(cfg: Dict[str, Any]) -> None:
             raise ConfigError("noise_report must be a bool")
         if cfg["noise_report"] and T != 2:
             raise ConfigError("noise_report is defined for T = 2 (the closed-form tie value) only")
+    if "actor_variant" in cfg and cfg["actor_variant"] not in ("relu", "t10"):
+        raise ConfigError("actor_variant, if present, must be 'relu' or 't10' (absent = the locked actor 't1')")
+    if "init_digest" in cfg and cfg["init_digest"] is not True:
+        raise ConfigError("init_digest, if present, must be true")
     if "fixed_global_sampler" in cfg:
         if cfg["fixed_global_sampler"] is not True:
             raise ConfigError("fixed_global_sampler, if present, must be true")
@@ -374,6 +389,10 @@ class MSRun:
                      "opp": _rng("opponent_action"), "start": _rng("starts_roles")}
         rng_mb = _rng("minibatch")
         self.agent = CurriculumPPOv2(self.ppo_cfg, self.torch_gen, rng_mb, device=rec["device"])
+        self.actor_variant = str(cfg.get("actor_variant", "t1"))
+        self.init_state_sha256 = self._init_digest(self.agent) if cfg.get("init_digest") else None
+        if self.actor_variant != "t1":
+            self.agent.set_actor_variant(self.actor_variant)
         self.opt_ids = {"actor": id(self.agent.opt_actor), "critic": id(self.agent.opt_critic)}
         set_lr(self.agent, lr_at(sched, "A", 1))
         self.sampler = StartSampler(spec, P["es_bin_width"])
@@ -512,6 +531,7 @@ class MSRun:
             "frozen_stages": {str(s): {k: v.detach().cpu().clone() for k, v in net.state_dict().items()}
                               for s, net in self.frozen_nets.items()},
             "seed": self.seed, "q": self.spec.q, "seed_namespaces": self.seed_namespaces,
+            **({"actor_variant": self.actor_variant} if self.actor_variant != "t1" else {}),
         }
 
     # ------------------------------------------------------------------ one phase
@@ -806,6 +826,17 @@ class MSRun:
         write_json(os.path.join(self.out_dir, "rule_log.json"), self._rule_log_doc())
 
     @staticmethod
+    def _init_digest(agent: Any) -> str:
+        """SHA-256 of the actor and critic weights (sorted names, float32 bytes); pure, no RNG."""
+        h = hashlib.sha256()
+        for pre, net in (("actor", agent.actor), ("critic", agent.critic)):
+            sd = net.state_dict()
+            for k in sorted(sd):
+                h.update(f"{pre}.{k}".encode())
+                h.update(np.ascontiguousarray(sd[k].detach().cpu().numpy()).tobytes())
+        return h.hexdigest()
+
+    @staticmethod
     def _net_digest(net: Any) -> str:
         h = hashlib.sha256()
         for k, v in net.state_dict().items():
@@ -913,6 +944,8 @@ def write_manifest(run: MSRun, cfg: Dict[str, Any], out_dir: str, cmd: str, git:
         "resolved_protocol": P, "lr_schedule": run.sched,
         "conc_scale_schedule": run.conc_sched, "fixed_global_sampler": run.fixed_global,
         "noise_report": run.noise_report,
+        **({"actor_variant": run.actor_variant} if run.actor_variant != "t1" else {}),
+        **({"init_state_sha256": run.init_state_sha256} if run.init_state_sha256 is not None else {}),
         "resolved_config": {"game": {k: getattr(spec, k) for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")},
                             "ppo": run.rec["ppo"], "verifier": run.rec["verifier"]},
         "versions": run.versions_actual, "thread_env": run.thread_env, "torch_threads": torch.get_num_threads(),
