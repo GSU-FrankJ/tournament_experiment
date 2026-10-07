@@ -1,0 +1,27 @@
+{
+ "K": 25,
+ "M": 3,
+ "conc_limit": 0.04,
+ "localized_fraction": 0.25,
+ "alpha_polish": 0.5,
+ "ema_beta": 0.5,
+ "near_tie_half_width": 20.0,
+ "stages": {
+  "2": {
+   "eps": 0.005,
+   "rho": 0.05,
+   "tau": 0.02,
+   "n_block": 400,
+   "u_cap": 2000,
+   "n_land": 400
+  },
+  "1": {
+   "eps": 0.005,
+   "rho": 0.03,
+   "tau": 0.02,
+   "n_block": 200,
+   "u_cap": 600,
+   "n_land": 400
+  }
+ }
+}
