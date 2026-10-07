@@ -1,0 +1,191 @@
+{
+ "wave": "v20_repro",
+ "dry_run": false,
+ "argv": [
+  "tools/ms/launch_ms_r1.py",
+  "--wave",
+  "v20_repro",
+  "--workers",
+  "20",
+  "--code-commit",
+  "c95a2af4"
+ ],
+ "started": "20261007_030049",
+ "workers": 20,
+ "nproc": 64,
+ "loadavg_at_start": [
+  22.458984375,
+  14.5224609375,
+  13.44873046875
+ ],
+ "disk_free_bytes": 1025877618688,
+ "disk_total_bytes": 5952313540608,
+ "head": "c95a2af471622987464be3d30b2c89accc616226",
+ "code_commit": "c95a2af4",
+ "status_porcelain": [
+  "?? results/ms_r1/base/"
+ ],
+ "code_commit_resolved": "c95a2af471622987464be3d30b2c89accc616226",
+ "diff_stat_code_commit_to_head": "",
+ "params_file": null,
+ "params_sha256": "defaults (D4/D5)",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "2": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 400,
+    "u_cap": 2000,
+    "n_land": 400
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 200,
+    "u_cap": 600,
+    "n_land": 400
+   }
+  }
+ },
+ "n_planned": 20,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10501",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10502",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10503",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10504",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10505",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10506",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10507",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10508",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10509",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10510",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10501",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10502",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10503",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10504",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10505",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10506",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10507",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10508",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10509",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10510"
+ ],
+ "validation": {},
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10505",
+   "returncode": 0,
+   "wall_sec": 481.65764469408896
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10510",
+   "returncode": 0,
+   "wall_sec": 481.7429907419719
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10504",
+   "returncode": 0,
+   "wall_sec": 482.50443804101087
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10508",
+   "returncode": 0,
+   "wall_sec": 483.05686653999146
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10502",
+   "returncode": 0,
+   "wall_sec": 484.6553146740189
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10501",
+   "returncode": 0,
+   "wall_sec": 486.8286216360284
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10503",
+   "returncode": 0,
+   "wall_sec": 492.6217074160231
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10507",
+   "returncode": 0,
+   "wall_sec": 492.7782446569763
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10509",
+   "returncode": 0,
+   "wall_sec": 498.1228696280159
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10506",
+   "returncode": 0,
+   "wall_sec": 499.91759447706863
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10505",
+   "returncode": 0,
+   "wall_sec": 500.014280486037
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10510",
+   "returncode": 0,
+   "wall_sec": 503.16227099497337
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10506",
+   "returncode": 0,
+   "wall_sec": 505.56102681404445
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10508",
+   "returncode": 0,
+   "wall_sec": 509.60004343499895
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10507",
+   "returncode": 0,
+   "wall_sec": 511.5987295190571
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q60/seed10504",
+   "returncode": 0,
+   "wall_sec": 512.112964715925
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10509",
+   "returncode": 0,
+   "wall_sec": 519.5693711970234
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10503",
+   "returncode": 0,
+   "wall_sec": 520.5634685109835
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10502",
+   "returncode": 0,
+   "wall_sec": 525.2802996239625
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/v20_reproduction/q50/seed10501",
+   "returncode": 0,
+   "wall_sec": 529.0051414159825
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  30.27734375,
+  39.34130859375,
+  28.18212890625
+ ]
+}

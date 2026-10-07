@@ -1,0 +1,21 @@
+{
+ "run": "msr1_q50_s10503_MS_base",
+ "arm": "MS_base",
+ "q": 50,
+ "seed": 10503,
+ "state": "done",
+ "pid": 4043148,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10503/MS_base/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10503/MS_base",
+ "start_time": "2026-10-07 03:00:54",
+ "git": {
+  "commit": "c95a2af471622987464be3d30b2c89accc616226",
+  "short": "c95a2af",
+  "dirty": false
+ },
+ "end_time": "2026-10-07 03:07:59",
+ "exit_code": 0,
+ "final_global_update": 2200,
+ "total_wall_sec": 424.7441801200621,
+ "outcome": "pass"
+}

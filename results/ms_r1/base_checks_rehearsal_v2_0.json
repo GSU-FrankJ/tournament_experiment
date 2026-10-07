@@ -1,0 +1,594 @@
+{
+ "tool": "tools/ms/cms1_compare.py",
+ "ref": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+ "ref_kind": "rehearsal",
+ "new": "results/ms_r1/base",
+ "arm": "MS_base",
+ "n": 20,
+ "n_identical": 20,
+ "ALL": true,
+ "failing_fields": [],
+ "first_differences": [],
+ "runs": [
+  {
+   "q": 50,
+   "seed": 10501,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10502,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10503,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10504,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10505,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10506,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10507,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10508,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10509,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 50,
+   "seed": 10510,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10501,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10502,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10503,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10504,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10505,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10506,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10507,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10508,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10509,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  },
+  {
+   "q": 60,
+   "seed": 10510,
+   "fields": {
+    "state:actor": true,
+    "state:critic": true,
+    "state:opponent": true,
+    "state:frozen": true,
+    "state:opt_actor": true,
+    "state:opt_critic": true,
+    "state:rng_minibatch": true,
+    "state:snapshot_refreshes": true,
+    "state:conc_scale": true,
+    "state:rng_streams": true,
+    "state:torch_generator": true,
+    "state:counters": true,
+    "weight_exports": true,
+    "train_history:series": true,
+    "updates_csv:stream_positions_and_losses": true,
+    "eval:freeze_stage2_final.npz": true,
+    "eval:freeze_stage2_development.npz": true
+   },
+   "ALL": true,
+   "first_difference": null,
+   "differences": {},
+   "info": {
+    "n_weight_exports_compared": 64
+   }
+  }
+ ]
+}
