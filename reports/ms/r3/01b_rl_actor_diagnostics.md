@@ -68,6 +68,48 @@ Ranges over the 26 source / arm / q rows (block `diag_ranges`):
 | pooled Spearman(max abs w, w_eff) | -0.356 | -0.162 | 26 |
 | share of final exports with max abs w <= the screen reference | 0.10 | 0.70 | 26 |
 
+### 2.1 The distribution of |w| over the 64 first-layer units (blocks `diag_dist`, `diag_dist_facts`; medians over the seeds of the quantiles and of the counts)
+
+| source | arm | q | u400 | final |
+|---|---|---|---|---|
+| ms_r2_pilot | NL_bb_s1 | 50 | |w| q25/q50/q90/max 0.11/0.31/0.72/1.10; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.15/0.38/0.80/1.26; units > 1/2/3/5: 3/0/0/0 |
+| ms_r2_pilot | NL_bb_s1 | 60 | |w| q25/q50/q90/max 0.09/0.26/0.76/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.09/0.31/0.86/1.28; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_bb_s4 | 50 | |w| q25/q50/q90/max 0.11/0.31/0.72/1.10; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.15/0.40/0.80/1.25; units > 1/2/3/5: 2/0/0/0 |
+| ms_r2_pilot | NL_bb_s4 | 60 | |w| q25/q50/q90/max 0.09/0.26/0.76/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.09/0.31/0.85/1.28; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_bb_s16 | 50 | |w| q25/q50/q90/max 0.11/0.31/0.72/1.10; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.15/0.39/0.80/1.26; units > 1/2/3/5: 2/0/0/0 |
+| ms_r2_pilot | NL_bb_s16 | 60 | |w| q25/q50/q90/max 0.09/0.26/0.76/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.09/0.31/0.85/1.27; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s1 | 50 | |w| q25/q50/q90/max 0.13/0.32/0.74/1.05; units > 1/2/3/5: 1/0/0/0 | |w| q25/q50/q90/max 0.17/0.40/0.84/1.24; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s1 | 60 | |w| q25/q50/q90/max 0.10/0.30/0.70/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.12/0.35/0.79/1.30; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s4 | 50 | |w| q25/q50/q90/max 0.13/0.32/0.74/1.05; units > 1/2/3/5: 1/0/0/0 | |w| q25/q50/q90/max 0.17/0.41/0.83/1.23; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s4 | 60 | |w| q25/q50/q90/max 0.10/0.30/0.70/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.12/0.35/0.80/1.30; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s16 | 50 | |w| q25/q50/q90/max 0.13/0.32/0.74/1.05; units > 1/2/3/5: 1/0/0/0 | |w| q25/q50/q90/max 0.16/0.41/0.84/1.23; units > 1/2/3/5: 4/0/0/0 |
+| ms_r2_pilot | NL_st_s16 | 60 | |w| q25/q50/q90/max 0.10/0.30/0.70/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.11/0.35/0.79/1.29; units > 1/2/3/5: 3/0/0/0 |
+| ms_r1_pilot | MS_base2400 | 50 | |w| q25/q50/q90/max 0.11/0.31/0.72/1.10; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.15/0.39/0.79/1.25; units > 1/2/3/5: 2/0/0/0 |
+| ms_r1_pilot | MS_base2400 | 60 | |w| q25/q50/q90/max 0.09/0.26/0.76/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.09/0.31/0.85/1.26; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_rule | 50 | |w| q25/q50/q90/max 0.11/0.31/0.73/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.17/0.37/0.84/1.24; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_rule | 60 | |w| q25/q50/q90/max 0.07/0.27/0.77/1.23; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.07/0.34/0.87/1.36; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s25a0 | 50 | |w| q25/q50/q90/max 0.13/0.32/0.74/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.14/0.41/0.86/1.32; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s25a0 | 60 | |w| q25/q50/q90/max 0.10/0.28/0.73/1.06; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.10/0.33/0.81/1.21; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s25a5 | 50 | |w| q25/q50/q90/max 0.11/0.29/0.76/1.18; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.12/0.35/0.85/1.34; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s25a5 | 60 | |w| q25/q50/q90/max 0.10/0.31/0.72/1.17; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.11/0.33/0.82/1.32; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s35a0 | 50 | |w| q25/q50/q90/max 0.11/0.32/0.74/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.15/0.42/0.85/1.33; units > 1/2/3/5: 3/0/0/0 |
+| ms_r1_pilot | MS_s35a0 | 60 | |w| q25/q50/q90/max 0.11/0.33/0.68/1.13; units > 1/2/3/5: 1/0/0/0 | |w| q25/q50/q90/max 0.12/0.38/0.78/1.33; units > 1/2/3/5: 3/0/0/0 |
+| ms_r1_pilot | MS_s35a5 | 50 | |w| q25/q50/q90/max 0.13/0.32/0.74/1.05; units > 1/2/3/5: 1/0/0/0 | |w| q25/q50/q90/max 0.14/0.39/0.82/1.21; units > 1/2/3/5: 4/0/0/0 |
+| ms_r1_pilot | MS_s35a5 | 60 | |w| q25/q50/q90/max 0.10/0.30/0.70/1.11; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.13/0.35/0.78/1.28; units > 1/2/3/5: 3/0/0/0 |
+| ms_r1_base | MS_base | 50 | |w| q25/q50/q90/max 0.11/0.31/0.72/1.10; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.14/0.36/0.78/1.22; units > 1/2/3/5: 2/0/0/0 |
+| ms_r1_base | MS_base | 60 | |w| q25/q50/q90/max 0.09/0.26/0.76/1.12; units > 1/2/3/5: 2/0/0/0 | |w| q25/q50/q90/max 0.09/0.31/0.83/1.22; units > 1/2/3/5: 3/0/0/0 |
+
+At the final terminal-stage export of every run:
+
+- final terminal-stage exports: 260 runs
+- units with |w| > 1: min 0, median 4, max 9 (of 64 units)
+- units with |w| > 2: min 0, median 0, max 0 (of 64 units)
+- units with |w| > 3: min 0, median 0, max 0 (of 64 units)
+- units with |w| > 5: min 0, median 0, max 0 (of 64 units)
+- median |w| over the units: min 0.169, median over runs 0.364, max 0.524
+- 90 % quantile of |w|: min 0.666, median over runs 0.829, max 1.069
+- max |w|: min 0.811, median over runs 1.280, max 1.693
+
 Reading (descriptive). The largest first-layer weight on d / B of the RL actors is about 1.0-1.2 at update 400 and 1.2-1.4 at the freeze (medians over seeds, all 26 rows): its median grows by 9-19 % between update 400 and the freeze (row by row). The rounding width `w_eff` falls over the same updates, from 7-14 units of d at update 400 to 3-6.5 at the freeze. At the freeze the sharpest tanh unit of the first layer bends over `B / max |w|` = 149-165 units of d (q = 50) and 162-182 units (q = 60), against a rounding width of 3-6.5 units of d. Over the rows the median `w_eff` at the freeze varies by a factor of about two (3.05-6.51) and the median max |w| by about 12 % (1.206-1.357): the MS-R1 sampler arms and the MS-R2 noise-landing arms differ more in the width than in the weight.
 
 ## 3. How the weights and the width move together (block `diag_relation`; Spearman correlation of max |w| with `w_eff` over the terminal-stage exports)

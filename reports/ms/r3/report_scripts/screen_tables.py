@@ -5,7 +5,7 @@
 quoted in the prompt (block ``sandbox``, marked as quoted and as not repository evidence).
 
 Usage (repository root):
-    python reports/ms/r3/report_scripts/screen_tables.py --block grid|metrics|premise|extended|sandbox|seeds|diag_arm|diag_relation|diag_regime|diag_ranges|diag_check
+    python reports/ms/r3/report_scripts/screen_tables.py --block grid|metrics|premise|extended|sandbox|seeds|diag_arm|diag_relation|diag_regime|diag_ranges|diag_check|diag_dist|diag_dist_facts|grid_rmse|grid_tail|grid_weff|grid_maxw
         [--dir results/ms_r3/supervised_screen] [--diag-dir results/ms_r3/rl_actor_diagnostics]
 """
 
@@ -49,8 +49,8 @@ def _cell(r: pd.Series, m: str, p: int = 3) -> str:
     return f"{r[f'{m}_median']:.{p}f} [{r[f'{m}_min']:.{p}f}, {r[f'{m}_max']:.{p}f}]"
 
 
-def block_grid(d: Path) -> str:
-    """Tip deficit e2*(0) - e_hat(0) (effort units), median [min, max] over the ten seeds, at the four checkpoints."""
+def _grid(d: Path, metric: str, p: int) -> str:
+    """One metric of ``summary_median.csv``, median [min, max] over the ten seeds, at the four checkpoints."""
     m = _med(d)
     rows = []
     for a in ACTORS:
@@ -60,10 +60,35 @@ def block_grid(d: Path) -> str:
                 r: Dict[str, object] = {"actor": a, "starts": STARTS_LAB[s], "q": q}
                 for st in (16000, 32000, 48000, 56000):
                     x = g[g.steps == st]
-                    r[f"{st // 1000}k"] = _cell(x.iloc[0], "tip_deficit") if len(x) else "n/a"
+                    r[f"{st // 1000}k"] = _cell(x.iloc[0], metric, p) if len(x) else "n/a"
                 r["n seeds"] = int(g[g.steps == 56000].n.iloc[0]) if len(g[g.steps == 56000]) else 0
                 rows.append(r)
     return _md(rows)
+
+
+def block_grid(d: Path) -> str:
+    """Tip deficit e2*(0) - e_hat(0) (effort units), median [min, max] over the ten seeds, at the four checkpoints."""
+    return _grid(d, "tip_deficit", 3)
+
+
+def block_grid_rmse(d: Path) -> str:
+    """RMSE_pos (effort units) at the four checkpoints."""
+    return _grid(d, "rmse_pos", 3)
+
+
+def block_grid_tail(d: Path) -> str:
+    """Tail mean (effort units) at the four checkpoints."""
+    return _grid(d, "tail_mean", 3)
+
+
+def block_grid_weff(d: Path) -> str:
+    """w_eff = tip deficit / (e2*(0) / 2q), units of d, at the four checkpoints."""
+    return _grid(d, "w_eff", 2)
+
+
+def block_grid_maxw(d: Path) -> str:
+    """Max abs first-layer weight on the d input (units of d / B; ten times the stored weight for t10) at the four checkpoints."""
+    return _grid(d, "max_abs_w_d", 2)
 
 
 def block_metrics(d: Path) -> str:
@@ -244,6 +269,40 @@ def block_diag_check(dd: Path) -> str:
     return _md(rows)
 
 
+def block_diag_dist(dd: Path) -> str:
+    """The distribution of |first-layer d-weight| over the 64 units (units of d / B): per source / arm / q the median over the
+    seeds of the quantiles 25 / 50 / 90 / 100 % and of the number of units above 1, 2, 3 and 5, at update 400 and at the final
+    terminal-stage export."""
+    e = _diag(dd, "per_export.csv")
+    e = e[e.stage == 2]
+    rows = []
+    for (src, arm, q), g in e.groupby(["source", "arm", "q"], sort=False):
+        r: Dict[str, object] = {"source": src, "arm": arm, "q": int(q)}
+        fin = g.sort_values("update").groupby("seed").tail(1)
+        for lab, x in (("u400", g[g["update"] == 400]), ("final", fin)):
+            if x.empty:
+                r[lab] = "n/a"
+                continue
+            r[lab] = (f"|w| q25/q50/q90/max {x.absw_q25.median():.2f}/{x.absw_q50.median():.2f}/{x.absw_q90.median():.2f}/"
+                      f"{x.absw_q100.median():.2f}; units > 1/2/3/5: {x.n_absw_gt1.median():.0f}/{x.n_absw_gt2.median():.0f}/"
+                      f"{x.n_absw_gt3.median():.0f}/{x.n_absw_gt5.median():.0f}")
+        rows.append(r)
+    return _md(rows)
+
+
+def block_diag_dist_facts(dd: Path) -> str:
+    """Facts about the |first-layer d-weight| distribution at the final terminal-stage export of every run."""
+    e = _diag(dd, "per_export.csv")
+    fin = e[e.stage == 2].sort_values("update").groupby(["source", "arm", "q", "seed"]).tail(1)
+    lines = [f"- final terminal-stage exports: {len(fin)} runs"]
+    for c, lab in (("n_absw_gt1", "units with |w| > 1"), ("n_absw_gt2", "units with |w| > 2"), ("n_absw_gt3", "units with |w| > 3"),
+                   ("n_absw_gt5", "units with |w| > 5")):
+        lines.append(f"- {lab}: min {int(fin[c].min())}, median {fin[c].median():.0f}, max {int(fin[c].max())} (of 64 units)")
+    for c, lab in (("absw_q50", "median |w| over the units"), ("absw_q90", "90 % quantile of |w|"), ("absw_q100", "max |w|")):
+        lines.append(f"- {lab}: min {fin[c].min():.3f}, median over runs {fin[c].median():.3f}, max {fin[c].max():.3f}")
+    return "\n".join(lines)
+
+
 def block_diag_regime(dd: Path) -> str:
     """Share of RL exports with max |w| at or below the screen's t1 reference (bin-balanced starts, 56,000 steps, median)."""
     a = _diag(dd, "regime.csv")
@@ -257,7 +316,9 @@ BLOCKS: Dict[str, Callable[[Path], str]] = {"grid": block_grid, "metrics": block
                                             "diag_arm": block_diag_arm, "diag_relation": block_diag_relation,
                                             "diag_regime": block_diag_regime,
                                             "diag_ranges": block_diag_ranges,
-                                            "diag_check": block_diag_check}
+                                            "diag_check": block_diag_check, "diag_dist": block_diag_dist, "diag_dist_facts": block_diag_dist_facts,
+                                            "grid_rmse": block_grid_rmse, "grid_tail": block_grid_tail,
+                                            "grid_weff": block_grid_weff, "grid_maxw": block_grid_maxw}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

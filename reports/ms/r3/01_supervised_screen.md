@@ -44,6 +44,76 @@ Grid: 3 actors x 2 starts x 2 q x 10 seeds (10501-10510) = 120 cells at 56,000 s
 | t10 | stratified | 50 | 0.073 [0.061, 0.085] | 0.040 [0.034, 0.045] | 0.62 [0.53, 0.79] | 13.06 [9.18, 24.35] | 0.0062 [0.0053, 0.0079] |
 | t10 | stratified | 60 | 0.053 [0.044, 0.077] | 0.034 [0.026, 0.048] | 0.69 [0.50, 0.92] | 17.94 [8.60, 37.23] | 0.0057 [0.0042, 0.0076] |
 
+The same four metrics at the four checkpoints (blocks `grid_rmse`, `grid_tail`, `grid_weff`, `grid_maxw`; median [min, max] over the ten seeds).
+
+RMSE_pos (effort units):
+
+| actor | starts | q | 16k | 32k | 48k | 56k | n seeds |
+|---|---|---|---|---|---|---|---|
+| t1 | bin-balanced | 50 | 0.501 [0.204, 2.967] | 0.394 [0.139, 2.714] | 0.448 [0.126, 2.816] | 0.256 [0.089, 2.691] | 10 |
+| t1 | bin-balanced | 60 | 2.114 [0.211, 2.443] | 2.109 [0.171, 2.661] | 2.114 [0.115, 2.396] | 2.098 [0.100, 2.120] | 10 |
+| t1 | stratified | 50 | 0.388 [0.236, 1.486] | 0.307 [0.187, 1.279] | 0.260 [0.103, 1.023] | 0.104 [0.078, 0.944] | 10 |
+| t1 | stratified | 60 | 0.463 [0.286, 1.446] | 0.413 [0.180, 0.749] | 0.427 [0.164, 0.807] | 0.356 [0.114, 0.561] | 10 |
+| relu | bin-balanced | 50 | 0.115 [0.093, 0.177] | 0.092 [0.047, 0.173] | 0.088 [0.043, 0.122] | 0.079 [0.027, 0.081] | 10 |
+| relu | bin-balanced | 60 | 0.048 [0.033, 0.164] | 0.040 [0.028, 0.064] | 0.032 [0.027, 0.074] | 0.018 [0.014, 0.023] | 10 |
+| relu | stratified | 50 | 0.133 [0.073, 0.181] | 0.083 [0.045, 0.161] | 0.084 [0.049, 0.131] | 0.039 [0.029, 0.112] | 10 |
+| relu | stratified | 60 | 0.054 [0.039, 0.108] | 0.037 [0.030, 0.055] | 0.047 [0.028, 0.078] | 0.022 [0.016, 0.024] | 10 |
+| t10 | bin-balanced | 50 | 0.162 [0.142, 0.219] | 0.112 [0.084, 0.279] | 0.104 [0.072, 0.206] | 0.064 [0.044, 0.078] | 10 |
+| t10 | bin-balanced | 60 | 0.176 [0.140, 0.208] | 0.116 [0.088, 0.202] | 0.106 [0.073, 0.140] | 0.058 [0.044, 0.067] | 10 |
+| t10 | stratified | 50 | 0.236 [0.148, 0.297] | 0.162 [0.124, 0.196] | 0.123 [0.093, 0.179] | 0.073 [0.061, 0.085] | 10 |
+| t10 | stratified | 60 | 0.198 [0.134, 0.312] | 0.126 [0.094, 0.178] | 0.118 [0.073, 0.160] | 0.053 [0.044, 0.077] | 10 |
+
+Tail mean (effort units):
+
+| actor | starts | q | 16k | 32k | 48k | 56k | n seeds |
+|---|---|---|---|---|---|---|---|
+| t1 | bin-balanced | 50 | 0.118 [0.083, 0.622] | 0.089 [0.053, 0.661] | 0.090 [0.042, 0.652] | 0.083 [0.039, 0.663] | 10 |
+| t1 | bin-balanced | 60 | 0.611 [0.118, 0.670] | 0.596 [0.076, 0.645] | 0.569 [0.061, 0.617] | 0.592 [0.057, 0.607] | 10 |
+| t1 | stratified | 50 | 0.123 [0.096, 0.579] | 0.088 [0.064, 0.428] | 0.078 [0.053, 0.319] | 0.069 [0.050, 0.289] | 10 |
+| t1 | stratified | 60 | 0.276 [0.128, 0.477] | 0.209 [0.103, 0.330] | 0.174 [0.089, 0.234] | 0.158 [0.076, 0.206] | 10 |
+| relu | bin-balanced | 50 | 0.009 [0.007, 0.011] | 0.003 [0.002, 0.004] | 0.002 [0.001, 0.002] | 0.002 [0.001, 0.002] | 10 |
+| relu | bin-balanced | 60 | 0.006 [0.005, 0.008] | 0.002 [0.002, 0.002] | 0.001 [0.001, 0.002] | 0.001 [0.001, 0.001] | 10 |
+| relu | stratified | 50 | 0.012 [0.010, 0.017] | 0.004 [0.002, 0.005] | 0.002 [0.001, 0.003] | 0.002 [0.001, 0.003] | 10 |
+| relu | stratified | 60 | 0.007 [0.005, 0.009] | 0.002 [0.001, 0.003] | 0.001 [0.001, 0.001] | 0.001 [0.001, 0.001] | 10 |
+| t10 | bin-balanced | 50 | 0.058 [0.054, 0.066] | 0.033 [0.029, 0.037] | 0.025 [0.020, 0.028] | 0.022 [0.019, 0.026] | 10 |
+| t10 | bin-balanced | 60 | 0.059 [0.050, 0.063] | 0.032 [0.027, 0.038] | 0.023 [0.019, 0.028] | 0.021 [0.017, 0.026] | 10 |
+| t10 | stratified | 50 | 0.089 [0.077, 0.092] | 0.056 [0.048, 0.062] | 0.044 [0.038, 0.050] | 0.040 [0.034, 0.045] | 10 |
+| t10 | stratified | 60 | 0.086 [0.073, 0.098] | 0.048 [0.041, 0.065] | 0.037 [0.029, 0.052] | 0.034 [0.026, 0.048] | 10 |
+
+w_eff (units of d):
+
+| actor | starts | q | 16k | 32k | 48k | 56k | n seeds |
+|---|---|---|---|---|---|---|---|
+| t1 | bin-balanced | 50 | 3.01 [1.64, 14.16] | 2.39 [1.31, 12.28] | 2.16 [0.92, 13.44] | 2.35 [1.21, 12.27] | 10 |
+| t1 | bin-balanced | 60 | 11.10 [2.85, 14.23] | 10.47 [2.09, 15.69] | 12.59 [1.68, 16.46] | 13.00 [1.80, 13.86] | 10 |
+| t1 | stratified | 50 | 1.35 [1.02, 2.50] | 1.50 [0.83, 2.55] | 1.20 [0.65, 2.79] | 1.02 [0.89, 2.30] | 10 |
+| t1 | stratified | 60 | 1.86 [1.48, 4.50] | 2.41 [1.39, 3.34] | 2.03 [1.12, 3.94] | 2.40 [1.22, 2.79] | 10 |
+| relu | bin-balanced | 50 | 0.72 [0.57, 0.85] | 0.70 [0.17, 0.81] | 0.65 [0.12, 0.80] | 0.69 [0.13, 0.73] | 10 |
+| relu | bin-balanced | 60 | 0.08 [-0.04, 0.18] | 0.12 [0.06, 0.20] | 0.07 [0.02, 0.20] | 0.07 [0.04, 0.11] | 10 |
+| relu | stratified | 50 | 0.50 [0.03, 0.67] | 0.15 [0.04, 0.69] | 0.14 [0.03, 0.60] | 0.12 [0.04, 0.60] | 10 |
+| relu | stratified | 60 | 0.10 [0.03, 0.21] | 0.10 [0.03, 0.13] | 0.08 [-0.01, 0.21] | 0.05 [0.01, 0.06] | 10 |
+| t10 | bin-balanced | 50 | 1.38 [0.91, 1.52] | 0.83 [0.70, 1.53] | 0.81 [0.66, 1.27] | 0.75 [0.53, 0.99] | 10 |
+| t10 | bin-balanced | 60 | 1.72 [0.76, 2.25] | 1.33 [0.82, 1.91] | 1.10 [0.44, 1.36] | 0.98 [0.82, 1.17] | 10 |
+| t10 | stratified | 50 | 1.18 [0.69, 1.51] | 0.97 [0.46, 1.07] | 0.70 [0.32, 1.00] | 0.62 [0.53, 0.79] | 10 |
+| t10 | stratified | 60 | 1.35 [0.78, 2.03] | 1.11 [0.56, 1.45] | 1.05 [0.17, 1.30] | 0.69 [0.50, 0.92] | 10 |
+
+Max abs first-layer d-weight (units of d / B; ten times the stored weight for `t10`):
+
+| actor | starts | q | 16k | 32k | 48k | 56k | n seeds |
+|---|---|---|---|---|---|---|---|
+| t1 | bin-balanced | 50 | 1.14 [1.04, 1.41] | 1.25 [1.08, 1.46] | 1.29 [1.13, 3.46] | 1.30 [1.18, 3.63] | 10 |
+| t1 | bin-balanced | 60 | 1.12 [0.99, 1.84] | 1.13 [0.99, 2.43] | 1.17 [0.99, 2.50] | 1.16 [0.99, 2.53] | 10 |
+| t1 | stratified | 50 | 1.18 [1.02, 1.71] | 1.31 [1.24, 2.00] | 1.48 [1.35, 1.93] | 1.51 [1.39, 1.93] | 10 |
+| t1 | stratified | 60 | 1.16 [0.99, 1.51] | 1.22 [1.01, 2.29] | 1.30 [1.05, 2.38] | 1.31 [1.06, 2.48] | 10 |
+| relu | bin-balanced | 50 | 0.86 [0.71, 0.95] | 0.86 [0.71, 0.95] | 0.86 [0.71, 0.95] | 0.86 [0.71, 0.95] | 10 |
+| relu | bin-balanced | 60 | 0.79 [0.72, 0.93] | 0.79 [0.72, 0.93] | 0.79 [0.72, 0.93] | 0.79 [0.72, 0.94] | 10 |
+| relu | stratified | 50 | 0.86 [0.77, 0.97] | 0.87 [0.79, 0.97] | 0.87 [0.79, 0.98] | 0.87 [0.79, 0.98] | 10 |
+| relu | stratified | 60 | 0.80 [0.73, 0.97] | 0.81 [0.73, 0.98] | 0.82 [0.74, 0.98] | 0.82 [0.74, 0.98] | 10 |
+| t10 | bin-balanced | 50 | 10.70 [7.77, 15.44] | 12.60 [9.22, 23.22] | 13.98 [9.86, 27.82] | 14.64 [10.08, 29.37] | 10 |
+| t10 | bin-balanced | 60 | 11.58 [8.13, 18.18] | 15.11 [10.70, 26.87] | 17.01 [12.42, 32.47] | 17.82 [12.69, 34.83] | 10 |
+| t10 | stratified | 50 | 8.77 [8.09, 12.80] | 11.38 [8.72, 19.47] | 12.05 [9.02, 23.24] | 13.06 [9.18, 24.35] | 10 |
+| t10 | stratified | 60 | 11.31 [6.64, 12.65] | 14.69 [7.72, 27.64] | 17.31 [8.26, 35.51] | 17.94 [8.60, 37.23] | 10 |
+
 ### 2.3 The ten per-seed tip deficits at 56,000 steps, bin-balanced starts (block `seeds`)
 
 | actor | q | 10501 | 10502 | 10503 | 10504 | 10505 | 10506 | 10507 | 10508 | 10509 | 10510 | seeds with deficit > 4 |
@@ -55,7 +125,7 @@ Grid: 3 actors x 2 starts x 2 q x 10 seeds (10501-10510) = 120 cells at 56,000 s
 | t10 | 50 | 0.47 | 0.49 | 0.55 | 0.70 | 0.50 | 0.51 | 0.62 | 0.37 | 0.60 | 0.57 | 0 |
 | t10 | 60 | 0.52 | 0.41 | 0.52 | 0.57 | 0.51 | 0.49 | 0.44 | 0.46 | 0.40 | 0.44 | 0 |
 
-Reading (descriptive). The current actor (`t1`) leaves a median tip deficit of 1.64 (q = 50) and 6.32 (q = 60) effort units under bin-balanced starts, and the distribution over seeds is split: at q = 50 two of ten seeds end near 8.5 and the other eight between 0.85 and 3.32; at q = 60 six of ten seeds end between 6.18 and 6.74 and four between 0.88 and 1.99. Under stratified starts its median deficit is lower at both q (0.71 and 1.17). Both kink-capable variants leave less: `relu` 0.48 and 0.03 (bin-balanced), `t10` 0.53 and 0.48; under stratified starts 0.08 / 0.03 and 0.44 / 0.34. The `relu` cell at q = 50 splits as well (four seeds at 0.09-0.10, six at 0.48-0.51). RMSE_pos, the tail mean and w_eff follow the same order (table 2.2); the first-layer d-weight of `t1` has a median of 1.30 / 1.16 (bin-balanced) and 1.51 / 1.31 (stratified), `relu` 0.86 / 0.79 and 0.87 / 0.82, `t10` 13.1-17.9 in units of d / B (the stored weights times ten, i.e. about 1.3-1.8 in the stored unit).
+Reading (descriptive). The current actor (`t1`) leaves a median tip deficit of 1.64 (q = 50) and 6.32 (q = 60) effort units under bin-balanced starts, and the distribution over seeds is split: at q = 50 two of ten seeds end near 8.5 and the other eight between 0.85 and 3.32; at q = 60 six of ten seeds end between 6.18 and 6.74 and four between 0.88 and 1.99. Under stratified starts its median deficit is lower at both q (0.71 and 1.17). Both kink-capable variants leave less: `relu` 0.48 and 0.03 (bin-balanced), `t10` 0.53 and 0.48; under stratified starts 0.081 / 0.025 and 0.437 / 0.335. The `relu` cell at q = 50 splits as well (four seeds at 0.09-0.10, six at 0.48-0.51). RMSE_pos, the tail mean and w_eff follow the same order (table 2.2); the first-layer d-weight of `t1` has a median of 1.30 / 1.16 (bin-balanced) and 1.51 / 1.31 (stratified), `relu` 0.86 / 0.79 and 0.87 / 0.82, `t10` 13.1-17.9 in units of d / B (the stored weights times ten, i.e. about 1.3-1.8 in the stored unit).
 
 ## 3. The premise check (prompt section 2.5; block `premise`; bin-balanced starts, 56,000 steps)
 
