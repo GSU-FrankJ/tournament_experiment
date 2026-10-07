@@ -1,0 +1,46 @@
+{
+ "grids_file": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/reports/ms/r2/stop_candidate_grids.json",
+ "grids_sha256": "ef0a01c41b686a7c9a73452d5c63f0866c1c28110007e7e9c53f079702cce09a",
+ "grids_git_commit": "93d8be5d528edaeb0ce9eba0bf280766ed8126b6",
+ "grids": {
+  "C1": [
+   0.02,
+   0.03,
+   0.04,
+   0.05
+  ],
+  "C2": [
+   0.005,
+   0.01,
+   0.02,
+   0.03
+  ],
+  "C3": [
+   0.03,
+   0.04,
+   0.05,
+   0.07
+  ],
+  "C2s": [
+   0.005,
+   0.01,
+   0.02,
+   0.03
+  ]
+ },
+ "rule": {
+  "M": 3,
+  "K": 25,
+  "columns": {
+   "C1": "R0",
+   "C2": "c2_abs",
+   "C3": "R_defl",
+   "C2s": "c2"
+  },
+  "valid_only": true,
+  "peak_tol": 0.05
+ },
+ "n_runs": 140,
+ "tool_sha256": "deed0e2b71146ac21652609d33579579752da427e0c4fbbc05c51af96c774c4b",
+ "command": "tools/ms/r2_stop_candidates.py tables --out results/ms_r2/stop_calibration --fire --grids reports/ms/r2/stop_candidate_grids.json --md"
+}

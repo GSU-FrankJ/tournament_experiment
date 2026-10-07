@@ -1,0 +1,83 @@
+{
+ "tool": "tools/ms/r2_stop_candidates.py",
+ "tool_sha256": "deed0e2b71146ac21652609d33579579752da427e0c4fbbc05c51af96c774c4b",
+ "command": "tools/ms/r2_stop_candidates.py replay --out results/ms_r2/stop_calibration --source base=/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base:MS_base --source pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot:MS_rule,MS_s25a0,MS_s25a5,MS_s35a0,MS_s35a5,MS_base2400 --qs 50 60 --seeds 10501-10510 --workers 30",
+ "git_head": "d9d85fe09d2406a1589c7740f17a9541258f1981",
+ "sources": {
+  "base": {
+   "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base",
+   "arms": [
+    "MS_base"
+   ]
+  },
+  "pilot": {
+   "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot",
+   "arms": [
+    "MS_rule",
+    "MS_s25a0",
+    "MS_s25a5",
+    "MS_s35a0",
+    "MS_s35a5",
+    "MS_base2400"
+   ]
+  }
+ },
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "restricted_updates": null,
+ "n_runs": 140,
+ "n_rows": 12800,
+ "verifier_tier": {
+  "name": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "grid_tol": 1e-09,
+  "mass_tol": 1e-10,
+  "pdl_tol_over_dw": 1e-10
+ },
+ "settings": {
+  "h_fd": 0.5,
+  "excl_abs": 0.1,
+  "j_away": 8.0,
+  "bisect_iters": 64,
+  "dense_step": 0.01,
+  "stage": 2,
+  "const_lr": 0.0003
+ },
+ "workers": 30,
+ "loadavg_at_start": [
+  16.76904296875,
+  16.744140625,
+  14.189453125
+ ],
+ "wall_sec": 14.834159224992618,
+ "python": "3.12.3",
+ "torch": "2.5.1+cu121",
+ "numpy": "2.5.0",
+ "scipy": "1.18.0",
+ "omp_num_threads": "1",
+ "validation": {
+  "n_runs": 140,
+  "n_exports_matched": 12800,
+  "max_abs_d3": 0.0,
+  "max_abs_closed": 0.0,
+  "ok": true,
+  "tolerance": 1e-09
+ },
+ "note": "numeric columns deterministic; replay_wall_sec is wall-clock"
+}
