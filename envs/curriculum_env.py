@@ -17,7 +17,7 @@ the training reward.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 
@@ -136,6 +136,103 @@ class StartSampler:
         """
         edges = self.bin_edges(t)
         cdf = np.cumsum(self.peak_bin_probs(t, half_width, share))
+        cdf[-1] = 1.0
+        b = np.minimum(np.searchsorted(cdf, rng.random(n), side="right"), edges.size - 2)
+        u = rng.random(n)
+        return edges[b] + u * (edges[b + 1] - edges[b])
+
+    # ------------------------------------------------------------------ MS-R1 (additions only)
+    def tail_threshold(self, t: int) -> float:
+        """2 q (T - t + 1): the gap beyond which the equilibrium effort of stage t is zero."""
+        return 2.0 * float(self.spec.q) * (self.spec.T - t + 1)
+
+    def tail_mask(self, t: int, tol: float = 1e-9) -> np.ndarray:
+        """Boolean mask over the bins of D_t: bins lying entirely inside |d| >= 2 q (T - t + 1)."""
+        edges = self.bin_edges(t)
+        thr = self.tail_threshold(t)
+        return (edges[:-1] >= thr - tol) | (edges[1:] <= -thr + tol)
+
+    def strata(self, t: int, near_tie_half_width: float) -> Dict[str, np.ndarray]:
+        """Disjoint bin masks of D_t: ``tail``, ``near`` (bins intersecting (-h, h)) and ``mid``.
+
+        Raises:
+            ValueError: If a near-tie bin lies in the tail, or the near-tie or middle stratum is empty.
+        """
+        tail = self.tail_mask(t)
+        near = self.peak_set(t, near_tie_half_width)
+        if (near & tail).any():
+            raise ValueError(f"near-tie half-width {near_tie_half_width} reaches the tail bins of D_{t}")
+        mid = ~tail & ~near
+        if not near.any() or not mid.any():
+            raise ValueError(f"D_{t} has {int(near.sum())} near-tie and {int(mid.sum())} middle bins "
+                             f"for half-width {near_tie_half_width}")
+        return {"tail": tail, "near": near, "mid": mid}
+
+    def stratum_labels(self, t: int, near_tie_half_width: float) -> np.ndarray:
+        """Per-bin stratum code: 0 tail, 1 near-tie, 2 middle."""
+        s = self.strata(t, near_tie_half_width)
+        return np.where(s["tail"], 0, np.where(s["near"], 1, 2)).astype(np.int8)
+
+    def coverage_lambda_t(self, t: int) -> float:
+        """The fixed tail share of the stratified scheme: n_tail / n_bins (the bin-balanced share)."""
+        return float(self.tail_mask(t).sum()) / float(self.n_bins(t))
+
+    def stratified_bin_probs(self, t: int, lambda_p: float, near_tie_half_width: float,
+                             alpha: float = 0.0, focus: Optional[np.ndarray] = None) -> np.ndarray:
+        """Bin probabilities of the coverage-constrained priority scheme (MS-R1 D5).
+
+        ``p(b) = lam_T u_tail(b) + (1 - lam_T) [(1 - alpha) p_PM(b) + alpha f(b)]`` with ``lam_T`` the
+        bin-balanced tail share (fixed), ``p_PM`` the near-tie / middle strata (``lambda_p`` on the
+        near-tie bins, the rest on the middle bins, bin-balanced within a stratum) and ``f`` the focus
+        distribution over the non-tail bins (``focus`` normalised on the non-tail bins; ``None`` or an
+        all-zero focus gives ``p_PM``). The tail share is ``lam_T`` for every ``alpha`` and ``focus``.
+
+        Raises:
+            ValueError: ``lambda_p`` outside (0, 1), ``lam_M = 1 - lambda_p - lam_T <= 0``, alpha
+                outside [0, 1], a focus of the wrong length or with a negative entry, or the strata
+                errors of :meth:`strata`.
+        """
+        if not 0.0 < lambda_p < 1.0:
+            raise ValueError(f"lambda_P must lie in (0, 1); got {lambda_p}")
+        if not 0.0 <= alpha <= 1.0:
+            raise ValueError(f"alpha must lie in [0, 1]; got {alpha}")
+        st = self.strata(t, near_tie_half_width)
+        n = self.n_bins(t)
+        n_tail, n_near, n_mid = (int(st[k].sum()) for k in ("tail", "near", "mid"))
+        lam_t = n_tail / n
+        lam_m = 1.0 - lambda_p - lam_t
+        if lam_m <= 0.0:
+            raise ValueError(f"lambda_M = 1 - {lambda_p} - {lam_t:.6g} = {lam_m:.6g} must be positive")
+        p_strat = np.zeros(n)
+        if n_tail:
+            p_strat[st["tail"]] = lam_t / n_tail
+        p_strat[st["near"]] = lambda_p / n_near
+        p_strat[st["mid"]] = lam_m / n_mid
+        nontail = ~st["tail"]
+        p_pm = np.where(nontail, p_strat / (1.0 - lam_t), 0.0)
+        f = p_pm
+        if focus is not None:
+            fo = np.asarray(focus, dtype=float)
+            if fo.shape != (n,) or np.any(fo < 0.0) or not np.all(np.isfinite(fo)):
+                raise ValueError(f"focus must be a finite non-negative vector of length {n}")
+            fo = np.where(nontail, fo, 0.0)
+            if fo.sum() > 0.0:
+                f = fo / fo.sum()
+        u_tail = st["tail"] / n_tail if n_tail else np.zeros(n)
+        return lam_t * u_tail + (1.0 - lam_t) * ((1.0 - alpha) * p_pm + alpha * f)
+
+    def stratified_priority(self, t: int, n: int, rng: np.random.Generator,
+                            probs: np.ndarray) -> np.ndarray:
+        """Draw n gaps from given bin probabilities: the draw mechanics of :meth:`peak_focused`.
+
+        One ``rng.random(n)`` call is mapped through the inverse CDF of ``probs`` to the bin, the start
+        inside the bin is uniform from a second ``rng.random(n)`` call, so the ``start`` stream moves
+        exactly as with :meth:`peak_focused`.
+        """
+        edges = self.bin_edges(t)
+        cdf = np.cumsum(np.asarray(probs, dtype=float))
+        if cdf.size != edges.size - 1 or abs(cdf[-1] - 1.0) > 1e-9:
+            raise ValueError("bin probabilities must have one entry per bin and sum to 1")
         cdf[-1] = 1.0
         b = np.minimum(np.searchsorted(cdf, rng.random(n), side="right"), edges.size - 2)
         u = rng.random(n)
