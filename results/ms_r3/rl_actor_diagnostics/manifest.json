@@ -1,0 +1,97 @@
+{
+ "tool": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/tools/ms/r3_actor_diagnostics.py",
+ "git_head": "e8eb9a08041efc6a6021549294edabb65f7dc047",
+ "command_line": "/home/fjiang4/tournament_experiment/.venv/bin/python /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/tools/ms/r3_actor_diagnostics.py --ms-r2-pilot-root /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot --ms-r1-pilot-root /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot --ms-r1-base-root /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base --screen-dir results/ms_r3/supervised_screen --workers 8 --out results/ms_r3/rl_actor_diagnostics",
+ "workers": 8,
+ "roots": {
+  "ms_r2_pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot",
+  "ms_r1_pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot",
+  "ms_r1_base": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base"
+ },
+ "counts": {
+  "by_source": {
+   "ms_r2_pilot": {
+    "runs": 120,
+    "exports": 16320,
+    "terminal_stage_exports": 13440,
+    "arms": {
+     "NL_bb_s1": 20,
+     "NL_bb_s4": 20,
+     "NL_bb_s16": 20,
+     "NL_st_s1": 20,
+     "NL_st_s4": 20,
+     "NL_st_s16": 20
+    },
+    "variants": [
+     "t1"
+    ]
+   },
+   "ms_r1_pilot": {
+    "runs": 120,
+    "exports": 14309,
+    "terminal_stage_exports": 11520,
+    "arms": {
+     "MS_base2400": 20,
+     "MS_rule": 20,
+     "MS_s25a0": 20,
+     "MS_s25a5": 20,
+     "MS_s35a0": 20,
+     "MS_s35a5": 20
+    },
+    "variants": [
+     "t1"
+    ]
+   },
+   "ms_r1_base": {
+    "runs": 20,
+    "exports": 1760,
+    "terminal_stage_exports": 1280,
+    "arms": {
+     "MS_base": 20
+    },
+    "variants": [
+     "t1"
+    ]
+   }
+  },
+  "total": {
+   "runs": 260,
+   "exports": 32389,
+   "terminal_stage_exports": 26240
+  }
+ },
+ "python": "3.12.3",
+ "numpy": "2.5.0",
+ "pandas": "3.0.3",
+ "scipy": "1.18.0",
+ "target_updates": [
+  400,
+  1200,
+  1600,
+  2000,
+  2400,
+  2800
+ ],
+ "regime": {
+  "status": "computed",
+  "screen_dir": "results/ms_r3/supervised_screen",
+  "filters": {},
+  "screen_csv": "results/ms_r3/supervised_screen/summary_by_cell.csv",
+  "default_filters": [
+   "extended is false (main-grid cells only)"
+  ],
+  "reference_max_abs_w_d_by_q": {
+   "50": 1.298542857170105,
+   "60": 1.1633278727531433
+  },
+  "n_rows_by_q": {
+   "50": 10,
+   "60": 10
+  },
+  "definition": "share of RL exports with max |w| <= the median over the screen rows (actor t1, bin-balanced starts, 56000 steps) of max_abs_w_d, per q"
+ },
+ "preamble_w_eff": {
+  "50": 4.85,
+  "60": 5.33
+ }
+}

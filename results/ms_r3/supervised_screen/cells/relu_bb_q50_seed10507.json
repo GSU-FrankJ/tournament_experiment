@@ -1,0 +1,195 @@
+{
+ "schema": "r3_supervised_screen_cell/1",
+ "tool": "tools/ms/r3_supervised_screen.py",
+ "cell": {
+  "name": "relu_bb_q50_seed10507",
+  "actor": "relu",
+  "starts": "bb",
+  "q": 50,
+  "seed": 10507,
+  "extended": false
+ },
+ "budget": {
+  "steps": 56000,
+  "const_steps": 48000,
+  "decay_steps": 8000,
+  "checkpoints": [
+   16000,
+   32000,
+   48000,
+   56000
+  ],
+  "minibatch": 256,
+  "max_grad_norm": 0.5,
+  "lr_start": 0.0003,
+  "lr_end": 3e-05,
+  "lr_formula": "lr(s) = lr_start for s <= const_steps else lr_start + (lr_end - lr_start) * (s - const_steps) / decay_steps, s = 1 ... steps",
+  "optimizer": {
+   "name": "torch.optim.Adam",
+   "betas": [
+    0.9,
+    0.999
+   ],
+   "eps": 1e-08,
+   "weight_decay": 0
+  }
+ },
+ "game": {
+  "w_h": 6,
+  "w_l": 2,
+  "k": 0.00028571428571428574,
+  "q": 50,
+  "T": 2,
+  "e_min": 0,
+  "e_max": 100
+ },
+ "recovery_step": 0.5,
+ "target": "utils.theory_multistage.g2_two_stage(d, q, w_h, w_l, k, e_max) (evaluation-side tent)",
+ "g2_at_0": 70.0,
+ "d_stream": {
+  "stream_id": 30001,
+  "seed_material": [
+   10507,
+   50,
+   30001
+  ],
+  "starts": "bb",
+  "starts_name": "bin_balanced",
+  "sampler": "StartSampler.balanced",
+  "bin_width": 10.0,
+  "n_bins": 40,
+  "domain_half": 200.0,
+  "stratum_shares": {
+   "tail": 0.5000000000000001,
+   "near": 0.1,
+   "mid": 0.4
+  },
+  "bin_probs": [
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025
+  ]
+ },
+ "init": {
+  "namespace": 0,
+  "seed_material": [
+   10507,
+   50,
+   0
+  ],
+  "torch_seed": 2811809371,
+  "actor_sha256": "7ca3fc06c25fc882f02ef21a3f753c273df4759ee76afd2008ed494b884ed156"
+ },
+ "protocol": {
+  "path": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+  "sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3"
+ },
+ "checkpoints": [
+  {
+   "step": 16000,
+   "lr": 0.0003,
+   "e_hat_0": 69.50662112863323,
+   "g2_at_0": 70.0,
+   "tip_deficit": 0.4933788713667724,
+   "tip_deficit_over_g2_0": 0.007048269590953891,
+   "rmse_pos": 0.10909600490472773,
+   "rmse_pos_over_g2_0": 0.0015585143557818248,
+   "tail_mean": 0.008772233578797084,
+   "tail_mean_over_g2_0": 0.00012531762255424406,
+   "w_eff": 0.7048269590953892,
+   "max_abs_w_d": 0.7321375012397766,
+   "train_mse": 13.352073700399139
+  },
+  {
+   "step": 32000,
+   "lr": 0.0003,
+   "e_hat_0": 69.60212632890584,
+   "g2_at_0": 70.0,
+   "tip_deficit": 0.3978736710941604,
+   "tip_deficit_over_g2_0": 0.005683909587059434,
+   "rmse_pos": 0.17271406011083673,
+   "rmse_pos_over_g2_0": 0.002467343715869096,
+   "tail_mean": 0.0030173538434975604,
+   "tail_mean_over_g2_0": 4.3105054907108e-05,
+   "w_eff": 0.5683909587059435,
+   "max_abs_w_d": 0.7370980978012085,
+   "train_mse": 0.007632181808818131
+  },
+  {
+   "step": 48000,
+   "lr": 0.0003,
+   "e_hat_0": 69.48687447422402,
+   "g2_at_0": 70.0,
+   "tip_deficit": 0.5131255257759761,
+   "tip_deficit_over_g2_0": 0.007330364653942516,
+   "rmse_pos": 0.08973977406592185,
+   "rmse_pos_over_g2_0": 0.0012819967723703121,
+   "tail_mean": 0.001722020318972558,
+   "tail_mean_over_g2_0": 2.4600290271036545e-05,
+   "w_eff": 0.7330364653942517,
+   "max_abs_w_d": 0.7410223484039307,
+   "train_mse": 0.006008791866541287
+  },
+  {
+   "step": 56000,
+   "lr": 3.0000000000000024e-05,
+   "e_hat_0": 69.50683459776553,
+   "g2_at_0": 70.0,
+   "tip_deficit": 0.49316540223446736,
+   "tip_deficit_over_g2_0": 0.007045220031920962,
+   "rmse_pos": 0.07911609842495272,
+   "rmse_pos_over_g2_0": 0.0011302299774993245,
+   "tail_mean": 0.0016690064470806884,
+   "tail_mean_over_g2_0": 2.3842949244009835e-05,
+   "w_eff": 0.7045220031920962,
+   "max_abs_w_d": 0.7417855858802795,
+   "train_mse": 0.0036395529438304946
+  }
+ ],
+ "wall_sec": 158.67413418507203,
+ "process_cpu_sec": 157.763798752,
+ "pid": 281224,
+ "versions": {
+  "python": "3.12.3",
+  "torch": "2.5.1+cu121",
+  "numpy": "2.5.0"
+ },
+ "versions_match_record": true
+}

@@ -1,0 +1,243 @@
+{
+ "schema": "r3_supervised_screen_cell/1",
+ "tool": "tools/ms/r3_supervised_screen.py",
+ "cell": {
+  "name": "t1_bb_q50_seed10509_ext",
+  "actor": "t1",
+  "starts": "bb",
+  "q": 50,
+  "seed": 10509,
+  "extended": true
+ },
+ "budget": {
+  "steps": 224000,
+  "const_steps": 216000,
+  "decay_steps": 8000,
+  "checkpoints": [
+   16000,
+   32000,
+   48000,
+   56000,
+   112000,
+   168000,
+   224000
+  ],
+  "minibatch": 256,
+  "max_grad_norm": 0.5,
+  "lr_start": 0.0003,
+  "lr_end": 3e-05,
+  "lr_formula": "lr(s) = lr_start for s <= const_steps else lr_start + (lr_end - lr_start) * (s - const_steps) / decay_steps, s = 1 ... steps",
+  "optimizer": {
+   "name": "torch.optim.Adam",
+   "betas": [
+    0.9,
+    0.999
+   ],
+   "eps": 1e-08,
+   "weight_decay": 0
+  }
+ },
+ "game": {
+  "w_h": 6,
+  "w_l": 2,
+  "k": 0.00028571428571428574,
+  "q": 50,
+  "T": 2,
+  "e_min": 0,
+  "e_max": 100
+ },
+ "recovery_step": 0.5,
+ "target": "utils.theory_multistage.g2_two_stage(d, q, w_h, w_l, k, e_max) (evaluation-side tent)",
+ "g2_at_0": 70.0,
+ "d_stream": {
+  "stream_id": 30001,
+  "seed_material": [
+   10509,
+   50,
+   30001
+  ],
+  "starts": "bb",
+  "starts_name": "bin_balanced",
+  "sampler": "StartSampler.balanced",
+  "bin_width": 10.0,
+  "n_bins": 40,
+  "domain_half": 200.0,
+  "stratum_shares": {
+   "tail": 0.5000000000000001,
+   "near": 0.1,
+   "mid": 0.4
+  },
+  "bin_probs": [
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025
+  ]
+ },
+ "init": {
+  "namespace": 0,
+  "seed_material": [
+   10509,
+   50,
+   0
+  ],
+  "torch_seed": 2662116772,
+  "actor_sha256": "8c6738d5bafe1d962f7f047f76e64f74e9ff9ffe680aa7fcfecab277f06fcd3d"
+ },
+ "protocol": {
+  "path": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+  "sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3"
+ },
+ "checkpoints": [
+  {
+   "step": 16000,
+   "lr": 0.0003,
+   "e_hat_0": 68.15622487318583,
+   "g2_at_0": 70.0,
+   "tip_deficit": 1.8437751268141653,
+   "tip_deficit_over_g2_0": 0.026339644668773792,
+   "rmse_pos": 0.4298200098597843,
+   "rmse_pos_over_g2_0": 0.0061402858551397755,
+   "tail_mean": 0.1252025988107133,
+   "tail_mean_over_g2_0": 0.0017886085544387615,
+   "w_eff": 2.633964466877379,
+   "max_abs_w_d": 1.227742075920105,
+   "train_mse": 45.61445823199349
+  },
+  {
+   "step": 32000,
+   "lr": 0.0003,
+   "e_hat_0": 68.3345921049561,
+   "g2_at_0": 70.0,
+   "tip_deficit": 1.6654078950438986,
+   "tip_deficit_over_g2_0": 0.02379154135776998,
+   "rmse_pos": 0.45495150868858736,
+   "rmse_pos_over_g2_0": 0.0064993072669798195,
+   "tail_mean": 0.08749316088907633,
+   "tail_mean_over_g2_0": 0.0012499022984153762,
+   "w_eff": 2.3791541357769983,
+   "max_abs_w_d": 1.2937400341033936,
+   "train_mse": 0.1351521928915754
+  },
+  {
+   "step": 48000,
+   "lr": 0.0003,
+   "e_hat_0": 68.61005569969615,
+   "g2_at_0": 70.0,
+   "tip_deficit": 1.3899443003038527,
+   "tip_deficit_over_g2_0": 0.019856347147197896,
+   "rmse_pos": 0.5586283562879374,
+   "rmse_pos_over_g2_0": 0.007980405089827678,
+   "tail_mean": 0.08398633106554347,
+   "tail_mean_over_g2_0": 0.001199804729507764,
+   "w_eff": 1.9856347147197897,
+   "max_abs_w_d": 1.3525450229644775,
+   "train_mse": 0.12477405828027986
+  },
+  {
+   "step": 56000,
+   "lr": 0.0003,
+   "e_hat_0": 67.6863297704843,
+   "g2_at_0": 70.0,
+   "tip_deficit": 2.3136702295156937,
+   "tip_deficit_over_g2_0": 0.0330524318502242,
+   "rmse_pos": 0.41766063530866654,
+   "rmse_pos_over_g2_0": 0.005966580504409522,
+   "tail_mean": 0.08078296611059918,
+   "tail_mean_over_g2_0": 0.0011540423730085597,
+   "w_eff": 3.3052431850224195,
+   "max_abs_w_d": 1.3804445266723633,
+   "train_mse": 0.11550830419827253
+  },
+  {
+   "step": 112000,
+   "lr": 0.0003,
+   "e_hat_0": 68.28037456892784,
+   "g2_at_0": 70.0,
+   "tip_deficit": 1.71962543107216,
+   "tip_deficit_over_g2_0": 0.02456607758674514,
+   "rmse_pos": 0.28296596731042867,
+   "rmse_pos_over_g2_0": 0.004042370961577553,
+   "tail_mean": 0.09898921832730974,
+   "tail_mean_over_g2_0": 0.001414131690390139,
+   "w_eff": 2.4566077586745143,
+   "max_abs_w_d": 1.5261660814285278,
+   "train_mse": 0.08891127562689195
+  },
+  {
+   "step": 168000,
+   "lr": 0.0003,
+   "e_hat_0": 68.88565331026327,
+   "g2_at_0": 70.0,
+   "tip_deficit": 1.1143466897367347,
+   "tip_deficit_over_g2_0": 0.015919238424810495,
+   "rmse_pos": 0.19821884250774527,
+   "rmse_pos_over_g2_0": 0.0028316977501106465,
+   "tail_mean": 0.0708429727670931,
+   "tail_mean_over_g2_0": 0.00101204246810133,
+   "w_eff": 1.5919238424810496,
+   "max_abs_w_d": 1.8886756896972656,
+   "train_mse": 0.04438030222180532
+  },
+  {
+   "step": 224000,
+   "lr": 3.0000000000000024e-05,
+   "e_hat_0": 69.46996420380826,
+   "g2_at_0": 70.0,
+   "tip_deficit": 0.5300357961917399,
+   "tip_deficit_over_g2_0": 0.007571939945596284,
+   "rmse_pos": 0.08113381875884582,
+   "rmse_pos_over_g2_0": 0.0011590545536977973,
+   "tail_mean": 0.057412864060521464,
+   "tail_mean_over_g2_0": 0.0008201837722931638,
+   "w_eff": 0.7571939945596284,
+   "max_abs_w_d": 1.9933905601501465,
+   "train_mse": 0.015500220487734103
+  }
+ ],
+ "wall_sec": 612.5931069370126,
+ "process_cpu_sec": 609.695183391,
+ "pid": 272945,
+ "versions": {
+  "python": "3.12.3",
+  "torch": "2.5.1+cu121",
+  "numpy": "2.5.0"
+ },
+ "versions_match_record": true
+}

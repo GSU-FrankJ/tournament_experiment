@@ -1,0 +1,195 @@
+{
+ "schema": "r3_supervised_screen_cell/1",
+ "tool": "tools/ms/r3_supervised_screen.py",
+ "cell": {
+  "name": "t1_bb_q50_seed10501",
+  "actor": "t1",
+  "starts": "bb",
+  "q": 50,
+  "seed": 10501,
+  "extended": false
+ },
+ "budget": {
+  "steps": 56000,
+  "const_steps": 48000,
+  "decay_steps": 8000,
+  "checkpoints": [
+   16000,
+   32000,
+   48000,
+   56000
+  ],
+  "minibatch": 256,
+  "max_grad_norm": 0.5,
+  "lr_start": 0.0003,
+  "lr_end": 3e-05,
+  "lr_formula": "lr(s) = lr_start for s <= const_steps else lr_start + (lr_end - lr_start) * (s - const_steps) / decay_steps, s = 1 ... steps",
+  "optimizer": {
+   "name": "torch.optim.Adam",
+   "betas": [
+    0.9,
+    0.999
+   ],
+   "eps": 1e-08,
+   "weight_decay": 0
+  }
+ },
+ "game": {
+  "w_h": 6,
+  "w_l": 2,
+  "k": 0.00028571428571428574,
+  "q": 50,
+  "T": 2,
+  "e_min": 0,
+  "e_max": 100
+ },
+ "recovery_step": 0.5,
+ "target": "utils.theory_multistage.g2_two_stage(d, q, w_h, w_l, k, e_max) (evaluation-side tent)",
+ "g2_at_0": 70.0,
+ "d_stream": {
+  "stream_id": 30001,
+  "seed_material": [
+   10501,
+   50,
+   30001
+  ],
+  "starts": "bb",
+  "starts_name": "bin_balanced",
+  "sampler": "StartSampler.balanced",
+  "bin_width": 10.0,
+  "n_bins": 40,
+  "domain_half": 200.0,
+  "stratum_shares": {
+   "tail": 0.5000000000000001,
+   "near": 0.1,
+   "mid": 0.4
+  },
+  "bin_probs": [
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025,
+   0.025
+  ]
+ },
+ "init": {
+  "namespace": 0,
+  "seed_material": [
+   10501,
+   50,
+   0
+  ],
+  "torch_seed": 992504416,
+  "actor_sha256": "406f99c4fe5b97a8b1abc158dbad30682948ff41aad27f59bfc305936d98328b"
+ },
+ "protocol": {
+  "path": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+  "sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3"
+ },
+ "checkpoints": [
+  {
+   "step": 16000,
+   "lr": 0.0003,
+   "e_hat_0": 62.0437508505043,
+   "g2_at_0": 70.0,
+   "tip_deficit": 7.956249149495697,
+   "tip_deficit_over_g2_0": 0.11366070213565282,
+   "rmse_pos": 2.7522661581470484,
+   "rmse_pos_over_g2_0": 0.039318087973529266,
+   "tail_mean": 0.6218666002152469,
+   "tail_mean_over_g2_0": 0.008883808574503526,
+   "w_eff": 11.366070213565283,
+   "max_abs_w_d": 1.4070618152618408,
+   "train_mse": 51.603071023344995
+  },
+  {
+   "step": 32000,
+   "lr": 0.0003,
+   "e_hat_0": 62.01956167470775,
+   "g2_at_0": 70.0,
+   "tip_deficit": 7.980438325292248,
+   "tip_deficit_over_g2_0": 0.11400626178988925,
+   "rmse_pos": 2.689557965840848,
+   "rmse_pos_over_g2_0": 0.03842225665486926,
+   "tail_mean": 0.6610236633753557,
+   "tail_mean_over_g2_0": 0.00944319519107651,
+   "w_eff": 11.400626178988926,
+   "max_abs_w_d": 1.4122264385223389,
+   "train_mse": 4.472373849779367
+  },
+  {
+   "step": 48000,
+   "lr": 0.0003,
+   "e_hat_0": 65.96161820086714,
+   "g2_at_0": 70.0,
+   "tip_deficit": 4.038381799132864,
+   "tip_deficit_over_g2_0": 0.05769116855904092,
+   "rmse_pos": 1.5684742718055946,
+   "rmse_pos_over_g2_0": 0.022406775311508493,
+   "tail_mean": 0.6398220201013305,
+   "tail_mean_over_g2_0": 0.00914031457287615,
+   "w_eff": 5.769116855904092,
+   "max_abs_w_d": 2.866872787475586,
+   "train_mse": 3.9816423766538502
+  },
+  {
+   "step": 56000,
+   "lr": 3.0000000000000024e-05,
+   "e_hat_0": 66.85151464581611,
+   "g2_at_0": 70.0,
+   "tip_deficit": 3.14848535418389,
+   "tip_deficit_over_g2_0": 0.044978362202627,
+   "rmse_pos": 1.1526742157092593,
+   "rmse_pos_over_g2_0": 0.016466774510132277,
+   "tail_mean": 0.4888635462869615,
+   "tail_mean_over_g2_0": 0.006983764946956593,
+   "w_eff": 4.497836220262701,
+   "max_abs_w_d": 2.9927449226379395,
+   "train_mse": 1.4784410826042294
+  }
+ ],
+ "wall_sec": 159.69247790100053,
+ "process_cpu_sec": 157.56322627900002,
+ "pid": 272958,
+ "versions": {
+  "python": "3.12.3",
+  "torch": "2.5.1+cu121",
+  "numpy": "2.5.0"
+ },
+ "versions_match_record": true
+}
