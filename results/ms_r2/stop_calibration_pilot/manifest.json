@@ -1,0 +1,77 @@
+{
+ "tool": "tools/ms/r2_stop_candidates.py",
+ "tool_sha256": "deed0e2b71146ac21652609d33579579752da427e0c4fbbc05c51af96c774c4b",
+ "command": "tools/ms/r2_stop_candidates.py replay --out results/ms_r2/stop_calibration_pilot --source pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot:NL_bb_s1,NL_bb_s4,NL_bb_s16,NL_st_s1,NL_st_s4,NL_st_s16 --qs 50 60 --seeds 10501-10510 --workers 30",
+ "git_head": "9b93b50c6ddf93649db7ba2cc3911ad7d7c349ac",
+ "sources": {
+  "pilot": {
+   "root": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot",
+   "arms": [
+    "NL_bb_s1",
+    "NL_bb_s4",
+    "NL_bb_s16",
+    "NL_st_s1",
+    "NL_st_s4",
+    "NL_st_s16"
+   ]
+  }
+ },
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "restricted_updates": null,
+ "n_runs": 120,
+ "n_rows": 13440,
+ "verifier_tier": {
+  "name": "development",
+  "state_step": 4.0,
+  "effort_step": 1.0,
+  "gl_half": 16,
+  "grid_tol": 1e-09,
+  "mass_tol": 1e-10,
+  "pdl_tol_over_dw": 1e-10
+ },
+ "settings": {
+  "h_fd": 0.5,
+  "excl_abs": 0.1,
+  "j_away": 8.0,
+  "bisect_iters": 64,
+  "dense_step": 0.01,
+  "stage": 2,
+  "const_lr": 0.0003
+ },
+ "workers": 30,
+ "loadavg_at_start": [
+  13.7216796875,
+  31.416015625,
+  39.72021484375
+ ],
+ "wall_sec": 15.775338339968584,
+ "python": "3.12.3",
+ "torch": "2.5.1+cu121",
+ "numpy": "2.5.0",
+ "scipy": "1.18.0",
+ "omp_num_threads": "1",
+ "validation": {
+  "n_runs": 120,
+  "n_exports_matched": 13440,
+  "max_abs_d3": 0.0,
+  "max_abs_closed": 0.0,
+  "ok": true,
+  "tolerance": 1e-09
+ },
+ "note": "numeric columns deterministic; replay_wall_sec is wall-clock"
+}
