@@ -16,10 +16,13 @@ constant, no helper, no thresholds). It re-derives, for every arm of ``criterion
       (violation: arm run done and failing, or failed; pending: arm run missing / running / incomplete),
 
 and compares every number with ``criterion.csv`` (agreement to 1e-12 for floats, equality for integers, flags
-and lists). If ``decision_inputs.csv`` is present the counts of runs with |peak error| <= 0.05 are compared as
-well. The report is written to ``blind_recomputation.txt`` next to ``criterion.csv`` (``--out``). Exit code 0 if
-everything agrees, 1 on any disagreement (a number, a flag, a missing or an extra arm), 2 if an input cannot
-be read.
+and lists). The primary table now includes the budget-matched control ``MS_base2400``. The secondary, descriptive
+table ``criterion_vs_MS_base2400.csv`` (the rule arms, i.e. every MS arm except ``MS_base`` and ``MS_base2400``,
+against the baseline ``MS_base2400``, parts (a) and (b) as above) is recomputed in the same way when it exists
+next to ``criterion.csv`` (or is named by ``--secondary``). If ``decision_inputs.csv`` is present the counts of
+runs with |peak error| <= 0.05 are compared as well. The report is written to ``blind_recomputation.txt`` next to
+``criterion.csv`` (``--out``). Exit code 0 if everything agrees, 1 on any disagreement (a number, a flag, a
+missing or an extra arm), 2 if an input cannot be read.
 
 Usage:
     python tools/ms/blind_criterion.py --analysis-dir results/ms_r1/analysis
@@ -44,6 +47,9 @@ N_RESAMPLES = 10000
 TOL = 1e-12
 METRIC = "stage2_peak_rel_err_abs"
 BASELINE = "parents_A"
+SECONDARY_BASELINE = "MS_base2400"                  # baseline of the secondary table (hard-coded: independent)
+SECONDARY_FILE = "criterion_vs_MS_base2400.csv"
+SECONDARY_EXCLUDED = ("MS_base", "MS_base2400")     # the arms that are not rule arms
 COMPARATOR_ROLE = "comparator"
 DEFAULT_PROTOCOL = Path(__file__).resolve().parents[2] / "protocols" / "v2_T2_locked_v2_0.json"
 
@@ -87,8 +93,10 @@ def boot_mean_ci(x: np.ndarray) -> Tuple[float, float]:
     return float(lo), float(hi)
 
 
-def recompute_arm(per: pd.DataFrame, arm: str, qs: Sequence[int], th: Dict[str, float]) -> Dict[str, Any]:
-    """Every number of one criterion row, from ``per_run.csv`` alone."""
+def recompute_arm(per: pd.DataFrame, arm: str, qs: Sequence[int], th: Dict[str, float],
+                  baseline: str = BASELINE) -> Dict[str, Any]:
+    """Every number of one criterion row, from ``per_run.csv`` alone (``baseline``: ``parents_A``, or
+    ``MS_base2400`` for the secondary table)."""
     out: Dict[str, Any] = {}
     a_flags: List[bool] = []
     a_full: List[bool] = []
@@ -97,7 +105,7 @@ def recompute_arm(per: pd.DataFrame, arm: str, qs: Sequence[int], th: Dict[str, 
     n_base = 0
     gate_col_mismatch: List[str] = []
     for q in qs:
-        base_rows = per[(per["arm"] == BASELINE) & (per["q"] == q)].set_index("seed")
+        base_rows = per[(per["arm"] == baseline) & (per["q"] == q)].set_index("seed")
         arm_rows = per[(per["arm"] == arm) & (per["q"] == q)].set_index("seed")
         seeds = sorted(set(base_rows.index) | set(arm_rows.index))
         diffs = []
@@ -127,7 +135,7 @@ def recompute_arm(per: pd.DataFrame, arm: str, qs: Sequence[int], th: Dict[str, 
             b = base_rows.loc[s] if s in base_rows.index else None
             base_pass = bool(b is not None and b["status"] == "done" and passes(b, th))
             if b is not None and b["status"] == "done" and passes(b, th) != truthy(b["gate_pass"]):
-                gate_col_mismatch.append("%s q%d/%d" % (BASELINE, q, s))
+                gate_col_mismatch.append("%s q%d/%d" % (baseline, q, s))
             if not base_pass:
                 continue
             n_base += 1
@@ -192,13 +200,67 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def run(per_run: Path, criterion: Path, out: Path, protocol: Path, decision: Optional[Path]) -> int:
-    """Recompute, compare, write the report; returns the exit code (0 agree, 1 disagree, 2 unreadable)."""
+def check_table(per: pd.DataFrame, crit: pd.DataFrame, qs: Sequence[int], th: Dict[str, float], baseline: str,
+                per_arms: Sequence[str], tag: str, lines: List[str]) -> Tuple[bool, int]:
+    """Recompute every arm row of one criterion table against ``baseline`` and compare it with ``crit``.
+
+    Returns:
+        ``(all_ok, n_checked)``.
+    """
+    all_ok = True
+    crit_arms = list(crit["arm"])
+    for a in per_arms:
+        if a not in crit_arms:
+            lines.append("DISAGREE: %sarm %s is in per_run.csv but not in the criterion table" % (tag, a))
+            all_ok = False
+    for a in crit_arms:
+        if a not in per_arms:
+            lines.append("DISAGREE: %sarm %s is in the criterion table but not in per_run.csv" % (tag, a))
+            all_ok = False
+    n_checked = 0
+    for _, row in crit.iterrows():
+        arm = row["arm"]
+        if arm not in per_arms:
+            continue
+        mine = recompute_arm(per, arm, qs, th, baseline)
+        lines.append("%s%s " % (tag, arm) + " | ".join(
+            "a%d %+.5f [%+.5f,%+.5f] n=%d %s" % (q, mine["mean_q%d" % q], mine["ci_mean_lo_q%d" % q],
+                                                  mine["ci_mean_hi_q%d" % q], mine["n_pairs_q%d" % q],
+                                                  "met" if mine["a_q%d" % q] else "not") for q in qs)
+                     + " | b_viol=[%s] b_pend=[%s] | overall %s" % (mine["b_violations"], mine["b_pending"],
+                                                                    mine["overall"]))
+        for k, v in mine.items():
+            if k.startswith("_"):
+                continue
+            if k not in row.index:
+                lines.append("  %-18s missing in the criterion table DISAGREE" % k)
+                all_ok = False
+                continue
+            n_checked += 1
+            all_ok &= compare(k, v, row[k], lines)
+        if mine["_gate_col_mismatch"]:
+            lines.append("  per_run.csv gate_pass differs from the recomputed G-A and G-N eta verdict at: %s "
+                         "DISAGREE" % ", ".join(mine["_gate_col_mismatch"]))
+            all_ok = False
+    return all_ok, n_checked
+
+
+def run(per_run: Path, criterion: Path, out: Path, protocol: Path, decision: Optional[Path],
+        secondary: Optional[Path] = None) -> int:
+    """Recompute, compare, write the report; returns the exit code (0 agree, 1 disagree, 2 unreadable).
+
+    ``secondary``: ``criterion_vs_MS_base2400.csv``; ``None`` looks for it next to ``criterion.csv``; an explicit
+    path must exist; when ``per_run.csv`` holds ``MS_base2400`` and a rule arm the file is required (a missing file
+    is a disagreement, not a skip).
+    """
     lines: List[str] = []
+    sec_path = Path(secondary) if secondary is not None else Path(criterion).parent / SECONDARY_FILE
     try:
         per = pd.read_csv(per_run, float_precision="round_trip")
         crit = pd.read_csv(criterion, float_precision="round_trip")
         th = thresholds(protocol)
+        crit2 = (pd.read_csv(sec_path, float_precision="round_trip")
+                 if (secondary is not None or sec_path.exists()) else None)
     except Exception as exc:  # noqa: BLE001
         msg = "cannot read the inputs: %s: %s" % (type(exc).__name__, exc)
         print(msg, file=sys.stderr)
@@ -208,6 +270,9 @@ def run(per_run: Path, criterion: Path, out: Path, protocol: Path, decision: Opt
     lines.append("blind recomputation of criterion.csv from per_run.csv (independent of tools/ms/r1_analysis.py)")
     lines.append("per_run.csv  sha256 %s" % sha256(per_run))
     lines.append("criterion.csv sha256 %s" % sha256(criterion))
+    if crit2 is not None:
+        lines.append("%s sha256 %s (secondary, descriptive; baseline %s)" % (sec_path.name, sha256(sec_path),
+                                                                           SECONDARY_BASELINE))
     lines.append("protocol %s sha256 %s; thresholds %s" % (protocol, sha256(protocol), th))
     info_path = Path(per_run).parent / "analysis_info.json"
     if info_path.exists():                                   # provenance only: the roots of the analysed run
@@ -220,42 +285,20 @@ def run(per_run: Path, criterion: Path, out: Path, protocol: Path, decision: Opt
                  "tolerance %.0e" % (N_RESAMPLES, SEED, TOL))
     lines.append("qs %s; rows by arm: %s" % (qs, per.groupby("arm").size().to_dict()))
     lines.append("status values: %s" % per["status"].value_counts().to_dict())
-    all_ok = True
     per_arms = [a for a in per.loc[per["role"] != COMPARATOR_ROLE, "arm"].unique()]
-    crit_arms = list(crit["arm"])
-    for a in per_arms:
-        if a not in crit_arms:
-            lines.append("DISAGREE: arm %s is in per_run.csv but not in criterion.csv" % a)
-            all_ok = False
-    for a in crit_arms:
-        if a not in per_arms:
-            lines.append("DISAGREE: arm %s is in criterion.csv but not in per_run.csv" % a)
-            all_ok = False
-    n_checked = 0
-    for _, row in crit.iterrows():
-        arm = row["arm"]
-        if arm not in per_arms:
-            continue
-        mine = recompute_arm(per, arm, qs, th)
-        lines.append("%s " % arm + " | ".join(
-            "a%d %+.5f [%+.5f,%+.5f] n=%d %s" % (q, mine["mean_q%d" % q], mine["ci_mean_lo_q%d" % q],
-                                                  mine["ci_mean_hi_q%d" % q], mine["n_pairs_q%d" % q],
-                                                  "met" if mine["a_q%d" % q] else "not") for q in qs)
-                     + " | b_viol=[%s] b_pend=[%s] | overall %s" % (mine["b_violations"], mine["b_pending"],
-                                                                    mine["overall"]))
-        for k, v in mine.items():
-            if k.startswith("_"):
-                continue
-            if k not in row.index:
-                lines.append("  %-18s missing in criterion.csv DISAGREE" % k)
-                all_ok = False
-                continue
-            n_checked += 1
-            all_ok &= compare(k, v, row[k], lines)
-        if mine["_gate_col_mismatch"]:
-            lines.append("  per_run.csv gate_pass differs from the recomputed G-A and G-N eta verdict at: %s "
-                         "DISAGREE" % ", ".join(mine["_gate_col_mismatch"]))
-            all_ok = False
+    all_ok, n_checked = check_table(per, crit, qs, th, BASELINE, per_arms, "", lines)
+    if crit2 is None and SECONDARY_BASELINE in per_arms and any(a not in SECONDARY_EXCLUDED for a in per_arms):
+        lines.append("DISAGREE: %s is missing although per_run.csv holds %s and rule arms (the secondary table "
+                     "is part of the recomputation)" % (SECONDARY_FILE, SECONDARY_BASELINE))
+        all_ok = False
+    if crit2 is not None:
+        lines.append("secondary table %s: baseline %s, every MS arm except %s" % (
+            sec_path.name, SECONDARY_BASELINE, ", ".join(SECONDARY_EXCLUDED)))
+        ok2, n2 = check_table(per, crit2, qs, th, SECONDARY_BASELINE,
+                              [a for a in per_arms if a not in SECONDARY_EXCLUDED], "[vs %s] " % SECONDARY_BASELINE,
+                              lines)
+        all_ok &= ok2
+        n_checked += n2
     if decision is not None and Path(decision).exists():
         dec = pd.read_csv(decision, float_precision="round_trip")
         lines.append("decision_inputs.csv: runs with |peak error| <= 0.05")
@@ -272,9 +315,10 @@ def run(per_run: Path, criterion: Path, out: Path, protocol: Path, decision: Opt
             lines.append("  %-15s q=%-5s tool=%d blind=%d %s" % (r["arm"], q, int(r["n_abs_peak_le_0.05"]), mine_n,
                                                                 "ok" if ok else "DISAGREE"))
     lines.append("")
-    lines.append(("ALL %d numbers agree with criterion.csv to %.0e (floats) / exactly (counts, flags, lists)"
-                  % (n_checked, TOL)) if all_ok else "DISAGREEMENT: criterion.csv does not match the blind "
-                 "recomputation")
+    what = "criterion.csv" + (" and %s" % sec_path.name if crit2 is not None else "")
+    lines.append(("ALL %d numbers agree with %s to %.0e (floats) / exactly (counts, flags, lists)"
+                  % (n_checked, what, TOL)) if all_ok else "DISAGREEMENT: %s does not match the blind "
+                 "recomputation" % what)
     out.write_text("\n".join(lines) + "\n")
     print("\n".join(lines[-1:]))
     return 0 if all_ok else 1
@@ -287,6 +331,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--per-run", default=None)
     p.add_argument("--criterion", default=None)
     p.add_argument("--decision-inputs", default=None)
+    p.add_argument("--secondary", default=None,
+                   help="criterion_vs_MS_base2400.csv (default: next to criterion.csv, checked if it exists)")
     p.add_argument("--out", default=None)
     p.add_argument("--protocol", default=str(DEFAULT_PROTOCOL))
     a = p.parse_args(argv)
@@ -295,7 +341,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     crit = Path(a.criterion) if a.criterion else d / "criterion.csv"
     dec = Path(a.decision_inputs) if a.decision_inputs else d / "decision_inputs.csv"
     out = Path(a.out) if a.out else d / "blind_recomputation.txt"
-    return run(per, crit, out, Path(a.protocol), dec)
+    return run(per, crit, out, Path(a.protocol), dec, Path(a.secondary) if a.secondary else None)
 
 
 if __name__ == "__main__":

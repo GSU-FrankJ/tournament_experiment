@@ -19,9 +19,16 @@ For every planned run (arms x q x seeds) of a wave root (``results/ms_r1/pilot``
                      constraint) to 1e-12, and the pooled measured tail share of every block is within 3 binomial
                      standard errors of it (same remark).
 
+Check C-MS2 (addendum A1 of 2026-10-07; ``--cms2-ref``): the budget-matched control ``MS_base2400`` equals
+``parents_A`` bit for bit through update 1201 -- the weight exports u0025 ... u1200, the per-update series (incl. the
+learning rate: update 1201, the first of ``parents_A``'s LR window, still runs at 3e-4) and the five stream positions
+after every update 1..1201 -- and its first export after that, u1225, differs from ``parents_A``'s. A failure is a
+stop-and-report.
+
 Usage:
     python tools/ms/launch_checks.py --root results/ms_r1/pilot --code-commit <sha> \
-        --out results/ms_r1/pilot/launch_checks.json
+        --out results/ms_r1/pilot/launch_checks.json \
+        [--cms2-ref <.../parents_A> [--cms2-arm MS_base2400]]
 """
 
 from __future__ import annotations
@@ -38,10 +45,14 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools" / "ms"))
 
+import cms1_compare as M1  # noqa: E402
 from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
 
+C = M1.C                                    # tools/v2/cr1_compare: Result, Diff, ModeSpec, first_diff, load_npz
 WEIGHTS_EVERY = 25
+CMS2_THROUGH = 1201                         # the first update of parents_A's LR window (v2.0 pipeline.lr_decay A)
 Z_LIMIT = 3.0
 STRATA = ("tail", "near", "mid")
 REPORT_NEAR_TIE_HALF_WIDTH = 20.0
@@ -194,8 +205,61 @@ def check_root(root: Path, arms: Sequence[str], qs: Sequence[int], seeds: Sequen
             "runs": runs}
 
 
+def _first_export_after_differs(ref_dir: Path, new_dir: Path, through: int) -> Optional[Any]:
+    """C-MS2 part 3: the first export after ``through`` exists on both sides and differs in at least one array
+    (a missing file is a failure, not a difference)."""
+    u = (through // WEIGHTS_EVERY + 1) * WEIGHTS_EVERY
+    a, b = C.load_npz(ref_dir / "weights" / f"u{u:05d}.npz"), C.load_npz(new_dir / "weights" / f"u{u:05d}.npz")
+    if C.first_diff(a, b, f"u{u:05d}.npz") is None:
+        return C.Diff(f"weights/u{u:05d}.npz", "identical to the reference", "identical to the reference",
+                      "expected to differ: the reference's learning rate has decayed from update 1202")
+    return None
+
+
+def cms2_run(ref_dir: Path, new_dir: Path, through: int = CMS2_THROUGH) -> Dict[str, Any]:
+    """C-MS2 of one (q, seed): ``new_dir`` (``MS_base2400``) against ``ref_dir`` (``parents_A``).
+
+    Args:
+        ref_dir: ``parents_A/q<q>/seed<seed>`` (a v2.0 ``phase_A`` run).
+        new_dir: the ``MS_base2400`` run directory.
+        through: Last update compared (1201: the first update of ``parents_A``'s LR window, still at 3e-4).
+
+    Returns:
+        The ``cr1_compare.Result`` dict (``fields``, ``ALL``, ``first_difference``, ``differences``, ``info``); a
+        missing file is a difference.
+    """
+    res = C.Result()
+    ref_dir, new_dir = Path(ref_dir), Path(new_dir)
+    if not new_dir.is_dir():
+        res.check("run_dir_present", lambda: C.Diff(str(new_dir), "present", "missing"))
+        return res.as_dict()
+    spec = C.ModeSpec("cms2", 1, through, (), "A", (), snap="all")
+    res.check("weight_exports_through", lambda: C._weights_diff(ref_dir, new_dir, spec, res.info))
+    res.check("train_history:series", lambda: M1._series_diff(ref_dir, new_dir, 2, through))
+    res.check("updates_csv:stream_positions_and_losses", lambda: M1._updates_csv_diff(ref_dir, new_dir, through))
+    res.check("first_export_after_differs", lambda: _first_export_after_differs(ref_dir, new_dir, through))
+    return res.as_dict()
+
+
+def cms2_root(ref: Path, new: Path, arm: str, qs: Sequence[int], seeds: Sequence[int],
+              through: int = CMS2_THROUGH) -> Dict[str, Any]:
+    """C-MS2 over every (q, seed): ``ref/q<q>/seed<seed>`` against ``new/q<q>/seed<seed>/<arm>``."""
+    runs = []
+    for q in qs:
+        for s in seeds:
+            r = cms2_run(C.run_dir(ref, q, s, None), C.run_dir(new, q, s, arm), through)
+            runs.append({"q": int(q), "seed": int(s), **r})
+    n_ok = sum(1 for r in runs if r["ALL"])
+    return {"check": "C-MS2", "ref": str(ref), "new": str(new), "arm": arm, "through_update": through,
+            "n": len(runs), "n_identical": n_ok, "ALL": bool(runs) and n_ok == len(runs),
+            "failing_fields": sorted({k for r in runs for k, v in r["fields"].items() if not v}),
+            "first_differences": [{"q": r["q"], "seed": r["seed"], **r["first_difference"]}
+                                  for r in runs if r["first_difference"]],
+            "runs": runs}
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    """CLI; exit code 0 iff every check of every run passed."""
+    """CLI; exit code 0 iff every check of every run passed (and C-MS2, if requested)."""
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--root", required=True, help="wave root: q*/seed*/<arm>")
     p.add_argument("--arms", nargs="+", required=True)
@@ -203,14 +267,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--qs", type=int, nargs="+", default=[50, 60])
     p.add_argument("--seeds", type=int, nargs="+", default=list(range(10501, 10511)))
     p.add_argument("--out", default=None)
+    p.add_argument("--cms2-ref", default=None, help="parents_A root (q*/seed*): also run C-MS2 on --cms2-arm")
+    p.add_argument("--cms2-arm", default="MS_base2400")
+    p.add_argument("--cms2-through", type=int, default=CMS2_THROUGH, help="last update compared (1201)")
     a = p.parse_args(argv)
     summary = check_root(Path(a.root), a.arms, a.qs, a.seeds, a.code_commit)
+    cms2_ok = True
+    if a.cms2_ref:
+        summary["c_ms2"] = cms2_root(Path(a.cms2_ref), Path(a.root), a.cms2_arm, a.qs, a.seeds,
+                                    a.cms2_through)
+        cms2_ok = bool(summary["c_ms2"]["ALL"])
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         with open(a.out, "w") as f:
             json.dump(summary, f, indent=1)
     print(json.dumps({k: summary[k] for k in ("n_runs", "n_ok_per_check", "all_ok", "start_share_tests")}, indent=1))
-    return 0 if summary["all_ok"] else 2
+    if a.cms2_ref:
+        c = summary["c_ms2"]
+        print(f"C-MS2 ({c['arm']} against parents_A through update {c['through_update']}) identical "
+              f"{c['n_identical']}/{c['n']} ALL={c['ALL']}")
+        for fd in c["first_differences"]:
+            print(f"  q={fd['q']} seed={fd['seed']} first differing field {fd['field']}: path={fd['path']} "
+                  f"ref={fd['ref']} new={fd['new']} {fd.get('note', '')}")
+    return 0 if summary["all_ok"] and cms2_ok else 2
 
 
 if __name__ == "__main__":

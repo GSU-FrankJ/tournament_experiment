@@ -6,7 +6,8 @@ Waves (``--wave``):
              check C-MS1 (terminal-stage end state = ``parents_A``) and the ``MS_base`` arm of the pilot.
   v20_repro  C-R4: the UNCHANGED ``run/run_v2_T2_locked.py --q Q --seed S`` into
              ``<root>/v20_reproduction/q{Q}/seed{S}`` (no config is written).
-  pilot      the five rule arms (``MS_rule``, ``MS_s25a0``, ``MS_s25a5``, ``MS_s35a0``, ``MS_s35a5``) x 20 runs into
+  pilot      the five rule arms (``MS_rule``, ``MS_s25a0``, ``MS_s25a5``, ``MS_s35a0``, ``MS_s35a5``) and the
+             budget-matched control ``MS_base2400`` (addendum A1 of 2026-10-07) x 20 runs = 120 runs into
              ``<root>/pilot/q{q}/seed{s}/<arm>``.
 
 Every config is the full ``ms_run_config/1`` (every key written out); the rule / sampler parameters come from
@@ -14,9 +15,10 @@ Every config is the full ``ms_run_config/1`` (every key written out); the rule /
 is recorded. ``--dry-run`` writes the configs and ``dryrun_<stamp>.json`` and validates every config (the
 configs are written into the run directories, so do not dry-run a wave whose root is a real results root until the
 wave is meant to be written); a real launch writes ``launch_<stamp>.json`` (planned and finished runs with return
-codes and wall time, nproc, load average, free disk, the HEAD hash, ``git diff --stat <code-commit> HEAD``,
-``git status --porcelain``, the parameter file hash) and runs the jobs single-threaded through a bounded pool (at
-most 40 workers).
+codes and wall time, nproc, load average, free disk, the HEAD hash, ``git diff --stat <code-commit> HEAD`` (the
+whole tree, and limited to ``run utils envs agents protocols``: the code the runs execute), ``git status
+--porcelain``, the parameter file hash) and runs the jobs single-threaded through a bounded pool (at most 40
+workers).
 
 Examples (inside tmux):
   python tools/ms/launch_ms_r1.py --wave base --workers 20 --code-commit <sha>
@@ -49,7 +51,8 @@ DEFAULT_ROOT = ROOT / "results" / "ms_r1"
 MAX_WORKERS = 40
 WAVES = ("base", "v20_repro", "pilot")
 WAVE_DIR = {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot"}
-WAVE_ARMS = {"base": ("MS_base",), "v20_repro": (), "pilot": mc.PILOT_ARMS}
+WAVE_ARMS = {"base": ("MS_base",), "v20_repro": (), "pilot": mc.PILOT_ARMS + (mc.CONTROL_2400_ARM,)}
+RUN_CODE_PATHS = ("run", "utils", "envs", "agents", "protocols")      # what the runs execute (addendum A1)
 
 
 class Job(NamedTuple):
@@ -138,7 +141,7 @@ def summarize_validation(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def git_record(code_commit: Optional[str]) -> Dict[str, Any]:
-    """HEAD hash, ``git diff --stat <code_commit> HEAD`` and ``git status --porcelain``."""
+    """HEAD hash, ``git diff --stat <code_commit> HEAD`` (whole tree and ``RUN_CODE_PATHS``), ``git status``."""
     def git(*args: str) -> str:
         r = subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True)
         if r.returncode != 0:
@@ -149,6 +152,7 @@ def git_record(code_commit: Optional[str]) -> Dict[str, Any]:
     if code_commit:
         rec["code_commit_resolved"] = git("rev-parse", "--verify", code_commit + "^{commit}")
         rec["diff_stat_code_commit_to_head"] = git("diff", "--stat", code_commit, "HEAD")
+        rec["diff_stat_run_code_to_head"] = git("diff", "--stat", code_commit, "HEAD", "--", *RUN_CODE_PATHS)
     return rec
 
 

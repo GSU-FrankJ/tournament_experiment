@@ -6,14 +6,14 @@ Inputs (all read only; every root is an explicit argument and is recorded in ``a
 ``per_run.csv``):
 
   * ``--base-root``      ``q*/seed*/MS_base`` (runs of ``run/run_ms_stagewise.py``, arm ``MS_base``)
-  * ``--pilot-root``     ``q*/seed*/<arm>``    (the five rule arms ``MS_rule``, ``MS_s25a0``, ``MS_s25a5``,
-                         ``MS_s35a0``, ``MS_s35a5``)
+  * ``--pilot-root``     ``q*/seed*/<arm>``    (the budget-matched control ``MS_base2400`` and the five rule
+                         arms ``MS_rule``, ``MS_s25a0``, ``MS_s25a5``, ``MS_s35a0``, ``MS_s35a5``)
   * ``--parents-root``   ``q*/seed*``          (v2.0 ``parents_A``: ``phase_A`` runs, ``final_v2.json`` with both
                          verifier tiers, ``status.json``, ``v2_run_summary.json``)
   * ``--rehearsal-root`` ``q*/seed*``          (``rehearsal_v2_0``: locked v2.0 runs, ``gates.json`` with
                          ``reported.end_of_A`` / ``reported.end_of_B``, ``induced_band.json``)
 
-One row per (arm, q, seed) of the six MS arms plus the two comparators as pseudo-arms ``parents_A`` and
+One row per (arm, q, seed) of the seven MS arms plus the two comparators as pseudo-arms ``parents_A`` and
 ``rehearsal_v2_0``. A missing, running, failed (``status.json`` not ``done`` / exit code 0, which includes a
 global-RNG violation, exit code 5) or unreadable run is a row with its ``status`` and ``status_info``, never a
 silent skip; it never enters a paired difference.
@@ -32,12 +32,26 @@ resampled indices are ``rng.integers(0, n, size=(10000, n))`` and the interval i
 the resampled statistic. Everything that is not this criterion is descriptive; an interval that contains 0 with
 10 seeds does not show that a mechanism has no effect.
 
+Secondary table (addendum A1; descriptive, not the criterion): the five rule arms minus the budget-matched control
+``MS_base2400`` with the same paired statistics (``paired_vs_MS_base2400.csv``, label ``vs MS_base2400``) and parts
+(a) and (b) computed against ``MS_base2400`` instead of ``parents_A`` (``criterion_vs_MS_base2400.csv``).
+``MS_base2400`` itself enters the primary table against ``parents_A`` like every other arm and is not part of the
+``vs MS_rule`` comparisons.
+
+Descriptive additions A3 (all labelled descriptive, all from files already in each run directory): ``r0.csv`` (the
+residual at the node d = 0, ``R0 = r_2(0)/s_2``, and |peak error| / R0), ``strata.csv`` / ``strata_summary.csv``
+(closed-form error and first-order residual per |d| stratum and side of d at the terminal-stage freeze),
+``classifications.csv`` and the |S_t| composition columns of ``rule_blocks.csv`` / ``rule.csv``, and
+``stage1_R1_runs.csv`` / ``stage1_R1.csv`` (R_1 at the stage-1 freeze, stage-1 checks with R_1 = 0 exactly, firing
+streaks that contain one).
+
 Outputs under ``--out``: ``per_run.csv`` (columns in :data:`COLUMNS`), ``paired_vs_parents_A.csv`` (terminal
-stage), ``paired_vs_rehearsal_v2_0.csv`` (stage 1), ``paired_vs_MS_rule.csv``, ``paired_seed_level.csv``,
-``criterion.csv``, ``arm_summary.csv``, ``budget.csv``, ``rule.csv``, ``rule_blocks.csv``, ``tail.csv``,
-``decomposition.csv``, ``stage1.csv``, ``start_shares_by_block.csv``, ``completeness.csv``,
-``decision_inputs.csv``, ``analysis_info.json``, ``summary.txt``, ``figures/*.png``. No timestamps are written:
-the tool is deterministic given the same inputs.
+stage), ``paired_vs_rehearsal_v2_0.csv`` (stage 1), ``paired_vs_MS_rule.csv``, ``paired_vs_MS_base2400.csv``,
+``paired_seed_level.csv``, ``criterion.csv``, ``criterion_vs_MS_base2400.csv``, ``arm_summary.csv``,
+``budget.csv``, ``rule.csv``, ``rule_blocks.csv``, ``classifications.csv``, ``tail.csv``, ``decomposition.csv``,
+``stage1.csv``, ``stage1_R1.csv``, ``stage1_R1_runs.csv``, ``r0.csv``, ``strata.csv``, ``strata_summary.csv``,
+``start_shares_by_block.csv``, ``completeness.csv``, ``decision_inputs.csv``, ``analysis_info.json``,
+``summary.txt``, ``figures/*.png``. No timestamps are written: the tool is deterministic given the same inputs.
 
 Exit code: 0 when every planned run is done; 3 when a run is missing / failed / incomplete (reported in the
 tables and on stderr); 2 on an argument error.
@@ -63,15 +77,21 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DEFAULT_PROTOCOL = ROOT / "protocols" / "v2_T2_locked_v2_0.json"
+
+from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
 
 # --------------------------------------------------------------------------------------------- constants
 N_BOOT = 10000
 BOOT_SEED = 20261006
 QS: Tuple[int, ...] = (50, 60)
 SEEDS: Tuple[int, ...] = tuple(range(10501, 10511))
-MS_ARMS: Tuple[str, ...] = ("MS_base", "MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
+MS_ARMS: Tuple[str, ...] = ("MS_base", "MS_base2400", "MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
 BASE_ARM = "MS_base"
+BASE2400_ARM = "MS_base2400"                       # budget-matched control (addendum A1), in the pilot root
+LEGACY_ARMS: Tuple[str, ...] = (BASE_ARM, BASE2400_ARM)
 CONTROL_ARM = "MS_rule"
 PARENTS = "parents_A"
 REHEARSAL = "rehearsal_v2_0"
@@ -84,6 +104,17 @@ NO_EFFECT_SENTENCE = ("An interval that contains 0 with 10 seeds does not show t
                       "(descriptive: the criterion is the pre-registered statement, nothing else is a test).")
 CRITERION_NOTE = ("pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change "
                   "follow from it")
+SECONDARY_LABEL = "vs MS_base2400"
+SECONDARY_NOTE = ("SECONDARY, descriptive table (rule arms minus the budget-matched control MS_base2400; parts (a) "
+                  "and (b) against MS_base2400): not the pre-registered criterion, not a gate; no selection rule "
+                  "and no protocol change follow from it")
+NODE_TOL = 1e-9                                     # a verifier grid has a node at d = 0 to this tolerance
+NEAR_TIE_HALF_WIDTH = 20.0                          # near-tie stratum |d| < 20 (the default of start_weights)
+STRATA: Tuple[str, ...] = ("near", "mid", "tail")
+SIDES: Tuple[str, ...] = ("d<0", "d>0")
+TIERS: Tuple[str, ...] = ("final", "development")
+#: v2.0 calibration medians of |peak error| / R0 (reports/ms/r1/01_calibration.md, Table 1b)
+CALIB_MEDIAN_PEAK_OVER_R0: Dict[int, float] = {50: 1.65, 60: 1.45}
 STATUSES = ("done", "failed", "running", "incomplete", "missing")
 D1_STAGE2 = ("L_s2", "O_s2", "L_s2_in", "L_s2_out")
 D1_STAGE1 = ("L_s1", "O_s1")
@@ -132,17 +163,24 @@ RULE1 = ["t1_fire_local", "t1_would_fire_local", "t1_budget_forced", "t1_n_check
          "t1_block_types", "t1_landing_first_local"]
 CLAMP1 = ["t1_d1_%s_%s" % (s, p) for s in D1_STAGE1 for p in D1_PARTS] + ["t1_clamp_L_frac"]
 TOTAL_COLS = ["total_updates", "total_episodes", "total_minibatch_steps", "total_wall_sec"]
+# descriptive additions A3: the residual at the node d = 0 of the terminal-stage freeze (both tiers), the |S_t|
+# composition of the classifications (near-tie / middle / tail bins), the stage-1 checks with R_1 = 0 exactly
+R0_COLS = ["t2_R0_final", "t2_R0_dev", "t2_peak_over_R0_final", "t2_peak_over_R0_dev"]
+CLASS_COLS = ["t2_n_classifications", "t2_S_near_sum", "t2_S_mid_sum", "t2_S_tail_sum",
+              "t2_n_class_with_near_in_S"]
+STREAK_COLS = ["t1_n_checks_R0", "t1_streak_kind", "t1_streak_has_R0"]
 COLUMNS: List[str] = (ID_COLS + DESIGN_COLS + TERMINAL_COLS + D3_STAGE2 + BUDGET2 + RULE2 + SHARES2 + CLAMP2
-                      + STAGE1_COLS + D3_STAGE1 + BAND_COLS + BUDGET1 + RULE1 + CLAMP1 + TOTAL_COLS)
+                      + STAGE1_COLS + D3_STAGE1 + BAND_COLS + BUDGET1 + RULE1 + CLAMP1 + TOTAL_COLS + R0_COLS
+                      + CLASS_COLS + STREAK_COLS)
 STR_COLS = {"arm", "role", "source_root", "status", "status_info", "run_dir", "flags", "git_commit", "outcome",
             "sw_scheme", "t2_block_types", "t2_classifications", "t2_nS_at_classification",
             "t2_landing_followed_type", "t2_block_share_tail", "t2_block_share_near", "t2_block_share_mid",
-            "t1_block_types"}
+            "t1_block_types", "t1_streak_kind"}
 BOOL_COLS = {"complete", "git_dirty", "global_rng_ok", "rule_enabled", "G_A_eta_pass", "G_A_rmse_pass",
              "G_A_tail_pass", "G_A_pass", "G_N_eta_pass", "gate_pass", "t2_tail_term", "t2_budget_forced",
              "G_F_pass", "G_N_gmax_pass", "G_S_pass", "S1_pass", "v20_combination_pass",
              "v20_combination_pass_recorded", "learning_contains_0", "inherited_contains_0", "band_contiguous",
-             "e1_inside_sweep", "t1_budget_forced"}
+             "e1_inside_sweep", "t1_budget_forced", "t1_streak_has_R0"}
 
 #: (column, direction): True = smaller is better, None = no direction
 S2_METRICS: List[Tuple[str, Optional[bool]]] = [
@@ -464,6 +502,158 @@ def update_cols(u: pd.DataFrame, anomalies: List[str]) -> Tuple[Dict[str, Any], 
     return out, bt
 
 
+# --------------------------------------------------------------------------------------------- descriptive A3
+def _npz_arrays(path: Path, keys: Sequence[str], anomalies: List[str]) -> Dict[str, np.ndarray]:
+    """The named float arrays of an npz; ``{}`` (and an anomaly) when the file or a key is missing."""
+    try:
+        with np.load(path) as z:
+            return {k: np.asarray(z[k], dtype=float) for k in keys}
+    except FileNotFoundError:
+        anomalies.append("%s missing" % Path(path).name)
+    except Exception as exc:  # noqa: BLE001
+        anomalies.append("%s unreadable: %s: %s" % (Path(path).name, type(exc).__name__, exc))
+    return {}
+
+
+def freeze_files(d: Path, arm: str) -> Tuple[Path, Path]:
+    """``(final, development)`` npz of the frozen terminal-stage candidate (verifier arrays and the
+    recovery grid): ``freeze_stage2_*`` of an MS run, ``final_*`` of ``parents_A``, ``gateA_*`` of
+    ``rehearsal_v2_0`` (the end of Phase A, the same candidate as ``parents_A``)."""
+    if arm == PARENTS:
+        return Path(d) / "final_final.npz", Path(d) / "final_development.npz"
+    if arm == REHEARSAL:
+        return Path(d) / "gateA_final.npz", Path(d) / "gateA_development.npz"
+    return Path(d) / "freeze_stage2_final.npz", Path(d) / "freeze_stage2_development.npz"
+
+
+def node0_residual(d: np.ndarray, e_hat: np.ndarray, a_dev: np.ndarray) -> Tuple[float, float]:
+    """``(r_2(0), s_2)`` at the node d = 0 of a verifier grid: ``r = |e_hat - a_dev|`` and ``s = a_dev`` there
+    (the definitions of ``utils.ms_residual.stage_diag``); NaN when the grid has no zero node."""
+    d = np.asarray(d, dtype=float)
+    j0 = int(np.argmin(np.abs(d)))
+    if abs(float(d[j0])) > NODE_TOL:
+        return float("nan"), float("nan")
+    s = float(a_dev[j0])
+    return abs(float(e_hat[j0]) - s), s
+
+
+def r0_cols(files: Tuple[Path, Path], peak_abs: float, anomalies: List[str]) -> Dict[str, Any]:
+    """``R0 = r_2(0)/s_2`` on both tiers and |peak error| / R0 (NaN if R0 is 0 or not defined)."""
+    out: Dict[str, Any] = {c: float("nan") for c in R0_COLS}
+    for tier, path in zip(("final", "dev"), files):
+        z = _npz_arrays(path, ("v_t2_d_grid", "v_t2_e_hat", "v_t2_a_dev"), anomalies)
+        if not z:
+            continue
+        r, s = node0_residual(z["v_t2_d_grid"], z["v_t2_e_hat"], z["v_t2_a_dev"])
+        r0 = r / s if np.isfinite(r) and np.isfinite(s) and s > 0.0 else float("nan")
+        out["t2_R0_" + tier] = r0
+        if np.isfinite(r0) and r0 > 0.0 and np.isfinite(peak_abs):
+            out["t2_peak_over_R0_" + tier] = float(peak_abs) / r0
+    return out
+
+
+def stratum_codes(d: np.ndarray, q: float) -> np.ndarray:
+    """Stratum of each gap: ``tail`` (|d| >= 2q), ``near`` (|d| < 20) or ``mid`` (20 <= |d| < 2q)."""
+    a = np.abs(np.asarray(d, dtype=float))
+    return np.where(a >= 2.0 * float(q), "tail", np.where(a < NEAR_TIE_HALF_WIDTH, "near", "mid"))
+
+
+STRATA_STAT_COLS = ["err_mean", "err_rmse", "err_max_abs", "err_mean_rel", "err_rmse_rel", "err_max_abs_rel",
+                    "max_r_over_s"]
+
+
+def strata_rows(z: Mapping[str, np.ndarray], q: float) -> List[Dict[str, Any]]:
+    """Per (stratum, side) closed-form error and first-order residual of one tier's freeze arrays.
+
+    The error ``e_hat_2 - g_2 = recovery_e2 - recovery_g2`` is taken on the ``recovery_d_grid`` (801 points at
+    q = 50, 881 at q = 60; ``n_nodes`` nodes; ``err_*_rel`` divide by g_2 at the node d = 0), the residual
+    ``max r_2/s_2`` on the
+    verifier nodes ``v_t2_d_grid`` (``n_verifier_nodes``) with ``r = |e_hat - a_dev|`` and ``s = a_dev(0)``. The
+    node d = 0 belongs to neither side (it is the peak; see ``r0.csv``).
+    """
+    rd = np.asarray(z["recovery_d_grid"], dtype=float)
+    err = np.asarray(z["recovery_e2"], dtype=float) - np.asarray(z["recovery_g2"], dtype=float)
+    i0 = int(np.argmin(np.abs(rd)))
+    g0 = float(z["recovery_g2"][i0]) if abs(float(rd[i0])) <= NODE_TOL else float("nan")
+    vd = np.asarray(z["v_t2_d_grid"], dtype=float)
+    r0, s0 = node0_residual(vd, z["v_t2_e_hat"], z["v_t2_a_dev"])
+    ratio = (np.abs(np.asarray(z["v_t2_e_hat"], dtype=float) - np.asarray(z["v_t2_a_dev"], dtype=float)) / s0
+             if np.isfinite(s0) and s0 > 0.0 else np.full(vd.size, np.nan))
+    rc, vc = stratum_codes(rd, q), stratum_codes(vd, q)
+    rows: List[Dict[str, Any]] = []
+    for stratum in STRATA:
+        for side in SIDES:
+            m = (rc == stratum) & ((rd < 0.0) if side == "d<0" else (rd > 0.0))
+            v = (vc == stratum) & ((vd < 0.0) if side == "d<0" else (vd > 0.0))
+            e = err[m]
+            row: Dict[str, Any] = {"stratum": stratum, "side": side, "n_nodes": int(m.sum()),
+                                   "n_verifier_nodes": int(v.sum())}
+            row["err_mean"] = float(e.mean()) if e.size else float("nan")
+            row["err_rmse"] = float(np.sqrt(np.mean(e ** 2))) if e.size else float("nan")
+            row["err_max_abs"] = float(np.abs(e).max()) if e.size else float("nan")
+            for k in ("err_mean", "err_rmse", "err_max_abs"):
+                row[k + "_rel"] = row[k] / g0 if np.isfinite(g0) and g0 != 0.0 else float("nan")
+            rv = ratio[v]
+            row["max_r_over_s"] = float(np.nanmax(rv)) if rv.size and np.isfinite(rv).any() else float("nan")
+            rows.append(row)
+    return rows
+
+
+def stage2_labels(cfg: Mapping[str, Any], anomalies: List[str]) -> Optional[np.ndarray]:
+    """Stratum code of every stage-2 bin (0 tail, 1 near-tie, 2 middle) from the run's own config, as
+    ``tools/ms/launch_checks.py`` builds it (``start_weights.near_tie_half_width``, default 20)."""
+    try:
+        g = cfg["record"]["game"]
+        spec = GameSpec(**{k: g[k] for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")})
+        hw = float((cfg.get("start_weights") or {}).get("near_tie_half_width", NEAR_TIE_HALF_WIDTH))
+        return StartSampler(spec, float(cfg["record"]["protocol"]["es_bin_width"])).stratum_labels(2, hw)
+    except Exception as exc:  # noqa: BLE001
+        anomalies.append("stage-2 stratum labels unavailable: %s: %s" % (type(exc).__name__, exc))
+        return None
+
+
+def s_composition(S: Sequence[int], labels: np.ndarray, anomalies: List[str]) -> Tuple[float, float, float]:
+    """``(n_near, n_mid, n_tail)``: how many bins of ``S`` are near-tie / middle / tail bins."""
+    idx = np.asarray([int(x) for x in S], dtype=int)
+    if idx.size and (idx.min() < 0 or idx.max() >= labels.size):
+        anomalies.append("a block's S has bin indices outside 0..%d" % (labels.size - 1))
+        return float("nan"), float("nan"), float("nan")
+    lab = labels[idx]
+    return float((lab == 1).sum()), float((lab == 2).sum()), float((lab == 0).sum())
+
+
+def streak_cols(check_path: Path, rec1: Mapping[str, Any], m_streak: int, anomalies: List[str]
+                ) -> Dict[str, Any]:
+    """Stage-1 checks with R_1 = 0 exactly and the firing streak (the ``m_streak`` consecutive checks, rows in
+    file order, ending at the check whose local update is the stage-1 ``fire_local`` of a rule arm, or the
+    ``would_fire_local`` of a legacy arm) with whether it contains one."""
+    out: Dict[str, Any] = {"t1_n_checks_R0": float("nan"), "t1_streak_kind": "", "t1_streak_has_R0": float("nan")}
+    try:
+        ck = pd.read_csv(check_path)
+    except FileNotFoundError:
+        anomalies.append("%s missing" % Path(check_path).name)
+        return out
+    except Exception as exc:  # noqa: BLE001
+        anomalies.append("%s unreadable: %s: %s" % (Path(check_path).name, type(exc).__name__, exc))
+        return out
+    if "stage" in ck.columns:
+        ck = ck[ck["stage"] == 1].reset_index(drop=True)
+    r1 = pd.to_numeric(ck["R"], errors="coerce")
+    out["t1_n_checks_R0"] = float(int((r1 == 0.0).sum()))
+    fire, wf = _f(rec1.get("fire_local")), _f(rec1.get("would_fire_local"))
+    kind, loc = ("fire", fire) if np.isfinite(fire) else ("would_fire", wf)
+    if not np.isfinite(loc):
+        return out
+    k = np.flatnonzero(pd.to_numeric(ck["local"], errors="coerce").to_numpy() == loc)
+    if k.size == 0:
+        anomalies.append("stage-1 %s_local %d is not a row of %s" % (kind, int(loc), Path(check_path).name))
+        return out
+    j = int(k[0])
+    out["t1_streak_kind"] = kind
+    out["t1_streak_has_R0"] = bool((r1.iloc[max(0, j - m_streak + 1):j + 1] == 0.0).any())
+    return out
+
+
 def finish_row(row: Dict[str, Any], anomalies: List[str], need_stage1: bool) -> None:
     """Set ``complete``, demote a ``done`` run without readable metrics to ``incomplete``, join the flags.
 
@@ -559,6 +749,7 @@ def extract_ms_run(d: Path, arm: str, q: int, seed: int, th: Thresholds, source:
     row["smoothed_share_peak_gap_d0"] = _f(sg.get("smoothed_share_peak_gap_d0"))
     row["smoothed_e_pred_0"] = _f(sg.get("smoothed_e_pred_0"))
     row["smoothed_e_learned_0"] = _f(sg.get("smoothed_e_learned_0"))
+    row.update(r0_cols(freeze_files(d, arm), row[PRIMARY], an if must else []))
     s_fin = _get(rep, "end_of_stage1", "final") or fz1.get("final") or {}
     s_dev = _get(rep, "end_of_stage1", "development") or fz1.get("development") or {}
     if s_fin:
@@ -596,15 +787,36 @@ def extract_ms_run(d: Path, arm: str, q: int, seed: int, th: Thresholds, source:
         pass
     except Exception as exc:  # noqa: BLE001
         an.append("ms_updates.csv unreadable: %s: %s" % (type(exc).__name__, exc))
-    # ---- flattened rule blocks of both stages
+    # ---- flattened rule blocks of both stages; |S_t| composition at every classification of the terminal stage
+    labels = stage2_labels(cfg, an if must else []) if (cfg and stages.get("2")) else None
     rb: List[Dict[str, Any]] = []
     for t in (2, 1):
-        for b in (_get(stages, str(t)) or {}).get("blocks") or []:
+        rec = _get(stages, str(t)) or {}
+        blks = rec.get("blocks") or []
+        for i, b in enumerate(blks):
+            comp = (float("nan"),) * 3
+            if t == 2 and b.get("classification") and labels is not None:
+                comp = s_composition(b.get("S") or [], labels, an)
+            nxt = blks[i + 1].get("type") if i + 1 < len(blks) else ("landing" if rec.get("landing") else "")
             rb.append({"arm": arm, "q": q, "seed": seed, "stage": t, "block_id": b.get("block_id"),
                        "block_type": b.get("type"), "first_local": b.get("first_local"),
                        "last_local": b.get("last_local"), "exit_reason": b.get("exit_reason"),
                        "classification": b.get("classification") or "", "n_S": b.get("n_S"),
-                       "S": _join(b.get("S") or [], ","), "fire_local": b.get("fire_local")})
+                       "n_S_near": comp[0], "n_S_mid": comp[1], "n_S_tail": comp[2],
+                       "S": _join(b.get("S") or [], ","), "followed_by": nxt or "",
+                       "fire_local": b.get("fire_local")})
+    if stages.get("2"):
+        cl = [b for b in rb if b["stage"] == 2 and b["classification"]]
+        row["t2_n_classifications"] = float(len(cl))
+        if labels is not None:
+            row["t2_S_near_sum"] = float(sum(b["n_S_near"] for b in cl))
+            row["t2_S_mid_sum"] = float(sum(b["n_S_mid"] for b in cl))
+            row["t2_S_tail_sum"] = float(sum(b["n_S_tail"] for b in cl))
+            row["t2_n_class_with_near_in_S"] = float(sum(1 for b in cl if b["n_S_near"] > 0))
+    # ---- stage-1 checks with R_1 = 0 exactly and the firing streak
+    if stages.get("1"):
+        row.update(streak_cols(d / "ms_checks_stage1.csv", stages["1"], int(_get(cfg, "rule", "M") or 3),
+                               an if must else []))
     finish_row(row, an, True)
     if not blocks.empty:
         blocks.insert(0, "seed", seed)
@@ -616,7 +828,8 @@ def extract_ms_run(d: Path, arm: str, q: int, seed: int, th: Thresholds, source:
 def calibration_d3(cal_root: Path, q: int, seed: int) -> Dict[str, Any]:
     """D3 quantities of the v2.0 candidate from the calibration replay (``rehearsal_v2_0/q*/seed*.csv``).
 
-    Terminal stage at u1600 on both tiers (``t2_*``), stage 1 at u2200 on the development tier (``t1_*_dev``).
+    Terminal stage at u1600 on both tiers (``t2_*``), stage 1 at u2200 on the development tier (``t1_*_dev``),
+    and ``t1_n_checks_R0``: the stage-1 exports (u1625 ... u2200, development tier) with R_1 = 0 exactly.
     ``parents_A`` has the same candidate as ``rehearsal_v2_0`` at u1600 (D6), so its terminal-stage values come
     from the same file. Empty if the file is missing.
     """
@@ -637,6 +850,9 @@ def calibration_d3(cal_root: Path, q: int, seed: int) -> Dict[str, Any]:
         r = b.iloc[0]
         for k, col in (("Delta", "Delta"), ("s", "s"), ("R", "R"), ("C", "C")):
             out["t1_%s_dev" % k] = _f(r[col])
+    s1 = df[(df["stage"] == 1) & (df["tier"] == "dev")]
+    if len(s1):
+        out["t1_n_checks_R0"] = float(int((pd.to_numeric(s1["R"], errors="coerce") == 0.0).sum()))
     return out
 
 
@@ -659,6 +875,7 @@ def extract_parents_run(d: Path, q: int, seed: int, th: Thresholds, source: str)
     fin, dev = fv.get("final") or {}, fv.get("development") or {}
     if fin:
         row.update(terminal_cols(fin, dev, th))
+    row.update(r0_cols(freeze_files(d, PARENTS), row[PRIMARY], an if must else []))
     ph = _get(summ, "phase_timing", "A") or {}
     row["t2_updates"] = _f(ph.get("updates", stj.get("final_global_update")))
     row["t2_wall_sec"] = _f(ph.get("wall_sec"))
@@ -698,6 +915,7 @@ def extract_rehearsal_run(d: Path, q: int, seed: int, th: Thresholds, source: st
     a_fin, a_dev = _get(rep, "end_of_A", "final") or {}, _get(rep, "end_of_A", "development") or {}
     if a_fin:
         row.update(terminal_cols(a_fin, a_dev, th))
+    row.update(r0_cols(freeze_files(d, REHEARSAL), row[PRIMARY], an if must else []))
     sg = _get(rep, "end_of_A", "smoothed_game") or {}
     row["smoothed_share_peak_gap_d0"] = _f(sg.get("smoothed_share_peak_gap_d0"))
     row["smoothed_e_pred_0"] = _f(sg.get("smoothed_e_pred_0"))
@@ -728,7 +946,8 @@ def extract_rehearsal_run(d: Path, q: int, seed: int, th: Thresholds, source: st
 
 
 def arm_dir(arm: str, q: int, seed: int, roots: Mapping[str, str]) -> Tuple[Path, str]:
-    """Run directory of (arm, q, seed) and the name of the root it lives under."""
+    """Run directory of (arm, q, seed) and the name of the root it lives under (``MS_base`` under the ``base``
+    root, every other MS arm incl. ``MS_base2400`` under the ``pilot`` root)."""
     if arm == BASE_ARM:
         return Path(roots["base"]) / ("q%d" % q) / ("seed%d" % seed) / arm, "base"
     if arm == PARENTS:
@@ -771,7 +990,7 @@ def extract_all(roots: Mapping[str, str], arms: Sequence[str], qs: Sequence[int]
     bcols = ["arm", "q", "seed", "stage", "block_id", "block_type", "n_updates", "n_tail", "n_near", "n_mid",
              "share_tail", "share_near", "share_mid"]
     rcols = ["arm", "q", "seed", "stage", "block_id", "block_type", "first_local", "last_local", "exit_reason",
-             "classification", "n_S", "S", "fire_local"]
+             "classification", "n_S", "n_S_near", "n_S_mid", "n_S_tail", "S", "followed_by", "fire_local"]
     bdf = pd.concat(blocks, ignore_index=True) if blocks else pd.DataFrame(columns=bcols)
     rdf = pd.concat(rblocks, ignore_index=True) if rblocks else pd.DataFrame(columns=rcols)
     return df, bdf, rdf
@@ -954,16 +1173,21 @@ def criterion_row(prim: pd.DataFrame, gates: pd.DataFrame, qs: Sequence[int], n_
 
 
 def criterion_table(df: pd.DataFrame, paired: pd.DataFrame, arms: Sequence[str], qs: Sequence[int],
-                    seeds: Sequence[int]) -> pd.DataFrame:
-    """``criterion.csv``: one row per arm (parts (a) and (b)), arms in table order, q in the given order."""
+                    seeds: Sequence[int], baseline: str = PARENTS, label: str = "vs parents_A",
+                    note: str = CRITERION_NOTE) -> pd.DataFrame:
+    """``criterion.csv``: one row per arm (parts (a) and (b)), arms in table order, q in the given order.
+
+    The defaults are the pre-registered table against ``parents_A``; ``baseline`` / ``label`` / ``note`` give the
+    secondary table of the rule arms against ``MS_base2400`` (``criterion_vs_MS_base2400.csv``).
+    """
     rows = []
     for arm in arms:
-        prim = paired[(paired["arm"] == arm) & (paired["baseline"] == PARENTS) & (paired["metric"] == PRIMARY)
-                      & (paired["comparison"] == "vs parents_A")]
-        gp = gate_pairs(df, arm, PARENTS, qs, seeds)
-        rows.append({"arm": arm, "baseline": PARENTS, "comparison": "vs parents_A", "primary_metric": PRIMARY,
+        prim = paired[(paired["arm"] == arm) & (paired["baseline"] == baseline) & (paired["metric"] == PRIMARY)
+                      & (paired["comparison"] == label)]
+        gp = gate_pairs(df, arm, baseline, qs, seeds)
+        rows.append({"arm": arm, "baseline": baseline, "comparison": label, "primary_metric": PRIMARY,
                      **criterion_row(prim, gp, qs, len(seeds)), "boot_seed": BOOT_SEED, "n_boot": N_BOOT,
-                     "note": CRITERION_NOTE})
+                     "note": note})
     return pd.DataFrame(rows)
 
 
@@ -1062,10 +1286,19 @@ def rule_table(df: pd.DataFrame, arms: Sequence[str], qs: Sequence[int]) -> pd.D
                 r[p + "n_blocks_max"] = float(nb.max()) if nb.size else float("nan")
                 r[p + "updates_mean"] = float(pd.to_numeric(g[p + "updates"], errors="coerce").mean())
                 r[p + "n_checks_mean"] = float(pd.to_numeric(g[p + "n_checks"], errors="coerce").mean())
+            r["t2_n_global_blocks_total"] = float(pd.to_numeric(g["t2_n_global_blocks"], errors="coerce").sum())
             r["t2_n_polish_blocks_total"] = float(pd.to_numeric(g["t2_n_polish_blocks"], errors="coerce").sum())
             r["t2_n_runs_with_polish"] = int((pd.to_numeric(g["t2_n_polish_blocks"], errors="coerce") > 0).sum())
             r["t2_n_localized_total"] = float(pd.to_numeric(g["t2_n_localized"], errors="coerce").sum())
             r["t2_n_broad_total"] = float(pd.to_numeric(g["t2_n_broad"], errors="coerce").sum())
+            # |S_t| at every classification: near-tie / middle / tail bins (a legacy arm has none: zeros)
+            r["t2_n_classifications_total"] = float(pd.to_numeric(g["t2_n_classifications"], errors="coerce").sum())
+            r["t2_S_near_total"] = float(pd.to_numeric(g["t2_S_near_sum"], errors="coerce").sum())
+            r["t2_S_mid_total"] = float(pd.to_numeric(g["t2_S_mid_sum"], errors="coerce").sum())
+            r["t2_S_tail_total"] = float(pd.to_numeric(g["t2_S_tail_sum"], errors="coerce").sum())
+            nr = pd.to_numeric(g["t2_n_class_with_near_in_S"], errors="coerce")
+            r["t2_n_classifications_with_near_in_S"] = float(nr.sum())
+            r["t2_n_runs_with_near_in_S"] = int((nr > 0).sum())
             nS = [int(x) for s in g["t2_nS_at_classification"].astype(str) for x in s.split(",") if x != ""]
             r["t2_nS_at_classification_mean"] = float(np.mean(nS)) if nS else float("nan")
             r["t2_nS_at_classification_max"] = float(max(nS)) if nS else float("nan")
@@ -1186,6 +1419,132 @@ def decision_inputs(df: pd.DataFrame, crit: pd.DataFrame, paired: pd.DataFrame, 
             r["n_t2_polish_runs"] = int((pd.to_numeric(g["t2_n_polish_blocks"], errors="coerce") > 0).sum())
             r["status_label"] = ("criterion columns (crit_*) pre-registered; every other column descriptive"
                                  if arm not in COMPARATORS else "reference row (descriptive)")
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------------------------- A3 tables
+def linearised_factor(game: Mapping[str, Any]) -> float:
+    """``(2k + a) / (2k)`` with ``a = DW / (4 q^2)``, ``DW = w_h - w_l``: the factor that the linearisation of the
+    one-step best response gives for |peak error| / R0 (reference column of ``r0.csv``)."""
+    k, dw, q = float(game["k"]), float(game["w_h"]) - float(game["w_l"]), float(game["q"])
+    return (2.0 * k + dw / (4.0 * q * q)) / (2.0 * k)
+
+
+def _desc(v: pd.Series, name: str, out: Dict[str, Any]) -> None:
+    """Mean / median / min / max (and the count) of the finite values of ``v`` as ``name_*`` entries."""
+    x = pd.to_numeric(v, errors="coerce").dropna()
+    nan = float("nan")
+    out.update({name + "_n": int(x.size), name + "_mean": float(x.mean()) if x.size else nan,
+                name + "_median": float(x.median()) if x.size else nan,
+                name + "_min": float(x.min()) if x.size else nan, name + "_max": float(x.max()) if x.size else nan})
+
+
+def r0_table(df: pd.DataFrame, arms: Sequence[str], qs: Sequence[int], proto: Mapping[str, Any]) -> pd.DataFrame:
+    """``r0.csv``: R0 = r_2(0)/s_2 at the terminal-stage freeze (both tiers) and |peak error| / R0 per arm and q
+    (every arm and both comparators), with the v2.0 calibration median and the linearised factor of the q as
+    reference columns."""
+    rows = []
+    for arm in list(arms) + list(COMPARATORS):
+        for q in qs:
+            g = _sel(df, arm, q)
+            r: Dict[str, Any] = {"arm": arm, "q": q, "n": len(g), "status": "descriptive"}
+            for m in R0_COLS:
+                _desc(g[m], m, r)
+            game = _get(proto, "records", str(q), "game")
+            r["calib_median_peak_over_R0"] = CALIB_MEDIAN_PEAK_OVER_R0.get(int(q), float("nan"))
+            r["linearised_factor"] = linearised_factor(game) if game else float("nan")
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def strata_table(df: pd.DataFrame) -> pd.DataFrame:
+    """``strata.csv``: per run, tier, stratum and side of d the closed-form error of e_hat_2 and the first-order
+    residual at the terminal-stage freeze (:func:`strata_rows`). A run whose arrays cannot be read has its rows
+    with NaN statistics (its ``status`` says why), never a silent skip."""
+    keys = ("v_t2_d_grid", "v_t2_e_hat", "v_t2_a_dev", "recovery_d_grid", "recovery_e2", "recovery_g2")
+    rows: List[Dict[str, Any]] = []
+    for r in df.itertuples():
+        files = freeze_files(Path(r.run_dir), r.arm)
+        for tier, path in zip(TIERS, files):
+            z = _npz_arrays(path, keys, []) if r.status != "missing" else {}
+            body = strata_rows(z, float(r.q)) if z else [
+                {"stratum": st, "side": sd, "n_nodes": float("nan"), "n_verifier_nodes": float("nan"),
+                 **{c: float("nan") for c in STRATA_STAT_COLS}} for st in STRATA for sd in SIDES]
+            for b in body:
+                rows.append({"arm": r.arm, "q": r.q, "seed": r.seed, "status": r.status,
+                             "complete": bool(r.complete), "tier": tier, **b, "status_label": "descriptive"})
+    cols = ["arm", "q", "seed", "status", "complete", "tier", "stratum", "side", "n_nodes", "n_verifier_nodes"]
+    return pd.DataFrame(rows, columns=cols + STRATA_STAT_COLS + ["status_label"])
+
+
+def strata_summary_table(strata: pd.DataFrame) -> pd.DataFrame:
+    """``strata_summary.csv``: per (arm, q, tier, stratum, side), over the complete runs: mean / median of the
+    per-run mean signed error and RMSE, mean / median / max of the per-run max |error| and of the per-run max
+    r_2/s_2 (each also relative to g_2(0))."""
+    aggs = {"err_mean": ("mean", "median"), "err_rmse": ("mean", "median"), "err_max_abs": ("mean", "median", "max"),
+            "err_mean_rel": ("mean", "median"), "err_rmse_rel": ("mean", "median"),
+            "err_max_abs_rel": ("mean", "median", "max"), "max_r_over_s": ("mean", "median", "max")}
+    key = ["arm", "q", "tier", "stratum", "side"]
+    rows = []
+    done = strata[strata["complete"].astype(bool)]
+    for k, g in done.groupby(key, sort=False):
+        r: Dict[str, Any] = dict(zip(key, k))
+        r["n_runs"] = int(len(g))
+        r["status"] = "descriptive"
+        for col, fns in aggs.items():
+            v = pd.to_numeric(g[col], errors="coerce").dropna()
+            for fn in fns:
+                r["%s_%s" % (col, fn)] = float(getattr(v, fn)()) if v.size else float("nan")
+        rows.append(r)
+    cols = key + ["n_runs", "status"] + ["%s_%s" % (c, f) for c, fns in aggs.items() for f in fns]
+    return pd.DataFrame(rows, columns=cols)
+
+
+def classifications_table(rblocks: pd.DataFrame, df: pd.DataFrame) -> pd.DataFrame:
+    """``classifications.csv``: one row per (arm, q, seed, block) of the terminal stage that has a classification,
+    with |S_t| and its near-tie / middle / tail composition, the block type that followed (``landing`` after a cap)
+    and the exit reason. A legacy arm has no classification and no row."""
+    cols = ["arm", "q", "seed", "run_status", "block_id", "block_type", "classification", "n_S", "n_S_near",
+            "n_S_mid", "n_S_tail", "S", "followed_by", "exit_reason", "status"]
+    if rblocks.empty:
+        return pd.DataFrame(columns=cols)
+    rb = rblocks[(rblocks["stage"] == 2) & (rblocks["classification"].astype(str) != "")].copy()
+    st = df.set_index(["arm", "q", "seed"])["status"]
+    rb["run_status"] = [st.get((a, q, s), "") for a, q, s in zip(rb["arm"], rb["q"], rb["seed"])]
+    rb["status"] = "descriptive"
+    return rb[cols].reset_index(drop=True)
+
+
+def stage1_R1_runs_table(df: pd.DataFrame, arms: Sequence[str]) -> pd.DataFrame:
+    """``stage1_R1_runs.csv``: R_1 at the stage-1 freeze (final / development tier), the stage-1 checks with R_1 = 0
+    exactly and whether the firing streak (``fire`` of a rule arm, ``would_fire`` of a legacy arm) contains one."""
+    cols = ["arm", "q", "seed", "status", "t1_R_final", "t1_R_dev", "t1_n_checks_R0", "t1_streak_kind",
+            "t1_streak_has_R0"]
+    out = df[df["arm"].isin(list(arms) + [REHEARSAL])][cols].copy()
+    out["status_label"] = "descriptive"
+    return out.reset_index(drop=True)
+
+
+def stage1_R1_table(df: pd.DataFrame, arms: Sequence[str], qs: Sequence[int]) -> pd.DataFrame:
+    """``stage1_R1.csv`` per (arm, q) over the complete runs: firing streaks (``fire`` / ``would_fire`` counted
+    separately), streaks that contain a check with R_1 = 0 exactly, stage-1 checks with R_1 = 0, and the
+    distribution of R_1 at the stage-1 freeze on both tiers (``rehearsal_v2_0``: development tier only)."""
+    rows = []
+    for arm in list(arms) + [REHEARSAL]:
+        for q in qs:
+            g = _sel(df, arm, q)
+            n0 = pd.to_numeric(g["t1_n_checks_R0"], errors="coerce")
+            kind = g["t1_streak_kind"].astype(str)
+            r: Dict[str, Any] = {"arm": arm, "q": q, "n_runs": len(g), "n_streaks_fire": int((kind == "fire").sum()),
+                                 "n_streaks_would_fire": int((kind == "would_fire").sum()),
+                                 "n_streaks_with_R0": _count(g["t1_streak_has_R0"]),
+                                 "n_checks_R0_total": float(n0.sum()), "n_runs_with_R0_check": int((n0 > 0).sum())}
+            for col in ("t1_R_final", "t1_R_dev"):
+                v = pd.to_numeric(g[col], errors="coerce").dropna()
+                for name, fn in (("median", "median"), ("min", "min"), ("max", "max"), ("mean", "mean")):
+                    r["%s_%s" % (col, name)] = float(getattr(v, fn)()) if v.size else float("nan")
+            r["status"] = "descriptive"
             rows.append(r)
     return pd.DataFrame(rows)
 
@@ -1431,9 +1790,42 @@ def _g(x: Any) -> str:
     return "nan" if x is None or (isinstance(x, float) and math.isnan(x)) else "%+.5f" % float(x)
 
 
+def _criterion_lines(crit: pd.DataFrame, qs: Sequence[int], seeds: Sequence[int]) -> Tuple[List[str], bool]:
+    """One line per arm of a criterion table (parts (a) per q, part (b), overall) and whether any interval
+    contains 0."""
+    lines: List[str] = []
+    any_ci0 = False
+    for r in crit.itertuples():
+        parts = []
+        for q in qs:
+            lo, hi = getattr(r, "ci_mean_lo_q%d" % q), getattr(r, "ci_mean_hi_q%d" % q)
+            met = getattr(r, "a_q%d" % q)
+            parts.append("a%d %s [%s,%s] n=%d/%d %s" % (q, _g(getattr(r, "mean_q%d" % q)), _g(lo), _g(hi),
+                                                        getattr(r, "n_pairs_q%d" % q), len(seeds),
+                                                        "met" if met else "not"))
+            if np.isfinite(lo) and np.isfinite(hi) and lo <= 0.0 <= hi:
+                any_ci0 = True
+        lines.append("%-11s %s | b: %s%s | overall: %s" % (
+            r.arm, " | ".join(parts), r.b_status, (" (%s)" % r.b_violations) if r.b_violations else "", r.overall))
+    return lines, any_ci0
+
+
 def summary_text(roots: Mapping[str, str], crit: pd.DataFrame, comp: pd.DataFrame, dec: pd.DataFrame,
-                 qs: Sequence[int], seeds: Sequence[int], command: Optional[Sequence[str]] = None) -> str:
-    """The CLI summary (also ``summary.txt``): provenance, criterion, run status, descriptive inputs."""
+                 qs: Sequence[int], seeds: Sequence[int], command: Optional[Sequence[str]] = None,
+                 crit2: Optional[pd.DataFrame] = None) -> str:
+    """The CLI summary (also ``summary.txt``): provenance, criterion, secondary table, run status, descriptive
+    inputs.
+
+    Args:
+        roots: The resolved run roots.
+        crit: ``criterion.csv`` (the pre-registered table against ``parents_A``).
+        comp: ``completeness.csv``.
+        dec: ``decision_inputs.csv``.
+        qs: q values.
+        seeds: Development seeds.
+        command: Command line to record.
+        crit2: ``criterion_vs_MS_base2400.csv`` (the secondary, descriptive table), if it was computed.
+    """
     L: List[str] = []
     L.append("MS-R1 analysis (prompt section 3.2)")
     if command:
@@ -1448,21 +1840,21 @@ def summary_text(roots: Mapping[str, str], crit: pd.DataFrame, comp: pd.DataFram
     L.append("primary metric %s of the frozen terminal-stage candidate; (a) CI of the mean paired difference "
              "arm - parents_A below 0 at BOTH q; (b) no run passing G-A with its G-N eta part under parents_A "
              "fails it under the arm" % PRIMARY)
-    any_ci0 = False
-    for r in crit.itertuples():
-        parts = []
-        for q in qs:
-            lo, hi = getattr(r, "ci_mean_lo_q%d" % q), getattr(r, "ci_mean_hi_q%d" % q)
-            met = getattr(r, "a_q%d" % q)
-            parts.append("a%d %s [%s,%s] n=%d/%d %s" % (q, _g(getattr(r, "mean_q%d" % q)), _g(lo), _g(hi),
-                                                        getattr(r, "n_pairs_q%d" % q), len(seeds),
-                                                        "met" if met else "not"))
-            if np.isfinite(lo) and np.isfinite(hi) and lo <= 0.0 <= hi:
-                any_ci0 = True
-        L.append("%-9s %s | b: %s%s | overall: %s" % (
-            r.arm, " | ".join(parts), r.b_status, (" (%s)" % r.b_violations) if r.b_violations else "", r.overall))
+    lines, any_ci0 = _criterion_lines(crit, qs, seeds)
+    L.extend(lines)
     if any_ci0:
         L.append("NOTE: " + NO_EFFECT_SENTENCE)
+    if crit2 is not None and len(crit2):
+        L.append("")
+        L.append("== SECONDARY (descriptive, not the criterion): rule arms minus the budget-matched control "
+                 "MS_base2400 ==")
+        L.append("same metric; (a) CI of the mean paired difference arm - MS_base2400 below 0 at BOTH q; (b) no run "
+                 "passing G-A with its G-N eta part under MS_base2400 fails it under the arm "
+                 "(criterion_vs_MS_base2400.csv, paired_vs_MS_base2400.csv)")
+        lines2, any_ci2 = _criterion_lines(crit2, qs, seeds)
+        L.extend(lines2)
+        if any_ci2:
+            L.append("NOTE: " + NO_EFFECT_SENTENCE)
     L.append("")
     L.append("== RUN STATUS ==")
     bad = comp[(comp["n_done"] != comp["n_planned"])]
@@ -1524,21 +1916,31 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     th, proto_sha = load_thresholds(protocol)
+    proto = json.loads(Path(protocol).read_text())
     rid = roots_id(roots)
     df, blocks, rblocks = extract_all(roots, arms, qs, seeds, th)
     cmp_parents = [(a, PARENTS, "") for a in arms]
     cmp_rehearsal = [(a, REHEARSAL, "") for a in arms]
-    cmp_rule = [(a, CONTROL_ARM, "") for a in arms if a not in (BASE_ARM, CONTROL_ARM)]
+    cmp_rule = [(a, CONTROL_ARM, "") for a in arms if a not in (BASE_ARM, BASE2400_ARM, CONTROL_ARM)]
+    # secondary table: the rule arms (MS_rule included) minus the budget-matched control, when both are analysed
+    sec_arms = [a for a in arms if a not in LEGACY_ARMS] if BASE2400_ARM in arms else []
+    cmp_b24 = [(a, BASE2400_ARM, "") for a in sec_arms]
     p_par, s_par = paired_tables(df, cmp_parents, S2_METRICS, qs, seeds, "vs parents_A")
     p_reh, s_reh = paired_tables(df, cmp_rehearsal, S1_METRICS, qs, seeds, "vs rehearsal_v2_0")
     p_rule2, s_rule2 = paired_tables(df, cmp_rule, S2_METRICS, qs, seeds, "vs MS_rule")
     p_rule1, s_rule1 = paired_tables(df, cmp_rule, S1_METRICS, qs, seeds, "vs MS_rule")
     p_rule = pd.concat([p_rule2, p_rule1], ignore_index=True)
-    seed_level = pd.concat([s_par, s_reh, s_rule2, s_rule1], ignore_index=True)
+    p_b24_2, s_b24_2 = paired_tables(df, cmp_b24, S2_METRICS, qs, seeds, SECONDARY_LABEL)
+    p_b24_1, s_b24_1 = paired_tables(df, cmp_b24, S1_METRICS, qs, seeds, SECONDARY_LABEL)
+    p_b24 = pd.concat([p_b24_2, p_b24_1], ignore_index=True)
+    seed_level = pd.concat([s_par, s_reh, s_rule2, s_rule1, s_b24_2, s_b24_1], ignore_index=True)
     crit = criterion_table(df, p_par, arms, qs, seeds)
+    crit2 = (criterion_table(df, p_b24, sec_arms, qs, seeds, BASE2400_ARM, SECONDARY_LABEL, SECONDARY_NOTE)
+             if sec_arms else None)
     comp = completeness_table(df, arms, qs, seeds)
     for t_ in (blocks, rblocks):
         t_["status"] = "descriptive"
+    strata = strata_table(df)
     tables: Dict[str, pd.DataFrame] = {
         "per_run": df, "paired_vs_parents_A": p_par, "paired_vs_rehearsal_v2_0": p_reh,
         "paired_vs_MS_rule": p_rule, "paired_seed_level": seed_level, "criterion": crit,
@@ -1546,6 +1948,13 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
         "rule": rule_table(df, arms, qs), "rule_blocks": rblocks, "tail": tail_table(df, arms, qs, th),
         "decomposition": decomposition_table(df), "stage1": stage1_table(df, arms, qs, th),
         "start_shares_by_block": blocks, "completeness": comp}
+    if crit2 is not None:
+        tables["paired_vs_MS_base2400"] = p_b24
+        tables["criterion_vs_MS_base2400"] = crit2
+    tables.update({
+        "r0": r0_table(df, arms, qs, proto), "strata": strata, "strata_summary": strata_summary_table(strata),
+        "classifications": classifications_table(rblocks, df), "stage1_R1_runs": stage1_R1_runs_table(df, arms),
+        "stage1_R1": stage1_R1_table(df, arms, qs)})
     tables["decision_inputs"] = decision_inputs(df, crit, p_par, arms, qs, seeds)
     for name, t in tables.items():
         write_csv(t, out_dir / ("%s.csv" % name), rid)
@@ -1564,9 +1973,13 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
                 "Descriptive: paired difference of the signed peak error, arm - parents_A (interval containing 0 "
                 "does not show that a mechanism has no effect, 10 seeds)", roots)),
             ("paired_primary_vs_MS_rule.png", lambda p: fig_paired(
-                p, seed_level, p_rule, "vs MS_rule", PRIMARY, [a for a in arms if a not in (BASE_ARM, CONTROL_ARM)],
+                p, seed_level, p_rule, "vs MS_rule", PRIMARY, [a for a in arms if a not in (BASE_ARM, BASE2400_ARM, CONTROL_ARM)],
                 qs, "Descriptive: paired difference of |peak error|, arm - MS_rule (the sampler's effect net of "
                 "the rule)", roots)),
+            ("paired_primary_vs_MS_base2400.png", lambda p: fig_paired(
+                p, seed_level, p_b24, SECONDARY_LABEL, PRIMARY, sec_arms, qs,
+                "Secondary, descriptive: paired difference of |peak error|, arm - MS_base2400 (the rule arms net of "
+                "the budget-matched control); not the pre-registered criterion", roots)),
             ("paired_stage1_vs_rehearsal.png", lambda p: fig_paired(
                 p, s_reh, p_reh, "vs rehearsal_v2_0", PRIMARY_S1, arms, qs,
                 "Descriptive: paired difference of the stage-1 |error| (G-S metric), arm - rehearsal_v2_0", roots)),
@@ -1579,6 +1992,8 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
                 p, df[df["arm"].isin(arms)], arms, qs, "ema", roots)),
             ("start_shares_by_block.png", lambda p: fig_start_shares(p, blocks, df, arms, qs, roots))]
         for fname, fn in jobs:
+            if crit2 is None and fname == "paired_primary_vs_MS_base2400.png":
+                continue
             try:
                 fn(fdir / fname)
                 fig_status[fname] = "ok"
@@ -1596,6 +2011,36 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
                       "parents_A at BOTH q", "b": "no run passing G-A (final tier) with the eta part of G-N "
                       "(|eta_dev - eta_final| <= 0.001) under parents_A fails it under the arm",
                       "note": CRITERION_NOTE},
+        "secondary": (None if crit2 is None else {
+            "baseline": BASE2400_ARM, "arms": list(sec_arms), "label": SECONDARY_LABEL,
+            "tables": ["paired_vs_MS_base2400.csv", "criterion_vs_MS_base2400.csv", "paired_seed_level.csv "
+                       "(comparison 'vs MS_base2400')", "figures/paired_primary_vs_MS_base2400.png"],
+            "a": "ci_mean_hi < 0 of the mean paired difference arm - MS_base2400 of %s at BOTH q" % PRIMARY,
+            "b": "no run passing G-A (final tier) with the eta part of G-N under MS_base2400 fails it under the arm",
+            "status": "descriptive (the vs-parents_A primary metric rows are the only pre-registered-criterion "
+                      "rows)", "note": SECONDARY_NOTE,
+            "parts_per_arm": {r.arm: {"a_met": bool(r.a_met), "b_status": r.b_status, "overall": r.overall}
+                              for r in crit2.itertuples()}}),
+        "a3_descriptive": {
+            "tables": ["r0.csv", "strata.csv", "strata_summary.csv", "rule.csv (t2_n_global_blocks_total, "
+                       "t2_n_classifications_total, t2_S_near_total, t2_S_mid_total, t2_S_tail_total, "
+                       "t2_n_classifications_with_near_in_S, t2_n_runs_with_near_in_S)", "rule_blocks.csv "
+                       "(n_S_near, n_S_mid, n_S_tail, followed_by)", "classifications.csv", "stage1_R1_runs.csv",
+                       "stage1_R1.csv", "per_run.csv (t2_R0_*, t2_peak_over_R0_*, t2_n_classifications, "
+                       "t2_S_*_sum, t2_n_class_with_near_in_S, t1_n_checks_R0, t1_streak_kind, "
+                       "t1_streak_has_R0)"],
+            "R0": "r_2(0)/s_2 at the node d = 0 of v_t2_d_grid: r = |v_t2_e_hat - v_t2_a_dev|, s = v_t2_a_dev "
+                  "(the definition of utils/ms_residual.stage_diag); |peak| = stage2_peak_rel_err_abs (final tier)",
+            "strata": "near |d| < %g, tail |d| >= 2q, middle between; sides d < 0 / d > 0, the node d = 0 in "
+                      "neither; error = recovery_e2 - recovery_g2 on the recovery grid (801 points at q = 50, 881 at q = 60), "
+                      "max r/s on the "
+                      "verifier grid of the tier" % NEAR_TIE_HALF_WIDTH,
+            "calib_median_peak_over_R0": {str(k): v for k, v in CALIB_MEDIAN_PEAK_OVER_R0.items()},
+            "linearised_factor": {str(q): (linearised_factor(_get(proto, "records", str(q), "game"))
+                                           if _get(proto, "records", str(q), "game") else None) for q in qs},
+            "stage1_R1_reference": "reports/ms/r1/01_calibration.md section 5: R_1 = 0 exactly is a property of the "
+                                   "verifier (a_dev_source = mean_action, Delta_1 = 0); 17 of 60 replayed fires at "
+                                   "rho = 0.03 had a firing check with R_1 = 0"},
         "status_counts": {a: {s: int(((df["arm"] == a) & (df["status"] == s)).sum()) for s in STATUSES}
                           for a in list(arms) + list(COMPARATORS)},
         "all_done": all_done, "figures": fig_status, "command": list(argv) if argv is not None else None,
@@ -1606,10 +2051,21 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
                       "every stage-1 column (stage 1 untrained)", "rule record, start shares, clamp counts (NaN)"],
             REHEARSAL: ["D3 columns t*_R_*, t*_C_*, t*_s_* (NaN)", "rule record, start shares, clamp counts (NaN)",
                         "t*_minibatch_steps (not stored in v2_run_summary.json; NaN)",
-                        "t*_episodes = updates x episodes_per_update (derived)"]}}
+                        "t*_episodes = updates x episodes_per_update (derived)"]},
+        "a3_not_stored_by_design": {
+            PARENTS: ["t1_R_final, t1_R_dev, t1_n_checks_R0, t1_streak_* (stage 1 untrained; NaN)",
+                      "t2_n_classifications, t2_S_*_sum (no rule; NaN)"],
+            REHEARSAL: ["t1_R_final (the calibration replay carries the development tier only; NaN)",
+                        "t1_streak_kind, t1_streak_has_R0 (v2.0 has no stage-1 rule, no firing streak; NaN)",
+                        "t1_n_checks_R0 = the stage-1 exports with R_1 = 0 exactly on the development tier of "
+                        "the calibration replay (NaN without --calibration-root)",
+                        "t2_n_classifications, t2_S_*_sum (no rule; NaN)"],
+            "R0_and_strata_of_comparators": "from final_final / final_development.npz (parents_A) and "
+                                            "gateA_final / gateA_development.npz (rehearsal_v2_0), which carry "
+                                            "v_t2_* and recovery_* like the MS freeze files"}}
     with open(out_dir / "analysis_info.json", "w") as f:
         json.dump(info, f, indent=1, sort_keys=True)
-    text = summary_text(roots, crit, comp, tables["decision_inputs"], qs, seeds, argv)
+    text = summary_text(roots, crit, comp, tables["decision_inputs"], qs, seeds, argv, crit2)
     (out_dir / "summary.txt").write_text(text)
     return tables, all_done
 

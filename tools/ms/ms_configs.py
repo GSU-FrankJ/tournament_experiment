@@ -33,6 +33,10 @@ ARMS: Dict[str, Dict[str, Any]] = {
     "MS_base": {"scheme": "bin_balanced", "rule_enabled": False,
                 "definition": "regression arm: bin_balanced, rule disabled, fixed 1600 / 600 with v2.0's LR "
                               "windows; checks every 25 reported, would-fire recorded (C-MS1)"},
+    "MS_base2400": {"scheme": "bin_balanced", "rule_enabled": False, "legacy_pipeline": "LEGACY_PIPELINE_2400",
+                    "definition": "budget-matched control (addendum A1): bin_balanced, rule disabled, terminal "
+                                  "stage fixed 2400 (LR 3e-4 to local 2000, linear 3e-4 -> 3e-5 over 2001-2400), "
+                                  "stage 1 as MS_base; checks every 25 reported, would-fire recorded"},
     "MS_rule": {"scheme": "stratified_priority", "lambda_P": None, "alpha_global": 0.0, "rule_enabled": True,
                 "definition": "stop rule and polishing alone: lambda_P = bin-balanced near-tie share, alpha_global 0"},
     "MS_s25a0": {"scheme": "stratified_priority", "lambda_P": 0.25, "alpha_global": 0.0, "rule_enabled": True,
@@ -45,6 +49,8 @@ ARMS: Dict[str, Dict[str, Any]] = {
                  "definition": "lambda_P 0.35, alpha_global 0.5"},
 }
 PILOT_ARMS = ("MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
+#: the budget-matched control of addendum A1: launched in the pilot wave, in the same root as the rule arms
+CONTROL_2400_ARM = "MS_base2400"
 
 #: the defaults of D4 / D5 (the calibration may move the keys D8 lists; epsilon and the coverage may not move)
 DEFAULT_PARAMS: Dict[str, Any] = {
@@ -61,6 +67,15 @@ LEGACY_PIPELINE: Dict[str, Dict[str, Any]] = {
     "lr_windows": {"2": [{"first": 1201, "last": 1600, "start": 3e-4, "end": 3e-5}],
                    "1": [{"first": 1, "last": 600, "start": 3e-4, "end": 3e-5}]},
 }
+#: MS_base2400 (addendum A1): terminal stage fixed 2400, LR constant 3e-4 to local 2000 and linear 3e-4 -> 3e-5
+#: over local 2001-2400 (the same ``lr_linear`` form and end value as the rule arms' landing); stage 1 as MS_base
+LEGACY_PIPELINE_2400: Dict[str, Dict[str, Any]] = {
+    "budgets": {"2": 2400, "1": 600},
+    "lr_windows": {"2": [{"first": 2001, "last": 2400, "start": 3e-4, "end": 3e-5}],
+                   "1": [{"first": 1, "last": 600, "start": 3e-4, "end": 3e-5}]},
+}
+LEGACY_PIPELINES: Dict[str, Dict[str, Dict[str, Any]]] = {"LEGACY_PIPELINE": LEGACY_PIPELINE,
+                                                          "LEGACY_PIPELINE_2400": LEGACY_PIPELINE_2400}
 
 
 def sha256_file(path: Path) -> str:
@@ -143,7 +158,12 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
         stages = {t: dict(v) for t, v in prm["stages"].items()}
     else:
         stages = {t: {k: e[k] for k in ("eps", "rho", "tau")} for t, e in prm["stages"].items()}
-        legacy = prm.get("legacy_pipeline", LEGACY_PIPELINE if T == 2 else None)
+        if "legacy_pipeline" in a:      # an arm with its own fixed budgets (MS_base2400); T = 2 only
+            if T != 2:
+                raise ValueError(f"arm {arm} has its own legacy pipeline, defined for T = 2 only")
+            legacy = LEGACY_PIPELINES[a["legacy_pipeline"]]
+        else:
+            legacy = prm.get("legacy_pipeline", LEGACY_PIPELINE if T == 2 else None)
         if legacy is None:
             raise ValueError("the legacy arm at T != 2 needs params['legacy_pipeline']")
         pipeline["budgets"] = copy.deepcopy(legacy["budgets"])
@@ -166,5 +186,6 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
     return cfg
 
 
-__all__ = ["ARMS", "PILOT_ARMS", "DEFAULT_PARAMS", "LEGACY_PIPELINE", "build_config", "load_protocol",
+__all__ = ["ARMS", "PILOT_ARMS", "CONTROL_2400_ARM", "DEFAULT_PARAMS", "LEGACY_PIPELINE", "LEGACY_PIPELINE_2400",
+           "build_config", "load_protocol",
            "REPORT_NEAR_TIE_HALF_WIDTH", "DEFAULT_QS", "DEFAULT_SEEDS", "sha256_file", "sha256_json"]

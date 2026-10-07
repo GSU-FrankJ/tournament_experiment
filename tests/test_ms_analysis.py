@@ -10,6 +10,9 @@ files (``final_v2.json`` / ``gates.json`` of the v2.0 reference runs). Sections:
 per-run columns on hand-computed cases, status handling (failed / missing / running / incomplete are rows),
 bootstrap determinism, paired tables, criterion parts (a) and (b) on constructed cases, the blind recomputation
 (agreement and failure on tampering), the CLI end to end, and a read-only smoke test on real reference runs.
+Addendum A1 / A3: the seventh arm ``MS_base2400`` (a legacy-rule arm with a 2400-style budget in the pilot root),
+the secondary table (rule arms minus ``MS_base2400``) with its blind recomputation, and the descriptive tables
+(R0, strata, classifications, stage-1 R_1); the unit tests of those helpers are in ``test_ms_analysis_a3.py``.
 """
 
 from __future__ import annotations
@@ -113,6 +116,9 @@ class Spec:
     status: str = "done"              # done | failed | running | rng | nofiles | missing
     R: float = 0.02                   # R_t at the terminal freeze (final tier)
     R_dev: Optional[float] = None
+    # stage-1 checks: R_1 at the checks (local = 5, 10, ...) and the check (1-based) where the 3-streak ends
+    s1_R: Tuple[float, ...] = (0.05, 0.02, 0.0, 0.02, 0.015, 0.01, 0.01, 0.02)
+    s1_stop: Optional[int] = 5
 
 
 def _pad(d: Dict[str, Any], keys: Tuple[str, ...]) -> Dict[str, Any]:
@@ -152,9 +158,56 @@ def _dump(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, indent=1))
 
 
+NONTAIL = list(range(10, 30))         # the non-tail bins of D_2 at q = 50 (40 bins of width 10, tail 0-9 / 30-39)
+S0 = 66.0                             # a_dev(0) of the synthetic freeze arrays
+G0 = 70.0                             # g_2(0) of the synthetic recovery grid
+RATIO = {50: 1.65, 60: 1.45}          # |peak| / R0 of the synthetic runs (the v2.0 calibration medians)
+# residual e_hat - a_dev on the verifier grid by (stratum, side); the mid / d<0 cell has a spike at d = -60
+RES_VER = {("near", "d<0"): -0.66, ("mid", "d<0"): -1.98, ("tail", "d<0"): 0.33, ("near", "d>0"): 0.396,
+           ("mid", "d>0"): 0.792, ("tail", "d>0"): 0.0}
+SPIKE = (-60.0, -3.3)
+# error e_hat - g_2 on the recovery grid by (stratum, side); mid / d<0 alternates -1, -3 along the grid
+ERR_REC = {("near", "d<0"): -1.0, ("mid", "d<0"): -2.0, ("tail", "d<0"): 0.1, ("near", "d>0"): 0.5,
+           ("mid", "d>0"): 1.0, ("tail", "d>0"): 0.0}
+
+
+def _cell(d: np.ndarray, q: float) -> Tuple[np.ndarray, np.ndarray]:
+    """Independent stratum / side labels of the synthetic arrays (written out, not the tool's helper)."""
+    a = np.abs(d)
+    st = np.where(a >= 2 * q, "tail", np.where(a < 20.0, "near", "mid"))
+    sd = np.where(d < 0, "d<0", np.where(d > 0, "d>0", "d=0"))
+    return st, sd
+
+
+def synth_freeze_arrays(q: int, tier: str, peak: float, scale: float = 1.0) -> Dict[str, np.ndarray]:
+    """The terminal-stage freeze arrays a verifier tier stores (the keys the analysis reads), with
+    R0 = scale * |peak| / RATIO[q], the residual pattern RES_VER and the recovery error pattern ERR_REC."""
+    d = np.arange(-200.0, 200.0 + 1e-9, 2.0 if tier == "final" else 4.0)
+    a_dev = np.where(np.abs(d) < 2 * q, S0 * (1.0 - np.abs(d) / (2.0 * q)), 0.0)
+    st, sd = _cell(d, q)
+    delta = np.array([RES_VER.get((a, b), 0.0) for a, b in zip(st, sd)])
+    delta[d == SPIKE[0]] = SPIKE[1]
+    delta[d == 0.0] = scale * abs(peak) / RATIO[q] * S0
+    rd = np.arange(-200.0, 200.0 + 1e-9, 0.5)
+    g2 = G0 * np.maximum(0.0, 1.0 - np.abs(rd) / (2.0 * q))
+    rst, rsd = _cell(rd, q)
+    err = np.array([ERR_REC.get((a, b), 0.0) for a, b in zip(rst, rsd)])
+    mid_neg = np.flatnonzero((rst == "mid") & (rsd == "d<0"))
+    err[mid_neg] = np.where(np.arange(mid_neg.size) % 2 == 0, -1.0, -3.0)
+    err[rd == 0.0] = peak * G0
+    return {"v_t2_d_grid": d, "v_t2_e_hat": a_dev + delta, "v_t2_a_dev": a_dev, "recovery_d_grid": rd,
+            "recovery_e2": g2 + err, "recovery_g2": g2}
+
+
+def write_freeze(run_dir: Path, names: Tuple[str, str], q: int, peak: float) -> None:
+    """The (final, development) freeze npz of one synthetic run (the development R0 is 1% larger)."""
+    for tier, name, scale in (("final", names[0], 1.0), ("development", names[1], 1.01)):
+        np.savez(run_dir / name, **synth_freeze_arrays(q, tier, peak, scale))
+
+
 def write_ms_run(run_dir: Path, tm: Dict[str, Any], arm: str, q: int, seed: int, sp: Spec) -> None:
     """One synthetic MS run directory in the runner's formats (copied from the genuine template)."""
-    legacy = arm == "MS_base"
+    legacy = arm in R.LEGACY_ARMS
     run_dir.mkdir(parents=True, exist_ok=True)
     name = "msr1_q%d_s%d_%s" % (q, seed, arm)
     st = copy.deepcopy(tm["status.json"])
@@ -197,7 +250,7 @@ def write_ms_run(run_dir: Path, tm: Dict[str, Any], arm: str, q: int, seed: int,
                                                                      else "block_end")
             blocks.append({"block_id": i, "type": typ, "first_local": first, "last_local": last,
                            "exit_reason": reason, "fire_local": last if (is_last and sp.fire) else None,
-                           "S": list(range(n_s)), "n_S": n_s, "classification": cls})
+                           "S": NONTAIL[:n_s], "n_S": n_s, "classification": cls})
             first = last + 1
         last_t = blocks[-1]
         landing = {"first_local": last_t["last_local"] + 1, "last_local": last_t["last_local"] + LAND,
@@ -227,6 +280,8 @@ def write_ms_run(run_dir: Path, tm: Dict[str, Any], arm: str, q: int, seed: int,
               wall_sec=0.7, n_checks=2, exit_update=n2 + n1, entry_update=n2)
     s1["freeze"]["final"].update(stage1_scalars(sp, "final"))
     s1["freeze"]["development"].update(stage1_scalars(sp, "development"))
+    s1.update(fire_local=None if legacy or sp.s1_stop is None else 5 * sp.s1_stop,
+              would_fire_local=5 * sp.s1_stop if legacy and sp.s1_stop is not None else None)
     s1["freeze"]["d3_final"].update(Delta=1e-4, R=0.02, s=46.5, C=0.05)
     s1["freeze"]["d3_development"].update(Delta=1.1e-4, R=0.021, s=46.4, C=0.05)
     if sp.status == "failed":
@@ -246,6 +301,16 @@ def write_ms_run(run_dir: Path, tm: Dict[str, Any], arm: str, q: int, seed: int,
                    consecutive=0)
         chk.append(row)
     pd.DataFrame(chk, columns=tm["checks_header"]).to_csv(run_dir / "ms_checks_stage2.csv", index=False)
+    if sp.status != "failed":                                    # stage-1 checks: R_1 per check, the stop
+        c1 = []
+        for k, r1 in enumerate(sp.s1_R, start=1):
+            row = {c: float("nan") for c in tm["checks_header"]}
+            row.update(run=name, arm=arm, q=q, seed=seed, stage=1, update=n2 + 5 * k, local=5 * k, R=r1,
+                       block_id=1, block_type="legacy" if legacy else "global", valid=True)
+            c1.append(row)
+        pd.DataFrame(c1, columns=tm["checks_header"]).to_csv(run_dir / "ms_checks_stage1.csv", index=False)
+    if sp.status != "nofiles":
+        write_freeze(run_dir, ("freeze_stage2_final.npz", "freeze_stage2_development.npz"), q, sp.peak)
     ups = []
     for loc in range(1, n2 + 1):
         row = {c: float("nan") for c in tm["updates_header"]}
@@ -334,6 +399,7 @@ def write_parents_run(run_dir: Path, q: int, seed: int, sp: Spec, status: str = 
         "costs": {"total_episodes": 819200, "minibatch_steps": 32000, "total_updates": 1600},
         "fixed_budget": True, "final_global_update": 1600})
     _dump(run_dir / "run_config.json", {"record": {"protocol": {"episodes_per_update": 512}}})
+    write_freeze(run_dir, ("final_final.npz", "final_development.npz"), q, sp.peak)
 
 
 def write_rehearsal_run(run_dir: Path, q: int, seed: int, sp: Spec) -> None:
@@ -372,6 +438,7 @@ def write_rehearsal_run(run_dir: Path, q: int, seed: int, sp: Spec) -> None:
                                "by_category_sec": {"dev_verifier": 0.19}}},
         "fixed_budget": True, "final_global_update": 2200})
     _dump(run_dir / "run_config.json", {"record": {"protocol": {"episodes_per_update": 512}}})
+    write_freeze(run_dir, ("gateA_final.npz", "gateA_development.npz"), q, sp.peak)
 
 
 def parents_spec(q: int, i: int) -> Spec:
@@ -396,17 +463,24 @@ def arm_spec(arm: str, q: int, i: int, with_failures: bool = True) -> Spec:
         sp = Spec(**{**base, "peak": p.peak, "tail": p.tail, "smoothed": 0.31, "fire": False})
         sp.blocks = (("legacy", None, 0, (50, 10, 40)),) * 3
         return sp
+    if arm == "MS_base2400":
+        # the budget-matched control: legacy rule (no fire, no classification), 4 blocks of budget (45 updates, the
+        # 2400 analogue), |peak| 0.015 below parents_A, every G-A / G-N eta pass kept (also where parents_A fails)
+        sp = Spec(**{**base, "peak": -(pa - 0.015), "fire": False})
+        sp.blocks = (("legacy", None, 0, (50, 10, 40)),) * 4
+        return sp
     if arm == "MS_rule":
         return Spec(**{**base, "peak": p.peak, "tail": p.tail, "blocks": BLOCKS_RULE})
-    if arm == "MS_s25a0":
+    if arm == "MS_s25a0":                  # stage 1 reaches its cap: no firing streak
         return Spec(**{**base, "peak": -(pa - 0.02 - 0.001 * i), "fire": False, "forced": True,
-                       "blocks": BLOCKS_CAP})
+                       "blocks": BLOCKS_CAP, "s1_stop": None})
     if arm == "MS_s25a5":
         peak = -(pa - 0.02 - 0.001 * i) if q == 50 else -(pa + 0.01)
         return Spec(**{**base, "peak": peak})
     if arm == "MS_s35a0":
         ap = pa - 0.02 - 0.001 * i
         sp = Spec(**{**base, "peak": -ap if i % 2 == 0 else ap})
+        sp.s1_R = (0.0, 0.05, 0.02, 0.015, 0.01, 0.02, 0.0, 0.0)      # R_1 = 0 outside the streak (checks 3-5)
         if q == 50 and i == 0:
             sp.tail = 0.03                 # breaks the G-A tail part that parents_A passes at q50 seed index 0
         return sp
@@ -463,7 +537,7 @@ def build_world(root: Path, templates: Dict[str, Any], with_failures: bool = Tru
                 if sp.status == "missing":
                     continue
                 d, _ = R.arm_dir(arm, q, s, roots)
-                write_ms_run(d, templates["MS_base" if arm == "MS_base" else "MS_rule"], arm, q, s, sp)
+                write_ms_run(d, templates["MS_base" if arm in R.LEGACY_ARMS else "MS_rule"], arm, q, s, sp)
     return roots
 
 
@@ -565,8 +639,9 @@ def test_reader_on_genuine_runner_output(genuine):
 
 def test_arm_table_matches_the_launcher_configs():
     """The analysis arm names are the arms of tools/ms/ms_configs.py (D6)."""
-    assert set(R.MS_ARMS) == set(mc.ARMS) and R.MS_ARMS[0] == "MS_base"
-    assert tuple(a for a in R.MS_ARMS if a != "MS_base") == tuple(mc.PILOT_ARMS)
+    assert set(R.MS_ARMS) == set(mc.ARMS) and R.MS_ARMS[:2] == ("MS_base", "MS_base2400")
+    assert tuple(a for a in R.MS_ARMS if a not in ("MS_base", "MS_base2400")) == tuple(mc.PILOT_ARMS)
+    assert R.LEGACY_ARMS == ("MS_base", "MS_base2400") and len(R.MS_ARMS) == 7
 
 
 def test_per_run_columns_cover_the_spec(extracted):
@@ -649,7 +724,7 @@ def test_block_shares_by_block_and_rule_blocks(extracted):
     t2 = rb[rb["stage"] == 2].sort_values("block_id")
     assert list(t2["classification"]) == ["localized", "broad", ""] and list(t2["n_S"]) == [3, 19, 0]
     assert list(t2["exit_reason"]) == ["block_end", "block_end", "development_stop"]
-    assert t2["S"].iloc[0] == "0,1,2"
+    assert t2["S"].iloc[0] == "10,11,12"
     leg = blocks[(blocks["arm"] == "MS_base") & (blocks["q"] == 50) & (blocks["seed"] == 10501)]
     assert list(leg["block_type"]) == ["legacy"]
 
@@ -869,7 +944,8 @@ def test_paired_tables_signs_counts_and_exclusions(extracted):
     assert s1["n_pairs"] == 4 and s1["mean"] == pytest.approx(0.002, abs=1e-15) and s1["n_pos"] == 4
     assert s1["status"] == "descriptive" and s1["baseline"] == "rehearsal_v2_0"
     # every rule arm against MS_rule: the four other rule arms, both stages' metrics
-    pm, _ = R.paired_tables(df, [(a, "MS_rule", "") for a in R.MS_ARMS if a not in ("MS_base", "MS_rule")],
+    pm, _ = R.paired_tables(df, [(a, "MS_rule", "") for a in R.MS_ARMS
+                                 if a not in ("MS_base", "MS_base2400", "MS_rule")],
                             R.S2_METRICS + R.S1_METRICS[:1], QS, SEEDS4, "vs MS_rule")
     assert set(pm["arm"]) == {"MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5"}
     m = pm[(pm["arm"] == "MS_s25a0") & (pm["q"] == 50) & (pm["metric"] == R.PRIMARY)].iloc[0]
@@ -1112,11 +1188,14 @@ def test_blind_script_does_not_import_the_analysis_tool():
 
 # ====================================================================== 9. the CLI end to end
 EXPECTED_FILES = ["per_run.csv", "paired_vs_parents_A.csv", "paired_vs_rehearsal_v2_0.csv", "paired_vs_MS_rule.csv",
-                  "paired_seed_level.csv", "criterion.csv", "arm_summary.csv", "budget.csv", "rule.csv",
-                  "rule_blocks.csv", "tail.csv", "decomposition.csv", "stage1.csv", "start_shares_by_block.csv",
+                  "paired_vs_MS_base2400.csv", "paired_seed_level.csv", "criterion.csv",
+                  "criterion_vs_MS_base2400.csv", "arm_summary.csv", "budget.csv", "rule.csv", "rule_blocks.csv",
+                  "classifications.csv", "tail.csv", "decomposition.csv", "stage1.csv", "stage1_R1.csv",
+                  "stage1_R1_runs.csv", "r0.csv", "strata.csv", "strata_summary.csv", "start_shares_by_block.csv",
                   "completeness.csv", "decision_inputs.csv", "analysis_info.json", "summary.txt"]
 EXPECTED_FIGURES = ["paired_primary_abs_peak.png", "paired_signed_peak.png", "paired_primary_vs_MS_rule.png",
-                    "paired_stage1_vs_rehearsal.png", "peak_error_vs_update.png", "residual_map_freeze_final.png",
+                    "paired_primary_vs_MS_base2400.png", "paired_stage1_vs_rehearsal.png",
+                    "peak_error_vs_update.png", "residual_map_freeze_final.png",
                     "residual_map_freeze_development.png", "residual_map_ema_last_check.png",
                     "start_shares_by_block.png"]
 
@@ -1149,7 +1228,7 @@ def test_cli_end_to_end_complete_world_writes_every_output(world_ok, tmp_path, c
         if f.endswith(".csv"):
             assert pd.read_csv(out / f, nrows=1)["roots_id"].iloc[0] == rid, f      # the roots are in every CSV
     per = pd.read_csv(out / "per_run.csv")
-    assert len(per) == (6 + 2) * 2 * 4 and (per["status"] == "done").all()
+    assert len(per) == (7 + 2) * 2 * 4 and (per["status"] == "done").all()
     assert list(per.columns) == ["roots_id"] + R.COLUMNS
     assert per["run_dir"].str.startswith("/").all()
     out_txt = capsys.readouterr().out
@@ -1157,8 +1236,8 @@ def test_cli_end_to_end_complete_world_writes_every_output(world_ok, tmp_path, c
     assert R.NO_EFFECT_SENTENCE in out_txt                                       # MS_s35a0's signed CI contains 0
     assert "does not show that a mechanism has no effect" in (out / "summary.txt").read_text()
     # every non-criterion table is labelled descriptive
-    for f in ("paired_vs_rehearsal_v2_0.csv", "paired_vs_MS_rule.csv", "arm_summary.csv", "budget.csv", "rule.csv",
-              "tail.csv", "stage1.csv"):
+    for f in ("paired_vs_rehearsal_v2_0.csv", "paired_vs_MS_rule.csv", "paired_vs_MS_base2400.csv", "arm_summary.csv",
+              "budget.csv", "rule.csv", "tail.csv", "stage1.csv", "r0.csv", "strata_summary.csv", "stage1_R1.csv"):
         assert (pd.read_csv(out / f)["status"] == "descriptive").all(), f
     pp = pd.read_csv(out / "paired_vs_parents_A.csv")
     assert (pp[pp["metric"] == R.PRIMARY]["status"] == R.CRITERION_NOTE).all()
@@ -1174,7 +1253,7 @@ def test_cli_incomplete_world_reports_the_rows_and_exits_3(cli_out, capsys):
     out, code = cli_out
     assert code == 3
     per = pd.read_csv(out / "per_run.csv")
-    assert len(per) == (6 + 2) * 2 * 4                                          # no run is dropped
+    assert len(per) == (7 + 2) * 2 * 4                                          # no run is dropped
     assert sorted(per[per["status"] != "done"]["status"]) == ["failed", "missing"]
     comp = pd.read_csv(out / "completeness.csv")
     assert comp["n_failed"].sum() == 1 and comp["n_missing"].sum() == 1
@@ -1194,7 +1273,7 @@ def test_cli_before_any_ms_run_exists_reports_every_run_as_missing(templates, tm
     assert _run_cli(roots, out, ["--seeds", "10501-10504"]) == 3
     per = pd.read_csv(out / "per_run.csv")
     ms = per[per["role"] == "ms_arm"]
-    assert len(ms) == 6 * 2 * 4 and (ms["status"] == "missing").all() and not ms["complete"].any()
+    assert len(ms) == 7 * 2 * 4 and (ms["status"] == "missing").all() and not ms["complete"].any()
     assert (per[per["role"] == "comparator"]["status"] == "done").all()
     crit = pd.read_csv(out / "criterion.csv")
     assert (crit["overall"] == "incomplete").all() and (crit["n_pairs_q50"] == 0).all() and not crit["a_met"].any()
@@ -1282,3 +1361,462 @@ def test_calibration_d3_join_reads_the_u1600_and_u2200_rows(tmp_path):
     assert out["t2_Rtail_dev"] == 0.009 and out["t2_s_dev"] == 68.0 and out["t2_C_final"] == 0.031
     assert out["t1_R_dev"] == 0.016 and out["t1_Delta_dev"] == 3e-5 and "t1_R_final" not in out
     assert R.calibration_d3(tmp_path / "cal", 50, 10599) == {}
+
+
+# ====================================================================== 11. addendum A1: MS_base2400, secondary table
+@pytest.fixture(scope="module")
+def ok_out(world_ok, tmp_path_factory):
+    """CLI output on the complete synthetic world (every run done), without figures."""
+    out = tmp_path_factory.mktemp("analysis_ok")
+    assert _run_cli(world_ok, out, ["--seeds", "10501-10504", "--no-figures"]) == 0
+    return out
+
+
+RULE_ARMS = ["MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5"]
+
+
+def test_primary_table_has_seven_arms_and_base2400_is_not_in_the_vs_MS_rule_table(ok_out):
+    """MS_base2400 enters the primary table against parents_A like every arm (a legacy-rule arm whose terminal-stage
+    budget is larger: no fire, no blocks classification) and is not part of the vs-MS_rule comparisons."""
+    crit = pd.read_csv(ok_out / "criterion.csv")
+    assert list(crit["arm"]) == list(R.MS_ARMS) and len(crit) == 7
+    c = crit[crit["arm"] == "MS_base2400"].iloc[0]
+    assert c["baseline"] == "parents_A" and c["comparison"] == "vs parents_A"
+    assert c["mean_q50"] == pytest.approx(-0.015, abs=1e-12) and c["mean_q60"] == pytest.approx(-0.015, abs=1e-12)
+    assert bool(c["a_met"]) and c["b_status"] == "holds" and c["n_base_pass"] == 7 and c["overall"] == "met"
+    for f in ("paired_vs_parents_A.csv", "paired_vs_rehearsal_v2_0.csv", "arm_summary.csv", "budget.csv", "rule.csv",
+              "tail.csv", "stage1.csv", "completeness.csv", "decision_inputs.csv", "per_run.csv", "decomposition.csv",
+              "r0.csv", "strata_summary.csv", "stage1_R1.csv"):
+        assert "MS_base2400" in set(pd.read_csv(ok_out / f)["arm"]), f
+    rule_cmp = pd.read_csv(ok_out / "paired_vs_MS_rule.csv")
+    assert set(rule_cmp["arm"]) == {"MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5"}
+    assert "MS_base2400" not in set(rule_cmp["baseline"]) | set(rule_cmp["arm"])
+    seed_level = pd.read_csv(ok_out / "paired_seed_level.csv")
+    vs_rule = seed_level[seed_level["comparison"] == "vs MS_rule"]
+    assert "MS_base2400" not in set(vs_rule["arm"])
+    per = pd.read_csv(ok_out / "per_run.csv")
+    r = per[(per["arm"] == "MS_base2400") & (per["q"] == 50) & (per["seed"] == 10501)].iloc[0]
+    assert r["status"] == "done" and r["t2_updates"] == 4 * NB + LAND and r["t2_n_blocks"] == 1
+    assert r["t2_block_types"] == "legacy" and np.isnan(r["t2_fire_local"]) and not bool(r["t2_budget_forced"])
+    assert pd.isna(r["t2_classifications"]) and r["t2_n_classifications"] == 0
+    assert r["source_root"] == "pilot" and "/pilot/q50/seed10501/MS_base2400" in r["run_dir"]
+    rule = pd.read_csv(ok_out / "rule.csv")
+    rr = rule[(rule["arm"] == "MS_base2400") & (rule["q"] == 50)].iloc[0]
+    assert rr["t2_n_fire"] == 0 and rr["t2_n_budget_forced"] == 0 and rr["t2_n_polish_blocks_total"] == 0
+    assert rr["t2_n_global_blocks_total"] == 0 and rr["t2_n_classifications_total"] == 0
+
+
+def test_secondary_table_parts_a_and_b_against_MS_base2400_by_hand(ok_out):
+    """Rule arms minus MS_base2400: (a) CI of the mean paired |peak| difference below 0 at both q, (b) no run that
+    passes G-A / G-N eta under MS_base2400 fails under the arm. Hand-computed on the synthetic arms (the
+    MS_base2400 |peak| is parents_A's minus 0.015, it passes every run)."""
+    c2 = pd.read_csv(ok_out / "criterion_vs_MS_base2400.csv")
+    assert list(c2["arm"]) == RULE_ARMS
+    assert (c2["baseline"] == "MS_base2400").all() and (c2["comparison"] == "vs MS_base2400").all()
+    assert c2["note"].str.contains("SECONDARY").all() and c2["note"].str.contains("descriptive").all()
+    assert (c2["note"] != R.CRITERION_NOTE).all()
+    assert (c2["boot_seed"] == 20261006).all() and (c2["n_boot"] == 10000).all() and (c2["n_base_pass"] == 8).all()
+    assert list(c2.columns) == list(pd.read_csv(ok_out / "criterion.csv").columns)
+    by = {r["arm"]: r for _, r in c2.iterrows()}
+    # MS_s25a0: |peak| lower by 0.02 + 0.001 i than parents_A, so by 0.005 + 0.001 i than MS_base2400, both q
+    d = -np.array([0.005, 0.006, 0.007, 0.008])
+    rng = np.random.default_rng(20261006)
+    m = d[rng.integers(0, 4, size=(10000, 4))].mean(axis=1)
+    for q in QS:
+        assert by["MS_s25a0"]["mean_q%d" % q] == pytest.approx(d.mean(), abs=1e-12)
+        assert by["MS_s25a0"]["ci_mean_lo_q%d" % q] == pytest.approx(np.percentile(m, 2.5), abs=1e-12)
+        assert by["MS_s25a0"]["ci_mean_hi_q%d" % q] == pytest.approx(np.percentile(m, 97.5), abs=1e-12)
+    assert bool(by["MS_s25a0"]["a_met"]) and by["MS_s25a0"]["b_status"] == "holds"
+    assert by["MS_s25a0"]["overall"] == "met"
+    # MS_s25a5: as MS_s25a0 at q50, 0.025 WORSE than MS_base2400 at q60: (a) is a conjunction over both q
+    assert bool(by["MS_s25a5"]["a_q50"]) and not bool(by["MS_s25a5"]["a_q60"]) and not bool(by["MS_s25a5"]["a_met"])
+    assert by["MS_s25a5"]["mean_q60"] == pytest.approx(0.025, abs=1e-12) and by["MS_s25a5"]["overall"] == "not met"
+    # MS_rule: |peak| = parents_A's, 0.015 above MS_base2400; its q60 seed 10503 fails G-A (tail 0.03) where
+    # MS_base2400 passes (it was failing under parents_A too, so under the primary table it is no violation)
+    assert by["MS_rule"]["mean_q50"] == pytest.approx(0.015, abs=1e-12) and not bool(by["MS_rule"]["a_met"])
+    assert by["MS_rule"]["b_violations"] == "q60/10503" and by["MS_rule"]["b_status"] == "violated"
+    primary = pd.read_csv(ok_out / "criterion.csv").set_index("arm")
+    assert primary.loc["MS_rule", "b_status"] == "holds" and primary.loc["MS_rule", "n_base_pass"] == 7
+    # MS_s35a0: improves, but q50 seed 10501 fails G-A (tail 0.03): a violation (b) against MS_base2400
+    assert bool(by["MS_s35a0"]["a_met"]) and by["MS_s35a0"]["b_violations"] == "q50/10501"
+    assert by["MS_s35a0"]["b_n_violations"] == 1 and by["MS_s35a0"]["overall"] == "not met"
+    # MS_s35a5: constant improvement of 0.005: an interval of width 0 below 0
+    assert by["MS_s35a5"]["mean_q50"] == pytest.approx(-0.005, abs=1e-12)
+    assert by["MS_s35a5"]["ci_mean_hi_q50"] == pytest.approx(-0.005, abs=1e-12) and bool(by["MS_s35a5"]["a_met"])
+    assert all(by[a]["a_complete"] for a in RULE_ARMS)
+
+
+def test_secondary_table_is_descriptive_and_uses_the_paired_machinery(ok_out):
+    p = pd.read_csv(ok_out / "paired_vs_MS_base2400.csv")
+    assert (p["comparison"] == "vs MS_base2400").all() and (p["baseline"] == "MS_base2400").all()
+    assert set(p["arm"]) == set(RULE_ARMS) and (p["status"] == "descriptive").all()       # no criterion label
+    assert R.PRIMARY_S1 in set(p["metric"]) and R.PRIMARY in set(p["metric"])        # S2 and S1 metrics
+    assert set(m for m, _ in R.S2_METRICS[:3]) <= set(p["metric"])
+    r = p[(p["arm"] == "MS_s25a0") & (p["q"] == 50) & (p["metric"] == R.PRIMARY)].iloc[0]
+    assert r["n_pairs"] == 4 and r["mean"] == pytest.approx(-0.0065, abs=1e-12) and r["n_neg"] == 4
+    assert r["n_better"] == 4 and bool(r["ci_mean_below_0"])
+    sl = pd.read_csv(ok_out / "paired_seed_level.csv")
+    s = sl[sl["comparison"] == "vs MS_base2400"]
+    assert (s["status"] == "descriptive").all() and set(s["baseline"]) == {"MS_base2400"}
+    one = s[(s["arm"] == "MS_s25a0") & (s["q"] == 60) & (s["metric"] == R.PRIMARY)].sort_values("seed")
+    assert np.allclose(one["diff"], -np.array([0.005, 0.006, 0.007, 0.008]), atol=1e-12)
+    assert np.allclose(one["base_value"] - one["arm_value"], [0.005, 0.006, 0.007, 0.008], atol=1e-12)
+    # the parents_A primary rows keep the criterion label, nothing else does
+    prim = sl[(sl["comparison"] == "vs parents_A") & (sl["metric"] == R.PRIMARY)]
+    assert (prim["status"] == R.CRITERION_NOTE).all()
+    txt = (ok_out / "summary.txt").read_text()
+    assert "SECONDARY (descriptive, not the criterion)" in txt and "MS_base2400" in txt
+    sec = txt.split("== SECONDARY")[1].split("== RUN STATUS")[0]
+    assert "MS_s35a0" in sec and "q50/10501" in sec and "overall: not met" in sec and "b: holds" in sec
+    info = json.loads((ok_out / "analysis_info.json").read_text())
+    assert info["secondary"]["baseline"] == "MS_base2400" and info["secondary"]["arms"] == RULE_ARMS
+    assert info["secondary"]["parts_per_arm"]["MS_s35a0"]["b_status"] == "violated"
+    assert "MS_base2400" in info["arms"] and "descriptive" in info["secondary"]["status"]
+
+
+def test_secondary_bootstrap_uses_one_fresh_generator_per_q_and_statistic(extracted, monkeypatch):
+    df = extracted[0]
+    seen: List[Any] = []
+    real = np.random.default_rng
+
+    def spy(seed=None):
+        seen.append(seed)
+        return real(seed)
+    monkeypatch.setattr(np.random, "default_rng", spy)
+    p, _ = R.paired_tables(df, [("MS_s25a0", "MS_base2400", "")], [(R.PRIMARY, True)], QS, SEEDS4, R.SECONDARY_LABEL)
+    assert seen == [20261006] * 4                         # q50 mean, q50 median, q60 mean, q60 median
+    monkeypatch.undo()
+    alone, _ = R.paired_tables(df, [("MS_s25a0", "MS_base2400", "")], [(R.PRIMARY, True)], (60,), SEEDS4,
+                               R.SECONDARY_LABEL)
+    for col in ("ci_mean_lo", "ci_mean_hi", "ci_median_lo", "ci_median_hi", "mean"):
+        assert alone[col].iloc[0] == p[p["q"] == 60][col].iloc[0]
+
+
+def test_criterion_table_default_call_is_unchanged_and_takes_a_baseline(extracted):
+    df = extracted[0]
+    p, _ = R.paired_tables(df, [("MS_s25a0", "parents_A", "")], R.S2_METRICS, QS, SEEDS4, "vs parents_A")
+    default = R.criterion_table(df, p, ["MS_s25a0"], QS, SEEDS4)
+    explicit = R.criterion_table(df, p, ["MS_s25a0"], QS, SEEDS4, "parents_A", "vs parents_A", R.CRITERION_NOTE)
+    assert default.equals(explicit)
+    assert default["baseline"].iloc[0] == "parents_A" and default["note"].iloc[0] == R.CRITERION_NOTE
+    p2, _ = R.paired_tables(df, [("MS_s25a0", "MS_base2400", "")], R.S2_METRICS, QS, SEEDS4, R.SECONDARY_LABEL)
+    sec = R.criterion_table(df, p2, ["MS_s25a0"], QS, SEEDS4, "MS_base2400", R.SECONDARY_LABEL, R.SECONDARY_NOTE)
+    assert sec["baseline"].iloc[0] == "MS_base2400" and sec["comparison"].iloc[0] == "vs MS_base2400"
+    assert sec["note"].iloc[0] == R.SECONDARY_NOTE and list(sec.columns) == list(default.columns)
+
+
+def test_secondary_table_in_a_world_with_a_failed_and_a_missing_run(cli_out):
+    """MS_s35a5: the failed q60 run (MS_base2400 passes there) is a violation, the missing q50 run is pending."""
+    out, _ = cli_out
+    c2 = pd.read_csv(out / "criterion_vs_MS_base2400.csv").set_index("arm")
+    c = c2.loc["MS_s35a5"]
+    assert c["b_status"] == "violated" and c["b_violations"] == "q60/10502" and c["b_pending"] == "q50/10504"
+    assert c["n_pairs_q50"] == 3 and c["n_pairs_q60"] == 3 and not bool(c["a_complete"])
+    assert (pd.read_csv(out / "criterion.csv").set_index("arm").loc["MS_base2400", "n_pairs_q50"]) == 4
+
+
+def test_secondary_files_are_not_written_without_MS_base2400(world_ok, tmp_path):
+    out = tmp_path / "no_b24"
+    assert _run_cli(world_ok, out, ["--seeds", "10501-10504", "--arms", "MS_rule", "MS_s25a0", "--no-figures"]) == 0
+    assert not (out / "criterion_vs_MS_base2400.csv").exists() and not (out / "paired_vs_MS_base2400.csv").exists()
+    assert "secondary" in json.loads((out / "analysis_info.json").read_text())
+    assert json.loads((out / "analysis_info.json").read_text())["secondary"] is None
+    assert "SECONDARY" not in (out / "summary.txt").read_text()
+    assert BL.main(["--analysis-dir", str(out)]) == 0
+
+
+# ---------------------------------------------------------------------- the blind recomputation of both tables
+def test_blind_recomputation_covers_the_primary_seven_arms_and_the_secondary_table(ok_out, cli_out, tmp_path):
+    for out in (ok_out, cli_out[0]):
+        assert BL.main(["--analysis-dir", str(out)]) == 0
+        txt = (out / "blind_recomputation.txt").read_text()
+        assert "DISAGREE" not in txt and "ALL " in txt and "criterion_vs_MS_base2400.csv" in txt
+        assert "MS_base2400 a50" in txt and "[vs MS_base2400] MS_s25a0 a50 -0.00650" in txt
+        assert "[vs MS_base2400] MS_base " not in txt and "[vs MS_base2400] MS_base2400 " not in txt
+        assert "criterion_vs_MS_base2400.csv sha256" in txt
+    # the secondary table is part of the recomputation: when per_run.csv holds MS_base2400 and rule arms, a missing
+    # criterion_vs_MS_base2400.csv is a disagreement, not a skip
+    d = tmp_path / "without"
+    shutil.copytree(ok_out, d)
+    (d / "criterion_vs_MS_base2400.csv").unlink()
+    assert BL.main(["--analysis-dir", str(d)]) == 1
+    txt = (d / "blind_recomputation.txt").read_text()
+    assert "DISAGREE: criterion_vs_MS_base2400.csv is missing" in txt and "DISAGREEMENT" in txt
+
+
+@pytest.mark.parametrize("tamper", ["ci_hi", "mean", "flag", "violation", "pairs", "drop_arm", "extra_arm", "overall",
+                                    "baseline_peak", "base2400_primary"])
+def test_blind_recomputation_fails_when_the_secondary_table_is_tampered_with(ok_out, tmp_path, tamper):
+    d = tmp_path / "analysis"
+    shutil.copytree(ok_out, d)
+    f = d / "criterion_vs_MS_base2400.csv"
+    crit = pd.read_csv(f, float_precision="round_trip")
+    i = int(crit.index[crit["arm"] == "MS_s25a5"][0])
+    if tamper == "ci_hi":
+        crit.loc[i, "ci_mean_hi_q50"] += 1e-9
+    elif tamper == "mean":
+        crit.loc[i, "mean_q60"] *= 1.000001
+    elif tamper == "flag":
+        crit.loc[i, "a_q60"] = True
+    elif tamper == "violation":
+        crit.loc[i, "b_violations"] = "q50/10501"
+    elif tamper == "pairs":
+        crit.loc[i, "n_pairs_q50"] = 3
+    elif tamper == "drop_arm":
+        crit = crit.drop(index=i)
+    elif tamper == "extra_arm":
+        crit = pd.concat([crit, crit.iloc[[i]].assign(arm="MS_ghost")], ignore_index=True)
+    elif tamper == "overall":
+        crit.loc[i, "overall"] = "met"
+    elif tamper == "baseline_peak":                  # a MS_base2400 value in per_run.csv moves both tables
+        per = pd.read_csv(d / "per_run.csv", float_precision="round_trip")
+        j = per.index[(per["arm"] == "MS_base2400") & (per["q"] == 50) & (per["seed"] == 10501)][0]
+        per.loc[j, "stage2_peak_rel_err_abs"] += 1e-6
+        per.to_csv(d / "per_run.csv", index=False)
+    elif tamper == "base2400_primary":               # the primary row of MS_base2400 itself
+        p = pd.read_csv(d / "criterion.csv", float_precision="round_trip")
+        k = int(p.index[p["arm"] == "MS_base2400"][0])
+        p.loc[k, "ci_mean_lo_q50"] += 1e-9
+        p.to_csv(d / "criterion.csv", index=False)
+    if tamper not in ("baseline_peak", "base2400_primary"):
+        crit.to_csv(f, index=False)
+    assert BL.main(["--analysis-dir", str(d)]) == 1
+    assert "DISAGREE" in (d / "blind_recomputation.txt").read_text()
+
+
+def test_blind_recomputation_still_passes_on_old_inputs_and_takes_an_explicit_secondary(ok_out, tmp_path):
+    # old inputs: no secondary file, no MS_base2400 anywhere
+    d = tmp_path / "old"
+    shutil.copytree(ok_out, d)
+    (d / "criterion_vs_MS_base2400.csv").unlink()
+    for f, col in (("per_run.csv", "arm"), ("criterion.csv", "arm"), ("decision_inputs.csv", "arm")):
+        t = pd.read_csv(d / f, float_precision="round_trip")
+        t[t[col] != "MS_base2400"].to_csv(d / f, index=False)
+    assert BL.main(["--analysis-dir", str(d)]) == 0
+    txt = (d / "blind_recomputation.txt").read_text()
+    assert "secondary" not in txt and "ALL " in txt
+    # an explicit --secondary that does not exist is an unreadable input (exit 2); an existing one is checked
+    assert BL.main(["--analysis-dir", str(ok_out), "--secondary", str(tmp_path / "nope.csv"),
+                    "--out", str(tmp_path / "r.txt")]) == 2
+    alt = tmp_path / "elsewhere" / "sec.csv"
+    alt.parent.mkdir()
+    shutil.copy(ok_out / "criterion_vs_MS_base2400.csv", alt)
+    assert BL.main(["--analysis-dir", str(d), "--per-run", str(ok_out / "per_run.csv"), "--criterion",
+                    str(ok_out / "criterion.csv"), "--decision-inputs", str(ok_out / "decision_inputs.csv"),
+                    "--secondary", str(alt), "--out", str(tmp_path / "r2.txt")]) == 0
+    assert "sec.csv" in (tmp_path / "r2.txt").read_text()
+
+
+def test_blind_script_hard_codes_the_secondary_baseline():
+    src = (ROOT / "tools" / "ms" / "blind_criterion.py").read_text()
+    assert BL.SECONDARY_BASELINE == "MS_base2400" and BL.SECONDARY_FILE == "criterion_vs_MS_base2400.csv"
+    assert "MS_base" in BL.SECONDARY_EXCLUDED and "MS_base2400" in BL.SECONDARY_EXCLUDED
+    assert "r1_analysis" not in src.replace("tools/ms/r1_analysis.py", "")
+
+
+# ====================================================================== 12. descriptive additions A3 (CLI outputs)
+def _r(df: pd.DataFrame, **kw: Any) -> pd.DataFrame:
+    m = np.ones(len(df), dtype=bool)
+    for k, v in kw.items():
+        m &= (df[k] == v).to_numpy()
+    return df[m]
+
+
+def test_a3_columns_are_per_run_columns_and_the_extra_key_guard_still_raises():
+    for c in R.R0_COLS + R.CLASS_COLS + R.STREAK_COLS:
+        assert c in R.COLUMNS
+    assert R.COLUMNS[-len(R.R0_COLS + R.CLASS_COLS + R.STREAK_COLS):] == R.R0_COLS + R.CLASS_COLS + R.STREAK_COLS
+    row = R.new_row("MS_rule", 50, 10501, "ms_arm", Path("/x"), "pilot")
+    row["t2_R0_typo"] = 1.0
+    with pytest.raises(KeyError, match="t2_R0_typo"):
+        R.finish_row(row, [], True)
+
+
+def test_r0_and_peak_over_R0_per_run_and_table(ok_out):
+    per = pd.read_csv(ok_out / "per_run.csv")
+    for arm in ("MS_rule", "MS_base2400", "parents_A", "rehearsal_v2_0"):          # MS arms and both comparators
+        for q in QS:
+            for i, seed in enumerate(SEEDS4):
+                r = _r(per, arm=arm, q=q, seed=seed).iloc[0]
+                peak = abs(r["stage2_peak_rel_err_signed"])
+                assert r["t2_R0_final"] == pytest.approx(peak / RATIO[q], abs=1e-12)
+                assert r["t2_R0_dev"] == pytest.approx(1.01 * peak / RATIO[q], abs=1e-12)
+                assert r["t2_peak_over_R0_final"] == pytest.approx(RATIO[q], abs=1e-9)
+                assert r["t2_peak_over_R0_dev"] == pytest.approx(RATIO[q] / 1.01, abs=1e-9)
+    t = pd.read_csv(ok_out / "r0.csv")
+    assert len(t) == (7 + 2) * 2 and set(t["arm"]) == set(R.MS_ARMS) | set(R.COMPARATORS)
+    assert (t["status"] == "descriptive").all()
+    for q, calib, lin in ((50, 1.65, 1.700), (60, 1.45, 1.486)):
+        sub = t[t["q"] == q]
+        assert (sub["calib_median_peak_over_R0"] == calib).all()                   # repeated in every row of the q
+        assert (sub["linearised_factor"].round(3) == lin).all()
+        r = _r(t, arm="MS_rule", q=q).iloc[0]
+        assert r["n"] == 4 and r["t2_peak_over_R0_final_median"] == pytest.approx(calib, abs=1e-9)
+        peaks = np.array([0.060, 0.062, 0.064, 0.066]) if q == 50 else np.array([0.050, 0.052, 0.054, 0.056])
+        assert r["t2_R0_final_mean"] == pytest.approx((peaks / calib).mean(), abs=1e-12)
+        assert r["t2_R0_final_min"] == pytest.approx(peaks.min() / calib, abs=1e-12)
+        assert r["t2_R0_final_max"] == pytest.approx(peaks.max() / calib, abs=1e-12)
+        assert r["t2_R0_dev_median"] == pytest.approx(1.01 * np.median(peaks) / calib, abs=1e-12)
+        assert r["t2_peak_over_R0_dev_max"] == pytest.approx(calib / 1.01, abs=1e-9)
+
+
+def test_a3_comparators_without_the_arrays_leave_nan_and_a_done_run_flags_it(world_ok, tmp_path):
+    """A comparator whose freeze arrays are missing keeps NaN R0 columns and a flag; no silent zero."""
+    roots = dict(world_ok)
+    d = Path(roots["parents"]) / "q50" / "seed10501"
+    row = R.extract_parents_run(d, 50, 10501, TH, "parents")
+    assert np.isfinite(row["t2_R0_final"])
+    shutil.copytree(roots["parents"], tmp_path / "p")
+    (tmp_path / "p" / "q50" / "seed10501" / "final_final.npz").unlink()
+    row2 = R.extract_parents_run(tmp_path / "p" / "q50" / "seed10501", 50, 10501, TH, "parents")
+    assert np.isnan(row2["t2_R0_final"]) and np.isnan(row2["t2_peak_over_R0_final"])
+    assert np.isfinite(row2["t2_R0_dev"]) and "final_final.npz missing" in row2["flags"]
+    assert row2["status"] == "done"                                                # the primary metric is intact
+
+
+def test_strata_table_hand_computed_cells_and_the_d0_exclusion(ok_out):
+    s = pd.read_csv(ok_out / "strata.csv")
+    assert len(s) == (7 + 2) * 2 * 4 * 2 * 6                                       # run x tier x stratum x side
+    assert set(s["tier"]) == {"final", "development"} and set(s["stratum"]) == {"near", "mid", "tail"}
+    assert set(s["side"]) == {"d<0", "d>0"} and (s["status_label"] == "descriptive").all()
+    nodes = {50: {"near": 39, "mid": 160, "tail": 201}, 60: {"near": 39, "mid": 200, "tail": 161}}
+    ver = {"final": {50: {"near": 9, "mid": 40, "tail": 51}, 60: {"near": 9, "mid": 50, "tail": 41}},
+           "development": {50: {"near": 4, "mid": 20, "tail": 26}, 60: {"near": 4, "mid": 25, "tail": 21}}}
+    for arm in ("MS_rule", "parents_A", "rehearsal_v2_0", "MS_base2400"):
+        for q in QS:
+            for tier in ("final", "development"):
+                sub = _r(s, arm=arm, q=q, seed=10501, tier=tier)
+                assert len(sub) == 6
+                assert sub["n_nodes"].sum() == 800                                # 801 grid nodes minus d = 0
+                for (stratum, side), c in ERR_REC.items():
+                    r = _r(sub, stratum=stratum, side=side).iloc[0]
+                    assert r["n_nodes"] == nodes[q][stratum] and r["n_verifier_nodes"] == ver[tier][q][stratum]
+                    if (stratum, side) == ("mid", "d<0"):
+                        mean, rmse, mx = -2.0, np.sqrt(5.0), 3.0
+                    else:
+                        mean, rmse, mx = c, abs(c), abs(c)
+                    assert r["err_mean"] == pytest.approx(mean, abs=1e-12)
+                    assert r["err_rmse"] == pytest.approx(rmse, abs=1e-12)
+                    assert r["err_max_abs"] == pytest.approx(mx, abs=1e-12)
+                    assert r["err_mean_rel"] == pytest.approx(mean / G0, abs=1e-12)
+                    assert r["err_rmse_rel"] == pytest.approx(rmse / G0, abs=1e-12)
+                    assert r["err_max_abs_rel"] == pytest.approx(mx / G0, abs=1e-12)
+                    spike = (stratum, side) == ("mid", "d<0")
+                    want = abs(SPIKE[1] if spike else RES_VER[(stratum, side)]) / S0
+                    assert r["max_r_over_s"] == pytest.approx(want, abs=1e-12)
+    summ = pd.read_csv(ok_out / "strata_summary.csv")
+    assert len(summ) == (7 + 2) * 2 * 2 * 6 and (summ["n_runs"] == 4).all() and (summ["status"] == "descriptive").all()
+    r = _r(summ, arm="MS_rule", q=50, tier="final", stratum="mid", side="d<0").iloc[0]
+    assert r["err_mean_mean"] == pytest.approx(-2.0) and r["err_mean_median"] == pytest.approx(-2.0)
+    assert r["err_rmse_mean"] == pytest.approx(np.sqrt(5.0)) and r["err_max_abs_max"] == pytest.approx(3.0)
+    assert r["err_max_abs_median"] == pytest.approx(3.0) and r["max_r_over_s_max"] == pytest.approx(0.05)
+    r = _r(summ, arm="MS_rule", q=60, tier="development", stratum="tail", side="d>0").iloc[0]
+    assert r["err_mean_mean"] == 0.0 and r["max_r_over_s_mean"] == 0.0 and r["err_max_abs_rel_max"] == 0.0
+
+
+def test_strata_rows_of_unreadable_runs_are_nan_rows_and_complete_runs_only_enter_the_summary(cli_out):
+    out, _ = cli_out
+    s = pd.read_csv(out / "strata.csv")
+    miss = _r(s, arm="MS_s35a5", q=50, seed=10504)                                  # the missing run
+    assert len(miss) == 12 and (miss["status"] == "missing").all() and miss["err_mean"].isna().all()
+    failed = _r(s, arm="MS_s35a5", q=60, seed=10502)                                # failed after the terminal stage
+    assert (failed["status"] == "failed").all() and failed["err_mean"].notna().all()
+    summ = pd.read_csv(out / "strata_summary.csv")
+    for q in QS:
+        assert (_r(summ, arm="MS_s35a5", q=q)["n_runs"] == 3).all()
+
+
+def test_classifications_and_s_composition(ok_out):
+    c = pd.read_csv(ok_out / "classifications.csv")
+    assert set(c["arm"]) == {"MS_rule", "MS_s25a0"}                                # legacy arms have none
+    assert (c["status"] == "descriptive").all() and (c["run_status"] == "done").all()
+    r = _r(c, arm="MS_rule", q=50, seed=10501).sort_values("block_id")
+    assert list(r["block_id"]) == [1, 2] and list(r["classification"]) == ["localized", "broad"]
+    assert list(r["n_S"]) == [3, 19] and list(r["n_S_near"]) == [0, 4] and list(r["n_S_mid"]) == [3, 15]
+    assert list(r["n_S_tail"]) == [0, 0] and list(r["block_type"]) == ["global", "polish"]
+    assert list(r["followed_by"]) == ["polish", "global"] and list(r["exit_reason"]) == ["block_end", "block_end"]
+    assert r["S"].iloc[0] == "10,11,12" and r["S"].iloc[1] == ",".join(str(x) for x in range(10, 29))
+    cap = _r(c, arm="MS_s25a0", q=60, seed=10504).sort_values("block_id")
+    assert list(cap["n_S"]) == [20, 20] and list(cap["n_S_near"]) == [4, 4] and list(cap["n_S_mid"]) == [16, 16]
+    assert list(cap["followed_by"]) == ["global", "landing"] and list(cap["exit_reason"]) == ["block_end", "cap"]
+    assert len(c) == 4 * 2 * 2 + 4 * 2 * 2
+    rb = pd.read_csv(ok_out / "rule_blocks.csv")
+    b = _r(rb, arm="MS_rule", q=50, seed=10501, stage=2).sort_values("block_id")
+    assert list(b["followed_by"]) == ["polish", "global", "landing"]
+    assert b["n_S_near"].iloc[:2].tolist() == [0, 4] and np.isnan(b["n_S_near"].iloc[2])    # no classification
+    leg = _r(rb, arm="MS_base2400", q=50, seed=10501, stage=2)
+    assert leg["classification"].isna().all() and leg["n_S_near"].isna().all()
+    rule = pd.read_csv(ok_out / "rule.csv")
+    m = _r(rule, arm="MS_rule", q=50).iloc[0]
+    assert (m["t2_n_global_blocks_total"], m["t2_n_polish_blocks_total"]) == (8, 4)
+    assert (m["t2_n_classifications_total"], m["t2_S_near_total"], m["t2_S_mid_total"], m["t2_S_tail_total"]) == (
+        8, 16, 72, 0)
+    assert m["t2_n_classifications_with_near_in_S"] == 4 and m["t2_n_runs_with_near_in_S"] == 4
+    k = _r(rule, arm="MS_s25a0", q=60).iloc[0]
+    assert (k["t2_n_global_blocks_total"], k["t2_n_classifications_total"]) == (8, 8)
+    assert (k["t2_S_near_total"], k["t2_S_mid_total"], k["t2_n_classifications_with_near_in_S"]) == (32, 128, 8)
+    assert k["t2_n_runs_with_near_in_S"] == 4 and k["t2_n_fire"] == 0 and k["t2_n_budget_forced"] == 4
+    for arm in ("MS_base", "MS_base2400", "MS_s25a5"):
+        z = _r(rule, arm=arm, q=50).iloc[0]
+        assert z["t2_n_classifications_total"] == 0 and z["t2_S_near_total"] == 0 and z["t2_n_runs_with_near_in_S"] == 0
+
+
+def test_stage1_R1_streaks_and_exact_zero_checks(ok_out):
+    runs = pd.read_csv(ok_out / "stage1_R1_runs.csv")
+    assert list(runs.columns) == ["roots_id", "arm", "q", "seed", "status", "t1_R_final", "t1_R_dev",
+                                  "t1_n_checks_R0", "t1_streak_kind", "t1_streak_has_R0", "status_label"]
+    assert set(runs["arm"]) == set(R.MS_ARMS) | {"rehearsal_v2_0"}
+    # default R_1 series (0.05, 0.02, 0.0, 0.02, 0.015, ...) with the stop at check 5: the streak is checks 3-5
+    for arm, kind in (("MS_rule", "fire"), ("MS_base", "would_fire"), ("MS_base2400", "would_fire")):
+        r = _r(runs, arm=arm, q=50, seed=10501).iloc[0]
+        assert r["t1_streak_kind"] == kind and bool(r["t1_streak_has_R0"]) and r["t1_n_checks_R0"] == 1
+        assert r["t1_R_final"] == 0.02 and r["t1_R_dev"] == 0.021
+    # MS_s35a0: R_1 = 0 at checks 1, 7 and 8 only, outside the streak (checks 3-5)
+    r = _r(runs, arm="MS_s35a0", q=60, seed=10502).iloc[0]
+    assert r["t1_streak_kind"] == "fire" and not bool(r["t1_streak_has_R0"]) and r["t1_n_checks_R0"] == 3
+    # MS_s25a0: stage 1 never stopped: no streak (kind empty, has_R0 undefined), the zero check is still counted
+    r = _r(runs, arm="MS_s25a0", q=50, seed=10501).iloc[0]
+    assert (pd.isna(r["t1_streak_kind"]) or r["t1_streak_kind"] == "") and pd.isna(r["t1_streak_has_R0"])
+    assert r["t1_n_checks_R0"] == 1
+    re = _r(runs, arm="rehearsal_v2_0", q=50, seed=10501).iloc[0]
+    assert pd.isna(re["t1_n_checks_R0"]) and pd.isna(re["t1_streak_has_R0"])      # no calibration root in this world
+    t = pd.read_csv(ok_out / "stage1_R1.csv")
+    assert len(t) == (7 + 1) * 2 and (t["status"] == "descriptive").all()
+    m = _r(t, arm="MS_rule", q=50).iloc[0]
+    assert (m["n_runs"], m["n_streaks_fire"], m["n_streaks_would_fire"], m["n_streaks_with_R0"]) == (4, 4, 0, 4)
+    assert m["n_checks_R0_total"] == 4 and m["n_runs_with_R0_check"] == 4
+    assert (m["t1_R_final_median"], m["t1_R_final_min"], m["t1_R_final_max"], m["t1_R_final_mean"]) == (
+        0.02, 0.02, 0.02, 0.02)
+    b = _r(t, arm="MS_base", q=60).iloc[0]
+    assert (b["n_streaks_fire"], b["n_streaks_would_fire"], b["n_streaks_with_R0"]) == (0, 4, 4)
+    n = _r(t, arm="MS_s35a0", q=50).iloc[0]
+    assert (n["n_streaks_fire"], n["n_streaks_with_R0"], n["n_checks_R0_total"]) == (4, 0, 12)
+    k = _r(t, arm="MS_s25a0", q=50).iloc[0]
+    assert (k["n_streaks_fire"], k["n_streaks_would_fire"], k["n_streaks_with_R0"], k["n_checks_R0_total"]) == (
+        0, 0, 0, 4)
+
+
+def test_a3_analysis_info_names_what_the_comparators_do_not_store(ok_out):
+    info = json.loads((ok_out / "analysis_info.json").read_text())
+    a3 = info["a3_descriptive"]
+    assert a3["calib_median_peak_over_R0"] == {"50": 1.65, "60": 1.45}
+    assert round(a3["linearised_factor"]["50"], 3) == 1.700 and round(a3["linearised_factor"]["60"], 3) == 1.486
+    assert "r0.csv" in a3["tables"] and "classifications.csv" in a3["tables"] and "stage1_R1.csv" in a3["tables"]
+    ns = info["a3_not_stored_by_design"]
+    assert "parents_A" in ns and "rehearsal_v2_0" in ns and any("t1_R_final" in x for x in ns["rehearsal_v2_0"])
+    assert "R0_and_strata_of_comparators" in ns
+
+
+def test_the_vs_MS_rule_and_secondary_figures_have_no_row_for_the_legacy_arms(world_ok, tmp_path, monkeypatch):
+    """The figure of the sampler's effect net of the rule lists rule arms only (no empty MS_base2400 row)."""
+    calls = []
+    real = R.fig_paired
+
+    def spy(*args, **kwargs):
+        calls.append((args[3], list(args[5])))              # (comparison label, arms drawn)
+        return real(*args, **kwargs)
+    monkeypatch.setattr(R, "fig_paired", spy)
+    assert _run_cli(world_ok, tmp_path / "fig", ["--seeds", "10501-10504"]) == 0
+    arms_by = {c: a for c, a in calls}
+    assert arms_by["vs MS_rule"] == RULE_ARMS[1:] and arms_by["vs MS_base2400"] == RULE_ARMS   # MS_rule is the control there
+    assert arms_by["vs parents_A"] == list(R.MS_ARMS)

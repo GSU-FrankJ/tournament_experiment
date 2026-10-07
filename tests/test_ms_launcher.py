@@ -26,11 +26,12 @@ def _dry(tmp_path, *argv):
 
 
 def test_wave_plans_and_job_counts(tmp_path):
-    for wave, n in (("pilot", 100), ("base", 20), ("v20_repro", 20)):
+    for wave, n in (("pilot", 120), ("base", 20), ("v20_repro", 20)):       # pilot = 5 rule arms + MS_base2400
         jobs = L.build_jobs(wave, mc.DEFAULT_QS, mc.DEFAULT_SEEDS, None, tmp_path, mc.DEFAULT_PARAMS)
         assert len(jobs) == n, wave
     pilot = L.build_jobs("pilot", mc.DEFAULT_QS, mc.DEFAULT_SEEDS, None, tmp_path, mc.DEFAULT_PARAMS)
-    assert {j.cfg["arm"] for j in pilot} == set(mc.PILOT_ARMS) and "MS_base" not in {j.cfg["arm"] for j in pilot}
+    assert {j.cfg["arm"] for j in pilot} == set(mc.PILOT_ARMS) | {"MS_base2400"}
+    assert "MS_base" not in {j.cfg["arm"] for j in pilot}
     assert all(j.out_dir.endswith(f"q{j.cfg['q']}/seed{j.cfg['seed']}/{j.cfg['arm']}") for j in pilot)
     base = L.build_jobs("base", mc.DEFAULT_QS, mc.DEFAULT_SEEDS, None, tmp_path, mc.DEFAULT_PARAMS)
     assert {j.cfg["arm"] for j in base} == {"MS_base"} and "/base/" in base[0].out_dir
@@ -51,9 +52,13 @@ def test_commands_use_the_right_entry_points(tmp_path):
 def test_every_config_validates_and_carries_every_key(tmp_path):
     jobs = L.build_jobs("pilot", mc.DEFAULT_QS, mc.DEFAULT_SEEDS, None, tmp_path, mc.DEFAULT_PARAMS)
     rows = L.validate_jobs(jobs)
-    assert len(rows) == 100 and all(r["ok"] for r in rows), [r for r in rows if not r["ok"]][:2]
+    assert len(rows) == 120 and all(r["ok"] for r in rows), [r for r in rows if not r["ok"]][:2]
     for j in jobs:
         assert set(j.cfg) >= set(rms.REQUIRED) and j.cfg["clamp_likelihood"] == "density"
+        if j.cfg["arm"] == "MS_base2400":           # the legacy control: fixed budgets, no rule, bin-balanced
+            assert j.cfg["rule"]["enabled"] is False and j.cfg["pipeline"]["budgets"] == {"2": 2400, "1": 600}
+            assert j.cfg["start_weights"] == {"scheme": "bin_balanced"}
+            continue
         assert j.cfg["rule"]["enabled"] is True and j.cfg["pipeline"]["budgets"] is None
         assert j.cfg["start_weights"]["scheme"] == "stratified_priority" and "derived" in j.cfg
 
@@ -81,6 +86,50 @@ def test_base_arm_is_the_legacy_configuration(tmp_path):
     lr = {w["phase"]: w for w in proto["pipeline"]["lr_decay"]}
     assert (lr["A"]["local_first"], lr["A"]["local_last"], lr["B"]["local_first"], lr["B"]["local_last"]) == (1201, 1600, 1, 600)
     assert c["record"] == {**proto["records"]["50"], "seed": 10501, "run": c["run"], "output_dir": c["record"]["output_dir"]}
+
+
+def test_ms_base2400_is_the_budget_matched_legacy_arm(tmp_path):
+    """Addendum A1: MS_base2400 = MS_base with the terminal stage fixed at 2400 (LR 3e-4 constant to local 2000,
+    linear 3e-4 -> 3e-5 over 2001-2400), stage 1 exactly as MS_base; nothing else differs."""
+    base, c = (L.build_jobs("base", [60], [10502], None, tmp_path, mc.DEFAULT_PARAMS)[0].cfg,
+               L.build_jobs("pilot", [60], [10502], ["MS_base2400"], tmp_path, mc.DEFAULT_PARAMS)[0].cfg)
+    assert c["arm"] == "MS_base2400" and c["run"] == "msr1_q60_s10502_MS_base2400"
+    assert c["pipeline"]["budgets"] == {"2": 2400, "1": 600}
+    assert c["pipeline"]["lr_windows"] == {"2": [{"first": 2001, "last": 2400, "start": 3e-4, "end": 3e-5}],
+                                           "1": [{"first": 1, "last": 600, "start": 3e-4, "end": 3e-5}]}
+    assert c["pipeline"]["lr_windows"]["1"] == base["pipeline"]["lr_windows"]["1"]
+    assert c["pipeline"]["budgets"]["1"] == base["pipeline"]["budgets"]["1"]
+    assert c["rule"] == base["rule"] and c["start_weights"] == base["start_weights"] == {"scheme": "bin_balanced"}
+    assert {k for k in c if c[k] != base[k]} == {"arm", "run", "pipeline", "record"}
+    assert {k for k in c["record"] if c["record"][k] != base["record"][k]} == {"run", "output_dir"}
+    assert mc.LEGACY_PIPELINE["budgets"] == {"2": 1600, "1": 600}          # MS_base itself is unchanged
+    rms.validate_config(c)                                                  # the runner accepts the 2400 window
+    jobs = L.build_jobs("pilot", [50], [10501], ["MS_base2400"], tmp_path, mc.DEFAULT_PARAMS)
+    cmd = L.job_command(*jobs[0])
+    assert cmd[3].endswith("run/run_ms_stagewise.py") and jobs[0].out_dir.endswith("pilot/q50/seed10501/MS_base2400")
+
+
+def test_ms_base2400_records_the_would_fire_thresholds_of_the_parameter_file(tmp_path):
+    prm = copy.deepcopy(mc.DEFAULT_PARAMS)
+    prm["stages"]["2"]["rho"] = 0.05
+    c = L.build_jobs("pilot", [50], [10501], ["MS_base2400"], tmp_path, prm)[0].cfg
+    assert c["rule"]["stages"]["2"] == {"eps": 0.005, "rho": 0.05, "tau": 0.02}
+
+
+def test_the_dry_run_record_carries_the_run_code_diff_stat(tmp_path):
+    root = tmp_path / "r"
+    assert L.main(["--wave", "pilot", "--arms", "MS_base2400", "--qs", "50", "--seeds", "10501", "--dry-run",
+                   "--root", str(root), "--code-commit", "HEAD"]) == 0
+    rec = json.load(open(next((root / "pilot").glob("dryrun_*.json"))))
+    assert rec["diff_stat_run_code_to_head"] == ""              # HEAD against itself: nothing differs
+    assert rec["validation"]["per_arm"]["MS_base2400"]["valid"] == 1
+    assert L.RUN_CODE_PATHS == ("run", "utils", "envs", "agents", "protocols")
+    # the path limit: between the base of the round (4dc604de: no runner yet) and HEAD the run code differs, and
+    # only run / utils / envs / agents / protocols paths are listed although tools/, tests/ and reports/ differ too
+    rec2 = L.git_record("4dc604de")
+    stat = rec2["diff_stat_run_code_to_head"]
+    assert "run/run_ms_stagewise.py" in stat and "tools/ms/" not in stat and "tests/" not in stat
+    assert "tools/ms/" in rec2["diff_stat_code_commit_to_head"]
 
 
 def test_the_parameter_file_is_used_and_recorded(tmp_path):
@@ -121,7 +170,8 @@ def test_refusals(tmp_path):
 
 
 def test_the_defaults_of_the_arm_table_match_d6():
-    assert set(mc.ARMS) == {"MS_base", "MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5"}
+    assert set(mc.ARMS) == {"MS_base", "MS_base2400", "MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5"}
+    assert mc.PILOT_ARMS == ("MS_rule", "MS_s25a0", "MS_s25a5", "MS_s35a0", "MS_s35a5")
     assert [(mc.ARMS[a]["lambda_P"], mc.ARMS[a]["alpha_global"]) for a in mc.PILOT_ARMS] == [
         (None, 0.0), (0.25, 0.0), (0.25, 0.5), (0.35, 0.0), (0.35, 0.5)]
     d = mc.DEFAULT_PARAMS
