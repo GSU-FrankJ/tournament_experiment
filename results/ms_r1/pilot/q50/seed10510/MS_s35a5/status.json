@@ -1,0 +1,21 @@
+{
+ "run": "msr1_q50_s10510_MS_s35a5",
+ "arm": "MS_s35a5",
+ "q": 50,
+ "seed": 10510,
+ "state": "done",
+ "pid": 4107975,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a5/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a5",
+ "start_time": "2026-10-07 06:00:17",
+ "git": {
+  "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+  "short": "f969d55",
+  "dirty": false
+ },
+ "end_time": "2026-10-07 06:08:58",
+ "exit_code": 0,
+ "final_global_update": 2875,
+ "total_wall_sec": 521.1571882170392,
+ "outcome": "pass"
+}

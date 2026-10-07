@@ -1,0 +1,4952 @@
+{
+ "tool": "tools/ms/launch_checks.py",
+ "root": "results/ms_r1/pilot",
+ "code_commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+ "n_runs": 120,
+ "n_ok_per_check": {
+  "status": 120,
+  "manifest": 120,
+  "files": 120,
+  "global_rng": 120,
+  "tail_share_coverage": 120
+ },
+ "all_ok": true,
+ "start_share_tests": {
+  "n_tests": 1860,
+  "n_flagged": 3,
+  "expected_flagged_under_null": 5.0216206776639565,
+  "note": "a few flags are expected by chance at 3 standard errors; they are not errors by themselves"
+ },
+ "runs": [
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.8045954311531682,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9646948978573409,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.034858853005835,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.48155727958538,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.5799443724792015,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10501/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.0127831501369822,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10501,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3170803015888992,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.5819621255474692,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.498990377245257,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.2993087104302168,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3739030856619747,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10502/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.831282885085634,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10502,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.8561553006146874,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.6108896026920814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9992176738352558,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.5897398000847223,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.573335469752585,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10503/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.7066526732268856,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10503,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.2907313432189196,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4954176754603625,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.5209158285460083,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7141929337782775,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.2503685536894644,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10504/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.5877132402714709,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10504,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4159481690540376,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7235727791421451,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9975444082145286,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7650999352992471,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7235727791421451,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10505/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 2.333084093133739,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10505,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3306119485228998,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.7046449243230923,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.5448622507574514,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.5341461013351396,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.3645825453321367,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10506/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.70515854004881,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10506,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.5335866525348776,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.730160442477084,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.476847298669772,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.0359908852458766,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.103916709244064,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10507/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 2.110936921724779,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10507,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1966373523074694,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.510518674716293,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.5190296220121087,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.4047718265980667,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.387697058078535,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10508/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.6573883356343685,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10508,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1876116042958818,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7350552344714179,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.8468843382388342,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3676412937366216,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3435028842545045,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10509/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.14904851942814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10509,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4717808399681505,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4041630560341973,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.6885804110474267,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4041630560341973,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4041630560341973,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q50/seed10510/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.1545727911561596,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 50,
+   "seed": 10510,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.79565678013899,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7702761378288323,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.958839269070159,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1002619107183853,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1174339473963193,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10501/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.23815903628108592,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10501,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.440382943875761,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.440382943875761,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.440382943875761,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.440382943875761,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.440382943875761,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10502/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.986064815286908,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10502,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4072669320271305,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1633777766448046,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.857915027361034,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.216193904558625,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.576299552049378,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10503/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.8538195909443052,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10503,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.0477833382960715,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.3139902873540528,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7784058147053503,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.3576022509608046,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.6568059091957577,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10504/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.0697706201272237,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10504,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.0143547757929454,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.0143547757929454,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.4079816259072646,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.0143547757929454,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.2955169025132975,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10505/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.5959335534521815,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10505,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.51607101536529,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 1,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 3.127151897866891,
+    "flagged": [
+     {
+      "stage": 2,
+      "block_id": 6,
+      "block_type": "landing",
+      "stratum": "mid",
+      "n_updates": 400,
+      "observed": 53019.0,
+      "expected": 53641.22869603744,
+      "z": -3.127151897866891,
+      "design_tail_share": 0.45454545454545453
+     }
+    ]
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 1,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 3.000880515488622,
+    "flagged": [
+     {
+      "stage": 2,
+      "block_id": 6,
+      "block_type": "landing",
+      "stratum": "mid",
+      "n_updates": 400,
+      "observed": 61566.0,
+      "expected": 62190.48202899264,
+      "z": -3.000880515488622,
+      "design_tail_share": 0.45454545454545453
+     }
+    ]
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1904323448978347,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.608216860135356,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10506/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.2021369048577468,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10506,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 1,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 3.1027189095971117,
+    "flagged": [
+     {
+      "stage": 2,
+      "block_id": 5,
+      "block_type": "polish",
+      "stratum": "near",
+      "n_updates": 400,
+      "observed": 19858.0,
+      "expected": 20277.027148734323,
+      "z": -3.1027189095971117,
+      "design_tail_share": 0.45454545454545453
+     }
+    ]
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.706020074363297,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.832405245674243,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.832405245674243,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.832405245674243,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10507/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.4030256997096561,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10507,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.2651745597612303,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.3574007850890566,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.2651745597612303,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.1323168697102868,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.2651745597612303,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10508/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.252723118918441,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10508,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9744146350351814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9744146350351814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9744146350351814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.353466580398996,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.9744146350351814,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10509/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 1.5208579121868848,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10509,
+   "arm": "MS_base2400"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_rule",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.459630598601779,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_rule"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_s25a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.7230183966912462,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_s25a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_s25a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.459630598601779,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_s25a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_s35a0",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 2.3330260592256584,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_s35a0"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_s35a5",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 18,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.04859632913868345,
+    "max_abs_z": 1.623588516749001,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+    "coverage_ok": true,
+    "n_tests": 6,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_s35a5"
+  },
+  {
+   "dir": "results/ms_r1/pilot/q60/seed10510/MS_base2400",
+   "status": {
+    "state": "done",
+    "exit_code": 0,
+    "ok": true
+   },
+   "manifest": {
+    "commit": "f969d55026b59edaaaac34be633b42b447f9af3c",
+    "clean_tree": true,
+    "ok": true
+   },
+   "files": {
+    "ok": true,
+    "missing": []
+   },
+   "global_rng": {
+    "ok": true,
+    "status": "ok",
+    "violations": []
+   },
+   "start_shares": {
+    "n_tests": 3,
+    "n_flagged_abs_z_gt_3": 0,
+    "expected_flagged_under_null": 0.008099388189780574,
+    "max_abs_z": 0.5950681867802983,
+    "flagged": []
+   },
+   "tail_share": {
+    "tail_mass_max_deviation_from_lambda_T": 0.0,
+    "coverage_ok": true,
+    "n_tests": 1,
+    "n_flagged_abs_z_gt_3": 0
+   },
+   "q": 60,
+   "seed": 10510,
+   "arm": "MS_base2400"
+  }
+ ],
+ "c_ms2": {
+  "check": "C-MS2",
+  "ref": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "new": "results/ms_r1/pilot",
+  "arm": "MS_base2400",
+  "through_update": 1201,
+  "n": 20,
+  "n_identical": 20,
+  "ALL": true,
+  "failing_fields": [],
+  "first_differences": [],
+  "runs": [
+   {
+    "q": 50,
+    "seed": 10501,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10502,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10503,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10504,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10505,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10506,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10507,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10508,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10509,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 50,
+    "seed": 10510,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10501,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10502,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10503,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10504,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10505,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10506,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10507,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10508,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10509,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   },
+   {
+    "q": 60,
+    "seed": 10510,
+    "fields": {
+     "weight_exports_through": true,
+     "train_history:series": true,
+     "updates_csv:stream_positions_and_losses": true,
+     "first_export_after_differs": true
+    },
+    "ALL": true,
+    "first_difference": null,
+    "differences": {},
+    "info": {
+     "n_weight_exports_compared": 48
+    }
+   }
+  ]
+ }
+}
