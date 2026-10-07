@@ -1,0 +1,58 @@
+{
+ "tool": "tools/ms/replay_dev_rule.py",
+ "command": "tools/ms/replay_dev_rule.py replay --root-v2 /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked --out results/ms_r1/calibration --workers 8",
+ "git_head": "4dc604de9b2800d5dba99dfafe95696f630ab4b1",
+ "reference_roots": {
+  "rehearsal_v2_0": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+  "confirmation_v2_0": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/confirmation_v2_0"
+ },
+ "root_v2": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked",
+ "protocol": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/protocols/v2_T2_locked_v2_0.json",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "n_runs": 60,
+ "n_exports_per_run": 88,
+ "export_us": [
+  25,
+  2200,
+  25
+ ],
+ "verifier_tiers": {
+  "dev": {
+   "name": "development",
+   "state_step": 4.0,
+   "effort_step": 1.0,
+   "gl_half": 16,
+   "grid_tol": 1e-09,
+   "mass_tol": 1e-10,
+   "pdl_tol_over_dw": 1e-10
+  },
+  "final": {
+   "name": "final",
+   "state_step": 2.0,
+   "effort_step": 0.5,
+   "gl_half": 32,
+   "grid_tol": 1e-09,
+   "mass_tol": 1e-10,
+   "pdl_tol_over_dw": 1e-10
+  }
+ },
+ "recovery_step": 0.5,
+ "workers": 8,
+ "loadavg_at_start": [
+  13.5859375,
+  12.14892578125,
+  11.615234375
+ ],
+ "wall_sec": 16.11852630204521,
+ "python": "3.12.3",
+ "torch": "2.5.1+cu121",
+ "numpy": "2.5.0",
+ "omp_num_threads": "1",
+ "validation": {
+  "n_runs": 60,
+  "n_gate_ok": 60,
+  "n_mismatching_fields": 0,
+  "max_abs_diff": 0.0
+ },
+ "note": "numeric columns deterministic; verifier_sec/diag_sec are wall-clock"
+}

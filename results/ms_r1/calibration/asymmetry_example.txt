@@ -1,0 +1,20 @@
+q=50 seed=10501 rehearsal_v2_0 u1600: e_hat(0)=61.44 a_dev(0)=66.48  a = DW/(4q^2) = 0.0004, 2k = 0.0005714; amplification 2k/(2k-a) = 3.333 (d<0), 2k/(2k+a) = 0.588 (d>0)
+  d=+-  4: e_hat(+d)= 61.11 e_hat(-d)= 61.26 | a_dev(+d)= 64.75 a_dev(-d)= 67.99 | r(+d)= 3.64 r(-d)= 6.73
+  d=+-  8: e_hat(+d)= 60.33 e_hat(-d)= 60.47 | a_dev(+d)= 62.78 a_dev(-d)= 69.30 | r(+d)= 2.46 r(-d)= 8.83
+  d=+- 16: e_hat(+d)= 57.61 e_hat(-d)= 56.96 | a_dev(+d)= 58.04 a_dev(-d)= 61.57 | r(+d)= 0.43 r(-d)= 4.61
+  d=+- 24: e_hat(+d)= 53.59 e_hat(-d)= 51.35 | a_dev(+d)= 52.44 a_dev(-d)= 52.30 | r(+d)= 1.15 r(-d)= 0.95
+  d=+- 40: e_hat(+d)= 42.35 e_hat(-d)= 39.51 | a_dev(+d)= 40.97 a_dev(-d)= 41.18 | r(+d)= 1.38 r(-d)= 1.67
+  d=+- 60: e_hat(+d)= 25.45 e_hat(-d)= 25.42 | a_dev(+d)= 26.94 a_dev(-d)= 33.95 | r(+d)= 1.48 r(-d)= 8.53
+  d=+- 80: e_hat(+d)= 11.66 e_hat(-d)= 10.77 | a_dev(+d)= 12.67 a_dev(-d)= 19.45 | r(+d)= 1.01 r(-d)= 8.68
+  d=+- 96: e_hat(+d)=  5.30 e_hat(-d)=  3.24 | a_dev(+d)=  2.98 a_dev(-d)=  0.00 | r(+d)= 2.32 r(-d)= 3.24
+  max sym err of e_hat on |d|<2q: 3.245; argmax of r at d = -72 (r = 10.65, R = r/s = 0.1602)
+q=60 seed=10503 rehearsal_v2_0 u1600: e_hat(0)=54.12 a_dev(0)=56.96  a = DW/(4q^2) = 0.0002778, 2k = 0.0005714; amplification 2k/(2k-a) = 1.946 (d<0), 2k/(2k+a) = 0.673 (d>0)
+  d=+-  4: e_hat(+d)= 53.82 e_hat(-d)= 53.98 | a_dev(+d)= 55.60 a_dev(-d)= 58.07 | r(+d)= 1.78 r(-d)= 4.09
+  d=+-  8: e_hat(+d)= 53.13 e_hat(-d)= 53.35 | a_dev(+d)= 54.09 a_dev(-d)= 55.69 | r(+d)= 0.96 r(-d)= 2.34
+  d=+- 16: e_hat(+d)= 50.81 e_hat(-d)= 50.56 | a_dev(+d)= 50.56 a_dev(-d)= 50.32 | r(+d)= 0.25 r(-d)= 0.25
+  d=+- 24: e_hat(+d)= 47.58 e_hat(-d)= 46.13 | a_dev(+d)= 46.49 a_dev(-d)= 45.81 | r(+d)= 1.09 r(-d)= 0.32
+  d=+- 40: e_hat(+d)= 39.68 e_hat(-d)= 36.35 | a_dev(+d)= 38.06 a_dev(-d)= 38.14 | r(+d)= 1.62 r(-d)= 1.78
+  d=+- 60: e_hat(+d)= 29.24 e_hat(-d)= 27.02 | a_dev(+d)= 28.47 a_dev(-d)= 29.10 | r(+d)= 0.78 r(-d)= 2.07
+  d=+- 80: e_hat(+d)= 19.46 e_hat(-d)= 18.48 | a_dev(+d)= 19.13 a_dev(-d)= 19.43 | r(+d)= 0.33 r(-d)= 0.95
+  d=+- 96: e_hat(+d)= 11.03 e_hat(-d)= 10.20 | a_dev(+d)= 11.19 a_dev(-d)= 12.26 | r(+d)= 0.15 r(-d)= 2.07
+  max sym err of e_hat on |d|<2q: 3.336; argmax of r at d = -4 (r = 4.09, R = r/s = 0.0718)

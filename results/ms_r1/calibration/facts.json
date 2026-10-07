@@ -1,0 +1,154 @@
+{
+ "fact1": {
+  "source_lines": {
+   "P[\"phase_thr_over_dw\"]": [
+    [
+     833,
+     "br_pass = bool(valid and crit_val <= P[\"phase_thr_over_dw\"][phase])"
+    ],
+    [
+     844,
+     "\"criterion_threshold_over_dw\": P[\"phase_thr_over_dw\"][phase],"
+    ]
+   ],
+   "P[\"k_phase\"]": [
+    [
+     886,
+     "if phase != \"C\" and eligible >= int(P[\"k_phase\"]):"
+    ]
+   ],
+   "P[\"conc_thr\"]": [
+    [
+     827,
+     "conc_pass = bool(conc_s.get(\"valid\") and conc_s[\"max_std_norm\"] <= P[\"conc_thr\"])"
+    ]
+   ],
+   "self.fixed = ": [
+    [
+     324,
+     "self.fixed = bool(cfg[\"fixed_budget\"])"
+    ]
+   ],
+   "if not self.fixed:": [
+    [
+     889,
+     "if not self.fixed:"
+    ],
+    [
+     895,
+     "if not self.fixed:"
+    ]
+   ],
+   "\"verifier_timeout\"": [
+    [
+     120,
+     "OVERRIDE_KEYS = (\"phase_caps\", \"warmup\", \"stability_every\", \"verifier_timeout\","
+    ],
+    [
+     379,
+     "if \"P\" in MODE_PHASES[self.mode] and isinstance(P[\"verifier_timeout\"], dict) and \"P\" not in P[\"verifier_timeout\"]:"
+    ],
+    [
+     662,
+     "v = P[\"verifier_timeout\"]"
+    ],
+    [
+     967,
+     "vt = P[\"verifier_timeout\"]"
+    ],
+    [
+     1134,
+     "\"verifier_timeout\": P[\"verifier_timeout\"], \"drift_thr\": P[\"drift_thr\"],"
+    ]
+   ],
+   "def timeout_for": [
+    [
+     661,
+     "def timeout_for() -> int:"
+    ]
+   ]
+  },
+  "run_config_values": {
+   "mode": [
+    "locked"
+   ],
+   "fixed_budget": [
+    true
+   ],
+   "verifier_timeout_A": [
+    100
+   ],
+   "phase_thr_over_dw_A": [
+    0.02
+   ],
+   "k_phase": [
+    3
+   ],
+   "conc_thr": [
+    0.04
+   ],
+   "phase_cap_A": [
+    1600
+   ]
+  },
+  "phase_A_call_spacing_counts": {
+   "20": 1,
+   "40": 2,
+   "60": 2,
+   "80": 1,
+   "100": 897
+  },
+  "n_runs_with_a_stability_triggered_call_in_A": 4,
+  "verifier_sec_A": {
+   "n": 963,
+   "median": 0.009031594963744283,
+   "mean": 0.009750811303039744,
+   "q10": 0.008353217400144785,
+   "q90": 0.010813663026783616,
+   "min": 0.007980861992109567,
+   "max": 0.02513379801530391
+  }
+ },
+ "fact2_checks": {
+  "n_calls_checked": 963,
+  "n_eligible_mismatch_vs_logged_column": 0,
+  "n_fire_mismatch_vs_would_have_fired": 0,
+  "n_run_thr_pairs_export_K100_vs_log": 120,
+  "n_equal": 120,
+  "differing": []
+ },
+ "fact3": {
+  "run": "confirmation_v2_0/q50/seed30501",
+  "gates_json_e2_at_0": 66.44632164611043,
+  "gates_json_g2_at_0": 70.0,
+  "gates_json_peak_rel_err_signed": -0.0507668336269938,
+  "gates_json_eta_final": 0.0009740349681508498,
+  "gates_json_eta_dev": 0.0009703325787630002,
+  "dw": 4.0,
+  "k": 0.00028571428571428574,
+  "verifier_dev": {
+   "e_hat_2_0": 66.44632164611043,
+   "a_dev_2_0": 68.53672067780987,
+   "a_dev_minus_e_hat": 2.090399031699434,
+   "delta_2_0_over_dw": 0.0005306146992816174,
+   "eta_T_over_dw": 0.0009703325787630002
+  },
+  "verifier_final": {
+   "e_hat_2_0": 66.44632164611043,
+   "a_dev_2_0": 68.5367206778097,
+   "a_dev_minus_e_hat": 2.0903990316992633,
+   "delta_2_0_over_dw": 0.0005306146992818395,
+   "eta_T_over_dw": 0.0009740349681508498
+  },
+  "independent_F_xi": {
+   "e_hat_2_0": 66.44632164611043,
+   "best_response": 68.53672067770286,
+   "best_response_minus_e_hat": 2.090399031592426,
+   "best_response_minus_e_hat_over_g2_0": 0.02986284330846323,
+   "gain_at_0_over_dw": 0.0005306146992816174,
+   "gain_over_GA_limit_0p005": 0.10612293985632348,
+   "e_hat_rel_err": -0.0507668336269938
+  }
+ },
+ "root_v2": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked"
+}
