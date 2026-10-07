@@ -1,0 +1,257 @@
+{
+ "all_done": true,
+ "arms": [
+  "NL_bb_s1",
+  "NL_bb_s4",
+  "NL_bb_s16",
+  "NL_st_s1",
+  "NL_st_s4",
+  "NL_st_s16"
+ ],
+ "boot_seed": 20261007,
+ "bootstrap_scheme": "fresh numpy.random.default_rng(seed) per (q, statistic); idx = rng.integers(0, n, size=(n_boot, n)); 2.5 / 97.5 percentiles of the resampled mean (or median); the transmission ratio is recomputed on every resample (resamples with |mean d smoothing| <= 1e-09 are dropped)",
+ "command": [
+  "tools/ms/r2_analysis.py",
+  "--pilot-root",
+  "results/ms_r2/pilot",
+  "--ms-r1-pilot-root",
+  "results/ms_r1/pilot",
+  "--parents-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "--rehearsal-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+  "--calibration-root",
+  "results/ms_r1/calibration",
+  "--out",
+  "results/ms_r2/analysis"
+ ],
+ "criterion": {
+  "a": "ci_mean_hi < 0 of the mean paired difference s - (same sampler, s = 1) at BOTH q",
+  "b": "no run passing G-A (final tier) with the eta part of G-N (|eta_dev - eta_final| <= 0.001) under s = 1 fails it under s",
+  "comparisons": [
+   [
+    "NL_bb_s4",
+    "NL_bb_s1"
+   ],
+   [
+    "NL_bb_s16",
+    "NL_bb_s1"
+   ],
+   [
+    "NL_st_s4",
+    "NL_st_s1"
+   ],
+   [
+    "NL_st_s16",
+    "NL_st_s1"
+   ]
+  ],
+  "note": "pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it",
+  "parts_per_arm": {
+   "NL_bb_s16": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "NL_bb_s4": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "NL_st_s16": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "NL_st_s4": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   }
+  },
+  "primary_metric": "stage2_peak_rel_err_abs"
+ },
+ "decomposition": "gap = g2_at_0 - e2_at_0; smoothing = g2_at_0 - smoothed_e_pred_0; remainder = smoothed_e_pred_0 - e2_at_0 (final tier, utils.ms_noise.decompose_gap); *_rel = / g2_at_0; smoothing_over_formula = smoothing / (g2_at_0 * sigma_effort_at_0_t2 / (sqrt(pi) * q))",
+ "figures": {
+  "paired_abs_peak_vs_parents_A.png": "ok",
+  "paired_abs_peak_vs_s1.png": "ok",
+  "paired_secondary_vs_s1.png": "ok",
+  "scatter_remainder_vs_smoothing_change.png": "ok",
+  "trajectory_decomposition.png": "ok"
+ },
+ "matplotlib": "3.11.0",
+ "n_boot": 10000,
+ "noise_record_check": "NL runs: the decomposition against rule_log.json stages[2].freeze.noise (absolute 1e-09 for gap, smoothing, remainder, e_sigma, e2*(0), e_hat; relative 1e-05 for sigma and the smoothing / formula ratio, whose per-run sigma is the verifier's float32 value); a disagreement is a flag in the row's flags column",
+ "not_stored_by_design": {
+  "MS_base2400": [
+   "conc_scale_final (MS-R1 runs carry no noise record; NaN)",
+   "the per-check decomposition (trajectory_checks.csv, segments.csv cover the six NL arms only)"
+  ],
+  "MS_s35a5": [
+   "conc_scale_final (MS-R1 runs carry no noise record; NaN)",
+   "the per-check decomposition (trajectory_checks.csv, segments.csv cover the six NL arms only)"
+  ],
+  "parents_A": [
+   "smoothing, remainder, smoothing_over_formula and smoothed_e_pred_0 (final_v2.json carries no smoothed_game; NaN; gap is defined)",
+   "conc_scale_final (no noise record; NaN)",
+   "D3 columns t2_R_*, t2_Rtail_*, t2_C_*, t2_s_* (no one-step best-response effort stored; NaN unless --calibration-root)",
+   "every stage-1 column (stage 1 untrained)",
+   "rule record, start shares, clamp counts (NaN)"
+  ],
+  "rehearsal_v2_0": [
+   "conc_scale_final (no noise record; NaN)",
+   "D3 columns t*_R_*, t*_C_*, t*_s_* (NaN unless --calibration-root)",
+   "rule record, start shares, clamp counts (NaN)",
+   "t*_minibatch_steps (not stored in v2_run_summary.json; NaN)",
+   "t*_episodes = updates x episodes_per_update (derived)"
+  ]
+ },
+ "numpy": "2.5.0",
+ "pandas": "3.0.3",
+ "protocol": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "python": "3.12.3",
+ "qs": [
+  50,
+  60
+ ],
+ "references": [
+  "MS_base2400",
+  "MS_s35a5",
+  "parents_A",
+  "rehearsal_v2_0"
+ ],
+ "roots": {
+  "calibration": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/calibration",
+  "ms_r1_pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot",
+  "parents": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot",
+  "rehearsal": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0"
+ },
+ "roots_id": "a5bcafe6998b",
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "status_counts": {
+  "MS_base2400": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_s35a5": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_bb_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_bb_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_bb_s4": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_st_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_st_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_st_s4": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "parents_A": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "rehearsal_v2_0": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  }
+ },
+ "thresholds": {
+  "eta": 0.005,
+  "g_f": 0.01,
+  "g_s": 0.05,
+  "n_eta": 0.001,
+  "n_gmax": 0.001,
+  "rmse": 0.05,
+  "s1": 0.1,
+  "tail": 0.02
+ },
+ "tool": "tools/ms/r2_analysis.py",
+ "transmission": "ratio = mean(d gap) / mean(d smoothing), d = arm - s=1 of the same sampler (the PI's -(change of the gap) / (change of the smoothing part) read as reduction over reduction: 1 = the whole smoothing change reaches the gap, 0 = the remainder offsets it)",
+ "windows": {
+  "decay_last": 2800,
+  "hold_last": 2400,
+  "ramp_first": 2001,
+  "ramp_last": 2200,
+  "segments": [
+   [
+    "training",
+    1,
+    2000
+   ],
+   [
+    "ramp",
+    2001,
+    2200
+   ],
+   [
+    "hold",
+    2201,
+    2400
+   ],
+   [
+    "decay",
+    2401,
+    2800
+   ]
+  ],
+  "traj_from": 1800
+ }
+}
