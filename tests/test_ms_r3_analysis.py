@@ -1140,8 +1140,13 @@ def test_the_last_export_is_the_freeze_candidate(tiny_df):
 
 def test_first_layer_table_of_the_tiny_wave(tiny, tiny_df):
     fl = R3.first_layer_table(tiny_df, WIN, PROTO, R3.r3_arms(R3.ACTORS, ("bb",)))
-    assert len(fl) == 6 * 12 and (fl["error"] == "").all()                  # exports at 5, 10, ..., 60 of the terminal stage
-    assert sorted(fl["local"].unique()) == list(range(5, 61, 5)) and (fl["update"] == fl["local"]).all()
+    assert len(fl) == 6 * (12 + 4) and (fl["error"] == "").all()            # every export: 12 of the terminal stage + 4 of stage 1
+    t2, t1 = fl[fl["stage"] == 2], fl[fl["stage"] == 1]
+    assert len(t2) == 6 * 12 and len(t1) == 6 * 4 and set(fl["stage"]) == {1, 2}
+    assert sorted(t2["local"].unique()) == list(range(5, 61, 5)) and (t2["update"] == t2["local"]).all()   # exports at 5, ..., 60
+    assert sorted(t1["local"].unique()) == [5, 10, 15, 20] and (t1["update"] == t1["local"] + 60).all()     # stage 1 follows
+    s2 = R3.first_layer_summary_table(fl, R3.r3_arms(R3.ACTORS, ("bb",)), (Q,))
+    assert len(s2) == 6 * 12 and s2["update"].max() == 60                    # the summary is the terminal stage only
     assert set(fl["variant"]) == {"t1", "relu", "t10"} and (fl.groupby("arm")["variant"].nunique() == 1).all()
     assert (fl["B"] == 200.0).all()
     s = R3.first_layer_summary_table(fl, R3.r3_arms(R3.ACTORS, ("bb",)), (Q,))
@@ -1348,7 +1353,7 @@ def test_cli_end_to_end_on_the_tiny_wave_the_missing_planned_runs_are_an_error(t
     q = pd.read_csv(out / "quadrature_check.csv")
     assert len(q) == 6 and q[q["starts"] == "st"]["closer"].isna().all()
     fl = pd.read_csv(out / "first_layer_weights.csv")
-    assert len(fl) == 6 * 12 and set(fl["variant"]) == {"t1", "relu", "t10"}
+    assert len(fl) == 6 * (12 + 4) and set(fl["variant"]) == {"t1", "relu", "t10"} and set(fl["stage"]) == {1, 2}
     assert len(pd.read_csv(out / "first_layer_units.csv")) == 6 * 64
     assert len(pd.read_csv(out / "first_layer_summary.csv")) == 6 * 12
 

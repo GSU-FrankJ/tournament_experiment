@@ -187,7 +187,7 @@ BOOL_COLS = set(R1.BOOL_COLS)
 TIE_COLS = ("peak_locfree_rel_err", "peak_locfree_argmax_d", "sym_err_max", "sym_err_max_rel", "sym_err_argmax_abs_d",
             "tent_slope", "w_eff")
 FL_COLS = ["arm", "actor", "starts", "s", "q", "seed", "status", "update", "local", "variant", "d_scale", "B",
-           "w_abs_max", "w_abs_q25", "w_abs_q50", "w_abs_q75", "w_abs_q90", "n_w_abs_gt1", "bend_d_min", "error"]
+           "w_abs_max", "w_abs_q25", "w_abs_q50", "w_abs_q75", "w_abs_q90", "n_w_abs_gt1", "bend_d_min", "error", "stage"]
 FU_COLS = ["arm", "actor", "starts", "s", "q", "seed", "status", "update", "local", "variant", "unit", "w_d", "w_d_abs",
            "w_stage", "bias", "center_d"]
 TRAJ_COLS = (["arm", "actor", "starts", "s", "q", "seed", "status", "update", "local", "lr", "conc_scale", "e2_at_0",
@@ -723,6 +723,19 @@ def terminal_exports(wdir: Path, entry: int, last_local: int) -> List[Tuple[int,
     return sorted(out)
 
 
+def stage1_exports(wdir: Path, entry: int, last_local: int) -> List[Tuple[int, int, Path]]:
+    """``(update, local, path)`` of the exports ``u*.npz`` of stage 1, i.e. after the terminal stage (``update - entry >
+    last_local``; ``local`` counts the updates of stage 1)."""
+    out: List[Tuple[int, int, Path]] = []
+    if not Path(wdir).is_dir():
+        return out
+    for p in Path(wdir).glob("u*.npz"):
+        m = re.fullmatch(r"u(\d+)\.npz", p.name)
+        if m and int(m.group(1)) - entry > last_local:
+            out.append((int(m.group(1)), int(m.group(1)) - entry - last_local, p))
+    return sorted(out)
+
+
 def _terminal_entry(run_dir: Path) -> int:
     """Global update at which the terminal stage starts (0 in every pilot: stage 2 runs first)."""
     summ = R1._jload(Path(run_dir) / "ms_run_summary.json", [], False)
@@ -737,9 +750,12 @@ def game_B(proto: Mapping[str, Any], q: int) -> float:
 
 
 def first_layer_table(df: pd.DataFrame, win: R2.Windows, proto: Mapping[str, Any], arms: Sequence[str]) -> pd.DataFrame:
-    """``first_layer_weights.csv``: first-layer d-weight statistics at every terminal-stage weight export of every run
-    of ``arms`` (every 25 updates; the exports of local update >= 1800 and those of every 100th update are the rows
-    the prompt names, the others are kept so that the figure of all exports can be drawn from this file).
+    """``first_layer_weights.csv``: first-layer d-weight statistics at EVERY weight export of every run of ``arms``
+    (every 25 updates): the terminal-stage exports (``stage`` 2, ``local`` the update within the terminal stage) and the
+    stage-1 exports that follow (``stage`` 1, ``local`` the update within stage 1; the actor is shared across stages, so
+    these show whether the d-weights move in stage 1). The exports of terminal-stage local update >= 1800 and those of
+    every 100th update are the rows the prompt names, the others are kept so that the figure of all exports can be drawn
+    from this file.
 
     A run without a weights directory has no rows; an unreadable export is a row with NaN statistics and the reason in
     ``error``.
@@ -750,10 +766,13 @@ def first_layer_table(df: pd.DataFrame, win: R2.Windows, proto: Mapping[str, Any
             continue
         B = game_B(proto, int(r.q))
         tags = _tags(r.arm)
-        for upd, loc, path in terminal_exports(Path(r.run_dir) / "weights", _terminal_entry(Path(r.run_dir)),
-                                               win.decay_last):
+        wdir, entry = Path(r.run_dir) / "weights", _terminal_entry(Path(r.run_dir))
+        listing = ([(2, e) for e in terminal_exports(wdir, entry, win.decay_last)]
+                   + [(1, e) for e in stage1_exports(wdir, entry, win.decay_last)])
+        for stage, (upd, loc, path) in listing:
             row: Dict[str, Any] = {"arm": r.arm, **{k: tags[k] for k in ("actor", "starts", "s")}, "q": r.q,
-                                   "seed": r.seed, "status": r.status, "update": upd, "local": loc, "B": B, "error": ""}
+                                   "seed": r.seed, "status": r.status, "update": upd, "local": loc, "B": B, "error": "",
+                                   "stage": stage}
             try:
                 row.update(read_export_stats(path, B))
             except Exception as exc:  # noqa: BLE001
@@ -824,6 +843,8 @@ def attach_last_export(df: pd.DataFrame, fl: pd.DataFrame, win: R2.Windows) -> p
     ``flags``, never raised): the last export is not the one of local update ``win.decay_last``; it cannot be read; its
     ``actor_variant`` (absent = ``t1``) or the one of the run's ``run_config.json`` disagrees with the arm name."""
     df = df.copy()
+    if len(fl):
+        fl = fl[fl["stage"] == 2]                       # the last TERMINAL-stage export (stage-1 exports are not the freeze)
     if len(fl):
         last = fl.sort_values("local").groupby(["arm", "q", "seed"], sort=False).tail(1)
         key = {(r.arm, r.q, r.seed): r for r in last.itertuples()}
@@ -989,7 +1010,7 @@ def first_layer_summary_table(fl: pd.DataFrame, arms: Sequence[str], qs: Sequenc
             "w_abs_max_q75", "w_abs_max_min", "w_abs_max_max", "w_abs_q50_median", "bend_d_min_median"]
     if fl.empty:
         return pd.DataFrame(columns=cols)
-    t = fl[(fl["status"] == "done") & (fl["error"].astype(str) == "") & fl["arm"].isin(list(arms))]
+    t = fl[(fl["status"] == "done") & (fl["error"].astype(str) == "") & fl["arm"].isin(list(arms)) & (fl["stage"] == 2)]
     rows = []
     for arm in arms:
         for q in qs:
@@ -1634,8 +1655,10 @@ def run_analysis(roots: Mapping[str, str], out_dir: Path, qs: Sequence[int] = QS
             "units": "d / B with B = (e_max - e_min) + 2q: the stored weight for t1 and relu, TEN times the stored "
                      "weight for t10 (the variant is read from the export's actor_variant entry, absent = t1)",
             "last_export": "local update %d" % win.decay_last,
-            "rows": "first_layer_weights.csv holds every terminal-stage export (every 25 updates), a superset of the "
-                    "requested rows (local >= %d, and every 100th update before)" % win.traj_from},
+            "rows": "first_layer_weights.csv holds EVERY weight export of every run (every 25 updates; column stage = 2 for "
+                    "the terminal stage, 1 for the stage-1 exports that follow), a superset of the requested rows "
+                    "(terminal-stage local >= %d, and every 100th update before); first_layer_summary.csv and the "
+                    "last-export columns of per_run.csv use the terminal-stage exports only" % win.traj_from},
         "transmission": TRANSMISSION_NOTE,
         "quadrature_check": "per (actor, starts, q) from arm means: F2 = gap(s1)^2 - smoothing(s1)^2 (negative: "
                             "F = 0 and F2_negative); quadrature = sqrt(F2 + smoothing(s16)^2); additive = gap(s1) - "

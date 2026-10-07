@@ -96,6 +96,20 @@ def _arrays_diff(a: Dict[str, np.ndarray], b: Dict[str, np.ndarray]) -> Optional
     return None
 
 
+def _weights_differ(a: Dict[str, np.ndarray], b: Dict[str, np.ndarray]) -> bool:
+    """True iff the network arrays (``actor.*``, ``critic.*``) of two exports differ in key set, dtype, shape or value.
+
+    The labels of an export (``conc_scale``, ``actor_variant``) are not weights: the s = 16 export that follows the ramp start
+    carries a ``conc_scale`` entry that the s = 1 export lacks, so a comparison of the whole key set would call two identical
+    networks different (C-NL review finding M1).
+    """
+    ka = sorted(k for k in a if k.startswith(("actor.", "critic.")))
+    kb = sorted(k for k in b if k.startswith(("actor.", "critic.")))
+    if ka != kb:
+        return True
+    return any(a[k].dtype != b[k].dtype or a[k].shape != b[k].shape or not np.array_equal(a[k], b[k]) for k in ka)
+
+
 def _same_json(a: Any, b: Any) -> bool:
     """Exact equality of parsed JSON values: same types, NaN equals NaN."""
     if isinstance(a, dict):
@@ -215,8 +229,8 @@ def prefix_identity(ref: Path, new: Path, upto: int, export_every: int = EXPORT_
     u = (upto // export_every + 1) * export_every
     res["first_export_after"] = u
     try:
-        res["first_export_after_differs"] = _arrays_diff(RC2._npz(ref / "weights" / f"u{u:05d}.npz"),
-                                                         RC2._npz(new / "weights" / f"u{u:05d}.npz")) is not None
+        res["first_export_after_differs"] = _weights_differ(RC2._npz(ref / "weights" / f"u{u:05d}.npz"),
+                                                            RC2._npz(new / "weights" / f"u{u:05d}.npz"))
     except Exception:  # noqa: BLE001 - a missing export is not a difference
         res["first_export_after_differs"] = False
     return res

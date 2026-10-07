@@ -274,6 +274,21 @@ def test_c_nl_requires_the_first_export_after_the_ramp_start_to_differ(wave, tmp
     assert r["summary"]["C_NL_pass"] == 5
 
 
+def test_c_nl_export_differs_half_compares_the_network_arrays_not_the_labels(wave, tmp_path):
+    """The s = 16 export after the ramp start has a ``conc_scale`` entry that the s = 1 export lacks. With the network arrays
+    of the s = 1 export under that label the two exports are the same network: C-NL must fail (review finding M1)."""
+    new, _ = _copy(wave, tmp_path)
+    s1, s16 = _run(new, "relu_bb_s1") / "weights" / "u00025.npz", _run(new, "relu_bb_s16") / "weights" / "u00025.npz"
+    assert "conc_scale" in np.load(s16).files and "conc_scale" not in np.load(s1).files          # the label that made the old test pass
+    nets = {k: v for k, v in dict(np.load(s1)).items() if k.startswith(("actor.", "critic."))}
+    _edit_npz(s16, lambda z: z.update(nets))
+    assert RC._weights_differ(dict(np.load(s1)), dict(np.load(s16))) is False
+    x = RC.prefix_identity(_run(new, "relu_bb_s1"), _run(new, "relu_bb_s16"), RAMP[0], 5)
+    assert x["ALL"] and x["first_export_after_differs"] is False                                  # identical networks: not "differs"
+    assert RC._weights_differ({"actor.l1.weight": np.zeros(2, np.float32)}, {"actor.l1.weight": np.zeros(2, np.float32), "conc_scale": np.asarray(4.0)}) is False
+    assert RC._weights_differ({"actor.l1.weight": np.zeros(2, np.float32)}, {"actor.l1.weight": np.ones(2, np.float32)}) is True
+
+
 def test_c_nl_compares_the_variant_entry_of_the_exports(wave, tmp_path):
     """A relu / t10 export carries the string entry ``actor_variant``; the comparison handles it (``np.array_equal`` with
     ``equal_nan=True``, as ``r2_launch_checks`` uses it, raises on a string array in the installed numpy) and sees a change."""

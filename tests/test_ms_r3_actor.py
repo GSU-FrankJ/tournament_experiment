@@ -46,6 +46,17 @@ BASE_COMMIT = "e8eb9a08"      # the MS-R2 head: the code the defaults must repro
 VARIANTS = ("relu", "t10")
 
 
+def same_networks(a: str, b: str, u: int) -> bool:
+    """The network arrays (``actor.*``, ``critic.*``) of the two exports at update ``u`` are identical. The labels of an export
+    (``actor_variant``, ``conc_scale``) are not weights: a relu export always has an ``actor_variant`` entry that a t1 export
+    lacks, and an s = 16 export a ``conc_scale`` entry that an s = 1 export lacks, so ``same_weights`` would be False for
+    identical networks (review finding M1/M2)."""
+    x, y = weights(a, u), weights(b, u)
+    kx = sorted(k for k in x if k.startswith(("actor.", "critic.")))
+    ky = sorted(k for k in y if k.startswith(("actor.", "critic.")))
+    return kx == ky and all(np.array_equal(x[k], y[k]) for k in kx)
+
+
 def with_variant(cfg: Dict[str, Any], variant: str) -> Dict[str, Any]:
     """The config with the MS-R3 keys (``actor_variant`` for relu / t10, ``init_digest`` for every actor)."""
     cfg = copy.deepcopy(cfg)
@@ -212,6 +223,28 @@ def test_initial_weights_are_identical_across_variants_for_a_q_seed(tmp_path):
     assert other.init_state_sha256 != states["t1"][1]
 
 
+def test_the_init_digest_covers_the_actor_and_the_critic_and_consumes_no_rng(tmp_path):
+    """A change of any actor or critic initial weight changes the digest (review finding M3: an actor-only digest would
+    leave C-INIT blind to the critic), and computing it draws no random number."""
+    ms = rms.MSRun(with_variant(reduced_nl("NL_bb_s1", str(tmp_path / "x")), "t1"), str(tmp_path / "x"))
+    base = rms.MSRun._init_digest(ms.agent)
+    assert base == ms.init_state_sha256
+    state_before = (torch.get_rng_state().clone(), np.random.get_state()[1].copy(), copy.deepcopy(ms.torch_gen.get_state()))
+    rms.MSRun._init_digest(ms.agent)
+    assert torch.equal(state_before[0], torch.get_rng_state()) and np.array_equal(state_before[1], np.random.get_state()[1])
+    assert torch.equal(state_before[2], ms.torch_gen.get_state())
+    for net, name in ((ms.agent.critic, "out.bias"), (ms.agent.critic, "out.weight"), (ms.agent.critic, "l1.weight"),
+                      (ms.agent.actor, "l1.bias"), (ms.agent.actor, "l2.weight"), (ms.agent.actor, "out.weight")):
+        p = dict(net.named_parameters())[name]
+        old = p.detach().clone()
+        with torch.no_grad():
+            p.view(-1)[0] += 1e-3
+        assert rms.MSRun._init_digest(ms.agent) != base, name
+        with torch.no_grad():
+            p.copy_(old)
+        assert rms.MSRun._init_digest(ms.agent) == base, name
+
+
 @pytest.mark.parametrize("bad", [{"actor_variant": "t1"}, {"actor_variant": "gelu"}, {"actor_variant": 3},
                                  {"init_digest": False}, {"init_digest": "yes"}])
 def test_configuration_refusals(tmp_path, bad):
@@ -253,7 +286,7 @@ def test_the_variants_train_to_different_functions_from_the_same_start(variant_r
     """Same seed, same init, same RNG streams: the runs differ (the variant is not a no-op) from the first export."""
     t1 = variant_runs["t1"]
     for v in VARIANTS:
-        assert not same_weights(t1, variant_runs[v], 5)
+        assert not same_networks(t1, variant_runs[v], 5)
 
 
 @pytest.mark.parametrize("variant", VARIANTS)
@@ -382,8 +415,8 @@ def test_c_nl_holds_for_each_variant(tmp_path, variant):
     run_cfg(with_variant(reduced_nl("NL_bb_s1", d1), variant), d1)
     run_cfg(with_variant(reduced_nl("NL_bb_s4", d4), variant), d4)
     for u in (5, 10, 15, 20):
-        assert same_weights(d1, d4, u), u
-    assert not same_weights(d1, d4, 25)
+        assert same_weights(d1, d4, u) and same_networks(d1, d4, u), u
+    assert not same_networks(d1, d4, 25)                      # the networks have moved apart (not merely the labels)
     a, b = read_csv(os.path.join(d1, "ms_updates.csv")), read_csv(os.path.join(d4, "ms_updates.csv"))
     skip = {"update_wall_sec", "verifier_sec", "diag_sec", "run", "arm", "conc_scale"}
     cols = (set(a[0]) & set(b[0])) - skip
