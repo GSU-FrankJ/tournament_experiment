@@ -1,6 +1,6 @@
 # MS-R3 P1: the first-layer d-weights and the rounding width of the RL actors of MS-R1 and MS-R2
 
-Date: 2026-10-07. Spec: `reports/ms/r3/pi_record/20_ms_r3_prompt.md` section 2.3 (b). Tool `tools/ms/r3_actor_diagnostics.py` (tests `tests/test_ms_r3_actor_diagnostics.py`), outputs `results/ms_r3/rl_actor_diagnostics/` (`per_export.csv`, `per_arm.csv`, `relation.csv`, `regime.csv`, `summary.txt`, `manifest.json`). Every table below is printed by `python reports/ms/r3/report_scripts/screen_tables.py --block <diag_...>` (default `--diag-dir results/ms_r3/rl_actor_diagnostics`). No RL training was run for this report: the tool reads the weight exports (every 25 updates) of existing runs.
+Date: 2026-10-07. Spec: `reports/ms/r3/pi_record/20_ms_r3_prompt.md` section 2.3 (b). Tool `tools/ms/r3_actor_diagnostics.py` (tests `tests/test_ms_r3_actor_diagnostics.py`), outputs `results/ms_r3/rl_actor_diagnostics/` (`per_export.csv`, `per_arm.csv`, `relation.csv`, `regime.csv`, `summary.txt`, `manifest.json`). Every table below except the table of section 1 is printed by `python reports/ms/r3/report_scripts/screen_tables.py --block <diag_...>` (default `--diag-dir results/ms_r3/rl_actor_diagnostics`). No RL training was run for this report: the tool reads the weight exports (every 25 updates) of existing runs.
 
 ## 1. What was read
 
@@ -110,7 +110,7 @@ At the final terminal-stage export of every run:
 - 90 % quantile of |w|: min 0.666, median over runs 0.829, max 1.069
 - max |w|: min 0.811, median over runs 1.280, max 1.693
 
-Reading (descriptive). The largest first-layer weight on d / B of the RL actors is about 1.0-1.2 at update 400 and 1.2-1.4 at the freeze (medians over seeds, all 26 rows): its median grows by 9-19 % between update 400 and the freeze (row by row). The rounding width `w_eff` falls over the same updates, from 7-14 units of d at update 400 to 3-6.5 at the freeze. At the freeze the sharpest tanh unit of the first layer bends over `B / max |w|` = 149-165 units of d (q = 50) and 162-182 units (q = 60), against a rounding width of 3-6.5 units of d. Over the rows the median `w_eff` at the freeze varies by a factor of about two (3.05-6.51) and the median max |w| by about 12 % (1.206-1.357): the MS-R1 sampler arms and the MS-R2 noise-landing arms differ more in the width than in the weight.
+Reading (descriptive). The largest first-layer weight on d / B of the RL actors is about 1.0-1.2 at update 400 and 1.2-1.4 at the freeze (medians over seeds, all 26 rows): its median grows by 9-19 % between update 400 and the freeze (row by row). The rounding width `w_eff` falls over the same updates, from 7-14 units of d at update 400 to 3-6.5 at the freeze. At the freeze the sharpest tanh unit of the first layer bends over `B / max |w|` = 149-165 units of d (q = 50) and 162-182 units (q = 60), against a rounding width of 3-6.5 units of d. Over the rows the median `w_eff` at the freeze varies by a factor of about two (3.05-6.51) and the median max |w| by about 12.5 % (1.206-1.357): the MS-R1 sampler arms and the MS-R2 noise-landing arms differ more in the width than in the weight.
 
 ## 3. How the weights and the width move together (block `diag_relation`; Spearman correlation of max |w| with `w_eff` over the terminal-stage exports)
 

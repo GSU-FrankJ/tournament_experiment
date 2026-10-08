@@ -1,6 +1,6 @@
 # MS-R3 pilot (P2): results of the 240 runs
 
-Date: 2026-10-08. Branch `ms-r3`. The twelve arms of D4 (`{t1,relu,t10}_{bb,st}_s{1,16}`: the actor variant crossed with the start sampler, bin-balanced or stratified, and the terminal-stage concentration scale s in {1, 16}), 20 runs per arm (q in {50, 60} x seeds 10501-10510), terminal stage fixed at 2800 updates, stage 1 as `MS_base` (600 updates, scale reset to 1.0). Everything below is read from `results/ms_r3/analysis/` (written by `tools/ms/r3_analysis.py`; its criterion and its transmission and interaction tables are recomputed independently by `tools/ms/r3_blind_criterion.py`, agreement of 684 numbers) and the launch files. Every table is printed by `python reports/ms/r3/report_scripts/pilot_tables.py --block <name> [--arm <arm> | --actor <actor>]` (the block is named at each table), the supervised-screen numbers by `screen_tables.py`; the figures are the PNG files of `results/ms_r3/analysis/figures/` (`tie_profile_runs.png` is drawn by `reports/ms/r3/report_scripts/tie_profile_runs.py`). The blocks `primary_median`, `robust` and `failures` are post hoc supplements, not part of D6; they are labelled where they appear.
+Date: 2026-10-08. Branch `ms-r3`. The twelve arms of D4 (`{t1,relu,t10}_{bb,st}_s{1,16}`: the actor variant crossed with the start sampler, bin-balanced or stratified, and the terminal-stage concentration scale s in {1, 16}), 20 runs per arm (q in {50, 60} x seeds 10501-10510), terminal stage fixed at 2800 updates, stage 1 as `MS_base` (600 updates, scale reset to 1.0). Everything below is read from `results/ms_r3/analysis/` (written by `tools/ms/r3_analysis.py`; its criterion and its transmission and interaction tables are recomputed independently by `tools/ms/r3_blind_criterion.py`, agreement of 684 numbers) and the launch files. Every table is printed by `python reports/ms/r3/report_scripts/pilot_tables.py --block <name> [--arm <arm> | --actor <actor>]` (the block is named in the text next to each table; the per-actor tables of section 3 are the blocks `overview`, `decomp` and `resolution` with `--actor`, the table of section 1 is `checks`), the supervised-screen numbers by `screen_tables.py`; the figures are the PNG files of `results/ms_r3/analysis/figures/` (`tie_profile_runs.png` is drawn by `reports/ms/r3/report_scripts/tie_profile_runs.py`). The blocks `primary_median`, `robust`, `failures`, the hidden-unit counts (`relu_units.py`) and the figure `tie_profile_runs.png` are post hoc supplements, not part of D6; they are labelled where they appear. The blocks `directions`, `side_by_side`, `tie_effort` and `screen_vs_rl` summarise the pre-registered tables or put them next to the screen; they add no test.
 
 Reading the tables. `arm - baseline` differences of |peak error| (`stage2_peak_rel_err_abs`, final tier) are negative when the arm is better. The signed peak error is `(e_hat_2(0) - e_2*(0)) / e_2*(0)` at the terminal-stage freeze; the gap is `e_2*(0) - e_hat_2(0)` (`e_2*(0)` = 70.0 at q = 50 and 58.33 at q = 60), the sum of the smoothing part `e_2*(0) - e_sigma(0)` and the remainder `e_sigma(0) - e_hat_2(0)` (`reports/ms/r2/01_decomposition.md`); where the signed peak error is negative in every run, |peak error| equals gap / `e_2*(0)`. `w_eff` = gap / (`e_2*(0)` / 2q) is the rounding width in units of d. `*` marks a 95 % percentile bootstrap interval that excludes 0 (10,000 resamples, a fresh `default_rng(20261008)` per (q, statistic)). Ten seeds per (arm, q): an interval that contains 0 does not show that an effect is absent, and a mean of ten is moved by one failed run (section 3.2). `parents_A` and `rehearsal_v2_0` are the same terminal-stage candidate (MS-R1 `03_checks.md`, C-MS1).
 
@@ -25,7 +25,7 @@ Launch and runs (block `launch`):
 - HEAD `b41ecefd`, code commit argument `b41ecefd6dc6327f21825dad381b980ad74c23ac`; `git diff --stat <code commit> HEAD -- run utils envs agents protocols` is empty; `git status --porcelain` lists 1920 entries
 - parameter file SHA-256 `0fbfc01857c5abe339ab1926361cd57d6e988da20e754fd6dea3ffa4e076b406`; nproc 64, load average at start 11.1, 12.1, 12.8, at the end 22.1, 41.1, 47.7, free disk 998 GB
 
-All checks pass and no stop condition was met; no run was lost, re-run or flagged (`results/ms_r3/pilot/crashed/` does not exist). C-MS5 compared each `t1` arm with MS-R2's `NL_*` arm over the whole run (all 136 weight exports, the whole per-update series with the five stream positions, the check rows of both stages, the freeze arrays, the bin maps, the stage-1 table and the gate values) and found them bit for bit identical in 80 of 80 comparisons: the four `t1` arms of this pilot are MS-R2's four `NL_*` arms re-run on the new code, and their rows below equal the rows of `reports/ms/r2/04_pilot.md`.
+All checks pass and no stop condition was met; no run was lost, re-run or flagged (`results/ms_r3/pilot/crashed/` does not exist). C-MS5 compared each `t1` arm with MS-R2's `NL_*` arm over the whole run (all 136 weight exports, the whole per-update series with the five stream positions, the check rows of both stages, the freeze arrays, the bin maps, the stage-1 table and the gate values) and found them bit for bit identical in 80 of 80 comparisons: the four `t1` arms of this pilot are MS-R2's four `NL_*` arms re-run on the new code, and their rows below equal the rows of `reports/ms/r2/04_pilot.md` (except the bootstrap intervals of the signed peak error, which use the seed 20261008 here and 20261007 there).
 
 ## 2. Primary criterion (D6)
 
@@ -42,7 +42,7 @@ For each variant v, starts and s: |peak error| at the terminal freeze, paired by
 | `t10_st_s1` | `t1_st_s1` | +0.00721 [-0.00705, +0.02204] | no | -0.00681 [-0.02749, +0.01108] | no | 10+10 | holds | not met |
 | `t10_st_s16` | `t1_st_s16` | -0.00381 [-0.01302, +0.00667] | no | -0.01358 [-0.02552, +0.00059] | no | 10+10 | holds | not met |
 
-**Not met in any of the eight rows.** Part (a) holds at both q in one row, `relu_st_s16` (-0.0104 [-0.0163, -0.0047] and -0.0206 [-0.0309, -0.0068]); `relu_bb_s16` and `relu_st_s1` meet it at q = 60 only, `t10_bb_s16` at q = 50 only, and no `t10` row at both q. Part (b) is violated in all four `relu` rows and holds in all four `t10` rows: the runs named are `q50/10504` (a run whose tie effort collapsed to zero, section 3.2) and `q50/10506` (a run with a dead region in the middle stratum, section 3.2); each passed G-A and G-N(eta) under the `t1` arm of the same (q, seed) and fails G-A (eta and RMSE) under `relu`. The mean difference of the two bin-balanced `relu` rows at q = 50 is positive (+0.0691 in both) because of the collapsed run (|peak error| 0.9999 there): the figure shows it at the right edge of the q = 50 panel.
+**Not met in any of the eight rows.** Part (a) holds at both q in one row, `relu_st_s16` (-0.0104 [-0.0162, -0.0047] and -0.0206 [-0.0309, -0.0068]); `relu_bb_s16` and `relu_st_s1` meet it at q = 60 only, `t10_bb_s16` at q = 50 only, and no `t10` row at both q. Part (b) is violated in all four `relu` rows and holds in all four `t10` rows: the runs named are `q50/10504` (a run whose tie effort collapsed to zero, section 3.2) and `q50/10506` (a run with a dead region in the middle stratum, section 3.2); each passed G-A and G-N(eta) under the `t1` arm of the same (q, seed) and fails G-A (eta and RMSE) under `relu`. The mean difference of the two bin-balanced `relu` rows at q = 50 is positive (+0.0691 in both) because of the collapsed run (|peak error| 1.0000 there): the figure shows it at the right edge of the q = 50 panel.
 
 ![paired differences of |peak error| against t1](../../../results/ms_r3/analysis/figures/paired_abs_peak_vs_t1.png)
 
@@ -98,7 +98,7 @@ The median difference is negative in all eight `relu` cells (6 to 10 of 10 seeds
 | t1_st_s16 | 50 | 4.01 | 4.25 | 0.598 | 0.588 | -0.0399 | -0.5, -1.0, +1.0 | 0.0208 | 1.225 | 164 |
 | t1_st_s16 | 60 | 4.98 | 5.22 | 0.682 | 0.673 | -0.0411 | +0.0, -2.5, +1.5 | 0.0207 | 1.291 | 170 |
 
-The rows equal those of MS-R2 (C-MS5): |peak error| 0.0565 / 0.0401 (`t1_bb_s1`, q = 50 / 60), gap 5.65 % / 4.01 % of `e_2*(0)`; the rounding width `w_eff` is 4.0-5.7 units of d in the eight cells; the largest first-layer d-weight is 1.23-1.30 (units of d / B), i.e. the sharpest tanh unit bends over 159-173 units of d. R0 / |peak error| is 0.598-0.683 against the linearised 2k / (2k + a) of 0.588 (q = 50) and 0.673 (q = 60). No `t1` run fails a gate.
+The rows equal those of MS-R2 (C-MS5; only the bootstrap interval of the signed peak error differs, the seed being 20261008 here and 20261007 there): |peak error| 0.0565 / 0.0401 (`t1_bb_s1`, q = 50 / 60), gap 5.65 % / 4.01 % of `e_2*(0)`; the rounding width `w_eff` is 4.0-5.7 units of d in the eight cells; the largest first-layer d-weight is 1.23-1.30 (units of d / B), i.e. the sharpest tanh unit bends over 159-173 units of d. R0 / |peak error| is 0.598-0.683 against the linearised 2k / (2k + a) of 0.588 (q = 50) and 0.673 (q = 60). No `t1` run fails a gate.
 
 ### 3.2 `relu` (ReLU hidden units, input d / B)
 
@@ -164,7 +164,7 @@ Robust summaries (post hoc, descriptive; block `robust`; all twelve arms, so tha
 | t10_st_s16 | 50 | 2.34 | 0.0334 | 0 | 3 | 0 | 0.0135 | 3.34 | 0 | 0.029 |
 | t10_st_s16 | 60 | 1.73 | 0.0297 | 3 | 5 | 0 | 0.0135 | 3.57 | 0 | 0.042 |
 
-Reading (descriptive). **The typical `relu` run has a smaller tie deficit than the typical `t1` run.** The median gap is 1.71 / 1.87 (`relu_bb_s1`, q = 50 / 60), 1.42 / 0.91 (`relu_bb_s16`), 2.36 / 0.84 (`relu_st_s1`) and 1.98 / 1.07 (`relu_st_s16`) effort units against 3.51 / 2.11, 3.77 / 2.78, 2.67 / 2.56 and 2.98 / 2.54 for the matching `t1` arms; 3-6 of 10 `relu` runs have a gap of at most 1 effort unit in each of the four q = 60 arms against 0-1 of 10 for `t1` (at q = 50: 0-3 against 0). The smoothing part and sigma_2(0) are lower than under `t1` in all eight cells (sigma_2(0) at s = 1: 1.75 / 1.93 / 1.99 / 1.96 against 2.41 / 2.45 / 2.38 / 2.44), and the tail mean is lower in all eight (0.0014-0.0030 of `e_2*(0)` against 0.0064-0.0088). The largest first-layer d-weight is 0.82-0.85 (bend width 235-268 units of d). The PPO diagnostics differ from `t1`: the mean KL per update is 0.0113-0.0117 in the training segment against 0.0070-0.0080 for `t1` and `t10`, and in the hold segment at s = 16 0.076-0.089 against 0.030-0.036 with clip fractions of 0.19-0.24 against 0.16-0.19 (block `segments`, section 10).
+Reading (descriptive). **The typical `relu` run has a smaller tie deficit than the typical `t1` run.** The median gap is 1.71 / 1.87 (`relu_bb_s1`, q = 50 / 60), 1.42 / 0.91 (`relu_bb_s16`), 2.36 / 0.84 (`relu_st_s1`) and 1.98 / 1.07 (`relu_st_s16`) effort units against 3.51 / 2.11, 3.77 / 2.78, 2.67 / 2.56 and 2.98 / 2.54 for the matching `t1` arms; 3-6 of 10 `relu` runs have a gap of at most 1 effort unit in each of the four q = 60 arms against 0-1 of 10 for `t1` (at q = 50: 0-3 against 0). The smoothing part and sigma_2(0) are lower than under `t1` in all eight cells (sigma_2(0) at s = 1: 1.75 / 1.93 / 1.99 / 1.96 against 2.41 / 2.45 / 2.38 / 2.44), and the tail mean is lower in all eight (0.0014-0.0030 of `e_2*(0)` against 0.0064-0.0088). The largest first-layer d-weight is 0.82-0.85 (units of d / B; B / max |w| = 235-268 units of d, which for a ReLU unit, whose kink is at any weight, is only a scale of the weights). The PPO diagnostics differ from `t1`: the mean KL per update is 0.0113-0.0117 in the training segment against 0.0070-0.0080 for `t1` and `t10`, and in the hold segment at s = 16 0.076-0.088 against 0.029-0.036 with clip fractions of 0.19-0.24 against 0.16-0.19 (block `segments`, section 10).
 
 **Five `relu` runs fail G-A, all at q = 50** (block `failures`, post hoc):
 
@@ -176,7 +176,7 @@ Reading (descriptive). **The typical `relu` run has a smaller tie deficit than t
 | relu_st_s1 | 50 | 10506 | 3.477 | 66.523 | 0.2433 | 0.09928 | 0.09887 | F/F/P | P | 0.547 | 0.0298 |
 | relu_st_s16 | 50 | 10506 | 1.963 | 68.037 | 0.0695 | 0.01805 | 0.01753 | F/F/P | P | 0.180 | 0.0167 |
 
-- **`q50/10504` (`relu_bb_s1` and `relu_bb_s16`, one run up to update 2001): the policy lost its tie effort.** e_hat_2(0) = 0.0001 (the mean clamp, effort 1e-4) at the freeze, gap 70.00, RMSE_pos / `e_2*(0)` 0.578, eta_2 / DW 0.259, stage-1 error -1.0000. In its check table (`ms_checks_stage2.csv`) the tie effort is learned normally for 825 updates (gap 0.5-7.9 effort units, R0 <= 0.07), then R0 goes from 0.070 (local 825) to 0.978 (850), 0.899 (875) and 0.9997 (900) and stays there to update 2800; its RMSE_pos was already 0.35-0.41 of `e_2*(0)` at local 750-825. The same seed under `relu_st_s1` and `relu_st_s16` has gaps 2.27 and 2.68 and passes.
+- **`q50/10504` (`relu_bb_s1` and `relu_bb_s16`, one run up to update 2001): the policy lost its tie effort.** e_hat_2(0) = 0.0001 (the mean clamp, effort 1e-4) at the freeze, gap 70.00, RMSE_pos / `e_2*(0)` 0.578, eta_2 / DW 0.259, stage-1 error -1.0000. In its check table (`ms_checks_stage2.csv`) the tie effort is learned normally (from local 175 to 825 the gap is between -1.6 and 7.9 effort units and R0 <= 0.08), then R0 goes from 0.070 (local 825) to 0.978 (850), 0.899 (875) and 0.9997 (900); from local 850 to 2800 R0 is at least 0.89 at every check but one (0.39 at local 1450) and equals 0.999998 (the clamp) from local 1725 on; its RMSE_pos was already 0.35-0.41 of `e_2*(0)` at local 750-825. The same seed under `relu_st_s1` and `relu_st_s16` has gaps 2.27 and 2.68 and passes.
 - **`q50/10506` (four `relu` arms): a dead region in the middle stratum, with a good tie.** The gaps are 2.89, 0.84, 3.48 and 1.96 (`relu_bb_s1`, `relu_bb_s16`, `relu_st_s1`, `relu_st_s16`); three of the four runs fail G-A (eta and RMSE) with RMSE_pos / `e_2*(0)` of 0.074, 0.243 and 0.070 and eta_2 / DW of 0.021, 0.099 and 0.018; the symmetry error is 0.149, 0.547 and 0.180 of `e_2*(0)` (0.547 is 38.3 effort units, at |d| = 35 in `relu_st_s1`). In `relu_st_s1` the middle stratum has a mean signed error of -19.8 effort units on d < 0 (max |error| 44.5; strata tables, section 11). The fourth run (`relu_bb_s16`) passes.
 - Seeds 10504 and 10506 at q = 50 are the only gate failures of the pilot: no `t1` run and no `t10` run fails a gate.
 
@@ -246,7 +246,7 @@ The figure (every run thin, the seed median thick; the collapsed run lies below 
 | t10_st_s16 | 50 | 3.63 | 3.34 | 0.597 | 0.588 | -0.0355 | +0.8, -1.5, +2.5 | 0.0234 | 7.840 | 26 |
 | t10_st_s16 | 60 | 3.35 | 3.57 | 0.672 | 0.673 | -0.0274 | -0.2, -2.0, +1.5 | 0.0289 | 8.033 | 27 |
 
-Reading (descriptive). **The finer d input did not change the tie deficit.** The mean |peak error| is within 0.015 of the `t1` arm's in every arm (0.0432 / 0.0546 for `t10_bb_s1` against 0.0565 / 0.0401), the rounding width `w_eff` is 3.4-6.6 units of d (`t1`: 4.0-5.7), the median gap 1.73-3.33 (`t1`: 2.11-3.77), although the largest first-layer d-weight is 7.4-8.5 (units of d / B, ten times the stored 0.74-0.85) and the sharpest unit bends over 24-30 units of d against 159-173 for `t1`. The tail mean is lower than under `t1` in all eight cells (0.0036-0.0058 of `e_2*(0)`), and RMSE_pos at s = 16 is lower in all four arms (0.0126-0.0137 against 0.0142-0.0186). The PPO diagnostics are those of `t1` (KL in the training segment 0.0075-0.0080, hold at s = 16 0.030-0.035). No `t10` run fails a gate.
+Reading (descriptive). **No detectable change of the mean tie deficit.** The mean |peak error| is within 0.015 of the `t1` arm's in every arm (0.0432 / 0.0546 for `t10_bb_s1` against 0.0565 / 0.0401), the rounding width `w_eff` is 3.4-6.6 units of d (`t1`: 4.0-5.7), the median gap 1.73-3.33 (`t1`: 2.11-3.77), although the largest first-layer d-weight is 7.4-8.5 (units of d / B, ten times the stored 0.74-0.85) and the sharpest unit bends over 24-30 units of d against 159-173 for `t1`. The tail mean is lower than under `t1` in all eight cells (0.0036-0.0058 of `e_2*(0)`), and RMSE_pos at s = 16 is lower in all four arms (0.0126-0.0137 against 0.0142-0.0186). The PPO diagnostics are close to `t1`'s (KL in the training segment 0.0075-0.0080 against 0.0070-0.0071, hold at s = 16 0.029-0.034). No `t10` run fails a gate.
 
 ## 4. Paired changes against `t1` (secondary; blocks `secondary` and `directions`)
 
@@ -509,7 +509,7 @@ The interaction (v_s16 - v_s1) - (t1_s16 - t1_s1) (block `interaction`):
 
 ![the noise-landing effect within each actor](../../../results/ms_r3/analysis/figures/paired_noise_landing.png)
 
-Reading (descriptive). The landing lowers sigma_2(0) in every cell of every actor (10 of 10 seeds in all twelve) and the smoothing part by 0.74-1.39 effort units (10 of 10 seeds in eleven cells, 9 of 10 in `relu_bb_s16` at q = 50). The mean change of the gap is small for `t1` (-0.27 to +0.42), as in MS-R2, and the remainder rises (+0.71 to +1.40; intervals above 0 in three of four cells). For `t10` the mean change of the gap is -0.15, -0.57, -1.00 and -0.66 (`t10_bb` q = 50 / 60, `t10_st` q = 50 / 60; intervals below 0 in two cells: `t10_bb_s16` at q = 60 and `t10_st_s16` at q = 50) and the remainder rises less (+0.30 to +1.21); the transmission ratios are 0.11, 0.60, 0.72 and 0.69 (intervals excluding 0 in two cells, 0.596 [0.090, 1.053] and 0.718 [0.424, 1.051]) against -0.43 to +0.28 for `t1` (none excluding 0). For `relu` the mean change of the gap is -0.06, -1.14, -0.15 and -0.25 with transmission ratios of 0.06, 1.53, 0.14 and 0.33, none with an interval excluding 0 (the bin-balanced q = 50 cell has the collapsed run in both of its arms). On |peak error| and on the gap the interaction excludes 0 in two cells, `relu` bin-balanced at q = 60 (|peak error| -0.0249 [-0.0431, -0.0078], gap -1.558 [-2.640, -0.531]) and `t10` bin-balanced at q = 60 (-0.0169 [-0.0299, -0.0042], gap -0.986 [-1.741, -0.246]); on the smoothing part it excludes 0 in all four `relu` cells (+0.43, +0.24, +0.26, +0.22: the landing lowers the smoothing part of `relu` by less than that of `t1`, whose smoothing part is higher at s = 1).
+Reading (descriptive). The landing lowers sigma_2(0) in every cell of every actor (10 of 10 seeds in all twelve) and the smoothing part by 0.74-1.39 effort units (10 of 10 seeds in eleven cells, 9 of 10 in `relu_bb_s16` at q = 50). The mean change of the gap is small for `t1` (-0.27 to +0.42), as in MS-R2, and the remainder rises (+0.71 to +1.40; intervals above 0 in three of four cells). For `t10` the mean change of the gap is -0.15, -0.57, -1.00 and -0.66 (`t10_bb` q = 50 / 60, `t10_st` q = 50 / 60; intervals below 0 in two cells: `t10_bb_s16` at q = 60 and `t10_st_s16` at q = 50) and the remainder rises less (+0.30 to +1.21); the transmission ratios are 0.11, 0.60, 0.72 and 0.69 (intervals excluding 0 in two cells, 0.596 [0.090, 1.053] and 0.718 [0.424, 1.051]) against -0.43 to +0.28 for `t1` (none excluding 0). For `relu` the mean change of the gap is -0.06, -1.14, -0.15 and -0.25 with transmission ratios of 0.06, 1.53, 0.14 and 0.33, none with an interval excluding 0 (the bin-balanced q = 50 cell has the collapsed run in both of its arms). On |peak error| and on the gap the interaction excludes 0 in two cells, `relu` bin-balanced at q = 60 (|peak error| -0.0249 [-0.0431, -0.0078], gap -1.558 [-2.640, -0.531]) and `t10` bin-balanced at q = 60 (-0.0169 [-0.0299, -0.0042], gap -0.986 [-1.741, -0.246]); on the smoothing part it excludes 0 in all four `relu` cells (+0.43, +0.23, +0.26, +0.22: the landing lowers the smoothing part of `relu` by less than that of `t1`, whose smoothing part is higher at s = 1).
 
 ## 6. The quadrature check (D6)
 
@@ -636,7 +636,7 @@ The rounding width, R0 / |peak error|, the location-free peak (its argmax d is w
 | t10_st_s16 | 50 | 3.63 | 3.34 | 0.597 | 0.588 | -0.0355 | +0.8, -1.5, +2.5 | 0.0234 | 7.840 | 26 |
 | t10_st_s16 | 60 | 3.35 | 3.57 | 0.672 | 0.673 | -0.0274 | -0.2, -2.0, +1.5 | 0.0289 | 8.033 | 27 |
 
-R0 as the terminal-stage tie-accuracy metric (block `r0`: Spearman correlation of R0 with |peak error| over the freeze values of the 40 runs of an actor per q, and over all terminal-stage checks):
+R0 as the terminal-stage tie-accuracy metric (block `r0`: Spearman correlation of R0 with |peak error| over the freeze values of the 40 runs of an actor per q, and over the checks of local update 1800-2800, 41 per run):
 
 | scope | actors | q | n | Spearman(R0, abs(peak)) |
 |---|---|---|---|---|
@@ -657,7 +657,38 @@ R0 as the terminal-stage tie-accuracy metric (block `r0`: Spearman correlation o
 | checks | relu | 60 | 1640 | 0.890 |
 | checks | t10 | 60 | 1640 | 0.980 |
 
-At the freeze the rank correlation is 1.000 for `t1` and `t10` at both q (1.000 and 0.995 over all 120 runs) and 0.993 / 0.970 for `relu`; over all 4,920 checks it is 0.923 (q = 50) and 0.946 (q = 60), `relu` 0.852 / 0.890. R0 / |peak error| is within 0.015 of the linearised value in fifteen of the sixteen `t1` and `t10` cells (0.597-0.685 against 0.588 / 0.673; the exception is `t10_st_s1` at q = 60, 0.614 against 0.673); for `relu` the cell means are 0.596-1.056 and differ from the linearised value by more than 0.03 in six of the eight cells.
+At the freeze the rank correlation is 1.000 for `t1` and `t10` at both q (1.000 and 0.995 over all 120 runs) and 0.993 / 0.970 for `relu`; over the 4,920 checks of local update 1800-2800 (41 per run) it is 0.923 (q = 50) and 0.946 (q = 60), `relu` 0.852 / 0.890. R0 / |peak error| is within 0.015 of the linearised value in fifteen of the sixteen `t1` and `t10` cells (0.597-0.685 against 0.588 / 0.673; the exception is `t10_st_s1` at q = 60, 0.614 against 0.673); for `relu` the cell means are 0.596-1.056 and differ from the linearised value by more than 0.03 in six of the eight cells.
+
+The column B / max |w| (bend width) is the d-range over which the sharpest unit of a tanh actor bends; for the `relu` actors, whose units have a kink at any weight, it is only a scale of the weights.
+
+R0 and R0 / |peak error| on both tiers (block `r0_tiers`; the development tier is the one of the check rows):
+
+| arm | q | R0 final tier (median) | R0 development tier (median) | R0/\|peak\| final (mean) | R0/\|peak\| development (mean) | linearised 2k/(2k+a) |
+|---|---|---|---|---|---|---|
+| t1_bb_s1 | 50 | 0.0301 | 0.0301 | 0.602 | 0.602 | 0.588 |
+| t1_bb_s1 | 60 | 0.0247 | 0.0247 | 0.682 | 0.678 | 0.673 |
+| t1_bb_s16 | 50 | 0.0324 | 0.0324 | 0.602 | 0.602 | 0.588 |
+| t1_bb_s16 | 60 | 0.0325 | 0.0325 | 0.683 | 0.683 | 0.673 |
+| t1_st_s1 | 50 | 0.0228 | 0.0228 | 0.599 | 0.598 | 0.588 |
+| t1_st_s1 | 60 | 0.0299 | 0.0299 | 0.683 | 0.683 | 0.673 |
+| t1_st_s16 | 50 | 0.0255 | 0.0255 | 0.598 | 0.597 | 0.588 |
+| t1_st_s16 | 60 | 0.0297 | 0.0297 | 0.682 | 0.676 | 0.673 |
+| relu_bb_s1 | 50 | 0.0145 | 0.0144 | 0.635 | 0.628 | 0.588 |
+| relu_bb_s1 | 60 | 0.0219 | 0.0219 | 0.631 | 0.546 | 0.673 |
+| relu_bb_s16 | 50 | 0.0120 | 0.0119 | 0.625 | 0.652 | 0.588 |
+| relu_bb_s16 | 60 | 0.0105 | 0.0108 | 1.056 | 0.868 | 0.673 |
+| relu_st_s1 | 50 | 0.0201 | 0.0201 | 0.873 | 0.864 | 0.588 |
+| relu_st_s1 | 60 | 0.0097 | 0.0091 | 0.667 | 0.539 | 0.673 |
+| relu_st_s16 | 50 | 0.0168 | 0.0168 | 0.596 | 0.595 | 0.588 |
+| relu_st_s16 | 60 | 0.0148 | 0.0147 | 0.763 | 0.668 | 0.673 |
+| t10_bb_s1 | 50 | 0.0244 | 0.0244 | 0.599 | 0.584 | 0.588 |
+| t10_bb_s1 | 60 | 0.0364 | 0.0364 | 0.685 | 0.685 | 0.673 |
+| t10_bb_s16 | 50 | 0.0244 | 0.0244 | 0.598 | 0.598 | 0.588 |
+| t10_bb_s16 | 60 | 0.0293 | 0.0293 | 0.683 | 0.682 | 0.673 |
+| t10_st_s1 | 50 | 0.0286 | 0.0286 | 0.601 | 0.601 | 0.588 |
+| t10_st_s1 | 60 | 0.0265 | 0.0265 | 0.614 | 0.609 | 0.673 |
+| t10_st_s16 | 50 | 0.0199 | 0.0199 | 0.597 | 0.595 | 0.588 |
+| t10_st_s16 | 60 | 0.0202 | 0.0202 | 0.672 | 0.622 | 0.673 |
 
 The largest first-layer d-weight over training, per actor (seed medians and inter-quartile bands; every export):
 
@@ -691,6 +722,35 @@ Block `first_layer` (median [min, max] over the seeds at four exports):
 | t10_st_s1 | 60 | 4.135 [2.898, 5.954] | 6.807 [4.397, 8.239] | 7.654 [5.237, 9.375] | 8.089 [5.404, 9.908] |
 | t10_st_s16 | 50 | 5.429 [3.175, 6.918] | 6.921 [4.095, 10.595] | 7.749 [4.962, 11.686] | 7.840 [5.350, 11.793] |
 | t10_st_s16 | 60 | 4.135 [2.898, 5.954] | 6.807 [4.397, 8.239] | 7.654 [5.237, 9.375] | 8.033 [5.293, 9.812] |
+
+The distribution of |w| over the 64 units (block `first_layer_dist`; median over the seeds of the quantiles and of the number of units above 1, at update 400 and at the freeze; every export is in `first_layer_weights.csv`):
+
+| arm | q | u400 | freeze (u2800) |
+|---|---|---|---|
+| t1_bb_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.11/0.31/0.56/0.72/1.10; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.15/0.38/0.67/0.80/1.26; units > 1: 3 |
+| t1_bb_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.09/0.26/0.58/0.76/1.12; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.09/0.31/0.65/0.86/1.28; units > 1: 4 |
+| t1_bb_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.11/0.31/0.56/0.72/1.10; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.15/0.39/0.67/0.80/1.26; units > 1: 2 |
+| t1_bb_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.09/0.26/0.58/0.76/1.12; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.09/0.31/0.66/0.85/1.27; units > 1: 4 |
+| t1_st_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.13/0.32/0.58/0.74/1.05; units > 1: 1 | \|w\| q25/q50/q75/q90/max 0.17/0.40/0.70/0.84/1.24; units > 1: 4 |
+| t1_st_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.10/0.30/0.56/0.70/1.11; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.12/0.35/0.61/0.79/1.30; units > 1: 4 |
+| t1_st_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.13/0.32/0.58/0.74/1.05; units > 1: 1 | \|w\| q25/q50/q75/q90/max 0.16/0.41/0.70/0.84/1.23; units > 1: 4 |
+| t1_st_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.10/0.30/0.56/0.70/1.11; units > 1: 2 | \|w\| q25/q50/q75/q90/max 0.11/0.35/0.61/0.79/1.29; units > 1: 3 |
+| relu_bb_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.12/0.34/0.47/0.55/0.74; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.13/0.41/0.54/0.65/0.83; units > 1: 0 |
+| relu_bb_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.10/0.28/0.46/0.55/0.75; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.11/0.38/0.54/0.64/0.82; units > 1: 0 |
+| relu_bb_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.12/0.34/0.47/0.55/0.74; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.13/0.41/0.53/0.63/0.82; units > 1: 0 |
+| relu_bb_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.10/0.28/0.46/0.55/0.75; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.11/0.39/0.53/0.63/0.84; units > 1: 0 |
+| relu_st_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.13/0.35/0.46/0.55/0.71; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.14/0.42/0.55/0.65/0.85; units > 1: 0 |
+| relu_st_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.11/0.31/0.47/0.56/0.73; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.11/0.39/0.56/0.66/0.83; units > 1: 0 |
+| relu_st_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.13/0.35/0.46/0.55/0.71; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.14/0.41/0.55/0.64/0.84; units > 1: 0 |
+| relu_st_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.11/0.31/0.47/0.56/0.73; units > 1: 0 | \|w\| q25/q50/q75/q90/max 0.11/0.38/0.55/0.66/0.82; units > 1: 0 |
+| t10_bb_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.15/1.14/2.06/2.50/5.16; units > 1: 33 | \|w\| q25/q50/q75/q90/max 0.14/1.31/2.32/2.86/8.51; units > 1: 36 |
+| t10_bb_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.15/1.07/1.97/2.28/4.43; units > 1: 32 | \|w\| q25/q50/q75/q90/max 0.12/1.23/2.31/2.74/7.49; units > 1: 34 |
+| t10_bb_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.15/1.14/2.06/2.50/5.16; units > 1: 33 | \|w\| q25/q50/q75/q90/max 0.15/1.37/2.32/2.81/8.47; units > 1: 34 |
+| t10_bb_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.15/1.07/1.97/2.28/4.43; units > 1: 32 | \|w\| q25/q50/q75/q90/max 0.13/1.26/2.28/2.73/7.41; units > 1: 35 |
+| t10_st_s1 | 50 | \|w\| q25/q50/q75/q90/max 0.16/1.21/2.05/2.49/5.43; units > 1: 35 | \|w\| q25/q50/q75/q90/max 0.17/1.43/2.37/3.07/7.89; units > 1: 36 |
+| t10_st_s1 | 60 | \|w\| q25/q50/q75/q90/max 0.15/1.05/1.91/2.24/4.14; units > 1: 33 | \|w\| q25/q50/q75/q90/max 0.16/1.30/2.27/2.75/8.09; units > 1: 36 |
+| t10_st_s16 | 50 | \|w\| q25/q50/q75/q90/max 0.16/1.21/2.05/2.49/5.43; units > 1: 35 | \|w\| q25/q50/q75/q90/max 0.19/1.46/2.35/3.05/7.84; units > 1: 36 |
+| t10_st_s16 | 60 | \|w\| q25/q50/q75/q90/max 0.15/1.05/1.91/2.24/4.14; units > 1: 33 | \|w\| q25/q50/q75/q90/max 0.15/1.27/2.24/2.74/8.03; units > 1: 35 |
 
 The learned peak is below `e_2*(0)` in every cell (location-free peak error negative in all cells), and its argmax d lies between -4.5 and +3.5 units of d in every run except the collapsed run (89.0 and 91.5).
 
@@ -825,6 +885,64 @@ Seed means of e_hat_2(0), the smoothing part, the remainder, `w_eff` and R0 at s
 | t10_st_s1 | 60 | 56.20, 1.50, 0.63, 4.39, 0.0247 | 56.01, 1.45, 0.87, 4.77, 0.0271 | 56.48, 1.41, 0.45, 3.82, 0.0214 | 56.09, 1.37, 0.88, 4.62, 0.0261 | 56.14, 1.34, 0.85, 4.50, 0.0254 | 56.04, 1.32, 0.97, 4.72, 0.0268 |
 | t10_st_s16 | 50 | 66.85, 2.15, 1.00, 4.50, 0.0271 | 66.10, 2.08, 1.82, 5.57, 0.0336 | 66.82, 0.52, 2.67, 4.55, 0.0273 | 67.45, 0.51, 2.04, 3.64, 0.0247 | 67.32, 0.51, 2.17, 3.83, 0.0229 | 67.46, 0.51, 2.04, 3.63, 0.0217 |
 | t10_st_s16 | 60 | 56.20, 1.50, 0.63, 4.39, 0.0247 | 56.01, 1.45, 0.87, 4.77, 0.0271 | 55.74, 0.36, 2.23, 5.33, 0.0303 | 57.04, 0.36, 0.93, 2.66, 0.0189 | 57.16, 0.36, 0.81, 2.41, 0.0147 | 56.70, 0.36, 1.27, 3.35, 0.0186 |
+
+R, Delta_2 and C_2 at the same six checks (seed means; block `trajectory_rdc`):
+
+| arm | q | u1800: R, Delta, C | u2000: R, Delta, C | u2200: R, Delta, C | u2400: R, Delta, C | u2600: R, Delta, C | u2800: R, Delta, C |
+|---|---|---|---|---|---|---|---|
+| t1_bb_s1 | 50 | 0.1207, 0.00217, 0.0290 | 0.1575, 0.00315, 0.0280 | 0.1200, 0.00174, 0.0273 | 0.1248, 0.00236, 0.0265 | 0.1077, 0.00155, 0.0260 | 0.0857, 0.00122, 0.0257 |
+| t1_bb_s1 | 60 | 0.0710, 0.00086, 0.0281 | 0.0781, 0.00096, 0.0271 | 0.0726, 0.00098, 0.0263 | 0.0740, 0.00079, 0.0255 | 0.0581, 0.00061, 0.0250 | 0.0630, 0.00058, 0.0248 |
+| t1_bb_s16 | 50 | 0.1207, 0.00217, 0.0290 | 0.1575, 0.00315, 0.0280 | 0.0845, 0.00122, 0.0070 | 0.1200, 0.00164, 0.0070 | 0.1142, 0.00199, 0.0070 | 0.0965, 0.00126, 0.0069 |
+| t1_bb_s16 | 60 | 0.0710, 0.00086, 0.0281 | 0.0781, 0.00096, 0.0271 | 0.0813, 0.00114, 0.0068 | 0.0725, 0.00081, 0.0068 | 0.0620, 0.00067, 0.0067 | 0.0551, 0.00051, 0.0067 |
+| t1_st_s1 | 50 | 0.1107, 0.00162, 0.0287 | 0.1258, 0.00194, 0.0278 | 0.1174, 0.00144, 0.0270 | 0.1024, 0.00126, 0.0263 | 0.0958, 0.00119, 0.0257 | 0.0981, 0.00117, 0.0255 |
+| t1_st_s1 | 60 | 0.0697, 0.00087, 0.0278 | 0.0710, 0.00077, 0.0269 | 0.0622, 0.00064, 0.0261 | 0.0729, 0.00080, 0.0254 | 0.0652, 0.00065, 0.0249 | 0.0600, 0.00054, 0.0246 |
+| t1_st_s16 | 50 | 0.1107, 0.00162, 0.0287 | 0.1258, 0.00194, 0.0278 | 0.1129, 0.00148, 0.0069 | 0.1010, 0.00112, 0.0069 | 0.0943, 0.00097, 0.0069 | 0.0766, 0.00065, 0.0069 |
+| t1_st_s16 | 60 | 0.0697, 0.00087, 0.0278 | 0.0710, 0.00077, 0.0269 | 0.0705, 0.00076, 0.0067 | 0.0596, 0.00057, 0.0067 | 0.0625, 0.00056, 0.0066 | 0.0484, 0.00039, 0.0066 |
+| relu_bb_s1 | 50 | 0.2504, 0.02545, 0.0256 | 0.2680, 0.02723, 0.0243 | 0.2499, 0.02705, 0.0230 | 0.2893, 0.02807, 0.0209 | 0.2920, 0.02930, 0.0202 | 0.2895, 0.02904, 0.0200 |
+| relu_bb_s1 | 60 | 0.0625, 0.00070, 0.0232 | 0.0686, 0.00074, 0.0222 | 0.0794, 0.00102, 0.0212 | 0.0735, 0.00093, 0.0205 | 0.0527, 0.00048, 0.0199 | 0.0534, 0.00046, 0.0196 |
+| relu_bb_s16 | 50 | 0.2504, 0.02545, 0.0256 | 0.2680, 0.02723, 0.0243 | 0.2632, 0.02773, 0.0061 | 0.2608, 0.02718, 0.0060 | 0.2496, 0.02682, 0.0059 | 0.2331, 0.02653, 0.0059 |
+| relu_bb_s16 | 60 | 0.0625, 0.00070, 0.0232 | 0.0686, 0.00074, 0.0222 | 0.0535, 0.00056, 0.0056 | 0.0655, 0.00075, 0.0057 | 0.0537, 0.00046, 0.0058 | 0.0378, 0.00031, 0.0058 |
+| relu_st_s1 | 50 | 0.1482, 0.00478, 0.0251 | 0.1538, 0.00461, 0.0240 | 0.1957, 0.00917, 0.0230 | 0.1698, 0.00622, 0.0223 | 0.1556, 0.00752, 0.0217 | 0.1851, 0.01095, 0.0214 |
+| relu_st_s1 | 60 | 0.0622, 0.00076, 0.0236 | 0.0658, 0.00084, 0.0225 | 0.0656, 0.00066, 0.0215 | 0.0592, 0.00064, 0.0208 | 0.0498, 0.00046, 0.0202 | 0.0472, 0.00036, 0.0199 |
+| relu_st_s16 | 50 | 0.1482, 0.00478, 0.0251 | 0.1538, 0.00461, 0.0240 | 0.1479, 0.00296, 0.0060 | 0.1448, 0.00357, 0.0062 | 0.1350, 0.00259, 0.0063 | 0.1022, 0.00221, 0.0063 |
+| relu_st_s16 | 60 | 0.0622, 0.00076, 0.0236 | 0.0658, 0.00084, 0.0225 | 0.0714, 0.00101, 0.0057 | 0.0676, 0.00081, 0.0058 | 0.0620, 0.00054, 0.0059 | 0.0394, 0.00035, 0.0059 |
+| t10_bb_s1 | 50 | 0.1114, 0.00192, 0.0287 | 0.1063, 0.00142, 0.0277 | 0.0929, 0.00134, 0.0269 | 0.1131, 0.00169, 0.0261 | 0.0966, 0.00124, 0.0256 | 0.0938, 0.00104, 0.0253 |
+| t10_bb_s1 | 60 | 0.0755, 0.00099, 0.0274 | 0.0651, 0.00070, 0.0264 | 0.0719, 0.00086, 0.0256 | 0.0627, 0.00075, 0.0248 | 0.0645, 0.00061, 0.0243 | 0.0572, 0.00061, 0.0241 |
+| t10_bb_s16 | 50 | 0.1114, 0.00192, 0.0287 | 0.1063, 0.00142, 0.0277 | 0.0890, 0.00092, 0.0069 | 0.0954, 0.00119, 0.0069 | 0.0876, 0.00106, 0.0069 | 0.0571, 0.00050, 0.0068 |
+| t10_bb_s16 | 60 | 0.0755, 0.00099, 0.0274 | 0.0651, 0.00070, 0.0264 | 0.0799, 0.00097, 0.0066 | 0.0712, 0.00073, 0.0065 | 0.0607, 0.00054, 0.0065 | 0.0487, 0.00041, 0.0065 |
+| t10_st_s1 | 50 | 0.1418, 0.00256, 0.0291 | 0.1115, 0.00160, 0.0281 | 0.1116, 0.00144, 0.0272 | 0.1038, 0.00137, 0.0265 | 0.0937, 0.00123, 0.0259 | 0.0691, 0.00065, 0.0257 |
+| t10_st_s1 | 60 | 0.0622, 0.00057, 0.0277 | 0.0760, 0.00088, 0.0268 | 0.0694, 0.00070, 0.0260 | 0.0636, 0.00075, 0.0252 | 0.0643, 0.00060, 0.0247 | 0.0639, 0.00058, 0.0244 |
+| t10_st_s16 | 50 | 0.1418, 0.00256, 0.0291 | 0.1115, 0.00160, 0.0281 | 0.1053, 0.00131, 0.0070 | 0.1002, 0.00128, 0.0070 | 0.0868, 0.00082, 0.0069 | 0.0705, 0.00061, 0.0069 |
+| t10_st_s16 | 60 | 0.0622, 0.00057, 0.0277 | 0.0760, 0.00088, 0.0268 | 0.0684, 0.00071, 0.0067 | 0.0685, 0.00070, 0.0067 | 0.0538, 0.00040, 0.0066 | 0.0412, 0.00032, 0.0066 |
+
+The ratio smoothing part / [`e_2*(0)` sigma_2(0) / (sqrt(pi) q)] at the freeze (the prediction of D6, block `smoothing_formula`):
+
+| arm | q | n | ratio: mean [min, max] |
+|---|---|---|---|
+| t1_bb_s1 | 50 | 10 | 0.99935 [0.99929, 0.99947] |
+| t1_bb_s1 | 60 | 10 | 0.99946 [0.99942, 0.99952] |
+| t1_bb_s16 | 50 | 10 | 0.99918 [0.99917, 0.99919] |
+| t1_bb_s16 | 60 | 10 | 0.99918 [0.99918, 0.99919] |
+| t1_st_s1 | 50 | 10 | 0.99933 [0.99927, 0.99936] |
+| t1_st_s1 | 60 | 10 | 0.99946 [0.99943, 0.99949] |
+| t1_st_s16 | 50 | 10 | 0.99917 [0.99917, 0.99918] |
+| t1_st_s16 | 60 | 10 | 0.99918 [0.99918, 0.99919] |
+| relu_bb_s1 | 50 | 10 | 0.89933 [0.00000, 0.99930] |
+| relu_bb_s1 | 60 | 10 | 0.99935 [0.99932, 0.99939] |
+| relu_bb_s16 | 50 | 10 | 0.90398 [0.04724, 0.99917] |
+| relu_bb_s16 | 60 | 10 | 0.99918 [0.99918, 0.99918] |
+| relu_st_s1 | 50 | 10 | 0.99927 [0.99921, 0.99932] |
+| relu_st_s1 | 60 | 10 | 0.99935 [0.99933, 0.99943] |
+| relu_st_s16 | 50 | 10 | 0.99917 [0.99917, 0.99917] |
+| relu_st_s16 | 60 | 10 | 0.99918 [0.99918, 0.99918] |
+| t10_bb_s1 | 50 | 10 | 0.99933 [0.99927, 0.99937] |
+| t10_bb_s1 | 60 | 10 | 0.99945 [0.99944, 0.99947] |
+| t10_bb_s16 | 50 | 10 | 0.99917 [0.99917, 0.99918] |
+| t10_bb_s16 | 60 | 10 | 0.99918 [0.99918, 0.99918] |
+| t10_st_s1 | 50 | 10 | 0.99934 [0.99931, 0.99937] |
+| t10_st_s1 | 60 | 10 | 0.99945 [0.99944, 0.99947] |
+| t10_st_s16 | 50 | 10 | 0.99917 [0.99917, 0.99918] |
+| t10_st_s16 | 60 | 10 | 0.99918 [0.99918, 0.99918] |
 
 ![decomposition along the run, bin-balanced starts](../../../results/ms_r3/analysis/figures/trajectory_decomposition_bb.png)
 
@@ -1156,8 +1274,9 @@ The median RL gap is larger than the screen's median deficit in 11 of the 12 cel
 3. **`relu` changes more per update**: KL and clip fraction are higher than under `t1` and `t10` in every segment (section 3.2).
 4. **sigma_2(0) is lower under `relu` already at s = 1** (1.75-1.99 against 2.38-2.45); the mechanism is not examined here.
 5. **R0 / |peak error| departs from the linearised value for `relu`** in six of eight cells, including `relu_bb_s16` at q = 60 (1.056, with mean |peak error| 0.017 and 10 of 10 runs at 0.05 or below).
-6. **`t10` has sharp first-layer units and the `t1` tie deficit** (section 3.3): the finer input resolution is there (bend width 24-30 units of d) and the rounding width is not reduced; this does not transfer from the supervised screen (section 15).
-7. **No run was lost, re-run or flagged by a check**; no `t1` run and no `t10` run fails a gate.
+6. **`t10` has sharp first-layer units and a mean tie deficit of the `t1` size** (section 3.3): the finer input resolution is there (bend width 24-30 units of d) and the mean rounding width is of the `t1` size (3.4-6.6 against 4.0-5.7 units of d); the screen's advantage does not appear (section 15).
+7. **The learner's clamp share is high for `relu`** (block `shares`, section 13): 0.131-0.233 of the learner's raw stage-2 draws sit at the action clamp in the eight `relu` arms against 0.0007-0.0199 for `t1` and 0.0021-0.0095 for `t10`; it co-varies with the lower tail mean of `relu` and is not examined further.
+8. **No run was lost, re-run or flagged by a check**; no `t1` run and no `t10` run fails a gate.
 
 ## 17. Where the numbers are
 
