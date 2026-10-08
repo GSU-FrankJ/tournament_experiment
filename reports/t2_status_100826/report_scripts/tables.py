@@ -335,15 +335,18 @@ def interventions(pack: Path) -> str:
 
 def premise(pack: Path) -> str:
     pc = evj(pack, "results/ms_r3/supervised_screen/premise_check.json")
-    d = runs(pack)
+    ex = ev(pack, "results/ms_r3/supervised_screen/summary_extended.csv")
     rows = []
     for act in ("t1", "relu", "t10"):
         med = pc["median_tip_deficit"][act]
         per = pc["per_seed_tip_deficit"][act]["60"]
-        plateau = sum(1 for v in per.values() if v >= 6.0)
-        rows.append([act, fmt(med["50"], 2), fmt(med["60"], 2),
-                     "%d of 10 seeds >= 6.0 (range %s-%s)" % (plateau, fmt(min(v for v in per.values() if v >= 6.0), 2), fmt(max(v for v in per.values() if v >= 6.0), 2)) if plateau else "0 of 10 seeds >= 6.0"])
-    return md(["actor", "median tip deficit q=50 (effort units)", "q=60", "q=60 plateau"], rows)
+        hi = [v for v in per.values() if v >= 6.0]
+        rows.append([act, "56,000 (the RL budget)", fmt(med["50"], 2), fmt(med["60"], 2),
+                     ("%d of 10 seeds >= 6.0 (range %s-%s)" % (len(hi), fmt(min(hi), 2), fmt(max(hi), 2))) if hi else "0 of 10 seeds >= 6.0"])
+    e = ex[(ex.actor == "t1") & (ex.starts == "bb") & (ex.steps == 224000)]
+    rows.append(["t1 (extended cell)", "224,000 (4 x the RL budget)", fmt(float(e[e.q == 50].tip_deficit_median.iloc[0]), 2),
+                 fmt(float(e[e.q == 60].tip_deficit_median.iloc[0]), 2), "-"])
+    return md(["actor", "supervised steps", "median tip deficit q=50 (effort units)", "q=60", "q=60 plateau"], rows)
 
 
 def screen_vs_rl(pack: Path) -> str:
@@ -375,15 +378,27 @@ def relu_fail(pack: Path) -> str:
     rows = []
     for r in f.sort_values(["seed", "arm"]).itertuples():
         rows.append([r.arm, int(r.q), int(r.seed), fmt(r.e2_at_0, 4), fmt(r.eta_T_over_dw, 5),
-                     fmt(r.stage2_rmse_pos_over_g2_0, 4), fmt(r.stage2_tail_mean_over_g2_0, 4)])
-    tab = md(["arm", "q", "seed", "e_hat_2(0)", "eta_2/DW (limit 0.005)", "RMSE_pos/e2*(0)", "tail mean/e2*(0)"], rows)
+                     fmt(r.stage2_rmse_pos_over_g2_0, 4), fmt(r.stage2_tail_mean_over_g2_0, 4),
+                     "yes" if r.fail1 else "no", fmt(r.stage1_rel_err_abs, 4)])
+    tab = md(["arm", "q", "seed", "e_hat_2(0)", "eta_2/DW (limit 0.005)", "RMSE_pos/e2*(0) (limit 0.05)",
+              "tail mean/e2*(0) (limit 0.02)", "also fails a stage-1 gate", "stage-1 \\|error\\| (S1)"], rows)
     n = len(f)
     cases = f.groupby(["q", "seed"]).ngroups
     n60 = int(x[x.q == 60].fail2.sum())
+    tt = d[(d["round"] == "MS-R3") & (d.arm.str.match(r"^(t1|t10)_")) & (d.role == "ms_arm")]
     return tab + "\n\n%d of %d `relu` runs fail G-A or G-N(eta) (%d at q=50, %d at q=60), from %d (q, seed) cases; `t1` and `t10`: %d failures in %d runs." % (
-        n, len(x), int(x[x.q == 50].fail2.sum()), n60, cases,
-        int(d[(d["round"] == "MS-R3") & (d.arm.str.match(r"^(t1|t10)_")) & (d.role == "ms_arm")].fail2.sum()),
-        len(d[(d["round"] == "MS-R3") & (d.arm.str.match(r"^(t1|t10)_")) & (d.role == "ms_arm")]))
+        n, len(x), int(x[x.q == 50].fail2.sum()), n60, cases, int(tt.fail2.sum()), len(tt))
+
+
+def relu_units(pack: Path) -> str:
+    u = ev(pack, "results/ms_r3/analysis/relu_units.csv")
+    rows = []
+    for lab, g in (("all relu runs", u), ("runs passing G-A", u[~u.failed_gate]), ("runs failing G-A", u[u.failed_gate])):
+        rows.append([lab, len(g), "%d-%d" % (g.alive_layer1.min(), g.alive_layer1.max()),
+                     "%d-%d" % (64 - g.alive_layer1.max(), 64 - g.alive_layer1.min()),
+                     "%d-%d" % (g.alive_layer2.min(), g.alive_layer2.max())])
+    return md(["runs", "n", "first-layer units alive somewhere on D_2 (of 64)", "first-layer units never active (of 64)",
+               "second-layer units alive (of 64)"], rows)
 
 
 def relu_typical(pack: Path) -> str:
@@ -708,31 +723,163 @@ def rounds(pack: Path) -> str:
                "pre-registered criterion: outcome", "main finding", "report"], rows)
 
 
-# ------------------------------------------------------------------ comparison table (10)
+# ------------------------------------------------------------------ PI decisions at the gates (6)
+
+
+def gates_pi(pack: Path) -> str:
+    rows = [
+        ["after the 100526 publication", "publication prompt, D1 [T2R:100526report section 1]",
+         "R1, v2.0, R2b and R2c closed as reported; the locked T=2 solver is v2.0; no v2.1; method 5 (pathwise) closed as negative at matched budgets; "
+         "censored likelihood not adopted; peak-focused starts not adopted at T=2 and carried as a design input for the T=3 terminal stage"],
+        ["start of the session", "prompt 17, MS-R1 [PI-01]",
+         "baseline settled (conditional expected reward + expected continuation + backward freeze, i.e. v2.0, not touched); restore the development stop rule "
+         "(threshold or budget) with stopping and targeted polishing, add coverage-constrained verifier-guided starts, T-generic code; T=2 experiments on the "
+         "development seeds only; stop at gate G1 after P1"],
+        ["gate G1 (MS-R1 P1 to P2)", "G1 reply [PI-02]",
+         "'proceed P2'; P1 accepted with its three recorded deviations; rho_2 = 0.05 stands (rho_1 = 0.03 and every other parameter stand); A1: one added arm, the "
+         "budget-matched control `MS_base2400`; A2: expectations recorded before the launch; A3: analysis additions; launch the 120 runs"],
+        ["after the MS-R1 pilot", "prompt 19, MS-R2 [PI-03]",
+         "PI reading of the MS-R1 data: the d = 0 gap = smoothing part + remainder, and the noise floor is what binds; test it with a noise landing (scale s in "
+         "{1, 4, 16}) crossed with the sampler; stop rule, classification and polishing off; offline calibration of three closed-form-free stop criteria; "
+         "development seeds only"],
+        ["after the MS-R2 pilot", "prompt 20, MS-R3 [PI-04]",
+         "the noise-floor reading is withdrawn (the tie effort is invariant to the policy noise); new post hoc reading: the actor's resolution at the kink; "
+         "only the actor changes (`relu`, `t10` against `t1`), the critic does not; continue to the RL pilot only if the supervised premise check passes"],
+        ["after the MS-R3 pilot", "prompt 21, this pack [PI-05]",
+         "no new experiment of any kind; assemble a status pack for a coworker who decides: close T=2 now, or continue improving accuracy; no experiment "
+         "before the coworker's reply"],
+    ]
+    return md(["gate", "record", "PI decision (as the record states it)"], rows)
+
+
+# ------------------------------------------------------------------ reference points and measures (10)
+
+
+def refpoints(pack: Path) -> str:
+    d = runs(pack)
+    cf = confirmation()
+    pc = evj(pack, "results/ms_r3/supervised_screen/premise_check.json")
+    ex = ev(pack, "results/ms_r3/supervised_screen/summary_extended.csv")
+    rows = []
+
+    def two(f50, f60):
+        return "%s / %s" % (f50, f60)
+    a, b = cf[cf.q == 50], cf[cf.q == 60]
+    rows.append(["v2.0, fresh seeds 30501-30520, n = 20 per q [T2R:R2B-18]", "mean \\|peak\\| (q=50 / q=60)", two(fmt(a.abs_peak.mean()), fmt(b.abs_peak.mean())),
+                 "runs <= 0.05: %d / %d of 20" % ((a.abs_peak <= 0.05).sum(), (b.abs_peak <= 0.05).sum())])
+    for lab, arm, role in (("v2.0, development seeds (`parents_A`), n = 10 per q [M3-08]", "parents_A", "comparator"),
+                           ("best development arm `relu_st_s16` [M3-08]", "relu_st_s16", "ms_arm"),
+                           ("`t10_st_s16` [M3-08]", "t10_st_s16", "ms_arm"), ("`t1_st_s16` [M3-08]", "t1_st_s16", "ms_arm")):
+        x, y = sel(d, "MS-R3", arm, 50, role), sel(d, "MS-R3", arm, 60, role)
+        rows.append([lab, "mean \\|peak\\| (q=50 / q=60)", two(fmt(x.abs_peak.mean()), fmt(y.abs_peak.mean())),
+                     "runs <= 0.05: %d / %d of 10; G-A or G-N(eta) failures %d / %d" % ((x.abs_peak <= 0.05).sum(), (y.abs_peak <= 0.05).sum(), x.fail2.sum(), y.fail2.sum())])
+    fs = floor_s(pack)
+    for s, arms in ((1, ("t1_bb_s1", "t1_st_s1", "t10_bb_s1", "t10_st_s1")), (16, ("t1_bb_s16", "t1_st_s16", "t10_bb_s16", "t10_st_s16"))):
+        v = {}
+        for q in (50, 60):
+            v[q] = [float((sel(d, "MS-R3", a_, q, "ms_arm").sigma_effort_at_0_t2 / (math.sqrt(math.pi) * q)).mean()) for a_ in arms]
+        rows.append(["smoothing floor sigma_2(0)/(sqrt(pi) q) at s = %d, tanh arms [M3-08]" % s, "% of e2*(0) (q=50 / q=60)",
+                     two("%s-%s %%" % (fmt(100 * min(v[50]), 2), fmt(100 * max(v[50]), 2)), "%s-%s %%" % (fmt(100 * min(v[60]), 2), fmt(100 * max(v[60]), 2))),
+                     "not a strict bound: single runs can overshoot it (non-negative signed errors exist, see TBL-nonneg)"])
+    for act in ("t1", "relu", "t10"):
+        m = pc["median_tip_deficit"][act]
+        rows.append(["supervised fit, `%s`, 56,000 steps, bin-balanced [M3-23]" % act, "median tip deficit, effort units (q=50 / q=60); % of e2*(0)",
+                     two(fmt(m["50"], 2), fmt(m["60"], 2)), two("%s %%" % fmt(100 * m["50"] / E_STAR0[50], 2), "%s %%" % fmt(100 * m["60"] / E_STAR0[60], 2))])
+    e = ex[(ex.actor == "t1") & (ex.starts == "bb") & (ex.steps == 224000)]
+    m50, m60 = float(e[e.q == 50].tip_deficit_median.iloc[0]), float(e[e.q == 60].tip_deficit_median.iloc[0])
+    rows.append(["supervised fit, `t1`, 224,000 steps [M3-36]", "median tip deficit, effort units (q=50 / q=60); % of e2*(0)", two(fmt(m50, 2), fmt(m60, 2)),
+                 two("%s %%" % fmt(100 * m50 / E_STAR0[50], 2), "%s %%" % fmt(100 * m60 / E_STAR0[60], 2))])
+    return md(["reference point", "quantity", "value", "note"], rows)
+
+
+def measures(pack: Path) -> str:
+    d = runs(pack)
+    r50 = sel(d, "MS-R3", "relu_st_s16", 50, "ms_arm").abs_peak.mean()
+    r60 = sel(d, "MS-R3", "relu_st_s16", 60, "ms_arm").abs_peak.mean()
+    t1_50 = sel(d, "MS-R3", "t1_st_s16", 50, "ms_arm").abs_peak.mean()
+    t1_60 = sel(d, "MS-R3", "t1_st_s16", 60, "ms_arm").abs_peak.mean()
+    pa50 = sel(d, "MS-R3", "parents_A", 50, "comparator").abs_peak.mean()
+    pa60 = sel(d, "MS-R3", "parents_A", 60, "comparator").abs_peak.mean()
+    rows = [
+        ["1. `relu` with robustness fixes (leaky ReLU; a mean map without the hard clamp)",
+         "[M3-09], [TBL-relutyp], [TBL-relufail], [TBL-reluunits]; the failure readings are [Hypothesis] H3 of [PI-06]",
+         "cannot be estimated from the current evidence: the fixes were never run and the failure rate is not estimable from 2 (q, seed) cases in 40 runs at q=50. "
+         "Recorded for the unfixed `relu_st_s16`: mean \\|peak\\| %s / %s (q=50 / q=60) against %s / %s for `t1_st_s16` [TBL-accuracy-a]. To estimate it one needs "
+         "fix arms run on more than the ten development seeds, with failure counts (the PI-side proposal: 20 seeds per q)" % (fmt(r50), fmt(r60), fmt(t1_50), fmt(t1_60)),
+         "MS-R3: 240 runs, per-run wall 542-721 s, 40 workers, 41.2 h of summed per-run wall [TBL-workload]; then a lock, a re-rehearsal and a fresh-seed confirmation (v2.0 round: 40 runs, 4.0 h summed) [TBL-workload]. Person-time cannot be estimated",
+         "ten seeds per cell; one failed run moves a ten-seed mean (+0.0691 in two rows) [M3-09]",
+         "part (b) violated in all four `relu` rows; the 5 failing runs also fail a stage-1 gate [TBL-relufail]",
+         "an actor change needs a lock and a fresh-seed confirmation and carries into T=3 (not evaluated)"],
+        ["2. Non-actor combination: stratified starts + noise landing (s = 16) + 2800 updates",
+         "[M2-09], [M2-10], [M3-10], [TBL-interventions]",
+         "cannot be separated from the budget with the current evidence: `t1_st_s16` (= `NL_st_s16`) has mean \\|peak\\| %s / %s against %s / %s for `parents_A` (1600 updates), "
+         "but that comparison confounds budget, sampler and landing [M2-02]; at matched budget no interval of the MS-R1 secondary table excludes 0 [M1-10]. To estimate it one needs a control with the same 2800 updates and starts but no landing" % (fmt(t1_50), fmt(t1_60), fmt(pa50), fmt(pa60)),
+         "MS-R2: 120 runs, per-run wall 555-711 s, 40 workers, 20.7 h summed [TBL-workload]; a v2.0 confirmation run took 346-373 s [TBL-workload]; lock, re-rehearsal and confirmation as above",
+         "intervals of the primary rows contain 0 in 7 of 8 cells; one cell lies above 0 [M2-09]",
+         "tail mean rose slightly under the landing (at most +0.0007 of e2*(0)) [M2-01]",
+         "a protocol change (the MS runner is not the locked entry point); the landing is T-generic code, not evaluated at T=3"],
+        ["3. More near-tie samples (share or batch size) within the tail constraint",
+         "[T2R:R2B-02], [T2R:R2C-02], [M1-09], [M1-10]; the estimation-limited reading is [Hypothesis] H1 of [PI-06], test not run",
+         "cannot be estimated for a configuration that respects the tail limit: the arm that meets part (a) at both q (`A_peak50`) breaks part (b) at q=60 (3 runs above the 0.02 tail limit) [T2R:R2B-02]; "
+         "R2c arms with shares 0.35 and 0.40 meet (a) at q=50 only [T2R:R2C-02]. MS-R1 estimated that resolving the observed sampler effects at q=50 needs about 27-54 seeds per q "
+         "(normal approximation, optimistic) and 89 to more than 1000 at q=60 [M1-02]",
+         "R2c: 80 runs; MS-R1: 120 pilot runs + 20 base runs, per-run wall 503-654 s [TBL-workload]",
+         "the effects seen so far are about the size of the seed spread (seed SD of e_hat_2(0) 0.45-1.56 effort units within an arm) [M2-02]",
+         "tail mean limit (0.02) binds at q=60 [T2R:R2B-04]",
+         "a protocol change (start distribution); the peak-focused start distribution was carried to T=3 as a design input [T2R:100526report]"],
+        ["4. Untested levers: the critic (tanh on d/B), the opponent refresh interval (20 updates)",
+         "[PI-06] (B9, labelled [Hypothesis], none tested)",
+         "cannot be estimated from the current evidence: no run varied either lever. To estimate it one needs a single-factor wave per lever with matched controls, paired by (q, seed)",
+         "one MS-R2-sized wave (120 runs, 20.7 h summed) per lever as a unit of comparison [TBL-workload]",
+         "unknown", "unknown; the critic is shared by all stages", "a critic change carries into T=3 (not evaluated)"],
+        ["5. A mechanism round (e.g. vary the number of near-tie samples per update with all else fixed, for `t1` and `t10`, and see whether the rounding width F_d falls)",
+         "[TBL-fd], [PI-06] (H1, H2; tests not run)",
+         "no accuracy gain is expected by itself (it has scientific value: it would test H1); the gain cannot be estimated",
+         "one wave of an MS-R2/R3 size as a unit of comparison [TBL-workload]",
+         "the F_d values are arm-mean post hoc quantities with large per-run spread [TBL-fd]",
+         "none to the locked solver (no adoption)",
+         "none for T=2; the readout would inform T=3 design only"],
+    ]
+    return md(["measure", "evidence", "expected gain (from records only)", "workload in recorded units", "uncertainty",
+               "risk to the guard rails", "consequences"], rows)
 
 
 def compare(pack: Path) -> str:
     cf = confirmation()
-    d = runs(pack)
     a50, a60 = cf[cf.q == 50], cf[cf.q == 60]
     rows = [
-        ["What the path consists of", "No new runs; v2.0 stays the T=2 solver; MS-R1..R3 produce no protocol change [T2R:PL-01]",
-         "New round(s) on development seeds; adoption of anything needs a lock, a re-rehearsal and a fresh-seed confirmation (precedent: the v2.0 round [T2R:RR-03])"],
-        ["Accuracy on the fresh seeds it rests on (v2.0, n = 20 per q)",
-         "mean \\|peak\\| %s (q=50) / %s (q=60); runs <= 0.05: %d / %d of 20 [T2R:R2B-18]" % (
+        ["What the path consists of", "no new runs; v2.0 stays the T=2 solver; MS-R1..R3 produce no protocol change [T2R:PL-01]; write up the solver, the confirmation and the characterised tip deficit",
+         "new development-seed round(s); adoption of anything needs a lock, a re-rehearsal and a fresh-seed confirmation (precedent: the v2.0 round [T2R:RR-03])"],
+        ["Accuracy it rests on (fresh seeds, v2.0, n = 20 per q)",
+         "mean \\|peak\\| %s / %s (q=50 / q=60); runs <= 0.05: %d / %d of 20; confirmation 19/20 and 20/20 [T2R:R2B-18], [T2R:CF-02]" % (
              fmt(a50.abs_peak.mean()), fmt(a60.abs_peak.mean()), (a50.abs_peak <= 0.05).sum(), (a60.abs_peak <= 0.05).sum()),
-         "The same numbers are the starting point; no MS configuration has a fresh-seed number"],
-        ["Best development-seed numbers (not confirmed)", "-",
-         "mean \\|peak\\|: `relu_st_s16` %s / %s; `t10_st_s16` %s / %s; `t1_st_s16` %s / %s (q=50 / q=60) [TBL-accuracy]" % (
-             fmt(sel(d, 'MS-R3', 'relu_st_s16', 50, 'ms_arm').abs_peak.mean(), 4), fmt(sel(d, 'MS-R3', 'relu_st_s16', 60, 'ms_arm').abs_peak.mean(), 4),
-             fmt(sel(d, 'MS-R3', 't10_st_s16', 50, 'ms_arm').abs_peak.mean(), 4), fmt(sel(d, 'MS-R3', 't10_st_s16', 60, 'ms_arm').abs_peak.mean(), 4),
-             fmt(sel(d, 'MS-R3', 't1_st_s16', 50, 'ms_arm').abs_peak.mean(), 4), fmt(sel(d, 'MS-R3', 't1_st_s16', 60, 'ms_arm').abs_peak.mean(), 4))],
-        ["Main risk", "The tip deficit stays at its measured size (negative signed error in 40 of 40 confirmation runs [T2R:R2B-18]); a reader who needs a tighter peak is not served",
-         "`relu` failures at q=50 (5 of 40 runs, 2 (q, seed) cases) and any guard-rail regression; the failure rate cannot be estimated from the current runs [M3-09]"],
-        ["Cost in recorded units", "none beyond the write-up",
-         "see the workload table (runs and per-run wall times of comparable rounds) [TBL-workload]; person-time cannot be estimated"],
+         "the same numbers are the starting point; no MS configuration has a fresh-seed number [M3-01]"],
+        ["What the current results support (labels in section 7)", "the solver passes its gates and its fresh-seed confirmation; the tip deficit is characterised (size, sign, exact smoothing part); no tested intervention is admissible",
+         "the same; plus a candidate (`relu`) whose typical run is better and which fails in 2 of 40 (q, seed) cases at q=50 [TBL-relufail]"],
+        ["What the current results do not support", "any claim that the tip deficit is removable, or that it is harmless for a claim that needs the peak", "any estimate of the gain, the failure rate or the cost of a fix"],
+        ["Main risk", "a reader who needs a tighter peak than 0.05 on most runs is not served (5 and 4 of 20 fresh runs within 0.05)",
+         "guard-rail regressions (`relu` fails G-A and a stage-1 gate in 5 runs); an adopted actor carries into T=3 untested"],
+        ["Cost in recorded units", "the write-up only", "runs and wall times of comparable waves in [TBL-workload]; person-time cannot be estimated"],
+        ["What the coworker is asked for", "(i) close", "(i) continue; (ii) the measure to start with, and the target (metric, value, seed set)"],
     ]
     return md(["", "Path A: close now", "Path B: continue improving accuracy"], rows)
+
+
+# ------------------------------------------------------------------ static tables with citations (3, 9)
+
+GOALS_MD = "| goal (Appendix A) | implemented | tested | outcome |\n|---|---|---|---|\n| Restore the stop rule: development DP-BR (threshold or budget) + stopping + targeted polishing | yes, in the MS runner (MS-R1), behind keys [M1-01] | MS-R1 pilot, 100 rule-arm runs at rho_2 = 0.05 [TBL-stoprule] | the stop fired in 0 of 100 runs; polishing was reached at q = 60 and rarely at q = 50; the effect of polishing is not separated from the sampler's [M1-01][M1-02] |\n| Verifier-guided prioritised state sampling with global/tail coverage kept (peak + tail constrained stratified sampling, lambda_P, lambda_M, lambda_T) | yes, scheme `stratified_priority`; lambda_T fixed at the bin-balanced tail share [PI-01] | MS-R1 (four sampler arms), MS-R2 and MS-R3 (stratified arms) | sampler arms meet the criterion's part (a) at q = 50 only; the budget control alone reproduces 40-55% of their q = 50 improvement and 52-112% of their q = 60 improvement; the tail mean stayed below its 0.02 limit in every run [M1-01][TBL-gates] |\n| Per-stage stop rule (Delta <= eps for M checks: freeze; broad residual: continue global training; localised: targeted polishing) | yes, T-generic code (T = 2 and 3 in tests) [PI-01] | T=2 only in the pilot; the T=3 smoke tests show that the pipeline runs, not how it trains [M3-02] | as the first row; nothing at T=3 was evaluated |\n| Address the systematic bias in the report (the stage-2 tip deficit) | the noise landing (MS-R2) and the actor variants (MS-R3) are the two mechanism tests the PI's readings led to [PI-03][PI-04] | MS-R2 (120 runs), MS-R3 (240 runs) | not solved: no row of either primary criterion is met [M2-01][M3-01] |"
+
+ISSUES_MD = "| # | issue | label | what is known | what would resolve it |\n|---|---|---|---|---|\n| U1 | The mechanism of the remainder (the part of the tip gap that the policy noise does not explain) | [Hypothesis] (H1: estimation-limited for tanh actors) | the remainder rose when the noise fell (MS-R2) [M2-01]; the rounding width F_d is similar for `t1` and `t10` and at s = 1 and 16 (post hoc) [TBL-fd]; the screen and RL disagree for `t10` [TBL-rlscreen] | vary the near-tie samples per update (batch or share) with all else fixed, for `t1` and `t10`, and see whether F_d falls (not run) [PI-06] |\n| U2 | Why `t10` does not transfer from the supervised screen to RL | [Hypothesis] | sharper first-layer units are present in the RL actors [TBL-t10]; nothing in MS-R3 separates optimisation, noise and other explanations [M3-02] | the U1 test, and a `t10` arm at a different near-tie share (not run) |\n| U3 | Whether `relu` forms the cusp from its two well-sampled side slopes | [Hypothesis] (H2) | `relu`'s typical run is better [TBL-relutyp] | `relu`'s response to the near-tie share should be weaker than the tanh actors' (not run) [PI-06] |\n| U4 | The mechanism of the two `relu` failure modes | [Hypothesis] (H3: hard mean clamp for the collapse, dead units for the dead region) | five failing runs from two cases; 14-28 of 64 first-layer units are never active in good and failed runs alike [TBL-reluunits] | a `relu` run with leaky ReLU and a mean map without a hard clamp, on more seeds (not run) |\n| U5 | `relu`'s failure rate | [Insufficient evidence] | 2 (q, seed) cases among 40 runs at q = 50, 0 of 40 at q = 60 [TBL-relufail] | more seeds per q (the PI-side proposal: 20 per q) [PI-06] |\n| U6 | Fresh-seed performance of any MS configuration | [Insufficient evidence] | none was confirmed [M3-01] | a lock, a re-rehearsal and a fresh-seed confirmation, as in the v2.0 round [T2R:RR-03] |\n| U7 | Whether the critic's rounding of the value kink at d = 0 matters | [Hypothesis] (untested lever) | the critic is unchanged (tanh on d/B); under a tent-shaped policy the value function has a kink at d = 0 from the effort cost [PI-06] | a single-factor critic arm with a matched control (not run) |\n| U8 | Whether the opponent refresh interval (20 updates) matters | [Hypothesis] (untested lever) | no run varied it [PI-06] | a single-factor arm with a matched control (not run) |\n| U9 | Another stop metric or threshold; polishing alone; budgets beyond 2800 updates | [Insufficient evidence] | section 8 items 6-8 | arms with another rho, a sampler without polishing, a longer budget (not run) |\n| U10 | The reason for the sandbox/repository difference at q = 60 | [Insufficient evidence] | section 8 item 11 | a repeat of the screen's `t1` bin-balanced cell with the sandbox's seeds, if the difference matters (not run) |\n| U11 | Whether the tip deficit matters for a claim that needs the peak | [Insufficient evidence] | the gates are met with the deficit present; the peak is reported, not gated [T2R:PL-02] | the coworker's requirement on the peak (section 10) |\n| U12 | Anything at T=3 (the actor, the sampler, the landing carry over) | [Insufficient evidence] | not evaluated [M3-02] | a T=3 experiment, outside this report |"
+
+
+def goals(pack: Path) -> str:
+    """Section 3: the session goals of Appendix A and their status (text; every cell cites its evidence)."""
+    return GOALS_MD
+
+
+def issues(pack: Path) -> str:
+    """Section 9: unresolved issues with label, what is known and what would resolve each (text with citations)."""
+    return ISSUES_MD
 
 
 # ------------------------------------------------------------------ registry
@@ -752,6 +899,7 @@ BLOCKS: Dict[str, Tuple[str, str, Callable[[Path], str], str]] = {
     "premise": ("TBL-premise", "Premise check", premise, "M3-23"),
     "rl_vs_screen": ("TBL-rlscreen", "RL medians", screen_vs_rl, "M3-08"),
     "relu_fail": ("TBL-relufail", "The failed relu runs", relu_fail, "M3-08"),
+    "relu_units": ("TBL-reluunits", "relu hidden-unit activity (post hoc)", relu_units, "M3-14"),
     "relu_typical": ("TBL-relutyp", "relu against t1, typical run", relu_typical, "M3-08"),
     "t10": ("TBL-t10", "t10 against t1", t10_vs_t1, "M3-08"),
     "transmission": ("TBL-transmission", "Noise-landing transmission", transmission, "M2-11, M3-11"),
@@ -767,7 +915,12 @@ BLOCKS: Dict[str, Tuple[str, str, Callable[[Path], str], str]] = {
     "gates": ("TBL-gates", "Gate failures in the MS rounds", gate_counts, "M1-08, M2-08, M3-08"),
     "eta": ("TBL-eta", "eta_2/DW in the t1 and t10 runs", eta_t1t10, "M3-08"),
     "budget": ("TBL-budget", "MS-R1 budget control", budget_control, "M1-09"),
-    "compare": ("TBL-compare", "Path A against Path B", compare, "T2R:R2B-18, M3-08"),
+    "goals": ("TBL-goals", "Session goals and their status", goals, "PI-05, M1-01, M2-01, M3-01"),
+    "issues": ("TBL-issues", "Unresolved issues", issues, "M1-02, M2-01, M3-02, PI-06, TBL-*"),
+    "gates_pi": ("TBL-gatespi", "PI decisions at each gate", gates_pi, "PI-01..PI-05, T2R:100526report"),
+    "refpoints": ("TBL-refpoints", "Reference points for choosing a target", refpoints, "T2R:R2B-18, M3-08, M3-23, M3-36"),
+    "measures": ("TBL-measures", "Candidate measures of Path B", measures, "M1-02, M1-09, M2-09, M3-09, T2R:R2B-02, T2R:R2C-02, PI-06"),
+    "compare": ("TBL-compare", "Path A against Path B", compare, "T2R:R2B-18, T2R:CF-02, M3-01"),
 }
 
 

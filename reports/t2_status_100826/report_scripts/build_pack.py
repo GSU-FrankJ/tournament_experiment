@@ -131,12 +131,18 @@ M3: List[Tuple[str, str, str, str]] = [
     ("M3-33", "PI sandbox output (not evidence)", "reports/ms/r3/pi_record/sandbox_fit_tip_results.jsonl", "PI side, 3 seeds"),
     ("M3-34", "MS-R3 stage-1 table", "results/ms_r3/analysis/stage1.csv", ""),
     ("M3-35", "MS-R3 housekeeping record", "reports/ms/r3/00_housekeeping.md", ""),
+    ("M3-36", "MS-R3 supervised screen, extended cell (t1, bin-balanced, up to 224,000 steps)", "results/ms_r3/supervised_screen/summary_extended.csv", "offline fit to the closed form; reported, not gated"),
 ]
 PI: List[Tuple[str, str, str, str]] = [
     ("PI-01", "PI prompt 17: MS-R1 (verbatim)", "reports/ms/r1/pi_record/17_ms_r1_prompt.md", ""),
     ("PI-02", "PI reply at gate G1 (verbatim)", "reports/ms/r1/pi_record/18_g1_reply.md", ""),
     ("PI-03", "PI prompt 19: MS-R2 (verbatim)", "reports/ms/r2/pi_record/19_ms_r2_prompt.md", ""),
     ("PI-04", "PI prompt 20: MS-R3 (verbatim)", "reports/ms/r3/pi_record/20_ms_r3_prompt.md", ""),
+]
+BG: List[Tuple[str, str, str, str]] = [
+    ("BG-01", "Pilot 1: terminal reward estimator (reward_mode = expected)", "reports/v2/pilot1_reward_estimator.md", "v2 pilot, Phase A"),
+    ("BG-02", "Project instructions (.claude/CLAUDE.md): sampled-reward invariant of the original runners", ".claude/CLAUDE.md", "text of the invariant as checked in at be4fd202"),
+    ("BG-03", "BetaActor and PPO trainer of the v2/MS pipeline (mean clamp at line 99)", "agents/ppo_curriculum.py", "code at be4fd202"),
 ]
 LOCAL_PI = [
     ("PI-05", "PI prompt 21 (this round) with Appendix A, the PI's plan note", "pi_record/21_t2_status_pack_prompt.md",
@@ -227,7 +233,7 @@ def build(out: Path, pack_for_local: Path, used_in: Dict[str, str]) -> List[Dict
         rows.append(r)
 
     for lst, rnd, br in ((M1, "MS-R1", "ms-r1"), (M2, "MS-R2", "ms-r2"), (M3, "MS-R3", "ms-r3"),
-                         (PI, "PI record", "ms-r1/r2/r3")):
+                         (PI, "PI record", "ms-r1/r2/r3"), (BG, "background", "ms-r3")):
         for iid, title, path, cond in lst:
             b = git_blob(path)
             if b is None:
@@ -237,12 +243,15 @@ def build(out: Path, pack_for_local: Path, used_in: Dict[str, str]) -> List[Dict
             if iid.startswith("PI-"):
                 r_br = {"PI-01": "ms-r1", "PI-02": "ms-r1", "PI-03": "ms-r2", "PI-04": "ms-r3"}[iid]
             if len(b) < MAX_COPY:
-                dest = ev / path
+                # an instruction file must not sit under its own name inside the pack (tools would read it as one)
+                rel = ("dot-claude/" + path[len(".claude/"):] + ".txt") if path.startswith(".claude/") else path
+                dest = ev / rel
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_bytes(b)
                 row(item_id=iid, title=title, round=rnd, source_branch=r_br, source_commit=lc,
-                    source_path=path, sha256=sha(b), size_bytes=str(len(b)), status="copied",
-                    copy_path="evidence/" + path, conditions=cond)
+                    source_path=path, sha256=sha(b), size_bytes=str(len(b)),
+                    status="copied" if rel == path else "copied (renamed, see copy_path)",
+                    copy_path="evidence/" + rel, conditions=cond)
             else:
                 row(item_id=iid, title=title, round=rnd, source_branch=r_br, source_commit=lc,
                     source_path=path, sha256=sha(b), size_bytes=str(len(b)),
