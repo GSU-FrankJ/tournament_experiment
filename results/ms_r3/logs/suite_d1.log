@@ -1,0 +1,9 @@
+...............................                                          [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r3_actor.py::test_without_the_new_keys_an_nl_run_equals_e8eb9a08[NL_st_s16]
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+31 passed, 1 warning in 487.85s (0:08:07)
+SUITE_EXIT 0

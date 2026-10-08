@@ -1,0 +1,84 @@
+MS-R3 analysis (prompt D5, D6, section 3.3)
+command: tools/ms/r3_analysis.py --pilot-root results/ms_r3/pilot --ms-r2-pilot-root /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot --parents-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A --rehearsal-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0 --calibration-root results/ms_r1/calibration --actors t1 relu t10 --out results/ms_r3/analysis
+independent check: python tools/ms/r3_blind_criterion.py --analysis-dir <the --out directory>
+roots: MS-R3 pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot | MS-R2 pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot | parents_A=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A | rehearsal_v2_0=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0
+actors: t1 relu t10
+bootstrap: 10000 resamples, numpy.random.default_rng(20261008), one fresh generator per (q, statistic)
+
+== PRE-REGISTERED CRITERION: pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it ==
+primary metric stage2_peak_rel_err_abs of the frozen terminal-stage candidate; (a) CI of the mean paired difference v - t1 (same starts and s) below 0 at BOTH q; (b) no run passing G-A with its G-N eta part under t1 fails it under v
+relu_bb_s1  a50 +0.06907 [-0.03629,+0.26956] n=10/10 not | a60 -0.00535 [-0.02069,+0.01116] n=10/10 not | b: violated (q50/10504 q50/10506) | overall: not met
+relu_bb_s16 a50 +0.06906 [-0.04565,+0.27448] n=10/10 not | a60 -0.03024 [-0.03721,-0.02308] n=10/10 met | b: violated (q50/10504) | overall: not met
+relu_st_s1  a50 -0.01077 [-0.03037,+0.00587] n=10/10 not | a60 -0.02339 [-0.03867,-0.00821] n=10/10 met | b: violated (q50/10506) | overall: not met
+relu_st_s16 a50 -0.01039 [-0.01625,-0.00467] n=10/10 met | a60 -0.02059 [-0.03090,-0.00684] n=10/10 met | b: violated (q50/10506) | overall: not met
+t10_bb_s1   a50 -0.01330 [-0.03590,+0.00859] n=10/10 not | a60 +0.01456 [+0.00187,+0.02646] n=10/10 not | b: holds | overall: not met
+t10_bb_s16  a50 -0.01451 [-0.02852,-0.00249] n=10/10 met | a60 -0.00235 [-0.01285,+0.00998] n=10/10 not | b: holds | overall: not met
+t10_st_s1   a50 +0.00721 [-0.00705,+0.02204] n=10/10 not | a60 -0.00681 [-0.02749,+0.01108] n=10/10 not | b: holds | overall: not met
+t10_st_s16  a50 -0.00381 [-0.01302,+0.00667] n=10/10 not | a60 -0.01358 [-0.02552,+0.00059] n=10/10 not | b: holds | overall: not met
+NOTE: An interval that contains 0 with 10 seeds does not show that a mechanism has no effect (descriptive: the criterion is the pre-registered statement, nothing else is a test).
+
+== TRANSMISSION (descriptive): mean(d gap) / mean(d smoothing), d = s16 - s1 within one (actor, starts); 1 = the smoothing change reaches the gap, 0 = the remainder offsets it ==
+t1_bb_s16    q=50 n=10  d gap -0.06079  d smoothing -1.39163  ratio +0.04368 [-0.52529, +0.65274]  (10000 resamples kept)
+t1_bb_s16    q=60 n=10  d gap +0.41714  d smoothing -0.97834  ratio -0.42638 [-1.04467, +0.20631]  (10000 resamples kept)
+t1_st_s16    q=50 n=10  d gap -0.22607  d smoothing -1.37145  ratio +0.16484 [-0.42466, +0.73456]  (10000 resamples kept)
+t1_st_s16    q=60 n=10  d gap -0.26898  d smoothing -0.97787  ratio +0.27507 [-0.56114, +1.15486]  (10000 resamples kept)
+relu_bb_s16  q=50 n=10  d gap -0.06135  d smoothing -0.96094  ratio +0.06384 [-1.39734, +1.50691]  (10000 resamples kept)
+relu_bb_s16  q=60 n=10  d gap -1.14086  d smoothing -0.74359  ratio +1.53425 [-0.08281, +3.15196]  (10000 resamples kept)
+relu_st_s16  q=50 n=10  d gap -0.15427  d smoothing -1.11040  ratio +0.13893 [-0.76529, +0.94723]  (10000 resamples kept)
+relu_st_s16  q=60 n=10  d gap -0.24956  d smoothing -0.75887  ratio +0.32885 [-1.08499, +1.77637]  (10000 resamples kept)
+t10_bb_s16   q=50 n=10  d gap -0.14574  d smoothing -1.35675  ratio +0.10742 [-0.57493, +0.81603]  (10000 resamples kept)
+t10_bb_s16   q=60 n=10  d gap -0.56919  d smoothing -0.95529  ratio +0.59582 [+0.09031, +1.05251]  (10000 resamples kept)
+t10_st_s16   q=50 n=10  d gap -0.99791  d smoothing -1.39074  ratio +0.71754 [+0.42364, +1.05070]  (10000 resamples kept)
+t10_st_s16   q=60 n=10  d gap -0.66393  d smoothing -0.96598  ratio +0.68731 [-0.09908, +1.49991]  (10000 resamples kept)
+
+== INTERACTION (descriptive): (v_s16 - v_s1) - (t1_s16 - t1_s1) per (starts, q, seed) ==
+relu  bb q=50 stage2_peak_rel_err_abs  n=10  mean -0.00001 [-0.02219, +0.02313]  median -0.00374
+relu  bb q=50 gap                      n=10  mean -0.00055 [-1.55334, +1.61878]  median -0.26154
+relu  bb q=50 remainder                n=10  mean -0.43124 [-1.98378, +1.21170]  median -0.68465
+relu  bb q=50 smoothing                n=10  mean +0.43069 [+0.28854, +0.64378]  median +0.33304
+relu  bb q=60 stage2_peak_rel_err_abs  n=10  mean -0.02489 [-0.04309, -0.00781]  median -0.02349
+relu  bb q=60 gap                      n=10  mean -1.55800 [-2.63997, -0.53136]  median -1.59692
+relu  bb q=60 remainder                n=10  mean -1.79275 [-2.88346, -0.76267]  median -1.83983
+relu  bb q=60 smoothing                n=10  mean +0.23475 [+0.18577, +0.28499]  median +0.22435
+relu  st q=50 stage2_peak_rel_err_abs  n=10  mean +0.00038 [-0.01648, +0.02039]  median -0.00858
+relu  st q=50 gap                      n=10  mean +0.07179 [-1.14835, +1.52942]  median -0.60034
+relu  st q=50 remainder                n=10  mean -0.18925 [-1.37043, +1.22640]  median -0.79423
+relu  st q=50 smoothing                n=10  mean +0.26104 [+0.18443, +0.33049]  median +0.28179
+relu  st q=60 stage2_peak_rel_err_abs  n=10  mean +0.00280 [-0.01900, +0.02562]  median +0.00280
+relu  st q=60 gap                      n=10  mean +0.01942 [-1.38114, +1.45623]  median +0.16359
+relu  st q=60 remainder                n=10  mean -0.19957 [-1.59365, +1.23243]  median -0.04690
+relu  st q=60 smoothing                n=10  mean +0.21899 [+0.18001, +0.25631]  median +0.22568
+t10   bb q=50 stage2_peak_rel_err_abs  n=10  mean -0.00121 [-0.01864, +0.01800]  median -0.00302
+t10   bb q=50 gap                      n=10  mean -0.08495 [-1.30499, +1.25986]  median -0.21123
+t10   bb q=50 remainder                n=10  mean -0.11983 [-1.31021, +1.21957]  median -0.40333
+t10   bb q=50 smoothing                n=10  mean +0.03488 [-0.03437, +0.11121]  median +0.02999
+t10   bb q=60 stage2_peak_rel_err_abs  n=10  mean -0.01691 [-0.02985, -0.00421]  median -0.01099
+t10   bb q=60 gap                      n=10  mean -0.98633 [-1.74125, -0.24569]  median -0.64080
+t10   bb q=60 remainder                n=10  mean -1.00938 [-1.75621, -0.27450]  median -0.64254
+t10   bb q=60 smoothing                n=10  mean +0.02305 [-0.00535, +0.05188]  median +0.02404
+t10   st q=50 stage2_peak_rel_err_abs  n=10  mean -0.01103 [-0.02521, +0.00166]  median -0.00445
+t10   st q=50 gap                      n=10  mean -0.77184 [-1.76467, +0.11592]  median -0.31144
+t10   st q=50 remainder                n=10  mean -0.75255 [-1.75301, +0.13799]  median -0.40202
+t10   st q=50 smoothing                n=10  mean -0.01929 [-0.05873, +0.02618]  median -0.04577
+t10   st q=60 stage2_peak_rel_err_abs  n=10  mean -0.00677 [-0.02794, +0.01560]  median -0.01171
+t10   st q=60 gap                      n=10  mean -0.39494 [-1.62978, +0.90974]  median -0.68312
+t10   st q=60 remainder                n=10  mean -0.40683 [-1.63597, +0.90610]  median -0.70535
+t10   st q=60 smoothing                n=10  mean +0.01189 [-0.01332, +0.03559]  median +0.01939
+
+== QUADRATURE CHECK (descriptive, from arm means): observed gap(s16) against the quadrature and the additive prediction ==
+t1    bb q=50  gap s1 +3.95807 -> s16 observed +3.89727 | quadrature +3.50707 (err +0.39020) | additive +2.56644 (err +1.33084) | closer: quadrature
+t1    bb q=60  gap s1 +2.33772 -> s16 observed +2.75486 | quadrature +1.94791 (err +0.80695) | additive +1.35938 (err +1.39549) | closer: quadrature
+t1    st q=50  gap s1 +3.03459 -> s16 observed +2.80852 | quadrature +2.43746 (err +0.37107) | additive +1.66314 (err +1.14538) | closer: quadrature
+t1    st q=60  gap s1 +2.69135 -> s16 observed +2.42237 | quadrature +2.36336 (err +0.05900) | additive +1.71348 (err +0.70889) | closer: quadrature
+relu  bb q=50  gap s1 +8.79270 -> s16 observed +8.73135 | quadrature +8.69406 (err +0.03729) | additive +7.83176 (err +0.89959) | closer: quadrature
+relu  bb q=60  gap s1 +2.02553 -> s16 observed +0.88468 | quadrature +1.75548 (err +0.87081) | additive +1.28194 (err +0.39727) | closer: additive
+relu  st q=50  gap s1 +2.23571 -> s16 observed +2.08144 | quadrature +1.65695 (err +0.42449) | additive +1.12530 (err +0.95613) | closer: quadrature
+relu  st q=60  gap s1 +1.32684 -> s16 observed +1.07728 | quadrature +0.83791 (err +0.23937) | additive +0.56797 (err +0.50932) | closer: quadrature
+t10   bb q=50  gap s1 +3.02732 -> s16 observed +2.88157 | quadrature +2.44132 (err +0.44026) | additive +1.67057 (err +1.21101) | closer: quadrature
+t10   bb q=60  gap s1 +3.18715 -> s16 observed +2.61797 | quadrature +2.92793 (err +0.30997) | additive +2.23186 (err +0.38611) | closer: quadrature
+t10   st q=50  gap s1 +3.53952 -> s16 observed +2.54161 | quadrature +3.03124 (err +0.48963) | additive +2.14878 (err +0.39283) | closer: additive
+t10   st q=60  gap s1 +2.29424 -> s16 observed +1.63032 | quadrature +1.90820 (err +0.27788) | additive +1.32826 (err +0.30205) | closer: quadrature
+
+== RUN STATUS ==
+every planned run of every arm and reference is done
+ANALYSIS_EXIT 0
