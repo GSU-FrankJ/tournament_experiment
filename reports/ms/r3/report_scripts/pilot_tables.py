@@ -93,9 +93,10 @@ def block_launch() -> str:
     f = sorted(glob.glob(str(P / "launch_2*.json")))
     r = json.loads(Path(f[0]).read_text())
     w = sorted(x["wall_sec"] for x in r["runs"])
+    wmed = float(np.median(w))
     lines = [f"- launch record `{f[0]}`: wave `{r['wave']}`, {r['n_planned']} planned, {len(r['runs'])} finished, state `{r['state']}`, workers {r['workers']}, "
              f"started {r['started']}",
-             f"- nonzero exits: {sum(1 for x in r['runs'] if x.get('returncode') != 0)}; wall per run min {w[0]:.0f} s, median {w[len(w) // 2]:.0f} s, max {w[-1]:.0f} s",
+             f"- nonzero exits: {sum(1 for x in r['runs'] if x.get('returncode') != 0)}; wall per run min {w[0]:.0f} s, median {wmed:.0f} s, max {w[-1]:.0f} s",
              f"- HEAD `{r['head'][:8]}`, code commit argument `{r['code_commit']}`; `git diff --stat <code commit> HEAD -- run utils envs agents protocols` is "
              f"{'empty' if not r['diff_stat_run_code_to_head'] else 'NOT empty'}; `git status --porcelain` lists {len(r['status_porcelain'])} entries",
              f"- parameter file SHA-256 `{r['params_sha256']}`; nproc {r['nproc']}, load average at start {', '.join(f'{x:.1f}' for x in r['loadavg_at_start'])}, "
@@ -565,6 +566,62 @@ def block_failures() -> str:
     return _md(pd.DataFrame(rows)) if rows else "(no run fails G-A with its G-N(eta) part)"
 
 
+def block_r0_tiers() -> str:
+    """R0 and R0 / |peak error| at the freeze on both tiers (final and development): median over the seeds per arm and q."""
+    r = _read("r0.csv")
+    rows = []
+    for arm in ARMS:
+        for q in QS:
+            x = r[(r.arm == arm) & (r.q == q)]
+            if x.empty:
+                continue
+            x = x.iloc[0]
+            rows.append({"arm": arm, "q": q, "R0 final tier (median)": f"{x.t2_R0_final_median:.4f}", "R0 development tier (median)": f"{x.t2_R0_dev_median:.4f}",
+                         "R0/|peak| final (mean)": f"{x.t2_R0_over_peak_final_mean:.3f}", "R0/|peak| development (mean)": f"{x.t2_R0_over_peak_dev_mean:.3f}",
+                         "linearised 2k/(2k+a)": f"{x.linearised_R0_over_peak:.3f}"})
+    return _md(pd.DataFrame(rows))
+
+
+def block_first_layer_dist() -> str:
+    """The |first-layer d-weight| distribution over the 64 units at update 400 and at the freeze (median over the seeds; units of d / B)."""
+    t = _read("first_layer_weights.csv")
+    t = t[(t["status"] == "done") & (t["stage"] == 2) & (t["error"].fillna("").astype(str) == "")]
+    rows = []
+    for arm in ARMS:
+        for q in QS:
+            row: Dict[str, object] = {"arm": arm, "q": q}
+            for lab, upd in (("u400", 400), ("freeze (u2800)", 2800)):
+                g = t[(t.arm == arm) & (t.q == q) & (t["update"] == upd)]
+                row[lab] = ("n/a" if g.empty else
+                            f"|w| q25/q50/q75/q90/max {g.w_abs_q25.median():.2f}/{g.w_abs_q50.median():.2f}/{g.w_abs_q75.median():.2f}/{g.w_abs_q90.median():.2f}/"
+                            f"{g.w_abs_max.median():.2f}; units > 1: {g.n_w_abs_gt1.median():.0f}")
+            rows.append(row)
+    return _md(pd.DataFrame(rows))
+
+
+def block_trajectory_rdc() -> str:
+    """Seed means of R, Delta_2 and C_2 at six checks of the terminal stage (1800, 2000, 2200, 2400, 2600, 2800)."""
+    t = _read("trajectory_checks.csv")
+    t = t[(t["status"] == "done") & t["arm"].isin(ARMS)]
+    rows = []
+    for arm in ARMS:
+        for q in QS:
+            row: Dict[str, object] = {"arm": arm, "q": q}
+            for u in (1800, 2000, 2200, 2400, 2600, 2800):
+                g = t[(t.arm == arm) & (t.q == q) & (t["update"] == u)]
+                row[f"u{u}: R, Delta, C"] = "n/a" if g.empty else f"{g.R.mean():.4f}, {g.Delta.mean():.5f}, {g.C.mean():.4f}"
+            rows.append(row)
+    return _md(pd.DataFrame(rows))
+
+
+def block_smoothing_formula() -> str:
+    """The prediction of D6: smoothing part / [e2*(0) sigma_2(0) / (sqrt(pi) q)] per arm and q (mean [min, max] over the seeds)."""
+    d = _read("freeze_decomposition.csv")
+    d = d[(d.quantity == "smoothing_over_formula") & d.arm.isin(ARMS)]
+    rows = [{"arm": r.arm, "q": int(r.q), "n": int(r.n), "ratio: mean [min, max]": f"{r['mean']:.5f} [{r['min']:.5f}, {r['max']:.5f}]"} for _, r in d.iterrows()]
+    return _md(pd.DataFrame(rows))
+
+
 BLOCKS: Dict[str, Callable[[], str]] = {
     "checks": block_checks, "launch": block_launch, "primary": block_primary, "overview": block_overview, "decomp": block_decomp,
     "resolution": block_resolution, "secondary": block_secondary, "landing": block_landing, "transmission": block_transmission,
@@ -574,7 +631,9 @@ BLOCKS: Dict[str, Callable[[], str]] = {
     "stage1_paired": block_stage1_paired, "gates": block_gates, "shares": block_shares, "budget": block_budget,
     "side_by_side": block_side_by_side, "tie_effort": block_tie_effort, "r0": block_r0,
     "directions": block_directions, "screen_vs_rl": block_screen_vs_rl,
-    "primary_median": block_primary_median, "robust": block_robust, "failures": block_failures}
+    "primary_median": block_primary_median, "robust": block_robust, "failures": block_failures,
+    "r0_tiers": block_r0_tiers, "first_layer_dist": block_first_layer_dist, "trajectory_rdc": block_trajectory_rdc,
+    "smoothing_formula": block_smoothing_formula}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
