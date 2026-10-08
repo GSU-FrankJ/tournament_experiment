@@ -7,7 +7,7 @@ Usage (repository root):
     python reports/ms/r3/report_scripts/pilot_tables.py --block primary
     python reports/ms/r3/report_scripts/pilot_tables.py --block overview --arm relu_bb_s1
 ``--analysis`` (default ``results/ms_r3/analysis``) and ``--pilot`` (default ``results/ms_r3/pilot``) name the inputs; ``--arm`` keeps
-the table rows whose first cell is that arm (or actor, for the blocks whose first cell is the actor).
+the table rows whose first cell is that arm; ``--actor`` those whose first cell is that actor or one of its arms.
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ def block_checks() -> str:
     b, s, e = c["base"], c["summary"], c["expected"]
     rows = [("status exit 0 / manifest at the launch commit, clean tree / files complete / global-RNG assertions / tail-share coverage",
              " / ".join(f"{b['n_ok_per_check'][k]}/{b['n_runs']}" for k in ("status", "manifest", "files", "global_rng", "tail_share_coverage"))),
-            ("start-share tests (flagged at \\|z\\| > 3; expected by chance)",
+            ("start-share tests (flagged at |z| > 3; expected by chance)",
              f"{b['start_share_tests']['n_tests']} tests, {b['start_share_tests']['n_flagged']} flagged "
              f"({b['start_share_tests']['expected_flagged_under_null']:.1f} expected)"),
             ("applied scale equals the D3 schedule at every update; 1.0 throughout stage 1", f"{s['scale_ok']}/{s['scale_n']} (expected {e['scale_n']})"),
@@ -379,6 +379,7 @@ def block_strata_tail() -> str:
 def block_stage1() -> str:
     """Stage 1 per arm and q: G-S, S1, G-F, G-N(Gmax), the stage-1 error, R_1."""
     s = _read("stage1.csv")
+    s = s[s["arm"].isin(ARMS + REFS)]
     g = _read("gates.csv").set_index(["arm", "q"])
     rows = []
     for x in s.itertuples():
@@ -405,6 +406,7 @@ def block_stage1_paired() -> str:
 def block_gates() -> str:
     """Gate counts per arm and q."""
     g = _read("gates.csv")
+    g = g[g["arm"].isin(ARMS + REFS)]
     return _md(pd.DataFrame([{"arm": r.arm, "q": r.q, "runs done": int(r.n_done), "G-A (eta)": r.n_G_A_eta, "G-A (RMSE)": r.n_G_A_rmse, "G-A (tail)": r.n_G_A_tail,
                               "G-A": r.n_G_A, "G-N(eta)": r.n_G_N_eta, "G-A and G-N(eta)": r.n_G_A_and_G_N_eta, "G-S": r.n_G_S, "S1": r.n_S1,
                               "G-F": r.n_G_F, "G-N(Gmax)": r.n_G_N_gmax, "v2.0 combination": r.n_v20_combination} for r in g.itertuples()]))
@@ -510,6 +512,59 @@ def block_screen_vs_rl() -> str:
     return _md(pd.DataFrame(rows))
 
 
+def block_primary_median() -> str:
+    """Supplement (post hoc, descriptive): the paired difference of |peak error| v - t1 by its MEDIAN with the percentile bootstrap interval of the median.
+
+    The primary criterion uses the mean (D6); a single collapsed run moves a mean of ten. The median columns are those of
+    ``paired_secondary.csv`` (same pairing, same 10,000 resamples and generator recipe).
+    """
+    t = _read("paired_secondary.csv")
+    rows = []
+    for arm, base in _comps("variant"):
+        cells: Dict[str, object] = {"arm": f"`{arm}`", "baseline": f"`{base}`"}
+        for q in QS:
+            r = t[(t.arm == arm) & (t.baseline == base) & (t.q == q) & (t.metric == "stage2_peak_rel_err_abs")]
+            if len(r):
+                r = r.iloc[0]
+                cells[f"q={q}: mean"] = f"{r['mean']:+.4f}"
+                cells[f"q={q}: median [95% CI of the median]"] = _ci(r["median"], r.ci_median_lo, r.ci_median_hi, 4)
+                cells[f"q={q}: seeds lower"] = f"{int(r.n_neg)}/{int(r.n_pairs)}"
+        rows.append(cells)
+    return _md(pd.DataFrame(rows))
+
+
+def block_robust() -> str:
+    """Supplement (post hoc, descriptive): medians and counts per arm and q that a single failed run does not move."""
+    per = _per_run()
+    rows = []
+    for arm in ARMS:
+        for q in QS:
+            g = per[(per.arm == arm) & (per.q == q)]
+            if g.empty:
+                continue
+            ok = g["gate_pass"].astype(str).eq("True")
+            rows.append({"arm": arm, "q": q, "median gap": f"{g['gap'].median():.2f}", "median abs(peak)": f"{g['stage2_peak_rel_err_abs'].median():.4f}",
+                         "gap <= 1": int((g["gap"] <= 1.0).sum()), "gap <= 2": int((g["gap"] <= 2.0).sum()), "gap > 10": int((g["gap"] > 10.0).sum()),
+                         "median RMSE_pos/e2*(0)": f"{g['stage2_rmse_pos_over_g2_0'].median():.4f}",
+                         "median w_eff": f"{g['w_eff'].median():.2f}", "gate failures (G-A and G-N(eta))": int((~ok).sum()),
+                         "max symmetry error/e2*(0)": f"{g['sym_err_max_rel'].max():.3f}"})
+    return _md(pd.DataFrame(rows))
+
+
+def block_failures() -> str:
+    """The runs that fail G-A with its G-N(eta) part (all arms): the values behind each gate."""
+    per = _per_run()
+    f = per[per["arm"].isin(ARMS) & ~per["gate_pass"].astype(str).eq("True")].sort_values(["arm", "q", "seed"])
+    rows = []
+    for r in f.itertuples():
+        rows.append({"arm": r.arm, "q": r.q, "seed": r.seed, "gap": f"{r.gap:.3f}", "e_hat_2(0)": f"{r.e2_at_0:.3f}",
+                     "RMSE_pos/e2*(0)": f"{r.stage2_rmse_pos_over_g2_0:.4f}", "eta_2/DW": f"{r.eta_T_over_dw:.5f}", "eta_dev/DW": f"{r.eta_dev:.5f}",
+                     "G-A: eta / RMSE / tail": "/".join("P" if str(x) == "True" else "F" for x in (r.G_A_eta_pass, r.G_A_rmse_pass, r.G_A_tail_pass)),
+                     "G-N(eta)": "P" if str(r.G_N_eta_pass) == "True" else "F", "symmetry error/e2*(0)": f"{r.sym_err_max_rel:.3f}",
+                     "R0": f"{r.t2_R0_final:.4f}"})
+    return _md(pd.DataFrame(rows)) if rows else "(no run fails G-A with its G-N(eta) part)"
+
+
 BLOCKS: Dict[str, Callable[[], str]] = {
     "checks": block_checks, "launch": block_launch, "primary": block_primary, "overview": block_overview, "decomp": block_decomp,
     "resolution": block_resolution, "secondary": block_secondary, "landing": block_landing, "transmission": block_transmission,
@@ -518,7 +573,8 @@ BLOCKS: Dict[str, Callable[[], str]] = {
     "strata_mid": block_strata, "strata_near": block_strata_near, "strata_tail": block_strata_tail, "stage1": block_stage1,
     "stage1_paired": block_stage1_paired, "gates": block_gates, "shares": block_shares, "budget": block_budget,
     "side_by_side": block_side_by_side, "tie_effort": block_tie_effort, "r0": block_r0,
-    "directions": block_directions, "screen_vs_rl": block_screen_vs_rl}
+    "directions": block_directions, "screen_vs_rl": block_screen_vs_rl,
+    "primary_median": block_primary_median, "robust": block_robust, "failures": block_failures}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -530,6 +586,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--pilot", default=str(P))
     p.add_argument("--list", action="store_true")
     p.add_argument("--arm", default=None, help="keep only the table rows whose first cell is this arm (or actor)")
+    p.add_argument("--actor", default=None, help="keep only the table rows whose first cell is this actor or an arm of this actor")
     a = p.parse_args(argv)
     A, P = Path(a.analysis), Path(a.pilot)
     if a.list or not a.block:
@@ -539,6 +596,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if a.arm:
         lines = text.split("\n")
         keep = lines[:2] + [ln for ln in lines[2:] if ln.split("|")[1].strip().strip("`") == a.arm]
+        text = "\n".join(keep)
+    if a.actor:
+        lines = text.split("\n")
+        first = lambda ln: ln.split("|")[1].strip().strip("`")  # noqa: E731
+        keep = lines[:2] + [ln for ln in lines[2:] if first(ln) == a.actor or first(ln).startswith(a.actor + "_")]
         text = "\n".join(keep)
     print(text)
     return 0

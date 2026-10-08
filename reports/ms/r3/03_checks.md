@@ -75,3 +75,20 @@ C-R2 identical 20/20 ALL=True
 ## 4. Offline outputs
 
 `results/ms_r3/supervised_screen/` (140 cells, premise check PASS: `reports/ms/r3/01_supervised_screen.md`) and `results/ms_r3/rl_actor_diagnostics/` (260 runs, 32,389 exports: `reports/ms/r3/01b_rl_actor_diagnostics.md`).
+
+## 5. P2: launch checks, identities, analysis, blind recomputation (2026-10-08)
+
+Run after the pilot (`results/ms_r3/pilot`, launched 00:24:23 from HEAD `b41ecefd` = the code commit; the worktree was not modified between the launch and the end of the pilot: `git status --porcelain` at the launch lists only the untracked arrays of the MS-R1 and MS-R2 pilots under `results/`, and every manifest has `clean_tree`). Tables: `python reports/ms/r3/report_scripts/pilot_tables.py --block checks`.
+
+| check | result | path |
+|---|---|---|
+| status exit 0 / manifest at the launch commit, clean tree / files complete / global-RNG assertions / tail-share coverage | 240/240 each | `results/ms_r3/pilot/launch_checks.json` (`base.n_ok_per_check`; `base.all_ok` true) |
+| start shares per stratum within 3 binomial SE | 720 tests, 0 flagged (1.9 expected by chance) | `launch_checks.json`, `base.start_share_tests` |
+| applied scale equals the D3 schedule at every terminal-stage update; 1.0 throughout stage 1 | 240/240 | `summary.scale_ok` |
+| C-INIT (one `init_state_sha256` across all twelve arms of every (q, seed)) | 20/20 | `summary.C_INIT_pass` |
+| C-NL (s = 16 against s = 1 within each (actor, starts, q, seed) through update 2001; `u02025` differs in the network arrays) | 120/120 | `summary.C_NL_pass` |
+| **C-MS5** (each `t1` arm against MS-R2's `NL_*` arm over the whole run: all 136 weight exports, `train_history`, the whole `ms_updates.csv`, both check tables, the freeze arrays, bin maps, stage-1 table, gate values) | **80/80** | `summary.C_MS5_pass`; what is and is not compared: `ignored` in the same file |
+| analysis tool: the decomposition against the runner's own record, the arm / export / config variant agreement | no flag raised: the `flags` column of `per_run.csv` is empty in all 360 rows; 360 of 360 rows done (240 arms + 80 MS-R2 `NL_*` reference rows + `parents_A` and `rehearsal_v2_0`) | `results/ms_r3/analysis/per_run.csv`, `completeness.csv`, `analysis_info.json` |
+| independent recomputation of `criterion.csv`, `transmission.csv` and `interaction.csv` from `per_run.csv` (`tools/ms/r3_blind_criterion.py`, imports nothing from `tools/ms/`) | "ALL 684 numbers agree ... to 1e-12 (floats) / exactly (counts, flags, lists)" | `results/ms_r3/analysis/blind_recomputation.txt` |
+
+All checks pass; no stop condition of the prompt was met. The checks are those of prompt section 3.2; no check was added after the pre-registration. The four `t1` arms of the pilot are therefore bit-identical re-runs of MS-R2's `NL_bb_s1`, `NL_bb_s16`, `NL_st_s1`, `NL_st_s16`: their rows in `results/ms_r3/analysis/` equal MS-R2's.
