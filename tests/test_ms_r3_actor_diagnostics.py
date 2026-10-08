@@ -46,10 +46,11 @@ from agents.ppo_curriculum import (  # noqa: E402
 from envs.curriculum_env import GameSpec  # noqa: E402
 
 GAME = {"w_h": 6, "w_l": 2, "k": 1.0 / 3500.0, "q": 50, "T": 2, "e_min": 0, "e_max": 100}
-MS_R2_BASES = (
-    ROOT / "results" / "ms_r2",
-    Path("/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857"
-         "/results/ms_r2"))
+#: Where a real MS-R2 pilot may live: ``results/ms_r2`` of the repository this file belongs to (ROOT is derived from the
+#: file location, no machine-specific path) and, if the environment names one, ``$MS_R2_RESULTS_DIR``. The real-run tests
+#: below skip when neither holds the run.
+MS_R2_BASES = tuple(
+    [ROOT / "results" / "ms_r2"] + ([Path(os.environ["MS_R2_RESULTS_DIR"])] if os.environ.get("MS_R2_RESULTS_DIR") else []))
 Row = Tuple[str, str, int, int, int, int, float, float]
 
 

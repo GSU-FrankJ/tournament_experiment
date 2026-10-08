@@ -12,6 +12,7 @@ metrics (reduced budgets); 5. no overwrite, run / resume; 6. summarise and the p
 
 from __future__ import annotations
 
+import copy
 import csv
 import json
 import math
@@ -192,11 +193,45 @@ def test_d_stream_is_the_documented_one_and_draws_the_stated_shares(q: int) -> N
         assert abs(np.mean(d < 0) - 0.5) < 5.0 * math.sqrt(0.25 / n)
 
 
-def test_the_stream_is_shared_by_the_variants_of_a_cell() -> None:
+@pytest.mark.parametrize("starts,q", [("bb", 50), ("st", 50), ("bb", 60), ("st", 60)])
+def test_the_fit_of_every_actor_consumes_the_same_d_draws(monkeypatch, starts: str, q: int) -> None:
+    """Behavioural: the minibatches of d that the real fit loop draws are recorded (a spy around ``make_start_draw``) for
+    the three actors of one cell. They are the same arrays, step by step, whatever the actor is; another seed gives other
+    draws (the check can tell)."""
+    real = SS.make_start_draw
+    log: List[np.ndarray] = []
+
+    def spy(*args: Any, **kw: Any):
+        draw, info = real(*args, **kw)
+
+        def recording(n: int) -> np.ndarray:
+            d = draw(n)
+            log.append(np.array(d, copy=True))
+            return d
+        return recording, info
+
+    monkeypatch.setattr(SS, "make_start_draw", spy)
+    steps = 30
+    drawn: Dict[str, List[np.ndarray]] = {}
+    for v in ACTOR_VARIANTS:
+        log.clear()
+        SS.fit_cell_actor(SS.CellSpec(v, starts, q, 10501, steps=steps, decay_steps=10, checkpoints=(steps,)))
+        drawn[v] = list(log)
+    assert len(drawn["t1"]) == steps and all(x.shape == (256,) for x in drawn["t1"])
+    for v in ("relu", "t10"):
+        assert len(drawn[v]) == steps
+        assert all(np.array_equal(x, y) for x, y in zip(drawn[v], drawn["t1"])), v
+    assert not np.array_equal(drawn["t1"][0], drawn["t1"][1])                      # a stream, not one repeated batch
+    log.clear()
+    SS.fit_cell_actor(SS.CellSpec("t1", starts, q, 10502, steps=2, decay_steps=1, checkpoints=(2,)))
+    assert not np.array_equal(log[0], drawn["t1"][0])                              # the seed does change the stream
+
+
+def test_the_records_of_the_variants_of_a_cell_share_stream_and_initial_weights() -> None:
     cells = [SS.fit_cell(SS.CellSpec(v, "st", 50, 10501, steps=40, decay_steps=10, checkpoints=(40,)))
              for v in ACTOR_VARIANTS]
-    assert cells[0]["d_stream"] == cells[1]["d_stream"] == cells[2]["d_stream"]
-    assert cells[0]["init"] == cells[1]["init"] == cells[2]["init"]
+    assert cells[0]["d_stream"] == cells[1]["d_stream"] == cells[2]["d_stream"]       # the recorded material
+    assert cells[0]["init"] == cells[1]["init"] == cells[2]["init"]                   # incl. the initial-weight digest
 
 
 # ====================================================================== 4. the fit and the metrics (reduced budgets)
@@ -385,8 +420,9 @@ def test_t10_reports_ten_times_the_stored_first_layer_weight(tiny) -> None:
         stored = float(actor.l1.weight[:, 1].abs().max())
         assert SS.max_abs_d_weight(actor) == pytest.approx(factor * stored, rel=1e-12)
         assert rec["checkpoints"][-1]["max_abs_w_d"] == pytest.approx(factor * stored, rel=1e-6)
-    # only the d column (column 1) enters; the stage feature (column 0) does not
-    actor = tiny[("t10", "bb")][0]
+    # only the d column (column 1) enters; the stage feature (column 0) does not. A copy: ``tiny`` is module-scoped and
+    # the other tests read its actors, so editing weights in place would make them depend on the test order.
+    actor = copy.deepcopy(tiny[("t10", "bb")][0])
     with torch.no_grad():
         actor.l1.weight[:, 0] = 5.0
         actor.l1.weight[:, 1] = torch.linspace(-0.25, 0.125, actor.l1.weight.shape[0])
@@ -658,6 +694,16 @@ def test_cli_smoke_with_a_process_pool_then_summarise(tmp_path: Path, capsys) ->
     assert SS.main(["summarise", "--out", str(out), "--premise-step", "100", "--expected-seeds", "1"]) == 0
     pc = json.load(open(out / "premise_check.json"))
     assert pc["step"] == 100 and pc["complete"] is True and pc["init_identical_across_actors"] is True
-    assert pc["outcome"] in ("PASS", "STOP", "DROP relu", "DROP t10")
+    # The expected outcome of THIS case, from the cell files themselves: after 100 steps every actor is far from the tent
+    # (tip deficits of tens of effort units), so (i) holds (the t1 deficit is above 1.0 at both q) and (ii) fails for BOTH
+    # variants (each deficit is above 0.5 x the t1 deficit) -> STOP, "both variants fail (ii)"; not PASS, not a DROP.
+    deficit = {(a, q): next(c["tip_deficit"] for c in json.load(open(out / "cells" / f"{a}_bb_q{q}_seed10501.json"))
+                            ["checkpoints"] if c["step"] == 100) for a in ACTOR_VARIANTS for q in (50, 60)}
+    for (a, q), x in deficit.items():                    # one seed: the premise check reads exactly these checkpoint values
+        assert pc["median_tip_deficit"][a][str(q)] == x
+    assert all(deficit[("t1", q)] >= 1.0 for q in (50, 60))
+    assert all(deficit[(v, q)] > 0.5 * deficit[("t1", q)] for v in ("relu", "t10") for q in (50, 60))
+    assert pc["condition_i"]["pass"] is True and pc["variants_failing_ii"] == ["relu", "t10"]
+    assert pc["outcome"] == "STOP" and "both variants fail (ii)" in pc["outcome_reason"]
     ext = list(csv.DictReader(open(out / "summary_extended.csv")))
     assert {(x["q"], x["steps"]) for x in ext} == {("50", "100"), ("50", "200"), ("60", "100"), ("60", "200")}

@@ -180,6 +180,25 @@ The reference is the median over the ten seeds of max |w| of the supervised `t1`
 
 The shares of final exports at or below the reference lie between 0.10 and 0.70 over the 26 rows; at q = 50 they are 0.4-0.7 and at q = 60 0.1-0.4. The RL actors' final max |w| (medians 1.21-1.36) lies in the neighbourhood of the supervised `t1` actors' median at the RL budget (1.30 and 1.16): the RL actors are in the same weight range as the supervised actors that leave a rounded tip (median tip deficit 1.64 and 6.32 effort units, `01_supervised_screen.md` section 2.1). For a ReLU unit the weight is not the relevant quantity (the unit has a kink at any weight); the supervised `relu` actors have max |w| of 0.79-0.87.
 
+Across the ten seeds of a screen cell the relation between max |w| and the tip deficit is not monotone (block `wdef`, Spearman correlation at 56,000 steps):
+
+| actor | starts | q | seeds | Spearman(max abs w, tip deficit) |
+|---|---|---|---|---|
+| t1 | bin-balanced | 50 | 10 | +0.70 |
+| t1 | bin-balanced | 60 | 10 | -0.60 |
+| t1 | stratified | 50 | 10 | -0.44 |
+| t1 | stratified | 60 | 10 | -0.73 |
+| relu | bin-balanced | 50 | 10 | +0.02 |
+| relu | bin-balanced | 60 | 10 | -0.02 |
+| relu | stratified | 50 | 10 | +0.01 |
+| relu | stratified | 60 | 10 | -0.36 |
+| t10 | bin-balanced | 50 | 10 | -0.36 |
+| t10 | bin-balanced | 60 | 10 | -0.35 |
+| t10 | stratified | 50 | 10 | -0.28 |
+| t10 | stratified | 60 | 10 | -0.56 |
+
+For the current actor under bin-balanced starts the rank correlation is +0.70 at q = 50 and -0.60 at q = 60 (stratified starts: -0.44 and -0.73): the screen does not establish a monotone small-weight regime in which a smaller weight goes with a larger deficit; the comparison above of the RL actors' weights with the screen's median max |w| is a statement about ranges, not about a threshold.
+
 ## 5. The preamble figure
 
 The six-arm mean of `w_eff` at the freeze of the MS-R2 runs is 4.855 at q = 50 and 5.333 at q = 60 (`summary.txt`, last table), next to the preamble's 4.85 and 5.33 ("gap / tent slope averages 4.85 at q = 50 and 5.33 at q = 60"): the tool, which reloads the exports, and the analysis table `results/ms_r2/analysis/per_run.csv` (`reports/ms/r3/01_supervised_screen.md` section 4, item 2) agree.

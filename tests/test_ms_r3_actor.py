@@ -326,9 +326,79 @@ def test_the_numpy_reload_reproduces_the_torch_forward_and_never_the_tanh_forwar
     np.testing.assert_allclose(e_arg, e_np, atol=0.0)
 
 
-def test_the_residual_asymmetry_example_refuses_a_non_t1_export():
-    src = (ROOT / "tools" / "ms" / "residual_asymmetry_example.py").read_text()
-    assert "actor_variant" in src and "t1 exports only" in src
+def _write_stored_export(root: Path, variant: str, run: str = "rehearsal_v2_0", q: int = 50, seed: int = 10501,
+                         u: int = 1600) -> Path:
+    """The one input layout ``tools/ms/residual_asymmetry_example.py`` reads, ``<root>/<run>/q<q>/seed<seed>/weights/u<u>.npz``,
+    written by the repository's own exporter (a ``relu`` / ``t10`` export carries its ``actor_variant`` entry, a ``t1`` one
+    does not)."""
+    agent = CurriculumPPO(PPOConfig(), torch.Generator().manual_seed(3), np.random.default_rng(0))
+    g = torch.Generator().manual_seed(4)
+    with torch.no_grad():                                   # a non-trivial policy (the output layer starts at zero)
+        agent.actor.out.weight.copy_(torch.randn(agent.actor.out.weight.shape, generator=g) * 0.3)
+        agent.actor.out.bias.copy_(torch.tensor([0.2, 0.0]))
+    if variant != "t1":
+        agent.set_actor_variant(variant)
+    path = root / run / f"q{q}" / f"seed{seed}" / "weights" / f"u{u:05d}.npz"
+    path.parent.mkdir(parents=True)
+    agent.export_weights_npz(str(path))
+    return path
+
+
+def _run_residual_example(monkeypatch: pytest.MonkeyPatch, root: Path) -> List[Dict[str, Any]]:
+    """Run ``main()`` of the example on ``root`` (one q / seed) with the development-tier verifier replaced by a recorder;
+    returns the recorded ``verify`` calls."""
+    import residual_asymmetry_example as rae
+    from types import SimpleNamespace
+    calls: List[Dict[str, Any]] = []
+
+    def fake_verify(mean_fn: Any, **kw: Any) -> Any:
+        calls.append({"mean_fn": mean_fn, **kw})
+        d = np.arange(-200.0, 200.1, 4.0)
+        z = np.full_like(d, 50.0)
+        return SimpleNamespace(stages={2: SimpleNamespace(d_grid=d, e_hat=z, a_dev=z + 1.0)})
+
+    monkeypatch.setattr(rae, "verify", fake_verify)
+    monkeypatch.setattr(sys, "argv", ["residual_asymmetry_example.py", "--root-v2", str(root), "--q", "50", "--seed",
+                                      "10501"])
+    rae.main()
+    return calls
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_the_residual_asymmetry_example_refuses_a_non_t1_export(tmp_path, monkeypatch, variant):
+    """Behavioural: a stored relu / t10 export in the layout the script reads makes ``main()`` raise its ``ValueError`` (naming
+    the variant) before any verifier call; the script never rebuilds such an export as the tanh d / B actor."""
+    _write_stored_export(tmp_path, variant)
+    calls: List[Any] = []
+    import residual_asymmetry_example as rae
+    monkeypatch.setattr(rae, "verify", lambda *a, **k: calls.append((a, k)))
+    monkeypatch.setattr(sys, "argv", ["residual_asymmetry_example.py", "--root-v2", str(tmp_path), "--q", "50", "--seed",
+                                      "10501"])
+    with pytest.raises(ValueError, match="t1 exports only") as e:
+        rae.main()
+    assert repr(variant) in str(e.value) and not calls
+
+
+def test_the_residual_asymmetry_example_reads_a_t1_export_as_the_tanh_actor(tmp_path, monkeypatch, capsys):
+    """The positive control of the refusal: the same layout with a t1 export (no ``actor_variant`` entry) is read, rebuilt as
+    the tanh d / B actor with the stored weights, and handed to the verifier."""
+    path = _write_stored_export(tmp_path, "t1")
+    calls = _run_residual_example(monkeypatch, tmp_path)
+    from envs.curriculum_env import GameSpec
+    game = json.load(open(ROOT / "protocols" / "v2_T2_locked_v2_0.json"))["records"]["50"]["game"]
+    spec = GameSpec(**{k: game[k] for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")})
+    assert len(calls) == 1
+    assert (calls[0]["q"], calls[0]["T"], calls[0]["w_h"], calls[0]["w_l"], calls[0]["k"]) == (50, 2, spec.w_h, spec.w_l, spec.k)
+    d = np.array([-40.0, 0.0, 17.0, 60.0])
+    with np.load(path) as z:
+        arrays = {k: z[k] for k in z.files}
+    assert "actor_variant" not in arrays
+    want, _, _ = mean_effort_numpy(arrays, spec.encode_obs(2, d))
+    got = calls[0]["mean_fn"](2, d)
+    np.testing.assert_allclose(got, want, atol=1e-3)
+    assert np.ptp(want) > 0.5                             # a non-constant policy: the comparison can tell readings apart
+    out = capsys.readouterr().out
+    assert "q=50 seed=10501 rehearsal_v2_0 u1600" in out and "d=+- 96" in out
 
 
 def test_opponent_refresh_and_frozen_snapshot_carry_the_variant(tmp_path):

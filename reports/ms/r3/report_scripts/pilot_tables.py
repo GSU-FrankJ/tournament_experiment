@@ -473,6 +473,43 @@ def block_r0() -> str:
                              for r in t.itertuples()]))
 
 
+def block_directions() -> str:
+    """Per variant and metric over the eight (starts, s, q) cells: how many changes against t1 are negative, how many intervals exclude 0."""
+    t = _read("paired_secondary.csv")
+    rows = []
+    for a in ACTORS[1:]:
+        for m, lab, p in METRICS:
+            x = t[(t.actor == a) & (t.metric == m) & (t.baseline.str.startswith("t1_"))]
+            if x.empty:
+                continue
+            rows.append({"variant": a, "metric": lab, "cells": len(x), "mean change < 0": int((x["mean"] < 0).sum()),
+                         "interval below 0": int((x.ci_mean_hi < 0).sum()), "interval above 0": int((x.ci_mean_lo > 0).sum()),
+                         "range of the mean changes": f"{x['mean'].min():+.{p}f} to {x['mean'].max():+.{p}f}"})
+    return _md(pd.DataFrame(rows))
+
+
+def block_screen_vs_rl() -> str:
+    """The RL tip deficit (= gap) next to the supervised screen's tip deficit at the same budget (medians over the ten seeds; means for the RL gap)."""
+    per = _per_run()
+    sc = pd.read_csv("results/ms_r3/supervised_screen/summary_median.csv", float_precision="round_trip")
+    sc = sc[sc.steps == 56000]
+    rows = []
+    for a in ACTORS:
+        for s in STARTS:
+            for q in QS:
+                x = sc[(sc.actor == a) & (sc.starts == s) & (sc.q == q)]
+                r: Dict[str, object] = {"actor": a, "starts": s, "q": q,
+                                        "screen: median tip deficit": f"{x.iloc[0].tip_deficit_median:.3f}" if len(x) else "n/a"}
+                for v in SCALES:
+                    g = per[(per.arm == f"{a}_{s}_s{v}") & (per.q == q)]
+                    r[f"RL s={v}: gap mean / median"] = f"{g['gap'].mean():.3f} / {g['gap'].median():.3f}" if len(g) else "n/a"
+                g1 = per[(per.arm == f"{a}_{s}_s1") & (per.q == q)]
+                r["RL s=1 median gap / screen median"] = (f"{g1['gap'].median() / x.iloc[0].tip_deficit_median:.2f}"
+                                                         if len(g1) and len(x) and x.iloc[0].tip_deficit_median != 0 else "n/a")
+                rows.append(r)
+    return _md(pd.DataFrame(rows))
+
+
 BLOCKS: Dict[str, Callable[[], str]] = {
     "checks": block_checks, "launch": block_launch, "primary": block_primary, "overview": block_overview, "decomp": block_decomp,
     "resolution": block_resolution, "secondary": block_secondary, "landing": block_landing, "transmission": block_transmission,
@@ -480,7 +517,8 @@ BLOCKS: Dict[str, Callable[[], str]] = {
     "vs_parents": block_vs_parents, "segments": block_segments, "trajectory": block_trajectory, "first_layer": block_first_layer,
     "strata_mid": block_strata, "strata_near": block_strata_near, "strata_tail": block_strata_tail, "stage1": block_stage1,
     "stage1_paired": block_stage1_paired, "gates": block_gates, "shares": block_shares, "budget": block_budget,
-    "side_by_side": block_side_by_side, "tie_effort": block_tie_effort, "r0": block_r0}
+    "side_by_side": block_side_by_side, "tie_effort": block_tie_effort, "r0": block_r0,
+    "directions": block_directions, "screen_vs_rl": block_screen_vs_rl}
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

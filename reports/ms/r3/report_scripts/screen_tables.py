@@ -5,7 +5,7 @@
 quoted in the prompt (block ``sandbox``, marked as quoted and as not repository evidence).
 
 Usage (repository root):
-    python reports/ms/r3/report_scripts/screen_tables.py --block grid|metrics|premise|extended|sandbox|seeds|diag_arm|diag_relation|diag_regime|diag_ranges|diag_check|diag_dist|diag_dist_facts|grid_rmse|grid_tail|grid_weff|grid_maxw
+    python reports/ms/r3/report_scripts/screen_tables.py --block grid|metrics|premise|extended|sandbox|seeds|diag_arm|diag_relation|diag_regime|diag_ranges|diag_check|wdef|diag_dist|diag_dist_facts|grid_rmse|grid_tail|grid_weff|grid_maxw
         [--dir results/ms_r3/supervised_screen] [--diag-dir results/ms_r3/rl_actor_diagnostics]
 """
 
@@ -190,6 +190,20 @@ def block_seeds(d: Path) -> str:
     return _md(rows)
 
 
+def block_wdef(d: Path) -> str:
+    """Spearman correlation across the ten seeds between the max abs first-layer d-weight and the tip deficit, per cell at 56,000 steps."""
+    c = pd.read_csv(d / "summary_by_cell.csv", float_precision="round_trip")
+    c = c[(c.extended == 0) & (c.steps == 56000)]
+    rows = []
+    for a in ACTORS:
+        for s in STARTS:
+            for q in QS:
+                g = c[(c.actor == a) & (c.starts == s) & (c.q == q)]
+                rows.append({"actor": a, "starts": STARTS_LAB[s], "q": q, "seeds": len(g),
+                             "Spearman(max abs w, tip deficit)": f"{g.max_abs_w_d.corr(g.tip_deficit, method='spearman'):+.2f}"})
+    return _md(rows)
+
+
 def _diag(dd: Path, name: str) -> pd.DataFrame:
     return pd.read_csv(dd / name, float_precision="round_trip")
 
@@ -316,7 +330,7 @@ BLOCKS: Dict[str, Callable[[Path], str]] = {"grid": block_grid, "metrics": block
                                             "diag_arm": block_diag_arm, "diag_relation": block_diag_relation,
                                             "diag_regime": block_diag_regime,
                                             "diag_ranges": block_diag_ranges,
-                                            "diag_check": block_diag_check, "diag_dist": block_diag_dist, "diag_dist_facts": block_diag_dist_facts,
+                                            "diag_check": block_diag_check, "wdef": block_wdef, "diag_dist": block_diag_dist, "diag_dist_facts": block_diag_dist_facts,
                                             "grid_rmse": block_grid_rmse, "grid_tail": block_grid_tail,
                                             "grid_weff": block_grid_weff, "grid_maxw": block_grid_maxw}
 
