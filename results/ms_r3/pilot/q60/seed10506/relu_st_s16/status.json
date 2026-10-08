@@ -1,0 +1,21 @@
+{
+ "run": "msr3_q60_s10506_relu_st_s16",
+ "arm": "relu_st_s16",
+ "q": 60,
+ "seed": 10506,
+ "state": "done",
+ "pid": 474810,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot/q60/seed10506/relu_st_s16/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot/q60/seed10506/relu_st_s16",
+ "start_time": "2026-10-08 01:06:31",
+ "git": {
+  "commit": "b41ecefd6dc6327f21825dad381b980ad74c23ac",
+  "short": "b41ecef",
+  "dirty": false
+ },
+ "end_time": "2026-10-08 01:16:01",
+ "exit_code": 0,
+ "final_global_update": 3400,
+ "total_wall_sec": 570.2299200120615,
+ "outcome": "pass"
+}
