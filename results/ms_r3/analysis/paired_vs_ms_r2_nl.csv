@@ -1,0 +1,313 @@
+roots_id,comparison,arm,baseline,actor,starts,s,q,metric,direction,n_expected,status,n_pairs,mean,median,n_better,n_pos,n_neg,n_zero,ci_mean_lo,ci_mean_hi,ci_median_lo,ci_median_hi,ci_mean_contains_0,ci_mean_below_0
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,50,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s1,NL_bb_s1,t1,bb,1,60,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,50,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_bb_s16,NL_bb_s16,t1,bb,16,60,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,50,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s1,NL_st_s1,t1,st,1,60,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,50,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage2_peak_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage2_peak_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,gap,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,smoothing,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,remainder,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,sigma_2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,gap_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,smoothing_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,remainder_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage2_rmse_pos_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage2_tail_mean_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage2_tail_max_over_g2_0,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,eta_T_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,eta_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_R0_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,w_eff,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,peak_locfree_rel_err,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,sym_err_max_rel,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,e2_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,eta_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_R0_dev,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_Rtail_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_episodes,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t2_minibatch_steps,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage1_rel_err_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,stage1_rel_err_signed,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,e1_at_0,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,Gmax_full_over_dw,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,gmax_dev_minus_final_abs,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,learning_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,inherited_rel,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,sigma_effort_at_0_t1,none,10,descriptive,10,0.0,0.0,,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t1_Delta_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t1_R_final,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,t1_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False
+70f65f747eb8,vs MS-R2 NL re-run (C-MS5 context),t1_st_s16,NL_st_s16,t1,st,16,60,total_updates,lower is better,10,descriptive,10,0.0,0.0,0.0,0,0,10,0.0,0.0,0.0,0.0,True,False

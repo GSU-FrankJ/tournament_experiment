@@ -1,0 +1,387 @@
+{
+ "actors": [
+  "t1",
+  "relu",
+  "t10"
+ ],
+ "all_done": true,
+ "arms": [
+  "t1_bb_s1",
+  "t1_bb_s16",
+  "t1_st_s1",
+  "t1_st_s16",
+  "relu_bb_s1",
+  "relu_bb_s16",
+  "relu_st_s1",
+  "relu_st_s16",
+  "t10_bb_s1",
+  "t10_bb_s16",
+  "t10_st_s1",
+  "t10_st_s16"
+ ],
+ "boot_seed": 20261008,
+ "bootstrap_scheme": "fresh numpy.random.default_rng(seed) per (q, statistic); idx = rng.integers(0, n, size=(n_boot, n)); 2.5 / 97.5 percentiles of the resampled mean (or median); the transmission ratio is recomputed on every resample (resamples with |mean d smoothing| <= 1e-09 are dropped)",
+ "command": [
+  "tools/ms/r3_analysis.py",
+  "--pilot-root",
+  "results/ms_r3/pilot",
+  "--ms-r2-pilot-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot",
+  "--parents-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "--rehearsal-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+  "--calibration-root",
+  "results/ms_r1/calibration",
+  "--actors",
+  "t1",
+  "relu",
+  "t10",
+  "--out",
+  "results/ms_r3/analysis"
+ ],
+ "criterion": {
+  "a": "ci_mean_hi < 0 of the mean paired difference v - t1 (same starts and s) at BOTH q",
+  "b": "no run passing G-A (final tier) with the eta part of G-N (|eta_dev - eta_final| <= 0.001) under t1 fails it under v",
+  "comparisons": [
+   [
+    "relu_bb_s1",
+    "t1_bb_s1"
+   ],
+   [
+    "relu_bb_s16",
+    "t1_bb_s16"
+   ],
+   [
+    "relu_st_s1",
+    "t1_st_s1"
+   ],
+   [
+    "relu_st_s16",
+    "t1_st_s16"
+   ],
+   [
+    "t10_bb_s1",
+    "t1_bb_s1"
+   ],
+   [
+    "t10_bb_s16",
+    "t1_bb_s16"
+   ],
+   [
+    "t10_st_s1",
+    "t1_st_s1"
+   ],
+   [
+    "t10_st_s16",
+    "t1_st_s16"
+   ]
+  ],
+  "note": "pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it",
+  "parts_per_arm": {
+   "relu_bb_s1": {
+    "a_met": false,
+    "b_status": "violated",
+    "overall": "not met"
+   },
+   "relu_bb_s16": {
+    "a_met": false,
+    "b_status": "violated",
+    "overall": "not met"
+   },
+   "relu_st_s1": {
+    "a_met": false,
+    "b_status": "violated",
+    "overall": "not met"
+   },
+   "relu_st_s16": {
+    "a_met": true,
+    "b_status": "violated",
+    "overall": "not met"
+   },
+   "t10_bb_s1": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "t10_bb_s16": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "t10_st_s1": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "t10_st_s16": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   }
+  },
+  "primary_metric": "stage2_peak_rel_err_abs"
+ },
+ "decomposition": "gap = g2_at_0 - e2_at_0; smoothing = g2_at_0 - smoothed_e_pred_0; remainder = smoothed_e_pred_0 - e2_at_0 (final tier, utils.ms_noise.decompose_gap); *_rel = / g2_at_0; smoothing_over_formula = smoothing / (g2_at_0 * sigma_effort_at_0_t2 / (sqrt(pi) * q)); cross-checked against the rule_log.json noise record (a disagreement is a flag)",
+ "figures": {
+  "first_layer_d_weights.png": "ok",
+  "paired_abs_peak_vs_parents_A.png": "ok",
+  "paired_abs_peak_vs_t1.png": "ok",
+  "paired_noise_landing.png": "ok",
+  "paired_secondary_vs_t1.png": "ok",
+  "scatter_remainder_vs_smoothing_change.png": "ok",
+  "tie_profile_near_tie.png": "ok",
+  "trajectory_decomposition_bb.png": "ok",
+  "trajectory_decomposition_st.png": "ok"
+ },
+ "first_layer_weights": {
+  "column": "actor.l1.weight[:, 1] (column 0 is the stage feature)",
+  "last_export": "local update 2800",
+  "rows": "first_layer_weights.csv holds EVERY weight export of every run (every 25 updates; column stage = 2 for the terminal stage, 1 for the stage-1 exports that follow), a superset of the requested rows (terminal-stage local >= 1800, and every 100th update before); first_layer_summary.csv and the last-export columns of per_run.csv use the terminal-stage exports only",
+  "units": "d / B with B = (e_max - e_min) + 2q: the stored weight for t1 and relu, TEN times the stored weight for t10 (the variant is read from the export's actor_variant entry, absent = t1)"
+ },
+ "matplotlib": "3.11.0",
+ "n_boot": 10000,
+ "not_stored_by_design": {
+  "NL_*": [
+   "first-layer weight columns and the actor-variant cross-check (not read for the MS-R2 re-run references; their exports are those of the t1 arms, check C-MS5)"
+  ],
+  "parents_A": [
+   "smoothing, remainder, smoothing_over_formula and smoothed_e_pred_0 (final_v2.json carries no smoothed_game; NaN; gap is defined)",
+   "conc_scale_final (no noise record; NaN)",
+   "D3 columns t2_R_*, t2_Rtail_*, t2_C_*, t2_s_* (no one-step best-response effort stored; NaN unless --calibration-root)",
+   "every stage-1 column (stage 1 untrained)",
+   "rule record, start shares, clamp counts (NaN)",
+   "first-layer weight columns (not read for references)"
+  ],
+  "rehearsal_v2_0": [
+   "conc_scale_final (no noise record; NaN)",
+   "D3 columns t*_R_*, t*_C_*, t*_s_* (NaN unless --calibration-root)",
+   "rule record, start shares, clamp counts (NaN)",
+   "t*_minibatch_steps (not stored in v2_run_summary.json; NaN)",
+   "t*_episodes = updates x episodes_per_update (derived)",
+   "first-layer weight columns (not read for references)"
+  ]
+ },
+ "numpy": "2.5.0",
+ "pandas": "3.0.3",
+ "protocol": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "python": "3.12.3",
+ "qs": [
+  50,
+  60
+ ],
+ "quadrature_check": "per (actor, starts, q) from arm means: F2 = gap(s1)^2 - smoothing(s1)^2 (negative: F = 0 and F2_negative); quadrature = sqrt(F2 + smoothing(s16)^2); additive = gap(s1) - (smoothing(s1) - smoothing(s16)); closer = smaller absolute error against gap(s16)",
+ "references": [
+  "NL_bb_s1",
+  "NL_bb_s16",
+  "NL_st_s1",
+  "NL_st_s16",
+  "parents_A",
+  "rehearsal_v2_0"
+ ],
+ "roots": {
+  "calibration": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/calibration",
+  "ms_r2_pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot",
+  "parents": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot",
+  "rehearsal": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0"
+ },
+ "roots_id": "70f65f747eb8",
+ "scales": [
+  1,
+  16
+ ],
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "starts": [
+  "bb",
+  "st"
+ ],
+ "status_counts": {
+  "NL_bb_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_bb_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_st_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "NL_st_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "parents_A": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "rehearsal_v2_0": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "relu_bb_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "relu_bb_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "relu_st_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "relu_st_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t10_bb_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t10_bb_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t10_st_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t10_st_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t1_bb_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t1_bb_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t1_st_s1": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "t1_st_s16": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  }
+ },
+ "thresholds": {
+  "eta": 0.005,
+  "g_f": 0.01,
+  "g_s": 0.05,
+  "n_eta": 0.001,
+  "n_gmax": 0.001,
+  "rmse": 0.05,
+  "s1": 0.1,
+  "tail": 0.02
+ },
+ "tie_metrics": {
+  "R0_over_peak": "t2_R0_{final,dev} / stage2_peak_rel_err_abs; linearised value 2k / (2k + a), a = DW / (4 q^2)",
+  "peak_locfree": "argmax over the whole final-tier recovery grid of recovery_e2 (run/run_ms_stagewise.py stage2_peak_locfree_*): peak_locfree_rel_err = (max e_hat_2 - g2_at_0) / g2_at_0, peak_locfree_argmax_d = d of the maximum",
+  "sym_err": "max over recovery nodes with |d| < 2q of |e_hat_2(d) - e_hat_2(-d)| (effort units; _rel: / g2_at_0)",
+  "w_eff": "gap / (g2_at_0 / (2q)) in units of d (tent slope g2_at_0 / 2q)"
+ },
+ "tool": "tools/ms/r3_analysis.py",
+ "transmission": "ratio = mean(d gap) / mean(d smoothing), d = s16 - s1 within one (actor, starts); 1 = the whole smoothing change reaches the gap, 0 = the remainder offsets it; interval = percentile bootstrap of the ratio of resampled means (resamples with |mean d smoothing| <= 1e-9 dropped)",
+ "windows": {
+  "decay_last": 2800,
+  "hold_last": 2400,
+  "ramp_first": 2001,
+  "ramp_last": 2200,
+  "segments": [
+   [
+    "training",
+    1,
+    2000
+   ],
+   [
+    "ramp",
+    2001,
+    2200
+   ],
+   [
+    "hold",
+    2201,
+    2400
+   ],
+   [
+    "decay",
+    2401,
+    2800
+   ]
+  ],
+  "traj_from": 1800
+ }
+}

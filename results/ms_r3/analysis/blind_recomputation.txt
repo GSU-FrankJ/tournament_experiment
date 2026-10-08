@@ -1,0 +1,748 @@
+blind recomputation of criterion.csv, transmission.csv and the interaction.csv summary from per_run.csv (independent of tools/ms/r3_analysis.py, r2_analysis.py and r1_analysis.py)
+per_run.csv      sha256 e54fe823215ba9264036e13bd62f03f129d919f4113a3eb55d1a0aa44e84cac1
+criterion.csv    sha256 1c04ea5c6d5c3abe3c345a2d5b8b2dbc42f7cc99912811cbd0aec16f30bb8863
+transmission.csv sha256 abe9a1e366cadb5efb51b78b2e96708273f6fb386bbdad93c46041915f987813
+interaction.csv  sha256 9e420067a3a5fb49b805ad6efa838a8f72ae5a2d10f9acf68bda262967e3edae
+protocol /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json sha256 6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3; thresholds {'eta': 0.005, 'rmse': 0.05, 'tail': 0.02, 'n_eta': 0.001}
+roots (analysis_info.json, roots_id 70f65f747eb8): {'calibration': '/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/calibration', 'ms_r2_pilot': '/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot', 'parents': '/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A', 'pilot': '/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot', 'rehearsal': '/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0'}
+bootstrap: 10000 resamples, numpy.random.default_rng(20261008), one fresh generator per (q, statistic); tolerance 1e-12
+qs [50, 60]; arms ['relu_bb_s1', 'relu_bb_s16', 'relu_st_s1', 'relu_st_s16', 't1_bb_s1', 't1_bb_s16', 't1_st_s1', 't1_st_s16', 't10_bb_s1', 't10_bb_s16', 't10_st_s1', 't10_st_s16']; rows by arm: {'NL_bb_s1': 20, 'NL_bb_s16': 20, 'NL_st_s1': 20, 'NL_st_s16': 20, 'parents_A': 20, 'rehearsal_v2_0': 20, 'relu_bb_s1': 20, 'relu_bb_s16': 20, 'relu_st_s1': 20, 'relu_st_s16': 20, 't10_bb_s1': 20, 't10_bb_s16': 20, 't10_st_s1': 20, 't10_st_s16': 20, 't1_bb_s1': 20, 't1_bb_s16': 20, 't1_st_s1': 20, 't1_st_s16': 20}
+status values: {'done': 360}
+relu_bb_s1 (vs t1_bb_s1) a50 +0.06907 [-0.03629,+0.26956] n=10 not | a60 -0.00535 [-0.02069,+0.01116] n=10 not | b_viol=[q50/10504 q50/10506] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool= 0.069066174542431136 blind= 0.069066174542431136 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.036286450336441317 blind=-0.036286450336441317 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.26955993902981651 blind= 0.26955993902981651 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0053517742062716908 blind=-0.0053517742062716908 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.02069209507968886 blind=-0.02069209507968886 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.011157370983699549 blind= 0.011157370983699549 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10504 q50/10506' blind='q50/10504 q50/10506' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=2 blind=2 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_bb_s1' blind='t1_bb_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=1 blind=1 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+relu_bb_s16 (vs t1_bb_s16) a50 +0.06906 [-0.04565,+0.27448] n=10 not | a60 -0.03024 [-0.03721,-0.02308] n=10 met | b_viol=[q50/10504] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool= 0.069058259654472903 blind= 0.069058259654472903 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.045648353917786016 blind=-0.045648353917786016 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.2744847000177304 blind= 0.2744847000177304 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.030237504720413189 blind=-0.030237504720413189 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.037213108246234271 blind=-0.037213108246234271 |diff|=0 ok
+  ci_mean_hi_q60     tool=-0.023082718513852293 blind=-0.023082718513852293 |diff|=0 ok
+  a_q60              tool=True blind=True ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10504' blind='q50/10504' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=1 blind=1 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_bb_s16' blind='t1_bb_s16' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+relu_st_s1 (vs t1_st_s1) a50 -0.01077 [-0.03037,+0.00587] n=10 not | a60 -0.02339 [-0.03867,-0.00821] n=10 met | b_viol=[q50/10506] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.010771164121081964 blind=-0.010771164121081964 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.030372910976738408 blind=-0.030372910976738408 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0058734112869027553 blind= 0.0058734112869027553 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.023391585155057439 blind=-0.023391585155057439 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.038670233833475946 blind=-0.038670233833475946 |diff|=0 ok
+  ci_mean_hi_q60     tool=-0.0082148392379011777 blind=-0.0082148392379011777 |diff|=0 ok
+  a_q60              tool=True blind=True ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10506' blind='q50/10506' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=1 blind=1 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_st_s1' blind='t1_st_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=1 blind=1 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+relu_st_s16 (vs t1_st_s16) a50 -0.01039 [-0.01625,-0.00467] n=10 met | a60 -0.02059 [-0.03090,-0.00684] n=10 met | b_viol=[q50/10506] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.01038693359347383 blind=-0.01038693359347383 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.016248674231858374 blind=-0.016248674231858374 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.0046708729586193405 blind=-0.0046708729586193405 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.020588849382106138 blind=-0.020588849382106138 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.030902737996452375 blind=-0.030902737996452375 |diff|=0 ok
+  ci_mean_hi_q60     tool=-0.0068392921732800364 blind=-0.0068392921732800364 |diff|=0 ok
+  a_q60              tool=True blind=True ok
+  a_met              tool=True blind=True ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='q50/10506' blind='q50/10506' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=1 blind=1 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='violated' blind='violated' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_st_s16' blind='t1_st_s16' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+t10_bb_s1 (vs t1_bb_s1) a50 -0.01330 [-0.03590,+0.00859] n=10 not | a60 +0.01456 [+0.00187,+0.02646] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.013296425657388774 blind=-0.013296425657388774 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.035899738990405577 blind=-0.035899738990405577 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0085900437829481025 blind= 0.0085900437829481025 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool= 0.014561744019689821 blind= 0.014561744019689821 |diff|=0 ok
+  ci_mean_lo_q60     tool= 0.001871053392319593 blind= 0.001871053392319593 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.026456466720441 blind= 0.026456466720441 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_bb_s1' blind='t1_bb_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=1 blind=1 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+t10_bb_s16 (vs t1_bb_s16) a50 -0.01451 [-0.02852,-0.00249] n=10 met | a60 -0.00235 [-0.01285,+0.00998] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.014510009549341965 blind=-0.014510009549341965 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.028524752290458852 blind=-0.028524752290458852 |diff|=0 ok
+  ci_mean_hi_q50     tool=-0.0024868495405018756 blind=-0.0024868495405018756 |diff|=0 ok
+  a_q50              tool=True blind=True ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0023468004669978107 blind=-0.0023468004669978107 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.012846630837064197 blind=-0.012846630837064197 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.0099844321809907308 blind= 0.0099844321809907308 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_bb_s16' blind='t1_bb_s16' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+t10_st_s1 (vs t1_st_s1) a50 +0.00721 [-0.00705,+0.02204] n=10 not | a60 -0.00681 [-0.02749,+0.01108] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool= 0.0072133264883116697 blind= 0.0072133264883116697 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.0070525255241318209 blind=-0.0070525255241318209 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.022038307929034971 blind= 0.022038307929034971 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.0068075074691568791 blind=-0.0068075074691568791 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.02749028916254603 blind=-0.02749028916254603 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.011079466017655522 blind= 0.011079466017655522 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_st_s1' blind='t1_st_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=1 blind=1 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+t10_st_s16 (vs t1_st_s16) a50 -0.00381 [-0.01302,+0.00667] n=10 not | a60 -0.01358 [-0.02552,+0.00059] n=10 not | b_viol=[] b_pend=[] | overall not met
+  n_pairs_q50        tool=10 blind=10 ok
+  mean_q50           tool=-0.0038130083053411561 blind=-0.0038130083053411561 |diff|=0 ok
+  ci_mean_lo_q50     tool=-0.013019516969616368 blind=-0.013019516969616368 |diff|=0 ok
+  ci_mean_hi_q50     tool= 0.0066735443932240063 blind= 0.0066735443932240063 |diff|=0 ok
+  a_q50              tool=False blind=False ok
+  n_pairs_q60        tool=10 blind=10 ok
+  mean_q60           tool=-0.013577984947514107 blind=-0.013577984947514107 |diff|=0 ok
+  ci_mean_lo_q60     tool=-0.025515711139671059 blind=-0.025515711139671059 |diff|=0 ok
+  ci_mean_hi_q60     tool= 0.00058952943047141035 blind= 0.00058952943047141035 |diff|=0 ok
+  a_q60              tool=False blind=False ok
+  a_met              tool=False blind=False ok
+  a_complete         tool=True blind=True ok
+  n_base_pass        tool=20 blind=20 ok
+  b_violations       tool='' blind='' ok
+  b_pending          tool='' blind='' ok
+  b_n_violations     tool=0 blind=0 ok
+  b_n_pending        tool=0 blind=0 ok
+  b_status           tool='holds' blind='holds' ok
+  overall            tool='not met' blind='not met' ok
+  baseline           tool='t1_st_s16' blind='t1_st_s16' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+  primary_metric     tool='stage2_peak_rel_err_abs' blind='stage2_peak_rel_err_abs' ok
+  boot_seed          tool=20261008 blind=20261008 ok
+  n_boot             tool=10000 blind=10000 ok
+transmission t1_bb_s16 q=50 n=10 d gap -0.060793 d smoothing -1.391628 ratio +0.043685 [-0.525290, +0.652744] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.06079281169898039 blind=-0.06079281169898039 |diff|=0 ok
+  mean_d_smoothing   tool=-1.3916281066506486 blind=-1.3916281066506486 |diff|=0 ok
+  ratio              tool= 0.043684667914113698 blind= 0.043684667914113698 |diff|=0 ok
+  ci_lo              tool=-0.52528972812382591 blind=-0.52528972812382591 |diff|=0 ok
+  ci_hi              tool= 0.65274449809224033 blind= 0.65274449809224033 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool=-0.36822732096076782 blind=-0.36822732096076782 |diff|=0 ok
+  per_seed_ratios    tool='10501:-0.428025;10502:-0.89633;10503:1.21709;10504:0.446876;10505:-0.735523;10506:-0.30843;10507:1.63567;10508:1.26183;10509:-0.670999;10510:-1.2003' blind='10501:-0.428025;10502:-0.89633;10503:1.21709;10504:0.446876;10505:-0.735523;10506:-0.30843;10507:1.63567;10508:1.26183;10509:-0.670999;10510:-1.2003' ok
+  baseline           tool='t1_bb_s1' blind='t1_bb_s1' ok
+  actor              tool='t1' blind='t1' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission t1_bb_s16 q=60 n=10 d gap +0.417144 d smoothing -0.978343 ratio -0.426378 [-1.044673, +0.206311] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool= 0.4171437365042962 blind= 0.4171437365042962 |diff|=0 ok
+  mean_d_smoothing   tool=-0.97834317135303261 blind=-0.97834317135303261 |diff|=0 ok
+  ratio              tool=-0.42637772585195566 blind=-0.42637772585195566 |diff|=0 ok
+  ci_lo              tool=-1.0446734671255322 blind=-1.0446734671255322 |diff|=0 ok
+  ci_hi              tool= 0.20631050297157713 blind= 0.20631050297157713 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool=-0.55626452197370646 blind=-0.55626452197370646 |diff|=0 ok
+  per_seed_ratios    tool='10501:0.584722;10502:0.611987;10503:1.36217;10504:-0.981928;10505:-0.107116;10506:-0.791748;10507:-1.59553;10508:-0.320781;10509:-1.18782;10510:-2.04951' blind='10501:0.584722;10502:0.611987;10503:1.36217;10504:-0.981928;10505:-0.107116;10506:-0.791748;10507:-1.59553;10508:-0.320781;10509:-1.18782;10510:-2.04951' ok
+  baseline           tool='t1_bb_s1' blind='t1_bb_s1' ok
+  actor              tool='t1' blind='t1' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission t1_st_s16 q=50 n=10 d gap -0.226066 d smoothing -1.371449 ratio +0.164837 [-0.424659, +0.734562] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.22606570025107403 blind=-0.22606570025107403 |diff|=0 ok
+  mean_d_smoothing   tool=-1.3714494367302166 blind=-1.3714494367302166 |diff|=0 ok
+  ratio              tool= 0.16483706522207303 blind= 0.16483706522207303 |diff|=0 ok
+  ci_lo              tool=-0.42465865487003474 blind=-0.42465865487003474 |diff|=0 ok
+  ci_hi              tool= 0.73456154517058492 blind= 0.73456154517058492 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.3594963685389696 blind= 0.3594963685389696 |diff|=0 ok
+  per_seed_ratios    tool='10501:0.72767;10502:1.67666;10503:-0.542848;10504:-0.708453;10505:-1.59839;10506:0.705104;10507:0.640353;10508:1.13073;10509:0.0786392;10510:-0.501866' blind='10501:0.72767;10502:1.67666;10503:-0.542848;10504:-0.708453;10505:-1.59839;10506:0.705104;10507:0.640353;10508:1.13073;10509:0.0786392;10510:-0.501866' ok
+  baseline           tool='t1_st_s1' blind='t1_st_s1' ok
+  actor              tool='t1' blind='t1' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+transmission t1_st_s16 q=60 n=10 d gap -0.268983 d smoothing -0.977869 ratio +0.275070 [-0.561140, +1.154861] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.26898257821469401 blind=-0.26898257821469401 |diff|=0 ok
+  mean_d_smoothing   tool=-0.97786892468125619 blind=-0.97786892468125619 |diff|=0 ok
+  ratio              tool= 0.27507017702026981 blind= 0.27507017702026981 |diff|=0 ok
+  ci_lo              tool=-0.56114027717349502 blind=-0.56114027717349502 |diff|=0 ok
+  ci_hi              tool= 1.1548605636659037 blind= 1.1548605636659037 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.27240095887703819 blind= 0.27240095887703819 |diff|=0 ok
+  per_seed_ratios    tool='10501:-1.53218;10502:-0.848969;10503:0.847533;10504:1.07688;10505:-1.71986;10506:1.21197;10507:2.4892;10508:-0.614965;10509:-0.302731;10510:2.21463' blind='10501:-1.53218;10502:-0.848969;10503:0.847533;10504:1.07688;10505:-1.71986;10506:1.21197;10507:2.4892;10508:-0.614965;10509:-0.302731;10510:2.21463' ok
+  baseline           tool='t1_st_s1' blind='t1_st_s1' ok
+  actor              tool='t1' blind='t1' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+transmission relu_bb_s16 q=50 n=10 d gap -0.061347 d smoothing -0.960941 ratio +0.063840 [-1.397342, +1.506908] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.061346853856058203 blind=-0.061346853856058203 |diff|=0 ok
+  mean_d_smoothing   tool=-0.96094053512458399 blind=-0.96094053512458399 |diff|=0 ok
+  ratio              tool= 0.063840426762832636 blind= 0.063840426762832636 |diff|=0 ok
+  ci_lo              tool=-1.3973424477349023 blind=-1.3973424477349023 |diff|=0 ok
+  ci_hi              tool= 1.5069076535237735 blind= 1.5069076535237735 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.044786599288666136 blind= 0.044786599288666136 |diff|=0 ok
+  per_seed_ratios    tool='10501:3.35567;10502:0.0895732;10503:2.72365;10504:0;10505:-0.619613;10506:1.81398;10507:-2.9896;10508:0.557;10509:-3.32899;10510:-1.18292' blind='10501:3.35567;10502:0.0895732;10503:2.72365;10504:0;10505:-0.619613;10506:1.81398;10507:-2.9896;10508:0.557;10509:-3.32899;10510:-1.18292' ok
+  baseline           tool='relu_bb_s1' blind='relu_bb_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission relu_bb_s16 q=60 n=10 d gap -1.140856 d smoothing -0.743590 ratio +1.534254 [-0.082810, +3.151957] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-1.1408561763297314 blind=-1.1408561763297314 |diff|=0 ok
+  mean_d_smoothing   tool=-0.74359014195139816 blind=-0.74359014195139816 |diff|=0 ok
+  ratio              tool= 1.5342540358802914 blind= 1.5342540358802914 |diff|=0 ok
+  ci_lo              tool=-0.082810444803145297 blind=-0.082810444803145297 |diff|=0 ok
+  ci_hi              tool= 3.1519571083343463 blind= 3.1519571083343463 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 1.7319084126580699 blind= 1.7319084126580699 |diff|=0 ok
+  per_seed_ratios    tool='10501:5.17173;10502:3.06943;10503:1.42848;10504:0.938777;10505:2.03534;10506:-2.221;10507:3.51934;10508:5.23587;10509:-1.11308;10510:-2.66194' blind='10501:5.17173;10502:3.06943;10503:1.42848;10504:0.938777;10505:2.03534;10506:-2.221;10507:3.51934;10508:5.23587;10509:-1.11308;10510:-2.66194' ok
+  baseline           tool='relu_bb_s1' blind='relu_bb_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission relu_st_s16 q=50 n=10 d gap -0.154271 d smoothing -1.110405 ratio +0.138932 [-0.765286, +0.947234] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.15427075138418758 blind=-0.15427075138418758 |diff|=0 ok
+  mean_d_smoothing   tool=-1.110404695313798 blind=-1.110404695313798 |diff|=0 ok
+  ratio              tool= 0.13893200563294716 blind= 0.13893200563294716 |diff|=0 ok
+  ci_lo              tool=-0.76528553973931768 blind=-0.76528553973931768 |diff|=0 ok
+  ci_hi              tool= 0.94723425678140394 blind= 0.94723425678140394 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.30231383725863076 blind= 0.30231383725863076 |diff|=0 ok
+  per_seed_ratios    tool='10501:0.63058;10502:-1.85535;10503:0.425251;10504:-0.373421;10505:-0.979559;10506:1.15966;10507:1.89784;10508:-2.6656;10509:0.179377;10510:2.01542' blind='10501:0.63058;10502:-1.85535;10503:0.425251;10504:-0.373421;10505:-0.979559;10506:1.15966;10507:1.89784;10508:-2.6656;10509:0.179377;10510:2.01542' ok
+  baseline           tool='relu_st_s1' blind='relu_st_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+transmission relu_st_s16 q=60 n=10 d gap -0.249559 d smoothing -0.758874 ratio +0.328854 [-1.084988, +1.776374] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.24955925959486577 blind=-0.24955925959486577 |diff|=0 ok
+  mean_d_smoothing   tool=-0.75887447479320547 blind=-0.75887447479320547 |diff|=0 ok
+  ratio              tool= 0.32885446524324208 blind= 0.32885446524324208 |diff|=0 ok
+  ci_lo              tool=-1.0849881396436227 blind=-1.0849881396436227 |diff|=0 ok
+  ci_hi              tool= 1.776373611795957 blind= 1.776373611795957 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.19106932772319593 blind= 0.19106932772319593 |diff|=0 ok
+  per_seed_ratios    tool='10501:2.01458;10502:-1.76785;10503:4.25412;10504:-1.50849;10505:-2.8616;10506:1.529;10507:-0.268872;10508:0.651011;10509:3.13991;10510:-2.3543' blind='10501:2.01458;10502:-1.76785;10503:4.25412;10504:-1.50849;10505:-2.8616;10506:1.529;10507:-0.268872;10508:0.651011;10509:3.13991;10510:-2.3543' ok
+  baseline           tool='relu_st_s1' blind='relu_st_s1' ok
+  actor              tool='relu' blind='relu' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+transmission t10_bb_s16 q=50 n=10 d gap -0.145744 d smoothing -1.356750 ratio +0.107421 [-0.574926, +0.816031] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.14574368413570368 blind=-0.14574368413570368 |diff|=0 ok
+  mean_d_smoothing   tool=-1.3567498112580878 blind=-1.3567498112580878 |diff|=0 ok
+  ratio              tool= 0.10742119359541932 blind= 0.10742119359541932 |diff|=0 ok
+  ci_lo              tool=-0.57492581769602091 blind=-0.57492581769602091 |diff|=0 ok
+  ci_hi              tool= 0.81603113871006105 blind= 0.81603113871006105 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool=-0.18420170996708418 blind=-0.18420170996708418 |diff|=0 ok
+  per_seed_ratios    tool='10501:-0.40523;10502:0.638321;10503:-0.65728;10504:2.12074;10505:-0.893603;10506:-0.819072;10507:-1.60909;10508:1.54445;10509:0.0368264;10510:0.918521' blind='10501:-0.40523;10502:0.638321;10503:-0.65728;10504:2.12074;10505:-0.893603;10506:-0.819072;10507:-1.60909;10508:1.54445;10509:0.0368264;10510:0.918521' ok
+  baseline           tool='t10_bb_s1' blind='t10_bb_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission t10_bb_s16 q=60 n=10 d gap -0.569188 d smoothing -0.955294 ratio +0.595825 [+0.090310, +1.052506] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.5691880252191488 blind=-0.5691880252191488 |diff|=0 ok
+  mean_d_smoothing   tool=-0.95529399629382183 blind=-0.95529399629382183 |diff|=0 ok
+  ratio              tool= 0.59582497893568087 blind= 0.59582497893568087 |diff|=0 ok
+  ci_lo              tool= 0.090309757522221687 blind= 0.090309757522221687 |diff|=0 ok
+  ci_hi              tool= 1.0525060017775163 blind= 1.0525060017775163 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.7611407397712272 blind= 0.7611407397712272 |diff|=0 ok
+  per_seed_ratios    tool='10501:1.38632;10502:0.810668;10503:0.711614;10504:-0.639125;10505:-0.691514;10506:-0.207468;10507:1.38898;10508:1.23557;10509:1.3462;10510:0.596823' blind='10501:1.38632;10502:0.810668;10503:0.711614;10504:-0.639125;10505:-0.691514;10506:-0.207468;10507:1.38898;10508:1.23557;10509:1.3462;10510:0.596823' ok
+  baseline           tool='t10_bb_s1' blind='t10_bb_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='bb' blind='bb' ok
+  s                  tool=16 blind=16 ok
+transmission t10_st_s16 q=50 n=10 d gap -0.997909 d smoothing -1.390741 ratio +0.717538 [+0.423635, +1.050699] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.99790913580677199 blind=-0.99790913580677199 |diff|=0 ok
+  mean_d_smoothing   tool=-1.3907408652358781 blind=-1.3907408652358781 |diff|=0 ok
+  ratio              tool= 0.71753779640143134 blind= 0.71753779640143134 |diff|=0 ok
+  ci_lo              tool= 0.42363517031388381 blind= 0.42363517031388381 |diff|=0 ok
+  ci_hi              tool= 1.0506985953302446 blind= 1.0506985953302446 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.66323305571529745 blind= 0.66323305571529745 |diff|=0 ok
+  per_seed_ratios    tool='10501:0.801074;10502:1.35655;10503:0.159167;10504:1.81773;10505:0.728061;10506:0.690865;10507:0.483044;10508:-0.0206439;10509:0.501837;10510:0.635601' blind='10501:0.801074;10502:1.35655;10503:0.159167;10504:1.81773;10505:0.728061;10506:0.690865;10507:0.483044;10508:-0.0206439;10509:0.501837;10510:0.635601' ok
+  baseline           tool='t10_st_s1' blind='t10_st_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+transmission t10_st_s16 q=60 n=10 d gap -0.663927 d smoothing -0.965980 ratio +0.687309 [-0.099081, +1.499914] kept 10000
+  n_pairs            tool=10 blind=10 ok
+  mean_d_gap         tool=-0.66392709778553249 blind=-0.66392709778553249 |diff|=0 ok
+  mean_d_smoothing   tool=-0.96598017206564324 blind=-0.96598017206564324 |diff|=0 ok
+  ratio              tool= 0.68730923986337811 blind= 0.68730923986337811 |diff|=0 ok
+  ci_lo              tool=-0.099080676952365665 blind=-0.099080676952365665 |diff|=0 ok
+  ci_hi              tool= 1.4999136236149253 blind= 1.4999136236149253 |diff|=0 ok
+  n_boot_valid       tool=10000 blind=10000 ok
+  median_per_seed_ratio tool= 0.64224413020161675 blind= 0.64224413020161675 |diff|=0 ok
+  per_seed_ratios    tool='10501:2.78498;10502:0.496581;10503:2.79657;10504:1.29824;10505:0.102435;10506:-0.382253;10507:-1.33427;10508:-0.620545;10509:0.879617;10510:0.787908' blind='10501:2.78498;10502:0.496581;10503:2.79657;10504:1.29824;10505:0.102435;10506:-0.382253;10507:-1.33427;10508:-0.620545;10509:0.879617;10510:0.787908' ok
+  baseline           tool='t10_st_s1' blind='t10_st_s1' ok
+  actor              tool='t10' blind='t10' ok
+  starts             tool='st' blind='st' ok
+  s                  tool=16 blind=16 ok
+interaction relu bb q=50 stage2_peak_rel_err_abs  n=10 mean -0.000008 [-0.022191, +0.023125]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-7.9148879582560665e-06 blind=-7.9148879582560665e-06 |diff|=0 ok
+  median             tool=-0.0037362633758543694 blind=-0.0037362633758543694 |diff|=0 ok
+  ci_mean_lo         tool=-0.022190519647832092 blind=-0.022190519647832092 |diff|=0 ok
+  ci_mean_hi         tool= 0.02312538666014903 blind= 0.02312538666014903 |diff|=0 ok
+  ci_median_lo       tool=-0.025655960955021484 blind=-0.025655960955021484 |diff|=0 ok
+  ci_median_hi       tool= 0.018374068678125913 blind= 0.018374068678125913 |diff|=0 ok
+interaction relu bb q=50 gap                      n=10 mean -0.000554 [-1.553336, +1.618777]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.0005540421570778165 blind=-0.0005540421570778165 |diff|=0 ok
+  median             tool=-0.26153843630980589 blind=-0.26153843630980589 |diff|=0 ok
+  ci_mean_lo         tool=-1.5533363753482463 blind=-1.5533363753482463 |diff|=0 ok
+  ci_mean_hi         tool= 1.6187770662104322 blind= 1.6187770662104322 |diff|=0 ok
+  ci_median_lo       tool=-1.7959172668515038 blind=-1.7959172668515038 |diff|=0 ok
+  ci_median_hi       tool= 1.286184807468814 blind= 1.286184807468814 |diff|=0 ok
+interaction relu bb q=50 remainder                n=10 mean -0.431242 [-1.983784, +1.211701]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.43124161368314234 blind=-0.43124161368314234 |diff|=0 ok
+  median             tool=-0.68464978740798443 blind=-0.68464978740798443 |diff|=0 ok
+  ci_mean_lo         tool=-1.983784279583187 blind=-1.983784279583187 |diff|=0 ok
+  ci_mean_hi         tool= 1.2117008486005447 blind= 1.2117008486005447 |diff|=0 ok
+  ci_median_lo       tool=-2.1498174014064872 blind=-2.1498174014064872 |diff|=0 ok
+  ci_median_hi       tool= 0.88558787735217948 blind= 0.88558787735217948 |diff|=0 ok
+interaction relu bb q=50 smoothing                n=10 mean +0.430688 [+0.288539, +0.643780]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=10 blind=10 ok
+  n_neg              tool=0 blind=0 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.43068757152606452 blind= 0.43068757152606452 |diff|=0 ok
+  median             tool= 0.33303792142218924 blind= 0.33303792142218924 |diff|=0 ok
+  ci_mean_lo         tool= 0.2885393569438548 blind= 0.2885393569438548 |diff|=0 ok
+  ci_mean_hi         tool= 0.64377956723231455 blind= 0.64377956723231455 |diff|=0 ok
+  ci_median_lo       tool= 0.29927331992459472 blind= 0.29927331992459472 |diff|=0 ok
+  ci_median_hi       tool= 0.43986386918309961 blind= 0.43986386918309961 |diff|=0 ok
+interaction relu bb q=60 stage2_peak_rel_err_abs  n=10 mean -0.024886 [-0.043091, -0.007811]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.024885730514141495 blind=-0.024885730514141495 |diff|=0 ok
+  median             tool=-0.023490869514882259 blind=-0.023490869514882259 |diff|=0 ok
+  ci_mean_lo         tool=-0.043091407642654365 blind=-0.043091407642654365 |diff|=0 ok
+  ci_mean_hi         tool=-0.0078106563311846561 blind=-0.0078106563311846561 |diff|=0 ok
+  ci_median_lo       tool=-0.049065572090618494 blind=-0.049065572090618494 |diff|=0 ok
+  ci_median_hi       tool=-0.0033683536480512907 blind=-0.0033683536480512907 |diff|=0 ok
+interaction relu bb q=60 gap                      n=10 mean -1.558000 [-2.639967, -0.531361]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-1.5579999128340276 blind=-1.5579999128340276 |diff|=0 ok
+  median             tool=-1.5969215227277367 blind=-1.5969215227277367 |diff|=0 ok
+  ci_mean_lo         tool=-2.6399669645911068 blind=-2.6399669645911068 |diff|=0 ok
+  ci_mean_hi         tool=-0.53136082693672271 blind=-0.53136082693672271 |diff|=0 ok
+  ci_median_lo       tool=-3.2302968477026113 blind=-3.2302968477026113 |diff|=0 ok
+  ci_median_hi       tool=-0.19648729613632554 blind=-0.19648729613632554 |diff|=0 ok
+interaction relu bb q=60 remainder                n=10 mean -1.792753 [-2.883464, -0.762673]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-1.7927529422356621 blind=-1.7927529422356621 |diff|=0 ok
+  median             tool=-1.8398278927662659 blind=-1.8398278927662659 |diff|=0 ok
+  ci_mean_lo         tool=-2.8834637030668628 blind=-2.8834637030668628 |diff|=0 ok
+  ci_mean_hi         tool=-0.76267340916178883 blind=-0.76267340916178883 |diff|=0 ok
+  ci_median_lo       tool=-3.5102582461119383 blind=-3.5102582461119383 |diff|=0 ok
+  ci_median_hi       tool=-0.36703450271880911 blind=-0.36703450271880911 |diff|=0 ok
+interaction relu bb q=60 smoothing                n=10 mean +0.234753 [+0.185767, +0.284987]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=10 blind=10 ok
+  n_neg              tool=0 blind=0 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.23475302940163445 blind= 0.23475302940163445 |diff|=0 ok
+  median             tool= 0.22434744236388227 blind= 0.22434744236388227 |diff|=0 ok
+  ci_mean_lo         tool= 0.18576678358216275 blind= 0.18576678358216275 |diff|=0 ok
+  ci_mean_hi         tool= 0.28498666390211741 blind= 0.28498666390211741 |diff|=0 ok
+  ci_median_lo       tool= 0.15852788781755578 blind= 0.15852788781755578 |diff|=0 ok
+  ci_median_hi       tool= 0.31989713414021281 blind= 0.31989713414021281 |diff|=0 ok
+interaction relu st q=50 stage2_peak_rel_err_abs  n=10 mean +0.000384 [-0.016477, +0.020394]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.00038423052760813426 blind= 0.00038423052760813426 |diff|=0 ok
+  median             tool=-0.0085762307260627071 blind=-0.0085762307260627071 |diff|=0 ok
+  ci_mean_lo         tool=-0.016477075213214443 blind=-0.016477075213214443 |diff|=0 ok
+  ci_mean_hi         tool= 0.020394086312447351 blind= 0.020394086312447351 |diff|=0 ok
+  ci_median_lo       tool=-0.017298361465804088 blind=-0.017298361465804088 |diff|=0 ok
+  ci_median_hi       tool= 0.025277648261061256 blind= 0.025277648261061256 |diff|=0 ok
+interaction relu st q=50 gap                      n=10 mean +0.071795 [-1.148346, +1.529416]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.071794948866886449 blind= 0.071794948866886449 |diff|=0 ok
+  median             tool=-0.60033615082438985 blind=-0.60033615082438985 |diff|=0 ok
+  ci_mean_lo         tool=-1.1483464813658517 blind=-1.1483464813658517 |diff|=0 ok
+  ci_mean_hi         tool= 1.5294158770566961 blind= 1.5294158770566961 |diff|=0 ok
+  ci_median_lo       tool=-1.210885302606286 blind=-1.210885302606286 |diff|=0 ok
+  ci_median_hi       tool= 1.9687109213256164 blind= 1.9687109213256164 |diff|=0 ok
+interaction relu st q=50 remainder                n=10 mean -0.189250 [-1.370434, +1.226404]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.189249792549532 blind=-0.189249792549532 |diff|=0 ok
+  median             tool=-0.79422743170913179 blind=-0.79422743170913179 |diff|=0 ok
+  ci_mean_lo         tool=-1.3704344874847427 blind=-1.3704344874847427 |diff|=0 ok
+  ci_mean_hi         tool= 1.2264044722066183 blind= 1.2264044722066183 |diff|=0 ok
+  ci_median_lo       tool=-1.3964280060015568 blind=-1.3964280060015568 |diff|=0 ok
+  ci_median_hi       tool= 1.6486219565153846 blind= 1.6486219565153846 |diff|=0 ok
+interaction relu st q=50 smoothing                n=10 mean +0.261045 [+0.184431, +0.330491]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=10 blind=10 ok
+  n_neg              tool=0 blind=0 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.26104474141641842 blind= 0.26104474141641842 |diff|=0 ok
+  median             tool= 0.28179307974508561 blind= 0.28179307974508561 |diff|=0 ok
+  ci_mean_lo         tool= 0.1844311923090344 blind= 0.1844311923090344 |diff|=0 ok
+  ci_mean_hi         tool= 0.33049093152593101 blind= 0.33049093152593101 |diff|=0 ok
+  ci_median_lo       tool= 0.17858270098302853 blind= 0.17858270098302853 |diff|=0 ok
+  ci_median_hi       tool= 0.35993027699116453 blind= 0.35993027699116453 |diff|=0 ok
+interaction relu st q=60 stage2_peak_rel_err_abs  n=10 mean +0.002803 [-0.019000, +0.025622]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=5 blind=5 ok
+  n_neg              tool=5 blind=5 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.0028027357729513017 blind= 0.0028027357729513017 |diff|=0 ok
+  median             tool= 0.0028044290854989523 blind= 0.0028044290854989523 |diff|=0 ok
+  ci_mean_lo         tool=-0.018999644388318641 blind=-0.018999644388318641 |diff|=0 ok
+  ci_mean_hi         tool= 0.025621605601175129 blind= 0.025621605601175129 |diff|=0 ok
+  ci_median_lo       tool=-0.028469396876802663 blind=-0.028469396876802663 |diff|=0 ok
+  ci_median_hi       tool= 0.037500564466182718 blind= 0.037500564466182718 |diff|=0 ok
+interaction relu st q=60 gap                      n=10 mean +0.019423 [-1.381143, +1.456228]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=5 blind=5 ok
+  n_neg              tool=5 blind=5 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.019423318619828222 blind= 0.019423318619828222 |diff|=0 ok
+  median             tool= 0.16359169665410533 blind= 0.16359169665410533 |diff|=0 ok
+  ci_mean_lo         tool=-1.3811428272612127 blind=-1.3811428272612127 |diff|=0 ok
+  ci_mean_hi         tool= 1.456227796260293 blind= 1.456227796260293 |diff|=0 ok
+  ci_median_lo       tool=-2.2304493612352729 blind=-2.2304493612352729 |diff|=0 ok
+  ci_median_hi       tool= 2.1875329271939918 blind= 2.1875329271939918 |diff|=0 ok
+interaction relu st q=60 remainder                n=10 mean -0.199571 [-1.593654, +1.232426]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=5 blind=5 ok
+  n_neg              tool=5 blind=5 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.19957113126822251 blind=-0.19957113126822251 |diff|=0 ok
+  median             tool=-0.046899388523392815 blind=-0.046899388523392815 |diff|=0 ok
+  ci_mean_lo         tool=-1.5936535041455024 blind=-1.5936535041455024 |diff|=0 ok
+  ci_mean_hi         tool= 1.2324257867294139 blind= 1.2324257867294139 |diff|=0 ok
+  ci_median_lo       tool=-2.5184929037297294 blind=-2.5184929037297294 |diff|=0 ok
+  ci_median_hi       tool= 2.0113776329120441 blind= 2.0113776329120441 |diff|=0 ok
+interaction relu st q=60 smoothing                n=10 mean +0.218994 [+0.180009, +0.256312]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=10 blind=10 ok
+  n_neg              tool=0 blind=0 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.21899444988805072 blind= 0.21899444988805072 |diff|=0 ok
+  median             tool= 0.22567543229601128 blind= 0.22567543229601128 |diff|=0 ok
+  ci_mean_lo         tool= 0.1800089518852547 blind= 0.1800089518852547 |diff|=0 ok
+  ci_mean_hi         tool= 0.25631171432442812 blind= 0.25631171432442812 |diff|=0 ok
+  ci_median_lo       tool= 0.15348229989769635 blind= 0.15348229989769635 |diff|=0 ok
+  ci_median_hi       tool= 0.28580210075351431 blind= 0.28580210075351431 |diff|=0 ok
+interaction t10 bb q=50 stage2_peak_rel_err_abs  n=10 mean -0.001214 [-0.018643, +0.017998]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.0012135838919531904 blind=-0.0012135838919531904 |diff|=0 ok
+  median             tool=-0.0030175453558083376 blind=-0.0030175453558083376 |diff|=0 ok
+  ci_mean_lo         tool=-0.018642727842083186 blind=-0.018642727842083186 |diff|=0 ok
+  ci_mean_hi         tool= 0.017997988700994609 blind= 0.017997988700994609 |diff|=0 ok
+  ci_median_lo       tool=-0.029389351092999248 blind=-0.029389351092999248 |diff|=0 ok
+  ci_median_hi       tool= 0.020058169091261187 blind= 0.020058169091261187 |diff|=0 ok
+interaction t10 bb q=50 gap                      n=10 mean -0.084951 [-1.304991, +1.259859]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.084950872436723307 blind=-0.084950872436723307 |diff|=0 ok
+  median             tool=-0.21122817490658363 blind=-0.21122817490658363 |diff|=0 ok
+  ci_mean_lo         tool=-1.3049909489458229 blind=-1.3049909489458229 |diff|=0 ok
+  ci_mean_hi         tool= 1.259859209069623 blind= 1.259859209069623 |diff|=0 ok
+  ci_median_lo       tool=-2.0572545765099477 blind=-2.0572545765099477 |diff|=0 ok
+  ci_median_hi       tool= 1.4040718363882831 blind= 1.4040718363882831 |diff|=0 ok
+interaction t10 bb q=50 remainder                n=10 mean -0.119829 [-1.310208, +1.219571]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.11982916782928399 blind=-0.11982916782928399 |diff|=0 ok
+  median             tool=-0.40333099280131179 blind=-0.40333099280131179 |diff|=0 ok
+  ci_mean_lo         tool=-1.3102084116448538 blind=-1.3102084116448538 |diff|=0 ok
+  ci_mean_hi         tool= 1.2195706896181371 blind= 1.2195706896181371 |diff|=0 ok
+  ci_median_lo       tool=-1.9508631592587591 blind=-1.9508631592587591 |diff|=0 ok
+  ci_median_hi       tool= 1.4033399598553515 blind= 1.4033399598553515 |diff|=0 ok
+interaction t10 bb q=50 smoothing                n=10 mean +0.034878 [-0.034370, +0.111210]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=6 blind=6 ok
+  n_neg              tool=4 blind=4 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.034878295392560689 blind= 0.034878295392560689 |diff|=0 ok
+  median             tool= 0.029987240833307283 blind= 0.029987240833307283 |diff|=0 ok
+  ci_mean_lo         tool=-0.034369864844045528 blind=-0.034369864844045528 |diff|=0 ok
+  ci_mean_hi         tool= 0.11121049978180896 blind= 0.11121049978180896 |diff|=0 ok
+  ci_median_lo       tool=-0.072100052024083539 blind=-0.072100052024083539 |diff|=0 ok
+  ci_median_hi       tool= 0.10956226916538014 blind= 0.10956226916538014 |diff|=0 ok
+interaction t10 bb q=60 stage2_peak_rel_err_abs  n=10 mean -0.016909 [-0.029850, -0.004212]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.016908544486687629 blind=-0.016908544486687629 |diff|=0 ok
+  median             tool=-0.010985103994318166 blind=-0.010985103994318166 |diff|=0 ok
+  ci_mean_lo         tool=-0.029850076701082542 blind=-0.029850076701082542 |diff|=0 ok
+  ci_mean_hi         tool=-0.0042118239921382899 blind=-0.0042118239921382899 |diff|=0 ok
+  ci_median_lo       tool=-0.041486377292399942 blind=-0.041486377292399942 |diff|=0 ok
+  ci_median_hi       tool= 0.0021230577262583167 blind= 0.0021230577262583167 |diff|=0 ok
+interaction t10 bb q=60 gap                      n=10 mean -0.986332 [-1.741254, -0.245690]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.98633176172344506 blind=-0.98633176172344506 |diff|=0 ok
+  median             tool=-0.64079773300189302 blind=-0.64079773300189302 |diff|=0 ok
+  ci_mean_lo         tool=-1.7412544742298148 blind=-1.7412544742298148 |diff|=0 ok
+  ci_mean_hi         tool=-0.2456897328747337 blind=-0.2456897328747337 |diff|=0 ok
+  ci_median_lo       tool=-2.4200386753899963 blind=-2.4200386753899963 |diff|=0 ok
+  ci_median_hi       tool= 0.12384503403173497 blind= 0.12384503403173497 |diff|=0 ok
+interaction t10 bb q=60 remainder                n=10 mean -1.009381 [-1.756212, -0.274501]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=2 blind=2 ok
+  n_neg              tool=8 blind=8 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-1.0093809367826558 blind=-1.0093809367826558 |diff|=0 ok
+  median             tool=-0.6425441238498415 blind=-0.6425441238498415 |diff|=0 ok
+  ci_mean_lo         tool=-1.7562119162127348 blind=-1.7562119162127348 |diff|=0 ok
+  ci_mean_hi         tool=-0.2745010477692042 blind=-0.2745010477692042 |diff|=0 ok
+  ci_median_lo       tool=-2.4429781426840762 blind=-2.4429781426840762 |diff|=0 ok
+  ci_median_hi       tool= 0.090743284525363066 blind= 0.090743284525363066 |diff|=0 ok
+interaction t10 bb q=60 smoothing                n=10 mean +0.023049 [-0.005345, +0.051881]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=6 blind=6 ok
+  n_neg              tool=4 blind=4 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.023049175059210825 blind= 0.023049175059210825 |diff|=0 ok
+  median             tool= 0.024042698256231176 blind= 0.024042698256231176 |diff|=0 ok
+  ci_mean_lo         tool=-0.0053450636248745373 blind=-0.0053450636248745373 |diff|=0 ok
+  ci_mean_hi         tool= 0.051880700724180842 blind= 0.051880700724180842 |diff|=0 ok
+  ci_median_lo       tool=-0.023243452979215817 blind=-0.023243452979215817 |diff|=0 ok
+  ci_median_hi       tool= 0.075991653672197401 blind= 0.075991653672197401 |diff|=0 ok
+interaction t10 st q=50 stage2_peak_rel_err_abs  n=10 mean -0.011026 [-0.025210, +0.001656]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.011026334793652828 blind=-0.011026334793652828 |diff|=0 ok
+  median             tool=-0.004449182133790178 blind=-0.004449182133790178 |diff|=0 ok
+  ci_mean_lo         tool=-0.02520957190595096 blind=-0.02520957190595096 |diff|=0 ok
+  ci_mean_hi         tool= 0.0016560221237898432 blind= 0.0016560221237898432 |diff|=0 ok
+  ci_median_lo       tool=-0.028637902101670165 blind=-0.028637902101670165 |diff|=0 ok
+  ci_median_hi       tool= 0.0031126321810510116 blind= 0.0031126321810510116 |diff|=0 ok
+interaction t10 st q=50 gap                      n=10 mean -0.771843 [-1.764670, +0.115922]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.77184343555569801 blind=-0.77184343555569801 |diff|=0 ok
+  median             tool=-0.31144274936531247 blind=-0.31144274936531247 |diff|=0 ok
+  ci_mean_lo         tool=-1.7646700334165673 blind=-1.7646700334165673 |diff|=0 ok
+  ci_mean_hi         tool= 0.11592154866528862 blind= 0.11592154866528862 |diff|=0 ok
+  ci_median_lo       tool=-2.0046531471169118 blind=-2.0046531471169118 |diff|=0 ok
+  ci_median_hi       tool= 0.2178842526735707 blind= 0.2178842526735707 |diff|=0 ok
+interaction t10 st q=50 remainder                n=10 mean -0.752552 [-1.753011, +0.137995]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=4 blind=4 ok
+  n_neg              tool=6 blind=6 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.75255200705003633 blind=-0.75255200705003633 |diff|=0 ok
+  median             tool=-0.40201644794127134 blind=-0.40201644794127134 |diff|=0 ok
+  ci_mean_lo         tool=-1.7530106793185518 blind=-1.7530106793185518 |diff|=0 ok
+  ci_mean_hi         tool= 0.1379948739754864 blind= 0.1379948739754864 |diff|=0 ok
+  ci_median_lo       tool=-1.9205024060811979 blind=-1.9205024060811979 |diff|=0 ok
+  ci_median_hi       tool= 0.22239839717730092 blind= 0.22239839717730092 |diff|=0 ok
+interaction t10 st q=50 smoothing                n=10 mean -0.019291 [-0.058728, +0.026175]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.019291428505661658 blind=-0.019291428505661658 |diff|=0 ok
+  median             tool=-0.045774228250387239 blind=-0.045774228250387239 |diff|=0 ok
+  ci_mean_lo         tool=-0.058727751432908482 blind=-0.058727751432908482 |diff|=0 ok
+  ci_mean_hi         tool= 0.026175343254572256 blind= 0.026175343254572256 |diff|=0 ok
+  ci_median_lo       tool=-0.074718271627155275 blind=-0.074718271627155275 |diff|=0 ok
+  ci_median_hi       tool= 0.040312731768239018 blind= 0.040312731768239018 |diff|=0 ok
+interaction t10 st q=60 stage2_peak_rel_err_abs  n=10 mean -0.006770 [-0.027939, +0.015596]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.0067704774783572301 blind=-0.0067704774783572301 |diff|=0 ok
+  median             tool=-0.011710677626010144 blind=-0.011710677626010144 |diff|=0 ok
+  ci_mean_lo         tool=-0.027939156265542105 blind=-0.027939156265542105 |diff|=0 ok
+  ci_mean_hi         tool= 0.015595613765808961 blind= 0.015595613765808961 |diff|=0 ok
+  ci_median_lo       tool=-0.030390969954015933 blind=-0.030390969954015933 |diff|=0 ok
+  ci_median_hi       tool= 0.025178112435563019 blind= 0.025178112435563019 |diff|=0 ok
+interaction t10 st q=60 gap                      n=10 mean -0.394945 [-1.629784, +0.909744]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.39494451957083854 blind=-0.39494451957083854 |diff|=0 ok
+  median             tool=-0.68312286151725843 blind=-0.68312286151725843 |diff|=0 ok
+  ci_mean_lo         tool=-1.6297841154899562 blind=-1.6297841154899562 |diff|=0 ok
+  ci_mean_hi         tool= 0.90974413633885587 blind= 0.90974413633885587 |diff|=0 ok
+  ci_median_lo       tool=-1.7728065806509292 blind=-1.7728065806509292 |diff|=0 ok
+  ci_median_hi       tool= 1.4687232254078424 blind= 1.4687232254078424 |diff|=0 ok
+interaction t10 st q=60 remainder                n=10 mean -0.406833 [-1.635973, +0.906099]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=3 blind=3 ok
+  n_neg              tool=7 blind=7 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool=-0.40683327218645149 blind=-0.40683327218645149 |diff|=0 ok
+  median             tool=-0.70534967233524171 blind=-0.70534967233524171 |diff|=0 ok
+  ci_mean_lo         tool=-1.6359730993027035 blind=-1.6359730993027035 |diff|=0 ok
+  ci_mean_hi         tool= 0.90609885933885159 blind= 0.90609885933885159 |diff|=0 ok
+  ci_median_lo       tool=-1.7764596275597668 blind=-1.7764596275597668 |diff|=0 ok
+  ci_median_hi       tool= 1.4336032401885817 blind= 1.4336032401885817 |diff|=0 ok
+interaction t10 st q=60 smoothing                n=10 mean +0.011889 [-0.013324, +0.035589]
+  n_pairs            tool=10 blind=10 ok
+  n_pos              tool=6 blind=6 ok
+  n_neg              tool=4 blind=4 ok
+  n_zero             tool=0 blind=0 ok
+  mean               tool= 0.011888752615612929 blind= 0.011888752615612929 |diff|=0 ok
+  median             tool= 0.019386516064049175 blind= 0.019386516064049175 |diff|=0 ok
+  ci_mean_lo         tool=-0.013323978161132163 blind=-0.013323978161132163 |diff|=0 ok
+  ci_mean_hi         tool= 0.035588782771036914 blind= 0.035588782771036914 |diff|=0 ok
+  ci_median_lo       tool=-0.025966515145597668 blind=-0.025966515145597668 |diff|=0 ok
+  ci_median_hi       tool= 0.048241322943354703 blind= 0.048241322943354703 |diff|=0 ok
+
+ALL 684 numbers agree with criterion.csv, transmission.csv and interaction.csv to 1e-12 (floats) / exactly (counts, flags, lists)
