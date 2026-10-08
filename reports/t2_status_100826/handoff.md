@@ -7,7 +7,7 @@ Nothing has been sent. The recipient and the channel are not named; this is the 
 需要你为 T=2 做一个决定：求解器 v2.0 已锁定并通过 fresh-seed 确认，之后三轮实验（MS-R1 到 MS-R3）想降低 stage-2 平局点的 peak 偏差，都没有达到预先登记的判据；状态整理在一个自包含的文件夹里。
 
 - 文件夹：https://github.com/GSU-FrankJ/tournament_experiment/tree/t2-status-pack/reports/t2_status_100826
-- 报告（固定版本）：https://github.com/GSU-FrankJ/tournament_experiment/blob/<FULL_SHA>/reports/t2_status_100826/report.md
+- 报告（固定版本）：https://github.com/GSU-FrankJ/tournament_experiment/blob/bbbbf7feba95ada407a4c1b1be4c7e68ff81e4bf/reports/t2_status_100826/report.md
 - 对比视图：https://github.com/GSU-FrankJ/tournament_experiment/compare/ms-r3...t2-status-pack
 
 状态：
@@ -24,7 +24,7 @@ Nothing has been sent. The recipient and the channel are not named; this is the 
 I need a decision from you on T=2: solver v2.0 is locked and passed its fresh-seed confirmation, three later rounds (MS-R1 to MS-R3) tried to lower the stage-2 peak error and none met its criterion, and the state is in one self-contained folder.
 
 - Folder: https://github.com/GSU-FrankJ/tournament_experiment/tree/t2-status-pack/reports/t2_status_100826
-- Report (fixed to one commit): https://github.com/GSU-FrankJ/tournament_experiment/blob/<FULL_SHA>/reports/t2_status_100826/report.md
+- Report (fixed to one commit): https://github.com/GSU-FrankJ/tournament_experiment/blob/bbbbf7feba95ada407a4c1b1be4c7e68ff81e4bf/reports/t2_status_100826/report.md
 - Compare view: https://github.com/GSU-FrankJ/tournament_experiment/compare/ms-r3...t2-status-pack
 
 Status:
