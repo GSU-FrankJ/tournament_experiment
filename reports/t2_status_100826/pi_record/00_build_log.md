@@ -165,3 +165,24 @@ $ git ls-remote origin main ms-r1 ms-r2 ms-r3 (unchanged)
 e8eb9a08041efc6a6021549294edabb65f7dc047	refs/heads/ms-r2
 be4fd2021e5aee52625a994b3566dc18726e0586	refs/heads/ms-r3
 ```
+
+## P5: the PI's reply (2026-10-08)
+
+A new session recorded the PI's reply to the pack delivered at P4, in its own worktree (`.claude/worktrees/t2-status-pack-pi-reply-2ec71b`, branch `t2-status-pack-reply`), without touching `.claude/worktrees/t2-status-pack-0c452c`.
+
+The pack at `e4f93dc8` is accepted as delivered, together with the differences from its prompt that P3/P4 reported:
+- the sign statement corrected to the record (eight runs with a non-negative signed peak error; report sections 7.3 and 11);
+- the trajectory drift as recorded, +1.83, not "about 1.7" (section 7.5);
+- the smoothing-floor range at s = 1 of 2.2-2.7 % once the t10 arms are included (section 10, reference points);
+- the fix of the empty table blocks in report.md (ledger rows S2-1 and S3-53);
+- the extra manifest prefixes TBL-, BG- and T2R:100526report, and the project instruction file stored as evidence/dot-claude/CLAUDE.md.txt;
+- the condensed fact-check ledger (non-OK rows listed with dispositions, OK rows counted per slice);
+- the English handoff text of 209 words.
+
+Handoff (the answers to D7): the PI sends the text of handoff.md personally, outside the repository, to the coworker the PI has chosen. This session sent nothing to anyone — no email, message, issue, pull request, mention or comment — and no name or contact detail of the recipient entered the repository.
+
+Nothing else in the pack changed: report.md, handoff.md, README.md, evidence/, figures/, report_scripts/ and pi_record/01_factcheck.md stay as they were at `e4f93dc8`.
+
+Next step: the coworker's decision.
+
+One commit on branch `t2-status-pack-reply` (from `origin/t2-status-pack` at `e4f93dc8`): "docs: record the PI reply to the T=2 status pack", touching exactly `docs/STATE.md`, this file, and `pi_record/22_pi_reply.md`. Pushed as a fast-forward to `origin/t2-status-pack` (no force); no experiment, training run, analysis or pack rebuild ran in this session.
