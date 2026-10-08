@@ -606,7 +606,8 @@ def workload(pack: Path) -> str:
     rows.append(["v2.0 confirmation (40 runs) [T2R:CF-03]", "`T2R:CF-03`", len(w), "not in table", "-", fmt(w.min(), 0), fmt(np.median(w), 0),
                  fmt(w.max(), 0), fmt(w.sum() / 3600.0, 1), "n/a", "-"])
     return md(["wave", "record", "runs", "workers", "launched", "per-run wall min (s)", "median", "max",
-               "sum of per-run wall (hours)", "sum / workers (hours; derived lower bound of the elapsed time)", "state"], rows)
+               "sum of per-run wall (hours)", "sum / workers (hours; derived lower bound of the elapsed time)", "state"], rows) + \
+        "\n\nNot in this table: the 140 supervised fits and 20 C-R6 runs of MS-R3 (the screen's 140 cells took 831.8 s of wall time with 40 workers [M3-05]), the C-checks runs of the other rounds, and the R2c wave (80 runs; no wall times in this pack)."
 
 
 def gate_counts(pack: Path) -> str:
@@ -710,7 +711,7 @@ FINDINGS = {
     "R2b": "peak-focused starts at share 0.50 meet (a) at both q but violate (b) at q=60; pathwise and censored arms not separated from controls [T2R:RR-04]",
     "R2c": "no arm selected: all four hold (b); none meets (a) at q=60 [T2R:R2C-03]",
     "MS-R1": "samplers meet (a) at q=50 only; the budget control reproduces part of the improvement; the stop rule never fires at rho_2 = 0.05 [M1-01]",
-    "MS-R2": "the noise landing lowers the smoothing part as predicted; the remainder rises and the gap does not follow [M2-01]",
+    "MS-R2": "the noise landing lowers the smoothing part as predicted; the remainder rises and no fall of the gap is detectable [M2-01]",
     "MS-R3": "`relu` lowers the typical tie deficit but 5 runs fail G-A; `t10` shows no detectable change of the mean deficit [M3-01]",
 }
 
@@ -803,8 +804,8 @@ def measures(pack: Path) -> str:
     rows = [
         ["1. `relu` with robustness fixes (leaky ReLU; a mean map without the hard clamp)",
          "[M3-09], [TBL-relutyp], [TBL-relufail], [TBL-reluunits]; the failure readings are [Hypothesis] H3 of [PI-06]",
-         "cannot be estimated from the current evidence: the fixes were never run and the failure rate is not estimable from 2 (q, seed) cases in 40 runs at q=50. "
-         "Recorded for the unfixed `relu_st_s16`: mean \\|peak\\| %s / %s (q=50 / q=60) against %s / %s for `t1_st_s16` [TBL-accuracy-a]. To estimate it one needs "
+         "[Insufficient evidence] cannot be estimated from the current evidence: the fixes were never run and the failure rate is not estimable from 2 (q, seed) cases in 40 runs at q=50. "
+         "Recorded for the unfixed `relu_st_s16` (development seeds, n = 10 per q): mean \\|peak\\| %s / %s (q=50 / q=60) against %s / %s for `t1_st_s16` [TBL-accuracy-a]. To estimate it one needs "
          "fix arms run on more than the ten development seeds, with failure counts (the PI-side proposal: 20 seeds per q)" % (fmt(r50), fmt(r60), fmt(t1_50), fmt(t1_60)),
          "MS-R3: 240 runs, per-run wall 542-721 s, 40 workers, 41.2 h of summed per-run wall [TBL-workload]; then a lock, a re-rehearsal and a fresh-seed confirmation (v2.0 round: 40 runs, 4.0 h summed) [TBL-workload]. Person-time cannot be estimated",
          "ten seeds per cell; one failed run moves a ten-seed mean (+0.0691 in two rows) [M3-09]",
@@ -812,7 +813,7 @@ def measures(pack: Path) -> str:
          "an actor change needs a lock and a fresh-seed confirmation and carries into T=3 (not evaluated)"],
         ["2. Non-actor combination: stratified starts + noise landing (s = 16) + 2800 updates",
          "[M2-09], [M2-10], [M3-10], [TBL-interventions]",
-         "cannot be separated from the budget with the current evidence: `t1_st_s16` (= `NL_st_s16`) has mean \\|peak\\| %s / %s against %s / %s for `parents_A` (1600 updates), "
+         "[Insufficient evidence] cannot be separated from the budget with the current evidence: `t1_st_s16` (= `NL_st_s16`) has mean \\|peak\\| %s / %s against %s / %s for `parents_A` (1600 updates), "
          "but that comparison confounds budget, sampler and landing [M2-02]; at matched budget no interval of the MS-R1 secondary table excludes 0 [M1-10]. To estimate it one needs a control with the same 2800 updates and starts but no landing" % (fmt(t1_50), fmt(t1_60), fmt(pa50), fmt(pa60)),
          "MS-R2: 120 runs, per-run wall 555-711 s, 40 workers, 20.7 h summed [TBL-workload]; a v2.0 confirmation run took 346-373 s [TBL-workload]; lock, re-rehearsal and confirmation as above",
          "intervals of the primary rows contain 0 in 7 of 8 cells; one cell lies above 0 [M2-09]",
@@ -820,25 +821,25 @@ def measures(pack: Path) -> str:
          "a protocol change (the MS runner is not the locked entry point); the landing is T-generic code, not evaluated at T=3"],
         ["3. More near-tie samples (share or batch size) within the tail constraint",
          "[T2R:R2B-02], [T2R:R2C-02], [M1-09], [M1-10]; the estimation-limited reading is [Hypothesis] H1 of [PI-06], test not run",
-         "cannot be estimated for a configuration that respects the tail limit: the arm that meets part (a) at both q (`A_peak50`) breaks part (b) at q=60 (3 runs above the 0.02 tail limit) [T2R:R2B-02]; "
+         "[Insufficient evidence] cannot be estimated for a configuration that respects the tail limit: the arm that meets part (a) at both q (`A_peak50`) breaks part (b) at q=60 (3 runs above the 0.02 tail limit) [T2R:R2B-02]; "
          "R2c arms with shares 0.35 and 0.40 meet (a) at q=50 only [T2R:R2C-02]. MS-R1 estimated that resolving the observed sampler effects at q=50 needs about 27-54 seeds per q "
          "(normal approximation, optimistic) and 89 to more than 1000 at q=60 [M1-02]",
-         "R2c: 80 runs; MS-R1: 120 pilot runs + 20 base runs, per-run wall 503-654 s [TBL-workload]",
-         "the effects seen so far are about the size of the seed spread (seed SD of e_hat_2(0) 0.45-1.56 effort units within an arm) [M2-02]",
+         "R2c: 80 runs (its wall times are not in this pack); MS-R1: 120 pilot runs (per-run wall 503-654 s) + 20 base runs (386-478 s) [TBL-workload]",
+         "ten seeds per cell; no matched-budget interval of the MS-R1 secondary table excludes 0 on \\|peak error\\| [M1-02]",
          "tail mean limit (0.02) binds at q=60 [T2R:R2B-04]",
          "a protocol change (start distribution); the peak-focused start distribution was carried to T=3 as a design input [T2R:100526report]"],
         ["4. Untested levers: the critic (tanh on d/B), the opponent refresh interval (20 updates)",
          "[PI-06] (B9, labelled [Hypothesis], none tested)",
-         "cannot be estimated from the current evidence: no run varied either lever. To estimate it one needs a single-factor wave per lever with matched controls, paired by (q, seed)",
-         "one MS-R2-sized wave (120 runs, 20.7 h summed) per lever as a unit of comparison [TBL-workload]",
-         "unknown", "unknown; the critic is shared by all stages", "a critic change carries into T=3 (not evaluated)"],
+         "[Insufficient evidence] cannot be estimated from the current evidence: no run varied either lever. To estimate it one needs a single-factor wave per lever with matched controls, paired by (q, seed)",
+         "for scale only: MS-R2 was 120 runs and 20.7 h of summed per-run wall; the size of a wave per lever is not determined [TBL-workload]",
+         "unknown", "unknown", "a critic change would also act in every stage of the pipeline, including T=3 (not evaluated)"],
         ["5. A mechanism round (e.g. vary the number of near-tie samples per update with all else fixed, for `t1` and `t10`, and see whether the rounding width F_d falls)",
          "[TBL-fd], [PI-06] (H1, H2; tests not run)",
-         "no accuracy gain is expected by itself (it has scientific value: it would test H1); the gain cannot be estimated",
-         "one wave of an MS-R2/R3 size as a unit of comparison [TBL-workload]",
-         "the F_d values are arm-mean post hoc quantities with large per-run spread [TBL-fd]",
+         "no accuracy gain is expected by itself (it has scientific value: it would test H1) [Hypothesis]; the gain cannot be estimated",
+         "for scale only: an MS-R2/R3-sized wave was 120-240 runs, 20.7-41.2 h of summed per-run wall; the size of this round is not determined [TBL-workload]",
+         "the F_d values are post hoc quantities whose arm-mean and per-run-median versions differ (for example 1.59 and 0.00 in one `relu` cell) [TBL-fd]",
          "none to the locked solver (no adoption)",
-         "none for T=2; the readout would inform T=3 design only"],
+         "none for the locked T=2 solver; the readout would inform the write-up and T=3 design (not evaluated)"],
     ]
     return md(["measure", "evidence", "expected gain (from records only)", "workload in recorded units", "uncertainty",
                "risk to the guard rails", "consequences"], rows)
@@ -855,11 +856,11 @@ def compare(pack: Path) -> str:
              fmt(a50.abs_peak.mean()), fmt(a60.abs_peak.mean()), (a50.abs_peak <= 0.05).sum(), (a60.abs_peak <= 0.05).sum()),
          "the same numbers are the starting point; no MS configuration has a fresh-seed number [M3-01]"],
         ["What the current results support (labels in section 7)", "the solver passes its gates and its fresh-seed confirmation; the tip deficit is characterised (size, sign, exact smoothing part); no tested intervention is admissible",
-         "the same; plus a candidate (`relu`) whose typical run is better and which fails in 2 of 40 (q, seed) cases at q=50 [TBL-relufail]"],
+         "the same; plus a candidate (`relu`) whose typical run is better and which fails in 2 of 10 (q, seed) cases at q=50 [TBL-relufail]"],
         ["What the current results do not support", "any claim that the tip deficit is removable, or that it is harmless for a claim that needs the peak", "any estimate of the gain, the failure rate or the cost of a fix"],
         ["Main risk", "a reader who needs a tighter peak than 0.05 on most runs is not served (5 and 4 of 20 fresh runs within 0.05)",
          "guard-rail regressions (`relu` fails G-A and a stage-1 gate in 5 runs); an adopted actor carries into T=3 untested"],
-        ["Cost in recorded units", "the write-up only", "runs and wall times of comparable waves in [TBL-workload]; person-time cannot be estimated"],
+        ["Cost in recorded units", "no runs; person-time cannot be estimated", "runs and wall times of comparable waves in [TBL-workload]; person-time cannot be estimated"],
         ["What the coworker is asked for", "(i) close", "(i) continue; (ii) the measure to start with, and the target (metric, value, seed set)"],
     ]
     return md(["", "Path A: close now", "Path B: continue improving accuracy"], rows)
@@ -869,7 +870,7 @@ def compare(pack: Path) -> str:
 
 GOALS_MD = "| goal (Appendix A) | implemented | tested | outcome |\n|---|---|---|---|\n| Restore the stop rule: development DP-BR (threshold or budget) + stopping + targeted polishing | yes, in the MS runner (MS-R1), behind keys [M1-01] | MS-R1 pilot, 100 rule-arm runs at rho_2 = 0.05 [TBL-stoprule] | the stop fired in 0 of 100 runs; polishing was reached at q = 60 and rarely at q = 50; the effect of polishing is not separated from the sampler's [M1-01][M1-02] |\n| Verifier-guided prioritised state sampling with global/tail coverage kept (peak + tail constrained stratified sampling, lambda_P, lambda_M, lambda_T) | yes, scheme `stratified_priority`; lambda_T fixed at the bin-balanced tail share [PI-01] | MS-R1 (four sampler arms), MS-R2 and MS-R3 (stratified arms) | sampler arms meet the criterion's part (a) at q = 50 only; the budget control alone reproduces 40-55% of their q = 50 improvement and 52-112% of their q = 60 improvement; the tail mean stayed below its 0.02 limit in every run [M1-01][TBL-gates] |\n| Per-stage stop rule (Delta <= eps for M checks: freeze; broad residual: continue global training; localised: targeted polishing) | yes, T-generic code (T = 2 and 3 in tests) [PI-01] | T=2 only in the pilot; the T=3 smoke tests show that the pipeline runs, not how it trains [M3-02] | as the first row; nothing at T=3 was evaluated |\n| Address the systematic bias in the report (the stage-2 tip deficit) | the noise landing (MS-R2) and the actor variants (MS-R3) are the two mechanism tests the PI's readings led to [PI-03][PI-04] | MS-R2 (120 runs), MS-R3 (240 runs) | not solved: no row of either primary criterion is met [M2-01][M3-01] |"
 
-ISSUES_MD = "| # | issue | label | what is known | what would resolve it |\n|---|---|---|---|---|\n| U1 | The mechanism of the remainder (the part of the tip gap that the policy noise does not explain) | [Hypothesis] (H1: estimation-limited for tanh actors) | the remainder rose when the noise fell (MS-R2) [M2-01]; the rounding width F_d is similar for `t1` and `t10` and at s = 1 and 16 (post hoc) [TBL-fd]; the screen and RL disagree for `t10` [TBL-rlscreen] | vary the near-tie samples per update (batch or share) with all else fixed, for `t1` and `t10`, and see whether F_d falls (not run) [PI-06] |\n| U2 | Why `t10` does not transfer from the supervised screen to RL | [Hypothesis] | sharper first-layer units are present in the RL actors [TBL-t10]; nothing in MS-R3 separates optimisation, noise and other explanations [M3-02] | the U1 test, and a `t10` arm at a different near-tie share (not run) |\n| U3 | Whether `relu` forms the cusp from its two well-sampled side slopes | [Hypothesis] (H2) | `relu`'s typical run is better [TBL-relutyp] | `relu`'s response to the near-tie share should be weaker than the tanh actors' (not run) [PI-06] |\n| U4 | The mechanism of the two `relu` failure modes | [Hypothesis] (H3: hard mean clamp for the collapse, dead units for the dead region) | five failing runs from two cases; 14-28 of 64 first-layer units are never active in good and failed runs alike [TBL-reluunits] | a `relu` run with leaky ReLU and a mean map without a hard clamp, on more seeds (not run) |\n| U5 | `relu`'s failure rate | [Insufficient evidence] | 2 (q, seed) cases among 40 runs at q = 50, 0 of 40 at q = 60 [TBL-relufail] | more seeds per q (the PI-side proposal: 20 per q) [PI-06] |\n| U6 | Fresh-seed performance of any MS configuration | [Insufficient evidence] | none was confirmed [M3-01] | a lock, a re-rehearsal and a fresh-seed confirmation, as in the v2.0 round [T2R:RR-03] |\n| U7 | Whether the critic's rounding of the value kink at d = 0 matters | [Hypothesis] (untested lever) | the critic is unchanged (tanh on d/B); under a tent-shaped policy the value function has a kink at d = 0 from the effort cost [PI-06] | a single-factor critic arm with a matched control (not run) |\n| U8 | Whether the opponent refresh interval (20 updates) matters | [Hypothesis] (untested lever) | no run varied it [PI-06] | a single-factor arm with a matched control (not run) |\n| U9 | Another stop metric or threshold; polishing alone; budgets beyond 2800 updates | [Insufficient evidence] | section 8 items 6-8 | arms with another rho, a sampler without polishing, a longer budget (not run) |\n| U10 | The reason for the sandbox/repository difference at q = 60 | [Insufficient evidence] | section 8 item 11 | a repeat of the screen's `t1` bin-balanced cell with the sandbox's seeds, if the difference matters (not run) |\n| U11 | Whether the tip deficit matters for a claim that needs the peak | [Insufficient evidence] | the gates are met with the deficit present; the peak is reported, not gated [T2R:PL-02] | the coworker's requirement on the peak (section 10) |\n| U12 | Anything at T=3 (the actor, the sampler, the landing carry over) | [Insufficient evidence] | not evaluated [M3-02] | a T=3 experiment, outside this report |"
+ISSUES_MD = "| # | issue | label | what is known | what would resolve it |\n|---|---|---|---|---|\n| U1 | The mechanism of the remainder (the part of the tip gap that the policy noise does not explain) | [Insufficient evidence] for the mechanism; the candidate reading is [Hypothesis] H1 (estimation-limited for tanh actors) | the remainder rose when the noise fell (MS-R2) [M2-01]; the rounding width F_d is similar for `t1` and `t10` and at s = 1 and 16 (post hoc) [TBL-fd]; the screen and RL disagree for `t10` [TBL-rlscreen] | vary the near-tie samples per update (batch or share) with all else fixed, for `t1` and `t10`, and see whether F_d falls (not run) [PI-06] |\n| U2 | Why `t10` does not transfer from the supervised screen to RL | [Hypothesis] | sharper first-layer units are present in the RL actors [TBL-t10]; nothing in MS-R3 separates optimisation, noise and other explanations [M3-02] | the U1 test, and a `t10` arm at a different near-tie share (not run) |\n| U3 | Whether `relu` forms the cusp from its two well-sampled side slopes | [Hypothesis] (H2) | `relu`'s typical run is better [TBL-relutyp] | `relu`'s response to the near-tie share should be weaker than the tanh actors' (not run) [PI-06] |\n| U4 | The mechanism of the two `relu` failure modes | [Hypothesis] (H3: hard mean clamp for the collapse, dead units for the dead region) | five failing runs from two cases; 14-28 of 64 first-layer units are never active in good and failed runs alike [TBL-reluunits] | a `relu` run with leaky ReLU and a mean map without a hard clamp, on more seeds (not run) |\n| U5 | `relu`'s failure rate | [Insufficient evidence] | 2 (q, seed) cases among 40 runs at q = 50, 0 of 40 at q = 60 [TBL-relufail] | more seeds per q (the PI-side proposal: 20 per q) [PI-06] |\n| U6 | Fresh-seed performance of any MS configuration | [Insufficient evidence] | none was confirmed [M3-01] | a lock, a re-rehearsal and a fresh-seed confirmation, as in the v2.0 round [T2R:RR-03] |\n| U7 | Whether the critic's rounding of the value kink at d = 0 matters | [Hypothesis] (untested lever) | the critic is unchanged (tanh on d/B); under a tent-shaped policy the value function has a kink at d = 0 from the effort cost [PI-06] | a single-factor critic arm with a matched control (not run) |\n| U8 | Whether the opponent refresh interval (20 updates) matters | [Hypothesis] (untested lever) | no run varied it [PI-06] | a single-factor arm with a matched control (not run) |\n| U9 | Another stop metric or threshold; polishing alone; budgets beyond 2800 updates | [Insufficient evidence] | section 8 items 6-8 | arms with another rho, a sampler without polishing, a longer budget (not run) |\n| U10 | The reason for the sandbox/repository difference at q = 60 | [Insufficient evidence] | section 8 item 11 | a repeat of the screen's `t1` bin-balanced cell with the sandbox's seeds, if the difference matters (not run) |\n| U11 | Whether the tip deficit matters for a claim that needs the peak | [Insufficient evidence] | the gates are met with the deficit present; the peak is reported, not gated [T2R:PL-02] | the coworker's requirement on the peak (section 10) |\n| U12 | Anything at T=3 (the actor, the sampler, the landing carry over) | [Insufficient evidence] | not evaluated [M3-02] | a T=3 experiment, outside this report |"
 
 
 def goals(pack: Path) -> str:
@@ -879,7 +880,12 @@ def goals(pack: Path) -> str:
 
 def issues(pack: Path) -> str:
     """Section 9: unresolved issues with label, what is known and what would resolve each (text with citations)."""
-    return ISSUES_MD
+    extra = ("| U13 | The history of the PI's readings of the tip deficit | [Verified, descriptive] for what each test found; the readings themselves are [Hypothesis] | "
+             "after MS-R1 the PI read the deficit as a policy-noise floor; MS-R2 found that the tie effort did not follow the lower noise and the reading was withdrawn [M2-01][PI-04]. "
+             "Before MS-R3 the PI read it as the actor's resolution at the kink; it holds for the supervised fit (premise check passed) [TBL-premise], but is not sufficient in RL: "
+             "`t10` does not transfer [TBL-t10], the RL median gap is 2.1-59 times the screen's deficit in 11 of 12 cells [TBL-rlscreen], and `relu`'s typical run improves with failures [TBL-relufail] | "
+             "the tests of H1 to H3 above (not run) |")
+    return ISSUES_MD + "\n" + extra
 
 
 # ------------------------------------------------------------------ registry
@@ -932,14 +938,15 @@ def render_all(pack: Path) -> List[Tuple[str, str, str, str]]:
 
 
 def inject(path: Path, pack: Path, verify: bool) -> int:
+    """Rewrite (or, with verify, only compare) every marked block. An empty block counts as a difference."""
     text = path.read_text()
     bad = 0
     for name, (tid, title, fn, inputs) in BLOCKS.items():
-        pat = re.compile(r"(<!-- TBL:%s -->\n)(.*?)(\n<!-- /TBL:%s -->)" % (re.escape(name), re.escape(name)), re.S)
+        pat = re.compile(r"(<!-- TBL:%s -->\n)(.*?)(<!-- /TBL:%s -->)" % (re.escape(name), re.escape(name)), re.S)
         m = pat.search(text)
         if not m:
             continue
-        new = fn(pack)
+        new = fn(pack) + "\n"
         if m.group(2) != new:
             bad += 1
             if verify:

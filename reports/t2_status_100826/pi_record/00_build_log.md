@@ -126,3 +126,25 @@ $ du -sh reports/t2_status_100826/evidence reports/t2_status_100826/figures
 ```
 
 Selection rule used: every tracked file smaller than 1 MiB that the report cites is copied under its original path; no cited file reached 1 MiB, so no `referenced (tracked, large)` row exists. Files not copied on purpose: run logs (`results/ms_r3/logs/*.log`, D8), weight exports, freeze arrays, per-run directories. Items of the 100526 pack are cited in place (status `cited in t2_refine_100526`); each was verified against the SHA-256 of that pack's manifest at build time. Extensions to the prompt's ID prefixes: `TBL-<name>` rows in the manifest for the tables produced by `tables.py` (status `generated (table text)`, SHA-256 of the rendered text), and `T2R:100526report` for the 100526 folder report.
+
+## P2. Report, index, handoff
+
+Written to D4/D6/D7; tables produced by `tables.py` and injected between markers; two figures by `figures.py`. Commits: `a279bb93` (pack extension), `44c9344f` (report, README, handoff, checkers), `5b67f487` (STATE pointer).
+
+## P3. Checks and independent fact-check
+
+Five read-only agents (slices: sections 0-6; 7.1-7.4; 7.5-7.7; 8-11 and coverage; Appendix B of the prompt against the records) ran on commit `5b67f487`. Their findings and the dispositions are in `01_factcheck.md`. One defect found by two of them: the table blocks of report.md were empty because the injector skipped empty blocks (so `tables.py --verify` and `check_numbers.py` had passed vacuously); fixed, and an empty block is now a difference.
+
+```
+$ tables.py --verify report.md
+tables --verify: PASS
+$ check_numbers.py
+check_numbers: PASS (116 numeric sentences checked, 0 without a citation)
+$ build_pack.py --check
+build_pack --check: PASS (0 differences)
+$ check_links.py
+check_links: PASS (21 relative links checked)
+$ sha256sum -c (evidence, figures)
+0
+0
+```
