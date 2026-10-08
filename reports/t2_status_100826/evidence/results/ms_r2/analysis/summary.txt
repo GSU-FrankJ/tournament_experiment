@@ -1,0 +1,40 @@
+MS-R2 analysis (prompt D4, D5, section 3.3)
+command: tools/ms/r2_analysis.py --pilot-root results/ms_r2/pilot --ms-r1-pilot-root results/ms_r1/pilot --parents-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A --rehearsal-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0 --calibration-root results/ms_r1/calibration --out results/ms_r2/analysis
+independent check: python tools/ms/r2_blind_criterion.py --analysis-dir <the --out directory>
+roots: MS-R2 pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot | MS-R1 pilot=/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot | parents_A=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A | rehearsal_v2_0=/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0
+bootstrap: 10000 resamples, numpy.random.default_rng(20261007), one fresh generator per (q, statistic)
+
+== PRE-REGISTERED CRITERION: pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it ==
+primary metric stage2_peak_rel_err_abs of the frozen terminal-stage candidate; (a) CI of the mean paired difference s - (same sampler, s = 1) below 0 at BOTH q; (b) no run passing G-A with its G-N eta part under s = 1 fails it under s
+NL_bb_s4    a50 -0.00563 [-0.02330,+0.00995] n=10/10 not | a60 +0.01136 [+0.00335,+0.01849] n=10/10 not | b: holds | overall: not met
+NL_bb_s16   a50 -0.00087 [-0.01324,+0.01022] n=10/10 not | a60 +0.00715 [-0.00376,+0.01742] n=10/10 not | b: holds | overall: not met
+NL_st_s4    a50 +0.00134 [-0.01297,+0.01591] n=10/10 not | a60 -0.00589 [-0.01762,+0.00532] n=10/10 not | b: holds | overall: not met
+NL_st_s16   a50 -0.00323 [-0.01421,+0.00787] n=10/10 not | a60 -0.00461 [-0.01917,+0.00990] n=10/10 not | b: holds | overall: not met
+NOTE: An interval that contains 0 with 10 seeds does not show that a mechanism has no effect (descriptive: the criterion is the pre-registered statement, nothing else is a test).
+
+== TRANSMISSION (descriptive): mean(d gap) / mean(d smoothing), d = arm - s=1 of the same sampler; 1 = the smoothing change reaches the gap, 0 = the remainder offsets it ==
+NL_bb_s4   q=50 n=10  d gap -0.39405  d smoothing -0.91495  ratio +0.43068 [-0.79278, +1.75275]  (10000 resamples kept)
+NL_bb_s4   q=60 n=10  d gap +0.66290  d smoothing -0.63946  ratio -1.03667 [-1.70352, -0.30016]  (10000 resamples kept)
+NL_bb_s16  q=50 n=10  d gap -0.06079  d smoothing -1.39163  ratio +0.04368 [-0.51947, +0.66178]  (10000 resamples kept)
+NL_bb_s16  q=60 n=10  d gap +0.41714  d smoothing -0.97834  ratio -0.42638 [-1.05180, +0.22163]  (10000 resamples kept)
+NL_st_s4   q=50 n=10  d gap +0.09360  d smoothing -0.89854  ratio -0.10417 [-1.24969, +1.00592]  (10000 resamples kept)
+NL_st_s4   q=60 n=10  d gap -0.34362  d smoothing -0.63979  ratio +0.53708 [-0.48649, +1.60620]  (10000 resamples kept)
+NL_st_s16  q=50 n=10  d gap -0.22607  d smoothing -1.37145  ratio +0.16484 [-0.40470, +0.72992]  (10000 resamples kept)
+NL_st_s16  q=60 n=10  d gap -0.26898  d smoothing -0.97787  ratio +0.27507 [-0.59083, +1.15117]  (10000 resamples kept)
+
+== INTERACTION (descriptive): (NL_st_s - NL_st_s1) - (NL_bb_s - NL_bb_s1) per (q, seed) ==
+s=4  q=50 stage2_peak_rel_err_abs  n=10  mean +0.00697 [-0.01205, +0.02626]  median +0.00333
+s=4  q=50 remainder                n=10  mean +0.47125 [-0.85201, +1.80219]  median +0.17667
+s=4  q=50 smoothing                n=10  mean +0.01640 [-0.03340, +0.06891]  median -0.01907
+s=4  q=60 stage2_peak_rel_err_abs  n=10  mean -0.01725 [-0.03243, -0.00327]  median -0.01071
+s=4  q=60 remainder                n=10  mean -1.00619 [-1.88362, -0.20204]  median -0.61696
+s=4  q=60 smoothing                n=10  mean -0.00033 [-0.02173, +0.02206]  median -0.00652
+s=16 q=50 stage2_peak_rel_err_abs  n=10  mean -0.00236 [-0.01780, +0.01229]  median -0.00381
+s=16 q=50 remainder                n=10  mean -0.18545 [-1.28114, +0.85737]  median -0.30862
+s=16 q=50 smoothing                n=10  mean +0.02018 [-0.04620, +0.09108]  median -0.02844
+s=16 q=60 stage2_peak_rel_err_abs  n=10  mean -0.01176 [-0.03485, +0.01033]  median -0.00480
+s=16 q=60 remainder                n=10  mean -0.68660 [-2.02653, +0.59187]  median -0.28049
+s=16 q=60 smoothing                n=10  mean +0.00047 [-0.03170, +0.03393]  median -0.00938
+
+== RUN STATUS ==
+every planned run of every arm and reference is done

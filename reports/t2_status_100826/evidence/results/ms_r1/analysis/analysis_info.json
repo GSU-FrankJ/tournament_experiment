@@ -1,0 +1,255 @@
+{
+ "a3_descriptive": {
+  "R0": "r_2(0)/s_2 at the node d = 0 of v_t2_d_grid: r = |v_t2_e_hat - v_t2_a_dev|, s = v_t2_a_dev (the definition of utils/ms_residual.stage_diag); |peak| = stage2_peak_rel_err_abs (final tier)",
+  "calib_median_peak_over_R0": {
+   "50": 1.65,
+   "60": 1.45
+  },
+  "linearised_factor": {
+   "50": 1.7,
+   "60": 1.4861111111111112
+  },
+  "stage1_R1_reference": "reports/ms/r1/01_calibration.md section 5: R_1 = 0 exactly is a property of the verifier (a_dev_source = mean_action, Delta_1 = 0); 17 of 60 replayed fires at rho = 0.03 had a firing check with R_1 = 0",
+  "strata": "near |d| < 20, tail |d| >= 2q, middle between; sides d < 0 / d > 0, the node d = 0 in neither; error = recovery_e2 - recovery_g2 on the recovery grid (801 points at q = 50, 881 at q = 60), max r/s on the verifier grid of the tier",
+  "tables": [
+   "r0.csv",
+   "strata.csv",
+   "strata_summary.csv",
+   "rule.csv (t2_n_global_blocks_total, t2_n_classifications_total, t2_S_near_total, t2_S_mid_total, t2_S_tail_total, t2_n_classifications_with_near_in_S, t2_n_runs_with_near_in_S)",
+   "rule_blocks.csv (n_S_near, n_S_mid, n_S_tail, followed_by)",
+   "classifications.csv",
+   "stage1_R1_runs.csv",
+   "stage1_R1.csv",
+   "per_run.csv (t2_R0_*, t2_peak_over_R0_*, t2_n_classifications, t2_S_*_sum, t2_n_class_with_near_in_S, t1_n_checks_R0, t1_streak_kind, t1_streak_has_R0)"
+  ]
+ },
+ "a3_not_stored_by_design": {
+  "R0_and_strata_of_comparators": "from final_final / final_development.npz (parents_A) and gateA_final / gateA_development.npz (rehearsal_v2_0), which carry v_t2_* and recovery_* like the MS freeze files",
+  "parents_A": [
+   "t1_R_final, t1_R_dev, t1_n_checks_R0, t1_streak_* (stage 1 untrained; NaN)",
+   "t2_n_classifications, t2_S_*_sum (no rule; NaN)"
+  ],
+  "rehearsal_v2_0": [
+   "t1_R_final (the calibration replay carries the development tier only; NaN)",
+   "t1_streak_kind, t1_streak_has_R0 (v2.0 has no stage-1 rule, no firing streak; NaN)",
+   "t1_n_checks_R0 = the stage-1 exports with R_1 = 0 exactly on the development tier of the calibration replay (NaN without --calibration-root)",
+   "t2_n_classifications, t2_S_*_sum (no rule; NaN)"
+  ]
+ },
+ "all_done": true,
+ "arms": [
+  "MS_base",
+  "MS_base2400",
+  "MS_rule",
+  "MS_s25a0",
+  "MS_s25a5",
+  "MS_s35a0",
+  "MS_s35a5"
+ ],
+ "boot_seed": 20261006,
+ "bootstrap_scheme": "fresh numpy.random.default_rng(seed) per (q, statistic); idx = rng.integers(0, n, size=(n_boot, n)); 2.5 / 97.5 percentiles of the resampled mean (or median)",
+ "command": [
+  "tools/ms/r1_analysis.py",
+  "--base-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base",
+  "--pilot-root",
+  "results/ms_r1/pilot",
+  "--parents-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "--rehearsal-root",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0",
+  "--calibration-root",
+  "results/ms_r1/calibration",
+  "--out",
+  "results/ms_r1/analysis"
+ ],
+ "comparators": [
+  "parents_A",
+  "rehearsal_v2_0"
+ ],
+ "criterion": {
+  "a": "ci_mean_hi < 0 of the mean paired difference arm - parents_A at BOTH q",
+  "b": "no run passing G-A (final tier) with the eta part of G-N (|eta_dev - eta_final| <= 0.001) under parents_A fails it under the arm",
+  "note": "pre-registered criterion (descriptive, not a gate); no selection rule and no protocol change follow from it",
+  "primary_metric": "stage2_peak_rel_err_abs"
+ },
+ "figures": {
+  "paired_primary_abs_peak.png": "ok",
+  "paired_primary_vs_MS_base2400.png": "ok",
+  "paired_primary_vs_MS_rule.png": "ok",
+  "paired_signed_peak.png": "ok",
+  "paired_stage1_vs_rehearsal.png": "ok",
+  "peak_error_vs_update.png": "ok",
+  "residual_map_ema_last_check.png": "ok",
+  "residual_map_freeze_development.png": "ok",
+  "residual_map_freeze_final.png": "ok",
+  "start_shares_by_block.png": "ok"
+ },
+ "n_boot": 10000,
+ "not_stored_by_design": {
+  "parents_A": [
+   "smoothed_share_peak_gap_d0 (final_v2.json carries no smoothed_game; NaN)",
+   "D3 columns t2_R_*, t2_Rtail_*, t2_C_*, t2_s_* (no one-step best-response effort stored; NaN)",
+   "every stage-1 column (stage 1 untrained)",
+   "rule record, start shares, clamp counts (NaN)"
+  ],
+  "rehearsal_v2_0": [
+   "D3 columns t*_R_*, t*_C_*, t*_s_* (NaN)",
+   "rule record, start shares, clamp counts (NaN)",
+   "t*_minibatch_steps (not stored in v2_run_summary.json; NaN)",
+   "t*_episodes = updates x episodes_per_update (derived)"
+  ]
+ },
+ "numpy": "2.5.0",
+ "pandas": "3.0.3",
+ "protocol": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/protocols/v2_T2_locked_v2_0.json",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "qs": [
+  50,
+  60
+ ],
+ "roots": {
+  "base": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base",
+  "calibration": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/calibration",
+  "parents": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_refine/parents_A",
+  "pilot": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot",
+  "rehearsal": "/home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/rehearsal_v2_0"
+ },
+ "roots_id": "c764afd35936",
+ "secondary": {
+  "a": "ci_mean_hi < 0 of the mean paired difference arm - MS_base2400 of stage2_peak_rel_err_abs at BOTH q",
+  "arms": [
+   "MS_rule",
+   "MS_s25a0",
+   "MS_s25a5",
+   "MS_s35a0",
+   "MS_s35a5"
+  ],
+  "b": "no run passing G-A (final tier) with the eta part of G-N under MS_base2400 fails it under the arm",
+  "baseline": "MS_base2400",
+  "label": "vs MS_base2400",
+  "note": "SECONDARY, descriptive table (rule arms minus the budget-matched control MS_base2400; parts (a) and (b) against MS_base2400): not the pre-registered criterion, not a gate; no selection rule and no protocol change follow from it",
+  "parts_per_arm": {
+   "MS_rule": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "MS_s25a0": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "MS_s25a5": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   },
+   "MS_s35a0": {
+    "a_met": false,
+    "b_status": "violated",
+    "overall": "not met"
+   },
+   "MS_s35a5": {
+    "a_met": false,
+    "b_status": "holds",
+    "overall": "not met"
+   }
+  },
+  "status": "descriptive (the vs-parents_A primary metric rows are the only pre-registered-criterion rows)",
+  "tables": [
+   "paired_vs_MS_base2400.csv",
+   "criterion_vs_MS_base2400.csv",
+   "paired_seed_level.csv (comparison 'vs MS_base2400')",
+   "figures/paired_primary_vs_MS_base2400.png"
+  ]
+ },
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "status_counts": {
+  "MS_base": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_base2400": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_rule": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_s25a0": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_s25a5": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_s35a0": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "MS_s35a5": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "parents_A": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  },
+  "rehearsal_v2_0": {
+   "done": 20,
+   "failed": 0,
+   "incomplete": 0,
+   "missing": 0,
+   "running": 0
+  }
+ },
+ "thresholds": {
+  "eta": 0.005,
+  "g_f": 0.01,
+  "g_s": 0.05,
+  "n_eta": 0.001,
+  "n_gmax": 0.001,
+  "rmse": 0.05,
+  "s1": 0.1,
+  "tail": 0.02
+ },
+ "tool": "tools/ms/r1_analysis.py"
+}

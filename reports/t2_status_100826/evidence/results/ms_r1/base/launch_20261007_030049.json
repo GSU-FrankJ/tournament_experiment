@@ -1,0 +1,198 @@
+{
+ "wave": "base",
+ "dry_run": false,
+ "argv": [
+  "tools/ms/launch_ms_r1.py",
+  "--wave",
+  "base",
+  "--workers",
+  "20",
+  "--code-commit",
+  "c95a2af4"
+ ],
+ "started": "20261007_030049",
+ "workers": 20,
+ "nproc": 64,
+ "loadavg_at_start": [
+  22.458984375,
+  14.5224609375,
+  13.44873046875
+ ],
+ "disk_free_bytes": 1025877622784,
+ "disk_total_bytes": 5952313540608,
+ "head": "c95a2af471622987464be3d30b2c89accc616226",
+ "code_commit": "c95a2af4",
+ "status_porcelain": [],
+ "code_commit_resolved": "c95a2af471622987464be3d30b2c89accc616226",
+ "diff_stat_code_commit_to_head": "",
+ "params_file": null,
+ "params_sha256": "defaults (D4/D5)",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "2": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 400,
+    "u_cap": 2000,
+    "n_land": 400
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 200,
+    "u_cap": 600,
+    "n_land": 400
+   }
+  }
+ },
+ "n_planned": 20,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10501/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10502/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10503/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10504/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10505/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10506/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10507/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10508/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10509/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10510/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10501/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10502/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10503/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10504/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10505/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10506/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10507/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10508/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10509/MS_base",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10510/MS_base"
+ ],
+ "validation": {
+  "per_arm": {
+   "MS_base": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   }
+  },
+  "n_invalid": 0
+ },
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10508/MS_base",
+   "returncode": 0,
+   "wall_sec": 386.31541275500786
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10506/MS_base",
+   "returncode": 0,
+   "wall_sec": 422.7201603939757
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10504/MS_base",
+   "returncode": 0,
+   "wall_sec": 427.6277161320904
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10503/MS_base",
+   "returncode": 0,
+   "wall_sec": 431.03993501199875
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10505/MS_base",
+   "returncode": 0,
+   "wall_sec": 433.45864935591817
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10505/MS_base",
+   "returncode": 0,
+   "wall_sec": 433.58052425901406
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10504/MS_base",
+   "returncode": 0,
+   "wall_sec": 437.06592133501545
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10502/MS_base",
+   "returncode": 0,
+   "wall_sec": 439.3806277929107
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10510/MS_base",
+   "returncode": 0,
+   "wall_sec": 445.1939657499315
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10506/MS_base",
+   "returncode": 0,
+   "wall_sec": 445.64457987295464
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10510/MS_base",
+   "returncode": 0,
+   "wall_sec": 445.99737216101494
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10501/MS_base",
+   "returncode": 0,
+   "wall_sec": 447.0769021010492
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10507/MS_base",
+   "returncode": 0,
+   "wall_sec": 450.4620962860063
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10503/MS_base",
+   "returncode": 0,
+   "wall_sec": 451.8417544750264
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10509/MS_base",
+   "returncode": 0,
+   "wall_sec": 457.1331457289634
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10509/MS_base",
+   "returncode": 0,
+   "wall_sec": 457.64983117603697
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10502/MS_base",
+   "returncode": 0,
+   "wall_sec": 457.73106992593966
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10507/MS_base",
+   "returncode": 0,
+   "wall_sec": 465.6057379200356
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q50/seed10508/MS_base",
+   "returncode": 0,
+   "wall_sec": 466.95250323496293
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base/q60/seed10501/MS_base",
+   "returncode": 0,
+   "wall_sec": 478.3422133709537
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  44.5791015625,
+  42.84423828125,
+  28.544921875
+ ]
+}

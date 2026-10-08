@@ -1,0 +1,98 @@
+r3_actor_diagnostics: RL-actor diagnostics on existing weight exports (MS-R3 prompt 2.3 (b))
+git HEAD: e8eb9a08041efc6a6021549294edabb65f7dc047
+command: /home/fjiang4/tournament_experiment/.venv/bin/python /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/tools/ms/r3_actor_diagnostics.py --ms-r2-pilot-root /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot --ms-r1-pilot-root /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot --ms-r1-base-root /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base --screen-dir results/ms_r3/supervised_screen --workers 8 --out results/ms_r3/rl_actor_diagnostics
+workers: 8
+roots (runs / exports / terminal-stage exports):
+  ms_r2_pilot: /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r2/pilot  (120 / 16320 / 13440)
+  ms_r1_pilot: /home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot  (120 / 14309 / 11520)
+  ms_r1_base: /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r1-multistage-development-afebf2/results/ms_r1/base  (20 / 1760 / 1280)
+  total: 260 runs, 32389 exports (26240 terminal-stage)
+
+Definitions: w_d = first-layer weights on the d input in units of d / B (x10 stored for
+  variant t10); w_eff = gap / (e2*(0) / (2 q)) in units of d, gap = e2*(0) - e_hat_2(0)
+  (export, variant-aware numpy reload at the stage-2 observation of d = 0; e2*(0) =
+  utils.theory_multistage.g2_two_stage). w_eff is NaN for stage-1 exports (the live actor
+  is then trained on the root game). 'final' = the last terminal-stage export of a run
+  (the terminal freeze); u<target> = the terminal-stage export nearest to and not after
+  that global update (update_used_* in per_arm.csv show which was used).
+
+MS-R2 w_eff at the freeze (final terminal-stage export), over the seeds, units of d:
+  q  arm            n   mean_w_eff  median_w_eff  median_max_abs_w_d
+  50  NL_bb_s1      10       5.654         5.017               1.260
+  50  NL_bb_s4      10       5.091         5.042               1.255
+  50  NL_bb_s16     10       5.568         5.385               1.255
+  50  NL_st_s1      10       4.335         3.810               1.237
+  50  NL_st_s4      10       4.469         4.277               1.231
+  50  NL_st_s16     10       4.012         4.254               1.225
+  60  NL_bb_s1      10       4.809         4.348               1.284
+  60  NL_bb_s4      10       6.173         6.338               1.280
+  60  NL_bb_s16     10       5.667         5.710               1.270
+  60  NL_st_s1      10       5.536         5.261               1.303
+  60  NL_st_s4      10       4.830         4.955               1.298
+  60  NL_st_s16     10       4.983         5.220               1.291
+
+  six-arm mean of the arm means of w_eff at the freeze, next to the PI's preamble figure
+  (gap / tent slope averaged over the six MS-R2 arms, quoted from the round prompt):
+  q   arms   mean w_eff (this tool)   PI preamble
+  50      6                    4.855          4.85
+  60      6                    5.333          5.33
+
+Final terminal-stage export (median over seeds) and the Spearman correlation
+of max |w| with w_eff over the terminal-stage exports (pooled over seeds / median
+within a run); relation.csv also has Pearson:
+  source        arm           q   n  max_abs_w_d    w_eff  pooled_rho  within_rho
+  ms_r2_pilot   NL_bb_s1      50  10       1.260    5.017      -0.199      -0.535
+  ms_r2_pilot   NL_bb_s1      60  10       1.284    4.348      -0.194      -0.504
+  ms_r2_pilot   NL_bb_s4      50  10       1.255    5.042      -0.180      -0.612
+  ms_r2_pilot   NL_bb_s4      60  10       1.280    6.338      -0.172      -0.560
+  ms_r2_pilot   NL_bb_s16     50  10       1.255    5.385      -0.203      -0.564
+  ms_r2_pilot   NL_bb_s16     60  10       1.270    5.710      -0.186      -0.503
+  ms_r2_pilot   NL_st_s1      50  10       1.237    3.810      -0.272      -0.559
+  ms_r2_pilot   NL_st_s1      60  10       1.303    5.261      -0.265      -0.522
+  ms_r2_pilot   NL_st_s4      50  10       1.231    4.277      -0.238      -0.635
+  ms_r2_pilot   NL_st_s4      60  10       1.298    4.955      -0.299      -0.529
+  ms_r2_pilot   NL_st_s16     50  10       1.225    4.254      -0.310      -0.633
+  ms_r2_pilot   NL_st_s16     60  10       1.291    5.220      -0.267      -0.418
+  ms_r1_pilot   MS_base2400   50  10       1.252    4.965      -0.221      -0.583
+  ms_r1_pilot   MS_base2400   60  10       1.263    4.417      -0.162      -0.558
+  ms_r1_pilot   MS_rule       50  10       1.238    4.938      -0.273      -0.624
+  ms_r1_pilot   MS_rule       60  10       1.357    6.508      -0.244      -0.596
+  ms_r1_pilot   MS_s25a0      50  10       1.318    3.966      -0.303      -0.582
+  ms_r1_pilot   MS_s25a0      60  10       1.206    4.820      -0.249      -0.432
+  ms_r1_pilot   MS_s25a5      50  10       1.338    4.160      -0.179      -0.603
+  ms_r1_pilot   MS_s25a5      60  10       1.324    4.697      -0.210      -0.559
+  ms_r1_pilot   MS_s35a0      50  10       1.328    3.616      -0.191      -0.612
+  ms_r1_pilot   MS_s35a0      60  10       1.335    4.774      -0.298      -0.539
+  ms_r1_pilot   MS_s35a5      50  10       1.210    3.054      -0.290      -0.595
+  ms_r1_pilot   MS_s35a5      60  10       1.285    4.895      -0.273      -0.516
+  ms_r1_base    MS_base       50  10       1.220    6.250      -0.356      -0.710
+  ms_r1_base    MS_base       60  10       1.220    5.966      -0.233      -0.701
+
+Share of exports with max |w| <= the screen reference (t1, bin-balanced starts, 56000 steps, median over seeds): q50 1.299, q60 1.163
+  source        arm           q  frac_all  frac_terminal  frac_final
+  ms_r2_pilot   NL_bb_s1      50     0.698          0.719       0.600
+  ms_r2_pilot   NL_bb_s1      60     0.307          0.352       0.100
+  ms_r2_pilot   NL_bb_s4      50     0.698          0.719       0.600
+  ms_r2_pilot   NL_bb_s4      60     0.303          0.346       0.100
+  ms_r2_pilot   NL_bb_s16     50     0.698          0.719       0.600
+  ms_r2_pilot   NL_bb_s16     60     0.304          0.348       0.100
+  ms_r2_pilot   NL_st_s1      50     0.593          0.613       0.500
+  ms_r2_pilot   NL_st_s1      60     0.399          0.420       0.300
+  ms_r2_pilot   NL_st_s4      50     0.592          0.612       0.500
+  ms_r2_pilot   NL_st_s4      60     0.399          0.420       0.300
+  ms_r2_pilot   NL_st_s16     50     0.598          0.619       0.500
+  ms_r2_pilot   NL_st_s16     60     0.399          0.420       0.300
+  ms_r1_pilot   MS_base2400   50     0.711          0.739       0.600
+  ms_r1_pilot   MS_base2400   60     0.328          0.384       0.100
+  ms_r1_pilot   MS_rule       50     0.789          0.830       0.700
+  ms_r1_pilot   MS_rule       60     0.306          0.339       0.200
+  ms_r1_pilot   MS_s25a0      50     0.626          0.650       0.500
+  ms_r1_pilot   MS_s25a0      60     0.518          0.552       0.400
+  ms_r1_pilot   MS_s25a5      50     0.552          0.599       0.400
+  ms_r1_pilot   MS_s25a5      60     0.367          0.406       0.200
+  ms_r1_pilot   MS_s35a0      50     0.595          0.648       0.400
+  ms_r1_pilot   MS_s35a0      60     0.418          0.443       0.300
+  ms_r1_pilot   MS_s35a5      50     0.619          0.640       0.600
+  ms_r1_pilot   MS_s35a5      60     0.404          0.432       0.300
+  ms_r1_base    MS_base       50     0.769          0.795       0.700
+  ms_r1_base    MS_base       60     0.457          0.516       0.300

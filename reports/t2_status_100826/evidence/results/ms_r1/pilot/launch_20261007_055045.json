@@ -1,0 +1,826 @@
+{
+ "wave": "pilot",
+ "dry_run": false,
+ "argv": [
+  "tools/ms/launch_ms_r1.py",
+  "--wave",
+  "pilot",
+  "--params",
+  "reports/ms/r1/prereg_parameters.json",
+  "--workers",
+  "40",
+  "--code-commit",
+  "c95a2af4"
+ ],
+ "started": "20261007_055045",
+ "workers": 40,
+ "nproc": 64,
+ "loadavg_at_start": [
+  11.55810546875,
+  12.11572265625,
+  12.38525390625
+ ],
+ "disk_free_bytes": 1019625193472,
+ "disk_total_bytes": 5952313540608,
+ "head": "f969d55026b59edaaaac34be633b42b447f9af3c",
+ "code_commit": "c95a2af4",
+ "status_porcelain": [],
+ "code_commit_resolved": "c95a2af471622987464be3d30b2c89accc616226",
+ "diff_stat_code_commit_to_head": "docs/STATE.md                                      |   10 +-\n reports/ms/README.md                               |   32 +\n reports/ms/r1/00_housekeeping.md                   |   14 +\n reports/ms/r1/02_preregistration.md                |  107 +-\n reports/ms/r1/03_checks.md                         |   76 +\n reports/ms/r1/pi_record/18_g1_reply.md             |   24 +\n .../r1/report_scripts/base_vs_rehearsal_stage1.py  |   39 +\n reports/ms/r1/report_scripts/base_would_fire.py    |   51 +\n results/ms_r1/base/launch_20261007_030049.json     |  198 ++\n results/ms_r1/base/launch_checks.json              |  782 +++++++\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10501/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10501/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10501/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10501/MS_base/manifest.json |  669 ++++++\n .../q50/seed10501/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10501/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10501/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10501/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10501/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10501/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10501/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10501/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10502/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10502/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10502/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10502/MS_base/manifest.json |  669 ++++++\n .../q50/seed10502/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10502/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10502/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10502/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10502/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10502/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10502/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10502/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10503/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10503/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10503/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10503/MS_base/manifest.json |  669 ++++++\n .../q50/seed10503/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10503/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10503/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10503/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10503/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10503/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10503/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10503/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10504/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10504/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10504/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10504/MS_base/manifest.json |  669 ++++++\n .../q50/seed10504/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10504/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10504/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10504/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10504/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10504/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10504/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10504/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10505/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10505/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10505/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10505/MS_base/manifest.json |  669 ++++++\n .../q50/seed10505/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10505/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10505/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10505/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10505/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10505/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10505/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10505/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10506/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10506/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10506/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10506/MS_base/manifest.json |  669 ++++++\n .../q50/seed10506/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10506/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10506/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10506/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10506/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10506/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10506/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10506/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10507/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10507/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10507/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10507/MS_base/manifest.json |  669 ++++++\n .../q50/seed10507/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10507/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10507/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10507/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10507/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10507/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10507/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10507/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10508/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10508/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10508/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10508/MS_base/manifest.json |  669 ++++++\n .../q50/seed10508/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10508/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10508/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10508/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10508/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10508/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10508/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10508/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10509/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10509/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10509/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10509/MS_base/manifest.json |  669 ++++++\n .../q50/seed10509/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10509/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10509/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10509/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10509/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10509/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10509/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10509/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q50/seed10510/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q50/seed10510/MS_base/gates.json    |  389 ++++\n .../base/q50/seed10510/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q50/seed10510/MS_base/manifest.json |  669 ++++++\n .../q50/seed10510/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 63698 bytes\n .../q50/seed10510/MS_base/ms_checks_stage1.csv     |   25 +\n .../q50/seed10510/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q50/seed10510/MS_base/ms_run_summary.json |   47 +\n .../base/q50/seed10510/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q50/seed10510/MS_base/rule_log.json |  409 ++++\n .../base/q50/seed10510/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q50/seed10510/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10501/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10501/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10501/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10501/MS_base/manifest.json |  669 ++++++\n .../q60/seed10501/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10501/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10501/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10501/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10501/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10501/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10501/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10501/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10502/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10502/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10502/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10502/MS_base/manifest.json |  669 ++++++\n .../q60/seed10502/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10502/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10502/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10502/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10502/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10502/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10502/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10502/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10503/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10503/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10503/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10503/MS_base/manifest.json |  669 ++++++\n .../q60/seed10503/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10503/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10503/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10503/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10503/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10503/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10503/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10503/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10504/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10504/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10504/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10504/MS_base/manifest.json |  669 ++++++\n .../q60/seed10504/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10504/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10504/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10504/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10504/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10504/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10504/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10504/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10505/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10505/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10505/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10505/MS_base/manifest.json |  669 ++++++\n .../q60/seed10505/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10505/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10505/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10505/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10505/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10505/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10505/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10505/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10506/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10506/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10506/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10506/MS_base/manifest.json |  669 ++++++\n .../q60/seed10506/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10506/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10506/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10506/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10506/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10506/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10506/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10506/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10507/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10507/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10507/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10507/MS_base/manifest.json |  669 ++++++\n .../q60/seed10507/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10507/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10507/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10507/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10507/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10507/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10507/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10507/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10508/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10508/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10508/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10508/MS_base/manifest.json |  669 ++++++\n .../q60/seed10508/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10508/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10508/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10508/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10508/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10508/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10508/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10508/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10509/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10509/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10509/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10509/MS_base/manifest.json |  669 ++++++\n .../q60/seed10509/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10509/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10509/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10509/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10509/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10509/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10509/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10509/MS_base/status.json   |   21 +\n .../MS_base/continuation_table_stage1.npz          |  Bin 0 -> 64486 bytes\n .../base/q60/seed10510/MS_base/drift_test.json     |   15 +\n .../ms_r1/base/q60/seed10510/MS_base/gates.json    |  389 ++++\n .../base/q60/seed10510/MS_base/induced_band.json   |   25 +\n .../ms_r1/base/q60/seed10510/MS_base/manifest.json |  669 ++++++\n .../q60/seed10510/MS_base/ms_binmaps_stage2.npz    |  Bin 0 -> 69842 bytes\n .../q60/seed10510/MS_base/ms_checks_stage1.csv     |   25 +\n .../q60/seed10510/MS_base/ms_checks_stage2.csv     |   65 +\n .../base/q60/seed10510/MS_base/ms_run_summary.json |   47 +\n .../base/q60/seed10510/MS_base/ms_updates.csv      | 2201 ++++++++++++++++++++\n .../ms_r1/base/q60/seed10510/MS_base/rule_log.json |  417 ++++\n .../base/q60/seed10510/MS_base/run_config.json     |  328 +++\n .../ms_r1/base/q60/seed10510/MS_base/status.json   |   21 +\n results/ms_r1/base_checks_parents_A.json           |  594 ++++++\n results/ms_r1/base_checks_rehearsal_v2_0.json      |  594 ++++++\n results/ms_r1/base_vs_rehearsal_stage1.csv         |   21 +\n results/ms_r1/base_vs_rehearsal_stage1.txt         |    3 +\n results/ms_r1/base_would_fire.csv                  |   21 +\n results/ms_r1/base_would_fire.txt                  |    2 +\n .../v20_reproduction/launch_20261007_030049.json   |  191 ++\n .../q50/seed10501/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10501/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10501/gates.json      |  299 +++\n .../q50/seed10501/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10501/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10501/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10501/status.json     |   21 +\n .../q50/seed10501/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10501/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10501/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10501/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10502/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10502/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10502/gates.json      |  299 +++\n .../q50/seed10502/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10502/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10502/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10502/status.json     |   21 +\n .../q50/seed10502/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10502/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10502/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10502/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10503/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10503/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10503/gates.json      |  299 +++\n .../q50/seed10503/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10503/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10503/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10503/status.json     |   21 +\n .../q50/seed10503/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10503/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10503/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10503/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10504/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10504/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10504/gates.json      |  299 +++\n .../q50/seed10504/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10504/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10504/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10504/status.json     |   21 +\n .../q50/seed10504/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10504/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10504/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10504/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10505/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10505/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10505/gates.json      |  299 +++\n .../q50/seed10505/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10505/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10505/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10505/status.json     |   21 +\n .../q50/seed10505/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10505/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10505/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10505/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10506/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10506/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10506/gates.json      |  299 +++\n .../q50/seed10506/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10506/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10506/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10506/status.json     |   21 +\n .../q50/seed10506/v2_checkpoints_A.csv             |   18 +\n .../q50/seed10506/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10506/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10506/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10507/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10507/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10507/gates.json      |  299 +++\n .../q50/seed10507/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10507/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10507/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10507/status.json     |   21 +\n .../q50/seed10507/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10507/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10507/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10507/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10508/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10508/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10508/gates.json      |  299 +++\n .../q50/seed10508/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10508/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10508/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10508/status.json     |   21 +\n .../q50/seed10508/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10508/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10508/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10508/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10509/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10509/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10509/gates.json      |  299 +++\n .../q50/seed10509/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10509/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10509/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10509/status.json     |   21 +\n .../q50/seed10509/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10509/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10509/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10509/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q50/seed10510/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q50/seed10510/drift_test.json |    9 +\n .../v20_reproduction/q50/seed10510/gates.json      |  299 +++\n .../q50/seed10510/induced_band.json                |   25 +\n .../v20_reproduction/q50/seed10510/manifest.json   |  568 +++++\n .../v20_reproduction/q50/seed10510/run_config.json |  190 ++\n .../v20_reproduction/q50/seed10510/status.json     |   21 +\n .../q50/seed10510/v2_checkpoints_A.csv             |   17 +\n .../q50/seed10510/v2_checkpoints_B.csv             |   22 +\n .../q50/seed10510/v2_run_summary.json              |   73 +\n .../v20_reproduction/q50/seed10510/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10501/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10501/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10501/gates.json      |  299 +++\n .../q60/seed10501/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10501/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10501/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10501/status.json     |   21 +\n .../q60/seed10501/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10501/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10501/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10501/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10502/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10502/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10502/gates.json      |  299 +++\n .../q60/seed10502/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10502/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10502/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10502/status.json     |   21 +\n .../q60/seed10502/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10502/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10502/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10502/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10503/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10503/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10503/gates.json      |  299 +++\n .../q60/seed10503/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10503/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10503/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10503/status.json     |   21 +\n .../q60/seed10503/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10503/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10503/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10503/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10504/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10504/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10504/gates.json      |  299 +++\n .../q60/seed10504/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10504/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10504/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10504/status.json     |   21 +\n .../q60/seed10504/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10504/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10504/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10504/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10505/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10505/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10505/gates.json      |  299 +++\n .../q60/seed10505/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10505/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10505/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10505/status.json     |   21 +\n .../q60/seed10505/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10505/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10505/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10505/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10506/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10506/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10506/gates.json      |  299 +++\n .../q60/seed10506/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10506/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10506/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10506/status.json     |   21 +\n .../q60/seed10506/v2_checkpoints_A.csv             |   18 +\n .../q60/seed10506/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10506/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10506/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10507/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10507/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10507/gates.json      |  299 +++\n .../q60/seed10507/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10507/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10507/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10507/status.json     |   21 +\n .../q60/seed10507/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10507/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10507/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10507/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10508/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10508/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10508/gates.json      |  299 +++\n .../q60/seed10508/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10508/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10508/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10508/status.json     |   21 +\n .../q60/seed10508/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10508/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10508/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10508/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10509/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10509/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10509/gates.json      |  299 +++\n .../q60/seed10509/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10509/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10509/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10509/status.json     |   21 +\n .../q60/seed10509/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10509/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10509/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10509/v2_updates.csv  | 2201 ++++++++++++++++++++\n .../q60/seed10510/continuation_table.npz           |  Bin 0 -> 64486 bytes\n .../v20_reproduction/q60/seed10510/drift_test.json |    9 +\n .../v20_reproduction/q60/seed10510/gates.json      |  299 +++\n .../q60/seed10510/induced_band.json                |   25 +\n .../v20_reproduction/q60/seed10510/manifest.json   |  568 +++++\n .../v20_reproduction/q60/seed10510/run_config.json |  190 ++\n .../v20_reproduction/q60/seed10510/status.json     |   21 +\n .../q60/seed10510/v2_checkpoints_A.csv             |   17 +\n .../q60/seed10510/v2_checkpoints_B.csv             |   22 +\n .../q60/seed10510/v2_run_summary.json              |   73 +\n .../v20_reproduction/q60/seed10510/v2_updates.csv  | 2201 ++++++++++++++++++++\n results/ms_r1/v20_reproduction_checks.json         | 1932 +++++++++++++++++\n tests/test_ms_analysis.py                          |  572 ++++-\n tests/test_ms_analysis_a3.py                       |  272 +++\n tests/test_ms_cms1.py                              |  158 +-\n tests/test_ms_launcher.py                          |   58 +-\n tools/ms/blind_criterion.py                        |  138 +-\n tools/ms/launch_checks.py                          |   85 +-\n tools/ms/launch_ms_r1.py                           |   16 +-\n tools/ms/ms_configs.py                             |   25 +-\n tools/ms/r1_analysis.py                            |  546 ++++-\n 507 files changed, 158890 insertions(+), 133 deletions(-)",
+ "diff_stat_run_code_to_head": "",
+ "params_file": "reports/ms/r1/prereg_parameters.json",
+ "params_sha256": "0fbfc01857c5abe339ab1926361cd57d6e988da20e754fd6dea3ffa4e076b406",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "2": {
+    "eps": 0.005,
+    "rho": 0.05,
+    "tau": 0.02,
+    "n_block": 400,
+    "u_cap": 2000,
+    "n_land": 400
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 200,
+    "u_cap": 600,
+    "n_land": 400
+   }
+  }
+ },
+ "n_planned": 120,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_base2400",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_rule",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s25a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s25a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s35a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s35a5",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_base2400"
+ ],
+ "validation": {
+  "per_arm": {
+   "MS_rule": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   },
+   "MS_s25a0": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   },
+   "MS_s25a5": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   },
+   "MS_s35a0": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   },
+   "MS_s35a5": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   },
+   "MS_base2400": {
+    "n": 20,
+    "valid": 20,
+    "errors": []
+   }
+  },
+  "n_invalid": 0
+ },
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 504.9607264000224
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_rule",
+   "returncode": 0,
+   "wall_sec": 517.6623131140368
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 520.556004352984
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_rule",
+   "returncode": 0,
+   "wall_sec": 524.5172932499554
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_rule",
+   "returncode": 0,
+   "wall_sec": 525.3309671859024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 530.6737456249539
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 530.7593999300152
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 537.672784787952
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 537.8215088420548
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 538.0691355830058
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 539.9869161610259
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 541.3770527510205
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 549.793584842002
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 550.6005487269722
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 552.1316574920202
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 552.7455919160275
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 552.7686978500569
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 555.2663559960201
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 566.2824632580159
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 570.4018636799883
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_rule",
+   "returncode": 0,
+   "wall_sec": 572.7878679900896
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 578.2716815980384
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 579.6376169420546
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 581.6204063550103
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10502/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 588.143715766957
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 589.1123263109475
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 589.7642412319547
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 590.2762195590185
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 591.9365760780638
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 592.2837524209172
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10505/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 592.9733090579975
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 594.3637385170441
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_rule",
+   "returncode": 0,
+   "wall_sec": 601.2883988609537
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10501/MS_rule",
+   "returncode": 0,
+   "wall_sec": 601.3639140800806
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_rule",
+   "returncode": 0,
+   "wall_sec": 604.4091196949594
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10503/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 607.610396728036
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 615.4819896939443
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 618.9146439270116
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10506/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 620.0406607359182
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10504/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 653.6445560880238
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 505.9918818920851
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_rule",
+   "returncode": 0,
+   "wall_sec": 509.73062446992844
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 534.7757599049946
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10507/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 547.8059289030498
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 543.9627225390868
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_rule",
+   "returncode": 0,
+   "wall_sec": 553.9861040689284
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_rule",
+   "returncode": 0,
+   "wall_sec": 524.5091558480635
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 541.6936123559717
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 544.3913909969851
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 561.7568475980079
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 527.8679920359282
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 550.3915130851092
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 558.3315009159269
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 520.9042957399506
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 558.5719478710089
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 534.2742061149329
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 521.5984546199907
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 544.0106913469499
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10510/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 566.4113828989211
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_rule",
+   "returncode": 0,
+   "wall_sec": 561.3094453240046
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 548.4375125629595
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 587.8900428870693
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 556.7530189729296
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 544.4233067190507
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 535.482462085085
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10508/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 627.7478325630073
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_rule",
+   "returncode": 0,
+   "wall_sec": 534.0066554920049
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 617.1156897400506
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q50/seed10509/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 620.4905475230189
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_rule",
+   "returncode": 0,
+   "wall_sec": 557.5789678680012
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 559.3233299900312
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 578.9942709320458
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 589.310719829984
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10501/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 599.9856954320567
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_rule",
+   "returncode": 0,
+   "wall_sec": 591.2682246610057
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 598.5068628130248
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 573.3558731030207
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10502/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 607.0297529479722
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10503/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 598.6655313089723
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 608.6624855319969
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 524.3553580529988
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 555.4465238240082
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 516.1964952329872
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 513.1418859770056
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 542.5145788539667
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 530.6240036130184
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_rule",
+   "returncode": 0,
+   "wall_sec": 553.1559231170686
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 532.628877294017
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10505/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 562.6433525650064
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 509.9923092300305
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 526.6579948770814
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 537.4540326390415
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_rule",
+   "returncode": 0,
+   "wall_sec": 512.9259452200495
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_rule",
+   "returncode": 0,
+   "wall_sec": 557.5648117270321
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 503.39925256802235
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 550.258184049977
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10504/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 606.2915633409284
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 545.1003779220628
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 543.3666399430949
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 520.788634393015
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 526.551456857007
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10506/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 561.5175537480973
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 505.1086482020328
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 521.243958152947
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_rule",
+   "returncode": 0,
+   "wall_sec": 518.8872399240499
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 530.6371046430431
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 507.28997443499975
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 534.7902519579511
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 541.4499915370252
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 528.0497576009948
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s25a5",
+   "returncode": 0,
+   "wall_sec": 510.8369870999595
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 594.7454725690186
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10509/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 532.3769528809935
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10508/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 562.1929982709698
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_rule",
+   "returncode": 0,
+   "wall_sec": 535.7356376890093
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s35a0",
+   "returncode": 0,
+   "wall_sec": 517.3899643550394
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s35a5",
+   "returncode": 0,
+   "wall_sec": 517.7374358309899
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10507/MS_rule",
+   "returncode": 0,
+   "wall_sec": 609.7354165170109
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_s25a0",
+   "returncode": 0,
+   "wall_sec": 555.2076054760255
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r1/pilot/q60/seed10510/MS_base2400",
+   "returncode": 0,
+   "wall_sec": 508.85711693100166
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  20.73828125,
+  40.83935546875,
+  42.1787109375
+ ]
+}
