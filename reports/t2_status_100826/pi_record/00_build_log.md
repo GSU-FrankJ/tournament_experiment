@@ -148,3 +148,20 @@ $ sha256sum -c (evidence, figures)
 0
 0
 ```
+
+## P4. Push and verification
+
+```
+$ git push origin t2-status-pack   (new branch, no force)
+head: 58d720a3c9e7157ea3b4528313663a220ed5d2c0
+$ git ls-remote origin t2-status-pack
+58d720a3c9e7157ea3b4528313663a220ed5d2c0	refs/heads/t2-status-pack
+$ check_links.py --ref origin/t2-status-pack
+folder files in working tree: 119; missing from origin/t2-status-pack: 0
+check_links: PASS (21 relative links checked)
+$ git ls-remote origin main ms-r1 ms-r2 ms-r3 (unchanged)
+15e5b71a5d87d85c891804f1b36fecb1b277e8ae	refs/heads/main
+71c58904678badd5fdea28e8213567b328f52b5c	refs/heads/ms-r1
+e8eb9a08041efc6a6021549294edabb65f7dc047	refs/heads/ms-r2
+be4fd2021e5aee52625a994b3566dc18726e0586	refs/heads/ms-r3
+```
