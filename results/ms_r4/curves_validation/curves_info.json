@@ -1,0 +1,32 @@
+{
+ "tool": "tools/ms/r4_curves.py",
+ "pilot_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot",
+ "arms": [
+  "t1_st_s16"
+ ],
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10501,
+  10502,
+  10503,
+  10504,
+  10505,
+  10506,
+  10507,
+  10508,
+  10509,
+  10510
+ ],
+ "workers": 20,
+ "c_off": true,
+ "n_runs": 20,
+ "n_ok": 20,
+ "n_points": 2240,
+ "wall_sec": 7.102952423039824,
+ "eval_sec_final_total": 47.158138391561806,
+ "eval_sec_dev_total": 22.620210685767233,
+ "note": "evaluation only: the closed form enters g2_at_0 and the peak / RMSE errors, no run decision"
+}
