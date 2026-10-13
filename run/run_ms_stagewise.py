@@ -44,6 +44,19 @@ MS-R3 optional config keys (absent == the MS-R2 behaviour, bit for bit):
   init_digest          true: ``manifest.json`` records ``init_state_sha256``, the SHA-256 of the initial actor and
                        critic weights (before any update; check C-INIT).
 
+MS-R4 optional config keys (absent == the MS-R3 behaviour, bit for bit):
+  actor_variant        also "lrsm" (LeakyReLU hidden units, slope 0.01, and the smooth unclamped mean map
+                       mu = m + (1 - 2 m) sigmoid(z0), m = mu_clamp; ``BetaActor.variant``).
+  focus_scope          "within_strata": with ``fixed_global_sampler``, ``stratified_priority`` starts and the rule disabled,
+                       the focus of the sampler acts INSIDE the tail / near-tie / middle strata only: the three stratum
+                       masses are exactly lambda_T, lambda_P, lambda_M at every update (``utils.ms_focus``). Before the first
+                       valid check the probabilities are those of alpha = 0.
+  focus_map            "residual_gain" (needs ``focus_scope``): the within-stratum focus is 1/2 the normalised residual map
+                       + 1/2 the normalised map of the per-bin deviation gains of the same development verifier call (no
+                       extra call). Absent: the focus is the normalised residual map alone.
+  With ``focus_scope`` the bin maps ``ms_binmaps_stage{t}.npz`` additionally hold, per check, ``focus_within`` and
+  ``probs_next`` (and with ``focus_map`` also ``gain`` and ``gain_bar``).
+
 Outputs in --out-dir: run_config.json, manifest.json, status.json, ms_checks_stage{t}.csv,
 ms_binmaps_stage{t}.npz, ms_updates.csv, rule_log.json, gates.json, state_end_stage{t}.pt,
 continuation_table_stage{t}.npz (t = T-1 ... 1), freeze_stage{t}_{final,development}.npz, weights/,
@@ -80,7 +93,7 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from agents.ppo_curriculum import PPOConfig  # noqa: E402
+from agents.ppo_curriculum import ACTOR_VARIANTS_R4, PPOConfig  # noqa: E402
 from agents.ppo_curriculum_v2 import CurriculumPPOv2  # noqa: E402
 from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
 from run.ms_rollout import collect_stage_batch  # noqa: E402
@@ -97,6 +110,7 @@ from run.v2_rollout import collect_batch_v2  # noqa: E402
 from utils.dp_br_verifier import (  # noqa: E402
     DEV_CONFIG, FINAL_CONFIG, DomainError, VerifierConfig, concentration_stats)
 from utils.ms_continuation import build_table  # noqa: E402
+from utils.ms_focus import FOCUS_MAPS, FOCUS_SCOPES, within_strata_probs  # noqa: E402
 from utils.ms_noise import tie_noise_report, tie_residual_R0  # noqa: E402
 from utils.ms_residual import StageDiag, invalid_diag, stage_diag  # noqa: E402
 from utils.ms_rule import StageController, StageRule  # noqa: E402
@@ -107,7 +121,8 @@ SCHEMA = "ms_run_config/1"
 REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "record", "protocol_ref",
             "record_sha256", "protocol_gates", "threads_per_process", "pipeline", "start_weights", "rule",
             "clamp_likelihood", "full_state_at")
-OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report", "actor_variant", "init_digest")
+OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report", "actor_variant", "init_digest",
+            "focus_scope", "focus_map")
 CONC_SCHEDULE_KEYS = ("stage", "local_first", "local_last", "scale_first", "scale_last")
 CHECK_NOISE = ("conc_scale", "sigma_0", "e_sigma_0", "g2_0", "smoothing", "remainder", "gap", "R0")
 START_SCHEMES = ("bin_balanced", "stratified_priority")
@@ -215,8 +230,8 @@ def validate_config(cfg: Dict[str, Any]) -> None:
             raise ConfigError("noise_report must be a bool")
         if cfg["noise_report"] and T != 2:
             raise ConfigError("noise_report is defined for T = 2 (the closed-form tie value) only")
-    if "actor_variant" in cfg and cfg["actor_variant"] not in ("relu", "t10"):
-        raise ConfigError("actor_variant, if present, must be 'relu' or 't10' (absent = the locked actor 't1')")
+    if "actor_variant" in cfg and cfg["actor_variant"] not in ("relu", "t10") + ACTOR_VARIANTS_R4:
+        raise ConfigError("actor_variant, if present, must be 'relu', 't10' or 'lrsm' (absent = the locked actor 't1')")
     if "init_digest" in cfg and cfg["init_digest"] is not True:
         raise ConfigError("init_digest, if present, must be true")
     if "fixed_global_sampler" in cfg:
@@ -224,6 +239,19 @@ def validate_config(cfg: Dict[str, Any]) -> None:
             raise ConfigError("fixed_global_sampler, if present, must be true")
         if cfg["rule"]["enabled"] is not False or cfg["start_weights"].get("scheme") != "stratified_priority":
             raise ConfigError("fixed_global_sampler needs rule.enabled = false and stratified_priority starts")
+    # ---- MS-R4 optional keys (absent == the MS-R3 behaviour)
+    if "focus_scope" in cfg:
+        if cfg["focus_scope"] not in FOCUS_SCOPES:
+            raise ConfigError(f"focus_scope, if present, must be one of {FOCUS_SCOPES}")
+        if cfg.get("fixed_global_sampler") is not True or cfg["rule"]["enabled"] is not False \
+                or cfg["start_weights"].get("scheme") != "stratified_priority":
+            raise ConfigError("focus_scope needs fixed_global_sampler = true, rule.enabled = false and "
+                              "stratified_priority starts")
+    if "focus_map" in cfg:
+        if "focus_scope" not in cfg:
+            raise ConfigError("focus_map needs focus_scope")
+        if cfg["focus_map"] not in FOCUS_MAPS:
+            raise ConfigError(f"focus_map, if present, must be one of {FOCUS_MAPS}")
     # ---- start weights
     sw = cfg["start_weights"]
     if not isinstance(sw, dict) or sw.get("scheme") not in START_SCHEMES:
@@ -407,6 +435,8 @@ class MSRun:
         self.rule_cfg = copy.deepcopy(cfg["rule"])
         self.conc_sched = copy.deepcopy(cfg.get("conc_scale_schedule"))
         self.fixed_global = bool(cfg.get("fixed_global_sampler", False))
+        self.focus_scope: Optional[str] = cfg.get("focus_scope")     # MS-R4; None == the MS-R3 sampler
+        self.focus_map: Optional[str] = cfg.get("focus_map")
         self.noise_report = bool(cfg.get("noise_report", False))
         self.stage_rules = {t: self._stage_rule(t) for t in range(1, self.T + 1)}
         # ---- run state
@@ -544,6 +574,9 @@ class MSRun:
         if t < 2 or not self.stratified:
             return None
         sw = self.start_weights
+        if self.focus_scope is not None:     # MS-R4: the focus moves samples inside the strata only
+            return within_strata_probs(self.sampler, t, float(sw["lambda_P"]), self.hw, setting.alpha,
+                                       setting.focus_within)
         return self.sampler.stratified_bin_probs(t, float(sw["lambda_P"]), self.hw, alpha=setting.alpha,
                                                  focus=setting.focus)
 
@@ -552,9 +585,12 @@ class MSRun:
         spec, P, agent = self.spec, self.P, self.agent
         T = self.T
         rule = self.stage_rules[t]
+        within = self.focus_scope is not None and t >= 2
         ctl = StageController(rule, self.lr_linear,
                               None if rule.enabled else self._legacy_lr(t),
-                              legacy_global_sampler=bool(self.fixed_global and t >= 2))
+                              legacy_global_sampler=bool(self.fixed_global and t >= 2),
+                              **({"focus_scope": self.focus_scope, "focus_map": self.focus_map,
+                                  "strata": self.sampler.strata(t, self.hw)} if within else {}))
         n_ep = int(P["episodes_per_update"])
         bin_w = float(P["es_bin_width"])
         table_next = self.tables.get(t) if t < T else None
@@ -578,6 +614,10 @@ class MSRun:
             self.phase_start_hook(t)
         counts = {"episodes": 0, "transitions": 0, "minibatch_steps": 0}
         maps: Dict[str, List[Any]] = {"update": [], "local": [], "rho": [], "rho_bar": [], "probs": []}
+        if within:                       # MS-R4: the focus and the probabilities in force from the next update
+            maps.update({"focus_within": [], "probs_next": []})
+            if self.focus_map:
+                maps.update({"gain": [], "gain_bar": []})
         last: Dict[str, Any] = {}
         local = 0
         probs: Optional[np.ndarray] = None
@@ -592,7 +632,7 @@ class MSRun:
             else:
                 _, beta_fn = self.policy_fns()
                 conc = concentration_stats(beta_fn, {t: dev_grid}, spec.e_range)
-                d = stage_diag(ev.res, spec, t, conc, bin_w)
+                d = stage_diag(ev.res, spec, t, conc, bin_w, with_gain=bool(within and self.focus_map))
             dt = time.perf_counter() - t_v
             self.costs.add("dev_verifier", dt)
             last.update(ev=ev, err=err, dt=dt, diag=d)
@@ -720,6 +760,16 @@ class MSRun:
                     maps["rho"].append(last["diag"].rho_bins.copy())
                     maps["rho_bar"].append(np.full(n_bins_t, np.nan) if ctl.rho_bar is None else ctl.rho_bar.copy())
                     maps["probs"].append(np.full(n_bins_t, np.nan) if p_used is None else p_used.copy())
+                    if within:
+                        fw_ = ctl.focus_within()
+                        maps["focus_within"].append(np.full(n_bins_t, np.nan) if fw_ is None else fw_.copy())
+                        maps["probs_next"].append(np.full(n_bins_t, np.nan) if ctl.finished
+                                                  else self._probs(t, ctl.sampler_setting()))
+                        if self.focus_map:
+                            g_ = last["diag"].gain_bins
+                            maps["gain"].append(g_.copy() if g_.size else np.full(n_bins_t, np.nan))
+                            maps["gain_bar"].append(np.full(n_bins_t, np.nan) if ctl.gain_bar is None
+                                                    else ctl.gain_bar.copy())
                 print(f"[u{self.global_u:>5} s{t} {local:>4}] check {step.check['block_type']} "
                       f"Delta={step.check['Delta']:.5f} R={step.check['R']:.4f} Rt={step.check['R_tail']:.4f} "
                       f"C={step.check['C']:.4f} elig={step.check['eligible']} consec={step.check['consecutive']} "
@@ -732,6 +782,9 @@ class MSRun:
             if prob_changes:   # the sampler probabilities change only at checks: piecewise constant in the update
                 extra = {"probs_first_update": np.array([u for u, _ in prob_changes]),
                          "probs_table": np.array([p_ for _, p_ in prob_changes])}
+            if within:
+                extra.update({k_: np.array(maps[k_]) for k_ in ("focus_within", "probs_next", "gain", "gain_bar")
+                              if k_ in maps})
             np.savez(os.path.join(self.out_dir, f"ms_binmaps_stage{t}.npz"), update=np.array(maps["update"]),
                      local=np.array(maps["local"]), rho=np.array(maps["rho"]),
                      rho_bar=np.array(maps["rho_bar"]), probs=np.array(maps["probs"]), **extra)
@@ -945,6 +998,8 @@ def write_manifest(run: MSRun, cfg: Dict[str, Any], out_dir: str, cmd: str, git:
         "conc_scale_schedule": run.conc_sched, "fixed_global_sampler": run.fixed_global,
         "noise_report": run.noise_report,
         **({"actor_variant": run.actor_variant} if run.actor_variant != "t1" else {}),
+        **({"focus_scope": run.focus_scope} if run.focus_scope is not None else {}),
+        **({"focus_map": run.focus_map} if run.focus_map is not None else {}),
         **({"init_state_sha256": run.init_state_sha256} if run.init_state_sha256 is not None else {}),
         "resolved_config": {"game": {k: getattr(spec, k) for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")},
                             "ppo": run.rec["ppo"], "verifier": run.rec["verifier"]},

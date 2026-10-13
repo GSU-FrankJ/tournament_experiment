@@ -33,10 +33,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 
 import numpy as np
 
+from utils.ms_focus import FOCUS_MAPS, FOCUS_SCOPES, within_stratum_focus
 from utils.ms_residual import StageDiag, ema_update
 
 LrLinear = Callable[[float, float, int, int, int], float]   # (start, end, first, last, local) -> lr
@@ -75,6 +76,7 @@ class SamplerSetting:
     alpha: float
     focus: Optional[np.ndarray]      # non-negative per-bin weights (NaN-free) or None -> p_PM
     followed_type: Optional[str] = None   # landing: the block type it follows
+    focus_within: Optional[np.ndarray] = None   # MS-R4 within-stratum focus f (None: no map yet, or not a within-strata run)
 
 
 def classify_block_end(R: float, rho_bar: Optional[np.ndarray], rho: float, n_nontail: int,
@@ -115,13 +117,32 @@ class StageController:
     """Block / landing / freeze state machine of one stage (see the module docstring)."""
 
     def __init__(self, rule: StageRule, lr_linear: LrLinear,
-                 lr_legacy: Optional[Callable[[int], float]] = None, legacy_global_sampler: bool = False):
+                 lr_legacy: Optional[Callable[[int], float]] = None, legacy_global_sampler: bool = False,
+                 focus_scope: Optional[str] = None, focus_map: Optional[str] = None,
+                 strata: Optional[Mapping[str, np.ndarray]] = None):
         self.rule = rule
         if legacy_global_sampler and rule.enabled:
             raise ValueError("legacy_global_sampler is defined for the legacy (fixed-budget) controller only")
         # MS-R2: the legacy controller draws every start from the sampler of a global block (alpha_global, the focus
         # rho_bar); a constructor argument, not a StageRule field, so that the logged rule parameters of MS-R1 are unchanged
         self.legacy_global_sampler = bool(legacy_global_sampler)
+        # MS-R4 (constructor arguments for the same reason): ``focus_scope = "within_strata"`` moves the focus inside the
+        # strata (``strata``: the ``StartSampler.strata`` masks), with the residual map (``focus_map`` None) or the residual
+        # + deviation-gain map (``focus_map = "residual_gain"``); the gain map is averaged by the same EMA as rho_bar.
+        if focus_scope is not None:
+            if focus_scope not in FOCUS_SCOPES:
+                raise ValueError(f"focus_scope must be one of {FOCUS_SCOPES}; got {focus_scope!r}")
+            if not legacy_global_sampler or rule.enabled:
+                raise ValueError("focus_scope needs the fixed-budget global sampler (legacy controller, "
+                                 "legacy_global_sampler = True)")
+            if strata is None:
+                raise ValueError("focus_scope needs the strata masks")
+        if focus_map is not None and (focus_scope is None or focus_map not in FOCUS_MAPS):
+            raise ValueError(f"focus_map {focus_map!r} needs focus_scope and one of {FOCUS_MAPS}")
+        self.focus_scope = focus_scope
+        self.focus_map = focus_map
+        self._strata = None if strata is None else {k: np.asarray(v, dtype=bool) for k, v in strata.items()}
+        self.gain_bar: Optional[np.ndarray] = None
         self.lr_linear = lr_linear
         self.lr_legacy = lr_legacy
         if rule.enabled:
@@ -211,7 +232,17 @@ class StageController:
                 mask[self._S] = True
                 focus = np.where(mask, rb, 0.0)
             return SamplerSetting("polish", r.alpha_polish, focus)
+        if self.focus_scope is not None:    # MS-R4: the focus acts inside the strata only
+            return SamplerSetting("global", r.alpha_global, rb, focus_within=self.focus_within())
         return SamplerSetting("global", r.alpha_global, rb)
+
+    def focus_within(self) -> Optional[np.ndarray]:
+        """The within-stratum focus ``f`` in force (``utils.ms_focus.within_stratum_focus`` of the current maps), or ``None``
+        before the first valid check or when the controller is not a within-strata one."""
+        if self.focus_scope is None or self.rho_bar is None or self._strata is None:
+            return None
+        return within_stratum_focus(self._strata, self.rho_bar,
+                                    self.gain_bar if self.focus_map == "residual_gain" else None)
 
     def block_label(self) -> Tuple[int, str]:
         """(block id, type) the next update belongs to ("landing" inside the landing window)."""
@@ -249,6 +280,8 @@ class StageController:
             self.n_checks += 1
             if diag.valid and diag.rho_bins.size and np.isfinite(diag.rho_bins).any():
                 self.rho_bar = ema_update(self.rho_bar, diag.rho_bins, r.ema_beta)
+                if self.focus_map == "residual_gain" and diag.gain_bins.size:
+                    self.gain_bar = ema_update(self.gain_bar, diag.gain_bins, r.ema_beta)
             eligible = is_eligible(r, diag)
             self.consec = self.consec + 1 if eligible else 0
             bid, btype = self.block_label()

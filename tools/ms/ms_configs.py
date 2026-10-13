@@ -8,7 +8,8 @@ parameters dict (``DEFAULT_PARAMS`` = the defaults of D4/D5; the pre-registered 
 
 MS-R2 adds the six ``NL_*`` arms (``R2_ARM_TABLE``); MS-R3 adds the twelve ``{t1,relu,t10}_{bb,st}_s{1,16}`` arms
 (``R3_ARM_TABLE``): the settings of an ``NL_*`` arm plus ``init_digest`` and, for the ``relu`` / ``t10`` actors,
-``actor_variant``. The three tables are kept apart.
+``actor_variant``. The three tables are kept apart. MS-R4 keeps its arm tables in ``tools/ms/r4_configs.py`` and builds
+them through the additive ``arm_table`` argument of :func:`build_config` (absent: the lookup of the earlier rounds).
 """
 
 from __future__ import annotations
@@ -33,8 +34,9 @@ DEFAULT_SEEDS = tuple(range(10501, 10511))
 PILOT = "ms_r1"
 PILOT_R2 = "ms_r2"
 PILOT_R3 = "ms_r3"
+PILOT_R4 = "ms_r4"
 #: prefix of the run name (``<prefix>_q<q>_s<seed>_<arm>``) by round tag
-RUN_PREFIX: Dict[str, str] = {PILOT: "msr1", PILOT_R2: "msr2", PILOT_R3: "msr3"}
+RUN_PREFIX: Dict[str, str] = {PILOT: "msr1", PILOT_R2: "msr2", PILOT_R3: "msr3", PILOT_R4: "msr4"}
 
 #: arm -> start-weights settings (D6). lambda_P None = the bin-balanced near-tie share n_near / n_bins.
 ARMS: Dict[str, Dict[str, Any]] = {
@@ -161,7 +163,7 @@ def bin_balanced_near_tie_share(spec: GameSpec, bin_width: float, half_width: fl
 
 def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: str,
                  params: Optional[Dict[str, Any]] = None, protocol_path: Path = PROTOCOL_PATH,
-                 T: int = 2) -> Dict[str, Any]:
+                 T: int = 2, arm_table: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, Any]:
     """The ``ms_run_config/1`` of one (q, seed, arm) (the v2.0 record of ``q`` embedded).
 
     ``T = 2`` is the experiment; ``T = 3`` (tests only) takes the same record with ``game.T = 3`` (the T = 2
@@ -177,16 +179,24 @@ def build_config(proto: Dict[str, Any], q: int, seed: int, arm: str, out_dir: st
         params: Rule / sampler parameters (default :data:`DEFAULT_PARAMS`).
         protocol_path: The protocol file (its SHA-256 is recorded).
         T: Horizon of the game (2 or 3).
+        arm_table: MS-R4: an arm table to resolve ``arm`` from INSTEAD of the lookup in ``ARMS`` / ``R2_ARM_TABLE`` /
+            ``R3_ARM_TABLE`` (``tools/ms/r4_configs.R4_ARM_TABLE``); ``None`` (default) is the lookup of the earlier rounds.
 
     Returns:
         The config dict (not validated; ``run.run_ms_stagewise.validate_config`` does that).
     """
-    if arm not in ARMS and arm not in R2_ARM_TABLE and arm not in R3_ARM_TABLE:
+    if arm_table is not None:
+        if arm not in arm_table:
+            raise KeyError(f"unknown arm {arm!r}; the given arm table has {sorted(arm_table)}")
+    elif arm not in ARMS and arm not in R2_ARM_TABLE and arm not in R3_ARM_TABLE:
         raise KeyError(f"unknown arm {arm!r}; arms are {sorted(ARMS) + sorted(R2_ARM_TABLE) + sorted(R3_ARM_TABLE)}")
     if q not in proto["q_values"]:
         raise KeyError(f"q={q} not in the protocol's q_values {proto['q_values']}")
     prm = copy.deepcopy(DEFAULT_PARAMS if params is None else params)
-    a = ARMS[arm] if arm in ARMS else (R2_ARM_TABLE[arm] if arm in R2_ARM_TABLE else R3_ARM_TABLE[arm])
+    if arm_table is not None:
+        a = arm_table[arm]
+    else:
+        a = ARMS[arm] if arm in ARMS else (R2_ARM_TABLE[arm] if arm in R2_ARM_TABLE else R3_ARM_TABLE[arm])
     rec0 = proto["records"][str(q)]
     rec = copy.deepcopy(rec0)
     pilot_tag = a.get("round", PILOT)
@@ -298,6 +308,6 @@ def parse_actors(text: str) -> Tuple[str, ...]:
 
 __all__ = ["ARMS", "PILOT_ARMS", "R2_ARMS", "R2_ARM_TABLE", "R2_SCALES", "CONTROL_2400_ARM", "DEFAULT_PARAMS", "LEGACY_PIPELINE",
            "LEGACY_PIPELINE_2400", "LEGACY_PIPELINE_NL", "CONC_RAMP_FIRST", "CONC_RAMP_LAST", "PILOT_R2", "PILOT_R3",
-           "RUN_PREFIX", "R3_ACTORS", "R3_ARMS", "R3_ARM_TABLE", "R3_SCALES", "R3_MS_R2_REFERENCE", "r3_arm_parts",
+           "RUN_PREFIX", "PILOT_R4", "R3_ACTORS", "R3_ARMS", "R3_ARM_TABLE", "R3_SCALES", "R3_MS_R2_REFERENCE", "r3_arm_parts",
            "r2_equivalent", "r3_arms_of", "parse_actors", "build_config", "load_protocol",
            "REPORT_NEAR_TIE_HALF_WIDTH", "DEFAULT_QS", "DEFAULT_SEEDS", "sha256_file", "sha256_json"]

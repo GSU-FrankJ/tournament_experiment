@@ -14,6 +14,7 @@ continuation). With ``dw = w_h - w_l``, ``thr = 2 q (T - t + 1)`` and ``s_t = a_
     R_t       = max { r_t(d) / s_t : |d| < thr }                       (non-tail region)
     R_t^tail  = mean { e_hat_t(d) : |d| >= thr } / s_t                 (void when there is no tail bin)
     rho_b     = max { r_t(d) / s_t : d in non-tail bin b }             (per-bin map, nodes by gap_bin_index)
+    g_b       = max { Delta_t(d) / DW : d in non-tail bin b }          (MS-R4 per-bin gain map, same nodes; optional)
 
 The per-bin maps are averaged across checks by :func:`ema_update`.
 """
@@ -47,6 +48,9 @@ class StageDiag:
     n_nodes_nontail: int = 0
     n_nodes_tail: int = 0
     argmax_d: float = float("nan")
+    # MS-R4: per-bin deviation gain map g_b = max { Delta_t(d) / DW : d in non-tail bin b } (same nodes as rho_b); empty
+    # unless ``stage_diag(..., with_gain=True)`` (the CSV scalars never include it)
+    gain_bins: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
     def scalars(self) -> Dict[str, object]:
         """Flat scalar form for the CSV rows."""
@@ -61,7 +65,7 @@ def invalid_diag(stage: int, n_bins: int = 0) -> StageDiag:
 
 
 def stage_diag(res: VerifierResult, spec: GameSpec, stage: int, conc: Optional[Dict[str, object]],
-               bin_width: float = 10.0) -> StageDiag:
+               bin_width: float = 10.0, with_gain: bool = False) -> StageDiag:
     """D3 quantities of the candidate behind ``res`` at ``stage``.
 
     Args:
@@ -71,6 +75,10 @@ def stage_diag(res: VerifierResult, spec: GameSpec, stage: int, conc: Optional[D
         conc: ``concentration_stats`` of the stage-``stage`` development grid (``valid`` and
             ``max_std_norm``), or ``None``.
         bin_width: Exploring-start bin width of D_stage.
+        with_gain: MS-R4: also fill ``gain_bins``, the per-bin maximum of ``Delta_stage(d) / DW`` over the same nodes as
+            ``rho_bins`` (``res.stages[stage].delta``, non-negative by construction). It is computed from the same
+            verifier result: no further verifier call. ``False`` (default): ``gain_bins`` stays empty and nothing else
+            changes.
 
     Returns:
         The :class:`StageDiag`; ``valid`` is False when the verifier result is invalid, the
@@ -99,9 +107,12 @@ def stage_diag(res: VerifierResult, spec: GameSpec, stage: int, conc: Optional[D
     c = float(conc["max_std_norm"]) if conc_ok else float("nan")
     ok = bool(res.valid and conc_ok and np.isfinite(s) and s > 0.0 and np.isfinite(c))
     delta = float(res.full_delta_max[stage]) / float(res.dw)
+    gain_kw: Dict[str, np.ndarray] = {}
     if not (np.isfinite(s) and s > 0.0):
+        if with_gain:
+            gain_kw = {"gain_bins": np.full(n_bins, np.nan)}
         return StageDiag(stage=stage, valid=False, delta_over_dw=delta, s=s, C=c,
-                         rho_bins=np.full(n_bins, np.nan), tail_term=has_tail)
+                         rho_bins=np.full(n_bins, np.nan), tail_term=has_tail, **gain_kw)
     ratio = r / s
     jm = int(np.argmax(np.where(nontail, ratio, -np.inf)))
     big_r = float(ratio[jm])
@@ -113,9 +124,13 @@ def stage_diag(res: VerifierResult, spec: GameSpec, stage: int, conc: Optional[D
         use = nontail & ~tail_bins[idx]
         np.maximum.at(acc, idx[use], ratio[use])
         rho = np.where(np.isfinite(acc), acc, np.nan)
+        if with_gain:       # MS-R4: the deviation gain per bin, from the same verifier result and the same nodes
+            gacc = np.full(nb, -np.inf)
+            np.maximum.at(gacc, idx[use], np.asarray(sr.delta, dtype=float)[use] / float(res.dw))
+            gain_kw = {"gain_bins": np.where(np.isfinite(gacc), gacc, np.nan)}
     return StageDiag(stage=stage, valid=ok, delta_over_dw=delta, s=s, R=big_r, R_tail=r_tail, C=c,
                      tail_term=has_tail, rho_bins=rho, n_nodes_nontail=int(nontail.sum()),
-                     n_nodes_tail=int(tail_nodes.sum()), argmax_d=float(d[jm]))
+                     n_nodes_tail=int(tail_nodes.sum()), argmax_d=float(d[jm]), **gain_kw)
 
 
 def ema_update(prev: Optional[np.ndarray], new: np.ndarray, beta: float) -> np.ndarray:
