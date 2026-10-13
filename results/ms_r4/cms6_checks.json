@@ -1,0 +1,2557 @@
+{
+ "tool": "tools/ms/r4_launch_checks.py",
+ "mode": "cms6",
+ "root": "results/ms_r4/cms6",
+ "ms_r3_pilot_root": "/home/fjiang4/tournament_experiment/.claude/worktrees/p2-gate-ms-base2400-e41857/results/ms_r3/pilot",
+ "code_commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+ "arms": [
+  "t1_st_s16",
+  "relu_st_s16"
+ ],
+ "base": {
+  "tool": "tools/ms/launch_checks.py",
+  "root": "results/ms_r4/cms6",
+  "code_commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+  "n_runs": 40,
+  "n_ok_per_check": {
+   "status": 40,
+   "manifest": 40,
+   "files": 40,
+   "global_rng": 40,
+   "tail_share_coverage": 40
+  },
+  "all_ok": true,
+  "start_share_tests": {
+   "n_tests": 120,
+   "n_flagged": 0,
+   "expected_flagged_under_null": 0.32397552759122294,
+   "note": "a few flags are expected by chance at 3 standard errors; they are not errors by themselves"
+  },
+  "runs": [
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10501/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.8104088150143272,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10501,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10501/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.7712406802570178,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10501,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10502/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.5163993134942325,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10502,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10502/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.23382206323246044,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10502,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10503/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.170900369646244,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10503,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10503/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.4811544174102969,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10503,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10504/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.1158156849845662,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10504,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10504/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.1158156849845662,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10504,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10505/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.3742356956391176,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10505,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10505/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.6269763280635385,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10505,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10506/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0499746408335624,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10506,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10506/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.5846339666832339,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10506,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10507/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0466762331674866,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10507,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10507/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.370902146506081,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10507,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10508/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.29795636083156024,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10508,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10508/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.41401603308361723,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10508,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10509/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.4459921974415526,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10509,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10509/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.6714531331518357,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10509,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10510/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.2501651409516554,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10510,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q50/seed10510/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.8802917155492422,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 50,
+    "seed": 10510,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10501/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.7299353636873005,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10501,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10501/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.7299353636873005,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10501,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10502/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.2488545186015032,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10502,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10502/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.5534371646697449,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10502,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10503/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.8226458706181567,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10503,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10503/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 2.0779076818723277,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10503,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10504/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.1019157327928322,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10504,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10504/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.007464340933335,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10504,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10505/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.8618289487752425,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10505,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10505/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0289987705319492,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10505,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10506/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0292696081882788,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10506,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10506/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0292696081882788,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10506,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10507/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.3273765835960307,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10507,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10507/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.6720485851982578,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10507,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10508/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.7843384607024602,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10508,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10508/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0940675324471705,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10508,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10509/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.966751009764268,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10509,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10509/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 0.966751009764268,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10509,
+    "arm": "relu_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10510/t1_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.705100856657431,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10510,
+    "arm": "t1_st_s16"
+   },
+   {
+    "dir": "results/ms_r4/cms6/q60/seed10510/relu_st_s16",
+    "status": {
+     "state": "done",
+     "exit_code": 0,
+     "ok": true
+    },
+    "manifest": {
+     "commit": "4c654d34722295d53176f0ccc44e692a2f1f33b0",
+     "clean_tree": true,
+     "ok": true
+    },
+    "files": {
+     "ok": true,
+     "missing": []
+    },
+    "global_rng": {
+     "ok": true,
+     "status": "ok",
+     "violations": []
+    },
+    "start_shares": {
+     "n_tests": 3,
+     "n_flagged_abs_z_gt_3": 0,
+     "expected_flagged_under_null": 0.008099388189780574,
+     "max_abs_z": 1.0371987962802403,
+     "flagged": []
+    },
+    "tail_share": {
+     "tail_mass_max_deviation_from_lambda_T": 1.1102230246251565e-16,
+     "coverage_ok": true,
+     "n_tests": 1,
+     "n_flagged_abs_z_gt_3": 0
+    },
+    "q": 60,
+    "seed": 10510,
+    "arm": "relu_st_s16"
+   }
+  ]
+ },
+ "summary": {
+  "C_MS6_pass": 40,
+  "C_MS6_n": 40
+ },
+ "expected": {
+  "C_MS6_n": 40
+ },
+ "all_ok": true,
+ "ignored": {
+  "csv_wall_clock_columns": [
+   "diag_sec",
+   "update_wall_sec",
+   "verifier_sec"
+  ],
+  "csv_label_columns": [
+   "arm",
+   "run"
+  ],
+  "gates_json_paths": [
+   "arm",
+   "run",
+   "commit",
+   "clean_tree",
+   "budget.*.wall_sec",
+   "budget.*.process_cpu_sec",
+   "continuation_tables.*.build_seconds",
+   "continuation_tables.*.meta.build_seconds"
+  ],
+  "files_not_compared": [
+   "run_config.json",
+   "manifest.json",
+   "status.json",
+   "run.log",
+   "rule_log.json",
+   "ms_run_summary.json",
+   "drift_test.json",
+   "induced_band.json",
+   "band_sweep.npz",
+   "state_end_stage1.pt",
+   "state_end_stage2.pt"
+  ]
+ },
+ "C_MS6": [
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10501,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10501,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10502,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10502,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10503,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10503,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10504,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10504,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10505,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10505,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10506,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10506,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10507,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10507,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10508,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10508,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10509,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10509,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 50,
+   "seed": 10510,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 50,
+   "seed": 10510,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10501,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10501,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10502,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10502,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10503,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10503,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10504,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10504,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10505,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10505,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10506,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10506,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10507,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10507,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10508,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10508,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10509,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10509,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "t1_st_s16",
+   "q": 60,
+   "seed": 10510,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 1873,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  },
+  {
+   "arm": "relu_st_s16",
+   "q": 60,
+   "seed": 10510,
+   "weight_exports": true,
+   "train_history": true,
+   "updates_csv": true,
+   "checks_stage1": true,
+   "checks_stage2": true,
+   "freeze_arrays": true,
+   "binmaps_stage2": true,
+   "continuation_table_stage1": true,
+   "gates": true,
+   "ALL": true,
+   "first_difference": null,
+   "compared": {
+    "exports": 136,
+    "arrays": 2009,
+    "update_rows": 3400,
+    "check_rows": 136,
+    "gate_values": 267
+   },
+   "pass": true
+  }
+ ]
+}
