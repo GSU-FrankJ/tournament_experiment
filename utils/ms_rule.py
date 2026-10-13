@@ -27,6 +27,12 @@ Rule (per stage; the defaults of D4 are in :class:`StageRule`):
 
 With ``enabled = False`` (the legacy arm) the controller runs ``fixed_budget`` updates with the LR of
 ``lr_legacy`` and records only the update at which the rule would have fired.
+
+MS-R4 (constructor arguments of :class:`StageController`; absent = the MS-R3 controller bit for bit):
+``focus_scope = "within_strata"`` (legacy controller with ``legacy_global_sampler`` and the ``StartSampler.strata`` masks)
+makes the sampler setting carry the within-stratum focus ``focus_within`` of ``utils.ms_focus`` -- built from ``rho_bar`` and,
+with ``focus_map = "residual_gain"``, from ``gain_bar``, the EMA (same weight) of the per-bin deviation-gain map of the same
+development check. Neither map reads the closed form.
 """
 
 from __future__ import annotations

@@ -72,13 +72,23 @@ def _f(x: Any) -> float:
         return float("nan")
 
 
-def export_paths(run_dir: Path, budget: int, every: int = EXPORT_EVERY) -> List[Tuple[int, Path]]:
-    """``(update, path)`` of the stage-2 exports u<every> ... u<budget>; a missing export is a ``FileNotFoundError``."""
+def export_paths(run_dir: Path, budget: int, every: int = EXPORT_EVERY, strict: bool = True) -> List[Tuple[int, Path]]:
+    """``(update, path)`` of the stage-2 exports u<every> ... u<budget>.
+
+    Args:
+        run_dir: The run directory.
+        budget: Last terminal-stage update.
+        every: Export interval.
+        strict: ``True`` (default): a missing export is a ``FileNotFoundError``; ``False``: the exports that exist (a failed
+            run stops early), the caller reports the gap.
+    """
     out: List[Tuple[int, Path]] = []
     for u in range(every, budget + 1, every):
         p = run_dir / "weights" / f"u{u:05d}.npz"
         if not p.exists():
-            raise FileNotFoundError(str(p))
+            if strict:
+                raise FileNotFoundError(str(p))
+            continue
         out.append((u, p))
     return out
 
@@ -145,7 +155,10 @@ def curve_run(run_dir: Path, arm: str, q: int, seed: int, c_off: bool = True, n_
         recovery_step = float(cfg["record"]["protocol"]["recovery_step"])
         budget = int(cfg["pipeline"]["budgets"]["2"])
         every = int(cfg["record"]["protocol"]["weights_every"])
-        exports = export_paths(run_dir, budget, every)
+        exports = export_paths(run_dir, budget, every, strict=False)       # a failed run stops early: evaluate what exists
+        if not exports:
+            raise FileNotFoundError(f"no stage-2 export under {run_dir / 'weights'}")
+        n_missing = budget // every - len(exports)
         if n_max is not None:
             exports = exports[:n_max]
         online = {int(r["local"]): r for r in csv.DictReader(open(run_dir / "ms_checks_stage2.csv"))} if c_off else {}
@@ -188,7 +201,12 @@ def curve_run(run_dir: Path, arm: str, q: int, seed: int, c_off: bool = True, n_
                         rec["first_mismatch"] = rec["first_mismatch"] or f"local {u} column {col}: online {a!r} offline {b!r}"
         rows.append(row)
     rec.update(n_exports=len(rows), eval_sec_final=sec_f, eval_sec_dev=sec_d)
-    if c_off and rows and n_max is None:
+    if n_missing and n_max is None:
+        rec["status"] = "incomplete"
+        rec["first_mismatch"] = rec["first_mismatch"] or f"{n_missing} of {budget // every} stage-2 exports are missing"
+    if n_missing and n_max is None:
+        rec["ok"] = False
+    elif c_off and rows and n_max is None:
         try:
             g = json.load(open(run_dir / "gates.json"))
             last = rows[-1]

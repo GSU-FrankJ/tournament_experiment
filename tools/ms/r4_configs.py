@@ -31,6 +31,7 @@ import ms_configs as mc  # noqa: E402
 
 ROUND = mc.PILOT_R4                              # "ms_r4"; run prefix "msr4"
 SEEDS = tuple(range(10511, 10531))               # the new development seeds of the pilot wave (wave r4)
+R4_SEEDS = SEEDS                                 # the name the prompt uses (section 2.1)
 SEEDS_CMS6 = tuple(range(10501, 10511))          # the seeds of the reproduction wave (r4_cms6)
 FORBIDDEN_SEEDS = tuple(range(30501, 30521)) + tuple(range(40501, 40521))   # v2.0 confirmation block; reserved block
 QS = (50, 60)
@@ -166,6 +167,6 @@ def arm_dir(root: Path, q: int, seed: int, arm: str) -> Path:
     return Path(root) / f"q{q}" / f"seed{seed}" / arm
 
 
-__all__ = ["ROUND", "SEEDS", "SEEDS_CMS6", "FORBIDDEN_SEEDS", "QS", "E1_ARMS", "E2_ARMS", "ARMS", "CMS6_ARMS", "COMPARATOR",
+__all__ = ["ROUND", "SEEDS", "R4_SEEDS", "SEEDS_CMS6", "FORBIDDEN_SEEDS", "QS", "E1_ARMS", "E2_ARMS", "ARMS", "CMS6_ARMS", "COMPARATOR",
            "R4_E1_ARM_TABLE", "R4_E2_ARM_TABLE", "R4_ARM_TABLE", "experiment_of", "build_config_r4", "config_text",
            "config_sha256", "config_diff", "top_level_diff", "arm_dir"]

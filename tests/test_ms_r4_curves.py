@@ -90,7 +90,15 @@ def test_a_missing_or_unreadable_run_is_reported_not_skipped(wave, tmp_path):
     shutil.copytree(run_dir(wave, "fb_r"), w)
     (w / "weights" / "u00030.npz").unlink()
     rows, rec = CU.curve_run(w, "fb_r", Q, SEED, strict_online=False)
-    assert rec["status"] == "missing" and "u00030" in rec["first_mismatch"] and rows == []
+    # a failed or damaged run: the exports that exist are evaluated, the gap is reported and the run is not ok
+    assert rec["status"] == "incomplete" and "1 of 12 stage-2 exports are missing" in rec["first_mismatch"] and rec["ok"] is False
+    assert [r["update"] for r in rows] == [u for u in range(5, 61, 5) if u != 30]
+    assert CU.export_paths(w, 60, 5, strict=False)[5][0] == 35
+    with pytest.raises(FileNotFoundError, match="u00030"):
+        CU.export_paths(w, 60, 5)
+    shutil.rmtree(w / "weights")
+    rows, rec = CU.curve_run(w, "fb_r", Q, SEED, strict_online=False)
+    assert rows == [] and rec["status"] == "missing" and rec["ok"] is False and "no stage-2 export" in rec["first_mismatch"]
 
 
 def test_a_changed_online_value_or_freeze_record_is_a_mismatch(wave, tmp_path):

@@ -470,7 +470,7 @@ def summary_text(tab: pd.DataFrame, dec: Mapping[str, Any], roots: Mapping[str, 
             lines.append(f"{r.arm} ({r.role}): {r.status}")
         else:
             lines.append(f"{r.arm} q={r.q}: rho = {r.rho:+.4f} 95% [{r.ci95_lo:+.4f}, {r.ci95_hi:+.4f}] 97.5% [{r.ci975_lo:+.4f}, "
-                         f"{r.ci975_hi:+.4f}] (a: {r.a_pass}); gate violations {r.n_gate_violations} (b: {r.b_pass}); Gmax diff "
+                         f"{r.ci975_hi:+.4f}] (a: {r.a_pass}); gate violations {int(r.n_gate_violations)} (b: {r.b_pass}); Gmax diff "
                          f"{r.mean_gmax_diff:+.5f} upper {r.gmax_ci_hi:+.5f} (c: {r.c_pass}); {r.status}")
     lines += ["", "DECISION (order fb_r, then fb_rg): " + dec["text"]]
     return "\n".join(lines) + "\n"
@@ -496,8 +496,12 @@ def run_analysis(pilot_root: Path, curves_root: Path, criteria_path: Path, out: 
     df.insert(0, "roots_id", R1.roots_id({"pilot": str(pilot_root), "curves": str(curves_root)}))
     df.to_csv(out / "per_run.csv", index=False)
     tab = pd.concat([criterion_e2(df, crit), criterion_e2(df, crit, e2["arms"]["descriptive"], "descriptive")], ignore_index=True)
-    tab.to_csv(out / "criterion_e2.csv", index=False)
     dec = decide(tab, crit)
+    # the decision by the order of D6 is the last row of criterion_e2.csv (role "decision_rule"; the decision itself reads the
+    # "decision" rows only)
+    verdict = pd.DataFrame([{"arm": "DECISION", "role": "decision_rule", "q": "both", "met_q": dec["statement_rests_on"] is not None,
+                             "status": dec["text"]}])
+    pd.concat([tab, verdict], ignore_index=True).to_csv(out / "criterion_e2.csv", index=False)
     sec = secondary_table(df, crit, arms[1:])
     sec.to_csv(out / "secondary_e2.csv", index=False)
     tab[tab["role"] == "descriptive"].to_csv(out / "fb_rx_comparison.csv", index=False)

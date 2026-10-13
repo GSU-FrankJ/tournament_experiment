@@ -26,7 +26,7 @@ map, the share of development nodes with a positive pre-activation per hidden un
 
 Outputs under ``--out`` (an existing non-empty directory is refused): ``per_run.csv``, ``criterion_e1.csv``, ``paired_e1.csv``,
 ``paired_seed_level_e1.csv``, ``failure_rates.csv``, ``failures.csv``, ``failure_trajectories.csv``, ``failure_units.csv``,
-``cost_e1.csv``, ``learning_curves_e1.csv``, ``tie_profile_e1.csv``, ``predictions_e1.csv``, ``analysis_info.json``,
+``cost_e1.csv``, ``strata.csv``, ``strata_summary.csv``, ``learning_curves_e1.csv``, ``tie_profile_e1.csv``, ``predictions_e1.csv``, ``analysis_info.json``,
 ``summary.txt``, ``figures/*.png``. Exit code 0 when every planned run is done, 3 otherwise, 2 on an argument error.
 
 Usage:
@@ -512,6 +512,9 @@ def run_analysis(pilot_root: Path, curves_root: Optional[Path], criteria_path: P
     traj.to_csv(out / "failure_trajectories.csv", index=False)
     failure_units_table(fail, pilot_root).to_csv(out / "failure_units.csv", index=False)
     cost_table(df).to_csv(out / "cost_e1.csv", index=False)
+    strata = R1.strata_table(df)                                       # D5: the per-stratum errors at the freeze (both tiers)
+    strata.to_csv(out / "strata.csv", index=False)
+    R1.strata_summary_table(strata).to_csv(out / "strata_summary.csv", index=False)
     preds = predictions_table(crit_tab, paired, rates, crit)
     preds.to_csv(out / "predictions_e1.csv", index=False)
     footer = f"pilot root: {pilot_root}; criteria sha256 {crit_sha[:12]}"

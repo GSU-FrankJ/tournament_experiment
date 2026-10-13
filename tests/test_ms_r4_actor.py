@@ -208,6 +208,33 @@ def test_the_loaders_of_this_round_build_the_lrsm_forward_or_refuse():
         R3D.export_variant(arrays)
 
 
+def test_the_residual_asymmetry_example_refuses_an_lrsm_export(tmp_path, monkeypatch):
+    """The MS-R1 example rebuilds the tanh d / B actor only: an lrsm export is refused before any verifier call."""
+    from test_ms_r3_actor import _write_stored_export
+    _write_stored_export(tmp_path, "lrsm")
+    import residual_asymmetry_example as rae
+    calls: List[Any] = []
+    monkeypatch.setattr(rae, "verify", lambda *a, **k: calls.append((a, k)))
+    monkeypatch.setattr(sys, "argv", ["residual_asymmetry_example.py", "--root-v2", str(tmp_path), "--q", "50", "--seed", "10501"])
+    with pytest.raises(ValueError, match="t1 exports only") as e:
+        rae.main()
+    assert "'lrsm'" in str(e.value) and not calls
+
+
+def test_no_new_tool_imports_a_tools_v2_module():
+    """The loaders of tools/v2 are unchanged and are not used on MS-R4 exports: no tools/ms/r4_*.py (nor utils/ms_focus.py)
+    imports a module of tools/v2 (the comparison helpers reach the tools only through tools/ms/launch_checks, which is
+    unchanged)."""
+    import ast
+    v2 = {p.stem for p in (ROOT / "tools" / "v2").glob("*.py")}
+    assert {"refine_analysis", "diag_seed30510"} <= v2
+    for f in sorted((ROOT / "tools" / "ms").glob("r4_*.py")) + [ROOT / "utils" / "ms_focus.py"]:
+        tree = ast.parse(f.read_text())
+        mods = {n.names[0].name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import)} | \
+               {n.module.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module}
+        assert not (mods & v2), (f.name, sorted(mods & v2))
+
+
 def test_the_curve_tool_refuses_an_export_of_an_unknown_variant():
     import r4_curves
     arrays = _export_arrays(_random_actor("lrsm"))

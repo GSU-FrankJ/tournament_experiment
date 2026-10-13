@@ -501,7 +501,8 @@ def test_end_to_end_e1_analysis_on_genuine_runs(e2e, tmp_path):
     assert set(df["arm"]) == set(rc.E1_ARMS) and (df["status"] == "done").all() and df["gates_all_pass"].dtype == bool
     assert np.isfinite(df["peak_abs"]).all() and np.isfinite(df["wall_total_sec"]).all() and (df["dev_verifier_share_stage2"] < 0.05).all()
     assert (df["actor_variant_cfg"] == ["t1", "relu", "lrsm"]).all()
-    for f in ("criterion_e1.csv", "paired_e1.csv", "failure_rates.csv", "failures.csv", "cost_e1.csv", "learning_curves_e1.csv",
+    for f in ("criterion_e1.csv", "paired_e1.csv", "failure_rates.csv", "failures.csv", "cost_e1.csv", "strata.csv", "strata_summary.csv",
+              "learning_curves_e1.csv",
               "tie_profile_e1.csv", "predictions_e1.csv", "analysis_info.json", "summary.txt"):
         assert (out / f).exists(), f
     for fig in ("peak_abs_by_arm.png", "paired_differences.png", "tie_profile.png", "learning_curves.png"):
@@ -523,7 +524,9 @@ def test_end_to_end_e2_analysis_on_genuine_runs(e2e, tmp_path):
     df = pd.read_csv(out / "per_run.csv")
     assert bool(df["curve_complete"].all()) and np.isfinite(df["A"]).all() and np.isfinite(df["A_dev_online"]).all()
     tab = pd.read_csv(out / "criterion_e2.csv")
-    assert set(tab["arm"]) == {"fb_r", "fb_rg", "fb_rx"} and (tab[tab["q"].astype(str) == "50"]["n_pairs"] == 1).all()
+    assert set(tab["arm"]) == {"fb_r", "fb_rg", "fb_rx", "DECISION"} and (tab[tab["q"].astype(str) == "50"]["n_pairs"].dropna() == 1).all()
+    last = tab.iloc[-1]
+    assert last["arm"] == "DECISION" and last["role"] == "decision_rule" and last["status"] == info["decision"]["text"]
     sw = pd.read_csv(out / "sampling_weights.csv")
     assert set(sw["arm"]) == {"fb_a0", "fb_r", "fb_rg", "fb_rx"} and len(sw) == 4 * 6
     for arm in ("fb_a0", "fb_r", "fb_rg"):
