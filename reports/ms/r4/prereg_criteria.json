@@ -1,0 +1,113 @@
+{
+ "schema": "ms_r4_prereg_criteria/1",
+ "round": "ms_r4",
+ "defined_in": "reports/ms/r4/pi_record/23_ms_r4_prompt.md, D6 (numeric parameters only); written before the launch, read by the analysis tools",
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": {
+  "pilot": [
+   10511,
+   10530
+  ],
+  "reproduction": [
+   10501,
+   10510
+  ],
+  "n_per_q": 20
+ },
+ "bootstrap": {
+  "n_resamples": 10000,
+  "resample": "the 20 seeds of one q with replacement (indices rng.integers(0, n, size=(n_resamples, n)))",
+  "generator": "a fresh numpy.random.default_rng(seed) per (q, statistic), in table order",
+  "interval": "percentile",
+  "seed_e1": 20261013,
+  "seed_e2": 20261014,
+  "pct95": [
+   2.5,
+   97.5
+  ],
+  "pct975": [
+   1.25,
+   98.75
+  ]
+ },
+ "gates": {
+  "names": [
+   "G-A",
+   "G-F",
+   "G-N",
+   "G-S"
+  ],
+  "source": "the pass flags of gates.json as written by the runner (thresholds of protocols/v2_T2_locked_v2_0.json)"
+ },
+ "e1": {
+  "arms": {
+   "candidate": "lrsm_st_s16",
+   "control": "t1_st_s16",
+   "second_control": "relu_st_s16"
+  },
+  "peak_abs_mean_max": 0.04,
+  "peak_diff_ci_upper_below": 0.0,
+  "max_gate_failures": 0,
+  "max_nonzero_exits": 0,
+  "metric": "stage2_peak_rel_err_abs of the frozen terminal stage, final tier"
+ },
+ "e2": {
+  "arms": {
+   "reference": "fb_a0",
+   "x": [
+    "fb_r",
+    "fb_rg"
+   ],
+   "descriptive": [
+    "fb_rx"
+   ]
+  },
+  "decision_order": [
+   "fb_r",
+   "fb_rg"
+  ],
+  "area": {
+   "curve": "final-tier eta_T_over_dw (= eta_2 / DW) evaluated offline on the stage-2 weight exports (tools/ms/r4_curves.py)",
+   "first_update": 25,
+   "last_update": 1600,
+   "step": 25,
+   "n_points": 64,
+   "rule": "trapezoid over the update",
+   "divisor": 1575
+  },
+  "reduction_min": 0.2,
+  "reduction_ci_lower_above": 0.0,
+  "gmax_noninferiority_margin": 0.001,
+  "gmax_metric": "Gmax_full_over_dw of the final tier at the end of stage 1 (metric_values.gmax_final of gates.json)",
+  "late_window": {
+   "first_update": 200,
+   "last_update": 1600,
+   "divisor": 1400
+  },
+  "eta_level": 0.005,
+  "stage1_error_metric": "stage1_rel_err_abs (metric_values.s1 of gates.json)"
+ },
+ "reference_values": {
+  "relu_minus_t1_peak_abs_ms_r3": {
+   "50": [
+    -0.0104,
+    -0.0162,
+    -0.0047
+   ],
+   "60": [
+    -0.0206,
+    -0.0309,
+    -0.0068
+   ],
+   "source": "results/ms_r3/analysis/criterion.csv, row relu_st_s16 (seeds 10501-10510)"
+  },
+  "zero_failure_power": {
+   "n_runs": 40,
+   "cp95_upper": 0.0881,
+   "pass_prob_20_runs_at_rate_0.1": 0.1216
+  }
+ }
+}

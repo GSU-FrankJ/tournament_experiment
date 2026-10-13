@@ -1,0 +1,21 @@
+arm,comparator,q,purpose,keys_that_differ,labels_that_differ
+relu_st_s16,t1_st_s16,50,E1 control relu against control t1,actor_variant,arm;run;record.run;record.output_dir
+relu_st_s16,t1_st_s16,60,E1 control relu against control t1,actor_variant,arm;run;record.run;record.output_dir
+lrsm_st_s16,t1_st_s16,50,E1 candidate against control t1 (the criterion's comparison),actor_variant,arm;run;record.run;record.output_dir
+lrsm_st_s16,t1_st_s16,60,E1 candidate against control t1 (the criterion's comparison),actor_variant,arm;run;record.run;record.output_dir
+lrsm_st_s16,relu_st_s16,50,E1 candidate against control relu (descriptive),actor_variant,arm;run;record.run;record.output_dir
+lrsm_st_s16,relu_st_s16,60,E1 candidate against control relu (descriptive),actor_variant,arm;run;record.run;record.output_dir
+fb_r,fb_a0,50,E2 arm (2) against arm (1),focus_scope;start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_r,fb_a0,60,E2 arm (2) against arm (1),focus_scope;start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_rg,fb_a0,50,E2 arm (3) against arm (1),focus_map;focus_scope;start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_rg,fb_a0,60,E2 arm (3) against arm (1),focus_map;focus_scope;start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_rx,fb_a0,50,E2 descriptive arm against arm (1),start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_rx,fb_a0,60,E2 descriptive arm against arm (1),start_weights.alpha_global,arm;run;record.run;record.output_dir
+fb_rg,fb_r,50,E2 arm (3) against arm (2),focus_map,arm;run;record.run;record.output_dir
+fb_rg,fb_r,60,E2 arm (3) against arm (2),focus_map,arm;run;record.run;record.output_dir
+fb_rx,t1_st_s16,50,"check C-X2: fb_rx against t1_st_s16 (same sampler, different budget / landing)",conc_scale_schedule.local_first;conc_scale_schedule.local_last;conc_scale_schedule.scale_first;conc_scale_schedule.scale_last;conc_scale_schedule.stage;pipeline.budgets.2;pipeline.lr_windows.2[0].first;pipeline.lr_windows.2[0].last,arm;run;record.run;record.output_dir
+fb_rx,t1_st_s16,60,"check C-X2: fb_rx against t1_st_s16 (same sampler, different budget / landing)",conc_scale_schedule.local_first;conc_scale_schedule.local_last;conc_scale_schedule.scale_first;conc_scale_schedule.scale_last;conc_scale_schedule.stage;pipeline.budgets.2;pipeline.lr_windows.2[0].first;pipeline.lr_windows.2[0].last,arm;run;record.run;record.output_dir
+"t1_st_s16 (MS-R4, wave r4_cms6)","t1_st_s16 (MS-R3, same seed)",50,check C-MS6: the control re-run on an MS-R3 seed against MS-R3's own config,pilot;record.run;run,"(all differences listed: round tag, run name)"
+"t1_st_s16 (MS-R4, wave r4_cms6)","t1_st_s16 (MS-R3, same seed)",60,check C-MS6: the control re-run on an MS-R3 seed against MS-R3's own config,pilot;record.run;run,"(all differences listed: round tag, run name)"
+"relu_st_s16 (MS-R4, wave r4_cms6)","relu_st_s16 (MS-R3, same seed)",50,check C-MS6: the control re-run on an MS-R3 seed against MS-R3's own config,pilot;record.run;run,"(all differences listed: round tag, run name)"
+"relu_st_s16 (MS-R4, wave r4_cms6)","relu_st_s16 (MS-R3, same seed)",60,check C-MS6: the control re-run on an MS-R3 seed against MS-R3's own config,pilot;record.run;run,"(all differences listed: round tag, run name)"
