@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -38,7 +37,7 @@ R4_COLS = (["experiment", "peak_abs", "peak_signed", "gate_G_A", "gate_G_F", "ga
             "tie_at_lower_bound", "tie_at_upper_bound", "tie_dist_lower", "tie_dist_upper", "wall_total_sec",
             "wall_stage2_sec", "wall_stage1_sec", "cpu_stage2_sec", "stage2_train_rollout_sec", "stage2_train_update_sec",
             "stage2_dev_verifier_sec", "stage1_train_rollout_sec", "stage1_train_update_sec", "stage1_dev_verifier_sec",
-            "dev_verifier_share_stage2", "n_checks_stage2", "actor_variant_cfg", "focus_scope", "focus_map"])
+            "dev_verifier_share_stage2", "n_updates_stage2", "actor_variant_cfg", "focus_scope", "focus_map"])
 STR_R4 = {"experiment", "actor_variant_cfg", "focus_scope", "focus_map"}
 
 
@@ -192,7 +191,7 @@ def per_run_row(d: Path, arm: str, q: int, seed: int, th: R1.Thresholds, proto: 
     r["tie_at_lower_bound"] = bool(np.isfinite(e0) and r["tie_dist_lower"] <= TIE_BOUND_TOL)
     r["tie_at_upper_bound"] = bool(np.isfinite(e0) and r["tie_dist_upper"] <= TIE_BOUND_TOL)
     r.update(cost_columns(d))
-    r["n_checks_stage2"] = R1._f(((gates.get("rule") or {}).get("2") or {}).get("total_updates"))
+    r["n_updates_stage2"] = R1._f(((gates.get("rule") or {}).get("2") or {}).get("total_updates"))   # updates, not checks (t2_n_checks)
     r["actor_variant_cfg"] = str(cfg.get("actor_variant", "t1")) if cfg else ""
     r["focus_scope"] = str(cfg.get("focus_scope", "")) if cfg else ""
     r["focus_map"] = str(cfg.get("focus_map", "")) if cfg else ""

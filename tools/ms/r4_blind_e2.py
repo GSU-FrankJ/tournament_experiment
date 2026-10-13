@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -127,6 +127,25 @@ def recompute(per_run: pd.DataFrame, curves: pd.DataFrame, crit: Dict[str, Any])
     return out, {"statement_rests_on": rest}
 
 
+def cross_check_gates_json(per_run: pd.DataFrame) -> List[str]:
+    """Re-read ``gates.json`` of every ``done`` run and compare the quantities E2-b and E2-c use (all four gate verdicts with the
+    process-global RNG assertion, and Gmax_full/DW of the final tier at the end of stage 1) with the per-run table."""
+    problems: List[str] = []
+    for r in per_run[per_run["status"].astype(str) == "done"].itertuples(index=False):
+        try:
+            g = json.load(open(Path(r.run_dir) / "gates.json"))
+        except Exception as exc:  # noqa: BLE001
+            problems.append(f"{r.arm} q{r.q} s{r.seed}: gates.json unreadable ({exc})")
+            continue
+        passed = bool(all(g[n]["pass"] for n in ("G-A", "G-F", "G-N", "G-S")) and (g.get("global_rng") or {}).get("status") == "ok")
+        if passed != _truthy(r.gates_all_pass):
+            problems.append(f"{r.arm} q{r.q} s{r.seed}: all gates pass = {passed} in gates.json, {r.gates_all_pass} in the table")
+        gm = float(g["metric_values"]["gmax_final"])
+        if abs(gm - float(r.gmax_final)) > TOL:
+            problems.append(f"{r.arm} q{r.q} s{r.seed}: Gmax_full/DW {gm!r} in gates.json, {r.gmax_final!r} in the table")
+    return problems
+
+
 def compare(blind: pd.DataFrame, decision: Dict[str, Any], analysis_csv: str, analysis_info: Optional[str]) -> List[str]:
     """Differences between the recomputed rows and the analysis table (empty list = agreement to 1e-12)."""
     ref = pd.read_csv(analysis_csv)
@@ -169,14 +188,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--out", required=True)
     p.add_argument("--compare", default=None)
     p.add_argument("--analysis-info", default=None, help="analysis_info.json (its decision is compared too)")
+    p.add_argument("--check-gates-json", action="store_true", help="re-read gates.json of every done run (run_dir column)")
     a = p.parse_args(argv)
     crit = json.load(open(a.criteria))
-    blind, dec = recompute(pd.read_csv(a.per_run), pd.read_csv(a.curves), crit)
+    per_run = pd.read_csv(a.per_run)
+    blind, dec = recompute(per_run, pd.read_csv(a.curves), crit)
     blind.to_csv(a.out, index=False)
     diffs = compare(blind, dec, a.compare, a.analysis_info) if a.compare else []
+    problems = cross_check_gates_json(per_run) if a.check_gates_json else []
     print(json.dumps({"tool": "tools/ms/r4_blind_e2.py", "out": a.out, "compare": a.compare, "n_differences": len(diffs),
-                      "differences": diffs[:20], "decision": dec}, indent=1))
-    return 0 if not diffs else 3
+                      "differences": diffs[:20], "gates_json_problems": problems[:20], "decision": dec}, indent=1))
+    return 0 if not diffs and not problems else 3
 
 
 if __name__ == "__main__":

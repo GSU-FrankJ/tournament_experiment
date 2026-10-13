@@ -30,7 +30,8 @@ sampling weights per check; the strata shares per update.
 
 Outputs under ``--out`` (an existing non-empty directory is refused): ``per_run.csv``, ``criterion_e2.csv``, ``secondary_e2.csv``,
 ``fb_rx_comparison.csv``, ``learning_curves_e2.csv``, ``sampling_weights.csv``, ``strata_shares_by_update.csv``,
-``cost_e2.csv``, ``predictions_e2.csv``, ``analysis_info.json``, ``summary.txt``, ``figures/*.png``. Exit code 0 when every
+``sampling_weights_bins_seed_mean.csv`` (seed-mean per-bin weights, maps and probabilities, long form; the per-bin arrays of every
+run are in its ``ms_binmaps_stage2.npz``), ``cost_e2.csv``, ``predictions_e2.csv``, ``analysis_info.json``, ``summary.txt``, ``figures/*.png``. Exit code 0 when every
 planned run is done, 3 otherwise, 2 on an argument error.
 
 Usage:
@@ -43,6 +44,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import warnings
 from pathlib import Path
@@ -83,9 +85,11 @@ def run_curve(curves: pd.DataFrame, arm: str, q: int, seed: int, crit: Mapping[s
 def curve_stats(g: Optional[pd.DataFrame], crit: Mapping[str, Any]) -> Dict[str, float]:
     """A, A_late, mean log10 eta, the first export with eta <= level (NaN if never), eta at the last export."""
     nan = float("nan")
-    out = {"A": nan, "A_late": nan, "log10_mean": nan, "first_le_level": nan, "eta_u1600": nan}
+    out = {"A": nan, "A_late": nan, "log10_mean": nan, "first_le_level": nan, "eta_u1600": nan, "n_final_invalid": nan}
     if g is None:
         return out
+    if "final_valid" in g.columns:           # descriptive: a point whose verifier result is not valid still enters A (flagged here)
+        out["n_final_invalid"] = float((~g["final_valid"].astype(bool)).sum())
     a, lw = crit["e2"]["area"], crit["e2"]["late_window"]
     u = g["update"].astype(float).to_numpy()
     y = g[ETA].astype(float).to_numpy()
@@ -236,16 +240,19 @@ def _digest(p: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(p, dtype="<f8").tobytes()).hexdigest()[:16]
 
 
-def sampling_weights_table(df: pd.DataFrame, arms: Sequence[str]) -> Tuple[pd.DataFrame, Dict[str, np.ndarray]]:
+def sampling_weights_table(df: pd.DataFrame, arms: Sequence[str]
+                           ) -> Tuple[pd.DataFrame, Dict[str, np.ndarray], Dict[Tuple[str, int], np.ndarray]]:
     """Per check: the stratum masses of the probabilities in force from the next update, the total variation distance to the
     alpha-0 probabilities, the maximum within-stratum weight ratios, the mass of the EMA maps; and the seed-mean heat-map arrays.
 
     ``probs_next`` is used where recorded, otherwise the probabilities are reconstructed from ``probs_first_update`` /
-    ``probs_table``. Returns ``(table, {f"{arm}_q{q}_{rho_bar|gain_bar}": seed-mean array of checks x bins})``.
+    ``probs_table``. Returns ``(table, {f"{arm}_q{q}_{rho_bar|gain_bar|probs_next}": seed-mean array of checks x bins},
+    {(arm, q): the check updates})``.
     """
     from envs.curriculum_env import GameSpec, StartSampler
     rows: List[Dict[str, Any]] = []
     heat: Dict[str, List[np.ndarray]] = {}
+    updates: Dict[Tuple[str, int], np.ndarray] = {}
     for r in df.itertuples(index=False):
         if r.arm not in arms or str(r.status) != "done":
             continue
@@ -262,6 +269,7 @@ def sampling_weights_table(df: pd.DataFrame, arms: Sequence[str]) -> Tuple[pd.Da
         except Exception:  # noqa: BLE001 - an unreadable run has no rows
             continue
         last_update = int(z["update"][-1])
+        pn_run: List[np.ndarray] = []
         for i, u in enumerate(z["update"]):
             if "probs_next" in z.files:
                 p = z["probs_next"][i]
@@ -270,6 +278,7 @@ def sampling_weights_table(df: pd.DataFrame, arms: Sequence[str]) -> Tuple[pd.Da
             else:
                 idx = int(np.searchsorted(z["probs_first_update"], int(u) + 1, side="right")) - 1
                 p = z["probs_table"][idx]
+            pn_run.append(np.asarray(p, dtype=float))
             ok = np.isfinite(p).all()
             row: Dict[str, Any] = {"arm": r.arm, "q": r.q, "seed": r.seed, "update": int(u), "local": int(z["local"][i]),
                                    "p_digest_next": _digest(p) if ok else ""}
@@ -284,13 +293,40 @@ def sampling_weights_table(df: pd.DataFrame, arms: Sequence[str]) -> Tuple[pd.Da
                 gb = z["gain_bar"][i]
                 row["gain_bar_max"] = float(np.nanmax(gb)) if np.isfinite(gb).any() else float("nan")
             rows.append(row)
+        heat.setdefault(f"{r.arm}_q{r.q}_probs_next", []).append(np.stack(pn_run))
+        updates[(r.arm, int(r.q))] = np.asarray(z["update"])
         heat.setdefault(f"{r.arm}_q{r.q}_rho_bar", []).append(z["rho_bar"])
         if "gain_bar" in z.files:
             heat.setdefault(f"{r.arm}_q{r.q}_gain_bar", []).append(z["gain_bar"])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)          # the tail bins are NaN in every run: an all-NaN column stays NaN
         mean_heat = {k: np.nanmean(np.stack(v), axis=0) for k, v in heat.items() if v and np.stack(v).shape[0]}
-    return pd.DataFrame(rows), mean_heat
+    return pd.DataFrame(rows), mean_heat, updates
+
+
+HEAT_KEY = re.compile(r"^(?P<arm>.+)_q(?P<q>\d+)_(?P<kind>rho_bar|gain_bar|probs_next)$")
+
+
+def heat_long_table(heat: Mapping[str, np.ndarray], updates: Mapping[Tuple[str, int], np.ndarray]) -> pd.DataFrame:
+    """Seed-mean per-bin values of the maps and of the probabilities in force from the next update, in long form (arm, q, kind,
+    check update, bin, bin centre, stratum, value); NaN where a map is undefined (the tail bins) or there is no next update."""
+    from envs.curriculum_env import GameSpec, StartSampler
+    rows = []
+    for key, arr in sorted(heat.items()):
+        m = HEAT_KEY.match(key)
+        if not m:
+            continue
+        arm, q, kind = m.group("arm"), int(m.group("q")), m.group("kind")
+        spec = GameSpec(w_h=1.0, w_l=0.0, k=1.0, q=float(q), T=2, e_min=0.0, e_max=100.0)       # the strata depend on q only
+        sp = StartSampler(spec, 10.0)
+        edges = sp.bin_edges(2)
+        centres = 0.5 * (edges[:-1] + edges[1:])
+        lab = np.array(["tail", "near", "mid"])[sp.stratum_labels(2, 20.0)]
+        for i, u in enumerate(updates[(arm, q)]):
+            for b in range(arr.shape[1]):
+                rows.append({"arm": arm, "q": q, "kind": kind, "update": int(u), "bin": b, "bin_centre": float(centres[b]),
+                             "stratum": lab[b], "seed_mean": float(arr[i, b])})
+    return pd.DataFrame(rows, columns=["arm", "q", "kind", "update", "bin", "bin_centre", "stratum", "seed_mean"])
 
 
 def strata_shares_table(df: pd.DataFrame, arms: Sequence[str]) -> pd.DataFrame:
@@ -507,8 +543,9 @@ def run_analysis(pilot_root: Path, curves_root: Path, criteria_path: Path, out: 
     tab[tab["role"] == "descriptive"].to_csv(out / "fb_rx_comparison.csv", index=False)
     cs = curve_summary(curves, arms)
     cs.to_csv(out / "learning_curves_e2.csv", index=False)
-    sw, heat = sampling_weights_table(df, arms)
+    sw, heat, upd = sampling_weights_table(df, arms)
     sw.to_csv(out / "sampling_weights.csv", index=False)
+    heat_long_table(heat, upd).to_csv(out / "sampling_weights_bins_seed_mean.csv", index=False)
     np.savez(out / "heatmaps_seed_mean.npz", **heat)
     sh = strata_shares_table(df, arms)
     sh.to_csv(out / "strata_shares_by_update.csv", index=False)

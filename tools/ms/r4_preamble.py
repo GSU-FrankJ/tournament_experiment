@@ -104,7 +104,7 @@ def reductions(areas: pd.DataFrame) -> pd.DataFrame:
                 rows.append({"window": win, "q": q, "lambda_P": lam, "rho": d6["rho"], "pi_draw_lo": pi_lo, "pi_draw_hi": pi_hi,
                              "d6_lo": d6["intervals"][0][0], "d6_hi": d6["intervals"][0][1], "prompt_rho": ref[0],
                              "prompt_lo": ref[1], "prompt_hi": ref[2],
-                             "matches_prompt_to_3dp": bool(all(abs(round(v, 3) - r) <= 1.5e-3 for v, r in
+                             "matches_prompt_to_3dp": bool(all(abs(round(v, 3) - r) < 1e-9 for v, r in
                                                                zip((d6["rho"], pi_lo, pi_hi), ref)))})
     return pd.DataFrame(rows)
 

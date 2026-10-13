@@ -29,6 +29,7 @@ from ms_r4_helpers import ROOT, reduced_r4  # noqa: E402
 import ms_configs as mc  # noqa: E402
 import replay_dev_rule as rdr  # noqa: E402
 import r3_analysis as R3  # noqa: E402
+import r3_launch_checks as R3C  # noqa: E402
 import r3_actor_diagnostics as R3D  # noqa: E402
 from agents import ppo_curriculum as pc  # noqa: E402
 from agents.ppo_curriculum import (  # noqa: E402
@@ -440,3 +441,15 @@ def test_without_the_new_variant_and_keys_a_run_equals_the_base_commit(base_tree
     _same_run_outputs(a, b)
     for f in sorted(os.listdir(os.path.join(a, "weights"))):
         assert ("actor_variant" in weights(a, int(f[1:6]))) == (mk == "relu_st_s16")
+    # the whole-run identity of C-MS5 / C-MS6 (every array of every export, the freeze arrays, the bin maps, the continuation
+    # table, the history and series, the check rows, the gate values). The harness ran the current tree in-process with the
+    # induced-band step 2.0 and the old tree through the CLI at its default step, so the band decomposition subtree of
+    # gates.json is the one thing excluded (review finding R4-07).
+    mp = pytest.MonkeyPatch()
+    mp.setattr(R3C, "GATES_IGNORED", R3C.GATES_IGNORED + ("reported.end_of_stage1.decomposition.*",))
+    try:
+        res = R3C.whole_run_identity(Path(a), Path(b))
+    finally:
+        mp.undo()
+    assert res["ALL"] is True, res["first_difference"]
+    assert res["compared"]["exports"] == (24 if mk in ("relu_st_s16", "t1_st_s16") else 16) and res["compared"]["gate_values"] > 20

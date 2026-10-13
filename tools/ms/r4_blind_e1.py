@@ -20,7 +20,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -89,10 +88,12 @@ def recompute(per_run: pd.DataFrame, crit: Dict[str, Any]) -> pd.DataFrame:
     return out
 
 
-def cross_check_gates_json(per_run: pd.DataFrame, arm: str) -> List[str]:
-    """Re-read ``gates.json`` of every ``done`` run of ``arm`` and compare the gate verdicts and |peak error| with the table."""
+def cross_check_gates_json(per_run: pd.DataFrame, arm: Any) -> List[str]:
+    """Re-read ``gates.json`` of every ``done`` run of ``arm`` (a name, or a list of names: E1-b uses the control's |peak| as well)
+    and compare the gate verdicts and |peak error| with the table."""
     problems: List[str] = []
-    for r in per_run[(per_run["arm"] == arm) & (per_run["status"].astype(str) == "done")].itertuples(index=False):
+    arms = [arm] if isinstance(arm, str) else list(arm)
+    for r in per_run[per_run["arm"].isin(arms) & (per_run["status"].astype(str) == "done")].itertuples(index=False):
         try:
             g = json.load(open(Path(r.run_dir) / "gates.json"))
         except Exception as exc:  # noqa: BLE001
@@ -157,7 +158,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     blind.to_csv(a.out, index=False)
     problems: List[str] = []
     if a.check_gates_json:
-        problems += cross_check_gates_json(per_run, crit["e1"]["arms"]["candidate"])
+        problems += cross_check_gates_json(per_run, [crit["e1"]["arms"]["candidate"], crit["e1"]["arms"]["control"]])
     diffs = compare(blind, Path(a.compare)) if a.compare else []
     report = {"tool": "tools/ms/r4_blind_e1.py", "out": a.out, "compare": a.compare, "n_differences": len(diffs),
               "differences": diffs[:20], "gates_json_problems": problems[:20], "met_overall": bool(blind["met_overall"].iloc[0])}

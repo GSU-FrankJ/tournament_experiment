@@ -124,16 +124,40 @@ def test_the_strata_shares_are_reported_for_every_arm(wave):
     assert m["ok_tail"] and not m["ok_within"]
 
 
-def test_the_cli_writes_the_json_and_returns_zero(wave, tmp_path, monkeypatch, capsys):
+REDUCED_CLI = ["--ramp-first", "61", "--ramp-last", "80", "--export-every", "5", "--fb25-upto", "10", "--x2-upto", "41"]
+
+
+def test_the_cli_returns_zero_iff_every_check_passed(wave, tmp_path, monkeypatch, capsys):
+    """The CLI (with the reduced prefix lengths of the tests-only options) writes the JSON and exits 0 on the genuine wave and 2 on
+    a tampered copy."""
     monkeypatch.setattr(LC1, "WEIGHTS_EVERY", 5)
     out = tmp_path / "launch_checks.json"
-    monkeypatch.setattr(RC, "RAMP", H.E1_RAMP)
-    # the CLI has the real-pilot defaults for the prefix lengths; only the tool-level check_pilot takes the reduced ones
-    rc_code = RC.main(["--mode", "pilot", "--root", str(wave), "--code-commit", "abc1234", "--out", str(out), "--qs", str(Q),
-                       "--seeds", str(SEED), "--arms", "fb_a0", "fb_r"])
+    base = ["--mode", "pilot", "--root", str(wave), "--code-commit", "abc1234", "--out", str(out), "--qs", str(Q), "--seeds", str(SEED)]
+    assert RC.main(base + REDUCED_CLI) == 0
     data = json.load(open(out))
-    assert data["mode"] == "pilot" and data["arms"] == ["fb_a0", "fb_r"] and "C_FB25" in data
-    assert rc_code in (0, 2)
+    assert data["mode"] == "pilot" and data["all_ok"] is True and data["arms"] == list(rc.ARMS)
+    assert data["summary"]["C_FB25_pass"] == 3 and data["summary"]["C_X2_pass"] == 1 and data["expected"]["C_FB25_n"] == 3
+    w = _copy(wave, tmp_path)
+    _edit_npz(run_dir(w, "fb_r") / "weights" / "u00010.npz", _ulp("actor.l1.weight"))
+    out2 = tmp_path / "bad.json"
+    assert RC.main(["--mode", "pilot", "--root", str(w), "--code-commit", "abc1234", "--out", str(out2), "--qs", str(Q), "--seeds", str(SEED)]
+                   + REDUCED_CLI) == 2
+    assert json.load(open(out2))["all_ok"] is False and "FAILED C_FB25 fb_r" in capsys.readouterr().out
+    # the real-pilot defaults (25 / 1201 / ramp 2001-2200) do not fit a reduced run: the checks fail, they are not skipped
+    assert RC.main(base[:-2] + ["--out", str(tmp_path / "default.json"), "--qs", str(Q), "--seeds", str(SEED)]) == 2
+
+
+def test_the_cms6_cli_returns_zero_iff_the_controls_are_identical(wave, tmp_path, monkeypatch):
+    monkeypatch.setattr(LC1, "WEIGHTS_EVERY", 5)
+    ref = _copy(wave, tmp_path / "ref")
+    out = tmp_path / "c6.json"
+    args = ["--mode", "cms6", "--root", str(wave), "--ms-r3-pilot-root", str(ref), "--code-commit", "abc1234", "--out", str(out),
+            "--qs", str(Q), "--seeds", str(SEED)]
+    assert RC.main(args) == 0 and json.load(open(out))["summary"] == {"C_MS6_pass": 2, "C_MS6_n": 2}
+    _edit_npz(run_dir(ref, "t1_st_s16") / "freeze_stage2_final.npz", _ulp("v_t2_e_hat"))
+    assert RC.main(args) == 2 and json.load(open(out))["summary"]["C_MS6_pass"] == 1
+    with pytest.raises(SystemExit):
+        RC.main(["--mode", "cms6", "--root", str(wave), "--code-commit", "abc1234", "--out", str(out)])           # no reference root
 
 
 # ---------------------------------------------------------------------------------------------- C-FB25

@@ -51,7 +51,6 @@ sys.path.insert(0, str(ROOT / "tools" / "ms"))
 
 import r1_analysis as R1  # noqa: E402
 import r4_common as C  # noqa: E402
-import r4_configs as rc  # noqa: E402
 
 #: metrics of the paired descriptive tables: (column, lower is better / None)
 PAIRED_METRICS: List[Tuple[str, Optional[bool]]] = [
@@ -185,11 +184,12 @@ def failure_rows(df: pd.DataFrame) -> pd.DataFrame:
 def failure_trajectories(fail: pd.DataFrame, curves: Optional[pd.DataFrame]) -> pd.DataFrame:
     """Trajectories (every 25 local updates) of e_hat_2(0), R0, RMSE_pos/e2*(0) (online development-tier checks of
     ``ms_checks_stage2.csv``) and the symmetry error (final tier, offline curve) of every failed run."""
-    cols = ["arm", "q", "seed", "local", "e2_at_0", "R0", "stage2_rmse_pos_over_g2_0", "stage2_peak_rel_err_abs", "sym_err_max"]
+    cols = ["arm", "q", "seed", "local", "e2_at_0", "R0", "stage2_rmse_pos_over_g2_0", "stage2_peak_rel_err_abs", "sym_err_max", "note"]
     out: List[pd.DataFrame] = []
     for r in fail.itertuples(index=False):
         p = Path(r.run_dir) / "ms_checks_stage2.csv"
-        if not p.exists():
+        if not p.exists():                                                   # a trace, never a silent skip
+            out.append(pd.DataFrame([{"arm": r.arm, "q": r.q, "seed": r.seed, "note": "ms_checks_stage2.csv missing"}]))
             continue
         ck = pd.read_csv(p)
         t = pd.DataFrame({"arm": r.arm, "q": r.q, "seed": r.seed, "local": ck["local"],
@@ -197,15 +197,19 @@ def failure_trajectories(fail: pd.DataFrame, curves: Optional[pd.DataFrame]) -> 
                           "stage2_rmse_pos_over_g2_0": ck.get("stage2_rmse_pos_over_g2_0"),
                           "stage2_peak_rel_err_abs": ck.get("stage2_peak_rel_err_abs")})
         t["sym_err_max"] = np.nan
+        t["note"] = ""
         if curves is not None and len(curves):
             cv = curves[(curves["arm"] == r.arm) & (curves["q"] == r.q) & (curves["seed"] == r.seed)].set_index("local")
             if len(cv):
                 t["sym_err_max"] = t["local"].map(cv["final_stage2_sym_err_max"])
+            else:
+                t["note"] = "no offline curve rows (the symmetry error is missing)"
         out.append(t)
-    return pd.concat(out, ignore_index=True)[cols] if out else pd.DataFrame(columns=cols)
+    res = pd.concat(out, ignore_index=True) if out else pd.DataFrame(columns=cols)
+    return res.reindex(columns=cols)
 
 
-def unit_activity(arrays: Mapping[str, np.ndarray], spec: Any, state_step: float = 4.0) -> Dict[str, np.ndarray]:
+def unit_activity(arrays: Mapping[str, np.ndarray], spec: Any, state_step: Optional[float] = None) -> Dict[str, np.ndarray]:
     """Share of the development nodes of D_2 with a positive pre-activation per hidden unit, first and second layer
     (post hoc, descriptive; the export's own variant: ReLU or LeakyReLU units).
 
@@ -213,6 +217,8 @@ def unit_activity(arrays: Mapping[str, np.ndarray], spec: Any, state_step: float
         ValueError: A variant without piecewise-linear hidden units (tanh).
     """
     from run.run_final_dp_br import dense_grid
+    from utils.dp_br_verifier import DEV_CONFIG
+    state_step = DEV_CONFIG.state_step if state_step is None else state_step        # the development grid of D_2
     variant = str(np.asarray(arrays["actor_variant"])) if "actor_variant" in arrays else "t1"
     if variant not in ("relu", "lrsm"):
         raise ValueError(f"unit activity is defined for relu / lrsm exports; got {variant!r}")
@@ -226,7 +232,7 @@ def unit_activity(arrays: Mapping[str, np.ndarray], spec: Any, state_step: float
 def failure_units_table(fail: pd.DataFrame, pilot_root: Path) -> pd.DataFrame:
     """``unit_activity`` of the last terminal-stage export of every failed relu / lrsm run (one row per unit)."""
     from envs.curriculum_env import GameSpec
-    cols = ["arm", "q", "seed", "layer", "unit", "share_positive"]
+    cols = ["arm", "q", "seed", "layer", "unit", "share_positive", "note"]
     rows = []
     for r in fail.itertuples(index=False):
         if not str(r.arm).startswith(("relu", "lrsm")):
@@ -240,11 +246,12 @@ def failure_units_table(fail: pd.DataFrame, pilot_root: Path) -> pd.DataFrame:
             with np.load(d / "weights" / f"u{budget:05d}.npz") as z:
                 arrays = {k: z[k] for k in z.files}
             act = unit_activity(arrays, spec)
-        except Exception:  # noqa: BLE001 - a failed run may lack its exports
+        except Exception as exc:  # noqa: BLE001 - a failed run may lack its exports: a trace, never a silent skip
+            rows.append({"arm": r.arm, "q": r.q, "seed": r.seed, "note": f"{type(exc).__name__}: {exc}"})
             continue
         for layer in ("layer1", "layer2"):
             for u, v in enumerate(act[layer]):
-                rows.append({"arm": r.arm, "q": r.q, "seed": r.seed, "layer": layer, "unit": u, "share_positive": float(v)})
+                rows.append({"arm": r.arm, "q": r.q, "seed": r.seed, "layer": layer, "unit": u, "share_positive": float(v), "note": ""})
     return pd.DataFrame(rows, columns=cols)
 
 

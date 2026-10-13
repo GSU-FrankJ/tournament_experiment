@@ -322,9 +322,11 @@ def test_e2_part_a_needs_20_percent_at_both_q_and_a_positive_lower_bound():
     _, _, tab = _e2({"fb_a0": ref, "fb_r": lv, "fb_rg": _lv(ref, 1.0)})
     assert _row(tab, "fb_r", 50)["met_q"] and not _row(tab, "fb_r", 60)["a_pass"] and not _row(tab, "fb_r", "both")["met_q"]
     assert abs(_row(tab, "fb_r", 60)["rho"] - 0.15) < 1e-12
-    # exactly 20 %: the bound is inclusive
+    # a reduction of 20 % up to rounding: rho is 0.19999999999999996 or 0.2 in float64 (1 - 0.8 is one ulp below 0.2), so a true tie
+    # is decided by the last bit; the pre-registered comparison is exact (>=) and a value that close to the bound would be flagged
+    # by the blind recomputation, not decided by it (review finding R4-08)
     _, _, tab = _e2({"fb_a0": ref, "fb_r": _lv(ref, 0.8), "fb_rg": _lv(ref, 1.0)})
-    assert _row(tab, "fb_r", 50)["rho"] >= 0.2 - 1e-12
+    assert abs(_row(tab, "fb_r", 50)["rho"] - 0.2) < 1e-12 and _row(tab, "fb_r", 50)["a_pass"] == bool(_row(tab, "fb_r", 50)["rho"] >= 0.2)
     # a 25 % mean reduction with a seed spread so wide that the interval reaches 0
     rng = np.random.default_rng(3)
     noisy = {q: list(np.array(ref[q]) * np.where(np.arange(20) % 2 == 0, 0.05, 1.45)) for q in (50, 60)}
@@ -535,6 +537,13 @@ def test_end_to_end_e2_analysis_on_genuine_runs(e2e, tmp_path):
     assert sw[sw["arm"] == "fb_rx"]["mass_near"].min() < 0.35 - 1e-3
     assert sw[(sw["arm"] == "fb_a0")]["tv_from_alpha0"].max() < 1e-12 and sw[(sw["arm"] == "fb_r")]["tv_from_alpha0"].max() > 1e-3
     assert int(sw["p_digest_next"].isna().sum()) == 4                                           # the last check of each run has no next update
+    bins = pd.read_csv(out / "sampling_weights_bins_seed_mean.csv")                              # review finding R4-09
+    assert set(bins["kind"]) == {"rho_bar", "gain_bar", "probs_next"} and set(bins["arm"]) == {"fb_a0", "fb_r", "fb_rg", "fb_rx"}
+    pn = bins[(bins["kind"] == "probs_next") & (bins["arm"] == "fb_r") & bins["seed_mean"].notna()]
+    assert np.allclose(pn.groupby("update")["seed_mean"].sum(), 1.0, atol=1e-12) and set(pn["stratum"]) == {"tail", "near", "mid"}
+    assert np.allclose(pn.groupby(["update", "stratum"])["seed_mean"].sum().unstack()[["tail", "near", "mid"]].to_numpy(),
+                       [0.5, 0.35, 0.15], atol=1e-12)
+    assert int(df["n_final_invalid"].sum()) == 0 and df["n_final_invalid"].notna().all()                # review finding R4-11
     sh = pd.read_csv(out / "strata_shares_by_update.csv")
     assert len(sh) == 4 * 60 and np.allclose(sh[["share_tail", "share_near", "share_mid"]].sum(axis=1), 1.0)
     for fig in ("eta_curves_log.png", "eta_curves_linear.png", "area_paired.png", "rho_bar_heatmaps.png", "gain_bar_heatmaps.png", "strata_shares.png"):
@@ -544,6 +553,59 @@ def test_end_to_end_e2_analysis_on_genuine_runs(e2e, tmp_path):
     # the blind tool re-derives the areas from the curve file
     a_blind = B2.area_of(pd.read_csv(curves / "curves_all.csv"), "fb_r", 50, 10511, json.load(open(crit_p)))
     assert abs(a_blind - float(df[(df["arm"] == "fb_r")]["A"].iloc[0])) < 1e-15
+
+
+def test_e1_failure_diagnostics_leave_a_trace_for_missing_files(tmp_path):
+    """A failed run whose files are missing is a row with a note, never a silent skip (review finding R4-12)."""
+    fail = pd.DataFrame([dict(arm="relu_st_s16", q=50, seed=10511, run_dir=str(tmp_path / "nope")),
+                         dict(arm="lrsm_st_s16", q=60, seed=10512, run_dir=str(tmp_path / "also_nope")),
+                         dict(arm="t1_st_s16", q=60, seed=10513, run_dir=str(tmp_path / "t1_nope"))])
+    traj = E1.failure_trajectories(fail, None)
+    assert list(traj["seed"]) == [10511, 10512, 10513] and (traj["note"] == "ms_checks_stage2.csv missing").all()
+    assert list(traj.columns) == ["arm", "q", "seed", "local", "e2_at_0", "R0", "stage2_rmse_pos_over_g2_0", "stage2_peak_rel_err_abs",
+                                  "sym_err_max", "note"]
+    units = E1.failure_units_table(fail, tmp_path)
+    assert list(units["arm"]) == ["relu_st_s16", "lrsm_st_s16"] and units["note"].str.len().gt(0).all()      # t1 has no units to report
+    # a check table without curve rows: the symmetry error is missing and says so
+    d = tmp_path / "run"
+    d.mkdir()
+    pd.DataFrame({"local": [25, 50], "e2_at_0": [1.0, 2.0], "R0": [0.1, 0.2], "stage2_rmse_pos_over_g2_0": [0.3, 0.4],
+                  "stage2_peak_rel_err_abs": [0.5, 0.6]}).to_csv(d / "ms_checks_stage2.csv", index=False)
+    f2 = pd.DataFrame([dict(arm="relu_st_s16", q=50, seed=10511, run_dir=str(d))])
+    cv = pd.DataFrame({"arm": ["relu_st_s16"] * 2, "q": [50, 50], "seed": [99, 99], "local": [25, 50], "final_stage2_sym_err_max": [7.0, 8.0]})
+    t2 = E1.failure_trajectories(f2, cv)
+    assert list(t2["e2_at_0"]) == [1.0, 2.0] and t2["sym_err_max"].isna().all() and "no offline curve rows" in t2["note"].iloc[0]
+    cv["seed"] = 10511
+    assert list(E1.failure_trajectories(f2, cv)["sym_err_max"]) == [7.0, 8.0]
+
+
+def test_the_unit_activity_default_grid_is_the_development_tier():
+    from envs.curriculum_env import GameSpec
+    from utils.dp_br_verifier import DEV_CONFIG
+    spec = GameSpec(w_h=6.5, w_l=3.0, k=0.001, q=50.0, T=2, e_min=0.0, e_max=100.0)
+    rng = np.random.default_rng(1)
+    arrays = {"actor.l1.weight": rng.standard_normal((64, 2)).astype(np.float32), "actor.l1.bias": rng.standard_normal(64).astype(np.float32),
+              "actor.l2.weight": rng.standard_normal((64, 64)).astype(np.float32), "actor.l2.bias": rng.standard_normal(64).astype(np.float32),
+              "actor_variant": np.asarray("relu")}
+    a, b = E1.unit_activity(arrays, spec), E1.unit_activity(arrays, spec, DEV_CONFIG.state_step)
+    assert np.array_equal(a["layer1"], b["layer1"]) and np.array_equal(a["layer2"], b["layer2"])
+    assert not np.array_equal(a["layer1"], E1.unit_activity(arrays, spec, 40.0)["layer1"])
+
+
+def test_blind_e2_gates_json_cross_check(tmp_path):
+    def run(name: str, passes: bool, gmax: float) -> Path:
+        d = tmp_path / name
+        d.mkdir()
+        json.dump({"G-A": {"pass": True}, "G-F": {"pass": passes}, "G-N": {"pass": True}, "G-S": {"pass": True},
+                   "global_rng": {"status": "ok"}, "metric_values": {"gmax_final": gmax}}, open(d / "gates.json", "w"))
+        return d
+    d1, d2 = run("a", True, 0.0004), run("b", False, 0.0006)
+    table = pd.DataFrame([dict(arm="fb_r", q=50, seed=10511, status="done", run_dir=str(d1), gates_all_pass=True, gmax_final=0.0004),
+                          dict(arm="fb_a0", q=50, seed=10511, status="done", run_dir=str(d2), gates_all_pass=False, gmax_final=0.0006),
+                          dict(arm="fb_rg", q=50, seed=10511, status="failed", run_dir=str(tmp_path / "gone"), gates_all_pass=False, gmax_final=np.nan)])
+    assert B2.cross_check_gates_json(table) == []                                       # a failed run has no gates.json to read
+    assert len(B2.cross_check_gates_json(table.assign(gates_all_pass=[False, False, False]))) == 1
+    assert len(B2.cross_check_gates_json(table.assign(gmax_final=[0.0004, 0.0007, np.nan]))) == 1
 
 
 def test_the_preamble_tool_reproduces_the_prompts_numbers():

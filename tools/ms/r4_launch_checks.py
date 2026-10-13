@@ -41,7 +41,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import json
 import sys
@@ -323,6 +322,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--qs", type=int, nargs="+", default=list(rc.QS))
     p.add_argument("--seeds", type=int, nargs="+", default=None, help="default: the block of the wave")
     p.add_argument("--arms", nargs="+", default=None)
+    p.add_argument("--ramp-first", type=int, default=RAMP[0], help="tests only")
+    p.add_argument("--ramp-last", type=int, default=RAMP[1], help="tests only")
+    p.add_argument("--export-every", type=int, default=EXPORT_EVERY, help="tests only")
+    p.add_argument("--fb25-upto", type=int, default=FB25_UPTO, help="tests only")
+    p.add_argument("--x2-upto", type=int, default=X2_UPTO, help="tests only")
     a = p.parse_args(argv)
     if a.mode == "cms6":
         if not a.ms_r3_pilot_root:
@@ -330,7 +334,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         res = check_cms6(Path(a.root), Path(a.ms_r3_pilot_root), a.qs, a.seeds or list(rc.SEEDS_CMS6), a.code_commit,
                          a.arms or rc.CMS6_ARMS)
     else:
-        res = check_pilot(Path(a.root), a.qs, a.seeds or list(rc.SEEDS), a.code_commit, a.arms or rc.ARMS)
+        res = check_pilot(Path(a.root), a.qs, a.seeds or list(rc.SEEDS), a.code_commit, a.arms or rc.ARMS,
+                          ramp=(a.ramp_first, a.ramp_last), fb25_upto=a.fb25_upto, x2_upto=a.x2_upto, export_every=a.export_every)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     with open(a.out, "w") as f:
         json.dump(res, f, indent=1)
