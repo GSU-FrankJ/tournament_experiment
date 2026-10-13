@@ -145,3 +145,28 @@ Every tool takes the roots as explicit arguments and records them; a missing ref
 ## Addendum 1 (2026-10-13, before the launch): the coworker's note was found
 
 After the P1 report the PI pointed to `reports/ms/r4/pi_record/` as the place where the coworker's document had been put. It is not on `origin/t2-status-pack` (still `be2881ff`, no `reports/ms/r4/`); it is an untracked file of the worktree `t2-status-pack-pi-reply-2ec71b` named `Multistage101126(1).md`, an **English rendering** of the note (not the `.docx`), 3,547 bytes, SHA-256 `ea3e6198bb8fe08b750dda1232efe0d4c403fd4398c88ad36a742e248a5e3138`. It is stored unchanged at `reports/ms/r4/pi_record/Multistage101126(1).md`. The SHA-256 `699f73f30010bc59777469c8cada4c8f81c2fa3bbde6fa39e28349b1126e10e8` of `Multistage1011261.docx` therefore remains uncheckable; the docx itself has not been seen. Compared with Appendix A paragraph by paragraph and by a mechanical check of every numeric token (all 43 tokens of Appendix A occur in the note with the same multiplicity; the note adds only its four page numbers) and of the identifiers, **the two texts agree: no difference in any number, seed, threshold, arm or rule**. Nothing in this pre-registration changes: not the arms, the criteria, the parameters (`prereg_criteria.json` keeps its SHA-256 `9b8b1a5558618aa297cad8bf99cb20d0e1df4602d6cba5a162248abdf3632393`), the predictions or the launch plan. Details and the provenance of the file: `reports/ms/r4/00_housekeeping.md`, Addendum 1.
+
+## Addendum 2 (2026-10-13): the PI's decision at gate G1
+
+The PI's reply is stored verbatim as `reports/ms/r4/pi_record/24_g1_reply.md`. Decision: **"proceed P2"**.
+
+- **P1 accepted** as pushed: `origin/ms-r4` at `a4b2580cf6ef21cb9383bbdafc513b3c3e5d51dd` (`a4b2580c`), with Addendum 1 (the English rendering of the coworker's note agrees with Appendix A; the `.docx` hash stays unchecked) and section 13, items 1-10, as written.
+- **Also accepted:** (a) the six skipped tests (they read the untracked MS-R1 / MS-R2 pilot arrays, absent from this worktree, and test analysis tools this round does not touch; the default paths are covered by C-MS6, C-R7 and the `git archive` tests); (b) the review dispositions R4-01 to R4-17 (`03_checks.md` section 3); (c) the completeness rule of section 8: a missing run, a nonzero exit or a non-finite point of the 64-point curve makes the affected criterion part False with the status `incomplete`; a gate failure is not missing data and enters E1-c and E2-b as a failure.
+- **Nothing else changes:** the arms, the configs (`run_config_hashes.csv`), the criteria and parameters (`prereg_criteria.json`, SHA-256 `9b8b1a5558618aa297cad8bf99cb20d0e1df4602d6cba5a162248abdf3632393`), the decision order and the predictions stand.
+- **A2, verbatim from the reply** (not used in this round; binds a later lock round only if the coworker decides at G2 to lock a scheme; `05_decision_inputs.md` states it next to each outcome):
+
+> A2. The confirmation rule of a possible lock (pre-registered now, before any pilot result exists)
+> This rule is not used in this round. It binds a later lock round only if the coworker decides at G2 to lock a scheme. `05_decision_inputs.md` states it next to each outcome.
+> Design. Fresh seeds 40501-40520 × q ∈ {50, 60}, 20 per q. The locked scheme and its comparator are run in the same wave on the same seeds, paired by (q, seed). The locked v2.0 entry point is run on the same seeds as a descriptive reference (it is not part of the pass rule). Bootstrap as in D6, with the seed of the experiment the scheme comes from (20261013 for E1, 20261014 for E2).
+> E1-type scheme (`lrsm_st_s16`, as locked; comparator `t1_st_s16`). It passes iff all three hold at both q:
+>
+> * (i) at least 18 of 20 runs pass all four gates (the rule of v2.0's confirmation; exact Clopper-Pearson intervals reported);
+> * (ii) the mean |peak error| over the 20 runs is <= 0.04;
+> * (iii) the 95 % interval of the mean paired difference of |peak error|, scheme - `t1_st_s16`, lies entirely below 0.
+>
+> E2-type scheme (the arm on which the E2 statement rests, as locked; comparator `fb_a0`). It passes iff E2-a, E2-b and E2-c hold on the fresh seeds and at least 18 of 20 runs of the scheme pass all four gates, at both q.
+> Combined scheme. It needs its own development run first (Appendix A). Its confirmation rule is fixed together with that run, before the run.
+> If the confirmation fails, v2.0 stays the T = 2 solver, and E1 and E2 are reported as ablations and limitations (Appendix A).
+
+- **Config gate (step 3): PASSED.** `tools/ms/r4_launch.py --wave r4 --params reports/ms/r1/prereg_parameters.json --plan-csv <scratch path outside the repository>` regenerated 280 planned runs in `.claude/worktrees/ms-r4-e1-e2-experiments-2da78b`; compared with the 280 `r4` rows of `run_config_hashes.csv`, every run name, output directory and `run_config.json` SHA-256 is equal (280 / 280, no difference). The launch therefore happens in the worktree the hashes were computed in.
+- **Launch commit:** the commit that adds this addendum (a `docs:` commit touching `reports/ms/r4/` only); a commit cannot contain its own hash, so the hash is recorded in the launch record `results/ms_r4/pilot/launch_<stamp>.json` (`code_commit`) and in `git log`. Run code unchanged since `4c654d34` (checked after the commit, step 4).
