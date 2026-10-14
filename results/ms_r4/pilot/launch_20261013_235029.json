@@ -1,0 +1,2633 @@
+{
+ "tool": "tools/ms/r4_launch.py",
+ "wave": "r4",
+ "dry_run": false,
+ "argv": [
+  "tools/ms/r4_launch.py",
+  "--wave",
+  "r4",
+  "--params",
+  "reports/ms/r1/prereg_parameters.json",
+  "--workers",
+  "40",
+  "--code-commit",
+  "2f618531be7c8a9a1a9e30c79014650416b945f3"
+ ],
+ "started": "20261013_235029",
+ "workers": 40,
+ "nproc": 64,
+ "loadavg_at_start": [
+  11.0966796875,
+  11.61181640625,
+  11.70068359375
+ ],
+ "disk_free_bytes": 923947544576,
+ "disk_total_bytes": 5952313540608,
+ "head": "2f618531be7c8a9a1a9e30c79014650416b945f3",
+ "code_commit": "2f618531be7c8a9a1a9e30c79014650416b945f3",
+ "status_porcelain": [
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10501/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10501/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10502/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10502/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10503/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10503/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10504/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10504/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10505/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10505/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10506/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10506/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10507/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10507/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10508/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10508/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10509/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10509/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10510/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q50/seed10510/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10501/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10501/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10502/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10502/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10503/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10503/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10504/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10504/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10505/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10505/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10506/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10506/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10507/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10507/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10508/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10508/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10509/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10509/t1_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10510/relu_st_s16/weights/",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/band_sweep.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/continuation_table_stage1.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/drift_test.json",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/freeze_stage1_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/freeze_stage1_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/freeze_stage2_development.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/freeze_stage2_final.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/induced_band.json",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/ms_binmaps_stage2.npz",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/ms_checks_stage1.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/ms_checks_stage2.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/ms_updates.csv",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/rule_log.json",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/train_history.json",
+  "?? results/ms_r4/cms6/q60/seed10510/t1_st_s16/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10501/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10502/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10503/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10504/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10505/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10506/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10507/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10508/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10509/weights/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q50/seed10510/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10501/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10502/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10503/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10504/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10505/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10506/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10507/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10508/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10509/weights/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/band_sweep.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/checkpoint_weights.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/checkpoints/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/d1_buffers/",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/final_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/final_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/gateA_development.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/gateA_final.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/phase_A_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/phase_B_exit_arrays.npz",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/train_history.json",
+  "?? results/ms_r4/v20_reproduction/q60/seed10510/weights/"
+ ],
+ "code_commit_resolved": "2f618531be7c8a9a1a9e30c79014650416b945f3",
+ "diff_stat_code_commit_to_head": "",
+ "diff_stat_run_code_to_head": "",
+ "params_file": "reports/ms/r1/prereg_parameters.json",
+ "params_sha256": "0fbfc01857c5abe339ab1926361cd57d6e988da20e754fd6dea3ffa4e076b406",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "2": {
+    "eps": 0.005,
+    "rho": 0.05,
+    "tau": 0.02,
+    "n_block": 400,
+    "u_cap": 2000,
+    "n_land": 400
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02,
+    "n_block": 200,
+    "u_cap": 600,
+    "n_land": 400
+   }
+  }
+ },
+ "n_planned": 280,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_rx",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/t1_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/relu_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/lrsm_st_s16",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_a0",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_r",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_rg",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_rx"
+ ],
+ "validation": {
+  "per_arm": {
+   "t1_st_s16": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "relu_st_s16": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "lrsm_st_s16": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "fb_a0": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "fb_r": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "fb_rg": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   },
+   "fb_rx": {
+    "n": 40,
+    "valid": 40,
+    "errors": []
+   }
+  },
+  "n_invalid": 0
+ },
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_r",
+   "returncode": 0,
+   "wall_sec": 399.52217718795873
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_a0",
+   "returncode": 0,
+   "wall_sec": 404.81698864512146
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_a0",
+   "returncode": 0,
+   "wall_sec": 408.2484351610765
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_rg",
+   "returncode": 0,
+   "wall_sec": 413.5382632468827
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_r",
+   "returncode": 0,
+   "wall_sec": 426.6591741540469
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_rg",
+   "returncode": 0,
+   "wall_sec": 431.704754039878
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_rg",
+   "returncode": 0,
+   "wall_sec": 432.5093855988234
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_r",
+   "returncode": 0,
+   "wall_sec": 432.8034401850309
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_rx",
+   "returncode": 0,
+   "wall_sec": 434.76993460115045
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_rx",
+   "returncode": 0,
+   "wall_sec": 435.2370464808773
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/fb_r",
+   "returncode": 0,
+   "wall_sec": 437.92977016605437
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_rg",
+   "returncode": 0,
+   "wall_sec": 439.6028266889043
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_a0",
+   "returncode": 0,
+   "wall_sec": 440.2913150410168
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_rx",
+   "returncode": 0,
+   "wall_sec": 441.36628148308955
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_r",
+   "returncode": 0,
+   "wall_sec": 443.4233333871234
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/fb_rx",
+   "returncode": 0,
+   "wall_sec": 448.67860548594035
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_a0",
+   "returncode": 0,
+   "wall_sec": 450.66484407614917
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/fb_rg",
+   "returncode": 0,
+   "wall_sec": 455.91707751504146
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/fb_a0",
+   "returncode": 0,
+   "wall_sec": 460.6508539651986
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_r",
+   "returncode": 0,
+   "wall_sec": 462.4713699850254
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_a0",
+   "returncode": 0,
+   "wall_sec": 465.8335133730434
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/fb_rx",
+   "returncode": 0,
+   "wall_sec": 479.49390372494236
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 583.8176558008417
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 590.0215806930792
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 602.2501053519081
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 603.1527283238247
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 607.011360262055
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 615.7465258310549
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10515/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 622.6702465969138
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 627.2057552479673
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 627.6604442130774
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 629.7447286678944
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 630.9589795479551
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 639.1751942001283
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 640.9414820699021
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 642.0942792079877
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10513/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 644.6826190249994
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10512/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 652.2466287999414
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10511/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 653.061968347989
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10514/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 665.9525605279487
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_rg",
+   "returncode": 0,
+   "wall_sec": 435.3765374890063
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_rg",
+   "returncode": 0,
+   "wall_sec": 418.713201852981
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_a0",
+   "returncode": 0,
+   "wall_sec": 410.84687175392173
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10516/fb_rx",
+   "returncode": 0,
+   "wall_sec": 468.67437210003845
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_rx",
+   "returncode": 0,
+   "wall_sec": 443.11968156998046
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_rx",
+   "returncode": 0,
+   "wall_sec": 431.02047377685085
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_a0",
+   "returncode": 0,
+   "wall_sec": 469.76197555009276
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_r",
+   "returncode": 0,
+   "wall_sec": 467.17403633589856
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_rg",
+   "returncode": 0,
+   "wall_sec": 467.45905534597114
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/fb_r",
+   "returncode": 0,
+   "wall_sec": 481.8749180419836
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_r",
+   "returncode": 0,
+   "wall_sec": 450.9469707098324
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_rg",
+   "returncode": 0,
+   "wall_sec": 451.18334835604765
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/fb_a0",
+   "returncode": 0,
+   "wall_sec": 493.4286982868798
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 599.2469866548199
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_a0",
+   "returncode": 0,
+   "wall_sec": 416.203782588942
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 593.378581940895
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 606.4889212329872
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 624.4249803049024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/fb_rx",
+   "returncode": 0,
+   "wall_sec": 470.38616505195387
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_r",
+   "returncode": 0,
+   "wall_sec": 440.74320418480784
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10517/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 650.8974984800443
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_rg",
+   "returncode": 0,
+   "wall_sec": 430.35963044990785
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_rx",
+   "returncode": 0,
+   "wall_sec": 429.2937787040137
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_rx",
+   "returncode": 0,
+   "wall_sec": 451.58189035300165
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 629.647220737068
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_r",
+   "returncode": 0,
+   "wall_sec": 445.02536950306967
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/fb_rg",
+   "returncode": 0,
+   "wall_sec": 466.6511368281208
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/fb_a0",
+   "returncode": 0,
+   "wall_sec": 454.42768849781714
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10518/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 660.8185449060984
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 635.5491216601804
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10519/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 651.1667291549966
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 583.1514885320794
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 588.4397555720061
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 622.4072516178712
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 606.4497412249912
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10520/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 647.8336545869242
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10521/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 622.0731534641236
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 593.1258825738914
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 614.7976359210443
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_a0",
+   "returncode": 0,
+   "wall_sec": 441.07303636777215
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 639.2301756080706
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_r",
+   "returncode": 0,
+   "wall_sec": 466.5361571412068
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_rg",
+   "returncode": 0,
+   "wall_sec": 448.4820357100107
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_a0",
+   "returncode": 0,
+   "wall_sec": 426.04259503097273
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10522/fb_rx",
+   "returncode": 0,
+   "wall_sec": 465.3028786499053
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_r",
+   "returncode": 0,
+   "wall_sec": 436.12225824501365
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_rx",
+   "returncode": 0,
+   "wall_sec": 438.0304656100925
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/fb_rg",
+   "returncode": 0,
+   "wall_sec": 447.9945781629067
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_r",
+   "returncode": 0,
+   "wall_sec": 432.36091588484123
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_a0",
+   "returncode": 0,
+   "wall_sec": 451.2748554160353
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_rg",
+   "returncode": 0,
+   "wall_sec": 453.45266431593336
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 621.3470844719559
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/fb_rx",
+   "returncode": 0,
+   "wall_sec": 462.14438891783357
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_a0",
+   "returncode": 0,
+   "wall_sec": 441.73363735107705
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 638.4036908480339
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10523/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 622.2641717200167
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_r",
+   "returncode": 0,
+   "wall_sec": 455.10931486892514
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 600.6159850880504
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_a0",
+   "returncode": 0,
+   "wall_sec": 441.67879652488045
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_rx",
+   "returncode": 0,
+   "wall_sec": 453.73837433592416
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 607.2452229228802
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/fb_rg",
+   "returncode": 0,
+   "wall_sec": 463.7895600979682
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_r",
+   "returncode": 0,
+   "wall_sec": 451.95989394700155
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_rg",
+   "returncode": 0,
+   "wall_sec": 457.91477106302045
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/fb_rx",
+   "returncode": 0,
+   "wall_sec": 439.0766242041718
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10524/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 635.8442877179477
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 594.1021805240307
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_a0",
+   "returncode": 0,
+   "wall_sec": 459.69264878402464
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 643.3956594408955
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_r",
+   "returncode": 0,
+   "wall_sec": 452.28341677295975
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10525/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 651.5428660821635
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 621.5192737809848
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 629.1250266488642
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10526/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 647.1814303980209
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_rx",
+   "returncode": 0,
+   "wall_sec": 467.1838129090611
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_rg",
+   "returncode": 0,
+   "wall_sec": 486.87142625590786
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_r",
+   "returncode": 0,
+   "wall_sec": 436.5644393020775
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_rg",
+   "returncode": 0,
+   "wall_sec": 432.72068139212206
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_a0",
+   "returncode": 0,
+   "wall_sec": 458.9937045320403
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/fb_rx",
+   "returncode": 0,
+   "wall_sec": 444.56061312695965
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 625.3588530619163
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 611.9123355280608
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 633.7849822610151
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 620.4052824489772
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_a0",
+   "returncode": 0,
+   "wall_sec": 433.49148062895983
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_rg",
+   "returncode": 0,
+   "wall_sec": 428.10668520000763
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_r",
+   "returncode": 0,
+   "wall_sec": 447.8420866339002
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 657.5014259549789
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_r",
+   "returncode": 0,
+   "wall_sec": 420.7728864508681
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10528/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 635.0130049260333
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/fb_rx",
+   "returncode": 0,
+   "wall_sec": 450.53581227199174
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_rg",
+   "returncode": 0,
+   "wall_sec": 437.7092196061276
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_rx",
+   "returncode": 0,
+   "wall_sec": 440.9493569319602
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_a0",
+   "returncode": 0,
+   "wall_sec": 420.8263053770643
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 630.3453936299775
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/fb_a0",
+   "returncode": 0,
+   "wall_sec": 459.93333661207
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 646.1819178739097
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_r",
+   "returncode": 0,
+   "wall_sec": 434.6392445238307
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_rg",
+   "returncode": 0,
+   "wall_sec": 412.58651807997376
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10529/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 610.8141716870014
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 589.3423756659031
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/fb_rx",
+   "returncode": 0,
+   "wall_sec": 473.29613114800304
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 630.5790267828852
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_rg",
+   "returncode": 0,
+   "wall_sec": 435.7944953769911
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 614.4089866098948
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10530/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 646.5476760170422
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_rx",
+   "returncode": 0,
+   "wall_sec": 442.6824411780108
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_a0",
+   "returncode": 0,
+   "wall_sec": 467.81065442902036
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_a0",
+   "returncode": 0,
+   "wall_sec": 407.4320570889395
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 648.5620193060022
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/fb_r",
+   "returncode": 0,
+   "wall_sec": 475.270499242004
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10511/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 656.2455026819371
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_r",
+   "returncode": 0,
+   "wall_sec": 457.24914950178936
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_rg",
+   "returncode": 0,
+   "wall_sec": 487.961750337854
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 606.1084555499256
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/fb_rx",
+   "returncode": 0,
+   "wall_sec": 467.4748180899769
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 624.3816069690511
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10512/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 629.578058677027
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_a0",
+   "returncode": 0,
+   "wall_sec": 429.9891000671778
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_rx",
+   "returncode": 0,
+   "wall_sec": 402.02829959988594
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_r",
+   "returncode": 0,
+   "wall_sec": 430.8230519199278
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 591.5342394888867
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 642.5229258139152
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_r",
+   "returncode": 0,
+   "wall_sec": 420.36489189695567
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10513/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 666.7382442790549
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/fb_rg",
+   "returncode": 0,
+   "wall_sec": 461.5318042279687
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_rg",
+   "returncode": 0,
+   "wall_sec": 439.7465750488918
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_a0",
+   "returncode": 0,
+   "wall_sec": 457.92744475905783
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_a0",
+   "returncode": 0,
+   "wall_sec": 386.8082700059749
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 600.4818643049803
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/fb_rx",
+   "returncode": 0,
+   "wall_sec": 484.7959514539689
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 585.1948502140585
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10514/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 641.5433719251305
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_r",
+   "returncode": 0,
+   "wall_sec": 431.90375097305514
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_rg",
+   "returncode": 0,
+   "wall_sec": 414.7737866870593
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 584.2491926490329
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 596.7205894861836
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10515/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 588.4092096420936
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/fb_rx",
+   "returncode": 0,
+   "wall_sec": 427.79989256104454
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 576.4686104299035
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_rg",
+   "returncode": 0,
+   "wall_sec": 411.73028976190835
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_a0",
+   "returncode": 0,
+   "wall_sec": 431.56769555294886
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 614.1234553859103
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10516/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 610.1181381980423
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_rx",
+   "returncode": 0,
+   "wall_sec": 491.9252220930066
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/fb_r",
+   "returncode": 0,
+   "wall_sec": 501.0618888011668
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_r",
+   "returncode": 0,
+   "wall_sec": 415.4388566710986
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_a0",
+   "returncode": 0,
+   "wall_sec": 474.3123697100673
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_rg",
+   "returncode": 0,
+   "wall_sec": 443.03745342814364
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 605.3204367039725
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 604.3861635799985
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10517/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 630.9552561838645
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_rg",
+   "returncode": 0,
+   "wall_sec": 418.0841539897956
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_a0",
+   "returncode": 0,
+   "wall_sec": 442.98745862185024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 595.680769738974
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/fb_rx",
+   "returncode": 0,
+   "wall_sec": 486.16371446312405
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 610.1765678960364
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_rx",
+   "returncode": 0,
+   "wall_sec": 411.3242097920738
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/fb_r",
+   "returncode": 0,
+   "wall_sec": 452.78382886503823
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10518/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 633.92610916798
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_a0",
+   "returncode": 0,
+   "wall_sec": 460.87769846990705
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_r",
+   "returncode": 0,
+   "wall_sec": 450.41205563605763
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_rg",
+   "returncode": 0,
+   "wall_sec": 454.08690152619965
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/fb_rx",
+   "returncode": 0,
+   "wall_sec": 453.57201829296537
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_a0",
+   "returncode": 0,
+   "wall_sec": 433.92092832690105
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 619.4569962511305
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_r",
+   "returncode": 0,
+   "wall_sec": 418.97014733590186
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_rx",
+   "returncode": 0,
+   "wall_sec": 403.6344676669687
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/fb_rg",
+   "returncode": 0,
+   "wall_sec": 419.3973322280217
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 636.9562797879335
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 605.051491429098
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_r",
+   "returncode": 0,
+   "wall_sec": 415.9259002050385
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_a0",
+   "returncode": 0,
+   "wall_sec": 429.20411258819513
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10519/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 703.765568214003
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 634.8454063320532
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_rg",
+   "returncode": 0,
+   "wall_sec": 438.61649917205796
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10520/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 666.0464930559974
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 605.9568898880389
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 610.0652773149777
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10521/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 648.3214221498929
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/fb_rx",
+   "returncode": 0,
+   "wall_sec": 449.35561864986084
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 579.5268116600346
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 574.2540000809822
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10522/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 618.1453905429225
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_rx",
+   "returncode": 0,
+   "wall_sec": 405.1096977998968
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_rg",
+   "returncode": 0,
+   "wall_sec": 420.01188909308985
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_a0",
+   "returncode": 0,
+   "wall_sec": 469.0165244648233
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/fb_r",
+   "returncode": 0,
+   "wall_sec": 437.27176443790086
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_rg",
+   "returncode": 0,
+   "wall_sec": 416.9700105348602
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_rx",
+   "returncode": 0,
+   "wall_sec": 454.0177105301991
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_r",
+   "returncode": 0,
+   "wall_sec": 457.00071893283166
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/fb_a0",
+   "returncode": 0,
+   "wall_sec": 463.1205451309215
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 607.6576981791295
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 621.3927323711105
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10523/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 647.5457233691122
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_rg",
+   "returncode": 0,
+   "wall_sec": 427.4266297649592
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_r",
+   "returncode": 0,
+   "wall_sec": 433.57935827295296
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 567.9247508079279
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_rx",
+   "returncode": 0,
+   "wall_sec": 413.05379809904844
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/fb_a0",
+   "returncode": 0,
+   "wall_sec": 479.7075542511884
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_r",
+   "returncode": 0,
+   "wall_sec": 400.12289366987534
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 602.5154533830937
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 604.7492731099483
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_rx",
+   "returncode": 0,
+   "wall_sec": 403.9770885279868
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10524/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 625.4629888539203
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_a0",
+   "returncode": 0,
+   "wall_sec": 466.5072678409051
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/fb_rg",
+   "returncode": 0,
+   "wall_sec": 439.0781169559341
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_a0",
+   "returncode": 0,
+   "wall_sec": 421.127368937945
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 645.8946872090455
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10525/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 597.8131203118246
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_r",
+   "returncode": 0,
+   "wall_sec": 409.72653258405626
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_rg",
+   "returncode": 0,
+   "wall_sec": 409.1616514711641
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 576.6575996689498
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/fb_rx",
+   "returncode": 0,
+   "wall_sec": 425.8082012650557
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 593.6454071460757
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10526/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 600.2118011179846
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_rg",
+   "returncode": 0,
+   "wall_sec": 384.6848247239832
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_r",
+   "returncode": 0,
+   "wall_sec": 398.45968059496954
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_a0",
+   "returncode": 0,
+   "wall_sec": 427.0664419089444
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 572.0771982150618
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/fb_rx",
+   "returncode": 0,
+   "wall_sec": 419.9828891940415
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 572.9337033759803
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10527/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 572.3462999649346
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_a0",
+   "returncode": 0,
+   "wall_sec": 362.0330365069676
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_r",
+   "returncode": 0,
+   "wall_sec": 364.8280206571799
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_rg",
+   "returncode": 0,
+   "wall_sec": 393.6572469549719
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/fb_rx",
+   "returncode": 0,
+   "wall_sec": 376.13823116896674
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 550.6342666801065
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 560.1571998500731
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10528/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 560.1365870728623
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_r",
+   "returncode": 0,
+   "wall_sec": 352.5430274119135
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 518.2786424409132
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_a0",
+   "returncode": 0,
+   "wall_sec": 365.6727756659966
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_rg",
+   "returncode": 0,
+   "wall_sec": 350.92149160499685
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 497.5936554609798
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/fb_rx",
+   "returncode": 0,
+   "wall_sec": 355.3316417771857
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10529/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 546.0858489270322
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/lrsm_st_s16",
+   "returncode": 0,
+   "wall_sec": 467.7507067550905
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/t1_st_s16",
+   "returncode": 0,
+   "wall_sec": 481.9711662752088
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q60/seed10530/relu_st_s16",
+   "returncode": 0,
+   "wall_sec": 488.71166602917947
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  16.15966796875,
+  32.16015625,
+  43.07470703125
+ ]
+}

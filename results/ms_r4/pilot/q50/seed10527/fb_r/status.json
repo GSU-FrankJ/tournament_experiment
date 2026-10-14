@@ -1,0 +1,21 @@
+{
+ "run": "msr4_q50_s10527_fb_r",
+ "arm": "fb_r",
+ "q": 50,
+ "seed": 10527,
+ "state": "done",
+ "pid": 2178665,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_r/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/ms-r4-e1-e2-experiments-2da78b/results/ms_r4/pilot/q50/seed10527/fb_r",
+ "start_time": "2026-10-14 00:11:25",
+ "git": {
+  "commit": "2f618531be7c8a9a1a9e30c79014650416b945f3",
+  "short": "2f61853",
+  "dirty": false
+ },
+ "end_time": "2026-10-14 00:18:50",
+ "exit_code": 0,
+ "final_global_update": 2200,
+ "total_wall_sec": 444.9736454009544,
+ "outcome": "pass"
+}
