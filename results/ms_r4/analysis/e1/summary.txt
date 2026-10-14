@@ -1,0 +1,18 @@
+MS-R4 E1 analysis (tools/ms/r4_e1_analysis.py)
+roots: {"pilot": "results/ms_r4/pilot", "curves": "results/ms_r4/curves", "criteria": "reports/ms/r4/prereg_criteria.json"}
+
+q = 50: mean |peak| (lrsm) = 0.03289 (a: True); paired lrsm - t1 = -0.00247 [-0.01753, +0.01965] (b: False); runs failing a gate or exiting nonzero = 4 of 20 (c: False); status ok
+q = 60: mean |peak| (lrsm) = 0.02589 (a: True); paired lrsm - t1 = -0.01217 [-0.02194, -0.00158] (b: True); runs failing a gate or exiting nonzero = 0 of 20 (c: True); status ok
+VERDICT: NOT MET (the line stops; no other slope, map or variant follows)
+
+t1_st_s16 q=50: 0 of 20 runs fail (CP95 [0.000, 0.168])
+t1_st_s16 q=60: 0 of 20 runs fail (CP95 [0.000, 0.168])
+t1_st_s16 q=both: 0 of 40 runs fail (CP95 [0.000, 0.088])
+relu_st_s16 q=50: 3 of 20 runs fail (CP95 [0.032, 0.379])
+relu_st_s16 q=60: 0 of 20 runs fail (CP95 [0.000, 0.168])
+relu_st_s16 q=both: 3 of 40 runs fail (CP95 [0.016, 0.204])
+lrsm_st_s16 q=50: 4 of 20 runs fail (CP95 [0.057, 0.437])
+lrsm_st_s16 q=60: 0 of 20 runs fail (CP95 [0.000, 0.168])
+lrsm_st_s16 q=both: 4 of 40 runs fail (CP95 [0.028, 0.237])
+
+The effect is that of the combined change (LeakyReLU hidden units and the smooth unclamped mean map); no part is attributed to either. Zero failures in 40 runs bound the per-run failure rate by 8.8 % (CP95 upper limit); a candidate with relu_st_s16's observed q = 50 rate (1 of 10) passes all 20 q = 50 runs with probability 0.9^20 = 0.12: passing E1 screens out relu-sized failure rates, it does not establish robustness.

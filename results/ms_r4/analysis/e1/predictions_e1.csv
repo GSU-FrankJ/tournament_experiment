@@ -1,0 +1,5 @@
+prediction,q,statement,prior_relu_minus_t1,observed_lrsm_minus_t1,observed_lrsm_ci,observed_relu_minus_t1,outcome,observed_relu_failures,observed_lrsm_failures
+E1-P1,50,"lrsm has a lower mean |peak error| than t1, about as relu had on 10501-10510","-0.0104 [-0.0162, -0.0047]",-0.002469869317913885,"[-0.0175, +0.0196]",-0.00326693021840412,lrsm lower than t1,,
+E1-P1,60,"lrsm has a lower mean |peak error| than t1, about as relu had on 10501-10510","-0.0206 [-0.0309, -0.0068]",-0.012171245010703349,"[-0.0219, -0.0016]",-0.020740196942647247,lrsm lower than t1,,
+E1-P2,50,relu fails at least one gate at q = 50 and lrsm fails fewer,,,,,"relu fails >= 1, lrsm not fewer",3.0,4.0
+E1-P2,60,relu fails at least one gate at q = 50 and lrsm fails fewer,,,,,relu fails none,0.0,0.0

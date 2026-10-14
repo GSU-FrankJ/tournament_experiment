@@ -1,0 +1,48 @@
+{
+ "tool": "tools/ms/r4_curves.py",
+ "pilot_root": "results/ms_r4/pilot",
+ "arms": [
+  "t1_st_s16",
+  "relu_st_s16",
+  "lrsm_st_s16",
+  "fb_a0",
+  "fb_r",
+  "fb_rg",
+  "fb_rx"
+ ],
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10511,
+  10512,
+  10513,
+  10514,
+  10515,
+  10516,
+  10517,
+  10518,
+  10519,
+  10520,
+  10521,
+  10522,
+  10523,
+  10524,
+  10525,
+  10526,
+  10527,
+  10528,
+  10529,
+  10530
+ ],
+ "workers": 40,
+ "c_off": true,
+ "n_runs": 280,
+ "n_ok": 280,
+ "n_points": 23680,
+ "wall_sec": 28.73437268100679,
+ "eval_sec_final_total": 625.4733153760899,
+ "eval_sec_dev_total": 313.8953888779506,
+ "note": "evaluation only: the closed form enters g2_at_0 and the peak / RMSE errors, no run decision"
+}

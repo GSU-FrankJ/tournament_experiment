@@ -1,0 +1,51 @@
+{
+ "tool": "tools/ms/r4_e1_analysis.py",
+ "roots": {
+  "pilot": "results/ms_r4/pilot",
+  "curves": "results/ms_r4/curves",
+  "criteria": "reports/ms/r4/prereg_criteria.json"
+ },
+ "criteria_sha256": "9b8b1a5558618aa297cad8bf99cb20d0e1df4602d6cba5a162248abdf3632393",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "arms": [
+  "t1_st_s16",
+  "relu_st_s16",
+  "lrsm_st_s16"
+ ],
+ "qs": [
+  50,
+  60
+ ],
+ "seeds": [
+  10511,
+  10512,
+  10513,
+  10514,
+  10515,
+  10516,
+  10517,
+  10518,
+  10519,
+  10520,
+  10521,
+  10522,
+  10523,
+  10524,
+  10525,
+  10526,
+  10527,
+  10528,
+  10529,
+  10530
+ ],
+ "n_planned": 120,
+ "n_not_done": 0,
+ "figures": [
+  "peak_abs_by_arm.png",
+  "paired_differences.png",
+  "tie_profile.png",
+  "learning_curves.png",
+  "failed_runs.png"
+ ],
+ "verdict": "NOT MET (the line stops; no other slope, map or variant follows)"
+}

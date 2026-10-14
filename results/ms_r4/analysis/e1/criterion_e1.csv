@@ -1,0 +1,4 @@
+q,n_expected,n_runs_done,mean_abs_peak_lrsm,a_threshold,a_pass,n_pairs,mean_diff_vs_t1,ci_lo,ci_hi,b_pass,n_gate_fail,n_G_A_fail,n_G_F_fail,n_G_N_fail,n_G_S_fail,n_nonzero_exit,c_pass,met_q,status
+50,20,20,0.032894399513432745,0.04,True,20,-0.002469869317913885,-0.017534767149326103,0.019649842194349877,False,4,4,4,1,1,0,False,False,ok
+60,20,20,0.025892666403463133,0.04,True,20,-0.012171245010703349,-0.021936699347621925,-0.0015833273556270723,True,0,0,0,0,0,0,True,True,ok
+both,,,,,,,,,,,,,,,,,,False,"NOT MET (the line stops; no other slope, map or variant follows)"

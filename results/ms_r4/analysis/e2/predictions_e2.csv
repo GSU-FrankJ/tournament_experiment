@@ -1,0 +1,10 @@
+prediction,statement,observed_rho_fb_rx_q60,outcome,arm,q,rho_full,rho_late,short_of_20pct,max_dev_verifier_share_stage2
+E2-P1,fb_rx has a larger area than fb_a0 at q = 60,-0.1255371650517645,larger area (rho < 0),,,,,,
+E2-P2,fb_r falls short of a 20 % reduction; any gain shows more in the area over local 200-1600,,,fb_r,50.0,0.020131178071696287,0.02040379885487631,True,
+E2-P2,fb_r falls short of a 20 % reduction; any gain shows more in the area over local 200-1600,,,fb_r,60.0,-0.02002906366136048,0.009504491860245157,True,
+E2-P2,fb_r falls short of a 20 % reduction; any gain shows more in the area over local 200-1600,,,fb_rg,50.0,0.013458711069118112,0.044333065476700795,True,
+E2-P2,fb_r falls short of a 20 % reduction; any gain shows more in the area over local 200-1600,,,fb_rg,60.0,-0.009255076467900691,0.039736657816732635,True,
+E2-P3,the development checks take under 1 % of the stage-2 wall time,,under 1 %,fb_a0,,,,,0.004272184029199087
+E2-P3,the development checks take under 1 % of the stage-2 wall time,,under 1 %,fb_r,,,,,0.004331819636164792
+E2-P3,the development checks take under 1 % of the stage-2 wall time,,under 1 %,fb_rg,,,,,0.004332767100549558
+E2-P3,the development checks take under 1 % of the stage-2 wall time,,under 1 %,fb_rx,,,,,0.004358733837998408

@@ -1,0 +1,14 @@
+MS-R4 E2 analysis (tools/ms/r4_e2_analysis.py)
+roots: {"pilot": "results/ms_r4/pilot", "curves": "results/ms_r4/curves", "criteria": "reports/ms/r4/prereg_criteria.json"}
+
+fb_r q=50: rho = +0.0201 95% [-0.0138, +0.0505] 97.5% [-0.0193, +0.0544] (a: False); gate violations 1 (b: False); Gmax diff +0.00026 upper +0.00079 (c: True); ok
+fb_r q=60: rho = -0.0200 95% [-0.0483, +0.0083] 97.5% [-0.0526, +0.0123] (a: False); gate violations 0 (b: True); Gmax diff -0.00001 upper +0.00017 (c: True); ok
+fb_r (decision): does not meet the target
+fb_rg q=50: rho = +0.0135 95% [-0.0245, +0.0495] 97.5% [-0.0299, +0.0545] (a: False); gate violations 0 (b: True); Gmax diff -0.00074 upper -0.00029 (c: True); ok
+fb_rg q=60: rho = -0.0093 95% [-0.0381, +0.0228] 97.5% [-0.0415, +0.0278] (a: False); gate violations 0 (b: True); Gmax diff -0.00004 upper +0.00013 (c: True); ok
+fb_rg (decision): does not meet the target
+fb_rx q=50: rho = +0.0543 95% [+0.0135, +0.0943] 97.5% [+0.0078, +0.1002] (a: False); gate violations 0 (b: True); Gmax diff -0.00062 upper +0.00005 (c: True); ok
+fb_rx q=60: rho = -0.1255 95% [-0.1664, -0.0853] 97.5% [-0.1725, -0.0793] (a: False); gate violations 0 (b: True); Gmax diff -0.00004 upper +0.00014 (c: True); ok
+fb_rx (descriptive): does not meet the target
+
+DECISION (order fb_r, then fb_rg): neither fb_r nor fb_rg meets the target: the development DP-BR is kept as a verifier only and no training improvement is claimed
