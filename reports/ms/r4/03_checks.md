@@ -94,3 +94,40 @@ python tools/v2/cr2_compare.py --ref <rehearsal_v2_0> --new results/ms_r4/v20_re
 ## 8. Stress test of the analysis tools on real runs (scratch, not evidence)
 
 Before the pre-registration the E1 and E2 analysis tools were run end to end on the genuine full-length MS-R3 runs with a substituted arm mapping (outputs in the session scratchpad, not tracked): E1 with `relu_st_s16` as the candidate and `t1_st_s16` as the control on seeds 10501-10510 gives the paired |peak error| difference -0.0104 [-0.0163, -0.0046] at q = 50 and -0.0206 [-0.0308, -0.0071] at q = 60 (the prompt's MS-R3 reference: -0.0104 [-0.0162, -0.0047] and -0.0206 [-0.0309, -0.0068], drawn with the MS-R3 bootstrap seed) and the one known relu gate failure (q = 50, seed 10506: G-A and G-F), with its trajectories, tie-mean-at-bound flags and unit activities; E2 with `t1_st_s1` as the reference and `t1_st_s16` as a descriptive arm gives a reduction of exactly 0 with the interval [0, 0] (the two arms are bit-identical through update 2001), and the development checks at 0.42 % of the stage-2 wall time. These runs exercised the per-run extraction, the curve files, the tables and the figures on real data; no number of them enters a report of this round.
+
+## 9. P2: the post-launch checks (2026-10-14)
+
+Printed by `python reports/ms/r4/report_scripts/pilot_tables.py --block checks` from `results/ms_r4/pilot/launch_checks.json`, `results/ms_r4/curves/c_off.csv`, `curves_info.json` and the two blind-recomputation records `results/ms_r4/analysis/e1_blind.stdout` and `e2_blind.stdout`:
+
+| check | result | status |
+|---|---|---|
+| runs done with exit code 0 (`status.json`) | 280 / 280 | pass |
+| manifest at the launch commit, clean tree | 280 / 280 | pass |
+| files complete | 280 / 280 | pass |
+| global-RNG assertions | 280 / 280 | pass |
+| tail share equals lambda_T at every update (coverage) | 280 / 280 | pass |
+| tail mass equals lambda_T to 1e-12 at every update (deterministic) | 280 / 280 | pass |
+| near-tie and middle masses equal the design to 1e-12 in the within-stratum arms `fb_a0`, `fb_r`, `fb_rg` | 120 / 120 | pass |
+| applied concentration scale equals the D2 schedule | 280 / 280 | pass |
+| C-INIT: initial weights identical across `t1`, `relu`, `lrsm` | 40 / 40 | pass |
+| C-FB25: the four E2 arms bit-identical through local update 25 | 120 / 120 | pass |
+| C-X2: `fb_rx` equals `t1_st_s16` through local update 1201 | 40 / 40 | pass |
+| sampling weights consistent with `p_digest_next` | 160 / 160 | pass |
+| C-OFF: development tier offline equals the online checks, runs | 280 / 280 | pass |
+| C-OFF: comparisons / mismatches / max abs difference | 260,480 / 0 / 0.0 | pass |
+| offline curve points written | 23,680 (280 / 280 runs) | done |
+| blind recomputation of `criterion_e1.csv` (1e-12) | 0 differences | agree |
+| blind recomputation of `criterion_e2.csv` and the decision (1e-12) | 0 differences | agree |
+| statistical start-share flags (|z| > 3), reported, not a failure | 8 of 840 tests (chance expectation 2.27) | reported |
+
+- **All deterministic checks pass.** The prompt's rule (section 3.2) makes any failure of a deterministic check a stop-and-report; none failed.
+- **The statistical start-share flags** are reported against their chance expectation, as in MS-R1..R3: 8 of 840 tests, 2.27 expected under independence; they belong to five runs (block `start_flags` in `04_e1_actor.md` section 1).
+- **The completeness rule** (section 8 of `02_preregistration.md`, accepted at gate G1) was not triggered: 280 of 280 runs exited 0, all curve points exist (120 x 112 + 160 x 64 = 23,680 points, `curves_info.json`), `complete` is true in all 120 + 160 rows of the two `per_run.csv` files, `curve_complete` is true and `n_final_invalid` is 0 in all 160 E2 runs, and the criterion tables carry the status `ok` in every per-q row (`criterion_e1.csv`, `criterion_e2.csv`).
+- **Commands:**
+
+```
+python tools/ms/r4_launch_checks.py --mode pilot --root results/ms_r4/pilot --code-commit 2f618531be7c8a9a1a9e30c79014650416b945f3 --out results/ms_r4/pilot/launch_checks.json
+python tools/ms/r4_curves.py --pilot-root results/ms_r4/pilot --out results/ms_r4/curves --workers 40
+python tools/ms/r4_blind_e1.py --per-run results/ms_r4/analysis/e1/per_run.csv --criteria reports/ms/r4/prereg_criteria.json --out results/ms_r4/analysis/e1_blind --compare results/ms_r4/analysis/e1/criterion_e1.csv --check-gates-json
+python tools/ms/r4_blind_e2.py --per-run results/ms_r4/analysis/e2/per_run.csv --curves results/ms_r4/curves/curves_all.csv --criteria reports/ms/r4/prereg_criteria.json --out results/ms_r4/analysis/e2_blind --compare results/ms_r4/analysis/e2/criterion_e2.csv --analysis-info results/ms_r4/analysis/e2/analysis_info.json --check-gates-json
+```
