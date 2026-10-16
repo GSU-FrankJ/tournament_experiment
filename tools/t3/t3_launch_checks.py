@@ -368,7 +368,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a3.add_argument("--root", default=str(tc.DEFAULT_ROOT))
     a3.add_argument("--waves", nargs="+", default=["t3", "t2j"])
     a3.add_argument("--commit", required=True, help="the launch commit (HEAD at the launch) the manifests must carry")
-    a3.add_argument("--plan-digests", default=None, help="c_init_plan.csv of the pre-launch check")
+    a3.add_argument("--plan-digests", required=True, help="c_init_plan.csv of the pre-launch check")
     a3.add_argument("--out", required=True)
     a3.add_argument("--workers", type=int, default=8)
     a = ap.parse_args(argv)
@@ -382,9 +382,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         res = c_t2r(Path(a.v20_root), out_dir, a.workers)
         print(json.dumps(res, indent=1))
         return 0 if res["identical"] == res["runs"] else 1
-    pd = None
-    if a.plan_digests:
-        pd = {(r["arm"], int(r["q"]), int(r["seed"])): r["init_state_sha256"] for r in read_csv(Path(a.plan_digests))}
+    pd = {(r["arm"], int(r["q"]), int(r["seed"])): r["init_state_sha256"] for r in read_csv(Path(a.plan_digests))}
     jobs = te.plan_jobs(Path(a.root), a.waves, None, None)
     res = post_launch(jobs, a.commit, a.workers, pd)
     with open(a.out, "w") as f:

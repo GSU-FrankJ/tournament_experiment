@@ -43,8 +43,14 @@ def main() -> int:
     ok = True
     n = 0
     for pat in NPZ[kind]:
+        names_a, names_b = sorted(str(f.relative_to(a)) for f in a.glob(pat)), sorted(str(f.relative_to(b)) for f in b.glob(pat))
+        if names_a != names_b:
+            ok = False
+            print("DIFFERENT file sets for", pat, sorted(set(names_a) ^ set(names_b)))
         for fa in sorted(a.glob(pat)):
             fb = b / fa.relative_to(a)
+            if not fb.exists():
+                continue
             za, zb = np.load(fa), np.load(fb)
             same = za.files == zb.files and all(same_array(za[k], zb[k]) for k in za.files)
             n += 1

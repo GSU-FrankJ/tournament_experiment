@@ -111,8 +111,10 @@ def test_several_waves_refuse_explicit_arms_and_the_launch_commit_is_required(tm
     for extra in (["--arms", "jt"], ["--seeds", "50501"]):
         with pytest.raises(SystemExit):
             tl.main(["--wave", "t3", "t2j", *extra, "--plan-csv", str(tmp_path / "x.csv")])
-    with pytest.raises(SystemExit):                    # post-launch needs the launch commit (no default)
-        lc.main(["post-launch", "--out", str(tmp_path / "o.json")])
+    with pytest.raises(SystemExit):                    # post-launch needs the launch commit and the planned digests
+        lc.main(["post-launch", "--out", str(tmp_path / "o.json"), "--plan-digests", str(tmp_path / "p.csv")])
+    with pytest.raises(SystemExit):
+        lc.main(["post-launch", "--out", str(tmp_path / "o.json"), "--commit", "x" * 40])
 
 
 def test_the_deterministic_checks_decide_the_exit_status():
