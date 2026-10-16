@@ -1,0 +1,182 @@
+{
+ "tool": "tools/t3/t3_launch.py",
+ "wave": "smoke",
+ "dry_run": false,
+ "argv": [
+  "tools/t3/t3_launch.py",
+  "--wave",
+  "smoke",
+  "--workers",
+  "8",
+  "--code-commit",
+  "da4b1115f518555125c4fab0a99c20e12243634a"
+ ],
+ "started": "20261016_224126",
+ "workers": 8,
+ "nproc": 64,
+ "loadavg_at_start": [
+  12.30810546875,
+  11.8544921875,
+  11.07958984375
+ ],
+ "disk_free_bytes": 912043995136,
+ "disk_total_bytes": 5952313540608,
+ "head": "91a9f51415b319a69595907cab2741a2e95758ee",
+ "code_commit": "da4b1115f518555125c4fab0a99c20e12243634a",
+ "status_porcelain": [
+  "?? results/t3_r1/preflight/c_init_plan.csv",
+  "?? results/t3_r1/preflight/c_init_plan.out.txt",
+  "?? results/t3_r1/preflight/seed_inventory_30501_30520.out.txt",
+  "?? results/t3_r1/preflight/seed_inventory_50500_50520.csv",
+  "?? results/t3_r1/preflight/seed_inventory_50500_50520.out.txt",
+  "?? results/t3_r1/smoke_launch_stdout.txt"
+ ],
+ "code_commit_resolved": "da4b1115f518555125c4fab0a99c20e12243634a",
+ "diff_stat_code_commit_to_head": "reports/t3/r1/00_housekeeping.md                   | 67 ++++++++++++++++++++++\n results/t3_r1/preflight/c_diff_commit.txt          |  3 +\n results/t3_r1/preflight/c_diff_staged.txt          |  3 +\n results/t3_r1/preflight/machine.txt                | 13 +++++\n results/t3_r1/preflight/v20_reference_runs.csv     | 41 +++++++++++++\n results/t3_r1/preflight/v20_reference_runs.out.txt |  3 +\n 6 files changed, 130 insertions(+)",
+ "diff_stat_run_code_to_head": "",
+ "params_file": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/reports/t3/r1/params_bw_t3.json",
+ "params_sha256": "db5156962a2d7a3eca0b7d0440d995d84dc57bb88c7066e38d7d61e40148e976",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "3": {
+    "eps": 0.005,
+    "rho": 0.05,
+    "tau": 0.02
+   },
+   "2": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02
+   }
+  },
+  "legacy_pipeline": {
+   "budgets": {
+    "3": 1600,
+    "2": 1600,
+    "1": 600
+   },
+   "lr_windows": {
+    "3": [
+     {
+      "first": 1201,
+      "last": 1600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ],
+    "2": [
+     {
+      "first": 1201,
+      "last": 1600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ],
+    "1": [
+     {
+      "first": 1,
+      "last": 600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ]
+   }
+  }
+ },
+ "n_planned": 8,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt_es",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt2",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt_es",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt2"
+ ],
+ "validation": {
+  "per_arm": {
+   "bw": {
+    "n": 2,
+    "valid": 2,
+    "errors": []
+   },
+   "jt": {
+    "n": 2,
+    "valid": 2,
+    "errors": []
+   },
+   "jt_es": {
+    "n": 2,
+    "valid": 2,
+    "errors": []
+   },
+   "jt2": {
+    "n": 2,
+    "valid": 2,
+    "errors": []
+   }
+  },
+  "n_invalid": 0
+ },
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt2",
+   "returncode": 0,
+   "wall_sec": 206.11592059605755
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt2",
+   "returncode": 0,
+   "wall_sec": 208.2889623439405
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt",
+   "returncode": 0,
+   "wall_sec": 339.46917433384806
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt",
+   "returncode": 0,
+   "wall_sec": 341.1536663840525
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/jt_es",
+   "returncode": 0,
+   "wall_sec": 389.29718728899024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/jt_es",
+   "returncode": 0,
+   "wall_sec": 390.12937932414934
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q50/bw",
+   "returncode": 0,
+   "wall_sec": 390.4021919788793
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472/results/t3_r1/smoke/q60/bw",
+   "returncode": 0,
+   "wall_sec": 402.3728080377914
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  15.66943359375,
+  16.126953125,
+  13.5625
+ ]
+}
