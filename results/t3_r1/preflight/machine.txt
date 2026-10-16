@@ -1,0 +1,13 @@
+$ nproc
+64
+$ uptime
+ 22:39:03 up 18 days,  6:19,  7 users,  load average: 11.20, 11.52, 10.86
+$ df -h /home/fjiang4
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/md0        5.5T  4.4T  850G  84% /home
+$ free -g
+               total        used        free      shared  buff/cache   available
+Mem:             754          42           3           0         715         711
+$ python/torch/numpy
+3.12.3 2.5.1+cu121 2.5.0
+(record: 3.12.3, 2.5.1+cu121, 2.5.0)
