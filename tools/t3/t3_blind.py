@@ -21,7 +21,6 @@ import argparse
 import csv
 import json
 import math
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -147,13 +146,13 @@ def gate_count_rows(tab: Dict[Tuple[str, int, int], Dict[str, str]], crit: Dict[
                 continue
             n = len(SEEDS[T])
             r_out: Dict[str, Any] = {"arm": arm, "q": q, "n_planned": n, "n_exit_ok": sum(1 for r in runs if exit_ok(r))}
-            names = ["G-A", "G-F", "G-N"] + (["G-S"] if T == 2 else [])
+            names = list(crit["gates"]["run_pass"][str(T)])            # the gates of the run pass, as the criteria file names them
             ver = [(r, gate_verdicts(r, T, crit)) for r in runs if exit_ok(r)]
             for g in names:
                 k = sum(1 for _, v in ver if v[g])
                 lo, hi = clopper_pearson(k, n)
                 r_out.update({f"{g}_pass": k, f"{g}_lo": lo, f"{g}_hi": hi})
-            k = sum(1 for r, v in ver if all(v.values()) and r.get("global_rng_ok") in ("True", "true", "1", "1.0"))
+            k = sum(1 for r, v in ver if all(v[g] for g in names) and r.get("global_rng_ok") in ("True", "true", "1", "1.0"))
             lo, hi = clopper_pearson(k, n)
             r_out.update({"run_pass": k, "run_pass_lo": lo, "run_pass_hi": hi})
             rows.append(r_out)

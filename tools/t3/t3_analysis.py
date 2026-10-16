@@ -55,9 +55,10 @@ def load_per_run(path: Path) -> pd.DataFrame:
     for c in BOOL_COLS:
         if c in df.columns:
             df[c] = df[c].map(_truthy)
+    df = df.copy()
     df["exit_ok"] = (df["status"] == "done") & (df["exit_code"] == 0)
     df["passed"] = df["exit_ok"] & df["gates_pass"] & df["global_rng_ok"]
-    return df
+    return df.copy()
 
 
 def planned_seeds(arm: str) -> Tuple[int, ...]:
@@ -87,6 +88,7 @@ def paired_row(x: np.ndarray, y: np.ndarray, S: int, n_boot: int, pct95: Sequenc
     st = R4.paired_stats(x, y, n_boot, S)
     ok = np.isfinite(x) & np.isfinite(y)
     d = (np.asarray(x, float) - np.asarray(y, float))[ok]
+    lo95, hi95 = R4.boot_mean_ci(d, n_boot, S, tuple(pct95))          # the percentiles of the criteria file
     lo98, hi98 = R4.boot_mean_ci(d, n_boot, S, tuple(pct9875))
     if d.size:
         med = np.median(d[R4.boot_indices(d.size, n_boot, S)], axis=1)
@@ -94,7 +96,7 @@ def paired_row(x: np.ndarray, y: np.ndarray, S: int, n_boot: int, pct95: Sequenc
     else:
         mlo = mhi = float("nan")
     return {"n_pairs": st["n_pairs"], "dropped_pairs": int(len(x) - st["n_pairs"]), "mean_a": st["mean_a"],
-            "mean_b": st["mean_b"], "mean_diff": st["mean_diff"], "ci95_lo": st["ci_lo"], "ci95_hi": st["ci_hi"],
+            "mean_b": st["mean_b"], "mean_diff": st["mean_diff"], "ci95_lo": lo95, "ci95_hi": hi95,
             "ci98_75_lo": lo98, "ci98_75_hi": hi98, "median_diff": st["median_diff"], "median_ci95_lo": mlo,
             "median_ci95_hi": mhi, "n_neg": st["n_neg"], "n_pos": st["n_pos"]}
 
@@ -193,15 +195,24 @@ def reading_rule(counts: pd.DataFrame, crit: Mapping[str, Any]) -> Dict[str, Any
 
 
 # ---------------------------------------------------------------------------------- bw diagnosis
-def bw_gate_table(df: pd.DataFrame) -> pd.DataFrame:
+def bw_gate_table(df: pd.DataFrame, crit: Optional[Mapping[str, Any]] = None) -> pd.DataFrame:
     """The T = 3 gate table of ``bw`` (one row per planned run) with the per-gate, per-stage diagnosis of every failure:
-    which criteria fail, the values, the stage and gap of the largest dynamic gain and whether it lies in band."""
+    which criteria fail, the values, the stage and gap of the largest dynamic gain and whether it lies in band. The
+    thresholds quoted in the text are those of the criteria file."""
+    if crit is None:
+        crit, _ = tm.load_criteria()
+    g = crit["gates"]
+    th_eta, th_rmse, th_tail = (g["G-A"][k] for k in ("eta_T_over_dw", "rmse_pos_T_over_eT0", "tail_mean_T_over_eT0"))
+    th_f = g["G-F"]["Gmax_full_over_dw"]
+    th_n = g["G-N"]["eta_T_over_dw_dev_minus_final_abs"], g["G-N"]["Gmax_full_over_dw_dev_minus_final_abs"]
     sub = df[df["arm"] == "bw"].sort_values(["q", "seed"])
     rows = []
     for _, r in sub.iterrows():
         row: Dict[str, Any] = {"q": int(r["q"]), "seed": int(r["seed"]), "exit_ok": bool(r["exit_ok"]), "passed": bool(r["passed"])}
-        if not r["exit_ok"]:
-            row["diagnosis"] = f"no result (status {r['status']}, exit code {r['exit_code']})"
+        if not r["exit_ok"] or pd.isna(r["Gmax_full_over_dw"]):
+            code = "none" if pd.isna(r["exit_code"]) else int(r["exit_code"])
+            err = r["eval_error"] if "eval_error" in r.index and isinstance(r["eval_error"], str) and r["eval_error"] else ""
+            row["diagnosis"] = f"no result (status {r['status']}, exit code {code}{', evaluation error: ' + err if err else ''})"
             rows.append(row)
             continue
         for c in ("gate_G_A", "gate_G_F", "gate_G_N"):
@@ -216,21 +227,21 @@ def bw_gate_table(df: pd.DataFrame) -> pd.DataFrame:
                 row[f"{c}_t{t}"] = r[f"{c}_t{t}"]
         why = []
         if not r["ga_eta"]:
-            why.append(f"G-A eta_3 {r['eta_T_over_dw']:.5f} > 0.005")
+            why.append(f"G-A eta_3 {r['eta_T_over_dw']:.5f} > {th_eta:g}")
         if not r["ga_rmse"]:
-            why.append(f"G-A rmse_pos {r['rmse_pos_T_over_eT0']:.4f} > 0.05")
+            why.append(f"G-A rmse_pos {r['rmse_pos_T_over_eT0']:.4f} > {th_rmse:g}")
         if not r["ga_tail"]:
-            why.append(f"G-A tail_mean {r['tail_mean_T_over_eT0']:.4f} > 0.02")
+            why.append(f"G-A tail_mean {r['tail_mean_T_over_eT0']:.4f} > {th_tail:g}")
         if not r["gate_G_F"]:
             t = int(r["Gmax_full_t"])
             side = "out of band" if t >= 2 and r[f"G_out_t{t}"] >= r[f"G_in_t{t}"] else "in band"
             if t == 1:
                 side = "root"
-            why.append(f"G-F Gmax {r['Gmax_full_over_dw']:.5f} > 0.01 at stage {t}, d = {r['Gmax_full_d']:g} ({side})")
+            why.append(f"G-F Gmax {r['Gmax_full_over_dw']:.5f} > {th_f:g} at stage {t}, d = {r['Gmax_full_d']:g} ({side})")
         if not r["gn_eta"]:
-            why.append(f"G-N |eta_3(dev) - eta_3(final)| = {abs(r['dev_eta_T_over_dw'] - r['eta_T_over_dw']):.5f} > 0.001")
+            why.append(f"G-N |eta_3(dev) - eta_3(final)| = {abs(r['dev_eta_T_over_dw'] - r['eta_T_over_dw']):.5f} > {th_n[0]:g}")
         if not r["gn_gmax"]:
-            why.append(f"G-N |Gmax(dev) - Gmax(final)| = {abs(r['dev_Gmax_full_over_dw'] - r['Gmax_full_over_dw']):.5f} > 0.001")
+            why.append(f"G-N |Gmax(dev) - Gmax(final)| = {abs(r['dev_Gmax_full_over_dw'] - r['Gmax_full_over_dw']):.5f} > {th_n[1]:g}")
         row["diagnosis"] = "; ".join(why)
         rows.append(row)
     return pd.DataFrame(rows)
@@ -368,6 +379,27 @@ def cost_table(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def budget_check(cost: pd.DataFrame) -> pd.DataFrame:
+    """Per arm: the number of completed runs and how many have exactly the updates, policy rows (per stage and in total) and
+    minibatch steps of D5 (``t3_configs.expected_budget``; for ``v20`` from each run's ``v2_updates.csv``)."""
+    rows = []
+    for arm in ARM_ORDER:
+        sub = cost[cost["arm"] == arm]
+        if sub.empty:
+            continue
+        exp = tc.expected_budget(arm)
+        ok_stage = np.ones(len(sub), dtype=bool)
+        for t, n in exp["rows_by_stage"].items():
+            ok_stage &= (sub[f"rows_t{t}"].to_numpy() == n)
+        rows.append({"arm": arm, "n_runs": len(sub), "updates_expected": exp["updates"],
+                     "updates_equal": int((sub["updates"] == exp["updates"]).sum()),
+                     "rows_total_expected": exp["rows_total"], "rows_total_equal": int((sub["policy_rows_total"] == exp["rows_total"]).sum()),
+                     "rows_by_stage_equal": int(ok_stage.sum()),
+                     "minibatch_steps_expected": exp["minibatch_steps"],
+                     "minibatch_steps_equal": int((sub["minibatch_steps"] == exp["minibatch_steps"]).sum())})
+    return pd.DataFrame(rows)
+
+
 # ---------------------------------------------------------------------------------- learning curves
 def joint_curve(run_dir: Path) -> pd.DataFrame:
     """The development checks of a joint run against cumulative policy rows (all stages)."""
@@ -396,150 +428,235 @@ def _plt() -> Any:
 
 
 COLORS = {"bw": "#1b9e77", "jt": "#d95f02", "jt_es": "#7570b3", "v20": "#1b9e77", "jt2": "#d95f02"}
+ARMS_BY_T = {3: ("bw", "jt", "jt_es"), 2: ("v20", "jt2")}
+Q_MARK = {50: "o", 60: "s"}
 
 
-def figure_effort(df: pd.DataFrame, arrays_dir: Path, out: Path) -> None:
-    """e_t(d) per arm and stage: the seed median with an inter-quartile band, the closed form at the terminal stage (and g1
-    at T = 2)."""
+def save_figure(fig: Any, path: Path) -> None:
+    """Write a figure (dpi 130) and close it."""
+    fig.savefig(path, dpi=130)
+    _plt().close(fig)
+
+
+def _arrays_of(df: pd.DataFrame, arrays_dir: Path, arm: str, q: int) -> List[Any]:
+    """The per-run figure arrays (``eval/arrays/{run}.npz``) of the completed runs of (arm, q)."""
+    out = []
+    for _, r in df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]].sort_values("seed").iterrows():
+        p = Path(arrays_dir) / f"{r['run']}.npz"
+        if p.exists():
+            out.append(np.load(p))
+    return out
+
+
+def _game(q: int) -> Dict[str, Any]:
+    return tc.load_protocol()["records"][str(q)]["game"]
+
+
+def figure_effort(df: pd.DataFrame, arrays_dir: Path, q: int) -> Any:
+    """e_t(d) per arm and stage at one q: the seed median with an inter-quartile band (stage 1: the median with the
+    inter-quartile bars at d = 0). Rows: T = 3 arms (``bw``, ``jt``, ``jt_es``), T = 2 arms (``v20``, ``jt2``). The closed
+    form e_T*(d) is added at the terminal stage of every row, and g1 at stage 1 of the T = 2 row."""
+    from utils.theory_multistage import g1_two_stage
     plt = _plt()
-    fig, axes = plt.subplots(2, 3, figsize=(14, 7))
-    for ax, (T, arms) in zip(axes, ((3, ("bw", "jt", "jt_es")), (2, ("v20", "jt2")))):
-        for k in range(3):
-            if k >= T:
-                ax[k].axis("off")
-                continue
-        for q in (50,):
-            for arm in arms:
-                sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
-                for t in range(1, T + 1):
-                    ys = []
-                    for _, r in sub.iterrows():
-                        p = arrays_dir / f"{r['run']}.npz"
-                        if p.exists():
-                            z = np.load(p)
-                            ys.append((z[f"fin_t{t}_d_grid"], z[f"fin_t{t}_e_hat"]))
-                    if not ys:
-                        continue
-                    d = ys[0][0]
-                    E = np.array([y[1] for y in ys])
-                    ax[t - 1].plot(d, np.median(E, axis=0), color=COLORS[arm], label=arm)
-                    ax[t - 1].fill_between(d, np.percentile(E, 25, axis=0), np.percentile(E, 75, axis=0), color=COLORS[arm], alpha=0.2)
-                    ax[t - 1].set_title(f"T = {T}, stage {t}, q = {q}")
-    for ax in axes.flat:
-        ax.set_xlabel("d")
-        ax.set_ylabel("effort")
-    h, l = axes[0, 0].get_legend_handles_labels()
-    if h:
-        axes[0, 0].legend(frameon=False)
-    fig.tight_layout()
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
-
-
-def figure_gains(df: pd.DataFrame, arrays_dir: Path, out: Path, q: int = 50) -> None:
-    """Delta_t(d) / dw per arm and stage (T = 3 arms): the seed median and the seed maximum, the band edges marked."""
-    plt = _plt()
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-    for arm in ("bw", "jt", "jt_es"):
-        sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
+    fig, axes = plt.subplots(2, 3, figsize=(14, 7.5), squeeze=False)
+    g = _game(q)
+    for row, T in enumerate((3, 2)):
         for t in range(1, 4):
-            ds = []
-            for _, r in sub.iterrows():
-                p = arrays_dir / f"{r['run']}.npz"
-                if p.exists():
-                    z = np.load(p)
-                    ds.append((z[f"fin_t{t}_d_grid"], z[f"fin_t{t}_delta"] / 4.0))
-            if not ds:
+            ax = axes[row, t - 1]
+            if t > T:
+                ax.axis("off")
                 continue
-            D = np.array([x[1] for x in ds])
-            axes[t - 1].plot(ds[0][0], np.median(D, axis=0), color=COLORS[arm], label=f"{arm} median")
-            axes[t - 1].plot(ds[0][0], D.max(axis=0), color=COLORS[arm], ls=":", label=f"{arm} max")
-    for t, ax in enumerate(axes, start=1):
-        if t >= 2:
-            for s in (-1, 1):
-                ax.axvline(s * 2 * q * (t - 1), color="0.4", lw=0.8, ls="--")
-        ax.set_title(f"stage {t}, q = {q}")
-        ax.set_xlabel("d")
-        ax.set_ylabel("Delta / dW")
-    axes[0].legend(frameon=False, fontsize=7)
+            ref = None
+            for arm in ARMS_BY_T[T]:
+                zs = _arrays_of(df, arrays_dir, arm, q)
+                if not zs:
+                    continue
+                ref = zs[0]
+                d = zs[0][f"fin_t{t}_d_grid"]
+                E = np.array([z[f"fin_t{t}_e_hat"] for z in zs])
+                med, lo, hi = np.median(E, axis=0), np.percentile(E, 25, axis=0), np.percentile(E, 75, axis=0)
+                if t == 1:
+                    ax.errorbar([0.0], med, yerr=[med - lo, hi - med], fmt="o", color=COLORS[arm], capsize=4, label=arm)
+                else:
+                    ax.plot(d, med, color=COLORS[arm], label=arm)
+                    ax.fill_between(d, lo, hi, color=COLORS[arm], alpha=0.2)
+            if ref is not None and t == T:
+                ax.plot(ref["recovery_d_grid"], ref["recovery_gT"], "k--", lw=1.0, label="closed form e_T*(d)")
+            if T == 2 and t == 1:
+                ax.axhline(g1_two_stage(q, g["w_h"], g["w_l"], g["k"]), color="k", ls="--", lw=1.0, label="g1")
+            ax.set_title(f"T = {T}, stage {t}, q = {q}")
+            ax.set_xlabel("d")
+            ax.set_ylabel("effort")
+            if ax.get_legend_handles_labels()[0]:
+                ax.legend(frameon=False, fontsize=8)
     fig.tight_layout()
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
+    return fig
 
 
-def figure_paired(crit_df: pd.DataFrame, out: Path) -> None:
-    """The mean paired differences of the primary statistic with their 95 % and 98.75 % intervals."""
+def figure_gains(df: pd.DataFrame, arrays_dir: Path, q: int) -> Any:
+    """Delta_t(d) / dW per arm and stage at one q: the seed median (solid) and the seed maximum (dotted); the band edges
+    |d| = 2 q (t - 1) are marked at t >= 2."""
     plt = _plt()
-    fig, ax = plt.subplots(figsize=(7, 4))
-    labels = []
-    for i, (_, r) in enumerate(crit_df.iterrows()):
-        ax.plot([r["ci98_75_lo"], r["ci98_75_hi"]], [i, i], color="0.7", lw=1)
-        ax.plot([r["ci95_lo"], r["ci95_hi"]], [i, i], color="C0", lw=3)
-        ax.plot([r["mean_diff"]], [i], "ko")
-        labels.append(f"{r['hypothesis']} ({r['a']} - {r['b']}), q = {int(r['q'])}")
-    ax.axvline(0, color="k", lw=0.8)
-    ax.set_yticks(range(len(labels)))
-    ax.set_yticklabels(labels, fontsize=8)
-    ax.set_xlabel("paired difference of Gmax_full / dW")
+    fig, axes = plt.subplots(2, 3, figsize=(14, 7.5), squeeze=False)
+    dw = float(_game(q)["w_h"] - _game(q)["w_l"])
+    for row, T in enumerate((3, 2)):
+        for t in range(1, 4):
+            ax = axes[row, t - 1]
+            if t > T:
+                ax.axis("off")
+                continue
+            for arm in ARMS_BY_T[T]:
+                zs = _arrays_of(df, arrays_dir, arm, q)
+                if not zs:
+                    continue
+                d = zs[0][f"fin_t{t}_d_grid"]
+                D = np.array([z[f"fin_t{t}_delta"] for z in zs]) / dw
+                if t == 1:
+                    ax.plot([0.0], np.median(D, axis=0), "o", color=COLORS[arm], label=f"{arm} median")
+                    ax.plot([0.0], D.max(axis=0), "x", color=COLORS[arm], label=f"{arm} max")
+                else:
+                    ax.plot(d, np.median(D, axis=0), color=COLORS[arm], label=f"{arm} median")
+                    ax.plot(d, D.max(axis=0), color=COLORS[arm], ls=":", label=f"{arm} max")
+            if t >= 2:
+                for s in (-1, 1):
+                    ax.axvline(s * 2 * q * (t - 1), color="0.4", lw=0.8, ls="--")
+            ax.set_title(f"T = {T}, stage {t}, q = {q}")
+            ax.set_xlabel("d")
+            ax.set_ylabel("Delta_t / dW")
+            if ax.get_legend_handles_labels()[0]:
+                ax.legend(frameon=False, fontsize=7)
     fig.tight_layout()
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
+    return fig
 
 
-def figure_curves(df: pd.DataFrame, out: Path, q: int = 50) -> None:
-    """Learning curves against cumulative policy rows: the joint arms' Gmax_full and EXP_root (seed median), and the stage
-    Delta of every arm (bw: the phase checks)."""
+PAIRED_STATS = ("Gmax_full_over_dw", "EXP_root_over_dw", "G_in_t2", "G_out_t2", "Delta_in_t2", "Delta_out_t2",
+                "G_in_t3", "G_out_t3", "Delta_in_t3", "Delta_out_t3")
+
+
+def paired_forest_rows(df: pd.DataFrame, crit: Mapping[str, Any], stats: Sequence[str] = PAIRED_STATS
+                       ) -> pd.DataFrame:
+    """Paired statistics (mean difference with the 95 % and 98.75 % intervals) of the figure: every statistic that exists at
+    the horizon of a hypothesis, per hypothesis and q."""
+    n_boot = int(crit["statistics"]["n_boot"])
+    p95, p9875 = crit["statistics"]["percentiles"]["ci95"], crit["statistics"]["percentiles"]["ci98_75"]
+    rows = []
+    for stat in stats:
+        for h, spec in crit["hypotheses"].items():
+            if stat not in ["Gmax_full_over_dw", "EXP_root_over_dw"] + secondary_stats(spec["horizon"]):
+                continue
+            S = int(crit["statistics"]["bootstrap_seed"][str(spec["horizon"])])
+            for q in QS:
+                r = paired_row(series(df, spec["a"], q, stat), series(df, spec["b"], q, stat), S, n_boot, p95, p9875)
+                r.update({"statistic": stat, "hypothesis": h, "a": spec["a"], "b": spec["b"], "q": q})
+                rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def figure_paired(df: pd.DataFrame, crit: Mapping[str, Any]) -> Any:
+    """Paired differences a - b with their 95 % (thick) and 98.75 % (thin) intervals: ``Gmax_full``, ``EXP_root`` and the
+    in-band and out-of-band maxima of the dynamic gain G_t and the one-step gain Delta_t per stage, for the four pairs and
+    both q."""
     plt = _plt()
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-    for arm in ("jt", "jt_es"):
-        sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
-        cs = [joint_curve(Path(r["run_dir"])) for _, r in sub.iterrows()]
-        if not cs:
-            continue
-        x = cs[0]["cum_rows"].to_numpy()
-        for ax, col in zip(axes, ("Gmax_full_over_dw", "EXP_root_over_dw", "Delta_max_t3_over_dw")):
-            ax.plot(x, np.median([c[col].to_numpy() for c in cs], axis=0), color=COLORS[arm], label=arm)
-    sub = df[(df["arm"] == "bw") & (df["q"] == q) & df["exit_ok"]]
-    for _, r in sub.iterrows():
-        c = bw_curve(Path(r["run_dir"]))
-        for t, ax_i in ((3, 2),):
-            cc = c[c["stage"] == t]
-            axes[ax_i].plot(cc["cum_rows"], cc["Delta"], color=COLORS["bw"], alpha=0.3)
-    for ax, title in zip(axes, ("Gmax_full / dW", "EXP_root / dW", "eta_3 (bw: stage-3 phase Delta)")):
-        ax.set_xlabel("cumulative policy rows")
-        ax.set_title(title)
+    rows = paired_forest_rows(df, crit)
+    stats = [s for s in PAIRED_STATS if s in set(rows["statistic"])]
+    ncol = 5
+    nrow = int(np.ceil(len(stats) / ncol))
+    fig, axes = plt.subplots(nrow, ncol, figsize=(4.2 * ncol, 3.4 * nrow), squeeze=False)
+    for ax in axes.flat:
+        ax.axis("off")
+    for ax, stat in zip(axes.flat, stats):
+        ax.axis("on")
+        sub = rows[rows["statistic"] == stat].reset_index(drop=True)
+        for i, r in sub.iterrows():
+            ax.plot([r["ci98_75_lo"], r["ci98_75_hi"]], [i, i], color="0.7", lw=1)
+            ax.plot([r["ci95_lo"], r["ci95_hi"]], [i, i], color=COLORS.get(r["a"], "C0"), lw=3)
+            ax.plot([r["mean_diff"]], [i], Q_MARK[int(r["q"])], color="k", ms=4)
+        ax.axvline(0, color="k", lw=0.8)
+        ax.set_yticks(range(len(sub)))
+        ax.set_yticklabels([f"{r['hypothesis']} q={int(r['q'])}" for _, r in sub.iterrows()], fontsize=7)
+        ax.set_title(stat, fontsize=9)
+    fig.tight_layout()
+    return fig
+
+
+def figure_curves(df: pd.DataFrame, q: int, T: int = 3) -> Any:
+    """Learning curves against cumulative policy rows (seed median with an inter-quartile band): the joint arms' development
+    checks (``Gmax_full``, ``EXP_root``, eta_t = ``Delta_max_t`` and ``G_max_t`` per stage) and, for ``bw``, each phase's own
+    ``Delta`` at the checks of that phase (drawn in the eta_t panel of the stage)."""
+    plt = _plt()
+    cols = ["Gmax_full_over_dw", "EXP_root_over_dw"] + [f"Delta_max_t{t}_over_dw" for t in range(1, T + 1)] + \
+        [f"G_max_t{t}_over_dw" for t in range(1, T + 1)]
+    ncol = 4 if T == 3 else 3
+    fig, axes = plt.subplots(2, ncol, figsize=(4.2 * ncol, 7), squeeze=False)
+    arms = ("jt", "jt_es") if T == 3 else ("jt2",)
+    for ax, col in zip(axes.flat, cols):
+        for arm in arms:
+            sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
+            cs = [joint_curve(Path(r["run_dir"])) for _, r in sub.iterrows()]
+            if not cs:
+                continue
+            x = cs[0]["cum_rows"].to_numpy()
+            Y = np.array([c[col].to_numpy() for c in cs])
+            ax.plot(x, np.maximum(np.median(Y, axis=0), 1e-7), color=COLORS[arm], label=arm)
+            ax.fill_between(x, np.maximum(np.percentile(Y, 25, axis=0), 1e-7), np.maximum(np.percentile(Y, 75, axis=0), 1e-7),
+                            color=COLORS[arm], alpha=0.2)
+        if T == 3 and col.startswith("Delta_max_t"):
+            t = int(col[len("Delta_max_t")])
+            sub = df[(df["arm"] == "bw") & (df["q"] == q) & df["exit_ok"]]
+            cs = [bw_curve(Path(r["run_dir"])) for _, r in sub.iterrows()]
+            cs = [c[c["stage"] == t] for c in cs]
+            if cs:
+                x = cs[0]["cum_rows"].to_numpy()
+                Y = np.array([c["Delta"].to_numpy() for c in cs])
+                ax.plot(x, np.maximum(np.median(Y, axis=0), 1e-7), color=COLORS["bw"], label=f"bw (phase of stage {t})")
+                ax.fill_between(x, np.maximum(np.percentile(Y, 25, axis=0), 1e-7), np.maximum(np.percentile(Y, 75, axis=0), 1e-7),
+                                color=COLORS["bw"], alpha=0.2)
         ax.set_yscale("log")
-    axes[0].legend(frameon=False)
+        ax.set_xlabel("cumulative policy rows")
+        ax.set_title(f"{col} (q = {q})", fontsize=9)
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(frameon=False, fontsize=7)
+    for ax in list(axes.flat)[len(cols):]:
+        ax.axis("off")
     fig.tight_layout()
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
+    return fig
 
 
-def figure_visitation(arrays: Mapping[str, np.ndarray], out: Path, q: int = 50) -> None:
-    """Visitation per stage of the joint arms (log counts per bin, mean over seeds) with the band edges and bw's design."""
+def figure_visitation(arrays: Mapping[str, np.ndarray], q: int) -> Any:
+    """Visitation per stage (log rows per bin, mean over seeds): the joint arms (all start stages added; ``jt_es`` also by
+    source) against ``bw``'s design coverage; panels: T = 3 stages 2 and 3, T = 2 stage 2 (``jt2``); the band edges
+    |d| = 2 q (t - 1) are marked."""
     plt = _plt()
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    for ax, t in zip(axes, (2, 3)):
-        for arm in ("jt", "jt_es"):
-            parts = [v for k, v in arrays.items() if k.startswith(f"{arm}_q{q}_stage{t}_")]
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4), squeeze=False)
+    B = 100.0 + 2.0 * q
+    panels = [(3, 2, ("jt", "jt_es")), (3, 3, ("jt", "jt_es")), (2, 2, ("jt2",))]
+    for ax, (T, t, arms) in zip(axes[0], panels):
+        half = (t - 1) * B
+        for arm in arms:
+            parts = {k[len(f"{arm}_q{q}_stage{t}_"):]: v for k, v in arrays.items() if k.startswith(f"{arm}_q{q}_stage{t}_")}
             if not parts:
                 continue
-            tot = np.sum(parts, axis=0)
-            nb = tot.size
-            ax.plot(np.linspace(-(t - 1) * (100 + 2 * q), (t - 1) * (100 + 2 * q), nb), np.maximum(tot, 0.5), color=COLORS[arm], label=arm)
+            tot = np.sum(list(parts.values()), axis=0)
+            x = np.linspace(-half, half, tot.size + 1)
+            x = 0.5 * (x[:-1] + x[1:])
+            ax.plot(x, np.maximum(tot, 0.5), color=COLORS[arm], label=f"{arm} (all sources)")
+            if arm == "jt_es":
+                for src, v in parts.items():
+                    ax.plot(x, np.maximum(v, 0.5), color=COLORS[arm], ls=":", lw=0.8, label=f"{arm}: {src}")
         d = arrays.get(f"bw_q{q}_stage{t}_direct_design")
-        if d is not None:
-            ax.plot(np.linspace(-(t - 1) * (100 + 2 * q), (t - 1) * (100 + 2 * q), d.size), d, color=COLORS["bw"], label="bw design")
+        if d is not None and T == 3:
+            x = np.linspace(-half, half, d.size + 1)
+            ax.plot(0.5 * (x[:-1] + x[1:]), d, color=COLORS["bw"], label="bw design (direct starts)")
         for s in (-1, 1):
             ax.axvline(s * 2 * q * (t - 1), color="0.4", lw=0.8, ls="--")
         ax.set_yscale("log")
-        ax.set_title(f"stage {t}, q = {q}")
+        ax.set_title(f"T = {T}, stage {t}, q = {q}")
         ax.set_xlabel("d")
         ax.set_ylabel("rows per bin")
-    axes[0].legend(frameon=False)
+        if ax.get_legend_handles_labels()[0]:
+            ax.legend(frameon=False, fontsize=6)
     fig.tight_layout()
-    fig.savefig(out, dpi=130)
-    plt.close(fig)
+    return fig
 
 
 # ---------------------------------------------------------------------------------- driver
@@ -553,25 +670,33 @@ def run_analysis(root: Path, eval_dir: Path, out_dir: Path, crit: Mapping[str, A
     secondary_table(df, crit).to_csv(out_dir / "secondary.csv", index=False)
     counts = gate_counts(df)
     counts.to_csv(out_dir / "gate_counts.csv", index=False)
-    bw_gate_table(df).to_csv(out_dir / "bw_t3_gates.csv", index=False)
+    bw_gate_table(df, crit).to_csv(out_dir / "bw_t3_gates.csv", index=False)
     best_path = eval_dir / "best_of_run.csv"
     if best_path.exists():
         best_of_run_table(df, pd.read_csv(best_path)).to_csv(out_dir / "best_of_run.csv", index=False)
     cov, arrays = coverage_arrays(root, df)
     cov.to_csv(out_dir / "coverage.csv", index=False)
     np.savez(out_dir / "coverage_arrays.npz", **arrays)
-    cost_table(df).to_csv(out_dir / "cost.csv", index=False)
+    cost = cost_table(df)
+    cost.to_csv(out_dir / "cost.csv", index=False)
+    bud = budget_check(cost)
+    bud.to_csv(out_dir / "budget_check.csv", index=False)
     if figures:
         fdir = out_dir / "figures"
         fdir.mkdir(exist_ok=True)
         adir = eval_dir / "arrays"
-        figure_effort(df, adir, fdir / "effort_functions.png")
-        figure_gains(df, adir, fdir / "deviation_gains.png")
-        figure_paired(crit_df, fdir / "paired_differences.png")
-        figure_curves(df, fdir / "learning_curves.png")
-        figure_visitation(arrays, fdir / "visitation.png")
+        for q in QS:
+            save_figure(figure_effort(df, adir, q), fdir / f"effort_functions_q{q}.png")
+            save_figure(figure_gains(df, adir, q), fdir / f"deviation_gains_q{q}.png")
+            save_figure(figure_curves(df, q, 3), fdir / f"learning_curves_t3_q{q}.png")
+            save_figure(figure_curves(df, q, 2), fdir / f"learning_curves_t2_q{q}.png")
+            save_figure(figure_visitation(arrays, q), fdir / f"visitation_q{q}.png")
+        save_figure(figure_paired(df, crit), fdir / "paired_differences.png")
     rr = reading_rule(counts, crit)
-    head = {"reading_rule": rr, "hypotheses": {h: bool(g["hypothesis_supported"].iloc[0]) for h, g in crit_df.groupby("hypothesis")}}
+    head = {"reading_rule": rr, "hypotheses": {h: bool(g["hypothesis_supported"].iloc[0]) for h, g in crit_df.groupby("hypothesis")},
+            "budget_check_all_equal": bool(((bud["updates_equal"] == bud["n_runs"]) & (bud["rows_total_equal"] == bud["n_runs"])
+                                            & (bud["rows_by_stage_equal"] == bud["n_runs"])
+                                            & (bud["minibatch_steps_equal"] == bud["n_runs"])).all())}
     with open(out_dir / "headline.json", "w") as f:
         json.dump(head, f, indent=1)
     return head

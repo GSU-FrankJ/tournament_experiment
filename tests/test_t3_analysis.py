@@ -245,6 +245,19 @@ def test_secondary_table_covers_the_pairs_and_statistics():
     assert ex["mean_diff"] == pytest.approx(0.0, abs=1e-15)         # EXP_root is 0.001 in both arms
 
 
+def test_the_secondary_statistics_are_those_of_the_criteria_file():
+    sec = CRIT["secondary"]
+    for T in (3, 2):
+        want = list(sec["scalar"])
+        for t in range(1, T + 1):
+            want += [x.format(t=t) for x in sec["per_stage"]]
+        for t in range(2, T + 1):
+            want += [x.format(t=t) for x in sec["per_stage_from_2"]]
+        if T == 2:
+            want += sec["horizon_2_only"]
+        assert sorted(ta.secondary_stats(T)) == sorted(want), T
+
+
 def test_best_of_run_table():
     best = pd.DataFrame([
         {"arm": "jt", "q": 50, "seed": 50501, "status": "done", "Gmax_full_over_dw": 0.02, "EXP_root_over_dw": 0.001, "best_update": 1000,
@@ -266,10 +279,11 @@ def reduced_df(tmp_path_factory):
     bw_dir, bw_cfg = H.reduced_bw_run()
     arrays = tmp_path_factory.mktemp("arrays")
     rows = []
-    for name, (d, cfg) in {"t3_root": runs["t3_root"], "t3_es": runs["t3_es"], "bw": (bw_dir, bw_cfg)}.items():
+    for name, (d, cfg) in {"t3_root": runs["t3_root"], "t3_es": runs["t3_es"], "bw": (bw_dir, bw_cfg), "t2_root": runs["t2_root"]}.items():
         arm = cfg["arm"]
-        rows.append(te.evaluate_run({"wave": "t3", "arm": arm, "q": 50, "seed": 50500, "T": 3, "run": cfg["run"], "run_dir": d,
-                                     "kind": "bw" if arm == "bw" else "joint", "arrays_dir": str(arrays)}))
+        T = cfg["record"]["game"]["T"]
+        rows.append(te.evaluate_run({"wave": "t3" if T == 3 else "t2j", "arm": arm, "q": 50, "seed": 50500, "T": T, "run": cfg["run"],
+                                     "run_dir": d, "kind": "bw" if arm == "bw" else "joint", "arrays_dir": str(arrays)}))
     df = pd.DataFrame(rows)
     df["exit_ok"] = (df["status"] == "done") & (df["exit_code"] == 0)
     return df, arrays
@@ -298,15 +312,162 @@ def test_coverage_cost_and_curves_on_the_reduced_runs(reduced_df):
     assert set(bc["stage"]) == {1, 2, 3} and (bc["cum_rows"] == bc["update"] * 48).all()
 
 
-def test_figures_run_on_the_reduced_runs(reduced_df, tmp_path):
+def _labels(ax):
+    return [h.get_label() for h in ax.get_lines() + [c for c in ax.collections]] + [t.get_text() for t in (ax.get_legend().get_texts() if ax.get_legend() else [])]
+
+
+def _vlines(ax):
+    return sorted(float(l.get_xdata()[0]) for l in ax.get_lines() if len(set(l.get_xdata())) == 1 and l.get_linestyle() == "--")
+
+
+def test_figures_have_the_pre_registered_content(reduced_df):
+    """Effort functions with the closed form (terminal stage) and g1 (stage 1 at T = 2), deviation gains with the band edges,
+    the paired differences of Gmax_full, EXP_root and the in / out-of-band maxima, the learning curves of every stage, and the
+    visitation with bw's design; the T = 2 row / figure is there. Checked on the reduced runs (q = 50; no v20)."""
+    import matplotlib.pyplot as plt
     df, arrays = reduced_df
-    ta.figure_effort(df, arrays, tmp_path / "e.png")
-    ta.figure_gains(df, arrays, tmp_path / "g.png")
-    ta.figure_curves(df, tmp_path / "c.png")
-    _, arr = ta.coverage_arrays(Path("."), df)
-    ta.figure_visitation(arr, tmp_path / "v.png")
-    rng = np.random.default_rng(6)
+    fe = ta.figure_effort(df, arrays, 50)
+    assert len(fe.axes) == 6 and fe.axes[2].get_title() == "T = 3, stage 3, q = 50" and fe.axes[4].get_title() == "T = 2, stage 2, q = 50"
+    txt3 = _labels(fe.axes[2])
+    assert "closed form e_T*(d)" in txt3 and {"bw", "jt", "jt_es"} <= set(txt3)          # the closed form at the T = 3 terminal stage
+    assert "closed form e_T*(d)" in _labels(fe.axes[4]) and "jt2" in _labels(fe.axes[4])  # and at the T = 2 terminal stage
+    assert "g1" in _labels(fe.axes[3]) and "g1" not in _labels(fe.axes[0])               # g1 at stage 1 of the T = 2 row only
+    assert not fe.axes[5].axison                                                        # no stage 3 at T = 2
+    x, y = [l for l in fe.axes[2].get_lines() if l.get_label() == "closed form e_T*(d)"][0].get_data()
+    assert x[0] == -400.0 and x[-1] == 400.0 and abs(float(np.max(y)) - 70.0) < 1e-9     # the tent of q = 50: 70 at d = 0
+    fg = ta.figure_gains(df, arrays, 50)
+    assert len(fg.axes) == 6 and _vlines(fg.axes[1]) == [-100.0, 100.0] and _vlines(fg.axes[2]) == [-200.0, 200.0]
+    assert _vlines(fg.axes[0]) == [] and _vlines(fg.axes[4]) == [-100.0, 100.0]          # stage 1 has no band; T = 2 stage 2 does
+    assert any("max" in t for t in _labels(fg.axes[2])) and any("median" in t for t in _labels(fg.axes[2]))
     p = Path(H._tmp()) / "fig_per_run.csv"
-    write_table(synth_table(rng), p)
-    ta.figure_paired(ta.criterion_table(ta.load_per_run(p), CRIT), tmp_path / "p.png")
-    assert all((tmp_path / f).stat().st_size > 1000 for f in ("e.png", "g.png", "c.png", "v.png", "p.png"))
+    write_table(synth_table(np.random.default_rng(6)), p)
+    dfs = ta.load_per_run(p)
+    fp = ta.figure_paired(dfs, CRIT)
+    titles = [ax.get_title() for ax in fp.axes if ax.axison]
+    assert titles == [s for s in ta.PAIRED_STATS], titles
+    n_rows = {ax.get_title(): len(ax.get_yticks()) for ax in fp.axes if ax.axison}
+    assert n_rows["Gmax_full_over_dw"] == 8 and n_rows["EXP_root_over_dw"] == 8 and n_rows["G_out_t3"] == 6 and n_rows["G_in_t2"] == 8
+    for T, ncols_ in ((3, 8), (2, 6)):
+        fc = ta.figure_curves(df, 50, T)
+        shown = [ax for ax in fc.axes if ax.axison]
+        assert len(shown) == ncols_ and shown[0].get_title().startswith("Gmax_full_over_dw") and shown[1].get_title().startswith("EXP_root")
+        assert all(ax.get_yscale() == "log" for ax in shown)
+        eta3 = [ax for ax in shown if ax.get_title().startswith("Delta_max_t3")]
+        if T == 3:
+            assert "bw (phase of stage 3)" in _labels(eta3[0]) and "jt_es" in _labels(shown[0]) and "jt" in _labels(shown[0])
+            assert not any(l.startswith("bw") for l in _labels(shown[0]))                # bw has only its own Delta
+        else:
+            assert not eta3 and "jt2" in _labels(shown[0])
+    _, arr = ta.coverage_arrays(Path("."), df)
+    fv = ta.figure_visitation(arr, 50)
+    assert len(fv.axes) == 3 and "bw design (direct starts)" in _labels(fv.axes[0]) and "bw design (direct starts)" in _labels(fv.axes[1])
+    assert "jt2 (all sources)" in _labels(fv.axes[2]) and "bw design (direct starts)" not in _labels(fv.axes[2])
+    assert _vlines(fv.axes[0]) == [-100.0, 100.0] and _vlines(fv.axes[1]) == [-200.0, 200.0]
+    assert any("jt_es: direct_es" in t for t in _labels(fv.axes[1]))
+    for f in (fe, fg, fp, fc, fv):
+        plt.close(f)
+
+
+def test_the_intervals_follow_the_percentiles_of_the_criteria_file():
+    rng = np.random.default_rng(11)
+    x, y = rng.normal(0.02, 0.01, 20), rng.normal(0.03, 0.01, 20)
+    base = ta.paired_row(x, y, 20261016, 10000, [2.5, 97.5], [0.625, 99.375])
+    wide = ta.paired_row(x, y, 20261016, 10000, [10.0, 90.0], [0.625, 99.375])
+    idx = np.random.default_rng(20261016).integers(0, 20, size=(10000, 20))
+    means = (x - y)[idx].mean(axis=1)
+    assert base["ci95_lo"] == np.percentile(means, 2.5) and base["ci95_hi"] == np.percentile(means, 97.5)
+    assert wide["ci95_lo"] == np.percentile(means, 10.0) and wide["ci95_hi"] == np.percentile(means, 90.0)
+    assert wide["ci95_lo"] > base["ci95_lo"] and wide["ci95_hi"] < base["ci95_hi"] and base["ci98_75_lo"] == np.percentile(means, 0.625)
+    med = np.median((x - y)[idx], axis=1)
+    assert base["median_ci95_lo"] == np.percentile(med, 2.5) and base["median_ci95_hi"] == np.percentile(med, 97.5)
+    assert base["mean_diff"] == pytest.approx(float(np.mean(x - y)), abs=1e-15) and base["n_neg"] == int(np.sum(x - y < 0))
+
+
+def test_a_run_with_a_clean_exit_but_no_metrics_is_reported_not_a_crash(tmp_path):
+    rng = np.random.default_rng(12)
+    rows = synth_table(rng, bw_scale=0.003)
+    for r in rows:
+        if r["arm"] == "bw" and r["q"] == 50 and r["seed"] == 50502:      # an evaluation error: done, exit 0, no metrics
+            for k in list(r):
+                if k not in ("wave", "arm", "q", "seed", "T", "run", "run_dir", "kind", "global_rng_ok", "status", "exit_code"):
+                    r[k] = float("nan")
+            r["eval_error"] = "DomainError: landing outside D_3"
+    df = ta.load_per_run(write_table(rows, tmp_path / "p.csv"))
+    t = ta.bw_gate_table(df).set_index(["q", "seed"])
+    assert t.loc[(50, 50502)]["diagnosis"] == "no result (status done, exit code 0, evaluation error: DomainError: landing outside D_3)"
+    assert not t.loc[(50, 50502)]["passed"]
+    c = ta.criterion_table(df, CRIT).set_index(["hypothesis", "q"])
+    assert c.loc[("H1", 50)]["n_pairs"] == 19 and c.loc[("H1", 50)]["dropped_pairs"] == 1
+
+
+def test_budget_check_compares_every_run_with_d5():
+    tcm = ta.tc
+    rows = []
+    for arm in ("bw", "jt", "jt_es", "jt2", "v20"):
+        e = tcm.expected_budget(arm)
+        for seed in (1, 2):
+            r = {"arm": arm, "q": 50, "seed": seed, "updates": e["updates"], "policy_rows_total": e["rows_total"],
+                 "minibatch_steps": e["minibatch_steps"]}
+            r.update({f"rows_t{t}": n for t, n in e["rows_by_stage"].items()})
+            rows.append(r)
+    cost = pd.DataFrame(rows)
+    b = ta.budget_check(cost).set_index("arm")
+    assert (b["n_runs"] == 2).all() and (b["updates_equal"] == 2).all() and (b["rows_total_equal"] == 2).all()
+    assert (b["rows_by_stage_equal"] == 2).all() and (b["minibatch_steps_equal"] == 2).all()
+    assert b.loc["v20", "minibatch_steps_expected"] == 56000 and b.loc["jt_es", "minibatch_steps_expected"] == 87700
+    cost.loc[(cost.arm == "v20") & (cost.seed == 2), "minibatch_steps"] = 55999
+    cost.loc[(cost.arm == "jt") & (cost.seed == 1), "rows_t2"] -= 1
+    b = ta.budget_check(cost).set_index("arm")
+    assert b.loc["v20", "minibatch_steps_equal"] == 1 and b.loc["jt", "rows_by_stage_equal"] == 1 and b.loc["bw", "rows_by_stage_equal"] == 2
+
+
+# ====================================================================== the driver end to end
+def _fake_v20_dir(d: Path) -> None:
+    d.mkdir(parents=True, exist_ok=True)
+    rows = [{"phase": "A", "n_epochs_run": 10, "n_rows": 512, "n_policy_rows": 512}] * 1600 + \
+           [{"phase": "B", "n_epochs_run": 10, "n_rows": 1024, "n_policy_rows": 512}] * 600
+    pd.DataFrame(rows).to_csv(d / "v2_updates.csv", index=False)
+    json.dump({"final_global_update": 2200, "total_wall_sec": 350.0,
+               "phase_timing": {"A": {"wall_sec": 200.0}, "B": {"wall_sec": 150.0}},
+               "costs": {"seconds": {"train_update": 300.0, "train_rollout": 7.0}}}, open(d / "v2_run_summary.json", "w"))
+
+
+def test_run_analysis_end_to_end_on_a_synthetic_table(tmp_path):
+    """Every table and figure of the driver is produced; the run-file readers see the reduced runs (every planned
+    row of an arm points at the same reduced run); the headline reads the gate counts."""
+    runs = H.reduced_runs()
+    bw_dir, _ = H.reduced_bw_run()
+    v20_dir = tmp_path / "v20_fake"
+    _fake_v20_dir(v20_dir)
+    dirs = {"bw": bw_dir, "jt": runs["t3_root"][0], "jt_es": runs["t3_es"][0], "jt2": runs["t2_root"][0], "v20": str(v20_dir)}
+    rng = np.random.default_rng(7)
+    rows = synth_table(rng, bw_scale=0.003)
+    for r in rows:
+        r["run_dir"] = dirs[r["arm"]]
+        r["kind"] = "bw" if r["arm"] == "bw" else ("v20" if r["arm"] == "v20" else "joint")
+    eval_dir = tmp_path / "eval"
+    eval_dir.mkdir()
+    write_table(rows, eval_dir / "per_run.csv")
+    best = [{"wave": "t3", "arm": a, "q": q, "seed": s, "T": 3 if a != "jt2" else 2, "run": f"{a}_{q}_{s}", "status": "done",
+             "Gmax_full_over_dw": 0.01, "EXP_root_over_dw": 0.001, "best_update": 1000, "best_source": "check", "gates_pass": True}
+            for a in ("jt", "jt_es", "jt2") for q in (50, 60) for s in (SEEDS3 if a != "jt2" else SEEDS2)]
+    pd.DataFrame(best).to_csv(eval_dir / "best_of_run.csv", index=False)
+    out = tmp_path / "analysis"
+    head = ta.run_analysis(tmp_path, eval_dir, out, CRIT, figures=True)
+    files = ["per_run_table.csv", "criterion.csv", "secondary.csv", "gate_counts.csv", "bw_t3_gates.csv", "best_of_run.csv",
+             "coverage.csv", "coverage_arrays.npz", "cost.csv", "budget_check.csv", "headline.json", "figures/paired_differences.png"]
+    files += [f"figures/{n}_q{q}.png" for q in (50, 60) for n in ("effort_functions", "deviation_gains", "learning_curves_t3",
+                                                                    "learning_curves_t2", "visitation")]
+    for f in files:
+        assert (out / f).exists() and (f.endswith(".png") is False or (out / f).stat().st_size > 1000), f
+    bud = pd.read_csv(out / "budget_check.csv").set_index("arm")
+    assert bud.loc["v20", "n_runs"] == 40 and bud.loc["v20", "minibatch_steps_equal"] == 40 and bud.loc["v20", "updates_equal"] == 40
+    assert bud.loc["bw", "updates_equal"] == 0 and head["budget_check_all_equal"] is False      # the reduced runs are not D5's
+    assert head["reading_rule"]["candidate_for_a_lock"] is True and set(head["hypotheses"]) == {"H1", "H2", "H3", "H1-T2"}
+    cost = pd.read_csv(out / "cost.csv")
+    v20 = cost[cost["arm"] == "v20"]
+    assert len(v20) == 40 and (v20["minibatch_steps"] == 56000).all() and (v20["policy_rows_total"] == 1126400).all()
+    assert (v20["rows_t2"] == 819200).all() and (v20["rows_t1"] == 307200).all()
+    assert json.load(open(out / "headline.json")) == json.loads(json.dumps(head))
+    # the blind tool agrees with the driver's tables
+    assert tb.main(["--per-run", str(eval_dir / "per_run.csv"), "--out-dir", str(out / "blind"), "--analysis-dir", str(out)]) == 0

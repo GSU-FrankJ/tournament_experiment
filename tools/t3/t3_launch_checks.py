@@ -25,8 +25,6 @@ import csv
 import hashlib
 import json
 import multiprocessing as mp
-import os
-import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -42,7 +40,6 @@ sys.path.insert(0, str(ROOT / "tools" / "t3"))
 
 import t3_configs as tc  # noqa: E402
 import t3_eval as te  # noqa: E402
-import t3_metrics as tm  # noqa: E402
 from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
 from run import run_joint as rj  # noqa: E402
 from run import run_ms_stagewise as rms  # noqa: E402
@@ -72,11 +69,6 @@ def read_csv(path: Path) -> List[Dict[str, str]]:
 def kind_of(arm: str) -> str:
     """Run format of an arm: ``bw`` or ``joint``."""
     return "bw" if arm == "bw" else "joint"
-
-
-def git_head() -> str:
-    """HEAD of the repository this file lives in."""
-    return subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
 
 
 def lr_expected(sched: Mapping[str, Any], windows: Sequence[Mapping[str, Any]], j: int) -> float:
@@ -186,7 +178,7 @@ def _check_bw(d: Path, cfg: Mapping[str, Any], sched: Mapping[str, Any], expecte
         tot = np.array([sum(int(r[f"n_start_{k}"]) for r in rows if int(r["stage"]) == t) for k in ("tail", "near", "mid")])
         zf = z_flags(tot, p)
         flags, cells = flags + zf["flags"], cells + zf["cells"]
-    out["starts_ok"] = True
+    out["starts_ok"] = True      # bw: the starts are bin-balanced by the pinned config; only the descriptive z flags are reported
     out["z_flags"], out["z_cells"] = flags, cells
 
 
@@ -274,6 +266,17 @@ def post_launch(jobs: Sequence[Mapping[str, Any]], commit: Optional[str], worker
     agg["start_share_flags"] = {"cells": cells, "flags": flags, "expected_under_null": NULL_RATE * cells}
     agg["runs"] = res
     return agg
+
+
+def post_launch_ok(res: Mapping[str, Any]) -> bool:
+    """True iff every deterministic check passed: no failed or unevaluated verdict, C-INIT equal within every
+    (q, seed) group and (when the plan was given) equal to the plan in every run. The z flags are descriptive."""
+    bad = [v for v, c in res["verdicts"].items() if c["fail"] or c["not_evaluated"]]
+    ci = res["c_init_within_q_seed"]
+    ok = not bad and ci["equal"] == ci["groups"]
+    if "c_init_equals_plan" in res:
+        ok = ok and res["c_init_equals_plan"]["equal"] == res["c_init_equals_plan"]["runs"]
+    return bool(ok)
 
 
 # ---------------------------------------------------------------------------------- C-INIT (plan)
@@ -364,7 +367,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a3 = sub.add_parser("post-launch")
     a3.add_argument("--root", default=str(tc.DEFAULT_ROOT))
     a3.add_argument("--waves", nargs="+", default=["t3", "t2j"])
-    a3.add_argument("--commit", default=None, help="the launch commit the manifests must carry (default: HEAD)")
+    a3.add_argument("--commit", required=True, help="the launch commit (HEAD at the launch) the manifests must carry")
     a3.add_argument("--plan-digests", default=None, help="c_init_plan.csv of the pre-launch check")
     a3.add_argument("--out", required=True)
     a3.add_argument("--workers", type=int, default=8)
@@ -383,12 +386,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if a.plan_digests:
         pd = {(r["arm"], int(r["q"]), int(r["seed"])): r["init_state_sha256"] for r in read_csv(Path(a.plan_digests))}
     jobs = te.plan_jobs(Path(a.root), a.waves, None, None)
-    res = post_launch(jobs, a.commit or git_head(), a.workers, pd)
+    res = post_launch(jobs, a.commit, a.workers, pd)
     with open(a.out, "w") as f:
         json.dump(res, f, indent=1, default=str)
     print(json.dumps({k: v for k, v in res.items() if k != "runs"}, indent=1))
-    bad = [v for v, c in res["verdicts"].items() if c["fail"] or c["not_evaluated"]]
-    return 0 if not bad else 1
+    return 0 if post_launch_ok(res) else 1
 
 
 if __name__ == "__main__":

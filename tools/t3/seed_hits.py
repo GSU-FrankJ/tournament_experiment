@@ -33,10 +33,17 @@ Rule = Tuple[str, Callable[[str], bool]]
 
 RULES: List[Rule] = [
     ("seed_inventory_output", lambda p: os.path.basename(p).startswith("seed_inventory")),
+    # files this round wrote itself (smoke runs, preflight tables, the config-hash table); the first scan precedes them
+    ("t3_r1_own_outputs", lambda p: "/results/t3_r1/" in p or "/reports/t3/r1/" in p),
     ("protocol", lambda p: "/protocols/" in p),
     (
+        # the 40 v2.0 confirmation runs, their copies and the analyses / re-evaluations of them: the confirmation directories
+        # themselves and their evidence copies; the MS-R1 offline calibration (bit-identical replays of the recorded exports,
+        # results/ms_r1/calibration/) and the R2b diagnostic tables of seed 30510 (computed from the recorded files,
+        # results/v2_refine_r2b/diag_30510/); none of them contains a training run
         "v20_confirmation_or_copy",
-        lambda p: "confirmation_v2_0" in p or "/t2_refine_100526/evidence/" in p,
+        lambda p: "confirmation_v2_0" in p or "/t2_refine_100526/evidence/" in p
+        or "/results/ms_r1/calibration/" in p or "/results/v2_refine_r2b/diag_30510/" in p,
     ),
     (
         "run_file_under_results_experiments_multistage",
@@ -84,7 +91,9 @@ def main() -> int:
         by_class = Counter(r["class"] for r in rows)
         print(f"block {lo}-{hi}: {len(rows)} hit rows, {len({r['seed'] for r in rows})} seeds -> {out}")
         for c, n in sorted(by_class.items()):
-            print(f"  {c}: {n}")
+            files = {r["source_file"] for r in rows if r["class"] == c}
+            names = Counter(os.path.basename(f) for f in files)
+            print(f"  {c}: {n} rows in {len(files)} files; most common file names: {names.most_common(6)}")
     return 0
 
 

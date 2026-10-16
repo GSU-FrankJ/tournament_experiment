@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import atexit
-import copy
 import json
 import os
 import shutil

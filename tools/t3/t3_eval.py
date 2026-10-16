@@ -48,7 +48,7 @@ from agents.ppo_curriculum import BetaActor  # noqa: E402
 from envs.curriculum_env import GameSpec  # noqa: E402
 from replay_dev_rule import build_actor, candidate_fns, load_export  # noqa: E402
 from utils.dp_br_verifier import DEV_CONFIG, FINAL_CONFIG, DomainError, VerifierConfig  # noqa: E402
-from utils.v2_metrics import V2Eval, evaluate, save_npz  # noqa: E402
+from utils.v2_metrics import V2Eval, evaluate  # noqa: E402
 
 TIERS = {"final": FINAL_CONFIG, "development": DEV_CONFIG}
 V20_EXPORTS = {2: "u01600", 1: "u02200"}
@@ -216,7 +216,8 @@ def read_checks(run_dir: Path) -> List[Dict[str, Any]]:
     out = []
     with open(run_dir / "joint_checks.csv", newline="") as f:
         for r in csv.DictReader(f):
-            ok = r["valid"] == "True" and r["error"] == ""
+            # a row of a failed evaluation has the base columns only (no ``valid``, no scalars): it is not valid
+            ok = r.get("valid") == "True" and r.get("error", "") == ""
             out.append({"update": int(r["update"]), "valid": ok,
                         "gmax_dev": float(r["Gmax_full_over_dw"]) if ok else float("nan")})
     return out
@@ -318,6 +319,20 @@ def plan_jobs(root: Path, waves: Sequence[str], v20_root: Optional[Path], arrays
     return jobs
 
 
+V20_FILES = ("status.json", "gates.json", "run_config.json", "weights/u01600.npz", "weights/u02200.npz")
+
+
+def missing_reference_files(v20_root: Path) -> List[str]:
+    """Files of the 40 v2.0 confirmation runs that the evaluation needs and that do not exist (D9: a missing file is a
+    stop-and-report)."""
+    miss = []
+    for q in tc.QS:
+        for seed in tc.WAVE_SEEDS["t2j"]:
+            d = Path(v20_root) / f"q{q}" / f"seed{seed}"
+            miss += [str(d / f) for f in V20_FILES if not (d / f).is_file()]
+    return miss
+
+
 def run_parallel(fn: Any, jobs: Sequence[Mapping[str, Any]], workers: int) -> List[Dict[str, Any]]:
     """``fn`` over the jobs in a pool of single-threaded spawned processes (input order kept)."""
     if workers <= 1 or len(jobs) <= 1:
@@ -345,13 +360,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="T3-R1 evaluation of the runs", allow_abbrev=False)
     ap.add_argument("--root", default=str(tc.DEFAULT_ROOT))
     ap.add_argument("--waves", nargs="+", default=["t3", "t2j"], choices=list(tc.WAVES))
-    ap.add_argument("--v20-root", default=None, help="the v2.0 confirmation root (D9); omit to skip the v20 runs")
+    ap.add_argument("--v20-root", default=None, help="the v2.0 confirmation root (D9); required with wave t2j")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--workers", type=int, default=8, help="at most 40")
     ap.add_argument("--no-best", action="store_true", help="skip the best-of-run evaluation of the joint arms")
     a = ap.parse_args(argv)
     if not 1 <= a.workers <= 40:
         ap.error("--workers must be in 1..40")
+    if "t2j" in a.waves and not a.v20_root:
+        ap.error("wave t2j is paired with the v20 reference: --v20-root is required (D9)")
+    if a.v20_root:
+        miss = missing_reference_files(Path(a.v20_root))
+        if miss:
+            ap.error(f"{len(miss)} reference file(s) of the v20 runs are missing, e.g. {miss[0]} (D9: stop-and-report)")
     out = Path(a.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     jobs = plan_jobs(Path(a.root), a.waves, Path(a.v20_root) if a.v20_root else None, out / "arrays")

@@ -7,7 +7,6 @@ Run: OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 
 from __future__ import annotations
 
-import copy
 import csv
 import json
 import math
@@ -16,7 +15,6 @@ import shutil
 
 import numpy as np
 import pytest
-import torch
 
 import t3_helpers as H
 import t3_eval as te  # noqa: E402
@@ -25,7 +23,7 @@ from envs.curriculum_env import GameSpec  # noqa: E402
 from replay_dev_rule import candidate_fns  # noqa: E402
 from utils.dp_br_verifier import DEV_CONFIG, FINAL_CONFIG  # noqa: E402
 from utils.theory_multistage import g2_two_stage  # noqa: E402
-from utils.v2_metrics import evaluate, recovery_metrics  # noqa: E402
+from utils.v2_metrics import evaluate  # noqa: E402
 
 CRIT, CRIT_SHA = tm.load_criteria()
 
@@ -56,6 +54,12 @@ def test_criteria_file_has_the_pre_registered_values():
     assert proto["G-A"]["all_must_hold"][0]["threshold"] == g["G-A"]["eta_T_over_dw"]
     assert proto["G-F"]["all_must_hold"][0]["threshold"] == g["G-F"]["Gmax_full_over_dw"]
     assert proto["G-S"]["all_must_hold"][0]["threshold"] == g["G-S"]["stage1_rel_err_abs"]
+
+
+def test_the_code_constants_equal_the_criteria_file():
+    assert tm.BAND_TOL == CRIT["band"]["node_tolerance"] == 1e-9
+    assert CRIT["band"]["in_band"].startswith("|d| < 2 q (t - 1)") and CRIT["recovery"]["pos"] == "|d| < 2 q"
+    assert CRIT["statistics"]["percentiles"] == {"ci95": [2.5, 97.5], "ci98_75": [0.625, 99.375]}
 
 
 @pytest.mark.parametrize("q", [50, 60])
@@ -288,6 +292,38 @@ def test_best_of_run_selection_rules(tmp_path):
     _fake_run(tmp_path / "e", [(25, 0.04, True, "")], 0.001, 30, valid_final=False)
     assert te.select_best(te.best_candidates(tmp_path / "e")) == (0.04, 25, "check")
     assert te.select_best([]) is None
+
+
+def test_a_check_file_without_any_successful_evaluation_has_no_valid_candidate(tmp_path):
+    """When every development evaluation failed the CSV holds the base columns only: no candidate, no crash."""
+    d = tmp_path / "bad"
+    d.mkdir()
+    with open(d / "joint_checks.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["update", "rows_t1", "verifier_sec", "error"])
+        w.writerow([25, 100, 0.1, "DomainError: x"])
+        w.writerow([50, 200, 0.1, "ValueError: y"])
+    assert [c["valid"] for c in te.read_checks(d)] == [False, False]
+    json.dump({"updates": 60, "final_eval": {"development": {"valid": False, "Gmax_full_over_dw": float("nan")}}},
+              open(d / "joint_run_summary.json", "w"))
+    assert te.best_candidates(d) == [] and te.select_best([]) is None
+
+
+def test_a_missing_reference_file_stops_the_evaluation(tmp_path):
+    from pathlib import Path
+    miss = te.missing_reference_files(tmp_path)
+    assert len(miss) == 2 * 20 * len(te.V20_FILES)
+    # one v20 directory complete, the rest missing
+    d = tmp_path / "q50" / "seed30501"
+    (d / "weights").mkdir(parents=True)
+    for f in te.V20_FILES:
+        (d / f).write_text("x")
+    assert len(te.missing_reference_files(tmp_path)) == len(miss) - len(te.V20_FILES)
+    with pytest.raises(SystemExit):
+        te.main(["--root", str(tmp_path), "--waves", "t2j", "--out-dir", str(tmp_path / "o")])          # no --v20-root
+    with pytest.raises(SystemExit):
+        te.main(["--root", str(tmp_path), "--waves", "t3", "--v20-root", str(tmp_path), "--out-dir", str(tmp_path / "o")])
+    assert not Path(tmp_path / "o").exists()
 
 
 @pytest.mark.parametrize("name", ["t3_es", "t2_root"])

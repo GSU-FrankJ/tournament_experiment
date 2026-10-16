@@ -257,13 +257,70 @@ def test_root_only_runs_have_no_direct_start_counts(runs):
         assert int(v[k].sum()) == 0
 
 
-def test_approximate_stage3_counts_follow_the_decoded_observation(runs):
-    """The approximate counts (float64 bin index of obs_d * (t - 1) B) are on the stage-3 grid and add up to the
-    number of stage-3 rows that come from stage-2 starts."""
-    d, cfg = runs["t3_es"]
-    v = np.load(os.path.join(d, "visitation.npz"))
-    assert v["stage3_from_stage2_start_approx"].shape == (80,)
-    assert v["stage3_from_stage2_start_approx"].sum() == 8 * U
+def test_visitation_sources_equal_the_bins_of_the_true_gaps(tmp_path, monkeypatch):
+    """On one jt_es batch: the exact counts (root path, direct starts) and the approximate counts (stage-3 rows from stage-2
+    starts, decoded from the float32 observation) equal the bins of the true float64 learner gaps recorded at the
+    ``encode_obs`` calls; the rows of each source are those of its start stage within the stage-3 block."""
+    from envs.curriculum_env import GameSpec, gap_bin_index
+    d = str(tmp_path / "x")
+    os.makedirs(d)
+    jr = rj.JointRun(H.joint_cfg(d, "jt_es", 60, 50500, U=2, starts=H.ES_MIX_T3, check_every=2, window=False), d)
+    recorded = []
+    orig = GameSpec.encode_obs
+
+    def spy(self, t, dd):
+        recorded.append((int(t), np.array(dd, dtype=float)))
+        return orig(self, t, dd)
+    monkeypatch.setattr(GameSpec, "encode_obs", spy)
+    t0, d0, roles = jr.draw_starts()
+    batch = collect_batch_v2(jr.spec, jr.agent, t0, d0, roles, jr.rngs["env"], jr.rngs["learn"], jr.rngs["opp"], 1.0, 1.0, 10.0,
+                             reward_mode="expected", frozen=None, continuation_action_mode="stochastic", cont_table=None,
+                             clamp_likelihood="density")
+    jr._accumulate_visitation(batch, t0)
+    true3 = [dd for t, dd in recorded if t == 3][0]          # the first stage-3 call is the learner's (obs_L)
+    true2 = [dd for t, dd in recorded if t == 2][0]
+    assert true3.size == t0.size == 48
+    for key, rows_ in (("stage3_root_path", t0 == 1), ("stage3_direct_es", t0 == 3), ("stage3_from_stage2_start_approx", t0 == 2)):
+        b, nb = gap_bin_index(jr.spec, 3, true3[rows_], 10.0)
+        assert nb == 88 and np.array_equal(jr.vis[key], np.bincount(b, minlength=nb)), key
+    t02 = t0[t0 <= 2]                                        # the stage-2 block holds the episodes with t0 <= 2
+    assert true2.size == t02.size == 32
+    for key, rows_ in (("stage2_root_path", t02 == 1), ("stage2_direct_es", t02 == 2)):
+        b, nb = gap_bin_index(jr.spec, 2, true2[rows_], 10.0)
+        assert nb == 44 and np.array_equal(jr.vis[key], np.bincount(b, minlength=nb)), key
+
+
+def test_a_stage3_only_joint_run_equals_the_ms_stage_3_phase_bit_for_bit(tmp_path):
+    """JointRun with every episode started at stage 3 (and legacy windows) consumes every stream, sets every learning rate and
+    ends in the state of ``MSRun``'s terminal-stage phase of the legacy bw arm: the training loop is the MS runner's."""
+    n_ep, n = 48, 40
+    d_ms = str(tmp_path / "ms")
+    os.makedirs(d_ms)
+    ms = rms.MSRun(H.bw_cfg(d_ms, 50, 50500, budgets=(n, 40, 20), epu=n_ep), d_ms)
+    ms.run_stage(3)
+    d_j = str(tmp_path / "j")
+    os.makedirs(d_j)
+    jr = rj.JointRun(H.joint_cfg(d_j, "jt", 50, 50500, U=n, epu=n_ep, starts={"root": 0, "stage2": 0, "stage3": n_ep},
+                                 check_every=25), d_j)
+    jr.train()
+    fs_ms, fs_j = ms.agent.full_state(), jr.agent.full_state()
+    for k in ("actor", "critic", "opponent", "opt_actor", "opt_critic", "rng_minibatch", "snapshot_refreshes"):
+        assert H.tree_equal(fs_ms[k], fs_j[k]), k
+    assert H.tree_equal({k: g.bit_generator.state for k, g in ms.rngs.items()}, {k: g.bit_generator.state for k, g in jr.rngs.items()})
+    assert len(ms.rows) == len(jr.rows) == n
+    for a, b in zip(ms.rows, jr.rows):
+        for k in ("lr", "kl_final_epoch", "clip_frac", "policy_loss", "value_loss", "adv_raw_mean", "adv_raw_std",
+                  "mean_episode_return", "rngpos_env", "rngpos_learn", "rngpos_opp", "rngpos_start", "rngpos_minibatch"):
+            assert a[k] == b[k], (a["update"], k)
+        assert a["mean_effort"] == b["mean_effort_t3"]
+    wa, wb = np.load(os.path.join(d_ms, "weights", "u00025.npz")), np.load(os.path.join(d_j, "weights", "u00025.npz"))
+    assert wa.files == wb.files and all(np.array_equal(wa[k], wb[k]) for k in wa.files)
+    assert jr.init_state_sha256 == ms.init_state_sha256
+    # the checks (pure) agree too: the development evaluation of the same live actor at update 25
+    ca = read_csv(os.path.join(d_ms, "ms_checks_stage3.csv"))[0]
+    cb = read_csv(os.path.join(d_j, "joint_checks.csv"))[0]
+    assert ca["update"] == cb["update"] == "25" and float(ca["eta_T_over_dw"]) == float(cb["eta_T_over_dw"])
+    assert float(ca["Gmax_full_over_dw"]) == float(cb["Gmax_full_over_dw"])
 
 
 @pytest.mark.parametrize("name", ["t3_es", "t2_root"])

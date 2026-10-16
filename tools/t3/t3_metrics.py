@@ -15,7 +15,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, Mapping, Tuple
 
 import numpy as np
 

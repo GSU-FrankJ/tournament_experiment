@@ -484,8 +484,6 @@ class JointRun:
                 w_path = os.path.join(self.weights_dir, f"u{u:05d}.npz")
                 agent.export_weights_npz(w_path)
                 self.weights_log.append({"update": u, "file": os.path.relpath(w_path, self.out_dir)})
-            if u % self.check_every == 0:
-                self.development_check(u)
             eff = batch["mean_effort_by_stage"]
             self.rows.append({
                 "update": u, "lr": actor_lr, "n_episodes": int(batch["n_episodes"]),
@@ -500,6 +498,8 @@ class JointRun:
                 **{f"rngpos_{k_}": rng_position(g_) for k_, g_ in self.rngs.items()},
                 "rngpos_minibatch": rng_position(agent.rng_mb),
                 "update_wall_sec": time.perf_counter() - t_upd})
+            if u % self.check_every == 0:       # after the row, as in MSRun: the check's seconds are not update_wall_sec
+                self.development_check(u)
             if u % 50 == 0 or u == self.U:
                 print(f"[u{u:>5}] ret={batch['mean_episode_return']:.4f} kl={diag['kl_final_epoch']:.4f} "
                       f"lr={actor_lr:.3g}", flush=True)

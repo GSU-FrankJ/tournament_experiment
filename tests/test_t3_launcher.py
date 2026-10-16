@@ -14,7 +14,6 @@ import json
 import math
 import os
 import shutil
-from pathlib import Path
 
 import pytest
 
@@ -22,7 +21,6 @@ import t3_helpers as H
 import t3_configs as tc  # noqa: E402
 import t3_launch as tl  # noqa: E402
 import t3_launch_checks as lc  # noqa: E402
-import t3_eval as te  # noqa: E402
 
 PROTO, PARAMS = H.PROTO, H.BW_PARAMS
 
@@ -109,6 +107,48 @@ def test_dry_run_writes_valid_configs_and_launches_nothing(tmp_path, capsys):
     assert len(cfgs) == 8 and not list((root / "smoke").glob("q*/*/status.json"))
 
 
+def test_several_waves_refuse_explicit_arms_and_the_launch_commit_is_required(tmp_path):
+    for extra in (["--arms", "jt"], ["--seeds", "50501"]):
+        with pytest.raises(SystemExit):
+            tl.main(["--wave", "t3", "t2j", *extra, "--plan-csv", str(tmp_path / "x.csv")])
+    with pytest.raises(SystemExit):                    # post-launch needs the launch commit (no default)
+        lc.main(["post-launch", "--out", str(tmp_path / "o.json")])
+
+
+def test_the_deterministic_checks_decide_the_exit_status():
+    ok = {"verdicts": {"exit_ok": {"pass": 4, "fail": 0, "not_evaluated": 0}, "lr_ok": {"pass": 4, "fail": 0, "not_evaluated": 0}},
+          "c_init_within_q_seed": {"groups": 2, "equal": 2}, "c_init_equals_plan": {"runs": 4, "equal": 4},
+          "start_share_flags": {"cells": 100, "flags": 5, "expected_under_null": 0.27}}
+    assert lc.post_launch_ok(ok) is True                     # the z flags are descriptive
+    import copy as _c
+    for path, val in ((("verdicts", "lr_ok", "fail"), 1), (("verdicts", "exit_ok", "not_evaluated"), 1),
+                      (("c_init_within_q_seed", "equal"), 1), (("c_init_equals_plan", "equal"), 3)):
+        bad = _c.deepcopy(ok)
+        node = bad
+        for k in path[:-1]:
+            node = node[k]
+        node[path[-1]] = val
+        assert lc.post_launch_ok(bad) is False, path
+    no_plan = _c.deepcopy(ok)
+    del no_plan["c_init_equals_plan"]
+    assert lc.post_launch_ok(no_plan) is True
+
+
+def test_two_waves_are_one_launch_with_one_record_and_one_plan(tmp_path):
+    root = tmp_path / "results" / "t3_r1"
+    plan = tmp_path / "plan.csv"
+    assert tl.main(["--wave", "t3", "t2j", "--root", str(root), "--plan-csv", str(plan)]) == 0
+    rows = list(csv.DictReader(open(plan)))
+    assert len(rows) == 160 and [r["wave"] for r in rows].count("t3") == 120 and [r["wave"] for r in rows].count("t2j") == 40
+    assert tl.main(["--wave", "t3", "t2j", "--dry-run", "--root", str(root), "--workers", "2"]) == 0
+    rec = json.load(open(next(root.glob("dryrun_t3_t2j_*.json"))))
+    assert rec["n_planned"] == 160 and rec["wave"] == "t3+t2j" and rec["validation"]["n_invalid"] == 0
+    assert len(list((root / "runs").glob("q*/seed*/*/run_config.json"))) == 120
+    assert len(list((root / "runs_t2").glob("q*/seed*/jt2/run_config.json"))) == 40
+    with pytest.raises(SystemExit):
+        tl.main(["--wave", "t3", "t2j", "--seeds", "50501", "--plan-csv", str(tmp_path / "x.csv")])
+
+
 def test_job_command_and_pool(tmp_path, monkeypatch):
     out = str(tmp_path / "o")
     bw = tc.build_config(PROTO, 50, 50501, "bw", out, PARAMS)
@@ -179,7 +219,6 @@ def test_within_an_arm_configs_differ_only_in_q_seed_run_output_and_derived_fiel
     other_q = tc.build_config(PROTO, 60, 50501, arm, "/x/c", PARAMS)
     rec_diff = {"record." + p for p in tc.config_diff(PROTO["records"]["50"], PROTO["records"]["60"])}
     ok = ["q", "run", "record.run", "record.output_dir", "record_sha256", "record.q", "record.game.q"] + sorted(rec_diff)
-    ok += ["pipeline", "derived"] if arm == "bw" else []
     d = tc.config_diff(base, other_q)
     assert not allowed(d, ok), allowed(d, ok)
     assert "record.game.k" not in d and "record.protocol.episodes_per_update" not in d     # the economics other than q are shared
@@ -288,7 +327,10 @@ def test_post_launch_flags_the_reduced_runs_that_are_not_production_runs():
     assert res["budget_ok"] and res["lr_ok"] and res["refresh_ok"]
     assert not res["config_equals_plan"] and not res["config_production_ok"]      # 48 episodes, U = 30
     assert not res["exports_ok"] and not res["checks_ok"]                         # exports and checks every 10 updates
-    assert res["manifest_commit_ok"] and res["clean_tree"] in (True, False)
+    man = json.load(open(os.path.join(_reduced_job("t3_es")["run_dir"], "manifest.json")))
+    assert res["clean_tree"] is man["clean_tree"]                       # the flag of the manifest, whatever the tree was
+    assert lc.check_run(_reduced_job("t3_es"), _reduced_expected("t3_es"), commit=man["commit"])["manifest_commit_ok"] is True
+    assert lc.check_run(_reduced_job("t3_es"), _reduced_expected("t3_es"), commit="0" * 40)["manifest_commit_ok"] is False
 
 
 def test_post_launch_detects_a_wrong_budget_and_a_missing_file(tmp_path):
