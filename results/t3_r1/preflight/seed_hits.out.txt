@@ -1,0 +1,13 @@
+$ python tools/t3/seed_hits.py --out-dir results/t3_r1/preflight --block 50500 50520 --block 30501 30520
+start 2026-10-16T23:15:11Z
+scanned 165586 json, 57532 csv files; 394 distinct seed values
+block 50500-50520: 105 hit rows, 21 seeds -> results/t3_r1/preflight/seed_hits_50500_50520.csv
+  seed_inventory_output: 21 rows in 1 files; most common file names: [('seed_inventory_30501_30520.csv', 1)]
+  t3_r1_own_outputs: 84 rows in 44 files; most common file names: [('status.json', 8), ('run_config.json', 8), ('manifest.json', 8), ('joint_run_summary.json', 6), ('rule_log.json', 2), ('ms_checks_stage2.csv', 2)]
+block 30501-30520: 11506 hit rows, 20 seeds -> results/t3_r1/preflight/seed_hits_30501_30520.csv
+  protocol: 400 rows in 20 files; most common file names: [('v2_T2_locked_v2_0.json', 20)]
+  seed_inventory_output: 700 rows in 35 files; most common file names: [('seed_inventory_stock.csv', 20), ('seed_inventory_40501_40520.csv', 10), ('seed_inventory_10511_10530.csv', 3), ('seed_inventory_30501_30520.csv', 1), ('seed_inventory_50500_50520.csv', 1)]
+  t3_r1_own_outputs: 100 rows in 5 files; most common file names: [('v20_reference_runs.csv', 1), ('c_init_plan.csv', 1), ('c_t2r_per_run.csv', 1), ('c_t2r.csv', 1), ('run_config_hashes.csv', 1)]
+  v20_confirmation_or_copy: 10306 rows in 3548 files; most common file names: [('gates.json', 488), ('manifest.json', 480), ('v2_checkpoints_B.csv', 480), ('status.json', 480), ('v2_checkpoints_A.csv', 480), ('run_config.json', 480)]
+exit=0
+end 2026-10-16T23:34:57Z

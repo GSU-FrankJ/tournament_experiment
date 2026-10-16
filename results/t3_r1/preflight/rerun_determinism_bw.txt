@@ -1,0 +1,20 @@
+$ python tools/t3/compare_runs.py bw results/t3_r1/smoke/q50/bw <scratch>/rerun_bw/q50/bw
+162 npz files compared, all identical: True
+ms_updates.csv identical (wall-clock columns excluded): True
+ms_checks_stage3.csv identical (wall-clock columns excluded): True
+ms_checks_stage2.csv identical (wall-clock columns excluded): True
+ms_checks_stage1.csv identical (wall-clock columns excluded): True
+final actor / critic / frozen stages and stream states identical: True
+exit=0
+$ python tools/t3/compare_runs.py bw results/t3_r1/smoke/q60/bw <scratch>/rerun_bw/q60/bw
+162 npz files compared, all identical: True
+ms_updates.csv identical (wall-clock columns excluded): True
+ms_checks_stage3.csv identical (wall-clock columns excluded): True
+ms_checks_stage2.csv identical (wall-clock columns excluded): True
+ms_checks_stage1.csv identical (wall-clock columns excluded): True
+final actor / critic / frozen stages and stream states identical: True
+exit=0
+
+peak RSS of the two bw reruns (resource.getrusage(RUSAGE_CHILDREN), one child each; the MS runner records none):
+{"q": 50, "returncode": 0, "wall_sec": 377.11026096343994, "peak_rss_kb": 934632, "user_cpu_sec": 356.432416, "sys_cpu_sec": 20.619814}
+{"q": 60, "returncode": 0, "wall_sec": 382.46056509017944, "peak_rss_kb": 933112, "user_cpu_sec": 357.562058, "sys_cpu_sec": 24.969055}

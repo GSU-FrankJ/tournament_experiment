@@ -1,0 +1,3 @@
+v20 budget from v2_updates.csv (steps per update = n_epochs_run * ceil(n_rows / 256); n_rows 512 in Phase A, 1024 in Phase B; n_policy_rows 512):
+runs: 40 | updates: [np.int64(2200)] | minibatch steps: [np.int64(56000)] | policy rows total: [np.int64(1126400)] | rows t2/t1: [np.int64(819200)] [np.int64(307200)]
+wall_sec (s): min 346 median 356 max 373

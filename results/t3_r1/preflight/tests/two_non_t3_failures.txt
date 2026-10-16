@@ -1,0 +1,22 @@
+### shard 1, the full-suite run (2026-10-16): tests/test_ms_analysis.py::test_cli_end_to_end_complete_world_writes_every_output
+27:>               assert pd.read_csv(out / f, nrows=1)["roots_id"].iloc[0] == rid, f      # the roots are in every CSV
+29:E               AssertionError: per_run.csv
+30:E               assert np.float64(inf) == '9e2443526928'
+32:tests/test_ms_analysis.py:1229: AssertionError
+
+### the same test alone at HEAD afterwards (a new pytest temporary directory):
+.                                                                        [100%]
+1 passed in 52.79s
+
+### shard 6, the full-suite run: tests/test_registry_canonicalization.py::test_registry_canonicalization
+69:>       assert n_grad == 15, f"expected 15 Set-2 gradient runs, got {n_grad}"
+70:E       AssertionError: expected 15 Set-2 gradient runs, got 0
+71:E       assert 0 == 15
+73:tests/test_registry_canonicalization.py:115: AssertionError
+
+### the same test in a git archive of origin/ms-r4 (db7577ea, which has no T3 file), run from the extracted directory:
+>       assert n_grad == 15, f"expected 15 Set-2 gradient runs, got {n_grad}"
+E       AssertionError: expected 15 Set-2 gradient runs, got 0
+E       assert 0 == 15
+tests/test_registry_canonicalization.py:115: AssertionError
+1 failed in 9.53s

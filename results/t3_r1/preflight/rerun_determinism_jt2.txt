@@ -1,0 +1,12 @@
+$ python tools/t3/compare_runs.py joint results/t3_r1/smoke/q50/jt2 <scratch>/rerun/smoke/q50/jt2
+47 npz files compared, all identical: True
+joint_updates.csv identical (wall-clock columns excluded): True
+joint_checks.csv identical (wall-clock columns excluded): True
+final actor / critic and stream states identical: True
+exit=0
+$ python tools/t3/compare_runs.py joint results/t3_r1/smoke/q60/jt2 <scratch>/rerun/smoke/q60/jt2
+47 npz files compared, all identical: True
+joint_updates.csv identical (wall-clock columns excluded): True
+joint_checks.csv identical (wall-clock columns excluded): True
+final actor / critic and stream states identical: True
+exit=0
