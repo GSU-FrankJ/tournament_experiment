@@ -1,0 +1,59 @@
+{
+ "K": 25,
+ "M": 3,
+ "conc_limit": 0.04,
+ "localized_fraction": 0.25,
+ "alpha_polish": 0.5,
+ "ema_beta": 0.5,
+ "near_tie_half_width": 20.0,
+ "stages": {
+  "3": {
+   "eps": 0.005,
+   "rho": 0.05,
+   "tau": 0.02
+  },
+  "2": {
+   "eps": 0.005,
+   "rho": 0.03,
+   "tau": 0.02
+  },
+  "1": {
+   "eps": 0.005,
+   "rho": 0.03,
+   "tau": 0.02
+  }
+ },
+ "legacy_pipeline": {
+  "budgets": {
+   "3": 1600,
+   "2": 1600,
+   "1": 600
+  },
+  "lr_windows": {
+   "3": [
+    {
+     "first": 1201,
+     "last": 1600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ],
+   "2": [
+    {
+     "first": 1201,
+     "last": 1600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ],
+   "1": [
+    {
+     "first": 1,
+     "last": 600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ]
+  }
+ }
+}

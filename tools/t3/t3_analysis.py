@@ -1,0 +1,597 @@
+#!/usr/bin/env python3
+"""Analysis of round T3-R1 (D7, prompt section 3.3): the pre-registered paired comparison, the secondary statistics,
+the gate counts, the diagnosis of every ``bw`` failure, best of run, coverage, cost, the learning curves and the figures.
+
+Inputs: ``per_run.csv`` and ``best_of_run.csv`` of ``tools/t3/t3_eval.py``, the run directories (cost, coverage, curves),
+``reports/t3/r1/prereg_criteria.json`` (read by this tool; the blind tool ``t3_blind.py`` follows it independently).
+The statistics are those of ``tools/ms/r4_common.py`` (``paired_stats``, ``boot_mean_ci``, ``boot_indices``,
+``clopper_pearson``), whose definition is D7's: ``numpy.random.default_rng(S).integers(0, n, size=(10000, n))`` created afresh
+for every (hypothesis, q, statistic), percentile intervals of the resampled means (``numpy.percentile``, linear method).
+Failed runs: every planned run is a row; its metrics are missing and its pair is dropped from the paired statistics.
+
+Usage:
+    python tools/t3/t3_analysis.py --root results/t3_r1 --eval-dir results/t3_r1/eval --out-dir results/t3_r1/analysis
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+
+import numpy as np
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools" / "ms"))
+sys.path.insert(0, str(ROOT / "tools" / "t3"))
+
+import r4_common as R4  # noqa: E402
+import t3_configs as tc  # noqa: E402
+import t3_metrics as tm  # noqa: E402
+from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
+
+QS = tc.QS
+ARM_ORDER = ("bw", "jt", "jt_es", "v20", "jt2")
+HORIZON = {"bw": 3, "jt": 3, "jt_es": 3, "v20": 2, "jt2": 2}
+BOOL_COLS = ("gate_G_A", "gate_G_F", "gate_G_N", "gate_G_S", "gates_pass", "ga_eta", "ga_rmse", "ga_tail", "gn_eta",
+             "gn_gmax", "gs_s1", "valid", "dev_valid", "global_rng_ok")
+
+
+# ---------------------------------------------------------------------------------- loading
+def _truthy(v: Any) -> bool:
+    return v is True or (isinstance(v, str) and v == "True") or (isinstance(v, (int, float, np.bool_)) and not isinstance(v, bool)
+                                                                 and not (isinstance(v, float) and math.isnan(v)) and bool(v))
+
+
+def load_per_run(path: Path) -> pd.DataFrame:
+    """The per-run table of ``t3_eval.py``: one row per planned run; the boolean columns as Python bools (False where
+    missing), ``exit_ok`` and ``passed`` (all gates and a clean exit and the global-RNG assertion) added."""
+    df = pd.read_csv(path)
+    for c in BOOL_COLS:
+        if c in df.columns:
+            df[c] = df[c].map(_truthy)
+    df["exit_ok"] = (df["status"] == "done") & (df["exit_code"] == 0)
+    df["passed"] = df["exit_ok"] & df["gates_pass"] & df["global_rng_ok"]
+    return df
+
+
+def planned_seeds(arm: str) -> Tuple[int, ...]:
+    """The planned seeds of an arm: 50501-50520 (T = 3 arms) or 30501-30520 (``v20``, ``jt2``)."""
+    return tc.WAVE_SEEDS["t3"] if HORIZON[arm] == 3 else tc.WAVE_SEEDS["t2j"]
+
+
+def series(df: pd.DataFrame, arm: str, q: int, stat: str) -> np.ndarray:
+    """The values of ``stat`` for the planned seeds of (arm, q), in seed order; NaN where the run is missing, failed or
+    has no value."""
+    sub = df[(df["arm"] == arm) & (df["q"] == q)].set_index("seed")
+    out = []
+    for s in planned_seeds(arm):
+        v = float("nan")
+        if s in sub.index and bool(sub.loc[s, "exit_ok"]) and stat in sub.columns:
+            x = sub.loc[s, stat]
+            v = float(x) if pd.notna(x) else float("nan")
+        out.append(v)
+    return np.array(out)
+
+
+# ---------------------------------------------------------------------------------- paired statistics
+def paired_row(x: np.ndarray, y: np.ndarray, S: int, n_boot: int, pct95: Sequence[float], pct9875: Sequence[float]
+               ) -> Dict[str, Any]:
+    """Paired statistics of a - b over the complete pairs: the mean with its 95 % and 98.75 % percentile intervals, the
+    median with its 95 % interval (the same bootstrap indices), the sign count and the dropped pairs."""
+    st = R4.paired_stats(x, y, n_boot, S)
+    ok = np.isfinite(x) & np.isfinite(y)
+    d = (np.asarray(x, float) - np.asarray(y, float))[ok]
+    lo98, hi98 = R4.boot_mean_ci(d, n_boot, S, tuple(pct9875))
+    if d.size:
+        med = np.median(d[R4.boot_indices(d.size, n_boot, S)], axis=1)
+        mlo, mhi = float(np.percentile(med, pct95[0])), float(np.percentile(med, pct95[1]))
+    else:
+        mlo = mhi = float("nan")
+    return {"n_pairs": st["n_pairs"], "dropped_pairs": int(len(x) - st["n_pairs"]), "mean_a": st["mean_a"],
+            "mean_b": st["mean_b"], "mean_diff": st["mean_diff"], "ci95_lo": st["ci_lo"], "ci95_hi": st["ci_hi"],
+            "ci98_75_lo": lo98, "ci98_75_hi": hi98, "median_diff": st["median_diff"], "median_ci95_lo": mlo,
+            "median_ci95_hi": mhi, "n_neg": st["n_neg"], "n_pos": st["n_pos"]}
+
+
+def criterion_table(df: pd.DataFrame, crit: Mapping[str, Any]) -> pd.DataFrame:
+    """H1, H2, H3 and H1-T2 per q on the primary statistic (final-tier ``Gmax_full_over_dw``): one row per
+    (hypothesis, q) with the intervals, the verdict at that q (upper end of the 95 % interval strictly below 0) and the
+    hypothesis verdict (both q)."""
+    stat = crit["primary"]["statistic"]
+    n_boot = int(crit["statistics"]["n_boot"])
+    p95, p9875 = crit["statistics"]["percentiles"]["ci95"], crit["statistics"]["percentiles"]["ci98_75"]
+    rows: List[Dict[str, Any]] = []
+    for h, spec in crit["hypotheses"].items():
+        S = int(crit["statistics"]["bootstrap_seed"][str(spec["horizon"])])
+        for q in QS:
+            r = paired_row(series(df, spec["a"], q, stat), series(df, spec["b"], q, stat), S, n_boot, p95, p9875)
+            r.update({"hypothesis": h, "horizon": spec["horizon"], "a": spec["a"], "b": spec["b"], "q": q,
+                      "statistic": stat, "bootstrap_seed": S, "ci_hi_below_0": bool(r["ci95_hi"] < 0.0)})
+            rows.append(r)
+    out = pd.DataFrame(rows)
+    verdict = out.groupby("hypothesis")["ci_hi_below_0"].all().to_dict()
+    fails = out[~out["ci_hi_below_0"]].groupby("hypothesis")["q"].apply(lambda s: ";".join(str(int(v)) for v in s)).to_dict()
+    out["hypothesis_supported"] = out["hypothesis"].map(verdict)
+    out["fails_at_q"] = out["hypothesis"].map(lambda h: fails.get(h, ""))
+    first = ["hypothesis", "horizon", "a", "b", "q", "statistic", "n_pairs", "dropped_pairs", "mean_a", "mean_b", "mean_diff",
+             "ci95_lo", "ci95_hi", "ci_hi_below_0", "hypothesis_supported", "fails_at_q", "ci98_75_lo", "ci98_75_hi",
+             "median_diff", "median_ci95_lo", "median_ci95_hi", "n_neg", "n_pos", "bootstrap_seed"]
+    return out[first + [c for c in out.columns if c not in first]]
+
+
+def secondary_stats(horizon: int) -> List[str]:
+    """The secondary statistics of D7 that exist at a horizon (column names of the per-run table)."""
+    T = int(horizon)
+    cols = ["EXP_root_over_dw", "dReach_over_dw", "rmse_pos_T_over_eT0", "tail_mean_T_over_eT0", "peak_T_abs", "e1_at_0"]
+    for t in range(1, T + 1):
+        cols += [f"Delta_max_t{t}_over_dw", f"G_max_t{t}_over_dw"]
+    for t in range(2, T + 1):
+        cols += [f"Delta_in_t{t}", f"Delta_out_t{t}", f"G_in_t{t}", f"G_out_t{t}"]
+    if T == 2:
+        cols.append("stage1_rel_err_abs")
+    return cols
+
+
+def secondary_table(df: pd.DataFrame, crit: Mapping[str, Any]) -> pd.DataFrame:
+    """The same paired statistics for each of the four pairs and every secondary statistic (descriptive)."""
+    n_boot = int(crit["statistics"]["n_boot"])
+    p95, p9875 = crit["statistics"]["percentiles"]["ci95"], crit["statistics"]["percentiles"]["ci98_75"]
+    rows: List[Dict[str, Any]] = []
+    for h, spec in crit["hypotheses"].items():
+        S = int(crit["statistics"]["bootstrap_seed"][str(spec["horizon"])])
+        for stat in secondary_stats(spec["horizon"]):
+            for q in QS:
+                r = paired_row(series(df, spec["a"], q, stat), series(df, spec["b"], q, stat), S, n_boot, p95, p9875)
+                r.update({"hypothesis": h, "a": spec["a"], "b": spec["b"], "q": q, "statistic": stat})
+                rows.append(r)
+    out = pd.DataFrame(rows)
+    first = ["hypothesis", "a", "b", "q", "statistic"]
+    return out[first + [c for c in out.columns if c not in first]]
+
+
+# ---------------------------------------------------------------------------------- gate counts
+def gate_counts(df: pd.DataFrame) -> pd.DataFrame:
+    """Per (arm, q): planned runs, runs with a clean exit, passes of G-A, G-F, G-N, (G-S at T = 2) and of the run pass, each
+    with the exact Clopper-Pearson 95 % interval of k / planned."""
+    rows: List[Dict[str, Any]] = []
+    for arm in ARM_ORDER:
+        for q in QS:
+            sub = df[(df["arm"] == arm) & (df["q"] == q)]
+            if sub.empty:
+                continue
+            n = len(planned_seeds(arm))
+            r: Dict[str, Any] = {"arm": arm, "q": q, "horizon": HORIZON[arm], "n_planned": n,
+                                 "n_exit_ok": int(sub["exit_ok"].sum())}
+            ok = sub[sub["exit_ok"]]
+            gates = [("G-A", "gate_G_A"), ("G-F", "gate_G_F"), ("G-N", "gate_G_N")]
+            if HORIZON[arm] == 2:
+                gates.append(("G-S", "gate_G_S"))
+            for name, col in gates:
+                k = int(ok[col].sum()) if col in ok.columns else 0
+                lo, hi = R4.clopper_pearson(k, n)
+                r.update({f"{name}_pass": k, f"{name}_lo": lo, f"{name}_hi": hi})
+            k = int(sub["passed"].sum())
+            lo, hi = R4.clopper_pearson(k, n)
+            r.update({"run_pass": k, "run_pass_lo": lo, "run_pass_hi": hi})
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def reading_rule(counts: pd.DataFrame, crit: Mapping[str, Any]) -> Dict[str, Any]:
+    """D7's reading of ``bw`` at T = 3: at least 18 of 20 runs pass G-A and G-F and G-N at both q."""
+    need = int(crit["reading_rule"]["min_passes_of_20_at_each_q"])
+    bw = counts[counts["arm"] == "bw"].set_index("q")
+    per_q = {int(q): int(bw.loc[q, "run_pass"]) for q in bw.index}
+    return {"min_passes": need, "passes_by_q": per_q, "candidate_for_a_lock": bool(len(per_q) == len(QS)
+                                                                                   and all(v >= need for v in per_q.values()))}
+
+
+# ---------------------------------------------------------------------------------- bw diagnosis
+def bw_gate_table(df: pd.DataFrame) -> pd.DataFrame:
+    """The T = 3 gate table of ``bw`` (one row per planned run) with the per-gate, per-stage diagnosis of every failure:
+    which criteria fail, the values, the stage and gap of the largest dynamic gain and whether it lies in band."""
+    sub = df[df["arm"] == "bw"].sort_values(["q", "seed"])
+    rows = []
+    for _, r in sub.iterrows():
+        row: Dict[str, Any] = {"q": int(r["q"]), "seed": int(r["seed"]), "exit_ok": bool(r["exit_ok"]), "passed": bool(r["passed"])}
+        if not r["exit_ok"]:
+            row["diagnosis"] = f"no result (status {r['status']}, exit code {r['exit_code']})"
+            rows.append(row)
+            continue
+        for c in ("gate_G_A", "gate_G_F", "gate_G_N"):
+            row[c] = bool(r[c])
+        row.update({c: r[c] for c in ("eta_T_over_dw", "rmse_pos_T_over_eT0", "tail_mean_T_over_eT0", "Gmax_full_over_dw",
+                                      "Gmax_full_t", "Gmax_full_d", "dev_eta_T_over_dw", "dev_Gmax_full_over_dw", "peak_T_signed")})
+        for t in (1, 2, 3):
+            row[f"G_max_t{t}_over_dw"] = r[f"G_max_t{t}_over_dw"]
+            row[f"Delta_max_t{t}_over_dw"] = r[f"Delta_max_t{t}_over_dw"]
+        for t in (2, 3):
+            for c in ("G_in", "G_out", "Delta_in", "Delta_out"):
+                row[f"{c}_t{t}"] = r[f"{c}_t{t}"]
+        why = []
+        if not r["ga_eta"]:
+            why.append(f"G-A eta_3 {r['eta_T_over_dw']:.5f} > 0.005")
+        if not r["ga_rmse"]:
+            why.append(f"G-A rmse_pos {r['rmse_pos_T_over_eT0']:.4f} > 0.05")
+        if not r["ga_tail"]:
+            why.append(f"G-A tail_mean {r['tail_mean_T_over_eT0']:.4f} > 0.02")
+        if not r["gate_G_F"]:
+            t = int(r["Gmax_full_t"])
+            side = "out of band" if t >= 2 and r[f"G_out_t{t}"] >= r[f"G_in_t{t}"] else "in band"
+            if t == 1:
+                side = "root"
+            why.append(f"G-F Gmax {r['Gmax_full_over_dw']:.5f} > 0.01 at stage {t}, d = {r['Gmax_full_d']:g} ({side})")
+        if not r["gn_eta"]:
+            why.append(f"G-N |eta_3(dev) - eta_3(final)| = {abs(r['dev_eta_T_over_dw'] - r['eta_T_over_dw']):.5f} > 0.001")
+        if not r["gn_gmax"]:
+            why.append(f"G-N |Gmax(dev) - Gmax(final)| = {abs(r['dev_Gmax_full_over_dw'] - r['Gmax_full_over_dw']):.5f} > 0.001")
+        row["diagnosis"] = "; ".join(why)
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------------- best of run
+def best_of_run_table(df: pd.DataFrame, best: pd.DataFrame) -> pd.DataFrame:
+    """Per (joint arm, q): last iterate against the selected candidate (selected with the development verifier; not a
+    pre-specified candidate): means and medians of ``Gmax_full_over_dw`` and ``EXP_root_over_dw``, the mean selected
+    update and the number of runs whose last iterate was selected."""
+    rows = []
+    for arm in ("jt", "jt_es", "jt2"):
+        for q in QS:
+            last = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]].set_index("seed")
+            b = best[(best["arm"] == arm) & (best["q"] == q) & (best["status"] == "done")].set_index("seed")
+            common = sorted(set(last.index) & set(b.index))
+            if not common:
+                continue
+            r: Dict[str, Any] = {"arm": arm, "q": q, "n": len(common), "label": "selected with the development verifier; "
+                                                                                "not a pre-specified candidate"}
+            for stat in ("Gmax_full_over_dw", "EXP_root_over_dw"):
+                lv = last.loc[common, stat].astype(float).to_numpy()
+                bv = b.loc[common, stat].astype(float).to_numpy()
+                r.update({f"{stat}_last_mean": float(np.nanmean(lv)), f"{stat}_best_mean": float(np.nanmean(bv)),
+                          f"{stat}_last_median": float(np.nanmedian(lv)), f"{stat}_best_median": float(np.nanmedian(bv))})
+            r["best_update_mean"] = float(b.loc[common, "best_update"].astype(float).mean())
+            r["n_last_iterate_selected"] = int((b.loc[common, "best_source"] == "last_iterate").sum())
+            r["n_gates_pass_best"] = int(b.loc[common, "gates_pass"].map(_truthy).sum()) if "gates_pass" in b.columns else 0
+            rows.append(r)
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------------- coverage and cost
+def coverage_arrays(root: Path, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, np.ndarray]]:
+    """Coverage of the joint arms from ``visitation.npz`` (rows per stage and bin, by start stage, and the share of each
+    stage's rows in band) and of ``bw`` from the design (expected direct starts per bin; realised stratum counts of
+    ``ms_updates.csv``). Returns the table (one row per run and stage) and the per-bin arrays (mean over seeds)."""
+    rows: List[Dict[str, Any]] = []
+    acc: Dict[str, List[np.ndarray]] = {}
+    for _, r in df[df["exit_ok"] & df["arm"].isin(["jt", "jt_es", "jt2"])].iterrows():
+        d = Path(r["run_dir"])
+        v = np.load(d / "visitation.npz")
+        T = int(r["T"])
+        for t in range(2, T + 1):
+            edges = v[f"stage{t}_bin_edges"]
+            mid = 0.5 * (edges[:-1] + edges[1:])
+            inb = np.abs(mid) < 2.0 * r["q"] * (t - 1)
+            srcs = {k[len(f"stage{t}_"):]: v[k] for k in v.files if k.startswith(f"stage{t}_") and "edges" not in k}
+            tot = sum(srcs.values())
+            row = {"arm": r["arm"], "q": int(r["q"]), "seed": int(r["seed"]), "stage": t, "rows": int(tot.sum()),
+                   "n_bins": int(tot.size), "bins_visited": int((tot > 0).sum()),
+                   "share_in_band": float(tot[inb].sum() / tot.sum()),
+                   "mean_rows_per_bin_in_band": float(tot[inb].mean()), "mean_rows_per_bin_out_of_band": float(tot[~inb].mean())}
+            for k, a in srcs.items():
+                row[f"rows_{k}"] = int(a.sum())
+            rows.append(row)
+            for k, a in srcs.items():
+                acc.setdefault(f"{r['arm']}_q{int(r['q'])}_stage{t}_{k}", []).append(a.astype(float))
+    for _, r in df[df["exit_ok"] & (df["arm"] == "bw")].iterrows():
+        d = Path(r["run_dir"])
+        cfg = json.load(open(d / "run_config.json"))
+        spec = GameSpec(**cfg["record"]["game"])
+        smp = StartSampler(spec, float(cfg["record"]["protocol"]["es_bin_width"]))
+        upd = pd.read_csv(d / "ms_updates.csv")
+        n_ep = int(cfg["record"]["protocol"]["episodes_per_update"])
+        for t in (2, 3):
+            nb = smp.n_bins(t)
+            sub = upd[upd["stage"] == t]
+            edges = smp.bin_edges(t)
+            mid = 0.5 * (edges[:-1] + edges[1:])
+            inb = np.abs(mid) < 2.0 * r["q"] * (t - 1)
+            exp_per_bin = len(sub) * n_ep / nb
+            rows.append({"arm": "bw", "q": int(r["q"]), "seed": int(r["seed"]), "stage": t, "rows": len(sub) * n_ep,
+                         "n_bins": nb, "bins_visited": nb, "share_in_band": float(inb.mean()),
+                         "mean_rows_per_bin_in_band": exp_per_bin, "mean_rows_per_bin_out_of_band": exp_per_bin,
+                         "rows_direct_design": len(sub) * n_ep,
+                         "n_start_tail": int(sub["n_start_tail"].sum()), "n_start_near": int(sub["n_start_near"].sum()),
+                         "n_start_mid": int(sub["n_start_mid"].sum())})
+            acc.setdefault(f"bw_q{int(r['q'])}_stage{t}_direct_design", []).append(np.full(nb, exp_per_bin))
+    arrays = {k: np.mean(v, axis=0) for k, v in acc.items()}
+    return pd.DataFrame(rows), arrays
+
+
+def cost_row(r: Mapping[str, Any]) -> Dict[str, Any]:
+    """Updates, policy rows by stage, minibatch steps, wall and CPU time per phase / category of one run (from its
+    summary files)."""
+    d = Path(r["run_dir"])
+    out: Dict[str, Any] = {"arm": r["arm"], "q": int(r["q"]), "seed": int(r["seed"])}
+    nan = float("nan")
+    if r["arm"] == "bw":
+        s = json.load(open(d / "ms_run_summary.json"))
+        g = json.load(open(d / "gates.json"))
+        st = json.load(open(d / "status.json"))
+        cfg = json.load(open(d / "run_config.json"))
+        n_ep = int(cfg["record"]["protocol"]["episodes_per_update"])
+        out.update({"updates": s["final_global_update"], "policy_rows_total": s["total_transitions"],
+                    "minibatch_steps": g["budget_totals"]["minibatch_steps"], "wall_sec": st["total_wall_sec"]})
+        for t in (3, 2, 1):
+            ph = s["phase_timing"][f"stage{t}"]
+            out.update({f"rows_t{t}": ph["updates"] * n_ep, f"wall_stage{t}_sec": ph["wall_sec"],
+                        f"cpu_stage{t}_sec": ph["process_cpu_sec"]})
+            for c, v in ph["by_category_sec"].items():
+                out[f"stage{t}_{c}_sec"] = v
+        out["cpu_sec"] = sum(s["phase_timing"][f"stage{t}"]["process_cpu_sec"] for t in (3, 2, 1))
+        for c, v in s["costs"]["seconds"].items():
+            out[f"{c}_sec"] = v
+    elif r["arm"] == "v20":
+        s = json.load(open(d / "v2_run_summary.json"))
+        rows = pd.read_csv(d / "v2_updates.csv")
+        steps = int((rows["n_epochs_run"] * np.ceil(rows["n_rows"] / 256.0)).sum())
+        out.update({"updates": s["final_global_update"], "minibatch_steps": steps,
+                    "policy_rows_total": int(rows["n_policy_rows"].sum()), "wall_sec": s["total_wall_sec"]})
+        for ph, t in (("A", 2), ("B", 1)):
+            sub = rows[rows["phase"] == ph]
+            out[f"rows_t{t}"] = int(sub["n_policy_rows"].sum())
+            out[f"wall_stage{t}_sec"] = s["phase_timing"][ph]["wall_sec"]
+        for c, v in s["costs"]["seconds"].items():
+            out[f"{c}_sec"] = v
+    else:
+        s = json.load(open(d / "joint_run_summary.json"))
+        out.update({"updates": s["updates"], "policy_rows_total": s["policy_rows_total"], "minibatch_steps": s["minibatch_steps"],
+                    "wall_sec": s["wall_sec"], "cpu_sec": s["process_cpu_sec"], "peak_rss_kb": s["peak_rss_kb"]})
+        for t, v in s["policy_rows_by_stage"].items():
+            out[f"rows_t{t}"] = v
+        for c, v in s["costs_wall_sec"].items():
+            out[f"{c}_sec"] = v
+        for c, v in s["costs_cpu_sec"].items():
+            out[f"{c}_cpu_sec"] = v
+    return out
+
+
+def cost_table(df: pd.DataFrame) -> pd.DataFrame:
+    """One cost row per completed run."""
+    rows = [cost_row(r) for _, r in df[df["exit_ok"]].iterrows()]
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------------- learning curves
+def joint_curve(run_dir: Path) -> pd.DataFrame:
+    """The development checks of a joint run against cumulative policy rows (all stages)."""
+    c = pd.read_csv(run_dir / "joint_checks.csv")
+    rows_cols = [k for k in c.columns if k.startswith("rows_t")]
+    c["cum_rows"] = c[rows_cols].sum(axis=1)
+    return c
+
+
+def bw_curve(run_dir: Path) -> pd.DataFrame:
+    """The per-phase checks of a ``bw`` run (each stage's own ``Delta``) against cumulative policy rows."""
+    cfg = json.load(open(run_dir / "run_config.json"))
+    n_ep = int(cfg["record"]["protocol"]["episodes_per_update"])
+    parts = [pd.read_csv(run_dir / f"ms_checks_stage{t}.csv") for t in (3, 2, 1)]
+    c = pd.concat(parts, ignore_index=True)
+    c["cum_rows"] = c["update"] * n_ep
+    return c
+
+
+# ---------------------------------------------------------------------------------- figures
+def _plt() -> Any:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    return plt
+
+
+COLORS = {"bw": "#1b9e77", "jt": "#d95f02", "jt_es": "#7570b3", "v20": "#1b9e77", "jt2": "#d95f02"}
+
+
+def figure_effort(df: pd.DataFrame, arrays_dir: Path, out: Path) -> None:
+    """e_t(d) per arm and stage: the seed median with an inter-quartile band, the closed form at the terminal stage (and g1
+    at T = 2)."""
+    plt = _plt()
+    fig, axes = plt.subplots(2, 3, figsize=(14, 7))
+    for ax, (T, arms) in zip(axes, ((3, ("bw", "jt", "jt_es")), (2, ("v20", "jt2")))):
+        for k in range(3):
+            if k >= T:
+                ax[k].axis("off")
+                continue
+        for q in (50,):
+            for arm in arms:
+                sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
+                for t in range(1, T + 1):
+                    ys = []
+                    for _, r in sub.iterrows():
+                        p = arrays_dir / f"{r['run']}.npz"
+                        if p.exists():
+                            z = np.load(p)
+                            ys.append((z[f"fin_t{t}_d_grid"], z[f"fin_t{t}_e_hat"]))
+                    if not ys:
+                        continue
+                    d = ys[0][0]
+                    E = np.array([y[1] for y in ys])
+                    ax[t - 1].plot(d, np.median(E, axis=0), color=COLORS[arm], label=arm)
+                    ax[t - 1].fill_between(d, np.percentile(E, 25, axis=0), np.percentile(E, 75, axis=0), color=COLORS[arm], alpha=0.2)
+                    ax[t - 1].set_title(f"T = {T}, stage {t}, q = {q}")
+    for ax in axes.flat:
+        ax.set_xlabel("d")
+        ax.set_ylabel("effort")
+    h, l = axes[0, 0].get_legend_handles_labels()
+    if h:
+        axes[0, 0].legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def figure_gains(df: pd.DataFrame, arrays_dir: Path, out: Path, q: int = 50) -> None:
+    """Delta_t(d) / dw per arm and stage (T = 3 arms): the seed median and the seed maximum, the band edges marked."""
+    plt = _plt()
+    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+    for arm in ("bw", "jt", "jt_es"):
+        sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
+        for t in range(1, 4):
+            ds = []
+            for _, r in sub.iterrows():
+                p = arrays_dir / f"{r['run']}.npz"
+                if p.exists():
+                    z = np.load(p)
+                    ds.append((z[f"fin_t{t}_d_grid"], z[f"fin_t{t}_delta"] / 4.0))
+            if not ds:
+                continue
+            D = np.array([x[1] for x in ds])
+            axes[t - 1].plot(ds[0][0], np.median(D, axis=0), color=COLORS[arm], label=f"{arm} median")
+            axes[t - 1].plot(ds[0][0], D.max(axis=0), color=COLORS[arm], ls=":", label=f"{arm} max")
+    for t, ax in enumerate(axes, start=1):
+        if t >= 2:
+            for s in (-1, 1):
+                ax.axvline(s * 2 * q * (t - 1), color="0.4", lw=0.8, ls="--")
+        ax.set_title(f"stage {t}, q = {q}")
+        ax.set_xlabel("d")
+        ax.set_ylabel("Delta / dW")
+    axes[0].legend(frameon=False, fontsize=7)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def figure_paired(crit_df: pd.DataFrame, out: Path) -> None:
+    """The mean paired differences of the primary statistic with their 95 % and 98.75 % intervals."""
+    plt = _plt()
+    fig, ax = plt.subplots(figsize=(7, 4))
+    labels = []
+    for i, (_, r) in enumerate(crit_df.iterrows()):
+        ax.plot([r["ci98_75_lo"], r["ci98_75_hi"]], [i, i], color="0.7", lw=1)
+        ax.plot([r["ci95_lo"], r["ci95_hi"]], [i, i], color="C0", lw=3)
+        ax.plot([r["mean_diff"]], [i], "ko")
+        labels.append(f"{r['hypothesis']} ({r['a']} - {r['b']}), q = {int(r['q'])}")
+    ax.axvline(0, color="k", lw=0.8)
+    ax.set_yticks(range(len(labels)))
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_xlabel("paired difference of Gmax_full / dW")
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def figure_curves(df: pd.DataFrame, out: Path, q: int = 50) -> None:
+    """Learning curves against cumulative policy rows: the joint arms' Gmax_full and EXP_root (seed median), and the stage
+    Delta of every arm (bw: the phase checks)."""
+    plt = _plt()
+    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+    for arm in ("jt", "jt_es"):
+        sub = df[(df["arm"] == arm) & (df["q"] == q) & df["exit_ok"]]
+        cs = [joint_curve(Path(r["run_dir"])) for _, r in sub.iterrows()]
+        if not cs:
+            continue
+        x = cs[0]["cum_rows"].to_numpy()
+        for ax, col in zip(axes, ("Gmax_full_over_dw", "EXP_root_over_dw", "Delta_max_t3_over_dw")):
+            ax.plot(x, np.median([c[col].to_numpy() for c in cs], axis=0), color=COLORS[arm], label=arm)
+    sub = df[(df["arm"] == "bw") & (df["q"] == q) & df["exit_ok"]]
+    for _, r in sub.iterrows():
+        c = bw_curve(Path(r["run_dir"]))
+        for t, ax_i in ((3, 2),):
+            cc = c[c["stage"] == t]
+            axes[ax_i].plot(cc["cum_rows"], cc["Delta"], color=COLORS["bw"], alpha=0.3)
+    for ax, title in zip(axes, ("Gmax_full / dW", "EXP_root / dW", "eta_3 (bw: stage-3 phase Delta)")):
+        ax.set_xlabel("cumulative policy rows")
+        ax.set_title(title)
+        ax.set_yscale("log")
+    axes[0].legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+def figure_visitation(arrays: Mapping[str, np.ndarray], out: Path, q: int = 50) -> None:
+    """Visitation per stage of the joint arms (log counts per bin, mean over seeds) with the band edges and bw's design."""
+    plt = _plt()
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    for ax, t in zip(axes, (2, 3)):
+        for arm in ("jt", "jt_es"):
+            parts = [v for k, v in arrays.items() if k.startswith(f"{arm}_q{q}_stage{t}_")]
+            if not parts:
+                continue
+            tot = np.sum(parts, axis=0)
+            nb = tot.size
+            ax.plot(np.linspace(-(t - 1) * (100 + 2 * q), (t - 1) * (100 + 2 * q), nb), np.maximum(tot, 0.5), color=COLORS[arm], label=arm)
+        d = arrays.get(f"bw_q{q}_stage{t}_direct_design")
+        if d is not None:
+            ax.plot(np.linspace(-(t - 1) * (100 + 2 * q), (t - 1) * (100 + 2 * q), d.size), d, color=COLORS["bw"], label="bw design")
+        for s in (-1, 1):
+            ax.axvline(s * 2 * q * (t - 1), color="0.4", lw=0.8, ls="--")
+        ax.set_yscale("log")
+        ax.set_title(f"stage {t}, q = {q}")
+        ax.set_xlabel("d")
+        ax.set_ylabel("rows per bin")
+    axes[0].legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------------- driver
+def run_analysis(root: Path, eval_dir: Path, out_dir: Path, crit: Mapping[str, Any], figures: bool = True) -> Dict[str, Any]:
+    """All tables (and figures) of section 3.3; returns the headline numbers."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df = load_per_run(eval_dir / "per_run.csv")
+    df.to_csv(out_dir / "per_run_table.csv", index=False)
+    crit_df = criterion_table(df, crit)
+    crit_df.to_csv(out_dir / "criterion.csv", index=False)
+    secondary_table(df, crit).to_csv(out_dir / "secondary.csv", index=False)
+    counts = gate_counts(df)
+    counts.to_csv(out_dir / "gate_counts.csv", index=False)
+    bw_gate_table(df).to_csv(out_dir / "bw_t3_gates.csv", index=False)
+    best_path = eval_dir / "best_of_run.csv"
+    if best_path.exists():
+        best_of_run_table(df, pd.read_csv(best_path)).to_csv(out_dir / "best_of_run.csv", index=False)
+    cov, arrays = coverage_arrays(root, df)
+    cov.to_csv(out_dir / "coverage.csv", index=False)
+    np.savez(out_dir / "coverage_arrays.npz", **arrays)
+    cost_table(df).to_csv(out_dir / "cost.csv", index=False)
+    if figures:
+        fdir = out_dir / "figures"
+        fdir.mkdir(exist_ok=True)
+        adir = eval_dir / "arrays"
+        figure_effort(df, adir, fdir / "effort_functions.png")
+        figure_gains(df, adir, fdir / "deviation_gains.png")
+        figure_paired(crit_df, fdir / "paired_differences.png")
+        figure_curves(df, fdir / "learning_curves.png")
+        figure_visitation(arrays, fdir / "visitation.png")
+    rr = reading_rule(counts, crit)
+    head = {"reading_rule": rr, "hypotheses": {h: bool(g["hypothesis_supported"].iloc[0]) for h, g in crit_df.groupby("hypothesis")}}
+    with open(out_dir / "headline.json", "w") as f:
+        json.dump(head, f, indent=1)
+    return head
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """CLI entry (see the module docstring)."""
+    ap = argparse.ArgumentParser(description="T3-R1 analysis", allow_abbrev=False)
+    ap.add_argument("--root", default=str(tc.DEFAULT_ROOT))
+    ap.add_argument("--eval-dir", default=str(tc.DEFAULT_ROOT / "eval"))
+    ap.add_argument("--out-dir", default=str(tc.DEFAULT_ROOT / "analysis"))
+    ap.add_argument("--criteria", default=str(tm.CRITERIA_PATH))
+    ap.add_argument("--no-figures", action="store_true")
+    a = ap.parse_args(argv)
+    crit, sha = tm.load_criteria(Path(a.criteria))
+    print(f"criteria {a.criteria} sha256 {sha}", flush=True)
+    head = run_analysis(Path(a.root), Path(a.eval_dir), Path(a.out_dir), crit, not a.no_figures)
+    print(json.dumps(head, indent=1))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

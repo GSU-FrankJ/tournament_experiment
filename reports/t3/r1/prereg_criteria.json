@@ -1,0 +1,83 @@
+{
+ "schema": "t3_r1_prereg_criteria/1",
+ "round": "t3_r1",
+ "source": "reports/t3/r1/pi_record/25_t3_r1_prompt.md, D6 and D7",
+ "gates": {
+  "G-A": {
+   "eta_T_over_dw": 0.005,
+   "rmse_pos_T_over_eT0": 0.05,
+   "tail_mean_T_over_eT0": 0.02
+  },
+  "G-F": {
+   "Gmax_full_over_dw": 0.01
+  },
+  "G-N": {
+   "eta_T_over_dw_dev_minus_final_abs": 0.001,
+   "Gmax_full_over_dw_dev_minus_final_abs": 0.001
+  },
+  "G-S": {
+   "stage1_rel_err_abs": 0.05,
+   "applies_at_horizon": 2
+  },
+  "comparison": "<= inclusive, full float64 precision",
+  "tier": "G-A and G-F on the final tier; G-N compares development and final tier",
+  "run_pass": {
+   "2": ["G-A", "G-F", "G-N", "G-S"],
+   "3": ["G-A", "G-F", "G-N"]
+  }
+ },
+ "band": {
+  "stages": "t >= 2",
+  "in_band": "|d| < 2 q (t - 1) on the stage-t grid (the open support of the summed shock differences before stage t)",
+  "edge_node": "a node at exactly |d| = 2 q (t - 1) is out of band",
+  "node_tolerance": 1e-09
+ },
+ "recovery": {
+  "closed_form": "utils.theory_multistage.g2_two_stage (the final-stage tent; evaluation only)",
+  "grid": "symmetric grid on D_T with step 0.5 (recovery_step)",
+  "pos": "|d| < 2 q",
+  "tail": "|d| >= 2 q",
+  "note": "At T = 3 the tail set |d| >= 2 q within D_3 is 100 to 400 per side at q = 50 (T = 2: 100 to 200); the threshold 0.02 is v2.0's but the set is larger."
+ },
+ "statistics": {
+  "pairing": "(q, seed); n = the number of complete pairs of that (q, hypothesis)",
+  "n_boot": 10000,
+  "bootstrap_seed": {"3": 20261016, "2": 20261017},
+  "indices": "numpy.random.default_rng(S).integers(0, n, size=(10000, n)), created afresh with the same S for every (hypothesis, q, statistic)",
+  "percentiles": {
+   "ci95": [2.5, 97.5],
+   "ci98_75": [0.625, 99.375]
+  },
+  "interval_method": "numpy.percentile (default linear method) of the 10,000 resampled means",
+  "ci98_75_note": "Bonferroni over four hypotheses; descriptive",
+  "median_interval": "the same percentiles of the 10,000 resampled medians, from the same indices",
+  "failed_runs": "every planned run is reported; a run with a nonzero exit (after the crash rule) counts as failed in the gate counts; its metrics are missing and its pair is dropped from the paired statistics; the number of dropped pairs is reported",
+  "gate_count_interval": "exact Clopper-Pearson 95 %"
+ },
+ "primary": {
+  "statistic": "Gmax_full_over_dw",
+  "tier": "final",
+  "support_rule": "a hypothesis is supported iff the upper end of the 95 % interval of the mean paired difference (a - b) is strictly below 0 at q = 50 and at q = 60; otherwise not supported, and the report names the q at which it fails"
+ },
+ "hypotheses": {
+  "H1": {"horizon": 3, "a": "bw", "b": "jt", "reads": "BW against the original joint scheme"},
+  "H2": {"horizon": 3, "a": "bw", "b": "jt_es", "reads": "whether BW still has the lower full-domain gain once the joint scheme has exploring starts; compares the two schemes as implemented, not a coverage-matched test of the backward order"},
+  "H3": {"horizon": 3, "a": "jt_es", "b": "jt", "reads": "whether the coverage that exploring starts give helps the joint scheme"},
+  "H1-T2": {"horizon": 2, "a": "v20", "b": "jt2", "reads": "H1 at T = 2 on the v2.0 confirmation seeds 30501-30520 (re-evaluated recorded runs against the new arm)"}
+ },
+ "secondary": {
+  "pairs": "the four pairs of the hypotheses",
+  "scalar": ["EXP_root_over_dw", "dReach_over_dw", "rmse_pos_T_over_eT0", "tail_mean_T_over_eT0", "peak_T_abs", "e1_at_0"],
+  "per_stage": ["Delta_max_t{t}_over_dw", "G_max_t{t}_over_dw"],
+  "per_stage_from_2": ["Delta_in_t{t}", "Delta_out_t{t}", "G_in_t{t}", "G_out_t{t}"],
+  "horizon_2_only": ["stage1_rel_err_abs"]
+ },
+ "reading_rule": {
+  "arm": "bw",
+  "horizon": 3,
+  "gates": ["G-A", "G-F", "G-N"],
+  "min_passes_of_20_at_each_q": 18,
+  "if_met": "v2.0's design at T = 3 is a candidate for a T = 3 lock; the next round would lock it and confirm it on a fresh T = 3 seed block",
+  "if_not_met": "the reports give the per-gate, per-stage diagnosis; no change is tried in this round"
+ }
+}
