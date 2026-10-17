@@ -1,0 +1,7 @@
+$ python tools/t3/t3_blind.py --per-run results/t3_r1/eval/per_run.csv --criteria reports/t3/r1/prereg_criteria.json --out-dir results/t3_r1/blind --analysis-dir results/t3_r1/analysis
+start 2026-10-17T01:39:39Z
+8 criterion rows, 10 gate-count rows -> results/t3_r1/blind
+criterion.csv: 120 numbers compared, largest absolute difference 5.9e-17, not in the analysis table: []
+gate_counts.csv: 152 numbers compared, largest absolute difference 1.11e-16, not in the analysis table: []
+exit=0
+end 2026-10-17T01:39:41Z

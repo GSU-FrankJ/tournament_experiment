@@ -1,0 +1,6 @@
+$ python tools/t3/t3_eval.py --root results/t3_r1 --waves t3 t2j --v20-root /home/fjiang4/tournament_experiment/.claude/worktrees/v2-t2-refine/results/v2_T2_locked/confirmation_v2_0 --out-dir results/t3_r1/eval --workers 32
+start 2026-10-17T01:38:25Z
+200 runs -> results/t3_r1/eval/per_run.csv
+120 best-of-run rows -> results/t3_r1/eval/best_of_run.csv
+exit=0
+end 2026-10-17T01:38:36Z

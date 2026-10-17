@@ -1,0 +1,92 @@
+$ python tools/t3/t3_launch_checks.py post-launch --root results/t3_r1 --waves t3 t2j --commit a848114eef501d9ef6bab0fcd7c71a3989d32d3c --plan-digests results/t3_r1/preflight/c_init_plan.csv --out results/t3_r1/launch_checks.json --workers 16
+start 2026-10-17T01:38:03Z
+{
+ "n_runs": 160,
+ "verdicts": {
+  "exit_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "files_complete": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "manifest_commit_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "clean_tree": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "global_rng_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_equals_plan": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_production_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "budget_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "lr_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "refresh_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "exports_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "checks_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "starts_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "replay_ok": {
+   "pass": 160,
+   "fail": 0,
+   "not_evaluated": 0
+  }
+ },
+ "c_init_within_q_seed": {
+  "groups": 40,
+  "equal": 40
+ },
+ "c_init_equals_plan": {
+  "runs": 160,
+  "equal": 160
+ },
+ "start_share_flags": {
+  "cells": 5240,
+  "flags": 17,
+  "expected_under_null": 14.148000000000001
+ }
+}
+exit=0
+end 2026-10-17T01:38:10Z

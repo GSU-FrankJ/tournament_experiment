@@ -1,0 +1,17 @@
+{
+ "reading_rule": {
+  "min_passes": 18,
+  "passes_by_q": {
+   "50": 18,
+   "60": 18
+  },
+  "candidate_for_a_lock": true
+ },
+ "hypotheses": {
+  "H1": true,
+  "H1-T2": true,
+  "H2": true,
+  "H3": true
+ },
+ "budget_check_all_equal": true
+}
