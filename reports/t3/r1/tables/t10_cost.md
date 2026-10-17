@@ -1,4 +1,4 @@
-| arm | q | updates | policy rows | minibatch steps | wall s (median) | wall s (max) | CPU s (median; v20: not recorded) | rollout s | update s | dev verifier s | final evaluation s | peak RSS MB (ru_maxrss / 1024) |
+| arm | q | updates | policy rows | minibatch steps | wall s (median) | wall s (max) | CPU s (median; `bw`, `v20`: sum of the phase timers) | rollout s | update s | dev verifier s | final evaluation s | peak RSS MB (ru_maxrss / 1024) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `bw` | 50 | 3800 | 1945600 | 76000 | 577 | 618 | 529 | 11.1 | 511.5 | 6.2 | - | - |
 | `bw` | 60 | 3800 | 1945600 | 76000 | 578 | 640 | 515 | 10.9 | 496.6 | 6.4 | - | - |
@@ -8,5 +8,5 @@
 | `jt_es` | 60 | 1754 | 1945186 | 87700 | 567 | 668 | 563 | 13.4 | 545.1 | 3.2 | 0.21 | 503 |
 | `jt2` | 50 | 1100 | 1126400 | 44000 | 309 | 344 | 305 | 6.6 | 297.6 | 0.7 | 0.03 | 492 |
 | `jt2` | 60 | 1100 | 1126400 | 44000 | 245 | 311 | 244 | 5.4 | 237.7 | 0.5 | 0.03 | 493 |
-| `v20` | 50 | 2200 | 1126400 | 56000 | 356 | 373 | - | 6.5 | 264.1 | 0.3 | - | - |
-| `v20` | 60 | 2200 | 1126400 | 56000 | 356 | 364 | - | 6.7 | 271.4 | 0.4 | - | - |
+| `v20` | 50 | 2200 | 1126400 | 56000 | 356 | 373 | 280 | 6.5 | 264.1 | 0.3 | - | - |
+| `v20` | 60 | 2200 | 1126400 | 56000 | 356 | 364 | 290 | 6.7 | 271.4 | 0.4 | - | - |

@@ -5,7 +5,7 @@ Date: 2026-10-17. The same structure as `04_t3_results.md`, for H1-T2: the 40 re
 ## 1. What differs between the two arms
 
 - **Scheme.** `v20`: two-phase backward induction (Phase A: stage 2 alone, 1,600 updates; Phase B: stage 1 with stage 2 frozen, 600 updates), 2,200 updates and 56,000 minibatch steps. `jt2`: one network for both stages trained jointly from root play, 1,100 updates and 44,000 minibatch steps. Both see 1,126,400 policy rows (`jt2`: 563,200 per stage; `v20`: 819,200 at stage 2 and 307,200 at stage 1), the same game, actor, critic and optimiser.
-- **Start distribution (coverage).** `v20` trains stage 2 in Phase A from 512 bin-balanced starts per update over all of D_2 (half of them out of band); `jt2` trains from root play only: its stage-2 rows are 99.8 % in band at q = 50 and 99.9 % at q = 60 and it visits 24 of the 40 (q = 50) and 28 of the 44 (q = 60) stage-2 bins (`04_t3_results.md` section 8, coverage table).
+- **Start distribution (coverage).** `v20` trains stage 2 in Phase A from 512 bin-balanced starts per update over all of D_2 (50 % of them out of band at q = 50 and 45 % at q = 60); `jt2` trains from root play only: its stage-2 rows are 99.8 % in band at q = 50 and 99.9 % at q = 60 and it visits 24 of the 40 (q = 50) and 28 of the 44 (q = 60) stage-2 bins (`04_t3_results.md` section 8, coverage table).
 - **Continuation.** `v20` Phase B uses the exact expected continuation of the frozen stage-2 policy for the stage-1 rows; `jt2` uses the sampled continuation.
 - **Capacity.** The policy of `v20` is two networks (the frozen stage-2 snapshot and the stage-1 actor), that of `jt2` one.
 - **Optimisation details.** The advantage normalisation of `v20` in Phase B is over the stage-1 rows only (`adv_norm_scope = stage1_rows`), that of `jt2` over all rows (`02_preregistration.md` section 13.8); the learning-rate windows differ with the schemes (arms table in `04_t3_results.md` section 2).
@@ -178,16 +178,16 @@ The largest gain of `jt2` is at stage 2 in every run and **out of band** in 15 o
 
 ## 8. EXP_root against Gmax_full
 
-At T = 2 the mean `Gmax_full` is 4.2 (q = 50) and 4.8 (q = 60) times the mean EXP_root for `v20` and 12.5 and 17.7 times for `jt2` (table of `04_t3_results.md` section 7). The paired `v20` - `jt2` difference is -0.00044 and -0.00053 in EXP_root against -0.00923 and -0.01248 in `Gmax_full`: the difference between the arms is about 21 and 24 times smaller in EXP_root, as in the pre-registered prediction P2 (section 10).
+At T = 2 the mean `Gmax_full` is 4.2 (q = 50) and 4.8 (q = 60) times the mean EXP_root for `v20` and 12.5 and 17.7 times for `jt2` (table of `04_t3_results.md` section 7). The paired `v20` - `jt2` difference is -0.00044 and -0.00053 in EXP_root against -0.00923 and -0.01248 in `Gmax_full`: the difference between the arms is about 21 and 23 times smaller in EXP_root (21.0 and 23.4, from the unrounded mean differences), as in the pre-registered prediction P2 (section 10).
 
 ## 9. Best of run, learning curves, coverage, cost
 
 - **Best of run** (descriptive: "selected with the development verifier; not a pre-specified candidate"; means over the 20 seeds): `jt2` 0.01040 and 0.01275 against 0.01111 and 0.01361 for the last iterate (q = 50 and 60; medians 0.00989 and 0.01133 against 0.01020 and 0.01298). The best-of-run `jt2` passes G-F in 10 of 20 runs at q = 50 and 6 of 20 at q = 60 and G-S in 13 and 14; G-A in none; in 4 runs at each q the last update is the best one (`04_t3_results.md` section 8).
-- **Learning curves** (development tier, median over the seeds at 25, 50, 75 and 100 % of the updates): Gmax_full 0.0296, 0.0159, 0.0118 and 0.0101 at q = 50 and 0.0341, 0.0166, 0.0140 and 0.0130 at q = 60, EXP_root between 0.0007 and 0.0018 throughout (`04_t3_results.md` section 8, table of the checks):
+- **Learning curves** (development tier, median over the seeds at 25, 50, 75 and 100 % of the updates): Gmax_full 0.0296, 0.0159, 0.0118 and 0.0101 at q = 50 and 0.0341, 0.0166, 0.0140 and 0.0130 at q = 60, EXP_root between 0.0007 and 0.0018 at those four points (`04_t3_results.md` section 8, table of the checks):
 
 ![learning curves T = 2, q = 50](../../../results/t3_r1/analysis/figures/learning_curves_t2_q50.png)
 
-- **Coverage, cost, concentration:** the rows of `jt2` and `v20` are in the tables of `04_t3_results.md` section 8 (coverage: `jt2` visits 24 of 40 and 28 of 44 stage-2 bins; cost: median wall 309 s (q = 50) and 245 s (q = 60) for `jt2`, 356 s for `v20`, CPU time of `v20` not recorded; the median maximum normalised standard deviation of the Beta policies is 0.026 to 0.031 for both arms).
+- **Coverage, cost, concentration:** the rows of `jt2` and `v20` are in the tables of `04_t3_results.md` section 8 (coverage: `jt2` visits 24 of 40 and 28 of 44 stage-2 bins; cost: median wall 309 s (q = 50) and 245 s (q = 60) for `jt2`, 356 s for `v20`, CPU time of `v20` recorded per phase only: 280 s (q = 50) and 290 s (q = 60), the sum of its two phase timers; the median maximum normalised standard deviation of the Beta policies is 0.026 to 0.031 for both arms).
 
 ## 10. The predictions at T = 2
 

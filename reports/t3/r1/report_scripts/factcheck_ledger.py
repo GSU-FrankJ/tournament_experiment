@@ -38,9 +38,12 @@ def tasks_table(tasks: List[Dict[str, object]]) -> str:
 
 def problems_table(items: List[Dict[str, object]], disp: Dict[int, str], default: str) -> str:
     """The confirmed problems with the disposition."""
-    lines = ["| # | checker | kind | where | what the report said | what is true (checker, confirmed by a skeptic) | disposition |", "|---|---|---|---|---|---|---|"]
+    lines = ["| # | checker | kind | touches a data number or verdict? (checker / second agent) | where | what the report said | what is true (checker, confirmed by a skeptic) | disposition |", "|---|---|---|---|---|---|---|---|"]
+    yn = lambda x: "-" if x is None else ("yes" if x else "no")
     for i, f in enumerate(items):
-        lines.append(f"| {i} | {f['task']} | {f['severity']} | {short(f['location'], 70)} | {short(f['claim'], 110)} | {short(f['truth'], 190)} | {disp.get(i, default)} |")
+        v = f.get("verdict") or {}
+        flag = f"{yn(f.get('affects_data'))} / {yn(v.get('affects_data'))}"
+        lines.append(f"| {i} | {f['task']} | {f['severity']} | {flag} | {short(f['location'], 70)} | {short(f['claim'], 110)} | {short(f['truth'], 190)} | {disp.get(i, default)} |")
     return "\n".join(lines) + "\n"
 
 
@@ -62,8 +65,13 @@ def main() -> int:
         r2 = json.loads(r2p.read_text())
         d2p = FC / "round2_dispositions.json"
         d2 = {int(k): v for k, v in json.loads(d2p.read_text()).items()} if d2p.exists() else {}
-        out += ["## Round 2 (on the corrected reports)", "", tasks_table(r2["tasks"]),
+        out += ["## Round 2 (on the reports after the P3 additions)", "",
+                "An earlier attempt at this round (run `wf_0bb5dc1a-d35`, on the corrected reports before the P3 additions) was killed after 75 seconds with no result and no completed checker; it is not counted. This round was run afresh on the reports as they stood after the additions of section 1 of the P3 resume (`04_t3_results.md` section 4.1, the decomposition H1 = H2 + H3, the level tables, the power note; `00_housekeeping.md` section 6.1), by new independent read-only checkers, each reported problem again re-derived by a second agent that tried to refute it.", "",
+                tasks_table(r2["tasks"]),
                 f"{len(r2['confirmed'])} problems were confirmed and {len(r2['not_confirmed'])} were not.", ""]
+        flag = [f for f in r2["confirmed"] if f.get("affects_data")]
+        both = [f for f in flag if (f.get("verdict") or {}).get("affects_data")]
+        out += [f"Of the confirmed problems, {len(flag)} were flagged by their checker as touching a data number (a CSV value, a criterion value, an interval, a count or a verdict); the second agent agreed for {len(both)} of them, which are one issue found by two checkers (the CPU time of the `v20` runs, absent from the cost tables although each `v2_run_summary.json` records it per phase). As the stop condition of the P3 task requires, the round was reported before anything was changed; the owner's answer was to fill the `v20` CPU cells from the run summaries by a report script (`report_scripts/v20_cpu.py`, `results/t3_r1/analysis/v20_cpu_phase.csv`) and to leave `analysis/cost.csv` untouched. The other {len(flag) - len(both)} flagged problems are derived figures in the prose (a ratio of two differences, a range of effort shortfalls) or a printed rounding residual; none changes a criterion value, an interval, a gate count or a verdict (the four hypotheses stay supported at both q, `bw` stays 18 of 20 at both q).", ""]
         if r2["confirmed"]:
             out += [problems_table(r2["confirmed"], d2, "corrected"), ""]
         out.append("Reported but not confirmed (no change):")

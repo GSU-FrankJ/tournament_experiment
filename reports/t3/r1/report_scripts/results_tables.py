@@ -83,6 +83,7 @@ def load() -> Dict[str, object]:
         "chk": json.loads((RES / "launch_checks.json").read_text()),
         "head": json.loads((RES / "analysis" / "headline.json").read_text()),
     }
+    d["v20cpu"] = pd.read_csv(RES / "analysis" / "v20_cpu_phase.csv")  # written by v20_cpu.py; cost.csv has no v20 CPU
     rec = sorted(RES.glob("launch_t3_t2j_*.json"))
     d["launch"] = json.loads(rec[-1].read_text())
     return d
@@ -308,7 +309,8 @@ def t05d_decomposition(d: Dict[str, object]) -> None:
     Uses the criterion rows of ``criterion.csv`` (n pairs must be 20 for all three hypotheses of a q; otherwise the shares are
     computed on the common (q, seed) pairs of the per-run table, and the table says so).
     """
-    c, per = d["crit"], d["per"]
+    per = d["per"]
+    c = pd.read_csv(RES / "analysis" / "criterion.csv", float_precision="round_trip")  # the default parser is not exact in the last digit
     rows = []
     for q in QS:
         r = {h: c[(c["hypothesis"] == h) & (c["q"] == q)].iloc[0] for h in ("H1", "H2", "H3")}
@@ -326,7 +328,7 @@ def t05d_decomposition(d: Dict[str, object]) -> None:
         print(f"decomposition q = {q}: n = {ns}, H1 = {h1:.6f}, H2 = {h2:.6f}, H3 = {h3:.6f}, H2 + H3 - H1 = {resid:.2e}, H3/H1 = {h3 / h1:.4f}, H2/H1 = {h2 / h1:.4f}")
         rows.append((q, f"{ns[0]} / {ns[1]} / {ns[2]}", signed(h1, 5), signed(h2, 5), signed(h3, 5), f"{resid:.1e}", f"{h3 / h1:.3f}", f"{h2 / h1:.3f}", note))
     write("t05d_decomposition", md(["q", "n pairs of H1 / H2 / H3", "H1: mean `bw` - `jt`", "H2: mean `bw` - `jt_es`", "H3: mean `jt_es` - `jt`",
-                                    "H2 + H3 - H1", "share H3 / H1 (closed by the exploring starts)", "share H2 / H1 (remaining after them)", "computed from"], rows))
+                                    "H2 + H3 - H1", "share H3 / H1 (closed by `jt_es`)", "share H2 / H1 (remaining between `jt_es` and `bw`)", "computed from"], rows))
 
 
 def t05e_levels(d: Dict[str, object]) -> None:
@@ -447,6 +449,26 @@ def t08_best(d: Dict[str, object]) -> None:
     write("t08b_best_gates", md(["arm", "q", "G-A pass (of 20)", "G-F pass", "G-N pass", "G-S pass (T = 2)", "all gates", "eta_T / dW median", "RMSE_pos median", "tail mean median"], rows_g))
 
 
+def t08c_best_stage(d: Dict[str, object]) -> None:
+    """D6 items 2-7 for the best-of-run policies: per-stage maxima, the band split, e_1(0), the terminal peak and the concentration (medians)."""
+    run = pd.read_csv(RES / "eval" / "best_of_run.csv")
+    rows = []
+    for arm in ("jt", "jt_es", "jt2"):
+        T = 2 if arm == "jt2" else 3
+        for q in QS:
+            m = run[(run["arm"] == arm) & (run["q"] == q)]
+            med = lambda c: num(m[c].median(), 5)
+            cells: List[object] = [f"`{arm}`", q, len(m), med("Gmax_full_over_dw")]
+            cells += [med(f"G_max_t{t}_over_dw") if t <= T else DASH for t in (1, 2, 3)]
+            cells += [med(f"Delta_max_t{t}_over_dw") if t <= T else DASH for t in (1, 2, 3)]
+            cells += [f"{med(f'G_in_t{t}')} / {med(f'G_out_t{t}')}" if t <= T else DASH for t in (2, 3)]
+            cells += [num(m["peak_T_abs"].median(), 4), num(m["e1_at_0"].median(), 2)]
+            cells += [num(m[f"conc_max_std_norm_t{t}"].median(), 4) if t <= T else DASH for t in (1, 2, 3)]
+            rows.append(cells)
+    write("t08c_best_stage", md(["arm", "q", "n", "Gmax_full / dW", "G_max,1", "G_max,2", "G_max,3", "eta_1", "eta_2", "eta_3", "G_in,2 / G_out,2", "G_in,3 / G_out,3",
+                                 "peak_T_abs", "e_1(0)", "max normalised sd, stage 1", "stage 2", "stage 3"], rows))
+
+
 def t09_coverage(d: Dict[str, object]) -> None:
     """Coverage by start stage and bin (all columns: medians over seeds of the per-run values)."""
     c = d["cov"]
@@ -474,6 +496,13 @@ def t09_coverage(d: Dict[str, object]) -> None:
     write("t09b_bw_design", md(["q", "stage", "direct starts in the tail stratum (median)", "near stratum", "mid stratum"], rows))
 
 
+def cpu_total(d: Dict[str, object], arm: str, q: int, m: pd.DataFrame) -> str:
+    """Median CPU time of a run: the whole-process time (joint arms), the sum of the phase timers (``bw``: cost.csv; ``v20``: v20_cpu.py)."""
+    if arm == "v20":
+        return num(d["v20cpu"].query("q == @q")["cpu_sum_sec"].median(), 0)
+    return num(m["cpu_sec"].median(), 0) if m["cpu_sec"].notna().any() else DASH
+
+
 def t10_cost(d: Dict[str, object]) -> None:
     """Cost: per run, per category and per phase."""
     k = d["cost"]
@@ -482,11 +511,11 @@ def t10_cost(d: Dict[str, object]) -> None:
         for q in QS:
             m = k[(k["arm"] == arm) & (k["q"] == q)]
             rows.append((f"`{arm}`", q, num(m["updates"].median(), 0), num(m["policy_rows_total"].median(), 0), num(m["minibatch_steps"].median(), 0),
-                         num(m["wall_sec"].median(), 0), num(m["wall_sec"].max(), 0), num(m["cpu_sec"].median(), 0) if m["cpu_sec"].notna().any() else DASH,
+                         num(m["wall_sec"].median(), 0), num(m["wall_sec"].max(), 0), cpu_total(d, arm, q, m),
                          num(m["train_rollout_sec"].median(), 1), num(m["train_update_sec"].median(), 1), num(m["dev_verifier_sec"].median(), 1),
                          num(m["final_eval_sec"].median(), 2) if m["final_eval_sec"].notna().any() else DASH,
                          num(m["peak_rss_kb"].median() / 1024, 0) if m["peak_rss_kb"].notna().any() else DASH))
-    write("t10_cost", md(["arm", "q", "updates", "policy rows", "minibatch steps", "wall s (median)", "wall s (max)", "CPU s (median; v20: not recorded)", "rollout s",
+    write("t10_cost", md(["arm", "q", "updates", "policy rows", "minibatch steps", "wall s (median)", "wall s (max)", "CPU s (median; `bw`, `v20`: sum of the phase timers)", "rollout s",
                           "update s", "dev verifier s", "final evaluation s", "peak RSS MB (ru_maxrss / 1024)"], rows))
     rows = []
     for arm, stages in (("bw", (3, 2, 1)), ("v20", (2, 1))):
@@ -497,6 +526,8 @@ def t10_cost(d: Dict[str, object]) -> None:
                 if t in stages and f"wall_stage{t}_sec" in m:
                     w = m[f"wall_stage{t}_sec"].median()
                     c = m[f"cpu_stage{t}_sec"].median() if f"cpu_stage{t}_sec" in m else np.nan
+                    if arm == "v20":
+                        c = d["v20cpu"].query("q == @q")[f"cpu_stage{t}_sec"].median()
                     cells.append(f"{num(w, 1)} / {num(c, 1) if not np.isnan(c) else DASH}")
                 else:
                     cells.append(DASH)
@@ -505,6 +536,14 @@ def t10_cost(d: Dict[str, object]) -> None:
     tot = k.groupby("arm")["wall_sec"].sum() / 3600
     write("t10b_cost_total", md(["arm", "runs", "total wall hours"], [(f"`{a}`", int((k['arm'] == a).sum()), f"{tot[a]:.2f}") for a in tot.index]
                                 + [("all", len(k), f"{tot.sum():.2f}")]))
+    rows = []
+    for arm in ("bw", "jt", "jt_es", "jt2", "v20"):
+        for q in QS:
+            m = k[(k["arm"] == arm) & (k["q"] == q)]
+            rows.append([f"`{arm}`", q] + [num(int(m[f"rows_t{t}"].median())) if m[f"rows_t{t}"].notna().any() else DASH for t in (1, 2, 3)]
+                        + [num(m[c].median(), 1) if m[c].notna().any() else DASH
+                           for c in ("train_rollout_cpu_sec", "train_update_cpu_sec", "dev_verifier_cpu_sec", "final_eval_cpu_sec")])
+    write("t10d_rows_cpu_category", md(["arm", "q", "policy rows, stage 1", "stage 2", "stage 3", "CPU s: rollout", "update", "dev verifier", "final evaluation"], rows))
 
 
 def t11_t2(d: Dict[str, object]) -> None:
@@ -557,7 +596,7 @@ def t13_curves(d: Dict[str, object]) -> None:
                     cells[f].append([c.loc[i, "update"], c.loc[i, "Gmax_full_over_dw"], c.loc[i, "EXP_root_over_dw"]])
             for f, v in cells.items():
                 a = np.array(v)
-                rows.append((f"`{arm}`", q, f"{int(f * 100)} %", num(np.median(a[:, 0]), 0), num(np.median(a[:, 1])), num(np.median(a[:, 2]))))
+                rows.append((f"`{arm}`", q, f"{int(f * 100)} %" if f < 1.0 else "100 % (the last check)", num(np.median(a[:, 0]), 0), num(np.median(a[:, 1])), num(np.median(a[:, 2]))))
     write("t13_curves", md(["arm", "q", "fraction of the updates", "check update (median over seeds)", "development Gmax_full / dW (median)",
                             "development EXP_root / dW (median)"], rows))
 
@@ -609,7 +648,7 @@ def t15_ga_parts(d: Dict[str, object]) -> None:
 def main() -> int:
     """Generate every table."""
     d = load()
-    for fn in (t01_checks, t02_arms, t03_per_seed, t04_bw, t05_comparison, t05d_decomposition, t05e_levels, t06_where, t08_best, t09_coverage, t10_cost, t11_t2, t12_recovery_t3, t13_curves, t14_reading, t15_ga_parts, t16_diag):
+    for fn in (t01_checks, t02_arms, t03_per_seed, t04_bw, t05_comparison, t05d_decomposition, t05e_levels, t06_where, t08_best, t08c_best_stage, t09_coverage, t10_cost, t11_t2, t12_recovery_t3, t13_curves, t14_reading, t15_ga_parts, t16_diag):
         fn(d)
     print(f"{len(list(OUT.glob('*.md')))} tables in {OUT}")
     return 0
