@@ -114,3 +114,34 @@ Also present and read-only: `MultiStage/three_stage/T3_IMPLEMENTATION_PLAN_20260
 ## 5. Machine
 
 `results/t3_r1/preflight/machine.txt`: `nproc` 64; load average 11.20 / 11.52 / 10.86 at 22:39 (other users' jobs; none of them is touched); `/home` 850 GB free of 5.5 TB (84 % used); 754 GB memory; Python 3.12.3, torch 2.5.1+cu121, numpy 2.5.0, **equal to the record** (3.12.3, 2.5.1+cu121, 2.5.0).
+
+## 6. P3 resume (2026-10-17)
+
+P3 of this round stopped at a usage limit during the second fact-check round. It is finished in a new session with its own worktree (`/home/fjiang4/tournament_experiment/.claude/worktrees/t3-r1-p3-finish-df1175`). That worktree's branch `t3-r1-p3-finish` was cut from `ea727dcb`, so it holds exactly the tracked files of `t3-r1`; the commits of P3 are made there and pushed as `git push origin t3-r1-p3-finish:t3-r1` (a fast-forward of the remote branch `t3-r1`). The round's own worktree (below) is read only: the round's weights, freeze arrays, per-run arrays and `.pt` files exist only there, and the one script that needs them reads them by absolute path (`T3R1_UNTRACKED_ROOT`, section 6.1). It is left as found: no `git clean`, no file written, no checkout (an append made to this file there at the start of the session was reverted with `git checkout -- <file>` before anything else and redone here; `git status` there is again 0 tracked changes and the same 715 untracked entries). The primary checkout, `main` and the other worktrees are not touched. The local ref `t3-r1` of the round's worktree stays at `ea727dcb` until it is fast-forwarded (the command is in the final report).
+
+**State at the stop, verified at 14:53 UTC** (`git` in the worktree; the file counts by `find`; no condition failed):
+
+| item | expected | found |
+|---|---|---|
+| worktree | `/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-vs-jt-51e472`, branch `t3-r1` | the path exists, `git rev-parse --abbrev-ref HEAD` = `t3-r1`, HEAD = `ea727dcb6b732e6787b1be258fe61d58821b3523` |
+| tracked changes | none | `git status --short` lists 715 entries, all untracked (`??`), 0 tracked and modified; nothing was cleaned |
+| files that exist only here | weights, freeze arrays, per-run arrays, `.pt` files | 160 `weights/` directories with 12,640 exports (40 x (152 + 50 + 70 + 44)); 240 `freeze_stage*_*.npz` (40 `bw` x 6); 240 `final_eval_*.npz` (120 joint runs x 2); 240 `state_end*.pt` (40 x 3 `bw` + 120 joint); 40 `train_history.json`; 200 `eval/arrays/*.npz` |
+| unpushed commits | `4a3ab946` (the P2 results) and `ea727dcb` (the reports) | `git log origin/t3-r1..HEAD` lists exactly these two, `4a3ab9469cf292603c820a9a4552e7fc65ae3c30` and `ea727dcb6b732e6787b1be258fe61d58821b3523` |
+| remote | `origin/t3-r1` = `a848114e` | `git ls-remote origin t3-r1` = `a848114eef501d9ef6bab0fcd7c71a3989d32d3c`, an ancestor of HEAD; no tag of the round exists locally or on `origin` |
+| first fact-check round | done; 68 problems reported, 64 confirmed and corrected | `results/t3_r1/factcheck/round1.json`: 13 checkers, 3,392 claims checked, 68 problems reported, 64 confirmed by a second agent, 4 not confirmed; `round1_dispositions.json` has one entry for each of the 64 (keys 0 to 63) |
+| second round | on the corrected reports, not finished, run id `wf_0bb5dc1a-d35` | the stored record of the run (`status` "killed", 75 s, 9 checkers started, no result, `result` null) shows no completed agent, so there is nothing to resume from; a workflow resume works only inside the session that started it, which is gone. The run is therefore replaced by a new second round on the reports as they stand after the additions of section 6.1 (section 6.2) |
+
+`main` is not touched: `origin/main` stands at `15e5b71a` ("Add files via upload", not by this round) and this round does not move it. No tag is created and no pull request is opened.
+
+### 6.1 Additions made before the second round
+
+Descriptive only: no new run, no change of a pre-registered number, criterion or verdict, no change under `protocols/`, `agents/`, `envs/`, `utils/`, `run/`, `tools/v2/`, `tools/ms/`. The pipeline is `bw_failures.py` (writes `tables/t17*.md`, `results/t3_r1/analysis/bw_failures/*.csv` and two figures), then `results_tables.py`, then `assemble_reports.py`; the three scripts read the CSVs of `results/t3_r1/`.
+
+| item | where | script |
+|---|---|---|
+| the four `bw` failures at T = 3 in detail (the failing gate and the other two, the stage, the gap and the band of the maximum, `Delta_t(d)` and `G_t(d)`, the learned mean effort and the best-response effort, the normalised Beta sd, the window d +- 20 as figure and table, the development checks of the failing stage's phase, the rank among the 20 runs, and the other 18 runs of the q at the same stage and gap) | `04_t3_results.md` section 4.1 | `bw_failures.py` |
+| the decomposition H1 = H2 + H3 (shares H3/H1 and H2/H1 per q, n = 20 for all three pairs at both q, residual 8.3e-17 and 0) | `04_t3_results.md` section 5, `06_decision_inputs.md` section 2, `summary.md` | `results_tables.py` (`t05d_decomposition`) |
+| ex-ante and full-domain levels side by side (mean and median of `EXP_root_over_dw` and `Gmax_full_over_dw`, per arm and q) | `04_t3_results.md` section 5, `05_t2_comparison.md` section 5 | `results_tables.py` (`t05e_levels`) |
+| the power of a confirmation under the T = 2 rule (printed by `t14_reading`) | `06_decision_inputs.md` section 1, `summary.md` | `results_tables.py` (`t14_reading`) |
+
+The best-response effort, the one-step argmax effort and the Beta spread of section 4.1 are not in the analysis CSVs. `bw_failures.py` re-evaluates the stored last-iterate weights of the 40 `bw` runs (`state_end_stage1.pt`, untracked, in the round's own worktree; `T3R1_UNTRACKED_ROOT` points at its `results/t3_r1`) with `tools/t3/t3_eval.py` on the final tier, and stops unless the evaluation reproduces the stored arrays (`eval/arrays/*.npz`: `d_grid`, `e_hat`, `delta`, `G` at every stage) and the scalars `Gmax_full_over_dw`, `EXP_root_over_dw`, `eta_T_over_dw` of `eval/per_run.csv` bit for bit. Run on 2026-10-17: 40 of 40 arrays and 40 of 40 scalar sets identical (`results/t3_r1/analysis/bw_failures/replay_check.json`). (Reading the scalars with `pandas.read_csv` at its default float precision differs from the stored doubles in the 16th digit; the check uses `float_precision="round_trip"`.)

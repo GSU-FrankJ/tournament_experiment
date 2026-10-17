@@ -1,4 +1,4 @@
-| true per-run pass probability p (same at both q) | P(at least 18 of 20) at one q | P(at least 18 of 20) at both q |
+| true per-run pass probability p (same at both q) | P(at least 18 of 20) at one q | P(at least 18 of 20) at both q (independent) |
 |---|---|---|
 | 0.70 | 0.035 | 0.001 |
 | 0.80 | 0.206 | 0.042 |

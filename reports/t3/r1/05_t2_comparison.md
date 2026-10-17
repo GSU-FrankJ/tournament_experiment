@@ -101,6 +101,15 @@ Final tier, last iterate; "run gates" is G-A and G-F and G-N and G-S.
 | 50 | `v20` - `jt2` | 20 | 0.00188 | 0.01111 | -0.00923 | [-0.01054, -0.00808] | yes | [-0.01093, -0.00784] | -0.00843 | [-0.01029, -0.00749] | 20 / 0 |
 | 60 | `v20` - `jt2` | 20 | 0.00113 | 0.01361 | -0.01248 | [-0.01442, -0.01088] | yes | [-0.01505, -0.01054] | -0.01182 | [-0.01357, -0.01015] | 20 / 0 |
 
+**The levels behind the difference** (added at P3; descriptive, nothing pre-registered changes). The mean and the median over the 20 seeds of the ex-ante gain EXP_root/dW and of the full-domain gain Gmax_full/dW per arm and q (final tier, last iterate), next to the paired difference above, so that the two measures can be compared directly (prediction P2, section 8). The paired difference of EXP_root is in the secondary table of section 6.
+
+| arm | q | runs | EXP_root / dW (ex ante): mean | median | Gmax_full / dW (full domain): mean | median |
+|---|---|---|---|---|---|---|
+| `v20` | 50 | 20 | 0.00045 | 0.00041 | 0.00188 | 0.00157 |
+| `v20` | 60 | 20 | 0.00024 | 0.00020 | 0.00113 | 0.00102 |
+| `jt2` | 50 | 20 | 0.00089 | 0.00066 | 0.01111 | 0.01020 |
+| `jt2` | 60 | 20 | 0.00077 | 0.00067 | 0.01361 | 0.01298 |
+
 **H1-T2 is supported at both q:** the mean paired difference of `Gmax_full/dW` (`v20` - `jt2`) is -0.00923 [-0.01054, -0.00808] at q = 50 and -0.01248 [-0.01442, -0.01088] at q = 60, negative in 20 of 20 seeds at both q (the criterion: the upper end of the 95 % interval below 0 at both q; S = 20261017, 10,000 resamples; dropped pairs 0). The mean `Gmax_full` is 0.00188 (`v20`) against 0.01111 (`jt2`) at q = 50 and 0.00113 against 0.01361 at q = 60.
 
 ## 6. Closed-form recovery, stage 1, and the secondaries

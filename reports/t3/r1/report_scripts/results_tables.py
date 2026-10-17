@@ -302,6 +302,46 @@ def t05_comparison(d: Dict[str, object]) -> None:
         write(f"t05c_stage_band_{tag}", md(hdr2, rows))
 
 
+def t05d_decomposition(d: Dict[str, object]) -> None:
+    """H1 = H2 + H3 over the same pairs: the mean paired differences add exactly; the shares H3/H1 and H2/H1 per q (P3 addition).
+
+    Uses the criterion rows of ``criterion.csv`` (n pairs must be 20 for all three hypotheses of a q; otherwise the shares are
+    computed on the common (q, seed) pairs of the per-run table, and the table says so).
+    """
+    c, per = d["crit"], d["per"]
+    rows = []
+    for q in QS:
+        r = {h: c[(c["hypothesis"] == h) & (c["q"] == q)].iloc[0] for h in ("H1", "H2", "H3")}
+        ns = [int(r[h].n_pairs) for h in ("H1", "H2", "H3")]
+        if ns == [20, 20, 20]:
+            h1, h2, h3 = (float(r[h].mean_diff) for h in ("H1", "H2", "H3"))
+            note = "criterion.csv"
+        else:
+            common = sorted(set.intersection(*(set(sel(per, a, q)["seed"]) for a in ARMS3)))
+            g = {a: sel(per, a, q).set_index("seed")["Gmax_full_over_dw"].loc[common] for a in ARMS3}
+            h1, h2, h3 = (g["bw"] - g["jt"]).mean(), (g["bw"] - g["jt_es"]).mean(), (g["jt_es"] - g["jt"]).mean()
+            note = f"common pairs only ({len(common)} seeds), n of H1 / H2 / H3 = {ns}"
+        resid = h2 + h3 - h1
+        assert abs(resid) < 1e-12, (q, resid)
+        print(f"decomposition q = {q}: n = {ns}, H1 = {h1:.6f}, H2 = {h2:.6f}, H3 = {h3:.6f}, H2 + H3 - H1 = {resid:.2e}, H3/H1 = {h3 / h1:.4f}, H2/H1 = {h2 / h1:.4f}")
+        rows.append((q, f"{ns[0]} / {ns[1]} / {ns[2]}", signed(h1, 5), signed(h2, 5), signed(h3, 5), f"{resid:.1e}", f"{h3 / h1:.3f}", f"{h2 / h1:.3f}", note))
+    write("t05d_decomposition", md(["q", "n pairs of H1 / H2 / H3", "H1: mean `bw` - `jt`", "H2: mean `bw` - `jt_es`", "H3: mean `jt_es` - `jt`",
+                                    "H2 + H3 - H1", "share H3 / H1 (closed by the exploring starts)", "share H2 / H1 (remaining after them)", "computed from"], rows))
+
+
+def t05e_levels(d: Dict[str, object]) -> None:
+    """The mean and the median of EXP_root / dW (ex ante) and of Gmax_full / dW (full domain) per arm and q (P3 addition; prediction P2)."""
+    per = d["per"]
+    for tag, arms in (("t3", ARMS3), ("t2", ARMS2)):
+        rows = []
+        for arm in arms:
+            for q in QS:
+                r = sel(per, arm, q)
+                rows.append((f"`{arm}`", q, len(r), num(r["EXP_root_over_dw"].mean()), num(r["EXP_root_over_dw"].median()),
+                             num(r["Gmax_full_over_dw"].mean()), num(r["Gmax_full_over_dw"].median())))
+        write(f"t05e_levels_{tag}", md(["arm", "q", "runs", "EXP_root / dW (ex ante): mean", "median", "Gmax_full / dW (full domain): mean", "median"], rows))
+
+
 def t06_where(d: Dict[str, object]) -> None:
     """Where the gains are: by stage and band, the location of the maximum, and EXP_root against Gmax_full."""
     per = d["per"].copy()
@@ -538,7 +578,10 @@ def t14_reading(d: Dict[str, object]) -> None:
     for p in (0.70, 0.80, 0.85, 0.90, 0.95, 0.98):
         one = sum(comb(20, k) * p ** k * (1 - p) ** (20 - k) for k in range(18, 21))
         rows.append((f"{p:.2f}", f"{one:.3f}", f"{one * one:.3f}"))
-    write("t14b_rule_probability", md(["true per-run pass probability p (same at both q)", "P(at least 18 of 20) at one q", "P(at least 18 of 20) at both q"], rows))
+    write("t14b_rule_probability", md(["true per-run pass probability p (same at both q)", "P(at least 18 of 20) at one q", "P(at least 18 of 20) at both q (independent)"], rows))
+    print("P(at least 18 of 20 in a fresh 20-seed block), binomial(20, p); both q = the square (independent blocks):")
+    for p, one, both in ((float(a), float(b), float(c)) for a, b, c in rows):
+        print(f"  p = {p:.2f}: one q {one:.3f}, both q {both:.3f}")
 
 
 def t15_ga_parts(d: Dict[str, object]) -> None:
@@ -566,7 +609,7 @@ def t15_ga_parts(d: Dict[str, object]) -> None:
 def main() -> int:
     """Generate every table."""
     d = load()
-    for fn in (t01_checks, t02_arms, t03_per_seed, t04_bw, t05_comparison, t06_where, t08_best, t09_coverage, t10_cost, t11_t2, t12_recovery_t3, t13_curves, t14_reading, t15_ga_parts, t16_diag):
+    for fn in (t01_checks, t02_arms, t03_per_seed, t04_bw, t05_comparison, t05d_decomposition, t05e_levels, t06_where, t08_best, t09_coverage, t10_cost, t11_t2, t12_recovery_t3, t13_curves, t14_reading, t15_ga_parts, t16_diag):
         fn(d)
     print(f"{len(list(OUT.glob('*.md')))} tables in {OUT}")
     return 0
