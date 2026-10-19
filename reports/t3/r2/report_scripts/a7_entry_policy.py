@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from common import RES, ROOT, md, num, write  # noqa: E402
+from common import RES, md, num, write  # noqa: E402
 
 import t3_eval as te  # noqa: E402
 from replay_dev_rule import candidate_fns  # noqa: E402

@@ -17,7 +17,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import matplotlib
 
@@ -29,6 +29,8 @@ import pandas as pd  # noqa: E402
 from common import REP, RES, ROOT, md, num, write  # noqa: E402
 
 import t3_blind as tb  # noqa: E402
+import t3c_analysis as an  # noqa: E402
+import t3c_blind as cb  # noqa: E402
 
 AUD = RES / "audit"
 R1 = ROOT / "results" / "t3_r1"
@@ -102,6 +104,7 @@ def a5() -> None:
                                      "calc (dynamic)", "one-step argmax stored", "calc", "slope dQ/de at the learned effort"], rows))
     N["a5_fail_maxdiff"] = float(max(f.Delta_diff_over_dw.max(), f.G_diff_over_dw.max()))
     N["a5_fail_br_maxdiff"] = float(f.br_effort_diff.max())
+    N["a5_fail_dev_maxdiff"] = float((f.stored_dev - f.calc_a_dev).abs().max())
 
     r = pd.read_csv(AUD / "a5_runs.csv")
     rows = []
@@ -207,6 +210,13 @@ def a6() -> None:
                      int(s.verdict_differs.sum())))
     rows.append(("all", len(d), *[sci(d[f"absdiff_{c}"].max()) for c in cols[:5]], int(d.verdict_differs.sum())))
     write("a06a_refined", md(["arm", "runs", "max abs diff Gmax_full (/dW)", "eta_T", "EXP_root", "dReach", "Deltamax_all", "G-A or G-F verdict differs"], rows))
+    rows = []
+    for arm in ("bw", "jt", "jt_es", "jt2", "v20"):
+        for q in (50, 60):
+            t = d[(d.arm == arm) & (d.q == q)]
+            rows.append((f"`{arm}`", q, len(t), int(t.final_G_A.sum()), int(t.refined_G_A.sum()), int(t.final_G_F.sum()), int(t.refined_G_F.sum()),
+                         int((t.final_G_A & t.final_G_F).sum()), int((t.refined_G_A & t.refined_G_F).sum())))
+    write("a06d_refined_verdicts", md(["arm", "q", "runs", "G-A passes, final tier", "refined tier", "G-F passes, final", "refined", "G-A and G-F, final", "refined"], rows))
     st = []
     for c in cols[5:]:
         if f"absdiff_{c}" in d and d[f"absdiff_{c}"].notna().any():
@@ -264,16 +274,22 @@ def a7() -> None:
         n_nodes = len(c[0]["nodes"])
         pe = [y["summary"]["n_policy_error"] for y in c]
         eq = [y["summary"]["n_equilibrium_like"] for y in c]
-        ever = []
+        ever, lowest, gap = [], [], []
         for y in c:
             e_mat = np.load(AUD / "a7_emat.npz")[f"q{y['q']}_s{y['seed']}"]
             grid = bc_grid(y["q"])
             idx = [int(np.argmin(np.abs(grid - d))) for d in y["nodes"]]
             ever.append(int(((e_mat[:, idx] < 1.0).any(axis=0)).sum()))
+            fin = {o["d"]: o for o in y["objective"] if o["export"] == "final"}
+            lowest.append(float(e_mat[-1, idx].min()))
+            gap.append(float(np.median([fin[float(d)]["a_dev"] - fin[float(d)]["e_hat"] for d in y["nodes"]])))
         rows3.append((q, len(c), n_nodes, f"{min(sh):.4f} - {max(sh):.4f}", f"{np.median(sh):.4f}", f"{min(sh_s):.3f} - {max(sh_s):.3f}",
-                      f"{min(pe)} - {max(pe)}", f"{min(eq)} - {max(eq)}", f"{min(ever)} - {max(ever)}"))
+                      f"{min(pe)} - {max(pe)}", f"{min(eq)} - {max(eq)}", f"{min(lowest):.2f} - {max(lowest):.2f}",
+                      f"{min(gap):.2f} - {max(gap):.2f}", f"{min(ever)} - {max(ever)}"))
     write("a07c_comparison", md(["q", "runs without a stretch", "nodes (union of the stretch nodes of the q)", "share of learner draws below the clamp, decay window (range)",
-                                 "median", "the stretch runs of the q (range)", "of those nodes: policy error (range)", "equilibrium-like (range)",
+                                 "median", "the stretch runs of the q (range)", "of those nodes: one-step argmax >= 1 (range)", "one-step argmax < 1 (range)",
+                                 "lowest learned effort among the nodes at the end (range over runs)",
+                                 "median over the nodes of (one-step argmax - learned effort) (range over runs)",
                                  "nodes that were below 1 at some export (range)"], rows3))
     # training signals of the decay window: stretch runs against the others
     rows5 = []
@@ -284,6 +300,24 @@ def a7() -> None:
                                                 ("kl_final_epoch_mean", "clip_frac_mean", "adv_raw_std_mean", "share_below_clamp")]))
     write("a07g_training_signal", md(["q", "group", "runs", "kl_final_epoch (mean over local 1201-1600)", "clip_frac", "adv_raw_std",
                                       "share of learner draws below the clamp"], rows5))
+    rows6 = []
+    for x in (y for y in runs if y["group"] == "stretch"):
+        for label in ("formation", "decay"):
+            w = x["windows"][label]
+            if not w:
+                continue
+            rows6.append((int(x["q"]), int(x["seed"]), label, f"{w['local_first']} - {w['local_last']}", f"{w['kl_final_epoch_mean']:.4f}", f"{w['clip_frac_mean']:.4f}",
+                          f"{w['adv_raw_mean_mean']:+.5f}", f"{w['adv_raw_std_mean']:.4f}", f"{w['starts_tail']:,} / {w['starts_near']:,} / {w['starts_mid']:,}",
+                          f"{w['learner_draws_below_clamp']:,} of {w['learner_draws']:,}", f"{w['share_below_clamp']:.3f}"))
+    write("a07h_windows", md(["q", "seed", "window", "local updates", "kl_final_epoch", "clip_frac", "adv_raw_mean", "adv_raw_std",
+                              "realised starts tail / near-tie / middle", "stage-2 learner draws below the clamp", "share"], rows6))
+    rows7 = []
+    for q in (50, 60):
+        for grp, label in (("stretch", "runs with a stretch"), ("comparison", "runs without a stretch")):
+            ws = [y["windows"]["decay"] for y in runs if y["group"] == grp and y["q"] == q]
+            rows7.append((q, label, len(ws), f"{min(w['adv_raw_mean_mean'] for w in ws):+.5f} - {max(w['adv_raw_mean_mean'] for w in ws):+.5f}",
+                          *[f"{min(w[k] for w in ws):,} - {max(w[k] for w in ws):,}" for k in ("starts_tail", "starts_near", "starts_mid")]))
+    write("a07i_group_starts", md(["q", "group", "runs", "adv_raw_mean (mean over local 1201-1600)", "realised starts in the tail stratum (sum over local 1201-1600)", "near-tie", "middle"], rows7))
     # placement (d) of A5: the calculator at every stretch node against the stored final-tier arrays of the evaluated iterate
     rows4 = []
     for x in (y for y in runs if y["group"] == "stretch"):
@@ -359,6 +393,10 @@ def a8() -> None:
         rows.append((q, f"{sd}{mark}", num(r.eta_min, 5), num(r.eta_med, 5), num(r.eta_max, 5), num(r.eta_final, 5), int(r.n_above), num(r.rmse_max, 4), num(r.tail_max, 4)))
     write("a08a_eta3_per_run", md(["q", "seed", "min eta_3/dW over the last 16 exports", "median", "max", "eta_3/dW of the evaluated iterate (u01600)",
                                    "exports above 0.005", "max RMSE_pos/e_3(0)*", "max tail mean/e_3(0)*"], rows))
+    sh = a.groupby(["q", "seed"]).agg(rmse_min=("rmse_pos_T_over_eT0", "min"), rmse_med=("rmse_pos_T_over_eT0", "median"), rmse_max=("rmse_pos_T_over_eT0", "max"),
+                                      tail_min=("tail_mean_T_over_eT0", "min"), tail_med=("tail_mean_T_over_eT0", "median"), tail_max=("tail_mean_T_over_eT0", "max"))
+    write("a08c_shape_per_run", md(["q", "seed", "RMSE_pos/e_3(0)* min over the 16 exports", "median", "max", "tail mean/e_3(0)* min", "median", "max"],
+                                   [(q, sd, *[num(r[c], 4) for c in ("rmse_min", "rmse_med", "rmse_max", "tail_min", "tail_med", "tail_max")]) for (q, sd), r in sh.iterrows()]))
     rows = []
     for q in (50, 60):
         t = s.loc[q]
@@ -394,6 +432,43 @@ def a4() -> None:
     p = RES / "preflight" / "tests" / "semantics.txt"
     if p.is_file():
         N["a4_summary"] = p.read_text().strip().splitlines()[-1]
+    q = RES / "preflight" / "tests" / "full_suite_shards.txt"
+    lines = q.read_text().splitlines()
+    tot = next(l for l in lines if l.startswith("total: "))[len("total: "):]
+    failed = next(l for l in lines if l.startswith("failed tests: "))[len("failed tests: "):]
+    N["full_suite"] = (f"The whole suite (`pytest tests` in 12 concurrent shards at the second code commit, "
+                       f"`results/t3_r2/preflight/tests/shard_*.txt`, summary `full_suite_shards.txt`): {tot}; failed: `{failed}` "
+                       f"(the known failure of earlier rounds); see `03_checks.md` section 2.")
+
+
+def recount() -> None:
+    """The run-pass rule of the T3-R2 tools applied to T3-R1's own table must reproduce T3-R1's gate counts."""
+    per = pd.read_csv(R1 / "eval" / "per_run.csv")
+    gc = pd.read_csv(R1 / "analysis" / "gate_counts.csv")
+    crit = json.loads((ROOT / "reports" / "t3" / "r1" / "prereg_criteria.json").read_text())
+    g = crit["gates"]
+    import csv as _csv
+    with open(R1 / "eval" / "per_run.csv", newline="") as f:
+        rows_csv = list(_csv.DictReader(f))                  # the blind tool reads the CSV as text, as it does in the confirmation
+    rows = []
+    ok = True
+    for arm in ("bw", "jt", "jt_es"):
+        for q in (50, 60):
+            sel = [r for r in rows_csv if r["arm"] == arm and int(float(r["q"])) == q]
+            blind = sum(cb.run_passes(r, g) for r in sel)
+            tab = an.planned_table(per[(per.arm == arm)], g, seeds=tuple(range(50501, 50521)), prefix="t3r1", arm=arm)
+            ana = sum(1 for t in tab if t["q"] == q and t["passed"])
+            want = int(gc[(gc.arm == arm) & (gc.q == q)].run_pass.iloc[0])
+            stored = {int(r["seed"]): r["gates_pass"] == "True" for r in sel}
+            tab_d = {t["seed"]: t["passed"] for t in tab if t["q"] == q}
+            blind_d = {int(r["seed"]): cb.run_passes(r, g) for r in sel}
+            per_run_equal = stored == tab_d == blind_d
+            ok &= blind == ana == want and per_run_equal
+            rows.append((f"`{arm}`", q, len(sel), want, ana, blind, "yes" if blind == ana == want else "NO",
+                         "yes" if per_run_equal else "NO"))
+    write("a05g_recount", md(["arm", "q", "runs", "run passes in `analysis/gate_counts.csv` (T3-R1)", "`t3c_analysis.run_row`", "`t3c_blind.run_passes`",
+                              "counts equal", "equal run for run (also against the stored `gates_pass` column)"], rows))
+    N["recount_ok"] = bool(ok)
 
 
 def costs() -> None:
@@ -405,7 +480,7 @@ def costs() -> None:
 
 def main() -> int:
     """Write every fragment, the figures and the numbers file."""
-    for fn in (costs, a1, a2, a3, a5, a6, flips, a7, a8, a4):
+    for fn in (costs, a1, a2, a3, a5, a6, flips, recount, a7, a8, a4):
         fn()
     (REP / "tables").mkdir(parents=True, exist_ok=True)
     (REP / "tables" / "audit_numbers.json").write_text(json.dumps(N, indent=1, default=str))

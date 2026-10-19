@@ -27,7 +27,7 @@ Nothing in the audit is classified (E). The four T3-R1 `bw` re-runs are bit-iden
 
 ## 1. Set-up
 
-- Code commit: `67336a38cca03215c467096e28d3717a54cf32fb` (the new tools and tests; `agents/`, `envs/`, `utils/`, `run/`, `protocols/`, `tools/ms/`, `tools/v2/` and the existing `tools/t3/` files are those of `be2b7e9f`). Every `record_*.json` in `results/t3_r2/audit/` holds the HEAD and `git status --porcelain` of its step. The steps A1, A2, A3 and A5 ran with only `results/` untracked (the re-run manifests say `clean_tree` true); A1's comparison, A5's convergence test, A6, A7 and A8 ran while the untracked report scripts and table fragments of `reports/t3/r2/` already existed. No tool path was dirty at any step.
+- Code commits: `67336a38cca03215c467096e28d3717a54cf32fb` (the new tools and tests; A1, A2, A3, A6, A7 and A8 ran at it) and `897982f28b820108ba7a8d1e9ebd3ec6407f4141` (the fixes of the independent review, `03_checks.md`; A5 and its convergence test were re-run at it, with more columns and the extra q = 50 stretch rows; the first A5 outputs are kept in `results/t3_r2/audit/at_67336a38/` and agree with the re-run in every shared column). `agents/`, `envs/`, `utils/`, `run/`, `protocols/`, `tools/ms/`, `tools/v2/` and the existing `tools/t3/` files are those of `be2b7e9f`. Every `record_*.json` in `results/t3_r2/audit/` holds the HEAD and `git status --porcelain` of its step. The steps A1, A2, A3 and A5 ran with only `results/` untracked (the re-run manifests say `clean_tree` true); A1's comparison, A5's convergence test, A6, A7 and A8 ran while the untracked report scripts and table fragments of `reports/t3/r2/` already existed. No tool path was dirty at any step.
 - Roots (explicit arguments, recorded in each `record_*.json`): T3-R1 untracked root `.../t3-bw-vs-jt-51e472/results/t3_r1` (weights, `state_end*.pt`, `eval/arrays/`), v2.0 confirmation runs `.../v2-t2-refine/results/v2_T2_locked/confirmation_v2_0`, tracked records `results/t3_r1/`. The reference-root check of P0 is in `00_housekeeping.md`.
 - The audit tool is pure: it moves no RNG and writes nothing but `results/t3_r2/audit/` (and, for A1, the four re-runs in `results/t3_r2/reruns/`). Parallel steps use spawned single-threaded processes (`OMP_NUM_THREADS=1`, at most 40 workers).
 - Cost of every step (`results/t3_r2/audit/costs.csv`; the A1 re-runs are the only training; all steps together take {{n:cost_total_sec:.0f}} seconds of wall time, {{n:a1_wall_max:.0f}} of them the longest of the four A1 runs, which ran side by side):
@@ -40,7 +40,7 @@ Each failing `bw` run was run again with `run/run_ms_stagewise.py --config <its 
 
 {{T:a01_reproduction}}
 
-**Outcome: {{n:a1_n}} of {{n:a1_n}} bit-identical in both comparisons**, `run_config.json` byte-equal. Training at the T3-R1 settings is deterministic, so a failing run fails again for the same reason: the failures are not an accident of the machine or the day.
+**Outcome: {{n:a1_n}} of {{n:a1_n}} bit-identical in both comparisons**, `run_config.json` byte-equal. Training at the T3-R1 settings is deterministic on this host (single-threaded CPU, the same machine on a second day): a failing run fails again with identical weights, tables and gains.
 
 ## 3. A2, snapshot identity (40 `bw` runs)
 
@@ -60,7 +60,7 @@ Step 1 (decisive): `utils.ms_continuation.build_nested_tables` from the two froz
 
 ## 5. A4, stage-2 training semantics at T = 3
 
-`tests/test_t3r2_semantics.py` (6 tests, hand-computed examples; returns are float32 and compared with a relative tolerance of 1e-5; record: `results/t3_r2/preflight/tests/semantics.txt`: "{{s:a4_summary}}"):
+`tests/test_t3r2_semantics.py` (6 tests with hand-computed expectations or draws replayed from the same generators; returns are float32 and compared with a relative tolerance of 1e-5; record: `results/t3_r2/preflight/tests/semantics.txt`: "{{s:a4_summary}}"):
 
 1. the observation at (t = 2, T = 3) is [0.5, d/B] (B = 200 at q = 50); at t = 3 it is [1, d/(2B)];
 2. a learner in role 1 sees −d (the stored states equal d/B for role 0 and −d/B for role 1), the opponent sees the negative of that;
@@ -75,15 +75,15 @@ Step 1 (decisive): `utils.ms_continuation.build_nested_tables` from the two froz
 
 `tools/t3/t3r2_br_calc.py`. It computes Q_T, V_T^mean, V_T^BR, W_{t+1}^mean/BR, Q_t^m, V_t^mean, Δ_t, V_t^BR, G_t and EXP_root = G_1(0) as defined in the prompt's table, from the mean-effort functions of the loaded networks (float32 networks, float64 means), with the learned effort as one of the candidates of every maximisation. Numerics: value functions tabulated on a symmetric grid of D_t of step 0.05 and cubic-spline interpolated; the expectation is a composite Gauss-Legendre rule on panels of width 1 aligned at z = 0 and ±2q with 4 nodes per panel and the triangular density in the weights; maximisation over the effort: a grid of step 0.01 on [0, 100] followed by bounded refinement around the best grid point and at both bounds. **Independence:** it uses none of `verify`, `gl_shock_rule`, `stage_grid`, `effort_grid`, `evaluate` of `utils/dp_br_verifier.py` / `utils/v2_metrics.py` (an AST test in `tests/test_t3r2_calc.py` checks every name and import); the loaders and the mean-effort functions come in through the audit tool, and the calculator takes only `f_xi` and `F_xi` of `utils.theory_multistage`, which that test integrates numerically. **One departure from the letter of the prompt, disclosed:** the tabulations (V^BR on the whole grid) refine with a vectorised golden-section search on the same brackets; the individually reported states use `scipy`'s bounded Brent as the prompt says; `test_the_vectorised_refinement_equals_scipy_bounded_brent` checks that both give the same values (≤ 1e-9) and efforts (≤ 2e-3 on the coarse test grid).
 
-**Tests** (`tests/test_t3r2_calc.py`, 13 tests): F_ξ and f_ξ against numerical integration; the shock rule (unit mass, mean 0, variance 2q²/3); **the T = 2 closed form** (tent and g1 as functions) at q = 50 and q = 60 (both above q_crit = 41.83): Δ_t and G_t at the root and at 50 states of D_2 are at most 1e-6 ΔW (they are at machine precision, ~1e-15 ΔW); a perturbed closed form has the exactly computable gain; the T = 3 continuation against direct nested adaptive quadrature at three (d, e) points (≤ 2e-7); the best-response chain at least the mean chain, G_T = Δ_T; both effort bounds; the convergence helper; and **agreement with the verifier on a synthetic T = 3 policy** (V^mean at 20 states per stage ≤ 1e-4 ΔW, Δ_3 and EXP_root ≤ 1e-3 ΔW).
+**Tests** (`tests/test_t3r2_calc.py`, 14 tests): F_ξ and f_ξ against numerical integration; the shock rule (unit mass, mean 0, variance 2q²/3); **the T = 2 closed form** (tent and g1 as functions) at q = 50 and q = 60 (both above q_crit = 41.83): Δ_t and G_t at the root and at 50 states of D_2 are at most 1e-6 ΔW (they are at machine precision, ~1e-15 ΔW); a perturbed closed form has the exactly computable gain; the T = 3 continuation against direct nested adaptive quadrature at three (d, e) points (≤ 2e-7); the best-response chain at least the mean chain, G_T = Δ_T; both effort bounds; the convergence helper; **agreement with the verifier on a synthetic T = 3 policy** (V^mean at 20 states per stage ≤ 1e-4 ΔW, Δ_3 and EXP_root ≤ 1e-3 ΔW); and **an independent brute-force T = 3 chain** written in the test (exact cell masses of the shock, linear interpolation, a plain effort grid; q = 20, a non-equilibrium policy), which agrees with the calculator on Δ_2 and G_2 at four states and on EXP_root to 1e-5 ΔW (the actual differences are about 1e-6 ΔW, on values of 0.2 to 0.4 ΔW).
 
 **(a) The four failure points** (`audit/a5_failure_points.csv`). The stored columns are those of `results/t3_r1/analysis/bw_failures/points.csv` (T3-R1 report §4.1):
 
 {{T:a05a_failure_points}}
 
-The calculator reproduces the stored gains to at most {{n:a5_fail_maxdiff:.1e}} ΔW and the stored best-response efforts to at most {{n:a5_fail_br_maxdiff:.3f}} effort units (the stored effort is the verifier's grid-and-vertex argmax on an effort grid of step 0.5). At the two q = 60 points the slope of Q_2^m at the learned effort is positive (0.0131 and 0.0060 per effort unit): the objective rises when the effort is raised from the learned near-zero value; the q = 50 slopes are 0.0046 and −0.0028 (the learned stage-3 effort is 8 below and 16 above the best response, respectively).
+The calculator reproduces the stored gains to at most {{n:a5_fail_maxdiff:.1e}} ΔW, the stored dynamic best-response efforts to at most {{n:a5_fail_br_maxdiff:.3f}} effort units and the stored one-step argmax efforts to at most {{n:a5_fail_dev_maxdiff:.3f}} effort units (the largest is 34.43 against 34.40 at q = 60, seed 50514, d = −14, where the objective is nearly flat; the stored efforts are the verifier's grid-and-vertex argmax on an effort grid of step 0.5, the calculator's the refined maximiser; the efforts are the less well determined quantity, the gains agree to 1e-5 or better). At the two q = 60 points the slope of Q_2^m at the learned effort is positive (0.0131 and 0.0060 per effort unit): the objective rises when the effort is raised from the learned near-zero value; the q = 50 slopes are 0.0046 and −0.0028 (the learned stage-3 effort is 8 below and 16 above the best response, respectively).
 
-**(b), (c) All 200 runs of `results/t3_r1/eval/per_run.csv`** (120 T = 3 runs, 40 `jt2`, 40 `v20`; `audit/a5_runs.csv`). For each run the calculator gives G and Δ at the state of the stored maximum (`Gmax_full_t`, `Gmax_full_d`), Δ_T at `Delta_argmax_d_t{T}` and EXP_root = G_1(0), set against the stored verifier values:
+**(b), (c) All 200 runs of `results/t3_r1/eval/per_run.csv`** (for every evaluated state `audit/a5_runs.csv` also holds the learned effort, both best-response efforts and the slope at the learned effort: at the state of the stored maximum `e_hat_at_Gmax`, `a_dev_at_Gmax`, `a_br_at_Gmax`, `slope_at_Gmax`; at the Δ_T state `e_hat_at_DeltaT`, `a_dev_at_DeltaT`, `a_br_at_DeltaT`, `G_at_DeltaT_over_dw`, `slope_at_DeltaT`; at the root `e1_calc`, `a_dev_1`, `a_br_1`, `Delta_1_over_dw`, `slope_1`) (120 T = 3 runs, 40 `jt2`, 40 `v20`; `audit/a5_runs.csv`). For each run the calculator gives G and Δ at the state of the stored maximum (`Gmax_full_t`, `Gmax_full_d`), Δ_T at `Delta_argmax_d_t{T}` and EXP_root = G_1(0), set against the stored verifier values:
 
 {{T:a05b_runs}}
 
@@ -95,7 +95,7 @@ Largest differences: G {{n:a5_G_max:.2e}} ΔW ({{s:a5_G_argmax}}), Δ_T {{n:a5_D
 
 Stage 3 agrees exactly (the closed-form terminal stage on the same grid); the largest difference, {{n:a5_agree_max:.1e}} ΔW, is the verifier's linear interpolation of the continuation, below 1e-4 ΔW.
 
-**Convergence test** (`audit/a5_convergence.json`): the four failure points, the root of the five named runs and 20 stretch nodes of the three q = 60 stretch runs (7 + 7 + 6), with every step halved (table step 0.025, effort step 0.005, panel width 0.5) and the nodes per panel doubled (8):
+**Convergence test** (`audit/a5_convergence.json`): the four failure points, the root of the five named runs and 20 stretch nodes of the three q = 60 stretch runs (7 + 7 + 6) (extra, beyond the prompt: 5 nodes of each of the four q = 50 stretch runs, rows `stretch nodes q50 extra`), with every step halved (table step 0.025, effort step 0.005, panel width 0.5) and the nodes per panel doubled (8):
 
 {{T:a05d_convergence}}
 
@@ -111,6 +111,10 @@ Values change by at most {{n:a5_conv_val_max:.1e}} ΔW (limit 1e-6) and efforts 
 
 {{T:a05f_hypotheses}}
 
+**Run-pass recount.** The run-pass rule of the confirmation tools (`t3c_analysis.run_row` and the independent `t3c_blind.run_passes`) applied to T3-R1's own table must reproduce T3-R1's gate counts (`results/t3_r1/analysis/gate_counts.csv`); it does, in the counts and run for run (also against the stored `gates_pass` column), including the four failing `bw` runs:
+
+{{T:a05g_recount}}
+
 **Outcome: {{n:gate_flips}} gate flips, {{n:hyp_flips}} hypothesis flips.** H1, H2, H3 and H1-T2 are supported under all three sources of `Gmax_full`, as T3-R1 reported. All differences are (N).
 
 ## 7. A6, the refined verifier tier (200 runs)
@@ -122,6 +126,10 @@ Values change by at most {{n:a5_conv_val_max:.1e}} ΔW (limit 1e-6) and efforts 
 {{T:a06b_refined_stages}}
 
 {{T:a06c_refined_top}}
+
+The G-A and G-F verdicts per arm and q (the shape parts of G-A, RMSE and tail, do not depend on the tier; G-N is not defined for a third tier):
+
+{{T:a06d_refined_verdicts}}
 
 **Outcome: the G-A and G-F verdicts are the same on the refined tier in all {{n:a6_n}} runs.** The largest change of Gmax_full is {{n:a6_G_max:.1e}} ΔW ({{s:a6_G_argmax}}), of η_T {{n:a6_eta_max:.1e}}, of EXP_root {{n:a6_exp_max:.1e}} ΔW. `dReach` (the sum of the maxima over the BR-reachable set, an exploratory aggregate that is defined by which grid nodes the reachability intervals cover, and so moves with the grid) changes by up to 1.7e-3 ΔW in four `jt` runs (up to 4.6e-4 in the others); it is not a gate quantity and enters no hypothesis. G-N is not defined for a third tier. All differences are (N).
 
@@ -155,9 +163,15 @@ At the two q = 60 failure nodes (the stored maxima) the curve at the first expor
 
 {{T:a07g_training_signal}}
 
+The two windows of each stretch run (the formation window and local updates 1201-1600), with `adv_raw_mean` and the realised starts per stratum, and the same two quantities per group:
+
+{{T:a07h_windows}}
+
+{{T:a07i_group_starts}}
+
 `kl_final_epoch`, `clip_frac` and `adv_raw_std` of the stretch runs lie at the upper end of the other runs' ranges, above them for `kl_final_epoch` at q = 50 and overlapping at q = 60; the share of draws below the clamp separates the groups clearly (seed 50514 aside).
 
-**6. The other 33 runs** at the same nodes (the union of the stretch nodes of their q):
+**6. The other 33 runs** at the same nodes (the union of the stretch nodes of their q). These runs have no in-band node below 1 at all (that is what "no stretch" means), so their learned effort at every one of these nodes is at least 1; the columns "one-step argmax >= 1" and "< 1" only say where the best response lies, and the last columns show how far the learned effort is from it:
 
 {{T:a07c_comparison}}
 
@@ -171,6 +185,10 @@ At the two q = 60 failure nodes (the stored maxima) the curve at the first expor
 
 {{T:a08b_eta3_counts}}
 
+The shape parts of G-A over the same 16 exports, per run (minimum, median, maximum):
+
+{{T:a08c_shape_per_run}}
+
 ![eta_3 against the stage-3 export](figures/f02_a8_eta3.png)
 
 **1. A5's Δ_3 at the two q = 50 failure points** are in the table of section 6 (a): 0.006227 (seed 50504, d = −4) and 0.005676 (seed 50517, d = −18), equal to the stored values to at most 2.1e-8 ΔW. **2. Variability:** at q = 50, **{{n:a8_q50_any}} of 20 runs have η_3 above 0.005 at one or more of the last 16 exports**, {{n:a8_q50_final}} at the evaluated iterate (the two failures); at q = 60, {{n:a8_q60_any}} of 20 at one or more exports and {{n:a8_q60_final}} at the evaluated iterate. Seed 50504 is above 0.005 at {{n:a8_50504_n}} of the 16 exports (min {{n:a8_50504_min:.5f}}, median {{n:a8_50504_med:.5f}}, max {{n:a8_50504_max:.5f}}): a persistent excess; seed 50517 has median {{n:a8_50517_med:.5f}} and exceeds 0.005 at {{n:a8_50517_n}} export only, the last (min {{n:a8_50517_min:.5f}}, max {{n:a8_50517_max:.5f}}). **3. Shape parts:** RMSE_pos/e_3(0)* exceeds 0.05 at some export in 11 of 20 runs at q = 50 and in 9 of 20 at q = 60, the tail mean never exceeds 0.02. So G-A's η_3 part and its RMSE part both vary strongly between neighbouring exports of the same run: the last iterate is a noisy draw from the end of a trajectory, and a run can sit just inside or just outside a limit. Classification (D2): the two q = 50 failures are (L), last-iterate variability of the stage-3 policy for seed 50517 and a persistent small excess for seed 50504.
@@ -179,13 +197,14 @@ At the two q = 60 failure nodes (the stored maxima) the curve at the first expor
 
 - The audit shows the code and the verifier are consistent with their specification at the points and tolerances above. It does not prove the absence of any error: it covers the quantities named in D3 (the four failure points, the 200 stored maxima, the roots, all stretch nodes, the 8 tables, the semantics in unit tests).
 - A5 (b) evaluates the calculator at the verifier's own maximising nodes; it does not search for a larger maximum elsewhere on D_t (the refined tier of A6 does that on a finer grid: no verdict changes).
+- (R) check of the records the prompt quotes: the four-failure table (learned and best-response efforts, values), the stretch counts of `zero_effort.csv`, the stage-2 `Delta` of seed 50514 at local 400 / 800 / 1200 (0.00551, 0.01611, 0.06122) and its minimum from local 1200 on (0.05505), and the clamp sums (11,142 to 71,877 of 204,800 draws in the stretch runs, at most 13,641 in the other 33) all agree with `results/t3_r1/analysis/bw_failures/{points,history,zero_effort}.csv` and with `audit/a7_runs.json`. No (R) finding. (The T3-R1 report texts were not audited line by line; only the values the prompt quotes were.)
 - The calculator departs from the letter of the prompt in one respect (golden section for the tabulations, Brent for reported states; section 6).
 - `t3c_launch.py` writes its plan CSV with its own writer: `t3_launch.write_plan_csv` has fixed field names and cannot carry the init-digest column the prompt asks for (disclosed again in `03_checks.md`).
-- The full test suite is recorded in `results/t3_r2/preflight/tests/` (`pytest_full_first.txt` and the later records); see `03_checks.md`.
+- {{s:full_suite}}
 - Window and node choices of A7 that the prompt leaves open: the formation window is the 100 local updates ending at the earliest first-below-1 export (local 1-25 where the stretch exists at the first export); the "same nodes" of the 33 other runs are the union of the stretch nodes of their q; the stretch runs are judged at `u03200`.
 
 ## 11. Predictions of D5 against the audit
 
 - **AP1** (no implementation error; A1, A2, A3 step 1 bit for bit; A5 and A6 without (E)): **confirmed.**
 - **AP2** (the stretches are learning failures; at most nodes the one-step best-response effort is above 1; Q still increases at the learned effort; no local maximum near zero; α < 1 so that a large share of the draws falls below the clamp): **confirmed for the objective** (all {{n:a7_nodes_total}} nodes: best response above 1, Q increasing, no local maximum near zero), **for α < 1** at 112 of 126 nodes (the other 14 have an effort between 0.41 and 0.96), and **for the clamp** (25-35 % of the draws in six of seven runs). The wording "collapsed onto the lower clamp and did not recover" fits only seed 50514 (q = 60, formed in updates 2475-2750); in the other six runs the stage-2 policy at these nodes was already near zero at the phase entry or within the first 25 updates and did not recover.
-- **AP3** (at q = 50 several runs besides the two failures have η_3 above 0.005 at one or more of the last 16 exports): **confirmed**, {{n:a8_q50_any}} of 20 runs, 12 besides the two failures; the failure of seed 50517 is last-iterate variability, the failure of seed 50504 is a persistent excess.
+- **AP3** (at q = 50 several runs besides the two failures have η_3 above 0.005 at one or more of the last 16 exports; the two G-A failures are last-iterate variability, not a different kind of policy): **partly confirmed.** The first sentence holds: {{n:a8_q50_any}} of 20 runs, 12 besides the two failures. The second holds for seed 50517 (its evaluated iterate is the top of its own range: median {{n:a8_50517_med:.5f}}, 1 export above 0.005). For seed 50504 it holds only in the weak sense that its policy is of the same kind as the others: its η_3 is above 0.005 at all 16 exports (min {{n:a8_50504_min:.5f}}, median {{n:a8_50504_med:.5f}}), against a median of the per-run medians of 0.00249 at q = 50, so the excess is persistent over the last 400 updates, not a last-iterate fluctuation.

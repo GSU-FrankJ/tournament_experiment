@@ -12,3 +12,7 @@
 | stretch nodes | `t3r1_q60_s50514_bw` | 7 | 3.09e-09 | yes | 0.0009 | yes |
 | stretch nodes | `t3r1_q60_s50517_bw` | 7 | 1.48e-09 | yes | 0.0006 | yes |
 | stretch nodes | `t3r1_q60_s50519_bw` | 6 | 2.25e-09 | yes | 0.0005 | yes |
+| stretch nodes q50 extra | `t3r1_q50_s50504_bw` | 5 | 1.47e-09 | yes | 0.0008 | yes |
+| stretch nodes q50 extra | `t3r1_q50_s50510_bw` | 5 | 1.82e-09 | yes | 0.0006 | yes |
+| stretch nodes q50 extra | `t3r1_q50_s50512_bw` | 5 | 1.87e-09 | yes | 0.0010 | yes |
+| stretch nodes q50 extra | `t3r1_q50_s50520_bw` | 5 | 2.72e-09 | yes | 0.0009 | yes |

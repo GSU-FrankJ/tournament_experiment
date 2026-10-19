@@ -1,5 +1,5 @@
 {
- "cost_total_sec": 672.5,
+ "cost_total_sec": 783.4,
  "a1_all_identical": true,
  "a1_n": 4,
  "a1_cols": 137,
@@ -11,6 +11,7 @@
  "a3_maxdiff": 1.35375519683123e-08,
  "a5_fail_maxdiff": 5.426684955289751e-06,
  "a5_fail_br_maxdiff": 0.0183328051161879,
+ "a5_fail_dev_maxdiff": 0.02910976829046774,
  "a5_G_max": 2.5487945144786472e-05,
  "a5_G_median": 6.896342719109327e-09,
  "a5_G_argmax": "jt_es q=50 seed 50502",
@@ -23,13 +24,13 @@
  "a5_n": 200,
  "a5_over_1e3": 0,
  "a5_over_1e4": 0,
- "a5_sec_max": 11.093056248035282,
- "a5_sec_median": 7.751654176041484,
+ "a5_sec_max": 10.538303412962703,
+ "a5_sec_median": 8.09093500196468,
  "a5_agree_max": 2.7957520540633496e-05,
  "a5_conv_val_max": 3.0894635738576426e-09,
- "a5_conv_eff_max": 0.0009566761589141493,
+ "a5_conv_eff_max": 0.0009946464224812601,
  "a5_conv_ok": true,
- "a5_conv_n": 12,
+ "a5_conv_n": 16,
  "a6_flips": 0,
  "a6_valid": 200,
  "a6_G_max": 0.0001692818135439,
@@ -47,6 +48,7 @@
   "H2",
   "H3"
  ],
+ "recount_ok": true,
  "a7_stored_maxdiff": 5.82e-06,
  "a7_nodes_total": 126,
  "a7_policy_error": 126,
@@ -72,5 +74,6 @@
  "a8_50517_med": 0.0017613775995781,
  "a8_50517_max": 0.005676366689295,
  "a8_50517_n": 1,
- "a4_summary": "============================== 6 passed in 2.38s ==============================="
+ "a4_summary": "============================== 6 passed in 2.38s ===============================",
+ "full_suite": "The whole suite (`pytest tests` in 12 concurrent shards at the second code commit, `results/t3_r2/preflight/tests/shard_*.txt`, summary `full_suite_shards.txt`): 1724 passed, 1 failed, 6 skipped, 2 xfailed, 0 error; failed: `tests/test_registry_canonicalization.py::test_registry_canonicalization` (the known failure of earlier rounds); see `03_checks.md` section 2."
 }

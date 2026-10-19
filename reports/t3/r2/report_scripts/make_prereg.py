@@ -16,7 +16,6 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-import re
 from pathlib import Path
 
 from common import REP, RES, ROOT, md
