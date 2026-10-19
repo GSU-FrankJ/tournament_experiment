@@ -226,6 +226,10 @@ def a6() -> None:
     write("a06c_refined_top", md(["arm", "q", "seed", "Gmax_full final", "Gmax_full refined", "abs diff", "G-A final / refined", "G-F final / refined"],
                                  [(f"`{x.arm}`", int(x.q), int(x.seed), num(x.final_Gmax_full_over_dw, 6), num(x.refined_Gmax_full_over_dw, 6),
                                    sci(x.absdiff_Gmax_full_over_dw), f"{x.final_G_A} / {x.refined_G_A}", f"{x.final_G_F} / {x.refined_G_F}") for x in top.itertuples()]))
+    jt = d[d.arm == "jt"].absdiff_dReach_over_dw.sort_values(ascending=False)
+    oth = d[d.arm != "jt"].absdiff_dReach_over_dw
+    N["dreach_jt_top4_min"], N["dreach_jt_top4_max"] = float(jt.iloc[3]), float(jt.iloc[0])
+    N["dreach_jt_next_max"], N["dreach_other_arms_max"] = float(jt.iloc[4]), float(oth.max())
     N["a6_flips"] = int(d.verdict_differs.sum())
     N["a6_valid"] = int(d.refined_valid.sum())
     N["a6_G_max"], N["a6_eta_max"], N["a6_exp_max"] = (float(d[f"absdiff_{c}"].max()) for c in cols[:3])
@@ -291,6 +295,18 @@ def a7() -> None:
                                  "lowest learned effort among the nodes at the end (range over runs)",
                                  "median over the nodes of (one-step argmax - learned effort) (range over runs)",
                                  "nodes that were below 1 at some export (range)"], rows3))
+    # recovery and re-collapse of the stretch nodes (number of stretch nodes with learned effort below 1 at selected exports)
+    sel = (1625, 2000, 2500, 2950, 3200)
+    rows8 = []
+    for x in (y for y in runs if y["group"] == "stretch"):
+        sm = x["summary"]
+        by = dict(zip(sm["exports"], sm["n_below1_by_export"]))
+        left = sum(1 for a in x["formation"] if a["stays_below1_from_update"] is not None and a["stays_below1_from_update"] > a["first_below1_update"])
+        rows8.append((int(x["q"]), int(x["seed"]), sm["n_nodes"], *[f"{by[u]}" for u in sel], f"{left} of {sm['n_nodes']}",
+                      f"{min(a['stays_below1_from_update'] for a in x['formation'])} - {max(a['stays_below1_from_update'] for a in x['formation'])}"))
+    write("a07j_recovery", md(["q", "seed", "stretch nodes", *[f"nodes below 1 at u{u:05d}" for u in sel], "nodes that left 1 and came back",
+                               "export from which a node stays below 1 (range over nodes)"], rows8))
+    N["a7_left_and_returned"] = int(sum(int(r[-2].split()[0]) for r in rows8))
     # training signals of the decay window: stretch runs against the others
     rows5 = []
     for q in (50, 60):

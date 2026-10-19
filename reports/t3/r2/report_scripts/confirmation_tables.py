@@ -61,7 +61,9 @@ def settings() -> None:
             ("code commit recorded by the launcher", f"`{launch['code_commit']}`"),
             ("`git diff --stat be2b7e9f HEAD -- agents envs utils run tools/ms tools/v2` at the launch", "empty" if not stat else f"`{stat}`"),
             ("`git status --porcelain -- . ':(exclude)results'` at the launch (the clean-tree definition)", "empty"),
-            ("`git status --porcelain` at the launch", "`" + "`, `".join(launch["status_porcelain"]) + "`" if launch["status_porcelain"] else "empty"),
+            ("`git status --porcelain` at the launch (recorded by the launcher in `launch_*.json`)",
+             f"{len(launch['status_porcelain'])} entries, " + ("all of them untracked files under `results/` (the audit's re-run weights and arrays, `a7_emat.npz`, and `results/t3_r2/confirmation/` itself)"
+                                                               if all(x.startswith("?? results/") for x in launch["status_porcelain"]) else "NOT all under results/")),
             ("workers (single-threaded)", launch["workers"]), ("`nproc`", launch["nproc"]),
             ("load average at the start", ", ".join(f"{x:.2f}" for x in launch["loadavg_at_start"])),
             ("free disk at the start", f"{launch['disk_free_bytes'] / 1e9:.0f} GB of {launch['disk_total_bytes'] / 1e9:.0f} GB"),
@@ -114,6 +116,10 @@ def verdict() -> None:
     bl = json.loads((ANA / "blind" / "blind_verdict.json").read_text())
     N["verdict"], N["blind_verdict"] = v["verdict"]["verdict"], bl["verdict"]
     N["pass_q50"], N["pass_q60"], N["pass_total"] = c["pass_q50"], c["pass_q60"], c["pass_total"]
+    from scipy.stats import binom
+    pm = binom.pmf(np.arange(21), 20, 0.875)
+    N["oc_pass_875"] = float(sum(pm[a] * pm[b] for a in range(17, 21) for b in range(17, 21) if a + b >= 36))
+    N["oc_fail_875"] = 1.0 - N["oc_pass_875"]
     N["blind_agrees"] = bool(bl["verdict"] == v["verdict"]["verdict"] and all(int(bl[k]) == int(c[k]) for k in ("pass_q50", "pass_q60", "pass_total")))
     N["reason"] = v["verdict"]["reason"]
     N["ci_total"] = f"[{c['ci_lo_total']:.3f}, {c['ci_hi_total']:.3f}]"
@@ -178,7 +184,7 @@ def comparison() -> None:
     t = pd.read_csv(ANA / "per_run_table.csv", float_precision="round_trip")
     old = pd.read_csv(ROOT / "results" / "t3_r1" / "eval" / "per_run.csv", float_precision="round_trip")
     old = old[old.arm == "bw"]
-    rows = [(q, num(t[t.q == q].Gmax_full_over_dw.mean(), 5), num(old[old.q == q].Gmax_full_over_dw.mean(), 5), num(t[t.q == q].EXP_root_over_dw.mean(), 5),
+    means_rows = [(q, num(t[t.q == q].Gmax_full_over_dw.mean(), 5), num(old[old.q == q].Gmax_full_over_dw.mean(), 5), num(t[t.q == q].EXP_root_over_dw.mean(), 5),
              num(old[old.q == q].EXP_root_over_dw.mean(), 5)) for q in QS]
     ev = pd.read_csv(CONF / "eval" / "per_run.csv", float_precision="round_trip")
     rows = []
@@ -188,10 +194,12 @@ def comparison() -> None:
             rows.append((label, q, len(x), int((x.Gmax_full_t == 3).sum()), int((x.Gmax_full_t == 2).sum()), int((x.Gmax_full_t == 1).sum()),
                          num(x.G_max_t2_over_dw.median(), 5), num(x.G_max_t2_over_dw.max(), 5), num(x.G_max_t3_over_dw.median(), 5), num(x.G_max_t3_over_dw.max(), 5)))
     write("c15_stage_of_max", md(["set", "q", "runs", "Gmax_full at stage 3", "at stage 2", "at stage 1", "median G_max,2/dW", "max", "median G_max,3/dW", "max"], rows))
+    r518 = ev[(ev.q == 60) & (ev.seed == 60518)].iloc[0]
+    N["d518_delta2"], N["d518_delta2_d"], N["d518_g2"] = float(r518.Delta_max_t2_over_dw), float(r518.Delta_argmax_d_t2), float(r518.G_max_t2_over_dw)
     N["conf_stage2_max_runs"] = int((ev.Gmax_full_t == 2).sum())
     N["t3r1_stage2_max_runs"] = int((old.Gmax_full_t == 2).sum())
     N["conf_gmax2_max_excl_60518"] = float(ev[~((ev.q == 60) & (ev.seed == 60518))].G_max_t2_over_dw.max())
-    write("c09_means", md(["q", "mean Gmax_full/dW, confirmation", "T3-R1 `bw`", "mean EXP_root/dW, confirmation", "T3-R1 `bw`"], rows))
+    write("c09_means", md(["q", "mean Gmax_full/dW, confirmation", "T3-R1 `bw`", "mean EXP_root/dW, confirmation", "T3-R1 `bw`"], means_rows))
 
 
 def cost() -> None:
@@ -209,7 +217,7 @@ def cost() -> None:
             ("T3-R1 `bw` (wave of 160 runs at 40 workers)", len(t1), f"{t1.wall_sec.min():.0f}", f"{t1.wall_sec.median():.0f}", f"{t1.wall_sec.max():.0f}", f"{t1.wall_sec.sum() / 3600:.2f}")]
     write("c10_cost", md(["set", "runs", "wall s, min", "median", "max", "sum of the runs' wall time, hours"], rows))
     N["wall_median"], N["wall_max"], N["wall_min"] = float(w.wall.median()), float(w.wall.max()), float(w.wall.min())
-    N["updates_all_3800"] = bool((w.updates == 3800).all())
+    N["updates_all_3800"] = "yes, 40 of 40 (`final_global_update` of `ms_run_summary.json`)" if bool((w.updates == 3800).all()) else "NO"
 
 
 def predictions(workers: int) -> None:
