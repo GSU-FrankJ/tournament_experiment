@@ -1,0 +1,14 @@
+shard 0: tests/test_different_ability_env_sampled.py tests/test_ms_r2_launch_checks.py tests/test_ms_r4_curves.py tests/test_t3_launcher.py tests/test_v2_r2b_diag.py tests/test_v2_refine_tools.py
+start 2026-10-19T21:00:25Z
+........................................................................ [ 58%]
+...................................................                      [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=4010467) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+123 passed, 2 warnings in 215.07s (0:03:35)
+exit=0
+end 2026-10-19T21:04:02Z

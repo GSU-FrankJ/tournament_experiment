@@ -1,0 +1,16 @@
+shard | test files | result | exit
+00 | 6 | 123 passed, 2 warnings in 215.07s (0:03:35) | 0
+01 | 6 | 127 passed, 2 xfailed in 193.90s (0:03:13) | 0
+02 | 5 | 123 passed, 1 warning in 565.82s (0:09:25) | 0
+03 | 5 | 88 passed in 89.26s (0:01:29) | 0
+04 | 5 | 136 passed, 3 skipped in 140.57s (0:02:20) | 0
+05 | 5 | 179 passed, 1 warning in 720.92s (0:12:00) | 0
+06 | 5 | 215 passed in 285.73s (0:04:45) | 0
+07 | 5 | 148 passed in 1039.22s (0:17:19) | 0
+08 | 5 | 104 passed in 51.08s | 0
+09 | 5 | 1 failed, 127 passed, 2 skipped, 2 warnings in 60.86s (0:01:00) | 1
+10 | 5 | 156 passed, 1 warning in 767.73s (0:12:47) | 0
+11 | 5 | 198 passed, 1 skipped in 311.80s (0:05:11) | 0
+
+total: 1724 passed, 1 failed, 6 skipped, 2 xfailed, 0 error
+failed tests: tests/test_registry_canonicalization.py::test_registry_canonicalization

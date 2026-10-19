@@ -1,0 +1,14 @@
+shard 10: tests/test_ms_r2_analysis.py tests/test_ms_r4_actor.py tests/test_t3_analysis.py tests/test_v2_infra.py tests/test_v2_refine_pathwise.py
+start 2026-10-19T21:00:25Z
+........................................................................ [ 46%]
+........................................................................ [ 92%]
+............                                                             [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r4_actor.py::test_the_forwards_of_t1_relu_and_t10_are_unchanged_bit_for_bit[0.3-t1]
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+156 passed, 1 warning in 767.73s (0:12:47)
+exit=0
+end 2026-10-19T21:13:15Z

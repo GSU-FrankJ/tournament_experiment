@@ -1,0 +1,14 @@
+shard 5: tests/test_ms_analysis.py tests/test_ms_r3_actor.py tests/test_ms_residual.py tests/test_t3r2_launch.py tests/test_v2_r2c_tools.py
+start 2026-10-19T21:00:25Z
+........................................................................ [ 40%]
+........................................................................ [ 80%]
+...................................                                      [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r3_actor.py::test_without_the_new_keys_an_nl_run_equals_e8eb9a08[NL_st_s16]
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+179 passed, 1 warning in 720.92s (0:12:00)
+exit=0
+end 2026-10-19T21:12:28Z

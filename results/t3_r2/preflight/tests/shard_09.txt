@@ -1,0 +1,29 @@
+shard 9: tests/test_ms_launcher.py tests/test_ms_r3_screen.py tests/test_registry_canonicalization.py tests/test_three_players_mcfd_gradient.py tests/test_v2_refine_d2.py
+start 2026-10-19T21:00:25Z
+E       AssertionError: expected 15 Set-2 gradient runs, got 0
+E       assert 0 == 15
+
+tests/test_registry_canonicalization.py:115: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[V1] duplicate run identities: 0 (guard warnings: 0) across 593 runs
+[V1] three_players      q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[47, 50, 52, 44, 47]
+[V1] three_players      q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[88, 113, 113, 119, 123]
+[V1] different_cost     q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[138, 136, 109, 122, 96]
+[V1] different_cost     q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[145, 124, 120, 127, 141]
+[V1] different_ability  q=35  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[100, 160, 109, 120, 157]
+[V1] different_ability  q=55  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[91, 81, 84, 120, 90]
+[V1] two_players        q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 99, 139, 49, 99]
+[V1] two_players        q=45  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 79, 109, 79, 119]
+[V1] two_players        q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 119, 99, 109, 129]
+=============================== warnings summary ===============================
+tests/test_v2_refine_d2.py::test_process_pool_equals_inline
+tests/test_v2_refine_d2.py::test_process_pool_equals_inline
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=4010485) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_registry_canonicalization.py::test_registry_canonicalization
+1 failed, 127 passed, 2 skipped, 2 warnings in 60.86s (0:01:00)
+exit=1
+end 2026-10-19T21:01:28Z
