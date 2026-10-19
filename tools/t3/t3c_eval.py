@@ -46,6 +46,19 @@ def plan_jobs(root: Path, arrays_dir: Optional[Path]) -> List[Dict[str, Any]]:
     return jobs
 
 
+def safe_evaluate_run(job: Dict[str, Any]) -> Dict[str, Any]:
+    """``t3_eval.evaluate_run`` with every other exception of the evaluation recorded as an evaluation error of that run (D4: an
+    evaluation error counts as a failed run; it must not abort the evaluation of the other runs)."""
+    try:
+        return te.evaluate_run(job)
+    except Exception as exc:  # noqa: BLE001 - recorded as the run's evaluation error
+        st = te.status_of(Path(job["run_dir"]))
+        return {"wave": job["wave"], "arm": job["arm"], "q": int(job["q"]), "seed": int(job["seed"]), "T": int(job["T"]),
+                "run": job["run"], "run_dir": str(job["run_dir"]), "kind": job["kind"], "status": st.get("state", "missing"),
+                "exit_code": st.get("exit_code"), "global_rng_ok": te.global_rng_ok(Path(job["run_dir"]), job["kind"]),
+                "eval_error": f"{type(exc).__name__}: {exc}"}
+
+
 def needs_rerun(row: Dict[str, Any]) -> bool:
     """A finished run whose evaluation raised an error or is invalid on either tier."""
     if row.get("status") != "done" or row.get("exit_code") != 0:
@@ -62,12 +75,12 @@ def evaluate_all(root: Path, out_dir: Path, workers: int) -> Dict[str, Any]:
     """Evaluate the 40 runs; re-run the evaluation of every row that needs it; write the CSV and the re-run record."""
     out_dir.mkdir(parents=True, exist_ok=True)
     jobs = plan_jobs(root, out_dir / "arrays")
-    rows = te.run_parallel(te.evaluate_run, jobs, workers)
+    rows = te.run_parallel(safe_evaluate_run, jobs, workers)
     reruns: List[Dict[str, Any]] = []
     for i, (job, row) in enumerate(zip(jobs, rows)):
         if not needs_rerun(row):
             continue
-        again = te.evaluate_run(job)
+        again = safe_evaluate_run(job)
         ok = usable(again)
         reruns.append({"run": job["run"], "first_eval_error": row.get("eval_error", ""), "first_valid": row.get("valid"),
                        "first_dev_valid": row.get("dev_valid"), "rerun_eval_error": again.get("eval_error", ""),

@@ -7,7 +7,6 @@ Run: OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 
 from __future__ import annotations
 
-import csv
 import json
 import os
 import shutil
@@ -29,6 +28,7 @@ import t3_eval as te  # noqa: E402
 import t3c_analysis as an  # noqa: E402
 import t3c_blind as bl  # noqa: E402
 import t3c_checks as ck  # noqa: E402
+import t3c_eval as ce  # noqa: E402
 import t3c_launch as cl  # noqa: E402
 
 SEEDS = list(range(60501, 60521))
@@ -229,3 +229,44 @@ def test_the_checks_report_a_missing_run_and_require_the_ledger(tmp_path):
     p.write_text("wave,arm,q,seed,run,out_dir,run_config_sha256,run_config_sha256_relpath,init_state_sha256\n"
                  "t3c,bw,50,60501,t3r2_q50_s60501_bw,/x,a,b,c\n")
     assert ck.read_plan(p)["t3r2_q50_s60501_bw"]["init_state_sha256"] == "c"
+
+
+def test_a_value_one_ulp_above_a_limit_fails_in_both_tools(tmp_path):
+    """The comparisons are inclusive at full float64 precision: a value that is one ulp above its limit fails, one that equals
+    it passes, and the two tools agree (the tables are read round-trip, not with pandas' faster float parser)."""
+    up = lambda x: float(np.nextafter(x, 1.0))                                  # noqa: E731
+    mods = {(50, 60501): dict(Gmax_full_over_dw=up(0.01)), (50, 60502): dict(eta_T_over_dw=up(0.005)),
+            (50, 60503): dict(rmse_pos_T_over_eT0=up(0.05)), (50, 60504): dict(tail_mean_T_over_eT0=up(0.02)),
+            (50, 60505): dict(Gmax_full_over_dw=0.01, eta_T_over_dw=0.005, rmse_pos_T_over_eT0=0.05, tail_mean_T_over_eT0=0.02,
+                              dev_eta_T_over_dw=0.005, dev_Gmax_full_over_dw=0.01)}
+    v, blind = run_both(tmp_path, table(20, 20, mods=mods), ledger(tmp_path))
+    assert v["pass_q50"] == 16 == blind["pass_q50"]             # four runs one ulp over fail; the run exactly on every limit passes
+    pr = pd.read_csv(tmp_path / "per_run.csv", float_precision="round_trip")
+    assert pr.loc[(pr.q == 50) & (pr.seed == 60501), "Gmax_full_over_dw"].iloc[0] == up(0.01)
+
+
+def test_an_exception_of_the_evaluation_is_a_failed_run_not_a_crash(tmp_path):
+    d, cfg = H.reduced_bw_run()
+    root = tmp_path / "conf"
+    dest = cl.run_dir(root, 50, 60501)
+    shutil.copytree(d, dest)
+    (dest / "state_end_stage1.pt").write_bytes(b"not a checkpoint")           # a defect that is none of ValueError & co.
+    job = ce.plan_jobs(root, None)[0]
+    row = ce.safe_evaluate_run(job)
+    assert row["status"] == "done" and row["eval_error"] and "Error" in row["eval_error"] and "Gmax_full_over_dw" not in row
+    out = ce.evaluate_all(root, tmp_path / "eval", 1)
+    assert len(out["rows"]) == 40 and out["rows"][0]["eval_error"]
+    assert out["reruns"][0]["run"] == "t3r2_q50_s60501_bw" and out["reruns"][0]["rerun_succeeded"] is False
+    gates = json.loads((ROOT / "reports" / "t3" / "r1" / "prereg_criteria.json").read_text())["gates"]
+    r = an.run_row(pd.read_csv(tmp_path / "eval" / "per_run.csv", float_precision="round_trip").to_dict("records")[0], gates)
+    assert r["passed"] is False and r["fail_reason"].startswith("evaluation")
+
+
+def test_a_second_attempt_event_in_the_ledger_stops_the_confirmation_even_without_the_list_entry(tmp_path):
+    ev = [{"run": "t3r2_q50_s60501_bw", "attempt": 1, "reason": "negative_returncode"},
+          {"run": "t3r2_q50_s60501_bw", "attempt": 2, "reason": "out_of_memory"}]
+    led = ledger(tmp_path, stopped=[], events=ev)                   # the operator recorded the events but not the list
+    v, blind = run_both(tmp_path, table(20, 20), led)
+    assert v["verdict"] == "no_verdict" == blind["verdict"]
+    assert v["stopped_without_verdict"] == ["t3r2_q50_s60501_bw"] and blind["n_counted_q50"] == 19
+    assert an.stopped_runs({"events": ev[:1]}) == []

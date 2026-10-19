@@ -314,6 +314,9 @@ def test_tree_problems_allow_only_new_t3c_and_t3r2_tool_files(tmp_path):
         _git(repo, "add", "-A")
         _git(repo, "commit", "-q", "-m", f"{how} {rel}")
         assert any(rel in p for p in cl.tree_problems(repo, base)), rel
+    (repo / "results").mkdir()
+    (repo / "results/untracked_output.npz").write_text("w\n")             # untracked results/ is the runner's own clean_tree definition
+    assert not any("not clean" in p for p in cl.tree_problems(repo, base))
     (repo / "reports/dirty.md").write_text("z\n")
     assert any("not clean" in p for p in cl.tree_problems(repo, base))
     _git(repo, "rm", "-q", "-f", "agents/a.py")
@@ -341,3 +344,40 @@ def test_t3c_eval_reproduces_a_reduced_runs_freeze_arrays_bit_for_bit(tmp_path):
     assert not ce.needs_rerun(miss) and not ce.needs_rerun(row) and ce.usable(row)
     assert ce.needs_rerun({**row, "valid": False}) and ce.needs_rerun({**row, "eval_error": "ValueError: x"})
     assert not ce.usable({**row, "dev_valid": False})
+
+
+def test_the_real_launch_path_writes_the_configs_and_an_empty_ledger_and_repeats_an_infrastructure_failure(tmp_path, monkeypatch,
+                                                                                                              lock_dir):
+    lockfile = tmp_path / "LOCK"
+    lockfile.write_text(json.dumps(record_for(lock_dir), indent=1) + "\n")
+    monkeypatch.setattr(cl, "LOCK_FILE", lockfile)
+    monkeypatch.setattr(cl, "ROOT", tmp_path / "repo")                     # the crashed directory goes here, not into the worktree
+    monkeypatch.setattr(cl, "tree_problems", lambda *a, **k: [])
+    killed = {"q50_s60503": True}
+
+    def fake_pool(jobs, workers, record, record_path):
+        for j in jobs:
+            key = f"q{j.cfg['q']}_s{j.cfg['seed']}"
+            record["runs"].append({"out": j.out_dir, "returncode": -9 if killed.get(key) else 0, "wall_sec": 1.0})
+        record["state"] = "failed"
+
+    repeats = []
+
+    def fake_run_job(cmd, out_dir, env):
+        repeats.append(out_dir)
+        return {"out": out_dir, "returncode": 0, "wall_sec": 1.0}
+    monkeypatch.setattr(cl, "run_pool", fake_pool)
+    monkeypatch.setattr(cl.L1, "run_job", fake_run_job)
+    root = tmp_path / "conf"
+    assert cl.main(["--lock-dir", str(lock_dir), "--root", str(root), "--workers", "40"]) == 0
+    assert len(list(root.glob("q*/seed*/bw/run_config.json"))) == 40
+    led = json.loads((root / "infra_events.json").read_text())
+    assert [e["run"] for e in led["events"]] == ["t3r2_q50_s60503_bw"] and led["events"][0]["reason"] == "negative_returncode"
+    assert led["stopped_without_verdict"] == [] and len(repeats) == 1 and repeats[0].endswith("q50/seed60503/bw")
+    assert (tmp_path / "repo" / "results" / "t3_r2" / "crashed" / "q50" / "seed60503" / "bw_attempt1").is_dir()
+    rec = json.loads(next(root.glob("launch_*.json")).read_text())
+    assert rec["state"] == "done" and rec["n_planned"] == 40 and rec["base_commit"] == cl.BASE_COMMIT
+    # a second launch into the same root is refused (the directories hold runs)
+    (root / "q50" / "seed60501" / "bw" / "run.log").write_text("x")
+    with pytest.raises(SystemExit):
+        cl.main(["--lock-dir", str(lock_dir), "--root", str(root), "--workers", "40"])

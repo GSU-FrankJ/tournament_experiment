@@ -161,6 +161,16 @@ def verdict(cnt: Mapping[str, Any], stopped: Sequence[str]) -> Dict[str, Any]:
             "rule": {"min_total": MIN_TOTAL, "min_per_q": MIN_PER_Q}, "stopped_without_verdict": list(stopped)}
 
 
+def stopped_runs(ledger: Mapping[str, Any]) -> List[str]:
+    """Runs whose repeat also failed for an infrastructure reason: those the ledger lists under ``stopped_without_verdict`` and
+    those with a recorded event of attempt 2 or later (an operator may record the events by hand)."""
+    names = list(ledger.get("stopped_without_verdict", []))
+    for e in ledger.get("events", []):
+        if int(e.get("attempt", 1)) >= 2 and e["run"] not in names:
+            names.append(e["run"])
+    return names
+
+
 def read_ledger(path: Path) -> Dict[str, Any]:
     """``infra_events.json`` (refuses a missing file: the ledger must exist, empty if there was no event)."""
     if not Path(path).is_file():
@@ -294,12 +304,12 @@ def analyse(per_run_path: Path, ledger_path: Path, out_dir: Path, t3r1_per_run: 
     crit, crit_sha = tm.load_criteria()
     gates = crit["gates"]
     ledger = read_ledger(ledger_path)
-    per_run = pd.read_csv(per_run_path)
+    per_run = pd.read_csv(per_run_path, float_precision="round_trip")
     table = planned_table(per_run, gates)
-    stopped = list(ledger.get("stopped_without_verdict", []))
+    stopped = stopped_runs(ledger)
     cnt = counts(table, excluded=stopped)
     vd = verdict(cnt, stopped)
-    old = pd.read_csv(t3r1_per_run)
+    old = pd.read_csv(t3r1_per_run, float_precision="round_trip")
     old_table = planned_table(old[old["arm"] == "bw"], gates, seeds=tuple(range(50501, 50521)), prefix="t3r1")
     pd.DataFrame(table).to_csv(out_dir / "per_run_table.csv", index=False)
     pd.DataFrame([{k: v for k, v in cnt.items()}]).to_csv(out_dir / "pass_counts.csv", index=False)

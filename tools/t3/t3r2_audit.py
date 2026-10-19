@@ -31,7 +31,6 @@ import argparse
 import csv
 import hashlib
 import json
-import math
 import multiprocessing as mp
 import subprocess
 import sys
@@ -331,10 +330,14 @@ def a5_run(args: Tuple[Dict[str, Any], Dict[str, str], str]) -> Dict[str, Any]:
     svT = calc.stage_values(T, [d_t])
     out.update(DeltaT_d=d_t, DeltaT_stored_over_dw=num(stored[f"Delta_max_t{T}_over_dw"]),
                DeltaT_calc_over_dw=float(svT["Delta"][0]) / dw, eta_T_stored_over_dw=num(stored["eta_T_over_dw"]),
-               e_hat_at_DeltaT=float(svT["e_hat"][0]), a_dev_at_DeltaT=float(svT["a_dev"][0]))
+               e_hat_at_DeltaT=float(svT["e_hat"][0]), a_dev_at_DeltaT=float(svT["a_dev"][0]),
+               a_br_at_DeltaT=float(svT["a_br"][0]), G_at_DeltaT_over_dw=float(svT["G"][0]) / dw,
+               slope_at_DeltaT=float(svT["slope"][0]))
+    sv1 = calc.stage_values(1, [0.0])
     r = calc.root()
     out.update(EXP_stored_over_dw=num(stored["EXP_root_over_dw"]), EXP_calc_over_dw=r["EXP_root"] / dw,
-               V1_mean_calc=r["V1_mean"], e1_calc=r["e1"], a_br_1=r["a_br_1"])
+               V1_mean_calc=r["V1_mean"], e1_calc=r["e1"], a_br_1=r["a_br_1"], a_dev_1=float(sv1["a_dev"][0]),
+               Delta_1_over_dw=float(sv1["Delta"][0]) / dw, slope_1=float(sv1["slope"][0]))
     out["G_diff_over_dw"] = abs(out["G_calc_over_dw"] - out["G_stored_over_dw"])
     out["DeltaT_diff_over_dw"] = abs(out["DeltaT_calc_over_dw"] - out["DeltaT_stored_over_dw"])
     out["EXP_diff_over_dw"] = abs(out["EXP_calc_over_dw"] - out["EXP_stored_over_dw"])
@@ -757,6 +760,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 pick = [nodes[int(round(i))] for i in np.linspace(0, len(nodes) - 1, min(n_take, len(nodes)))] if nodes else []
                 if pick:
                     items.append((job_of(jobs, "bw", 60, int(r["seed"])), [(2, float(x)) for x in pick], "stretch_nodes"))
+        for r in stretch:                      # extra (beyond the 20 nodes of the prompt): the four q = 50 stretch runs, 5 nodes each
+            if int(r["q"]) == 50:
+                lo, hi = (int(x) for x in r["stretches"].strip("[]").replace(" ", "").split(",")[:2])
+                nodes = list(range(lo, hi + 1, 2))
+                pick = [nodes[int(round(i))] for i in np.linspace(0, len(nodes) - 1, min(5, len(nodes)))]
+                items.append((job_of(jobs, "bw", 50, int(r["seed"])), [(2, float(x)) for x in pick], "stretch_nodes_q50_extra"))
         res = parallel(conv_one, items, a.workers)
         write_json(out / "a5_convergence.json", res)
         n_items = len(res)

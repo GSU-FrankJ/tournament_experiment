@@ -92,6 +92,9 @@ def recompute(per_run: Path, ledger: Path, criteria: Path = CRITERIA) -> Dict[st
         raise FileNotFoundError(f"{ledger}: the infrastructure ledger must exist")
     led = json.loads(Path(ledger).read_text())
     stopped = list(led.get("stopped_without_verdict", []))
+    for e in led.get("events", []):                      # an event of attempt 2 or later: the repeat also failed
+        if int(e.get("attempt", 1)) >= 2 and e["run"] not in stopped:
+            stopped.append(e["run"])
     rows = read_rows(per_run)
     res: Dict[str, Any] = {}
     total = counted = 0

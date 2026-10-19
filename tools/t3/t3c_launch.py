@@ -13,7 +13,7 @@ seed guard and the production check are this module's own:
   * at launch the T3 record is read from ``protocols/LOCK`` (absent: refused), the lock JSON and MD must match its SHA-256,
     and every tool file listed in the lock JSON must match its recorded SHA-256; with ``--plan-csv`` the drafts in
     ``reports/t3/r2/lock_draft/`` are checked instead (no record exists yet);
-  * the working tree must be clean and ``git diff --name-status be2b7e9f HEAD`` over ``agents envs utils run tools/ms
+  * the working tree must be clean outside ``results/`` (the runner's definition of ``clean_tree``) and ``git diff --name-status be2b7e9f HEAD`` over ``agents envs utils run tools/ms
     tools/v2 tools/t3`` may show only new ``tools/t3/t3c_*`` and ``tools/t3/t3r2_*`` files.
 
 ``--plan-csv`` writes, for every run, the run name, the output directory, the config SHA-256 (as written and with the output
@@ -225,9 +225,11 @@ def _git(*args: str, repo: Path = ROOT) -> str:
 def tree_problems(repo: Path = ROOT, base: str = BASE_COMMIT) -> List[str]:
     """A dirty working tree, or a code path that changed since ``base`` other than by a new ``t3c_*`` / ``t3r2_*`` file."""
     out: List[str] = []
-    dirty = _git("status", "--porcelain", repo=repo).splitlines()
+    # the runner's own definition of "dirty" (``run.run_v2_stagewise.git_state``, the ``clean_tree`` flag of every manifest):
+    # tracked changes or untracked files anywhere except results/ (run outputs, weights and arrays live there, untracked)
+    dirty = _git("status", "--porcelain", "--", ".", ":(exclude)results", repo=repo).splitlines()
     if dirty:
-        out.append(f"working tree is not clean ({len(dirty)} entries, e.g. {dirty[0]!r})")
+        out.append(f"working tree is not clean ({len(dirty)} entries outside results/, e.g. {dirty[0]!r})")
     for line in _git("diff", "--name-status", base, "HEAD", "--", *CODE_PATHS, repo=repo).splitlines():
         status, path = line.split("\t", 1)
         ok = status == "A" and re.fullmatch(r"tools/t3/(t3c_|t3r2_)[^/]*", path) is not None
@@ -445,7 +447,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     run_pool(jobs, a.workers, record, record_path)
     env = L1.child_env()
     repeats = handle_infra_failures(jobs, record["runs"], root,
-                                    lambda j: L1.run_job(job_command(*j), j.out_dir, env), ledger)
+                                    lambda j: L1.run_job(job_command(*j), j.out_dir, env), ledger,
+                                    repo=ROOT)
     write_ledger(ledger_path, ledger)
     if repeats:
         record["infra_repeats"] = repeats

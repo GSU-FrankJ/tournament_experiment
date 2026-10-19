@@ -160,8 +160,7 @@ def test_the_best_response_chain_is_at_least_the_mean_chain_and_the_root_gain_is
         assert (sv["G"] >= sv["Delta"] - 1e-9).all() and (sv["Delta"] >= -1e-12).all()
         assert (sv["a_br"] >= 0).all() and (sv["a_br"] <= 100).all()
     r = calc.root()
-    assert abs(r["EXP_root"] - calc.stage_values(1, [0.0])["G"][0]) == 0.0
-    assert r["V1_br"] >= r["V1_mean"] - 1e-12
+    assert r["V1_br"] >= r["V1_mean"] - 1e-12 and r["EXP_root"] >= 0.0 and r["Delta_1"] <= r["EXP_root"] + 1e-12
     # the terminal stage has one chain: G_T = Delta_T
     sv3 = calc.stage_values(3, [-30.0, 5.0])
     assert np.array_equal(sv3["G"], sv3["Delta"])
@@ -224,3 +223,60 @@ def test_the_calculator_agrees_with_the_verifier_on_a_synthetic_t3_policy():
     sv = calc.stage_values(3, [float(ev.arrays["v_t3_d_grid"][j])])
     assert abs(float(sv["Delta"][0]) - float(ev.arrays["v_t3_delta"][j])) / g.dw < 1e-3
     assert abs(calc.root()["EXP_root"] - ev.res.exp_root) / g.dw < 1e-3
+
+
+def brute_chain(g: bc.Game, pol, d_states, h: float = 0.1, de: float = 0.05):
+    """An independent brute-force T = 3 chain (exact cell masses of the shock, linear interpolation, plain effort grid): returns
+    Delta_2, G_2 at ``d_states`` and EXP_root. Shares nothing with the calculator but ``F_xi``."""
+    q, k, dw, wl, B = g.q, g.k, g.dw, g.w_l, g.B
+    grid = lambda half: np.arange(-int(round(half / h)), int(round(half / h)) + 1) * h          # noqa: E731
+    z = grid(2 * q)
+    mass = F_xi(z + h / 2, q) - F_xi(z - h / 2, q)
+    E = np.arange(0.0, 100.0 + de / 2, de)
+    x3 = grid(2 * B)
+    e3, o3 = pol(3, x3), pol(3, -x3)
+    vm3 = wl + dw * F_xi(x3 + e3 - o3, q) - k * e3 ** 2
+    vb3 = np.empty_like(vm3)
+    for i in range(0, x3.size, 500):
+        sl = slice(i, i + 500)
+        vb3[sl] = (wl + dw * F_xi((x3[sl, None] + E[None, :] - o3[sl, None]).ravel(), q).reshape(-1, E.size) - k * E ** 2).max(axis=1)
+    vb3 = np.maximum(vb3, vm3)
+    y2 = grid(B + 100.0)
+    W3m = np.array([np.interp(y + z, x3, vm3) @ mass for y in y2])
+    W3b = np.array([np.interp(y + z, x3, vb3) @ mass for y in y2])
+
+    def stage2(d):
+        d = np.atleast_1d(np.asarray(d, dtype=float))
+        e, o = pol(2, d), pol(2, -d)
+        vm = -k * e ** 2 + np.interp(d + e - o, y2, W3m)
+        qm = -k * E[None, :] ** 2 + np.interp((d - o)[:, None] + E[None, :], y2, W3m)
+        qb = -k * E[None, :] ** 2 + np.interp((d - o)[:, None] + E[None, :], y2, W3b)
+        return vm, np.maximum(qm.max(axis=1), vm), np.maximum(qb.max(axis=1), vm)
+    out = []
+    for d in d_states:
+        vm, qm, qb = stage2([d])
+        out.append(((qm - vm)[0] / dw, (qb - vm)[0] / dw))
+    x2 = grid(B)
+    vm2, _, vb2 = (np.concatenate(a) for a in zip(*[tuple(map(np.atleast_1d, stage2(np.array([xx])))) for xx in x2]))
+    y1 = grid(100.0)
+    W2m = np.array([np.interp(y + z, x2, vm2) @ mass for y in y1])
+    W2b = np.array([np.interp(y + z, x2, vb2) @ mass for y in y1])
+    e1 = float(pol(1, np.zeros(1))[0])
+    v1m = -k * e1 ** 2 + np.interp(0.0, y1, W2m)
+    v1b = max((-k * E ** 2 + np.interp(E - e1, y1, W2b)).max(), v1m)
+    return out, (v1b - v1m) / dw
+
+
+def test_the_t3_chain_agrees_with_an_independent_brute_force_chain():
+    q = 20.0
+    g = game(q, 3)
+    pol = smooth_policy(q)
+    calc = bc.BRCalculator(g, pol, COARSE)
+    ds = [-60.0, -15.0, 0.0, 22.0]
+    bf, exp_bf = brute_chain(g, pol, ds)
+    sv = calc.stage_values(2, ds)
+    for i, _ in enumerate(ds):
+        assert abs(float(sv["Delta"][i]) / g.dw - bf[i][0]) < 1e-5, (ds[i], sv["Delta"][i] / g.dw, bf[i])
+        assert abs(float(sv["G"][i]) / g.dw - bf[i][1]) < 1e-5, (ds[i], sv["G"][i] / g.dw, bf[i])
+    assert abs(calc.root()["EXP_root"] / g.dw - exp_bf) < 1e-5, (calc.root()["EXP_root"] / g.dw, exp_bf)
+    assert max(b[1] for b in bf) > 1e-4                         # the comparison is not between zeros
