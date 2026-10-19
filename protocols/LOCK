@@ -49,3 +49,14 @@
  },
  "rule": "nothing in protocols/, the entry point, the pipeline code, utils/v2_continuation.py or the analysis script changes after this lock without a new version number and a stated reason"
 }
+{
+ "protocol": "protocols/v2_T3_locked_v1_0.json",
+ "protocol_version": "T3-1.0",
+ "lock_commit": "72bd773f784f40bcd190113acbeb2dd8450d5b9a",
+ "protocol_sha256": "4f02c7ae89f2578a7510e1f3934caeb4fc6085e851d8898c26fff6fe1487a741",
+ "protocol_md_sha256": "14f8e2e7e14e4398bf8ca7a46e7a762d7b25581977944580e23e975d2e08a063",
+ "entry_point": "run/run_ms_stagewise.py through tools/t3/t3c_launch.py",
+ "date": "2026-10-19",
+ "reason": "PI reply \"proceed P2\" at gate G1 of round T3-R2, after the audit found no implementation error (reports/t3/r2/01_audit.md) and before any confirmation seed: the settings of T3-R1's bw arm unchanged, confirmation seeds 60501-60520 at q = 50 and 60, pass iff at least 36 of 40 and at least 17 of 20 per q",
+ "rule": "nothing in protocols/ changes after this lock without a new version number and a stated reason"
+}
