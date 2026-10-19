@@ -1,0 +1,19 @@
+# launch preconditions 2026-10-19T21:21:57Z
+nproc: 64
+loadavg: 13.68 13.77 14.96 14/2140 4029718
+free disk /home: /dev/md0        5.5T  4.4T  819G  85% /home
+HEAD: 2b63ffe469fd75457938c715c194e944cb735587
+--- git status --porcelain (all, incl. results/)
+?? results/t3_r2/confirmation/
+--- git status --porcelain -- . ':(exclude)results' (the clean-tree definition)
+--- git diff --stat be2b7e9f HEAD -- agents envs utils run tools/ms tools/v2 (must be empty)
+--- git diff --name-status be2b7e9f HEAD -- tools/t3
+A	tools/t3/t3c_analysis.py
+A	tools/t3/t3c_blind.py
+A	tools/t3/t3c_checks.py
+A	tools/t3/t3c_eval.py
+A	tools/t3/t3c_launch.py
+A	tools/t3/t3r2_audit.py
+A	tools/t3/t3r2_br_calc.py
+A	tools/t3/t3r2_check_roots.py
+A	tools/t3/t3r2_make_lock.py

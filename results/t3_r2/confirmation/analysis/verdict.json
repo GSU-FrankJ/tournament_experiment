@@ -1,0 +1,38 @@
+{
+ "verdict": {
+  "verdict": "fail",
+  "reason": "not met: total >= 36, q=50 >= 17",
+  "total_condition": false,
+  "q50_condition": false,
+  "q60_condition": true,
+  "pass_total": 34,
+  "pass_q50": 16,
+  "pass_q60": 18,
+  "rule": {
+   "min_total": 36,
+   "min_per_q": 17
+  },
+  "stopped_without_verdict": []
+ },
+ "counts": {
+  "n_planned_q50": 20,
+  "n_counted_q50": 20,
+  "pass_q50": 16,
+  "ci_lo_q50": 0.5633859970033317,
+  "ci_hi_q50": 0.9426660029499672,
+  "n_planned_q60": 20,
+  "n_counted_q60": 20,
+  "pass_q60": 18,
+  "ci_lo_q60": 0.6830172859809177,
+  "ci_hi_q60": 0.9876514728297052,
+  "pass_total": 34,
+  "n_counted_total": 40,
+  "n_planned_total": 40,
+  "ci_lo_total": 0.7016473331604235,
+  "ci_hi_total": 0.9428977418454741
+ },
+ "criteria_sha256": "b586a5e39b1fad503282b1bb903696ad7d47c52e75fb9ff6e47f06781ad88332",
+ "n_infra_events": 0,
+ "infra_events": [],
+ "per_run": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/eval/per_run.csv"
+}

@@ -1,0 +1,319 @@
+{
+ "tool": "tools/t3/t3c_launch.py",
+ "wave": "t3c",
+ "dry_run": false,
+ "argv": [
+  "tools/t3/t3c_launch.py",
+  "--workers",
+  "40",
+  "--code-commit",
+  "be2b7e9fe3e0aad34f7481a1d8306af7cc2963e7"
+ ],
+ "started": "20261019_212215",
+ "workers": 40,
+ "nproc": 64,
+ "loadavg_at_start": [
+  14.19677734375,
+  13.880859375,
+  14.97119140625
+ ],
+ "disk_free_bytes": 878964961280,
+ "disk_total_bytes": 5952313540608,
+ "head": "2b63ffe469fd75457938c715c194e944cb735587",
+ "code_commit": "be2b7e9fe3e0aad34f7481a1d8306af7cc2963e7",
+ "status_porcelain": [
+  "?? results/t3_r2/audit/a7_emat.npz",
+  "?? results/t3_r2/confirmation/",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage1_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage1_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage2_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage2_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage3_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/freeze_stage3_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/train_history.json",
+  "?? results/t3_r2/reruns/q50/seed50504/bw/weights/",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage1_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage1_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage2_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage2_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage3_development.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/freeze_stage3_final.npz",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/train_history.json",
+  "?? results/t3_r2/reruns/q50/seed50517/bw/weights/",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage1_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage1_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage2_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage2_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage3_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/freeze_stage3_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/train_history.json",
+  "?? results/t3_r2/reruns/q60/seed50514/bw/weights/",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage1_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage1_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage2_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage2_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage3_development.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/freeze_stage3_final.npz",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/train_history.json",
+  "?? results/t3_r2/reruns/q60/seed50517/bw/weights/"
+ ],
+ "code_commit_resolved": "be2b7e9fe3e0aad34f7481a1d8306af7cc2963e7",
+ "diff_stat_code_commit_to_head": "docs/STATE.md                                      |    10 +-\n protocols/LOCK                                     |    11 +\n protocols/v2_T3_locked_v1_0.json                   |   552 +\n protocols/v2_T3_locked_v1_0.md                     |    78 +\n reports/t3/README.md                               |     9 +-\n reports/t3/r2/00_housekeeping.md                   |   107 +\n reports/t3/r2/01_audit.md                          |   489 +\n reports/t3/r2/02_preregistration.md                |   176 +\n reports/t3/r2/03_checks.md                         |    79 +\n reports/t3/r2/confirmation_plan.csv                |    41 +\n reports/t3/r2/figures/f01_a7_formation.png         |   Bin 0 -> 177811 bytes\n reports/t3/r2/figures/f02_a8_eta3.png              |   Bin 0 -> 122568 bytes\n reports/t3/r2/lock_draft/v2_T3_locked_v1_0.json    |   552 +\n reports/t3/r2/lock_draft/v2_T3_locked_v1_0.md      |    78 +\n reports/t3/r2/pi_record/27_t3_r2_prompt.md         |   561 +\n reports/t3/r2/report_scripts/a7_entry_policy.py    |    69 +\n reports/t3/r2/report_scripts/assemble_audit.py     |    47 +\n reports/t3/r2/report_scripts/audit_tables.py       |   492 +\n reports/t3/r2/report_scripts/common.py             |    44 +\n reports/t3/r2/report_scripts/make_prereg.py        |   112 +\n reports/t3/r2/report_scripts/oc_table.py           |    48 +\n reports/t3/r2/report_scripts/suite_summary.py      |    51 +\n .../t3/r2/report_scripts/templates/01_audit.tpl.md |   210 +\n reports/t3/r2/tables/a00_costs.md                  |    13 +\n reports/t3/r2/tables/a01_reproduction.md           |     6 +\n reports/t3/r2/tables/a02_snapshot_identity.md      |     5 +\n reports/t3/r2/tables/a03_tables.md                 |    10 +\n reports/t3/r2/tables/a05a_failure_points.md        |     6 +\n reports/t3/r2/tables/a05b_runs.md                  |     8 +\n reports/t3/r2/tables/a05c_verifier_agreement.md    |     7 +\n reports/t3/r2/tables/a05d_convergence.md           |    18 +\n reports/t3/r2/tables/a05e_gate_flips.md            |     1 +\n reports/t3/r2/tables/a05f_hypotheses.md            |    26 +\n reports/t3/r2/tables/a05g_recount.md               |     8 +\n reports/t3/r2/tables/a06a_refined.md               |     8 +\n reports/t3/r2/tables/a06b_refined_stages.md        |     8 +\n reports/t3/r2/tables/a06c_refined_top.md           |     8 +\n reports/t3/r2/tables/a06d_refined_verdicts.md      |    12 +\n reports/t3/r2/tables/a07a_stretches.md             |     9 +\n reports/t3/r2/tables/a07b_stretch_objective.md     |     9 +\n reports/t3/r2/tables/a07c_comparison.md            |     4 +\n reports/t3/r2/tables/a07d_failure_nodes.md         |     6 +\n reports/t3/r2/tables/a07e_stretch_vs_stored.md     |     9 +\n reports/t3/r2/tables/a07f_phase_entry.md           |     9 +\n reports/t3/r2/tables/a07g_training_signal.md       |     6 +\n reports/t3/r2/tables/a07h_windows.md               |    16 +\n reports/t3/r2/tables/a07i_group_starts.md          |     6 +\n reports/t3/r2/tables/a08a_eta3_per_run.md          |    42 +\n reports/t3/r2/tables/a08b_eta3_counts.md           |     4 +\n reports/t3/r2/tables/a08c_shape_per_run.md         |    42 +\n reports/t3/r2/tables/audit_numbers.json            |    79 +\n .../t3/r2/tables/t01_operating_characteristic.md   |     6 +\n results/t3_r2/a1_rerun_stdout.txt                  |     2 +\n results/t3_r2/a23_stdout.txt                       |     3 +\n results/t3_r2/a5_rerun_stdout.txt                  |     3 +\n results/t3_r2/a68_stdout.txt                       |     3 +\n results/t3_r2/a7_stdout.txt                        |     2 +\n results/t3_r2/audit/a1_compare.csv                 |     5 +\n results/t3_r2/audit/a1_compare_runs_q50_s50504.txt |     6 +\n results/t3_r2/audit/a1_compare_runs_q50_s50517.txt |     6 +\n results/t3_r2/audit/a1_compare_runs_q60_s50514.txt |     6 +\n results/t3_r2/audit/a1_compare_runs_q60_s50517.txt |     6 +\n results/t3_r2/audit/a1_rerun_exit.csv              |     5 +\n results/t3_r2/audit/a2_snapshot_identity.csv       |    41 +\n results/t3_r2/audit/a3_tables.csv                  |     9 +\n results/t3_r2/audit/a5_convergence.json            |   701 +\n results/t3_r2/audit/a5_failure_points.csv          |     5 +\n results/t3_r2/audit/a5_runs.csv                    |   201 +\n results/t3_r2/audit/a5_verifier_agreement.csv      |     6 +\n results/t3_r2/audit/a6_refined.csv                 |   201 +\n results/t3_r2/audit/a7_phase_entry.csv             |   127 +\n results/t3_r2/audit/a7_runs.json                   | 58508 ++++++++++++++\n results/t3_r2/audit/a7_series.csv                  | 77505 +++++++++++++++++++\n results/t3_r2/audit/a8_last16.csv                  |   641 +\n .../t3_r2/audit/at_67336a38/a5_convergence.json    |   441 +\n .../t3_r2/audit/at_67336a38/a5_failure_points.csv  |     5 +\n results/t3_r2/audit/at_67336a38/a5_runs.csv        |   201 +\n results/t3_r2/audit/at_67336a38/a5_stdout.txt      |     2 +\n .../audit/at_67336a38/a5_verifier_agreement.csv    |     6 +\n results/t3_r2/audit/at_67336a38/a5conv_stdout.txt  |     1 +\n .../t3_r2/audit/at_67336a38/record_a5-conv.json    |    22 +\n results/t3_r2/audit/at_67336a38/record_a5.json     |    18 +\n results/t3_r2/audit/costs.csv                      |    12 +\n results/t3_r2/audit/record_a1-compare.json         |    24 +\n results/t3_r2/audit/record_a1-rerun.json           |    14 +\n results/t3_r2/audit/record_a2.json                 |    16 +\n results/t3_r2/audit/record_a3.json                 |    17 +\n results/t3_r2/audit/record_a5-conv.json            |    71 +\n results/t3_r2/audit/record_a5.json                 |    66 +\n results/t3_r2/audit/record_a6.json                 |    23 +\n results/t3_r2/audit/record_a7.json                 |    24 +\n results/t3_r2/audit/record_a8.json                 |    23 +\n results/t3_r2/preflight/oc_table.csv               |     5 +\n results/t3_r2/preflight/preflight_seeds.done       |     1 +\n results/t3_r2/preflight/reference_roots.csv        |   201 +\n results/t3_r2/preflight/seed_hits.out.txt          |     6 +\n results/t3_r2/preflight/seed_hits_60501_60520.csv  |     1 +\n .../t3_r2/preflight/seed_inventory_60501_60520.csv |   397 +\n .../preflight/seed_inventory_60501_60520.out.txt   |     7 +\n .../t3_r2/preflight/tests/full_suite_shards.txt    |    16 +\n results/t3_r2/preflight/tests/semantics.txt        |    12 +\n .../t3_r2/preflight/tests/semantics_and_calc.txt   |    26 +\n results/t3_r2/preflight/tests/shard_00.txt         |    14 +\n results/t3_r2/preflight/tests/shard_01.txt         |     7 +\n results/t3_r2/preflight/tests/shard_02.txt         |    13 +\n results/t3_r2/preflight/tests/shard_03.txt         |     7 +\n results/t3_r2/preflight/tests/shard_04.txt         |     7 +\n results/t3_r2/preflight/tests/shard_05.txt         |    14 +\n results/t3_r2/preflight/tests/shard_06.txt         |     8 +\n results/t3_r2/preflight/tests/shard_07.txt         |     8 +\n results/t3_r2/preflight/tests/shard_08.txt         |     7 +\n results/t3_r2/preflight/tests/shard_09.txt         |    29 +\n results/t3_r2/preflight/tests/shard_10.txt         |    14 +\n results/t3_r2/preflight/tests/shard_11.txt         |     8 +\n results/t3_r2/preflight/tests/shards.done          |     1 +\n results/t3_r2/preflight/tests/shards.sh            |    15 +\n .../q50/seed50504/bw/continuation_table_stage1.npz |   Bin 0 -> 64486 bytes\n .../q50/seed50504/bw/continuation_table_stage2.npz |   Bin 0 -> 192486 bytes\n .../t3_r2/reruns/q50/seed50504/bw/drift_test.json  |    21 +\n results/t3_r2/reruns/q50/seed50504/bw/gates.json   |   222 +\n .../t3_r2/reruns/q50/seed50504/bw/manifest.json    |   753 +\n .../reruns/q50/seed50504/bw/ms_binmaps_stage2.npz  |   Bin 0 -> 63698 bytes\n .../reruns/q50/seed50504/bw/ms_binmaps_stage3.npz  |   Bin 0 -> 125138 bytes\n .../reruns/q50/seed50504/bw/ms_checks_stage1.csv   |    25 +\n .../reruns/q50/seed50504/bw/ms_checks_stage2.csv   |    65 +\n .../reruns/q50/seed50504/bw/ms_checks_stage3.csv   |    65 +\n .../reruns/q50/seed50504/bw/ms_run_summary.json    |    60 +\n .../t3_r2/reruns/q50/seed50504/bw/ms_updates.csv   |  3801 +\n .../t3_r2/reruns/q50/seed50504/bw/rule_log.json    |   620 +\n .../t3_r2/reruns/q50/seed50504/bw/run_config.json  |   342 +\n results/t3_r2/reruns/q50/seed50504/bw/status.json  |    21 +\n .../q50/seed50517/bw/continuation_table_stage1.npz |   Bin 0 -> 64486 bytes\n .../q50/seed50517/bw/continuation_table_stage2.npz |   Bin 0 -> 192486 bytes\n .../t3_r2/reruns/q50/seed50517/bw/drift_test.json  |    21 +\n results/t3_r2/reruns/q50/seed50517/bw/gates.json   |   222 +\n .../t3_r2/reruns/q50/seed50517/bw/manifest.json    |   753 +\n .../reruns/q50/seed50517/bw/ms_binmaps_stage2.npz  |   Bin 0 -> 63698 bytes\n .../reruns/q50/seed50517/bw/ms_binmaps_stage3.npz  |   Bin 0 -> 125138 bytes\n .../reruns/q50/seed50517/bw/ms_checks_stage1.csv   |    25 +\n .../reruns/q50/seed50517/bw/ms_checks_stage2.csv   |    65 +\n .../reruns/q50/seed50517/bw/ms_checks_stage3.csv   |    65 +\n .../reruns/q50/seed50517/bw/ms_run_summary.json    |    60 +\n .../t3_r2/reruns/q50/seed50517/bw/ms_updates.csv   |  3801 +\n .../t3_r2/reruns/q50/seed50517/bw/rule_log.json    |   620 +\n .../t3_r2/reruns/q50/seed50517/bw/run_config.json  |   342 +\n results/t3_r2/reruns/q50/seed50517/bw/status.json  |    21 +\n .../q60/seed50514/bw/continuation_table_stage1.npz |   Bin 0 -> 64486 bytes\n .../q60/seed50514/bw/continuation_table_stage2.npz |   Bin 0 -> 205286 bytes\n .../t3_r2/reruns/q60/seed50514/bw/drift_test.json  |    21 +\n results/t3_r2/reruns/q60/seed50514/bw/gates.json   |   222 +\n .../t3_r2/reruns/q60/seed50514/bw/manifest.json    |   753 +\n .../reruns/q60/seed50514/bw/ms_binmaps_stage2.npz  |   Bin 0 -> 69842 bytes\n .../reruns/q60/seed50514/bw/ms_binmaps_stage3.npz  |   Bin 0 -> 137426 bytes\n .../reruns/q60/seed50514/bw/ms_checks_stage1.csv   |    25 +\n .../reruns/q60/seed50514/bw/ms_checks_stage2.csv   |    65 +\n .../reruns/q60/seed50514/bw/ms_checks_stage3.csv   |    65 +\n .../reruns/q60/seed50514/bw/ms_run_summary.json    |    60 +\n .../t3_r2/reruns/q60/seed50514/bw/ms_updates.csv   |  3801 +\n .../t3_r2/reruns/q60/seed50514/bw/rule_log.json    |   644 +\n .../t3_r2/reruns/q60/seed50514/bw/run_config.json  |   342 +\n results/t3_r2/reruns/q60/seed50514/bw/status.json  |    21 +\n .../q60/seed50517/bw/continuation_table_stage1.npz |   Bin 0 -> 64486 bytes\n .../q60/seed50517/bw/continuation_table_stage2.npz |   Bin 0 -> 205286 bytes\n .../t3_r2/reruns/q60/seed50517/bw/drift_test.json  |    21 +\n results/t3_r2/reruns/q60/seed50517/bw/gates.json   |   222 +\n .../t3_r2/reruns/q60/seed50517/bw/manifest.json    |   753 +\n .../reruns/q60/seed50517/bw/ms_binmaps_stage2.npz  |   Bin 0 -> 69842 bytes\n .../reruns/q60/seed50517/bw/ms_binmaps_stage3.npz  |   Bin 0 -> 137426 bytes\n .../reruns/q60/seed50517/bw/ms_checks_stage1.csv   |    25 +\n .../reruns/q60/seed50517/bw/ms_checks_stage2.csv   |    65 +\n .../reruns/q60/seed50517/bw/ms_checks_stage3.csv   |    65 +\n .../reruns/q60/seed50517/bw/ms_run_summary.json    |    60 +\n .../t3_r2/reruns/q60/seed50517/bw/ms_updates.csv   |  3801 +\n .../t3_r2/reruns/q60/seed50517/bw/rule_log.json    |   644 +\n .../t3_r2/reruns/q60/seed50517/bw/run_config.json  |   342 +\n results/t3_r2/reruns/q60/seed50517/bw/status.json  |    21 +\n tests/test_t3r2_analysis.py                        |   272 +\n tests/test_t3r2_audit.py                           |   230 +\n tests/test_t3r2_calc.py                            |   282 +\n tests/test_t3r2_launch.py                          |   383 +\n tests/test_t3r2_semantics.py                       |   185 +\n tools/t3/t3c_analysis.py                           |   345 +\n tools/t3/t3c_blind.py                              |   155 +\n tools/t3/t3c_checks.py                             |   137 +\n tools/t3/t3c_eval.py                               |   111 +\n tools/t3/t3c_launch.py                             |   464 +\n tools/t3/t3r2_audit.py                             |   814 +\n tools/t3/t3r2_br_calc.py                           |   394 +\n tools/t3/t3r2_check_roots.py                       |    76 +\n tools/t3/t3r2_make_lock.py                         |   183 +\n 190 files changed, 172065 insertions(+), 3 deletions(-)",
+ "diff_stat_run_code_to_head": "protocols/LOCK                   |  11 +\n protocols/v2_T3_locked_v1_0.json | 552 +++++++++++++++++++++++++++++++++++++++\n protocols/v2_T3_locked_v1_0.md   |  78 ++++++\n 3 files changed, 641 insertions(+)",
+ "base_commit": "be2b7e9fe3e0aad34f7481a1d8306af7cc2963e7",
+ "lock_dir": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/protocols",
+ "lock_protocol_sha256": "4f02c7ae89f2578a7510e1f3934caeb4fc6085e851d8898c26fff6fe1487a741",
+ "params_file": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/reports/t3/r1/params_bw_t3.json",
+ "params_sha256": "db5156962a2d7a3eca0b7d0440d995d84dc57bb88c7066e38d7d61e40148e976",
+ "n_planned": 40,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60501/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60502/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60503/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60504/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60505/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60506/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60507/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60508/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60509/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60510/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60511/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60512/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60513/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60514/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60515/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60516/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60517/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60518/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60519/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60520/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60501/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60502/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60503/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60504/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60505/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60506/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60507/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60508/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60509/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60510/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60511/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60512/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60513/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60514/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60515/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60516/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60517/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60518/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60519/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60520/bw"
+ ],
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60518/bw",
+   "returncode": 0,
+   "wall_sec": 581.7714427621104
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60519/bw",
+   "returncode": 0,
+   "wall_sec": 584.3506820341572
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60512/bw",
+   "returncode": 0,
+   "wall_sec": 586.8362330268137
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60509/bw",
+   "returncode": 0,
+   "wall_sec": 587.5419395028148
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60501/bw",
+   "returncode": 0,
+   "wall_sec": 593.7868413149845
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60512/bw",
+   "returncode": 0,
+   "wall_sec": 594.3570111659355
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60517/bw",
+   "returncode": 0,
+   "wall_sec": 595.6294896090403
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60511/bw",
+   "returncode": 0,
+   "wall_sec": 597.3745161939878
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60510/bw",
+   "returncode": 0,
+   "wall_sec": 597.7352253219578
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60517/bw",
+   "returncode": 0,
+   "wall_sec": 598.1410194798373
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60505/bw",
+   "returncode": 0,
+   "wall_sec": 604.6172146720346
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60505/bw",
+   "returncode": 0,
+   "wall_sec": 605.3928116511088
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60506/bw",
+   "returncode": 0,
+   "wall_sec": 608.5583292110823
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60507/bw",
+   "returncode": 0,
+   "wall_sec": 608.6538124210201
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60515/bw",
+   "returncode": 0,
+   "wall_sec": 610.5542008611374
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60514/bw",
+   "returncode": 0,
+   "wall_sec": 610.8231403199024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60510/bw",
+   "returncode": 0,
+   "wall_sec": 611.5203736410476
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60501/bw",
+   "returncode": 0,
+   "wall_sec": 613.0480555270333
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60513/bw",
+   "returncode": 0,
+   "wall_sec": 615.0287494850345
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60506/bw",
+   "returncode": 0,
+   "wall_sec": 615.446714439895
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60520/bw",
+   "returncode": 0,
+   "wall_sec": 615.6264438820072
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60514/bw",
+   "returncode": 0,
+   "wall_sec": 615.8285669260658
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60516/bw",
+   "returncode": 0,
+   "wall_sec": 615.8598888679408
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60503/bw",
+   "returncode": 0,
+   "wall_sec": 617.3297573879827
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60504/bw",
+   "returncode": 0,
+   "wall_sec": 618.3838520389982
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60518/bw",
+   "returncode": 0,
+   "wall_sec": 624.840815908974
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60516/bw",
+   "returncode": 0,
+   "wall_sec": 624.9257184180897
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60519/bw",
+   "returncode": 0,
+   "wall_sec": 627.6395903709345
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60503/bw",
+   "returncode": 0,
+   "wall_sec": 628.3986191179138
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60511/bw",
+   "returncode": 0,
+   "wall_sec": 629.433700602036
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60508/bw",
+   "returncode": 0,
+   "wall_sec": 631.2311063241214
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60513/bw",
+   "returncode": 0,
+   "wall_sec": 635.4539930259343
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60520/bw",
+   "returncode": 0,
+   "wall_sec": 637.0997629158664
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60508/bw",
+   "returncode": 0,
+   "wall_sec": 638.0464147429448
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q50/seed60502/bw",
+   "returncode": 0,
+   "wall_sec": 638.2996582381893
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60515/bw",
+   "returncode": 0,
+   "wall_sec": 638.2985526351258
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60507/bw",
+   "returncode": 0,
+   "wall_sec": 640.2765193439554
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60502/bw",
+   "returncode": 0,
+   "wall_sec": 642.8676058091223
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60509/bw",
+   "returncode": 0,
+   "wall_sec": 644.8663328939583
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60504/bw",
+   "returncode": 0,
+   "wall_sec": 644.9246144220233
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  39.19091796875,
+  45.24267578125,
+  33.19873046875
+ ]
+}
