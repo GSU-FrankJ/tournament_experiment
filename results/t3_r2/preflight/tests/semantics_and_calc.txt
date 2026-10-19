@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/fjiang4/tournament_experiment/.venv/bin/python
+rootdir: /home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38
+collecting ... collected 19 items
+
+tests/test_t3r2_semantics.py::test_the_observation_at_stage_2_of_a_three_stage_game_is_tau_half_and_d_over_B PASSED [  5%]
+tests/test_t3r2_semantics.py::test_a_learner_in_role_1_sees_minus_d_and_the_opponent_sees_the_negative_of_that PASSED [ 10%]
+tests/test_t3r2_semantics.py::test_the_stage_2_return_is_minus_k_e_squared_plus_the_table_at_d_plus_eL_minus_eO PASSED [ 15%]
+tests/test_t3r2_semantics.py::test_the_table_lookup_refuses_an_out_of_grid_y PASSED [ 21%]
+tests/test_t3r2_semantics.py::test_the_opponents_stage_2_action_comes_from_the_lagged_copy_not_the_live_actor PASSED [ 26%]
+tests/test_t3r2_semantics.py::test_the_stage_3_phase_reward_is_the_expected_terminal_reward PASSED [ 31%]
+tests/test_t3r2_calc.py::test_the_calculator_uses_no_name_of_the_verifier_or_metrics_numerics PASSED [ 36%]
+tests/test_t3r2_calc.py::test_f_xi_and_F_xi_match_numerical_integration_of_the_triangular_density[20.0] PASSED [ 42%]
+tests/test_t3r2_calc.py::test_f_xi_and_F_xi_match_numerical_integration_of_the_triangular_density[50.0] PASSED [ 47%]
+tests/test_t3r2_calc.py::test_the_shock_rule_integrates_polynomials_and_has_unit_mass PASSED [ 52%]
+tests/test_t3r2_calc.py::test_the_closed_form_policy_has_no_gain_at_t2[50.0] PASSED [ 57%]
+tests/test_t3r2_calc.py::test_the_closed_form_policy_has_no_gain_at_t2[60.0] PASSED [ 63%]
+tests/test_t3r2_calc.py::test_a_perturbed_closed_form_has_a_positive_gain_that_the_calculator_finds PASSED [ 68%]
+tests/test_t3r2_calc.py::test_the_t3_continuation_matches_direct_nested_quadrature PASSED [ 73%]
+tests/test_t3r2_calc.py::test_the_best_response_chain_is_at_least_the_mean_chain_and_the_root_gain_is_g1 PASSED [ 78%]
+tests/test_t3r2_calc.py::test_the_vectorised_refinement_equals_scipy_bounded_brent PASSED [ 84%]
+tests/test_t3r2_calc.py::test_the_maximiser_handles_both_bounds PASSED   [ 89%]
+tests/test_t3r2_calc.py::test_the_convergence_helper_reports_small_changes_for_the_closed_form PASSED [ 94%]
+tests/test_t3r2_calc.py::test_the_calculator_agrees_with_the_verifier_on_a_synthetic_t3_policy PASSED [100%]
+
+============================= 19 passed in 23.62s ==============================

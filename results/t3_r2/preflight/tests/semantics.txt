@@ -1,0 +1,12 @@
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/fjiang4/tournament_experiment/.venv/bin/python
+rootdir: /home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38
+collecting ... collected 6 items
+
+tests/test_t3r2_semantics.py::test_the_observation_at_stage_2_of_a_three_stage_game_is_tau_half_and_d_over_B PASSED [ 16%]
+tests/test_t3r2_semantics.py::test_a_learner_in_role_1_sees_minus_d_and_the_opponent_sees_the_negative_of_that PASSED [ 33%]
+tests/test_t3r2_semantics.py::test_the_stage_2_return_is_minus_k_e_squared_plus_the_table_at_d_plus_eL_minus_eO PASSED [ 50%]
+tests/test_t3r2_semantics.py::test_the_table_lookup_refuses_an_out_of_grid_y PASSED [ 66%]
+tests/test_t3r2_semantics.py::test_the_opponents_stage_2_action_comes_from_the_lagged_copy_not_the_live_actor PASSED [ 83%]
+tests/test_t3r2_semantics.py::test_the_stage_3_phase_reward_is_the_expected_terminal_reward PASSED [100%]
+
+============================== 6 passed in 2.38s ===============================
