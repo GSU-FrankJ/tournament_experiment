@@ -39,6 +39,7 @@ for _k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
 import argparse
 import copy
 import csv
+import importlib.util
 import json
 import multiprocessing as mp
 import subprocess
@@ -56,7 +57,11 @@ sys.path.insert(0, str(ROOT / "tools" / "ms"))
 sys.path.insert(0, str(ROOT / "tools" / "t3"))
 
 from run import run_ms_stagewise as rms  # noqa: E402
-import compare_runs as cr  # noqa: E402
+
+# ``tools/t3/compare_runs.py`` loaded by path: ``tools/v2/compare_runs.py`` has the same module name and a full test session may import it first
+_spec = importlib.util.spec_from_file_location("t3_compare_runs", Path(__file__).with_name("compare_runs.py"))
+cr = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(cr)  # type: ignore[union-attr]
 import t3r3_diag as dg  # noqa: E402
 
 DEFAULT_R2 = Path("/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2")
