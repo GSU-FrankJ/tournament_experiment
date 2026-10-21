@@ -180,7 +180,7 @@ def update_diag(actor: Any, spec: Any, states: np.ndarray, actions: np.ndarray, 
         for k in ("n", "adv_raw_mean", "adv_raw_std", "adv_norm_mean", "adv_norm_std", "gnorm", "share", "sample_norm_mean"):
             sc[f"{k}_{name}"] = float(R[k][i])
     for name, i in (("lo", 0), ("hi", 1), ("free", 2)):
-        for k in ("n", "adv_norm_mean", "gnorm", "share", "sample_norm_mean"):
+        for k in ("n", "adv_raw_mean", "adv_raw_std", "adv_norm_mean", "adv_norm_std", "gnorm", "share", "sample_norm_mean"):
             sc[f"{k}_clamp_{name}"] = float(C[k][i])
     sc["n_clamp_lo_in"] = int(((clamp == 0) & inb).sum())
     sc["n_clamp_lo_out"] = int(((clamp == 0) & ~inb).sum())
@@ -197,7 +197,8 @@ def update_diag(actor: Any, spec: Any, states: np.ndarray, actions: np.ndarray, 
         sc["sat2_in"] = float((p["pre2"].detach().abs() > dg.SAT_THR).float().mean())
     else:
         sc.update({"sens_in_mean": float("nan"), "sens_in_max": float("nan"), "sat1_in": float("nan"), "sat2_in": float("nan")})
-    return {"scalars": sc, "bins": {"n": Bn["n"], "adv_raw_mean": Bn["adv_raw_mean"], "adv_norm_mean": Bn["adv_norm_mean"],
+    return {"scalars": sc, "bins": {"n": Bn["n"], "adv_raw_mean": Bn["adv_raw_mean"], "adv_raw_std": Bn["adv_raw_std"],
+                                    "adv_norm_mean": Bn["adv_norm_mean"], "adv_norm_std": Bn["adv_norm_std"],
                                     "gnorm": Bn["gnorm"], "share": Bn["share"], "sample_norm_mean": Bn["sample_norm_mean"]}}
 
 

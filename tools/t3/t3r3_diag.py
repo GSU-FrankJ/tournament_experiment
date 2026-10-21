@@ -743,8 +743,8 @@ def dg6(runs: Sequence[Mapping[str, Any]], v20_root: Path, out: Path, dg2_dir: P
     # (the run's own onset, or the median onset of the regime runs of its q for a run without one)
     if e0:
         ups = list(EXPORTS3)
-        med_on = {q: float(np.median([x["onset_local"] for x in s3_rows if x["q"] == q and x["onset_local"] is not None]))
-                  for q in QS}
+        med_on = {q: float(np.median([x["onset_local"] for x in s3_rows
+                                      if x["q"] == q and x["S3"] > REGIME_SHARE and x["onset_local"] is not None])) for q in QS}
         for rec in s3_rows:
             ref = rec["onset_local"] if rec["onset_local"] is not None else med_on[rec["q"]]
             ser = np.array([e0[(rec["round"], rec["q"], rec["seed"], u)] for u in ups])
@@ -856,13 +856,16 @@ def dg8(runs: Sequence[Mapping[str, Any]], out: Path, dg6_dir: Path, workers: in
 
 # ---------------------------------------------------------------------------------- retrospective trigger table
 def trigger_flags(check: Mapping[str, Any]) -> Dict[str, bool]:
-    """The trigger conditions of D4 on one stage-3 development check (closed-form-free columns only)."""
+    """The trigger conditions of D4 on one stage-3 development check (the columns ``Delta``, ``s``, ``C``, ``R``, ``R_tail`` only; none
+    of them reads the closed form, and ``valid`` is not used because it also depends on stages 1 and 2 of the composite candidate).
+    ``degenerate``: ``Delta``, ``s`` or ``C`` not finite, or ``s <= 0`` (the check could not be evaluated)."""
     out = {"Delta>0.005": fnum(check["Delta"]) > TRIGGER_THRESHOLDS["Delta"]}
     for x in TRIGGER_THRESHOLDS["R"]:
         out[f"R>{x:g}"] = fnum(check["R"]) > x
     for x in TRIGGER_THRESHOLDS["R_tail"]:
         out[f"R_tail>{x:g}"] = fnum(check["R_tail"]) > x
-    out["invalid"] = str(check["valid"]) != "True"
+    vals = [fnum(check["Delta"]), fnum(check["s"]), fnum(check["C"])]
+    out["degenerate"] = bool((not all(np.isfinite(vals))) or fnum(check["s"]) <= 0.0)
     return out
 
 
@@ -908,8 +911,8 @@ def retro(runs: Sequence[Mapping[str, Any]], out: Path) -> None:
     others = [x for x in per_run if x["label"] != "r2_q60_s60518"]
     write_json(out / "retro_record.json", {"step": "retro", "largest_R_other_than_60518": max(x["R"] for x in others),
                                            "largest_R_tail_other_than_60518": max(x["R_tail"] for x in others),
-                                           "R_60518": next(x["R"] for x in per_run if x["label"] == "r2_q60_s60518"),
-                                           "R_tail_60518": next(x["R_tail"] for x in per_run if x["label"] == "r2_q60_s60518"),
+                                           "R_60518": next((x["R"] for x in per_run if x["label"] == "r2_q60_s60518"), None),
+                                           "R_tail_60518": next((x["R_tail"] for x in per_run if x["label"] == "r2_q60_s60518"), None),
                                            "thresholds": {k: list(v) if isinstance(v, tuple) else v for k, v in TRIGGER_THRESHOLDS.items()},
                                            **git_head()})
 

@@ -141,8 +141,8 @@ def test_instrumentation_is_passive_and_bit_identical(reduced_cfg):
     # the stage-3 state (actor, critic, optimizer, streams) is identical, tensor by tensor
     sa = torch.load(a / "state_end_stage3.pt", weights_only=False, map_location="cpu")
     sb = torch.load(b / "state_end_stage3.pt", weights_only=False, map_location="cpu")
-    assert th.tree_equal({k: sa["agent"][k] for k in ("actor", "critic", "opponent")},
-                         {k: sb["agent"][k] for k in ("actor", "critic", "opponent")})
+    keys = ("actor", "critic", "opponent", "opt_actor", "opt_critic")           # networks and both Adam states
+    assert th.tree_equal({k: sa["agent"][k] for k in keys}, {k: sb["agent"][k] for k in keys})
     assert sa["rng"] == sb["rng"] and sa["agent"]["rng_minibatch"] == sb["agent"]["rng_minibatch"]
     # the records: one row per update; the rollout's clamp counters agree with the stored actions
     rows = _read_rows(b / "replay_updates.csv")
@@ -154,6 +154,7 @@ def test_instrumentation_is_passive_and_bit_identical(reduced_cfg):
         assert float(r["share_in"]) + float(r["share_out"]) == pytest.approx(1.0, abs=1e-6)
         assert int(float(r["n_in"])) + int(float(r["n_out"])) == 48
     z = np.load(b / "replay_bins.npz")
+    assert {"adv_raw_std", "adv_norm_std"} <= set(z.files)
     assert z["share"].shape == (50, 40) and np.allclose(np.nansum(z["share"], axis=1), 1.0, atol=1e-6)
 
 

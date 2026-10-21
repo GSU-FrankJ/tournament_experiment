@@ -156,15 +156,17 @@ def test_stretch_entry_summary():
 
 
 # ---------------------------------------------------------------------------------- the retrospective table
-def _check(delta, R, Rt, valid="True"):
-    return {"Delta": delta, "R": R, "R_tail": Rt, "valid": valid}
+def _check(delta, R, Rt, s=60.0, C=0.03):
+    return {"Delta": delta, "R": R, "R_tail": Rt, "s": s, "C": C}
 
 
 def test_trigger_flags_read_only_stage3_check_columns():
     f = dg.trigger_flags(_check(0.006, 0.2, 0.01))
-    assert f["Delta>0.005"] and not f["R>0.5"] and not f["R_tail>0.05"] and not f["invalid"]
+    assert f["Delta>0.005"] and not f["R>0.5"] and not f["R_tail>0.05"] and not f["degenerate"]
+    assert dg.trigger_flags(_check(0.001, 0.2, 0.01, s=0.0))["degenerate"] and dg.trigger_flags(_check(float("nan"), 0.2, 0.01))["degenerate"]
+    assert dg.trigger_flags(_check(0.001, 0.2, 0.01, C=float("nan")))["degenerate"]
     src = inspect.getsource(dg.trigger_flags) + inspect.getsource(dg.retro_table)
-    for banned in ("rmse", "tail_mean", "peak", "Gmax", "eT_", "g2_", "theory"):
+    for banned in ("rmse", "tail_mean", "peak", "Gmax", "eT_", "g2_", "theory", '["valid"]'):
         assert banned not in src
 
 
@@ -182,7 +184,7 @@ def test_retro_table_counts():
     r = tab["R>0.7"]
     assert r["n_fired"] == 1 and r["fired_runs"] == "c" and r["fired_and_failed"] == 1 and r["failing_missed"] == 2
     assert tab["R_tail>0.05"]["fired_runs"] == "c"
-    assert tab["invalid"]["n_fired"] == 0
+    assert tab["degenerate"]["n_fired"] == 0
 
 
 def test_rank_from_top():
@@ -245,3 +247,26 @@ def test_tail_nodes_at_the_mean_clamp_are_counted():
     s = dg.export_summary(grid, net, SPEC.q)
     assert s["mu_min"] == pytest.approx(1e-6) and s["out_mu_at_clamp"] == 1.0 and s["out_mu_lt_1e4"] == 1.0
     assert s["sens_in_max"] == 0.0                         # no gradient through the clamp
+
+
+def test_retro_reads_the_local_1600_row_of_the_check_files(tmp_path, monkeypatch):
+    """``retro`` on three fake runs: the row with local == 1600 is used, the pass flag comes from ``passes``."""
+    import csv
+    runs = []
+    for i, (delta, ok) in enumerate([(0.001, True), (0.006, False), (0.0049, True)]):
+        d = tmp_path / f"run{i}"
+        d.mkdir()
+        with open(d / "ms_checks_stage3.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=["local", "Delta", "s", "R", "R_tail", "C", "valid"])
+            w.writeheader()
+            w.writerow({"local": 1575, "Delta": 0.5, "s": 60, "R": 1.5, "R_tail": 0.5, "C": 0.03, "valid": "True"})     # not the last check
+            w.writerow({"local": 1600, "Delta": delta, "s": 60, "R": 0.2, "R_tail": 0.004, "C": 0.03, "valid": "True"})
+        runs.append({"round": "t3_r2", "q": 50, "seed": 60501 + i, "tracked": str(d), "ok": ok})
+    monkeypatch.setattr(dg, "passes", lambda r, g=None: r["ok"])
+    out = tmp_path / "out"
+    out.mkdir()
+    dg.retro(runs, out)
+    import pandas as pd
+    t = pd.read_csv(out / "retro_triggers.csv").set_index("trigger")
+    assert t.loc["Delta>0.005", "n_fired"] == 1 and t.loc["Delta>0.005", "fired_runs"] == "r2_q50_s60502"
+    assert t.loc["Delta>0.005", "failing_missed"] == 0 and t.loc["R>0.4", "n_fired"] == 0
