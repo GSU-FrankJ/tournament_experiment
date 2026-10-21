@@ -1,0 +1,11 @@
+........................................................................ [ 33%]
+........................................................................ [ 67%]
+.....................................................................    [100%]
+============================= slowest 5 durations ==============================
+66.54s call     tests/test_ms_runner.py::test_t3_pipeline_three_phases_nested_tables_and_the_rule[True]
+65.92s call     tests/test_ms_runner.py::test_t3_pipeline_three_phases_nested_tables_and_the_rule[False]
+36.02s setup    tests/test_v2_refine_tools.py::test_parents_a_mid_phase_state_is_what_stage2_continues_from
+34.81s setup    tests/test_t3r2_audit.py::test_snapshot_identity_a2_on_a_reduced_run
+31.46s call     tests/test_t3r2_audit.py::test_continuation_tables_a3_on_a_reduced_run
+213 passed in 391.83s (0:06:31)
+exit=0

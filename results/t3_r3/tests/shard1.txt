@@ -1,0 +1,10 @@
+........................................................................ [ 90%]
+........                                                                 [100%]
+============================= slowest 5 durations ==============================
+27.66s call     tests/test_ms_analysis.py::test_cli_end_to_end_complete_world_writes_every_output
+26.54s setup    tests/test_ms_analysis.py::test_reader_on_genuine_runner_output
+26.09s call     tests/test_ms_analysis.py::test_the_vs_MS_rule_and_secondary_figures_have_no_row_for_the_legacy_arms
+20.51s call     tests/test_ms_analysis.py::test_cli_before_any_ms_run_exists_reports_every_run_as_missing
+17.58s setup    tests/test_ms_analysis.py::test_primary_table_has_seven_arms_and_base2400_is_not_in_the_vs_MS_rule_table
+80 passed in 184.00s (0:03:04)
+exit=0

@@ -1,0 +1,172 @@
+.....................ss................................................. [ 53%]
+...........................................................FFF           [100%]
+=================================== FAILURES ===================================
+______________ test_instrumentation_is_passive_and_bit_identical _______________
+
+reduced_cfg = ('/tmp/pytest-of-fjiang4@gsuad.gsu.edu/pytest-701/t3r3_replay0', {'schema': 'ms_run_config/1', 'base_commit': '657f54a', 'pilot': 't3_r1', 'arm': 'bw', ...})
+
+    def test_instrumentation_is_passive_and_bit_identical(reduced_cfg):
+        base, cfg = reduced_cfg
+        a, b = Path(base) / "plain", Path(base) / "instrumented"
+        ra = rp.replay_stage3(json.loads(json.dumps(cfg)), str(a), instrument=False)
+        rb = rp.replay_stage3(json.loads(json.dumps(cfg)), str(b), instrument=True)
+        assert ra["violations"] == [] and rb["violations"] == []            # the instrumentation consumed no global RNG
+>       cmp = rp.compare_with_original(a, b)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_t3r3_replay.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tools/t3/t3r3_replay.py:337: in compare_with_original
+    same = za.files == zb.files and all(cr.same_array(za[k], zb[k]) for k in za.files)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x795670350970>
+
+>   same = za.files == zb.files and all(cr.same_array(za[k], zb[k]) for k in za.files)
+                                        ^^^^^^^^^^^^^
+E   AttributeError: module 'compare_runs' has no attribute 'same_array'
+
+tools/t3/t3r3_replay.py:337: AttributeError
+----------------------------- Captured stdout call -----------------------------
+[stage 3] entry at global update 0, rule enabled=False, scheme=bin_balanced
+[u   25 s3   25] check legacy Delta=0.13969 R=0.7192 Rt=0.7118 C=0.0493 elig=False consec=0 events=[]
+[u   50 s3   50] check legacy Delta=0.09357 R=0.7757 Rt=0.5376 C=0.0463 elig=False consec=0 events=['fixed_budget_end']
+[stage 3] done at global update 50 after 50 local updates (fire=None, would_fire=None, budget_forced=False)
+[stage 3] entry at global update 0, rule enabled=False, scheme=bin_balanced
+[u   25 s3   25] check legacy Delta=0.13969 R=0.7192 Rt=0.7118 C=0.0493 elig=False consec=0 events=[]
+[u   50 s3   50] check legacy Delta=0.09357 R=0.7757 Rt=0.5376 C=0.0463 elig=False consec=0 events=['fixed_budget_end']
+[stage 3] done at global update 50 after 50 local updates (fire=None, would_fire=None, budget_forced=False)
+____________ test_replay_reproduces_the_original_stage3_bit_for_bit ____________
+
+    def test_replay_reproduces_the_original_stage3_bit_for_bit():
+        """The replay driver on the reduced legacy ``bw`` run's own config equals that run's stage-3 files (exports, rows, checks,
+        freeze arrays)."""
+        orig, cfg = th.reduced_bw_run()
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+>           rec = rp.replay_one((orig, str(Path(td) / "rep"), True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_t3r3_replay.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tools/t3/t3r3_replay.py:382: in replay_one
+    rec = compare_with_original(orig, out)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools/t3/t3r3_replay.py:337: in compare_with_original
+    same = za.files == zb.files and all(cr.same_array(za[k], zb[k]) for k in za.files)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7956703b9960>
+
+>   same = za.files == zb.files and all(cr.same_array(za[k], zb[k]) for k in za.files)
+                                        ^^^^^^^^^^^^^
+E   AttributeError: module 'compare_runs' has no attribute 'same_array'
+
+tools/t3/t3r3_replay.py:337: AttributeError
+----------------------------- Captured stdout call -----------------------------
+[stage 3] entry at global update 0, rule enabled=False, scheme=bin_balanced
+[u   25 s3   25] check legacy Delta=0.14120 R=0.7222 Rt=0.7147 C=0.0493 elig=False consec=0 events=[]
+[u   40 s3   40] check legacy Delta=0.09846 R=0.6705 Rt=0.6015 C=0.0479 elig=False consec=0 events=['fixed_budget_end']
+[stage 3] done at global update 40 after 40 local updates (fire=None, would_fire=None, budget_forced=False)
+________________________ test_registry_canonicalization ________________________
+
+    def test_registry_canonicalization():
+        runs, df, conv, dup_warnings = _load()
+    
+        # 1. zero duplicate identities
+        keys = [(r.experiment, r.method, r.q, r.seed, r.ablation, r.weight_variant) for r in runs]
+        assert len(keys) == len(set(keys)), "duplicate run identities present"
+        assert not dup_warnings, f"duplicate-identity guard fired: {dup_warnings}"
+        print(f"[V1] duplicate run identities: 0 (guard warnings: 0) across {len(runs)} runs")
+    
+        # Registry path lookup for source-tag verification
+        path_of = {
+            (r.experiment, r.method, r.q, r.seed, r.ablation): r.path
+            for r in runs
+            if r.method in ("TEL-PPO", "PPO") and r.weight_variant == "baseline"
+        }
+    
+        base = conv[
+            (conv["method"].isin(["TEL-PPO", "PPO"]))
+            & (conv["ablation"] == "baseline")
+            & (conv["weight_variant"] == "baseline")
+        ]
+    
+        for exp, spec in CANONICAL.items():
+            for q in spec["qs"]:
+                cell = base[(base["experiment"] == exp) & (base["q"] == q)]
+                seeds = sorted(cell["seed"].tolist())
+    
+                # 2. exactly 5 seeds
+                assert set(seeds) == EXPECTED_SEEDS, f"{exp} q={q}: seeds {seeds}"
+    
+                # 3. post-fix tags only: the promoted baseline rows must come from
+                # files registered under the approved tag
+                srcs = []
+                for s in seeds:
+                    p = path_of.get((exp, "TEL-PPO", q, s, spec["tag"])) or path_of.get(
+                        (exp, "PPO", q, s, spec["tag"])
+                    )
+                    assert p is not None, f"{exp} q={q} seed {s}: no registry run with tag '{spec['tag']}'"
+                    srcs.append(os.path.basename(p))
+                if spec["tag"] != "baseline":
+                    assert all(spec["tag"] in s for s in srcs), f"{exp} q={q}: wrong source files {srcs}"
+    
+                # 4. verified stop on every seed
+                reasons = sorted(set(cell["stop_reason"].tolist()))
+                assert reasons == ["exploitability"], f"{exp} q={q}: stop_reasons {reasons}"
+    
+                upds = {int(r["seed"]): int(r["convergence_update"]) for _, r in cell.iterrows()}
+                print(
+                    f"[V1] {exp:<18} q={int(q):<3} tag={spec['tag']:<16} seeds={seeds} "
+                    f"stop=exploitability conv_update={[upds[s] for s in sorted(upds)]}"
+                )
+    
+        # two_players Set 2 still present as a separate variant (not pooled):
+        # 15 r5 PPO runs (3 q x 5 seeds) + 15 r5 gradient runs (legacy Set-2 rows
+        # are dropped by the promotion)
+        set2 = conv[
+            (conv["experiment"] == "two_players")
+            & (conv["weight_variant"] == "wh8_wl4")
+            & (conv["ablation"] == "baseline")
+        ]
+        n_ppo = len(set2[set2["method"].isin(["TEL-PPO", "PPO"])])
+        n_grad = len(set2[set2["method"] == "Gradient"])
+        assert n_ppo == 15, f"expected 15 Set-2 PPO runs, got {n_ppo}"
+>       assert n_grad == 15, f"expected 15 Set-2 gradient runs, got {n_grad}"
+E       AssertionError: expected 15 Set-2 gradient runs, got 0
+E       assert 0 == 15
+
+tests/test_registry_canonicalization.py:115: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[V1] duplicate run identities: 0 (guard warnings: 0) across 593 runs
+[V1] three_players      q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[47, 50, 52, 44, 47]
+[V1] three_players      q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[88, 113, 113, 119, 123]
+[V1] different_cost     q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[138, 136, 109, 122, 96]
+[V1] different_cost     q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[145, 124, 120, 127, 141]
+[V1] different_ability  q=35  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[100, 160, 109, 120, 157]
+[V1] different_ability  q=55  tag=r5_sampled_std   seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[91, 81, 84, 120, 90]
+[V1] two_players        q=35  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 99, 139, 49, 99]
+[V1] two_players        q=45  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 79, 109, 79, 119]
+[V1] two_players        q=55  tag=r5_sampled       seeds=[42, 43, 44, 45, 46] stop=exploitability conv_update=[109, 119, 99, 109, 129]
+=============================== warnings summary ===============================
+tests/test_ms_r3_actor.py::test_without_the_new_keys_an_nl_run_equals_e8eb9a08[NL_st_s16]
+tests/test_ms_r2_runner.py::test_without_the_new_keys_a_legacy_run_equals_71c58904
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 5 durations ==============================
+107.23s call     tests/test_ms_r3_actor.py::test_without_the_new_keys_an_nl_run_equals_e8eb9a08[NL_st_s16]
+99.66s call     tests/test_ms_r3_actor.py::test_without_the_new_keys_an_nl_run_equals_e8eb9a08[NL_bb_s4]
+97.88s call     tests/test_ms_r3_actor.py::test_without_the_new_keys_a_rule_run_equals_e8eb9a08
+95.14s call     tests/test_ms_r2_runner.py::test_without_the_new_keys_a_rule_run_equals_71c58904
+90.17s call     tests/test_ms_r2_runner.py::test_without_the_new_keys_a_legacy_run_equals_71c58904
+=========================== short test summary info ============================
+FAILED tests/test_t3r3_replay.py::test_instrumentation_is_passive_and_bit_identical
+FAILED tests/test_t3r3_replay.py::test_replay_reproduces_the_original_stage3_bit_for_bit
+FAILED tests/test_registry_canonicalization.py::test_registry_canonicalization
+3 failed, 129 passed, 2 skipped, 2 warnings in 1043.31s (0:17:23)
+exit=1

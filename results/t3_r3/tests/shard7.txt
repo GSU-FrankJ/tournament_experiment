@@ -1,0 +1,11 @@
+........................................................................ [ 45%]
+........................................................................ [ 91%]
+.............                                                            [100%]
+============================= slowest 5 durations ==============================
+143.44s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[60]
+121.07s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[50]
+38.73s call     tests/test_v2_refine_continuation.py::test_ii_a_self_convergence[60]
+31.91s call     tests/test_v2_refine_continuation.py::test_ii_a_self_convergence[50]
+19.71s setup    tests/test_ms_cms1.py::test_ms_base2400_equals_parents_a_through_the_first_window_update
+157 passed in 537.17s (0:08:57)
+exit=0

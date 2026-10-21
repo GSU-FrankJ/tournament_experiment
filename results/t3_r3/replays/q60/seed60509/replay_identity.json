@@ -1,0 +1,35 @@
+{
+ "orig": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-audit-6f3a38/results/t3_r2/confirmation/q60/seed60509/bw",
+ "replay": "results/t3_r3/replays/q60/seed60509",
+ "exports_compared": 64,
+ "exports_identical": true,
+ "exports_bad": [],
+ "updates_rows": [
+  1600,
+  1600
+ ],
+ "updates_identical": true,
+ "checks_identical": true,
+ "freeze_identical": {
+  "final": true,
+  "development": true
+ },
+ "all_identical": true,
+ "instrument": true,
+ "wall_sec": 313.74418060691096,
+ "global_rng_violations": [],
+ "q": 60,
+ "seed": 60509,
+ "clamp_count_crosscheck": {
+  "n_updates": 1600,
+  "updates_differ_in_lo": 0,
+  "samples_differ_in_lo": 0,
+  "updates_differ_out_lo": 0,
+  "samples_differ_out_lo": 0,
+  "updates_differ_in_hi": 0,
+  "samples_differ_in_hi": 0,
+  "updates_differ_out_hi": 0,
+  "samples_differ_out_hi": 0,
+  "updates_differ_n_in": 0
+ }
+}

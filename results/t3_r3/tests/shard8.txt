@@ -1,0 +1,11 @@
+........................................................................ [ 46%]
+........................................................................ [ 93%]
+.....s....                                                               [100%]
+============================= slowest 5 durations ==============================
+47.16s setup    tests/test_t3_analysis.py::test_coverage_cost_and_curves_on_the_reduced_runs
+40.61s setup    tests/test_v2_infra.py::test_rng_alignment_after_one_batch
+26.64s setup    tests/test_v2_infra.py::test_branch_reproducibility[A_joint]
+22.26s call     tests/test_v2_refine.py::test_defaults_bit_identical_to_c7
+17.02s call     tests/test_t3_analysis.py::test_run_analysis_end_to_end_on_a_synthetic_table
+153 passed, 1 skipped in 294.30s (0:04:54)
+exit=0

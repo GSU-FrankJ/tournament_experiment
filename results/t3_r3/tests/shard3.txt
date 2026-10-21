@@ -1,0 +1,10 @@
+......................................sss............................... [ 63%]
+.........................................                                [100%]
+============================= slowest 5 durations ==============================
+106.83s setup    tests/test_ms_r2_launch_checks.py::test_a_genuine_wave_passes_every_check
+10.98s setup    tests/test_ms_r3_actor_diagnostics.py::test_mini_run_exports_are_read_as_their_variant[t10]
+10.11s setup    tests/test_ms_r3_actor_diagnostics.py::test_mini_run_exports_are_read_as_their_variant[relu]
+9.08s call     tests/test_t3_launcher.py::test_post_launch_flags_the_reduced_runs_that_are_not_production_runs
+4.68s call     tests/test_t3_launcher.py::test_c_init_plan_on_a_few_seeds
+110 passed, 3 skipped in 157.44s (0:02:37)
+exit=0

@@ -1,0 +1,11 @@
+........................................................................ [ 43%]
+........................................................................ [ 87%]
+....................                                                     [100%]
+============================= slowest 5 durations ==============================
+39.06s call     tests/test_t3r2_launch.py::test_t3c_eval_reproduces_a_reduced_runs_freeze_arrays_bit_for_bit
+31.80s call     tests/test_v2_r2b.py::test_defaults_equal_the_v20_lock_commit_on_a_reduced_locked_run
+21.29s call     tests/test_v2_r2b.py::test_new_keys_at_default_equal_the_c7_reference
+10.55s call     tests/test_t3r2_calc.py::test_the_convergence_helper_reports_small_changes_for_the_closed_form
+5.66s call     tests/test_t3r2_calc.py::test_the_calculator_agrees_with_the_verifier_on_a_synthetic_t3_policy
+164 passed in 141.19s (0:02:21)
+exit=0

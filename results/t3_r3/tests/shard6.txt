@@ -1,0 +1,10 @@
+........................................................................ [ 78%]
+....................                                                     [100%]
+============================= slowest 5 durations ==============================
+13.98s setup    tests/test_ms_launch_checks.py::test_a_genuine_run_passes_every_check
+12.18s setup    tests/test_v2_refine_analysis.py::test_end_to_end_completeness_lists_failed_missing_and_running
+10.67s setup    tests/test_v2_refine_d1tool.py::test_end_to_end_on_real_runs_phase_A_and_frozen_phase_B
+3.60s call     tests/test_v2_refine_analysis.py::test_end_to_end_deterministic
+1.18s call     tests/test_v2_refine_d1tool.py::test_end_to_end_on_a_mocked_two_seed_root
+92 passed in 54.27s
+exit=0
