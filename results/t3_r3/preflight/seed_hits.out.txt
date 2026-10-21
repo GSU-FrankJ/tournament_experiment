@@ -1,0 +1,7 @@
+$ /home/fjiang4/tournament_experiment/.venv/bin/python tools/t3/seed_hits.py --out-dir results/t3_r3/preflight --block 70501 70520 --block 80501 80540
+start 2026-10-21T22:10:09Z
+scanned 213844 json, 79069 csv files; 416 distinct seed values
+block 70501-70520: 0 hit rows, 0 seeds -> results/t3_r3/preflight/seed_hits_70501_70520.csv
+block 80501-80540: 0 hit rows, 0 seeds -> results/t3_r3/preflight/seed_hits_80501_80540.csv
+exit=0
+end 2026-10-21T22:12:35Z
