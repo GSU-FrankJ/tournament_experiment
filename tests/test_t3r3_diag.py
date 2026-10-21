@@ -217,6 +217,7 @@ def test_replay_windows_compare_gradient_share_with_sample_share():
     assert a["ratio_out"] == pytest.approx(0.9 / 0.75)
     assert a["sample_share_clamp_lo"] == pytest.approx(300 / 512) and a["ratio_clamp_lo"] == pytest.approx(0.6 / (300 / 512))
     assert a["sample_share_in"] + a["sample_share_out"] == pytest.approx(1.0)
+    assert a["cos_in_out_mean"] == pytest.approx((4.0 - 0.25 - 1.9 ** 2) / (2 * 0.5 * 1.9))
     assert a["sample_share_clamp_hi"] == 0.0 and np.isnan(a["ratio_clamp_hi"])               # no hi draws: no ratio is formed
 
 

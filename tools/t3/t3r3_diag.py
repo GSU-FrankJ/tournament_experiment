@@ -608,6 +608,10 @@ def replay_windows(rows: Sequence[Mapping[str, str]], windows: Sequence[Tuple[in
             row[f"grad_share_{g}_mean"] = float(np.nanmean(sh_)) if np.isfinite(sh_).any() else float("nan")
             row[f"grad_share_{g}_pooled"] = pooled_share(cols[f"share_{g}"][m], cols["gnorm_total"][m])
             row[f"ratio_{g}"] = row[f"grad_share_{g}_pooled"] / row["sample_share_" + g] if row["sample_share_" + g] > 0 else float("nan")
+        gt, gi, go = cols["gnorm_total"][m], cols["gnorm_in"][m], cols["gnorm_out"][m]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            cos = (gt ** 2 - gi ** 2 - go ** 2) / (2.0 * gi * go)          # cos(g_in, g_out) from |g|^2 = |g_in|^2 + |g_out|^2 + 2 <g_in, g_out>
+        row["cos_in_out_mean"] = float(np.nanmean(cos)) if np.isfinite(cos).any() else float("nan")
         for k in ("gnorm_total", "gnorm_in", "gnorm_out", "sens_in_mean", "sat1_in", "sat2_in", "sample_norm_mean_clamp_lo",
                   "sample_norm_mean_clamp_free", "sample_norm_mean_in", "sample_norm_mean_out", "adv_norm_mean_clamp_lo",
                   "adv_norm_mean_out", "adv_norm_mean_in"):
@@ -662,7 +666,8 @@ def dg5(runs: Sequence[Mapping[str, Any]], replay_dir: Path, out: Path) -> None:
             sub = [w for w in win_rows if w["group"] == grp and w["first"] == first]
             row: Dict[str, Any] = {"group": grp, "first": first, "last": sub[0]["last"], "runs": len(sub)}
             for k in ("sample_share_out", "grad_share_out_pooled", "ratio_out", "sample_share_clamp_lo", "grad_share_clamp_lo_pooled",
-                      "ratio_clamp_lo", "grad_share_in_pooled", "ratio_in", "sens_in_mean", "sat2_in", "gnorm_total"):
+                      "ratio_clamp_lo", "grad_share_in_pooled", "ratio_in", "sens_in_mean", "sat2_in", "gnorm_total", "gnorm_in",
+                      "gnorm_out", "cos_in_out_mean"):
                 v = [w[k] for w in sub if np.isfinite(w[k])]
                 row[k + "_median"] = float(np.median(v)) if v else float("nan")
             med.append(row)
@@ -727,6 +732,18 @@ def dg6(runs: Sequence[Mapping[str, Any]], v20_root: Path, out: Path, dg2_dir: P
             sh, lo_, n_ = clamp_share(rows, "d1_L_s3_out_lo", "d1_L_s3_out_n", 25 * (a - 1) + 1, 25 * a, lambda x: int(x["stage"]) == 3)
             win_rows.append({"round": r["round"], "q": r["q"], "seed": r["seed"], "window_last_local": 25 * a, "share_out": sh,
                              "lo": lo_, "n": n_})
+    # timing: the tie-point effort after the regime's onset against the same quantity in the other runs, at a reference update
+    # (the run's own onset, or the median onset of the regime runs of its q for a run without one)
+    if e0:
+        ups = list(EXPORTS3)
+        med_on = {q: float(np.median([x["onset_local"] for x in s3_rows if x["q"] == q and x["onset_local"] is not None]))
+                  for q in QS}
+        for rec in s3_rows:
+            ref = rec["onset_local"] if rec["onset_local"] is not None else med_on[rec["q"]]
+            ser = np.array([e0[(rec["round"], rec["q"], rec["seed"], u)] for u in ups])
+            i = min(max(int(ref // 25) - 1, 0), len(ups) - 1)
+            rec.update({"ref_local": float(ref), "e0_at_ref": float(ser[i]), "e0_change_ref_plus_10_exports": float(ser[min(i + 10, 63)] - ser[i]),
+                        "e0_change_ref_to_final": float(ser[-1] - ser[i]), "e0_drawdown_from_max_after_ref": float(ser[i:].max() - ser[-1])})
     write_rows(out / "dg6_s3_runs.csv", s3_rows)
     write_rows(out / "dg6_s3_windows.csv", win_rows)
     # ---- the T = 2 analogue of the 40 v2.0 runs
@@ -744,6 +761,16 @@ def dg6(runs: Sequence[Mapping[str, Any]], v20_root: Path, out: Path, dg2_dir: P
             rel.append({"scope": scope, "quantity": col, "n": len(sel), "spearman_with_S3": spearman([x["S3"] for x in sel], [x[col] for x in sel])})
         rel.append({"scope": scope, "quantity": "fail (1/0)", "n": len(sel),
                     "spearman_with_S3": spearman([x["S3"] for x in sel], [0.0 if x["pass"] else 1.0 for x in sel])})
+    if e0:
+        from scipy.stats import mannwhitneyu
+
+        for q in QS:
+            a = [x for x in s3_rows if x["q"] == q and x["S3"] > REGIME_SHARE]
+            b = [x for x in s3_rows if x["q"] == q and x["S3"] <= REGIME_SHARE]
+            for col in ("e0_change_ref_plus_10_exports", "e0_change_ref_to_final", "e0_drawdown_from_max_after_ref"):
+                rel.append({"scope": f"timing q{q}", "quantity": col, "n": len(a) + len(b), "regime_median": float(np.median([x[col] for x in a])),
+                            "other_median": float(np.median([x[col] for x in b])),
+                            "mannwhitney_p": float(mannwhitneyu([x[col] for x in a], [x[col] for x in b]).pvalue)})
     write_rows(out / "dg6_relations.csv", rel)
     tab = []
     for scope, sel in (("all", s3_rows), ("q50", [x for x in s3_rows if x["q"] == 50]), ("q60", [x for x in s3_rows if x["q"] == 60])):
