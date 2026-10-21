@@ -73,6 +73,7 @@ REGIME_SHARE = 0.2                              # S3 above this: the run is in t
 HIGH_SHARE = 0.4
 LOW_SHARE = 0.05
 BAND_TOL = 1e-9
+MU_CLAMP = 1e-6                                 # ``BetaActor`` mean clamp: mu = clamp(sigmoid(z0), 1e-6, 1 - 1e-6)
 WINDOWS3 = ((1, 100), (101, 400), (401, 800), (801, 1200), (1201, 1600))
 CHECK_LOCALS = (25, 50, 100, 200, 400, 800, 1200, 1600)
 # the ten failures of the 80 bw runs (prompt table): (round, q, seed)
@@ -282,6 +283,7 @@ def export_summary(grid: np.ndarray, net: Mapping[str, np.ndarray], q: float) ->
     right = np.where(inb & (d >= 0.0))[0]
     e0 = float(e[z])
     out_mean = float(e[out].mean())
+    mu = np.asarray(net["alpha"], dtype=float) / (np.asarray(net["alpha"], dtype=float) + np.asarray(net["beta"], dtype=float))
     return {
         "e0": e0, "in_min": float(e[inb].min()), "in_max": float(e[inb].max()),
         "in_range": float(e[inb].max() - e[inb].min()),
@@ -289,6 +291,8 @@ def export_summary(grid: np.ndarray, net: Mapping[str, np.ndarray], q: float) ->
         "slope_pos": float((e[right[-1]] - e0) / d[right[-1]]) if right.size > 1 else float("nan"),
         "out_mean": out_mean, "out_max": float(e[out].max()),
         "out_alpha_lt1": float((np.asarray(net["alpha"])[out] < 1.0).mean()), "F": e0 - out_mean,
+        "mu_min": float(mu.min()), "out_mu_at_clamp": float((mu[out] <= MU_CLAMP * (1.0 + 1e-3)).mean()),
+        "out_mu_lt_1e4": float((mu[out] < 1e-4).mean()),
         "sens_in_mean": float(np.asarray(net["sens"])[inb].mean()), "sens_in_max": float(np.asarray(net["sens"])[inb].max()),
         "sens_at_0": float(np.asarray(net["sens"])[z]),
         "sat1_in": float(np.asarray(net["sat1"])[inb].mean()), "sat2_in": float(np.asarray(net["sat2"])[inb].mean()),
@@ -400,6 +404,9 @@ def dg2(runs: Sequence[Mapping[str, Any]], out: Path, workers: int) -> None:
                      "out_mean_final": last["out_mean"], "out_alpha_lt1_final": last["out_alpha_lt1"],
                      "sens_in_mean_final": last["sens_in_mean"], "sat1_in_final": last["sat1_in"],
                      "sat2_in_final": last["sat2_in"], "sd_norm_max_final": last["sd_norm_max"],
+                     "mu_min_final": last["mu_min"], "out_mu_at_clamp_final": last["out_mu_at_clamp"],
+                     "out_mu_lt_1e4_final": last["out_mu_lt_1e4"],
+                     "first_export_tail_mu_at_clamp": next((x["update"] for x in mine if x["out_mu_at_clamp"] > 0.0), None),
                      "F_max": float(F.max()), "F_argmax_update": int(ups[int(np.argmax(F))]),
                      "e0_max": float(max(x["e0"] for x in mine))})
     write_rows(out / "dg2_runs.csv", summ)

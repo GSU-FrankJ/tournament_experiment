@@ -109,6 +109,7 @@ def test_constant_network_has_no_formation_and_no_sensitivity():
     assert s["in_range"] == 0.0 and s["F"] == 0.0 and s["slope_neg"] == 0.0 and s["slope_pos"] == 0.0
     assert s["sens_in_max"] == 0.0 and s["sat1_in"] == 0.0 and s["sat2_in"] == 0.0
     assert s["e0"] == pytest.approx(50.0)
+    assert s["out_mu_at_clamp"] == 0.0 and s["mu_min"] == pytest.approx(0.5)
 
 
 def test_saturated_second_layer_is_counted_and_kills_the_sensitivity():
@@ -234,3 +235,13 @@ def test_replay_bins_summary_coverage_and_pooled_share():
     assert len(out) == nb and sum(x["starts_share"] for x in out) == pytest.approx(1.0)
     assert out[10]["starts_share"] == pytest.approx(0.5) and out[25]["grad_share_pooled"] == pytest.approx(0.75)
     assert out[10]["bin_centre"] == pytest.approx(-400 + 10 * 20 + 10) and out[20]["in_band"] and not out[10]["in_band"]
+
+
+def test_tail_nodes_at_the_mean_clamp_are_counted():
+    arr = _zeros_arrays()
+    arr["actor.out.bias"][0] = -20.0                       # sigmoid(-20) = 2e-9 < 1e-6: mu is clamped at 1e-6 everywhere
+    grid = dg.stage_grid(SPEC, 3)
+    net = dg.network_on_grid(arr, SPEC, grid, 3, with_critic=False)
+    s = dg.export_summary(grid, net, SPEC.q)
+    assert s["mu_min"] == pytest.approx(1e-6) and s["out_mu_at_clamp"] == 1.0 and s["out_mu_lt_1e4"] == 1.0
+    assert s["sens_in_max"] == 0.0                         # no gradient through the clamp
