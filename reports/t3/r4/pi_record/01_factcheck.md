@@ -147,4 +147,126 @@ No result number was wrong. Everything below was corrected in the templates (`re
 
 # Round 2
 
-(see below, added after the follow-up check of the corrected passages and the handoff)
+Same agent, resumed, at commit `dddfdd6e` (the corrections of round 1) with the new `handoff.md` read from disk. Its report verbatim:
+
+---
+
+## Round 2 ledger
+
+I checked commit `dddfdd6e`, with `handoff.md` read from disk (untracked). Numbers were recomputed from raw run files, not from the generated CSVs. The tree is unchanged by me: `git diff HEAD` is empty for `reports/`, `docs/`, `protocols/` and `tools/`, and the only untracked file outside `results/` is `handoff.md`.
+
+### (a) Round-1 corrections E1-E12 and O1-O5, as they now stand in the regenerated files
+
+| Item | Where | Verdict |
+|---|---|---|
+| E1 | `02_checks` §5: launcher test in shard 9, `test_registry_canonicalization` in shard 10 | FIXED. Matches `shard9.txt` and `shard10.txt`. |
+| E2 | `02_checks` §1 test row | FIXED. "six more cases" matches the 10 parametrised cases. |
+| E3 | `02_checks` header | FIXED. At HEAD the command gives 18 A and 1 M (`protocols/LOCK`, +11 lines), as the text now says. |
+| E4 | `02_checks` §4 | FIXED. `results/t3_r4/repro_stdout.txt` is named with its path. |
+| E5 | `03` §7, `summary` | FIXED, and the new wording is correct. 47,810.85 s of summed `total_wall_sec` is 13.28 h. Summed `phase_timing` process CPU plus attempt-1 CPU is 12.097 h. The wave took 22 min 56 s. |
+| E6 | `03` §7 | FIXED, and the values are correct. Launch record start (8.64, 11.24, 12.77) shows as 8.6, 11.2, 12.8. End (14.76, 33.25, 35.32) shows as 14.8, 33.3, 35.3. |
+| E7 | `03` §4 | FIXED, but one number is off (see Corrections 1). |
+| E8 | `03` §6 | FIXED. 0.0010748 / 0.001 = 1.0748, so "7.5 %" is right. |
+| E9 | `01_lock` §1, `02_checks` test row | FIXED. The only short hash in either lock file is `b565f0e8`. The test excludes 40-hex strings only, so "full commit hash" is accurate. |
+| E10 | `01_lock` settings table and `tables/lock_settings.md` | FIXED. "The record itself has T = 2, the run configs set `game.T` = 3" matches the lock JSON (`records.*.T` = 2, `records.*.game.T` = 2) and the run configs (`record.game.T` = 3). |
+| E11 | README row, STATE, `summary` "For the PI" | NOT CHANGED (see Corrections 2). `docs/STATE.md` is not in the diff, and the README row is unchanged. |
+| E12 | README tests row | FIXED. `tests/test_t3r4_*.py` is now listed. |
+| O1 | `03` §6 | FIXED, and correct. The stretch nodes are d = -22, -20, -18, -16, -14, and the final-tier maximum of the stage-2 gain is at d = -14. The development-tier peak is at d = -12, one node outside the stretch. |
+| O2 | `03` §9, `summary` limits bullet | FIXED. |
+| O3 | `03` §6 | FIXED, numbers correct (see Overstated 1). `last16.csv` covers updates 1225-1600 (16 exports). The maximum `rmse_pos` is 0.050523 and the maximum `eta_3` is 0.004193, both at update 1300. The final export has `eta_3` 0.00093 and `rmse_pos` 0.0214; `last16_summary.csv` has `n_above_limit` = 1 for `rmse_pos`. |
+| O4 | `03` §1 and §5 | FIXED, numbers correct. `launch_checks.json` has `z_flags` = 1 in q50 s80536, `z_cells` = 5, and `starts_ok` for all 80. Non-fired runs with Delta >= 0.00475 are exactly three: 0.004897 (q60 s80528), 0.004825 (q50 s80510), 0.004758 (q50 s80520), all passing. The next is 0.004583, which is 91.7 % of the limit. |
+| O5 | `03` §8 new bullet | Correct. My round-1 O5 was wrong (see below). |
+
+**§5 sentence on the attempt-1 re-evaluation.** My scratch results, by final-tier `eta_3` of attempt-1 `u01600`, in trigger-table order, are:
+
+| Seed | `eta_3` |
+|---|---|
+| 80501 | 0.006397 |
+| 80515 | 0.007454 |
+| 80526 | 0.005173 |
+| 80532 | 0.009369 |
+| 80535 | 0.006715 |
+
+These round to the quoted 0.0064, 0.0075, 0.0052, 0.0094 and 0.0067, the order matches the trigger table, and all five are above 0.005.
+
+**§8 first-attempt bullet.** Failures are 40 - 35 = 5 at q = 50, 1 at q = 60, 6 in all. 6 <= 6 meets the total limit exactly, and 5 > 4 exceeds the per-q limit. The bullet is correct.
+
+**My round-1 O5 was wrong.** I wrote that the first-attempt count would "still have met the rule at exactly the boundary". That ignored the per-q limit of 4. The coordinator's disposition is right, and I withdraw that sentence.
+
+### (b) `handoff.md`, claim by claim
+
+All of the following are CONFIRMED against the data and the reports.
+
+- **Verdict and counts:** 79/80; per-q 40/40 and 39/40; intervals; limits 6 and 4.
+- **Operating characteristic:** 0.982 / 0.865 / 0.271 / 0.030 at f = 0.03 / 0.05 / 0.10 / 0.15.
+- **Lock and code:** the empty frozen-code diff against the T3-R3 pre-registration commit `b565f0e8`; 33 listed files; commits `98355d8a` and `141b5189` pushed before the launch (reflog 07:10:33, launch 07:11:46); the guard list.
+- **Trigger:** 5/80 (6.25 %, [0.021, 0.140]), all at q = 50, 5/5 second attempts pass. First attempt 74/80; the 6 first-attempt failures are 5 at q = 50 and 1 at q = 60. 7/120 over development plus confirmation.
+- **Comparisons:** 118/120 (0.983, [0.941, 0.998]); `bw` 36/34/37 of 40, pooled 107/120 (0.892, [0.822, 0.941]).
+- **Cost:** 3,800 / 5,400 (1.421); mean 3,900 (1.026); 597.6 s per run; 801 s fired against 584 s unfired (+37 %, wall ratio 1.37); 22.9 min with 40 concurrent runs; 47,810 s summed wall.
+- **Failure paragraph:**
+  - run and mechanism: s80502, 5 nodes, d in [-22, -14];
+  - values: `Gmax_full` 0.0586 at d = -14, S3 0.536, Delta 0.000809, `rmse_pos` 0.0505 at one of the last 16 exports, final 0.0214;
+  - T3-R3 comparison: the second failure of its kind after T3-R3 s70511, both at q = 60.
+- **Margins:** `eta_3` 0.004897 = 98 %; `rmse_pos` 0.0454 = 91 %; 6 runs above 80 %; three non-fired runs within 5 % of the limit.
+- **Tools and checks:** C-REPRO 162 npz; 109 tests; 27 findings; 1,928 passed, 6 skipped, 2 xfailed, 2 failed; the known failure explanation.
+- **Remote state:** main is still `15e5b71a` and the remote tag list is unchanged (20 lines), so "no tags, main untouched" holds at this moment. "No pull request" is NOT DATA-CHECKABLE.
+- **Format:**
+  - exactly 5 GitHub links, all on one line at the full hash `dddfdd6ee26d...`;
+  - every link target exists at that commit;
+  - no e-mail and no personal name; the URLs carry only the account handle, as in the T3-R2 handoff;
+  - no English sentence (a regex scan found no run of 3 or more English words outside code spans and URLs; only identifiers such as `bwA`, G-A, C-REPRO, SHA-256 and link texts remain).
+
+### (c) STATE and README at HEAD
+
+- `docs/STATE.md` and the README T3-R4 row are byte-identical to the versions I fact-checked in round 1. Still untrue at `dddfdd6e`:
+  - "P0-P3 done" and "Done: ... P3: ... `handoff.md` ... and the push of `t3-r4`": `handoff.md` is untracked and `origin/t3-r4` is still `141b5189`.
+  - The README "start here" cell lists `handoff.md` in the same way.
+  - `summary.md` "`handoff.md` is the Chinese note for the coworker" is true only once it is committed.
+- Everything else in STATE and the README (numbers, hashes, 27 findings, 109 tests, 1,928 passed) matches the data.
+- `141b5189` is an ancestor of HEAD, so the planned push is a fast-forward (3 commits ahead).
+
+## Corrections (exact old/new text)
+
+1. **E7 residue, `03_confirmation.md` §4. Trivial.**
+   - Old: "the development-final differences reach at most 47 %, 49 % and 24.1 % of theirs"
+   - New: "... at most 47.1 %, 49 % and 24.1 % of theirs". The `tail_mean` maximum is 0.4709 of its limit (q60 s80529), so "47 %" is 0.09 percentage points too low. This inherited number came from my own round-1 suggestion.
+2. **E11 residue, `docs/STATE.md` top section and README T3-R4 row. Premature, until the final commit and push.**
+   - Old: "P3: ... `handoff.md` (Chinese), the independent fact-check (`pi_record/01_factcheck.md`) and the push of `t3-r4` (fast-forward; ...)", and the README "P0-P3 done".
+   - Needed: after `handoff.md` and the round-2 ledger are committed and pushed, these hold. If STATE is committed before the push, write "pushed" only once `git ls-remote origin t3-r4` shows the new head. Also state the second fact-check round, since the ledger's "Round 2" section is still a placeholder at `dddfdd6e`.
+3. **`handoff.md` §4, last bullet. Understated.**
+   - Old: "没有发现错误的结果数字，只有措辞和归属上的更正，已全部处理"
+   - New: "没有发现错误的结果数字；更正涉及措辞、归属、一处测试用例数目（'八个'应为'六个'）以及成本/负载的两处表述（'CPU-hours'实为墙钟之和、'约 50'的负载无记录）"
+   - Reason: E2 was a wrong count and E5/E6 were a mislabelled unit and an unsupported figure, so "only wording and attribution" is too small. Also, "已全部处理" is not yet true for E11 until the final commit and push.
+4. **`handoff.md` §2, failure paragraph. Ambiguous wording, inherited from the English summary.**
+   - Old: "它处在第 3 阶段的夹紧区间里（S3 = 0.536）"
+   - New: "该 run 处在第 3 阶段的夹紧区间里（S3 = 0.536）"
+   - Reason: the clamp regime is a property of the run (stage 3, S3), not of the stage-2 stretch at d in [-22, -14].
+5. **`handoff.md` §2, trigger paragraph. Possible misreading.**
+   - Old: "在最终层上重新评估"
+   - New: "在最终验证层级（final tier）上重新评估"
+   - Reason: "最终层" can read as the final network layer.
+
+## Overstated or loosely supported
+
+1. **`03` §6 (O3 text): "The same run is not quiet in its last iterates".** The last-16 table was computed only for the failing run (`last16.csv` has one run). Nothing shows this run is noisier than passing runs, so "not quiet" implies an untested comparison. The figures are right; "reaches 0.0505 and 0.0042" is enough. Both maxima fall at the same export (update 1300).
+2. **`handoff.md` §3 and `summary.md` limits bullet: "重启为什么有效的机制没有被确立" / "the mechanism by which the restart helps".** This presupposes an effect, which the same paragraph says cannot be measured without a control arm. "Whether and how the restart helps" is accurate.
+3. **`03` §1 versus §7 load figures.** §1 quotes the `launch_machine.txt` snapshot (8.9 / 11.5 / 12.9, 21 s before launch). §7 quotes the launch record (8.6 / 11.2 / 12.8 "at the start"). Both are correctly sourced, but a reader will see two different "start" loads. One clause naming the sources would remove the confusion.
+4. **"Recorded process CPU time" (12.1 h).** This sums the three training phases plus attempt 1. It excludes the continuation-table builds and process start-up, about 40 s per run, since a fired run's wall time of 804.8 s exceeds its summed phases of 764 s. "12.1 hours of recorded training-phase CPU time" is exact.
+5. **`03` §4 "wide margin".** This still stands. It is one block of 80 runs, and the new §8 bullet shows the first-attempt counts would not meet the per-q limit.
+
+---
+
+## Dispositions of round 2 (mine)
+
+| item | disposition |
+|---|---|
+| (a) E1-E10, E12, O1-O4 | confirmed fixed by the checker; nothing to do. The checker withdrew its round-1 O5 (the per-q limit of 4 makes the first-attempt count miss the rule at q = 50). |
+| Correction 1 | `03_confirmation.md` section 4 now says 'at most 47.1 %, 49 % and 24.1 %'. |
+| Correction 2 (E11 residue) | The README row, the STATE section and `summary.md` were true only after the final commit and the push; both were made true (the commit that adds `handoff.md` and this round-2 section is pushed last, fast-forward from `141b5189`), and STATE now names the two fact-check rounds. |
+| Correction 3 | The last bullet of section 4 of `handoff.md` now lists what was corrected (wording, attribution, one test count, one unit, one unsupported load figure). |
+| Corrections 4, 5 | '该 run 处在……夹紧区间里'; '最终验证层级（final tier）'. |
+| Overstated 1 | The sentence 'not quiet in its last iterates' is replaced by the figures and a note that the last-16 table was computed for the failing run only, with no comparison with the passing runs. |
+| Overstated 2 | `summary.md` and `handoff.md` now say 'whether and how the restart helps beyond a second draw is not established' ('重启是否以及如何起作用，没有被确立'). |
+| Overstated 3 | `03_confirmation.md` section 7 names the sources of the two load pairs (the launch record at its start and end; `launch_machine.txt` 21 s before the launch). |
+| Overstated 4 | '12.1 hours of recorded training-phase CPU time'. |
+| Overstated 5 | unchanged: the text of section 4 states the margin against the limits and section 8 and 9 state the caveats (one block, first-attempt counts). |
