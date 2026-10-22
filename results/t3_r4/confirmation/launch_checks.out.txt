@@ -1,0 +1,94 @@
+{
+ "n_runs": 80,
+ "verdicts": {
+  "exit_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "files_complete": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "manifest_commit_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "clean_tree": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "global_rng_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_equals_plan": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_production_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "trigger_consistent": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "budget_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "lr_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "refresh_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "exports_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "checks_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "retry_budget_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "init_equals_plan": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "replay_ok": {
+   "pass": 80,
+   "fail": 0,
+   "not_evaluated": 0
+  }
+ },
+ "fired": 5,
+ "would_fire": 5,
+ "errors": [],
+ "infra_events_present": true,
+ "infra_events": {
+  "schema": "t3r4_infra_events/1",
+  "events": [],
+  "stopped_without_verdict": []
+ }
+}

@@ -1,0 +1,68 @@
+{
+ "counts": {
+  "n_q50": 40,
+  "pass_q50": 40,
+  "fail_q50": 0,
+  "ci_lo_q50": 0.9119026971211976,
+  "ci_hi_q50": 1.0,
+  "n_q60": 40,
+  "pass_q60": 39,
+  "fail_q60": 1,
+  "ci_lo_q60": 0.8684141415172343,
+  "ci_hi_q60": 0.9993672550679505,
+  "n_total": 80,
+  "pass_total": 79,
+  "fail_total": 1,
+  "ci_lo_total": 0.9323122155360776,
+  "ci_hi_total": 0.9996835774723675
+ },
+ "verdict": {
+  "verdict": "pass",
+  "reason": "at most 6 of the 80 runs fail and at most 4 of the 40 at each q",
+  "total_condition": true,
+  "q50_condition": true,
+  "q60_condition": true,
+  "fail_total": 1,
+  "fail_q50": 0,
+  "fail_q60": 1,
+  "rule": {
+   "max_failures_total": 6,
+   "max_failures_per_q": 4
+  },
+  "stopped_without_verdict": []
+ },
+ "trigger": {
+  "fired": 5,
+  "n": 80,
+  "rate": 0.0625,
+  "ci_lo": 0.02060307230201024,
+  "ci_hi": 0.13985707529763905,
+  "runs": [
+   "t3r4_q50_s80501_bwA",
+   "t3r4_q50_s80515_bwA",
+   "t3r4_q50_s80526_bwA",
+   "t3r4_q50_s80532_bwA",
+   "t3r4_q50_s80535_bwA"
+  ],
+  "first_attempt_pass": 74,
+  "first_attempt_rate": 0.925,
+  "fired_runs_that_pass": 5
+ },
+ "stopped_without_verdict": [],
+ "infra_events": [],
+ "n_rows": 80,
+ "failures": [
+  {
+   "run": "t3r4_q60_s80502_bwA",
+   "failing_gates": "gate_G_F;gate_G_N",
+   "class_suggested": "K"
+  }
+ ],
+ "reporting_complete": true,
+ "reporting_errors": [],
+ "checks": {
+  "checks_ok": true,
+  "n_runs": 80,
+  "fired": 5
+ }
+}

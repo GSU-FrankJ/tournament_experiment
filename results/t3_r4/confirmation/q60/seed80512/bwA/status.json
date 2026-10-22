@@ -1,0 +1,21 @@
+{
+ "run": "t3r4_q60_s80512_bwA",
+ "arm": "bw",
+ "q": 60,
+ "seed": 80512,
+ "state": "done",
+ "pid": 1237417,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-r4-lock-confirm/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/t3-r4-lock-confirm/results/t3_r4/confirmation/q60/seed80512/bwA/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/t3-r4-lock-confirm/results/t3_r4/confirmation/q60/seed80512/bwA",
+ "start_time": "2026-10-22 07:21:22",
+ "git": {
+  "commit": "141b51898d9574f0f61cc268b7e7c98b44a42690",
+  "short": "141b518",
+  "dirty": false
+ },
+ "end_time": "2026-10-22 07:31:17",
+ "exit_code": 0,
+ "final_global_update": 3800,
+ "total_wall_sec": 595.2880605219398,
+ "outcome": "not_evaluated_T3"
+}
