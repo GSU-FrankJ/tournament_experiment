@@ -1,0 +1,10 @@
+........................................................................ [ 70%]
+..............................                                           [100%]
+============================= slowest 5 durations ==============================
+39.54s call     tests/test_t3r2_analysis.py::test_the_diagnosis_and_the_stretch_table_run_on_a_reduced_run
+29.31s call     tests/test_ms_analysis.py::test_cli_end_to_end_complete_world_writes_every_output
+26.97s setup    tests/test_ms_analysis.py::test_reader_on_genuine_runner_output
+26.94s call     tests/test_ms_analysis.py::test_the_vs_MS_rule_and_secondary_figures_have_no_row_for_the_legacy_arms
+21.12s call     tests/test_ms_analysis.py::test_cli_before_any_ms_run_exists_reports_every_run_as_missing
+102 passed in 221.08s (0:03:41)
+exit=0

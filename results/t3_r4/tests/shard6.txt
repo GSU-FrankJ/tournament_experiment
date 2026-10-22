@@ -1,0 +1,10 @@
+........................................................................ [ 54%]
+............................................................             [100%]
+============================= slowest 5 durations ==============================
+40.22s setup    tests/test_t3r2_audit.py::test_snapshot_identity_a2_on_a_reduced_run
+33.20s call     tests/test_t3r2_audit.py::test_continuation_tables_a3_on_a_reduced_run
+31.22s call     tests/test_v2_r2c.py::test_defaults_equal_the_v20_lock_commit_on_a_reduced_locked_run
+20.00s call     tests/test_v2_r2c.py::test_start_weights_absent_equals_the_c7_reference
+17.04s call     tests/test_v2_r2c.py::test_peak_focused_from_update_1_equals_the_r2b_implementation
+132 passed in 229.09s (0:03:49)
+exit=0

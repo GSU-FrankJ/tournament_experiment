@@ -1,0 +1,11 @@
+........................................................................ [ 38%]
+........................................................................ [ 77%]
+...................xx.....................                               [100%]
+============================= slowest 5 durations ==============================
+147.00s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[60]
+125.58s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[50]
+73.93s setup    tests/test_t3r4_repro.py::test_an_identical_rerun_is_ok_and_the_npz_count_is_pinned
+39.52s call     tests/test_v2_refine_continuation.py::test_ii_a_self_convergence[60]
+37.30s call     tests/test_t3r4_repro.py::test_every_perturbation_of_a_rerun_is_caught_and_the_harmless_ones_are_not
+184 passed, 2 xfailed in 690.08s (0:11:30)
+exit=0

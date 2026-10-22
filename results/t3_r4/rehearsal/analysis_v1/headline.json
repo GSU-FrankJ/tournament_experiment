@@ -1,0 +1,65 @@
+{
+ "counts": {
+  "n_q50": 40,
+  "pass_q50": 40,
+  "fail_q50": 0,
+  "ci_lo_q50": 0.9119026971211976,
+  "ci_hi_q50": 1.0,
+  "n_q60": 40,
+  "pass_q60": 38,
+  "fail_q60": 2,
+  "ci_lo_q60": 0.8308031360405824,
+  "ci_hi_q60": 0.9938863534006491,
+  "n_total": 80,
+  "pass_total": 78,
+  "fail_total": 2,
+  "ci_lo_total": 0.9125928440694078,
+  "ci_hi_total": 0.9969579138351904
+ },
+ "verdict": {
+  "verdict": "pass",
+  "reason": "at most 6 of the 80 runs fail and at most 4 of the 40 at each q",
+  "total_condition": true,
+  "q50_condition": true,
+  "q60_condition": true,
+  "fail_total": 2,
+  "fail_q50": 0,
+  "fail_q60": 2,
+  "rule": {
+   "max_failures_total": 6,
+   "max_failures_per_q": 4
+  },
+  "stopped_without_verdict": []
+ },
+ "trigger": {
+  "fired": 4,
+  "n": 80,
+  "rate": 0.05,
+  "ci_lo": 0.013789393976461813,
+  "ci_hi": 0.12309873644315295,
+  "runs": [
+   "t3r4_q50_s80508_bwA",
+   "t3r4_q50_s80516_bwA",
+   "t3r4_q50_s80528_bwA",
+   "t3r4_q50_s80536_bwA"
+  ],
+  "first_attempt_pass": 74,
+  "first_attempt_rate": 0.925,
+  "fired_runs_that_pass": 4
+ },
+ "failures": [
+  {
+   "run": "t3r4_q60_s80511_bwA",
+   "failing_gates": "gate_G_A;gate_G_F",
+   "class_suggested": "K"
+  },
+  {
+   "run": "t3r4_q60_s80531_bwA",
+   "failing_gates": "gate_G_A;gate_G_F",
+   "class_suggested": "K"
+  }
+ ],
+ "stopped_without_verdict": [],
+ "infra_events": [],
+ "n_rows": 80
+}

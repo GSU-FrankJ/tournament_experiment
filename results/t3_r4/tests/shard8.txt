@@ -1,0 +1,10 @@
+........................................................................ [ 55%]
+.........................................................                [100%]
+============================= slowest 5 durations ==============================
+115.26s setup    tests/test_t3r3_retry.py::test_a_fired_run_keeps_attempt1_equal_to_bw_and_freezes_attempt2
+48.05s setup    tests/test_t3_analysis.py::test_coverage_cost_and_curves_on_the_reduced_runs
+21.12s call     tests/test_v2_refine.py::test_defaults_bit_identical_to_c7
+21.02s setup    tests/test_ms_cms1.py::test_ms_base2400_equals_parents_a_through_the_first_window_update
+17.07s call     tests/test_t3_analysis.py::test_run_analysis_end_to_end_on_a_synthetic_table
+129 passed in 347.17s (0:05:47)
+exit=0

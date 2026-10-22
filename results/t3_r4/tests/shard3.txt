@@ -1,0 +1,22 @@
+......................................sss............................... [ 46%]
+........................................................................ [ 92%]
+............                                                             [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r4_actor.py::test_the_forwards_of_t1_relu_and_t10_are_unchanged_bit_for_bit[0.3-t1]
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1209961) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 5 durations ==============================
+102.10s call     tests/test_ms_r4_actor.py::test_without_the_new_variant_and_keys_a_run_equals_the_base_commit[nl_st_s16]
+101.07s call     tests/test_ms_r4_actor.py::test_without_the_new_variant_and_keys_a_run_equals_the_base_commit[relu_st_s16]
+99.34s call     tests/test_ms_r4_actor.py::test_without_the_new_variant_and_keys_a_run_equals_the_base_commit[t1_st_s16]
+97.17s call     tests/test_ms_r4_actor.py::test_without_the_new_variant_and_keys_a_run_equals_the_base_commit[fb_rx]
+48.74s setup    tests/test_ms_r4_actor.py::test_exports_manifest_config_and_state_carry_the_variant
+153 passed, 3 skipped, 3 warnings in 591.98s (0:09:51)
+exit=0

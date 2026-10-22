@@ -1,0 +1,17 @@
+........................................................................ [ 36%]
+........................................................................ [ 72%]
+...................................................s...                  [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r2_runner.py::test_without_the_new_keys_a_legacy_run_equals_71c58904
+  /usr/lib/python3.12/tarfile.py:2301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 5 durations ==============================
+111.22s call     tests/test_ms_r2_runner.py::test_without_the_new_keys_a_rule_run_equals_71c58904
+101.70s call     tests/test_ms_r2_runner.py::test_without_the_new_keys_a_legacy_run_equals_71c58904
+75.60s call     tests/test_ms_r2_runner.py::test_c_nl_scale_runs_equal_the_s1_run_through_the_first_ramp_update
+26.99s call     tests/test_ms_r2_runner.py::test_c_ms4_fixed_budget_stratified_equals_the_rule_mode_global_blocks_through_the_cap
+25.85s call     tests/test_ms_r2_runner.py::test_the_recorded_scale_column_and_the_s1_arms_never_set_a_scale
+198 passed, 1 skipped, 1 warning in 542.49s (0:09:02)
+exit=0

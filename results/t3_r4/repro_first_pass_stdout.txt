@@ -1,0 +1,65 @@
+[
+ {
+  "run": "t3r3_q50_s70508_bwA",
+  "q": 50,
+  "seed": 70508,
+  "fired_in_original": true,
+  "orig": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bwA",
+  "new": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-r4-lock-confirm/results/t3_r4/repro/q50/seed70508/bwA",
+  "returncode": 0,
+  "commit": "5af02fd781a9131be481fbaad4e381daf05b5cd8",
+  "tree_clean_outside_results": false,
+  "compare_runs_returncode": 0,
+  "n_npz": 162,
+  "file_sets_equal": true,
+  "file_set_difference": [],
+  "fired_in_rerun": true,
+  "retry_state_matches": true,
+  "json_diffs": {
+   "gates.json": [],
+   "rule_log.json": [],
+   "drift_test.json": [],
+   "ms_run_summary.json": []
+  },
+  "attempt1": {
+   "n_exports": 64,
+   "exports_same_names": true,
+   "exports_identical": true,
+   "binmaps": true,
+   "updates_csv": true,
+   "checks_csv": true,
+   "state": true,
+   "record_json_diff": [],
+   "ok": true
+  },
+  "retry_json_diff": [],
+  "ok": true,
+  "wall_sec": 477.04713353002444
+ },
+ {
+  "run": "t3r3_q60_s70501_bwA",
+  "q": 60,
+  "seed": 70501,
+  "fired_in_original": false,
+  "orig": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bwA",
+  "new": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-r4-lock-confirm/results/t3_r4/repro/q60/seed70501/bwA",
+  "returncode": 0,
+  "commit": "5af02fd781a9131be481fbaad4e381daf05b5cd8",
+  "tree_clean_outside_results": false,
+  "compare_runs_returncode": 0,
+  "n_npz": 162,
+  "file_sets_equal": true,
+  "file_set_difference": [],
+  "fired_in_rerun": false,
+  "retry_state_matches": true,
+  "json_diffs": {
+   "gates.json": [],
+   "rule_log.json": [],
+   "drift_test.json": [],
+   "ms_run_summary.json": []
+  },
+  "ok": true,
+  "wall_sec": 366.43427029205486
+ }
+]
+exit=0

@@ -1,0 +1,11 @@
+........................................................................ [ 39%]
+........................................................................ [ 79%]
+......................................                                   [100%]
+============================= slowest 5 durations ==============================
+101.38s setup    tests/test_ms_r2_launch_checks.py::test_a_genuine_wave_passes_every_check
+86.43s setup    tests/test_ms_r2_analysis.py::test_extraction_of_the_tiny_wave
+67.45s call     tests/test_ms_runner.py::test_t3_pipeline_three_phases_nested_tables_and_the_rule[False]
+67.03s call     tests/test_ms_runner.py::test_t3_pipeline_three_phases_nested_tables_and_the_rule[True]
+37.85s call     tests/test_ms_r4_focus.py::test_t3_smoke_with_the_within_stratum_focus[residual_gain]
+182 passed in 589.94s (0:09:49)
+exit=0
