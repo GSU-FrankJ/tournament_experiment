@@ -60,3 +60,14 @@
  "reason": "PI reply \"proceed P2\" at gate G1 of round T3-R2, after the audit found no implementation error (reports/t3/r2/01_audit.md) and before any confirmation seed: the settings of T3-R1's bw arm unchanged, confirmation seeds 60501-60520 at q = 50 and 60, pass iff at least 36 of 40 and at least 17 of 20 per q",
  "rule": "nothing in protocols/ changes after this lock without a new version number and a stated reason"
 }
+{
+ "protocol": "protocols/v2_T3_locked_v1_1.json",
+ "protocol_version": "T3-1.1",
+ "lock_commit": "98355d8ae7351f7b1759e46db6adb1932f089a1a",
+ "protocol_sha256": "97bb9146c379c957356706f463361c2ff48c2724fac31b9114e7aba5a2a7e38e",
+ "protocol_md_sha256": "90a1047b745174209a0d05c8826cce868b8506d89cb1c1fc3239104ef0063c47",
+ "entry_point": "run/run_ms_stagewise.py through tools/t3/t3r4_launch.py",
+ "date": "2026-10-22",
+ "reason": "PI decision at gate G2 of round T3-R3: lock `bwA` (the settings of T3-1.0 plus stage3_retry = {\"delta_gt\": 0.005, \"max_retries\": 1}), confirmation seeds 80501-80540 at q = 50 and 60, pass iff at most 6 of the 80 runs fail and at most 4 of the 40 runs fail at each q",
+ "rule": "nothing in protocols/ changes after this lock without a new version number and a stated reason"
+}
