@@ -110,6 +110,8 @@ def t_repro() -> str:
         rows.append({"run": d["run"], "trigger fired in the original": d["fired_in_original"], "re-run": rel(d["new"]), "original (T3-R3 untracked root)": rel(d["orig"]),
                      "code commit of the re-run": d["commit"][:8], "`compare_runs.py bw` exit code": d.get("compare_runs_returncode"),
                      "npz files compared": d.get("n_npz"), "same set of files": d.get("file_sets_equal"),
+                     "stage-2 and stage-3 end states (bitwise)": all(d.get("states_equal", {"x": False}).values()),
+                     "gates, rule log, drift test, summary, manifest, train history": "identical" if not any(d.get("json_diffs", {"x": ["?"]}).values()) else "DIFFERENT",
                      "`attempt1/` and `retry.json`": ("identical" if (a1 and a1["ok"] and not d["retry_json_diff"]) else "DIFFERENT") if d["fired_in_original"] else "-",
                      "all identical": d["ok"], "wall time (s)": d.get("wall_sec")})
     return md(rows)
