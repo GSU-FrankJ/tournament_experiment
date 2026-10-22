@@ -275,19 +275,28 @@ def handle_infra_failures(jobs: Sequence[L1.Job], results: Sequence[Dict[str, An
 
 
 # ---------------------------------------------------------------------------------- CLI
+def require_absolute(parser: argparse.ArgumentParser, flag: str, value: str) -> Path:
+    """The path given for ``flag``, which must be absolute (a relative ``--root`` made ``config_equals_plan`` fail for all 122 runs of the
+    development wave: the plan hashes the output directory relative to the root's parent, which a relative root cannot do)."""
+    path = Path(value)
+    if not path.is_absolute():
+        parser.error(f"{flag} must be an absolute path, got {value!r}")
+    return path
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """CLI entry (see the module docstring)."""
     p = argparse.ArgumentParser(description="T3-R3 development-wave launcher", allow_abbrev=False)
     p.add_argument("--params", default=str(tc.PARAMS_PATH), help="the pre-registered bw parameters (JSON)")
     p.add_argument("--workers", type=int, default=40, help=f"at most {MAX_WORKERS}")
-    p.add_argument("--root", default=str(DEFAULT_ROOT), help="results root (default results/t3_r3)")
+    p.add_argument("--root", default=str(DEFAULT_ROOT), help="results root, an absolute path (default <repo>/results/t3_r3)")
     p.add_argument("--code-commit", default=None, help="SHA of the code commit (recorded)")
     p.add_argument("--plan-csv", default=None, help="write the run plan with the config hashes and init digests and exit")
     p.add_argument("--dry-run", action="store_true", help="validate and write the configs + a dry-run record; train nothing")
     a = p.parse_args(argv)
     if not 1 <= a.workers <= MAX_WORKERS:
         p.error(f"--workers must be in 1..{MAX_WORKERS}")
-    root = Path(a.root).resolve()
+    root = require_absolute(p, "--root", a.root)
     try:
         check_params_file(Path(a.params))
         params = tc.load_bw_params(Path(a.params))

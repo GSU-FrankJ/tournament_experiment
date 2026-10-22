@@ -455,7 +455,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--dg2-runs", default=str(ROOT / "results" / "t3_r3" / "diag" / "dg2_runs.csv"))
     ap.add_argument("--workers", type=int, default=8)
     a = ap.parse_args(argv)
-    head = analyse(Path(a.root), Path(a.dev_eval), Path(a.diag_eval) if a.diag_eval else None, Path(a.out_dir),
+    root = lt.require_absolute(ap, "--root", a.root)
+    head = analyse(root, Path(a.dev_eval), Path(a.diag_eval) if a.diag_eval else None, Path(a.out_dir),
                    Path(a.checks) if a.checks else None, Path(a.ledger), a.workers, Path(a.dg2_runs))
     print(json.dumps({k: head[k] for k in ("counts", "targets", "selection")}, indent=1, default=str))
     if head["first_attempt"]["stop"]:

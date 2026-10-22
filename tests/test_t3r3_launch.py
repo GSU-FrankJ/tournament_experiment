@@ -158,3 +158,29 @@ def test_legacy_jobs_are_the_two_t3r2_runs():
     js = lg.jobs(Path("/r2"), Path("/out"))
     assert [(j["q"], j["seed"]) for j in js] == [(50, 60502), (60, 60518)]
     assert js[0]["orig"] == Path("/r2/confirmation/q50/seed60502/bw") and js[1]["new"] == Path("/out/q60/seed60518/bw")
+
+
+# ---------------------------------------------------------------------------------- PI reply 28c: absolute roots, stop on failure
+@pytest.mark.parametrize("tool", ["launch", "eval", "checks", "analysis"])
+def test_a_tool_with_a_root_refuses_a_relative_one(tool, tmp_path):
+    import t3r3_analysis as an
+    import t3r3_checks as ck
+    import t3r3_eval as ev
+    argv = {"launch": (lt.main, ["--root", "results/t3_r3", "--dry-run"]),
+            "eval": (ev.main, ["--root", "results/t3_r3", "--which", "dev", "--out-dir", str(tmp_path)]),
+            "checks": (ck.main, ["--root", "results/t3_r3", "--plan", "p.csv", "--commit", "x", "--out", str(tmp_path / "o.json")]),
+            "analysis": (an.main, ["--root", "results/t3_r3", "--dev-eval", "e.csv", "--ledger", "l.json", "--out-dir", str(tmp_path)])}[tool]
+    with pytest.raises(SystemExit) as exc:
+        argv[0](argv[1])
+    assert exc.value.code == 2 and list(tmp_path.iterdir()) == []                 # refused before anything was read or written
+
+
+def test_the_post_launch_script_refuses_a_relative_root_and_stops_at_the_first_failure(tmp_path):
+    import subprocess
+    script = ROOT / "tools" / "t3" / "t3r3_post_launch.sh"
+    r = subprocess.run(["bash", str(script), "results/t3_r3", str(tmp_path)], capture_output=True, text=True, cwd=ROOT)
+    assert r.returncode == 2 and "absolute" in r.stderr
+    (tmp_path / "launch_commit.txt").write_text("abc\n")
+    (tmp_path / "dev").mkdir()
+    r = subprocess.run(["bash", str(script), str(tmp_path), str(tmp_path)], capture_output=True, text=True, cwd=ROOT, env={**os.environ, "T3R3_PY": "false"})
+    assert r.returncode != 0 and "=== checks" in r.stdout and "=== eval_dev" not in r.stdout          # the first failing step ends the chain

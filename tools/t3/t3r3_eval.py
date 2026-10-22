@@ -10,8 +10,9 @@ the re-run replaces the first row only if it has no error and both tiers valid; 
 Outputs in --out-dir: ``per_run.csv``, ``eval_reruns.json`` and ``arrays/{run}.npz`` (final-tier arrays, untracked).
 
 Usage:
-    python tools/t3/t3r3_eval.py --root results/t3_r3 --which dev --out-dir results/t3_r3/dev/eval --workers 40
-    python tools/t3/t3r3_eval.py --root results/t3_r3 --which diagnostic --out-dir results/t3_r3/diagnostic/eval
+    python tools/t3/t3r3_eval.py --root $PWD/results/t3_r3 --which dev --out-dir results/t3_r3/dev/eval --workers 40
+    python tools/t3/t3r3_eval.py --root $PWD/results/t3_r3 --which diagnostic --out-dir results/t3_r3/diagnostic/eval
+(--root must be absolute.)
 """
 
 from __future__ import annotations
@@ -75,7 +76,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a = ap.parse_args(argv)
     if not 1 <= a.workers <= 40:
         ap.error("--workers must be in 1..40")
-    res = evaluate_all(Path(a.root), a.which, Path(a.out_dir), a.workers)
+    root = lt.require_absolute(ap, "--root", a.root)
+    res = evaluate_all(root, a.which, Path(a.out_dir), a.workers)
     print(f"{len(res['rows'])} runs -> {Path(a.out_dir) / 'per_run.csv'}; {len(res['reruns'])} evaluation re-run(s)", flush=True)
     return 0
 

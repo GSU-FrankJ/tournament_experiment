@@ -22,7 +22,7 @@ Per run (all verdicts are booleans; a deterministic failure is a stop-and-report
                seed 60518 (binding for both arms); ``bwAB`` against ``bw`` is computed and reported, deciding nothing.
 
 Usage:
-    python tools/t3/t3r3_checks.py --root results/t3_r3 --plan reports/t3/r3/dev_plan.csv --commit <launch HEAD> \
+    python tools/t3/t3r3_checks.py --root $PWD/results/t3_r3 --plan reports/t3/r3/dev_plan.csv --commit <launch HEAD> \
         --t3r2-root <results/t3_r2> --out results/t3_r3/dev/launch_checks.json --workers 40
 """
 
@@ -250,8 +250,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a = ap.parse_args(argv)
     if not 1 <= a.workers <= 40:
         ap.error("--workers must be in 1..40")
+    root = lt.require_absolute(ap, "--root", a.root)
     lock = cl.check_lock(ROOT / "protocols", use_record=True)
-    res = run_checks(Path(a.root), Path(a.plan), a.commit, a.workers, lock, Path(a.t3r2_root))
+    res = run_checks(root, Path(a.plan), a.commit, a.workers, lock, Path(a.t3r2_root))
     with open(a.out, "w") as f:
         json.dump(res, f, indent=1, default=str)
     print(json.dumps({k: v for k, v in res.items() if k != "runs"}, indent=1, default=str))
