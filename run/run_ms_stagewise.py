@@ -57,6 +57,19 @@ MS-R4 optional config keys (absent == the MS-R3 behaviour, bit for bit):
   With ``focus_scope`` the bin maps ``ms_binmaps_stage{t}.npz`` additionally hold, per check, ``focus_within`` and
   ``probs_next`` (and with ``focus_map`` also ``gain`` and ``gain_bar``).
 
+T3-R3 optional config keys (absent == the MS-R4 behaviour, bit for bit):
+  stage3_retry         {delta_gt, max_retries = 1}, T = 3 only (candidate A, ``run/ms_retry.py``): after the stage-3 phase the
+                       development check of its last local update is read; if ``Delta`` > delta_gt, or ``Delta``, ``s`` or ``C``
+                       is not finite, or ``s`` <= 0, the artefacts of the attempt are moved to ``attempt1/``, the actor and
+                       critic are re-initialised in place from derived seeds and streams, the counters are reset and the stage-3
+                       phase is run once more; the second attempt is frozen whatever its check says. ``retry.json`` is written
+                       when the trigger fired; a run whose trigger did not fire writes exactly the files of the ``bw`` run.
+  terminal_clamp_likelihood
+                       "censored" (candidate B): in the phase of the terminal stage only, the log-prob of a draw that was clipped
+                       at the action clamp is the censored log-mass of ``utils.beta_tail`` (``collect_batch_v2(...,
+                       clamp_likelihood="censored")`` and ``CurriculumPPOv2.update(..., clamp_side=...)``), for every attempt.
+                       ``clamp_likelihood`` stays "density".
+
 Outputs in --out-dir: run_config.json, manifest.json, status.json, ms_checks_stage{t}.csv,
 ms_binmaps_stage{t}.npz, ms_updates.csv, rule_log.json, gates.json, state_end_stage{t}.pt,
 continuation_table_stage{t}.npz (t = T-1 ... 1), freeze_stage{t}_{final,development}.npz, weights/,
@@ -96,6 +109,7 @@ sys.path.insert(0, str(ROOT))
 from agents.ppo_curriculum import ACTOR_VARIANTS_R4, PPOConfig  # noqa: E402
 from agents.ppo_curriculum_v2 import CurriculumPPOv2  # noqa: E402
 from envs.curriculum_env import GameSpec, StartSampler  # noqa: E402
+from run import ms_retry  # noqa: E402
 from run.ms_rollout import collect_stage_batch  # noqa: E402
 from run.run_final_dp_br import Costs, dense_grid, make_policy_fns, write_json  # noqa: E402
 from run.run_final_dp_br_round3_dense import (  # noqa: E402
@@ -122,7 +136,8 @@ REQUIRED = ("schema", "base_commit", "pilot", "arm", "run", "q", "seed", "record
             "record_sha256", "protocol_gates", "threads_per_process", "pipeline", "start_weights", "rule",
             "clamp_likelihood", "full_state_at")
 OPTIONAL = ("derived", "conc_scale_schedule", "fixed_global_sampler", "noise_report", "actor_variant", "init_digest",
-            "focus_scope", "focus_map")
+            "focus_scope", "focus_map", "stage3_retry", "terminal_clamp_likelihood")
+TERMINAL_CLAMP_LIKELIHOODS = ("censored",)
 CONC_SCHEDULE_KEYS = ("stage", "local_first", "local_last", "scale_first", "scale_last")
 CHECK_NOISE = ("conc_scale", "sigma_0", "e_sigma_0", "g2_0", "smoothing", "remainder", "gap", "R0")
 START_SCHEMES = ("bin_balanced", "stratified_priority")
@@ -252,6 +267,13 @@ def validate_config(cfg: Dict[str, Any]) -> None:
             raise ConfigError("focus_map needs focus_scope")
         if cfg["focus_map"] not in FOCUS_MAPS:
             raise ConfigError(f"focus_map, if present, must be one of {FOCUS_MAPS}")
+    # ---- T3-R3 optional keys (absent == the MS-R4 behaviour)
+    if "stage3_retry" in cfg:
+        why = ms_retry.validate(cfg["stage3_retry"], T)
+        if why:
+            raise ConfigError(why)
+    if "terminal_clamp_likelihood" in cfg and cfg["terminal_clamp_likelihood"] not in TERMINAL_CLAMP_LIKELIHOODS:
+        raise ConfigError(f"terminal_clamp_likelihood, if present, must be one of {TERMINAL_CLAMP_LIKELIHOODS}")
     # ---- start weights
     sw = cfg["start_weights"]
     if not isinstance(sw, dict) or sw.get("scheme") not in START_SCHEMES:
@@ -438,6 +460,9 @@ class MSRun:
         self.focus_scope: Optional[str] = cfg.get("focus_scope")     # MS-R4; None == the MS-R3 sampler
         self.focus_map: Optional[str] = cfg.get("focus_map")
         self.noise_report = bool(cfg.get("noise_report", False))
+        self.retry_cfg: Optional[Dict[str, Any]] = copy.deepcopy(cfg.get("stage3_retry"))      # T3-R3 A; None == bw
+        self.terminal_clamp: str = cfg.get("terminal_clamp_likelihood", "density")              # T3-R3 B; "density" == bw
+        self.last_check: Optional[Dict[str, Any]] = None       # the last development check of the running phase (bookkeeping only)
         self.stage_rules = {t: self._stage_rule(t) for t in range(1, self.T + 1)}
         # ---- run state
         self.costs = Costs()
@@ -681,14 +706,15 @@ class MSRun:
                                          self.rngs["opp"], self.ppo_cfg.gamma, self.ppo_cfg.gae_lambda,
                                          bin_w, reward_mode="expected", frozen=None,
                                          continuation_action_mode="stochastic", cont_table=None,
-                                         clamp_likelihood="density")
+                                         clamp_likelihood=self.terminal_clamp)
             else:
                 batch = collect_stage_batch(spec, agent, t, d0, roles, self.rngs["learn"], self.rngs["opp"],
                                             table_next)
             self.costs.add("train_rollout", time.perf_counter() - t_r)
             t_u = time.perf_counter()
+            upd_kw = {"clamp_side": batch["clamp_side"]} if (t == T and self.terminal_clamp == "censored") else {}
             diag = agent.update(batch["states"], batch["actions"], batch["logp"], batch["returns"],
-                                batch["advantages"])
+                                batch["advantages"], **upd_kw)
             self.costs.add("train_update", time.perf_counter() - t_u)
             self.total_episodes += batch["n_episodes"]
             self.total_transitions += batch["n_transitions"]
@@ -753,6 +779,8 @@ class MSRun:
                         row.update({"sigma_0": rep_["sigma_0"], "e_sigma_0": rep_["e_sigma_0"], "g2_0": rep_["g2_0"],
                                     "smoothing": rep_["smoothing"], "remainder": rep_["remainder"], "gap": rep_["gap"],
                                     "R0": tie_residual_R0(ev.res, t)})
+                self.last_check = {"stage": t, "local": local, "update": self.global_u,
+                                   **{k: row[k] for k in ms_retry.CHECK_FIELDS}}
                 append_csv(csv_path, {c: row[c] for c in cols})
                 if t >= 2:
                     maps["update"].append(self.global_u)
@@ -944,8 +972,17 @@ def run_pipeline(cfg: Dict[str, Any], out_dir: str, cmd: str, band_step: Optiona
     man = write_manifest(run, cfg, out_dir, cmd, git, rng_log)
     try:
         T = run.T
+        rec1 = a2_check = None
+        a2_digest = ""
         for t in range(T, 0, -1):
             rec = run.run_stage(t)
+            if t == T and run.retry_cfg is not None:      # T3-R3 candidate A: the verifier-gated restart of the terminal stage
+                fires, reasons = ms_retry.trigger(run.last_check, run.retry_cfg["delta_gt"], int(cfg["pipeline"]["budgets"][str(T)]))
+                print(f"[stage {t}] retry trigger {'FIRES' if fires else 'does not fire'}: {run.last_check} {reasons}", flush=True)
+                if fires:
+                    rec1 = ms_retry.restart_stage3(run, rec, reasons)
+                    rec = run.run_stage(t)
+                    a2_check, a2_digest = dict(run.last_check), rec1["attempt2_init_state_sha256"]
             run.freeze_stage(t, rec, check)
         gates = build_gates(run, cfg, git, band_step)
         write_drift_test(run, out_dir)
@@ -960,6 +997,8 @@ def run_pipeline(cfg: Dict[str, Any], out_dir: str, cmd: str, band_step: Optiona
         write_json(os.path.join(out_dir, "gates.json"), gates)
         write_json(os.path.join(out_dir, "rule_log.json"), run._rule_log_doc())
         write_histories(run, out_dir)
+        if rec1 is not None:
+            write_json(os.path.join(out_dir, "retry.json"), ms_retry.final_record(run, rec1, a2_check, a2_digest))
         man["global_rng"] = rng_log
         man["continuation_tables"] = run.table_records
         write_json(os.path.join(out_dir, "manifest.json"), man)
@@ -1000,6 +1039,8 @@ def write_manifest(run: MSRun, cfg: Dict[str, Any], out_dir: str, cmd: str, git:
         **({"actor_variant": run.actor_variant} if run.actor_variant != "t1" else {}),
         **({"focus_scope": run.focus_scope} if run.focus_scope is not None else {}),
         **({"focus_map": run.focus_map} if run.focus_map is not None else {}),
+        **({"stage3_retry": run.retry_cfg} if run.retry_cfg is not None else {}),
+        **({"terminal_clamp_likelihood": run.terminal_clamp} if run.terminal_clamp != "density" else {}),
         **({"init_state_sha256": run.init_state_sha256} if run.init_state_sha256 is not None else {}),
         "resolved_config": {"game": {k: getattr(spec, k) for k in ("w_h", "w_l", "k", "q", "T", "e_min", "e_max")},
                             "ppo": run.rec["ppo"], "verifier": run.rec["verifier"]},
