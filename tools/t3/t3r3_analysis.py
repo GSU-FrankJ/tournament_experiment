@@ -122,6 +122,13 @@ def first_check(d: Path) -> Dict[str, Any]:
             "R": dg.fnum(last["R"]), "R_tail": dg.fnum(last["R_tail"])}
 
 
+def first_attempt_rows(d: Path) -> List[Dict[str, str]]:
+    """The update rows of the first attempt's stage-3 phase: ``attempt1/ms_updates_stage3.csv`` for a run that fired, else the run's own
+    ``ms_updates.csv`` (the first attempt is the run)."""
+    p = d / "attempt1" / "ms_updates_stage3.csv" if (d / "retry.json").is_file() else d / "ms_updates.csv"
+    return dg.read_csv(p)
+
+
 def stage2_stretch(d: Path, cfg: Mapping[str, Any]) -> Dict[str, Any]:
     """The stage-2 stretch of the frozen stage 2 (the export ``u03200``): in-band final-tier nodes with mean effort below 1."""
     spec = te.spec_of(cfg)
@@ -162,10 +169,8 @@ def run_record(args: Any) -> Dict[str, Any]:
     b3 = int(cfg["pipeline"]["budgets"]["3"])
     fires, reasons = ms_retry.trigger(chk, lt.RETRY["delta_gt"], b3)
     out["would_fire"], out["trig_reasons"] = bool(fires), ";".join(reasons)
-    rows_f = dg.read_csv(d / "ms_updates.csv")
-    out["S3_frozen"] = dg.s3_of_rows(rows_f)[0]
-    rows_1 = dg.read_csv(d / "attempt1" / "ms_updates_stage3.csv") if fired else rows_f
-    out["S3_first"] = dg.s3_of_rows(rows_1)[0]
+    out["S3_frozen"] = dg.s3_of_rows(dg.read_csv(d / "ms_updates.csv"))[0]
+    out["S3_first"] = dg.s3_of_rows(first_attempt_rows(d))[0]
     first_dir = d / "attempt1" / "weights" if fired else d / "weights"
     sm = stage3_export_summary(first_dir, cfg, 1600) if (first_dir / "u01600.npz").is_file() else {}
     out["first_out_mu_at_clamp"] = sm.get("out_mu_at_clamp", NAN)

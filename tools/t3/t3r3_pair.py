@@ -35,7 +35,10 @@ cr = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(cr)  # type: ignore[union-attr]
 
 WALL_UPDATES = {"update_wall_sec"}
-WALL_CHECKS = {"verifier_sec"}
+WALL_CHECKS = {"verifier_sec", "run"}        # the check files carry the run name, which differs between arms and between rounds
+# the CSVs of ``compare_runs.CSV["bw"]`` with the run name dropped as well
+CSV_BW = {"ms_updates.csv": WALL_UPDATES, "ms_checks_stage3.csv": WALL_CHECKS, "ms_checks_stage2.csv": WALL_CHECKS,
+          "ms_checks_stage1.csv": WALL_CHECKS}
 
 
 def read_json(path: Path) -> Dict[str, Any]:
@@ -81,7 +84,7 @@ def compare_full(a: Path, b: Path) -> Dict[str, Any]:
             if not (za.files == zb.files and all(cr.same_array(za[k], zb[k]) for k in za.files)):
                 res["npz"][pat]["different"].append(str(fa.relative_to(a)))
                 ok = False
-    for name, wall in cr.CSV["bw"].items():
+    for name, wall in CSV_BW.items():
         same = cr.rows(a / name, wall) == cr.rows(b / name, wall)
         res["csv"][name] = same
         ok = ok and same

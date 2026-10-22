@@ -272,6 +272,9 @@ def validate_config(cfg: Dict[str, Any]) -> None:
         why = ms_retry.validate(cfg["stage3_retry"], T)
         if why:
             raise ConfigError(why)
+        clash = [k for k in ("conc_scale_schedule", "actor_variant", "focus_scope", "fixed_global_sampler") if k in cfg]
+        if clash:
+            raise ConfigError(f"stage3_retry is defined for the bw settings (the restart resets nothing of {clash})")
     if "terminal_clamp_likelihood" in cfg and cfg["terminal_clamp_likelihood"] not in TERMINAL_CLAMP_LIKELIHOODS:
         raise ConfigError(f"terminal_clamp_likelihood, if present, must be one of {TERMINAL_CLAMP_LIKELIHOODS}")
     # ---- start weights

@@ -88,11 +88,20 @@ def reference_dir(job: Mapping[str, Any], root: Path, t3r2_root: Path) -> Path:
 
 
 def check_run(args: Any) -> Dict[str, Any]:
-    """All post-launch checks of one run.
+    """All post-launch checks of one run; an exception inside the checks of a run is recorded as ``error`` and leaves the verdicts it
+    did not reach unevaluated (which fails :func:`checks_ok`), so it cannot abort the checks of the other runs.
 
     Args:
         args: ``(job, plan_row, commit, lock, root, t3r2_root)``.
     """
+    job = args[0]
+    try:
+        return _check_run(args)
+    except Exception as exc:  # noqa: BLE001 - recorded
+        return {**{k: job[k] for k in ("wave", "arm", "q", "seed", "run", "run_kind")}, "error": f"{type(exc).__name__}: {exc}"}
+
+
+def _check_run(args: Any) -> Dict[str, Any]:
     job, plan, commit, lock, root, t3r2_root = args
     torch.set_num_threads(1)
     d = Path(job["run_dir"])
@@ -114,8 +123,7 @@ def check_run(args: Any) -> Dict[str, Any]:
     out["manifest_commit_ok"] = bool(commit is None or man["commit"] == commit)
     out["clean_tree"] = bool(man["clean_tree"] is True)
     out["global_rng_ok"] = bool(te.global_rng_ok(d, "bw"))
-    root_of_run = Path(d).parents[2]
-    out["config_equals_plan"] = bool(plan is not None and relpath_sha256(cfg, root_of_run) == plan["run_config_sha256_relpath"])
+    out["config_equals_plan"] = bool(plan is not None and relpath_sha256(cfg, Path(root)) == plan["run_config_sha256_relpath"])
     out["config_production_ok"] = not lt.config_problems(cfg, lock, arm)
     sched = cfg["record"]["lr_schedule"]
     lc._check_bw(d, cfg, sched, tc.expected_budget("bw"), out)             # the frozen path: budgets, schedules, exports, checks
@@ -150,6 +158,9 @@ def check_run(args: Any) -> Dict[str, Any]:
         out["total_updates"], out["total_transitions"] = 3800, 3800 * 512
     # ---- C-INIT
     ok_init = bool(plan is not None and man["init_state_sha256"] == plan["init_state_sha256"])
+    if job["run_kind"] == "diagnostic":          # attempt 1 starts from T3-R2's original initial network
+        orig_man = te.read_json(reference_dir(job, Path(root), Path(t3r2_root)) / "manifest.json")
+        ok_init = bool(ok_init and man["init_state_sha256"] == orig_man["init_state_sha256"])
     if fired:
         ok_init = bool(ok_init and plan["attempt2_init_state_sha256"] != "" and
                        te.read_json(d / "retry.json")["attempt2"]["init_state_sha256"] == plan["attempt2_init_state_sha256"])

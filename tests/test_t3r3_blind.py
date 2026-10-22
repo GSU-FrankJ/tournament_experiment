@@ -106,3 +106,20 @@ def test_compare_with_a_headline(tmp_path):
     head["selection"]["proposed"] = "bwAB"
     ok, diffs = bl.compare(res, head)
     assert not ok and len(diffs) == 2
+
+
+def test_the_total_threshold_alone_decides_with_both_per_q_conditions_met(tmp_path):
+    def world(n_fail_q50, n_fail_q60):
+        fail = {}
+        for i in range(n_fail_q50):
+            fail[("bwA", 50, 70501 + i)] = {"exit_code": 1}
+        for i in range(n_fail_q60):
+            fail[("bwA", 60, 70501 + i)] = {"exit_code": 1}
+        return fail
+    p, lg = _write(tmp_path, _all(world(1, 2)))                    # 37 of 40: 19 and 18 per q
+    a = bl.recompute(p, lg)["arms"]["bwA"]
+    assert a["pass_total"] == 37 and a["pass_q50"] == 19 and a["pass_q60"] == 18 and not a["reaches_target"]
+    (tmp_path / "b").mkdir()
+    p, lg = _write(tmp_path / "b", _all(world(0, 2)))                                                          # 38 of 40
+    a = bl.recompute(p, lg)["arms"]["bwA"]
+    assert a["pass_total"] == 38 and a["reaches_target"]

@@ -31,11 +31,15 @@ Examples (inside tmux):
 
 from __future__ import annotations
 
+import os
+
+for _k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+    os.environ.setdefault(_k, "1")           # the plan constructs the runs in this process; a run refuses another thread environment
+
 import argparse
 import copy
 import csv
 import json
-import os
 import shutil
 import sys
 import time

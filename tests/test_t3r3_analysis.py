@@ -44,7 +44,7 @@ def test_counts_and_the_target_rule():
     assert cnt["bwAB"]["pass_total"] == 37 and cnt["bw"]["pass_q50"] == 16
     t = {a: an.target_outcome(cnt[a]) for a in an.ARMS}
     assert t["bwA"]["reaches_target"] and not t["bwAB"]["reaches_target"] and not t["bw"]["reaches_target"]
-    assert cnt["bwA"]["ci_lo_total"] == pytest.approx(0.8235, abs=1e-3) or 0.8 < cnt["bwA"]["ci_lo_total"] < 0.85
+    assert cnt["bwA"]["ci_lo_total"] == pytest.approx(0.8308, abs=1e-3) and cnt["bwA"]["ci_hi_total"] == pytest.approx(0.9937, abs=1e-3)
     # the per-q condition: 38 of 40 but 17 at q = 60
     c = dict(cnt["bwA"], pass_q50=21 - 1, pass_q60=17, pass_total=37 + 1)
     assert not an.target_outcome({**c, "pass_q50": 20, "pass_q60": 17, "pass_total": 37})["reaches_target"]
@@ -101,15 +101,19 @@ def test_first_attempt_convention_and_the_bwA_invariant():
 
 def test_paired_bootstrap_uses_the_registered_seed_and_resamples():
     rows = _world({})
+    rng = np.random.default_rng(5)
+    delta = {(q, s): float(rng.normal(-0.0002, 0.0003)) for q in an.QS for s in lt.SEEDS}
     for r in rows:
         if r["arm"] == "bwA":
-            r["Gmax_full_over_dw"] = 0.001 - 0.0002 * (r["seed"] % 3)
+            r["Gmax_full_over_dw"] = 0.001 + delta[(r["q"], r["seed"])]
     p = an.paired_vs(rows, "bwA", "bw", "Gmax_full_over_dw", "both")
-    d = np.array([-0.0002 * (s % 3) for _ in an.QS for s in lt.SEEDS])
+    d = np.array([delta[(q, s)] for q in an.QS for s in lt.SEEDS])
     assert p["n_pairs"] == 40 and p["mean_diff"] == pytest.approx(d.mean())
     idx = np.random.default_rng(20261021).integers(0, 40, size=(10000, 40))
     m = d[idx].mean(axis=1)
     assert p["ci_lo"] == pytest.approx(np.percentile(m, 2.5)) and p["ci_hi"] == pytest.approx(np.percentile(m, 97.5))
+    other = d[np.random.default_rng(20261022).integers(0, 40, size=(10000, 40))].mean(axis=1)
+    assert abs(np.percentile(other, 2.5) - p["ci_lo"]) > 1e-9                         # a different seed would give another interval
     x = an.crosstab(rows, "bwA")
     assert x["both_pass"] == 40 and x["ref_only"] == x["arm_only"] == x["both_fail"] == 0
 

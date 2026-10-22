@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -13,6 +14,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 for _p in (ROOT, ROOT / "tools" / "ms", ROOT / "tools" / "t3", Path(__file__).resolve().parent):
     sys.path.insert(0, str(_p))
+
+for _k in ("OMP", "MKL", "OPENBLAS"):
+    os.environ[f"{_k}_NUM_THREADS"] = "1"          # the runner refuses a run whose thread environment differs from the config
 
 import launch_ms_r1 as L1  # noqa: E402
 import t3_configs as tc  # noqa: E402
@@ -147,3 +151,10 @@ def test_infrastructure_failures_are_repeated_once_and_recorded(tmp_path):
     Path(jobs[0].out_dir).mkdir(parents=True, exist_ok=True)
     lt.handle_infra_failures(jobs[:1], [{"out": jobs[0].out_dir, "returncode": -9}], tmp_path, runner2, ledger2)
     assert ledger2["stopped_without_verdict"] == ["r0"] and [e["attempt"] for e in ledger2["events"]] == [1, 2]
+
+
+def test_legacy_jobs_are_the_two_t3r2_runs():
+    import t3r3_legacy as lg
+    js = lg.jobs(Path("/r2"), Path("/out"))
+    assert [(j["q"], j["seed"]) for j in js] == [(50, 60502), (60, 60518)]
+    assert js[0]["orig"] == Path("/r2/confirmation/q50/seed60502/bw") and js[1]["new"] == Path("/out/q60/seed60518/bw")
