@@ -80,7 +80,7 @@ def t_boundary() -> str:
         sub = bc[bc.manifest_dirty == flag]
         rows.append({"manifests record": label, "runs": b["n_clean" if not flag else "n_dirty"], "`bw`": b[key]["bw"], "`bwA`": b[key]["bwA"], "`bwAB`": b[key]["bwAB"],
                      "first start (UTC)": sub.start_utc.min(), "last start (UTC)": sub.start_utc.max()})
-    txt = (f"\n\n`reports/t3/r3/report_scripts/results_tables.py` was created at {b['results_tables_py_birth_utc']} (birth time, `stat`); the wave was launched at "
+    txt = (f"\n\n`reports/t3/r3/report_scripts/results_tables.py` was created at {b['results_tables_py_birth_utc']} (birth time recorded in `boundary.json`); the wave was launched at "
            f"02:20:02 UTC. Runs whose recorded flag disagrees with 'started after the file was created': {len(b['runs_whose_flag_disagrees_with_the_boundary'])}. "
            f"All {b['n_runs']} manifests carry the commit `{b['commits'][0]}`; the diagnostic runs are all in the clean group "
            f"({b['dirty_by_kind']['diagnostic']} dirty). Table: `results/t3_r3/dev/verify_clean_tree/boundary.csv`.")
@@ -108,7 +108,7 @@ def t_rerun() -> str:
                      "npz files identical": cr, "same file set": r["file_sets_equal"],
                      "`attempt1/` (64 exports, CSVs, bin maps, state) and `retry.json`": ("identical" if (a1 and a1["ok"] and not r["retry_json_diff"]) else "-") if r["fired"] else "no `attempt1/`",
                      "gates / rule log / drift / summary JSON": "identical" if not any(r["json_diffs"].values()) else "DIFFERENT",
-                     "re-run wall time (s)": round(first[r["run"]]["wall_sec"])})
+                     "re-run wall time (s, driver clock)": round(first[r["run"]]["wall_sec"])})
     return md(rows)
 
 

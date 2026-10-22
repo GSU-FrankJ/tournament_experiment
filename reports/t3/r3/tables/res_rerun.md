@@ -1,4 +1,4 @@
-| run | why this run | flag, original | flag, re-run | `compare_runs.py bw` exit code | npz files identical | same file set | `attempt1/` (64 exports, CSVs, bin maps, state) and `retry.json` | gates / rule log / drift / summary JSON | re-run wall time (s) |
+| run | why this run | flag, original | flag, re-run | `compare_runs.py bw` exit code | npz files identical | same file set | `attempt1/` (64 exports, CSVs, bin maps, state) and `retry.json` | gates / rule log / drift / summary JSON | re-run wall time (s, driver clock) |
 |---|---|---|---|---|---|---|---|---|---|
 | `t3r3_q50_s70508_bwA` | dirty-flagged bwA run whose trigger fired | dirty | clean | 0 | 162 | yes | identical | identical | 496 |
 | `t3r3_q50_s70516_bwA` | dirty-flagged bwA run whose trigger fired | dirty | clean | 0 | 162 | yes | identical | identical | 494 |
