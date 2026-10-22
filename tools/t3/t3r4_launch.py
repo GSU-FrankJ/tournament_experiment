@@ -176,14 +176,6 @@ def read_lock_records(path: Path = LOCK_FILE) -> List[Dict[str, Any]]:
     return cl.read_lock_records(path)
 
 
-def t31_record(path: Path = LOCK_FILE) -> Optional[Dict[str, Any]]:
-    """The T3-1.1 record of ``protocols/LOCK`` (``None`` if absent)."""
-    for r in read_lock_records(path):
-        if r.get("protocol") == LOCK_REL:
-            return r
-    return None
-
-
 def check_lock(lock_dir: Path, use_record: bool, lock_file: Path = LOCK_FILE, repo: Path = ROOT) -> Dict[str, Any]:
     """Verify the lock files and return the lock JSON.
 

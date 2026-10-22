@@ -346,12 +346,41 @@ def test_a_run_that_exited_0_is_never_an_infrastructure_failure_whatever_its_log
     lt.handle_infra_failures([job], [{"out": str(out), "returncode": 1}], tmp_path,
                              lambda j: seen.append(1) or {"out": j.out_dir, "returncode": 0}, ledger)
     assert seen == [1] and [e["reason"] for e in ledger["events"]] == ["out_of_memory"]            # the same log with a nonzero exit is one
-    # a repeat that exits 0 is not classified either, so it cannot become a second infrastructure failure
-    out.mkdir(exist_ok=True)
-    (out / "run.log").write_text("Cannot allocate memory\n")
+    # a repeat that exits 0 is not classified either (its log may say anything), so it cannot become a second infrastructure failure
+    out2 = tmp_path / "q60" / "seed80501" / "bwA"
+    out2.mkdir(parents=True)
+    job2 = L1.Job({"q": 60, "seed": 80501, "run": "r2"}, str(out2))
     ledger2 = lt.new_ledger()
-    lt.handle_infra_failures([job], [{"out": str(out), "returncode": -9}], tmp_path / "other", lambda j: {"out": j.out_dir, "returncode": 0}, ledger2)
-    assert ledger2["stopped_without_verdict"] == []
+
+    def repeat_with_a_scary_log(j):
+        (Path(j.out_dir) / "run.log").write_text("MemoryError: Cannot allocate memory\n")
+        return {"out": j.out_dir, "returncode": 0}
+    lt.handle_infra_failures([job2], [{"out": str(out2), "returncode": -9}], tmp_path / "other", repeat_with_a_scary_log, ledger2)
+    assert ledger2["stopped_without_verdict"] == [] and [e["attempt"] for e in ledger2["events"]] == [1] and out2.is_dir()
+    # while the same repeat with a nonzero exit is the second failure
+    out3 = tmp_path / "q60" / "seed80502" / "bwA"
+    out3.mkdir(parents=True)
+    job3 = L1.Job({"q": 60, "seed": 80502, "run": "r3"}, str(out3))
+    ledger3 = lt.new_ledger()
+
+    def repeat_that_fails(j):
+        (Path(j.out_dir) / "run.log").write_text("MemoryError: Cannot allocate memory\n")
+        return {"out": j.out_dir, "returncode": 1}
+    lt.handle_infra_failures([job3], [{"out": str(out3), "returncode": -9}], tmp_path / "other", repeat_that_fails, ledger3)
+    assert ledger3["stopped_without_verdict"] == ["r3"]
+
+
+def test_the_lock_checks_the_protocol_params_and_criteria_files_by_hash(tmp_path, lock_dir):
+    js = json.loads((lock_dir / "v2_T3_locked_v1_1.json").read_text())
+    d = tmp_path / "mut"
+    d.mkdir()
+    (d / "v2_T3_locked_v1_1.md").write_text("x")
+    for key in ("protocol_sha256", "params_sha256", "criteria_sha256"):
+        mut = copy.deepcopy(js)
+        mut[key] = "0" * 64
+        (d / "v2_T3_locked_v1_1.json").write_text(json.dumps(mut, indent=1) + "\n")
+        with pytest.raises(ValueError, match="differs from the lock"):
+            lt.check_lock(d, use_record=False)
 
 
 def test_the_ledger_is_saved_after_every_event_before_the_repeat_starts(tmp_path):

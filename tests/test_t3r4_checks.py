@@ -165,6 +165,35 @@ def test_the_trigger_check_compares_retry_json_with_the_check_rows_of_both_attem
     assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is True
 
 
+def test_a_trigger_that_fired_on_a_non_finite_value_is_consistent_with_nan_on_both_sides(runs, tmp_path):
+    import csv
+    from run import ms_retry
+    d, root = _copy(runs, "fired", tmp_path)
+    cfg, plan = _plan(d, root, True)
+    p = d / "attempt1" / "ms_checks_stage3.csv"
+    rows = list(csv.DictReader(open(p)))
+    fields = list(rows[0].keys())
+    for k in ("Delta", "s", "C"):
+        rows[-1][k] = "nan"
+    with open(p, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
+    nan = float("nan")
+    fires, reasons = ms_retry.trigger({"stage": 3, "local": int(float(rows[-1]["local"])), "Delta": nan, "s": nan, "C": nan},
+                                      cfg["stage3_retry"]["delta_gt"], int(cfg["pipeline"]["budgets"]["3"]))
+    assert fires
+    rj = json.load(open(d / "retry.json"))
+    for k in ("Delta", "s", "C"):
+        rj["attempt1"]["trigger_check"][k] = nan
+    rj["attempt1"]["reasons"] = reasons
+    json.dump(rj, open(d / "retry.json", "w"))
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is True
+    rj["attempt1"]["trigger_check"]["Delta"] = 1.0                                                  # finite in retry.json, NaN in the check file
+    json.dump(rj, open(d / "retry.json", "w"))
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is False
+
+
 def test_checks_ok_also_needs_every_run_to_pass_every_verdict():
     assert not ck.checks_ok(_agg(verdicts={"exit_ok": {"pass": 79, "fail": 0, "not_evaluated": 0}}))
 

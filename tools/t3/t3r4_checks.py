@@ -57,6 +57,11 @@ VERDICTS = ["exit_ok", "files_complete", "manifest_commit_ok", "clean_tree", "gl
 N_RUNS = len(lt.QS) * len(lt.SEEDS)
 
 
+def _same(a: float, b: float) -> bool:
+    """Exact float equality with NaN equal to NaN (a trigger that fired on a non-finite check value records NaN on both sides)."""
+    return bool(a == b or (a != a and b != b))
+
+
 def read_plan(path: Path) -> Dict[str, Dict[str, str]]:
     """``{run name: plan row}`` of the plan CSV."""
     return {r["run"]: r for r in lc.read_csv(Path(path))}
@@ -127,8 +132,8 @@ def _check_run(args: Any) -> Dict[str, Any]:
         t1, f2 = rj["attempt1"]["trigger_check"], rj["attempt2"]["final_check"]
         last2 = lc.read_csv(d / "ms_checks_stage3.csv")[-1]
         consistent = bool(consistent and rj["attempt1"]["reasons"] == reasons
-                          and all(float(t1[k]) == chk[k] for k in ("Delta", "s", "C"))
-                          and all(float(f2[k]) == float(last2[k]) for k in ("Delta", "s", "C")))
+                          and all(_same(float(t1[k]), chk[k]) for k in ("Delta", "s", "C"))
+                          and all(_same(float(f2[k]), float(last2[k])) for k in ("Delta", "s", "C")))
     out["trigger_consistent"] = consistent
     out["trigger_Delta"], out["trigger_s"], out["trigger_C"] = chk["Delta"], chk["s"], chk["C"]
     # ---- budgets of a run that fired (retry.json totals and attempt1/)

@@ -11,6 +11,7 @@ import random
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -287,8 +288,8 @@ def _stub_run_record(args):
             "total_minibatch_steps": 76000, "total_dev_checks": 152, "a2_final_Delta": 0.001}
 
 
-def _driver(tmp_path, monkeypatch, rows):
-    p, lp = write(tmp_path, rows)
+def _driver(tmp_path, monkeypatch, rows, ledger=None):
+    p, lp = write(tmp_path, rows, ledger)
     monkeypatch.setattr(ta.r3a, "run_record", _stub_run_record)
     monkeypatch.setattr(ta.ck, "all_jobs", lambda root: [{"run": r["run"], "q": r["q"], "seed": r["seed"], "run_dir": str(tmp_path)} for r in rows])
     return p, lp
@@ -320,6 +321,37 @@ def test_a_complete_analysis_exits_0_and_writes_every_output(tmp_path, monkeypat
     assert head["trigger"]["first_attempt_pass"] == 78 and head["trigger"]["fired_runs_that_pass"] == 2
     for name in ("per_run.csv", "counts.csv", "fired.csv", "failures.csv", "cost.csv", "comparisons.csv", "last16.csv", "last16_summary.csv"):
         assert (out / name).is_file(), name
+
+
+def test_a_stopped_run_in_the_ledger_gives_no_verdict_through_the_driver_and_counts_as_failed(tmp_path, monkeypatch):
+    rows = table()
+    name = rows[3]["run"]
+    ledger = {"schema": "x", "events": [{"run": name, "attempt": 1}, {"run": name, "attempt": 2}], "stopped_without_verdict": [name]}
+    p, lp = _driver(tmp_path, monkeypatch, rows, ledger)
+    monkeypatch.setattr(ta, "last16_tables", lambda *a, **k: ([], []))                      # the run directories are not real here
+    monkeypatch.setattr(ta, "failure_rows", lambda *a, **k: [])
+    out = tmp_path / "analysis"
+    assert ta.main(["--root", str(tmp_path), "--eval", str(p), "--ledger", str(lp), "--out-dir", str(out), "--workers", "1"]) == 0
+    head = json.loads((out / "headline.json").read_text())
+    assert head["verdict"]["verdict"] == "no_verdict" and head["stopped_without_verdict"] == [name] and head["counts"]["fail_total"] == 1
+    per = pd.read_csv(out / "per_run.csv")
+    assert bool(per[per.run == name].passed.item()) is False and "infrastructure failure twice" in per[per.run == name].fail_reason.item()
+    assert bl.recompute(p, lp)["verdict"] == "no_verdict"
+
+
+def test_the_headline_exists_when_the_first_reporting_step_starts(tmp_path, monkeypatch):
+    rows = table((0,), ())
+    p, lp = _driver(tmp_path, monkeypatch, rows)
+    out = tmp_path / "analysis"
+    seen = []
+
+    def probe(rows_, failing, workers):
+        seen.append(json.loads((out / "headline.json").read_text())["verdict"]["verdict"])
+        return [], []
+    monkeypatch.setattr(ta, "last16_tables", probe)
+    monkeypatch.setattr(ta, "failure_rows", lambda *a, **k: [])
+    assert ta.main(["--root", str(tmp_path), "--eval", str(p), "--ledger", str(lp), "--out-dir", str(out), "--workers", "1"]) == 0
+    assert seen == ["pass"]
 
 
 def test_a_checks_file_that_is_given_but_missing_is_an_error_and_a_failed_checks_file_stops(tmp_path, monkeypatch):
