@@ -1,0 +1,222 @@
+{
+ "schema": "ms_gates/1",
+ "arm": "bw",
+ "run": "t3r3_q50_s70508_bwAB",
+ "q": 50,
+ "seed": 70508,
+ "commit": "b565f0e8dd644a39043ebd3c24875c210b2cfe63",
+ "clean_tree": true,
+ "protocol_ref": {
+  "path": "protocols/v2_T2_locked_v2_0.json",
+  "sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3"
+ },
+ "continuation_tables": {
+  "2": {
+   "file": "continuation_table_stage2.npz",
+   "npz_sha256": "ad91e68d5da0285acd13418e6a57bafc1c6426562ef6d4253f646d12d8bc7e60",
+   "meta": {
+    "schema": "ms_continuation_table/1",
+    "rule": "composite Gauss-Legendre in z, panels aligned at z=0 and z=+-2q; frozen actor evaluated directly at d=y+z (no interpolation of g); nested through the linear lookup of the next table",
+    "stage": 3,
+    "phase_stage": 2,
+    "T": 3,
+    "nested": false,
+    "q": 50.0,
+    "w_h": 6.0,
+    "w_l": 2.0,
+    "k": 0.00028571428571428574,
+    "dw": 4.0,
+    "e_min": 0.0,
+    "e_max": 100.0,
+    "step_requested": 0.05,
+    "step_actual": 0.05000000000001137,
+    "n_y": 12001,
+    "y_half": 300.0,
+    "panel_width": 1.0,
+    "nodes_per_panel": 6,
+    "n_panels": 200,
+    "n_nodes": 1200,
+    "weight_sum": 1.0,
+    "conc_scale": 1.0,
+    "build_seconds": 28.251401893096045
+   },
+   "build_seconds": 28.251401893096045,
+   "rng_unchanged_by_build": {
+    "training": true,
+    "torch_global": true,
+    "numpy_global": true,
+    "python_random": true
+   }
+  },
+  "1": {
+   "file": "continuation_table_stage1.npz",
+   "npz_sha256": "4a4ad145ce046ea41d0e5e60cbb1f6f201fc6930aacbdcd815532dc0f1c9888e",
+   "meta": {
+    "schema": "ms_continuation_table/1",
+    "rule": "composite Gauss-Legendre in z, panels aligned at z=0 and z=+-2q; frozen actor evaluated directly at d=y+z (no interpolation of g); nested through the linear lookup of the next table",
+    "stage": 2,
+    "phase_stage": 1,
+    "T": 3,
+    "nested": true,
+    "q": 50.0,
+    "w_h": 6.0,
+    "w_l": 2.0,
+    "k": 0.00028571428571428574,
+    "dw": 4.0,
+    "e_min": 0.0,
+    "e_max": 100.0,
+    "step_requested": 0.05,
+    "step_actual": 0.04999999999999716,
+    "n_y": 4001,
+    "y_half": 100.0,
+    "panel_width": 1.0,
+    "nodes_per_panel": 6,
+    "n_panels": 200,
+    "n_nodes": 1200,
+    "weight_sum": 1.0,
+    "conc_scale": 1.0,
+    "build_seconds": 12.415980492020026
+   },
+   "build_seconds": 12.415980492020026,
+   "rng_unchanged_by_build": {
+    "training": true,
+    "torch_global": true,
+    "numpy_global": true,
+    "python_random": true
+   }
+  }
+ },
+ "budget": {
+  "stage3": {
+   "updates": 1600,
+   "wall_sec": 328.0970188919455,
+   "process_cpu_sec": 327.83067499400005
+  },
+  "stage2": {
+   "updates": 1600,
+   "wall_sec": 230.2304913320113,
+   "process_cpu_sec": 229.927350876
+  },
+  "stage1": {
+   "updates": 600,
+   "wall_sec": 84.72810917091556,
+   "process_cpu_sec": 84.56733039899996
+  }
+ },
+ "budget_totals": {
+  "total_updates": 3800,
+  "total_episodes": 1945600,
+  "total_transitions": 1945600,
+  "minibatch_steps": 76000
+ },
+ "d3_at_freeze": {
+  "3": {
+   "final": {
+    "valid": true,
+    "Delta": 0.0033336592558561584,
+    "s": 66.73786955525267,
+    "R": 0.13250770114825042,
+    "R_tail": 0.004421638253255378,
+    "C": 0.03873476080544958,
+    "tail_term": true,
+    "R_argmax_d": -70.0
+   },
+   "development": {
+    "valid": true,
+    "Delta": 0.0033336592558561584,
+    "s": 66.73786955525354,
+    "R": 0.1312973137000263,
+    "R_tail": 0.0046217920430644864,
+    "C": 0.038719560363513754,
+    "tail_term": true,
+    "R_argmax_d": -72.0
+   }
+  },
+  "2": {
+   "final": {
+    "valid": true,
+    "Delta": 0.00042875231560568494,
+    "s": 47.33744913831321,
+    "R": 0.050619030642341016,
+    "R_tail": NaN,
+    "C": 0.027284216370288817,
+    "tail_term": false,
+    "R_argmax_d": -8.0
+   },
+   "development": {
+    "valid": true,
+    "Delta": 0.0003773817853329753,
+    "s": 47.0,
+    "R": 0.05816881704568772,
+    "R_tail": NaN,
+    "C": 0.027284216370288817,
+    "tail_term": false,
+    "R_argmax_d": -4.0
+   }
+  },
+  "1": {
+   "final": {
+    "valid": true,
+    "Delta": 4.67127225309838e-05,
+    "s": 45.944723412244755,
+    "R": 0.025585229352076695,
+    "R_tail": NaN,
+    "C": 0.02696865279350214,
+    "tail_term": false,
+    "R_argmax_d": 0.0
+   },
+   "development": {
+    "valid": true,
+    "Delta": 5.8116267826147094e-05,
+    "s": 45.45231340728598,
+    "R": 0.015028856175926395,
+    "R_tail": NaN,
+    "C": 0.02696865279350214,
+    "tail_term": false,
+    "R_argmax_d": 0.0
+   }
+  }
+ },
+ "rule": {
+  "3": {
+   "fire_local": null,
+   "would_fire_local": null,
+   "budget_forced": false,
+   "training_updates": null,
+   "total_updates": 1600
+  },
+  "2": {
+   "fire_local": null,
+   "would_fire_local": null,
+   "budget_forced": false,
+   "training_updates": null,
+   "total_updates": 1600
+  },
+  "1": {
+   "fire_local": null,
+   "would_fire_local": 125,
+   "budget_forced": false,
+   "training_updates": null,
+   "total_updates": 600
+  }
+ },
+ "closed_form_gates": null,
+ "v20_combination_pass": null,
+ "outcome": "not_evaluated_T3",
+ "global_rng": {
+  "status": "ok",
+  "violations": [],
+  "assertion_points": [
+   "after_run_construction",
+   "reference_before_first_update",
+   "end_of_stage3",
+   "after_freeze_eval_stage3",
+   "end_of_stage2",
+   "after_freeze_eval_stage2",
+   "end_of_stage1",
+   "after_freeze_eval_stage1",
+   "end_of_run"
+  ]
+ },
+ "run_pass_v20_combination_and_rng": false
+}

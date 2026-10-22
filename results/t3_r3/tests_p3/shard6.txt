@@ -1,0 +1,10 @@
+........................................................................ [ 59%]
+.................................................                        [100%]
+============================= slowest 5 durations ==============================
+29.57s call     tests/test_v2_r2c.py::test_defaults_equal_the_v20_lock_commit_on_a_reduced_locked_run
+19.97s call     tests/test_v2_r2c.py::test_start_weights_absent_equals_the_c7_reference
+16.56s call     tests/test_v2_r2c.py::test_peak_focused_from_update_1_equals_the_r2b_implementation
+12.36s setup    tests/test_v2_refine_analysis.py::test_end_to_end_completeness_lists_failed_missing_and_running
+10.61s setup    tests/test_v2_refine_d1tool.py::test_end_to_end_on_real_runs_phase_A_and_frozen_phase_B
+121 passed in 127.65s (0:02:07)
+exit=0

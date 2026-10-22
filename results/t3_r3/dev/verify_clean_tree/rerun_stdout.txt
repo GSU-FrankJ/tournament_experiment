@@ -1,0 +1,12 @@
+5 re-runs at HEAD b565f0e8, tree clean outside results/
+  dirty-flagged bwA run whose trigger fired results/t3_r3/dev/q50/seed70508/bwA
+  dirty-flagged bwA run whose trigger fired results/t3_r3/dev/q50/seed70516/bwA
+  lowest-numbered dirty-flagged bwAB run at q=60 whose trigger did not fire results/t3_r3/dev/q60/seed70519/bwAB
+  ADDITION: lowest-numbered dirty-flagged bwA run at q=50 whose trigger did not fire results/t3_r3/dev/q50/seed70501/bwA
+  ADDITION: lowest-numbered dirty-flagged bwA run at q=60 whose trigger did not fire results/t3_r3/dev/q60/seed70501/bwA
+t3r3_q50_s70508_bwA returncode 0 ok False wall 496
+t3r3_q50_s70516_bwA returncode 0 ok False wall 494
+t3r3_q60_s70519_bwAB returncode 0 ok False wall 368
+t3r3_q50_s70501_bwA returncode 0 ok False wall 377
+t3r3_q60_s70501_bwA returncode 0 ok False wall 363
+exit=1

@@ -1,0 +1,16 @@
+# evidence: paths outside results/ and .git changed (mtime) in the wave window 2026-10-22 02:20:00-02:55:47 UTC (the launch at 02:20:02, the end at 02:55:46)
+2026-10-22 02:21:15.6805672030  f ./reports/t3/r3/report_scripts/results_tables.py
+
+# stat of the file (birth, modification)
+birth=2026-10-22 03:20:40.626963081 +0000 mtime=2026-10-22 02:21:15.680567203 +0000 reports/t3/r3/report_scripts/results_tables.py
+
+# git status --porcelain -- . ':(exclude)results' (the runner's definition), after the verification re-runs, with the file restored; 28c is the PI reply saved after the wave
+?? reports/t3/r3/pi_record/28c_dirty_tree_reply.md
+?? reports/t3/r3/report_scripts/results_tables.py
+
+# note on the timestamps
+# The file was moved to the scratchpad (another file system) and back for the clean-tree re-runs, so its birth time above (03:20:40) is that of
+# the copy. Before the move it was recorded in boundary.json as results_tables_py_birth_utc = 2026-10-22 02:21:15.679567227 +0000, and the same
+# search (run at 03:10 UTC, before the move) listed, besides the file, only its parent directory:
+#   2026-10-22 02:21:15.7565654020  d ./reports/t3/r3/report_scripts      (mtime and ctime)
+# The directory's mtime has since changed with the move; the search above no longer lists it.

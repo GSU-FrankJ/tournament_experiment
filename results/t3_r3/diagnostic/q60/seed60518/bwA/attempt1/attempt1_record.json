@@ -1,0 +1,122 @@
+{
+ "schema": "t3_retry/1",
+ "attempt": 1,
+ "trigger_check": {
+  "stage": 3,
+  "local": 1600,
+  "update": 1600,
+  "valid": true,
+  "Delta": 0.14467770597856666,
+  "s": 41.91998106347793,
+  "R": 1.1799992201389449,
+  "R_tail": 0.1945461441746456,
+  "C": 0.014766652550437557
+ },
+ "reasons": [
+  "delta_gt"
+ ],
+ "delta_gt": 0.005,
+ "counts": {
+  "updates": 1600,
+  "episodes": 819200,
+  "transitions": 819200,
+  "minibatch_steps": 32000,
+  "wall_sec": 189.4817915209569,
+  "process_cpu_sec": 189.313588484,
+  "dev_verifier_sec": 2.346138147637248,
+  "n_dev_checks": 64
+ },
+ "costs": {
+  "seconds": {
+   "train_rollout": 4.551648304564878,
+   "train_update": 181.72983821411617,
+   "dev_verifier": 2.346138147637248
+  },
+  "count": {
+   "train_rollout": 1600,
+   "train_update": 1600,
+   "dev_verifier": 64
+  }
+ },
+ "rule_record": {
+  "stage": 3,
+  "enabled": false,
+  "n_checks": 64,
+  "blocks": [
+   {
+    "block_id": 1,
+    "type": "legacy",
+    "first_local": 1,
+    "last_local": 1600,
+    "exit_reason": "fixed_budget"
+   }
+  ],
+  "landing": null,
+  "fire_local": null,
+  "would_fire_local": null,
+  "budget_forced": false,
+  "training_updates": null,
+  "total_updates": 1600,
+  "params": {
+   "stage": 3,
+   "enabled": false,
+   "K": 25,
+   "M": 3,
+   "eps": 0.005,
+   "rho": 0.05,
+   "tau": 0.02,
+   "conc_limit": 0.04,
+   "n_block": 400,
+   "u_cap": 2000,
+   "n_land": 400,
+   "loc_frac": 0.25,
+   "alpha_polish": 0.5,
+   "alpha_global": 0.0,
+   "ema_beta": 0.5,
+   "lr_base": 0.0003,
+   "lr_end": 3e-05,
+   "n_nontail_bins": 24,
+   "fixed_budget": 1600
+  },
+  "entry_update": 0,
+  "exit_update": 1600,
+  "episodes": 819200,
+  "transitions": 819200,
+  "minibatch_steps": 32000,
+  "wall_sec": 189.4817915209569
+ },
+ "init_state_sha256": "fb3fde188a7b348df5c1791effc57be0cd084ae4c1fe6219519167e7f76985ed",
+ "seed_namespaces": {
+  "init": [
+   60518,
+   60,
+   0
+  ],
+  "env_noise": [
+   60518,
+   60,
+   1
+  ],
+  "learner_action": [
+   60518,
+   60,
+   2
+  ],
+  "opponent_action": [
+   60518,
+   60,
+   3
+  ],
+  "starts_roles": [
+   60518,
+   60,
+   4
+  ],
+  "minibatch": [
+   60518,
+   60,
+   5
+  ]
+ },
+ "attempt2_init_state_sha256": "0c5c5434c94f10b6740aa2ce258e3f4b62d18a7d8c6e4957840772a92c5b72a7"
+}

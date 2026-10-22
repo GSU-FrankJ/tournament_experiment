@@ -1,0 +1,114 @@
+{
+ "schema": "t3_retry/1",
+ "fired": true,
+ "config": {
+  "delta_gt": 0.005,
+  "max_retries": 1
+ },
+ "frozen_attempt": 2,
+ "attempt1": {
+  "trigger_check": {
+   "stage": 3,
+   "local": 1600,
+   "update": 1600,
+   "valid": true,
+   "Delta": 0.0058020299653824825,
+   "s": 67.34608899053754,
+   "R": 0.24433236251687301,
+   "R_tail": 0.00464404082913686,
+   "C": 0.04064504786442614
+  },
+  "reasons": [
+   "delta_gt"
+  ],
+  "counts": {
+   "updates": 1600,
+   "episodes": 819200,
+   "transitions": 819200,
+   "minibatch_steps": 32000,
+   "wall_sec": 338.98042371310294,
+   "process_cpu_sec": 337.466126641,
+   "dev_verifier_sec": 2.900153456022963,
+   "n_dev_checks": 64
+  },
+  "init_state_sha256": "89ca657bf293cd813610ceaeb80a926281e58490945ca1fca8394ef60b3dd1cb"
+ },
+ "attempt2": {
+  "final_check": {
+   "stage": 3,
+   "local": 1600,
+   "update": 1600,
+   "valid": true,
+   "Delta": 0.0037590532291351675,
+   "s": 68.41545608225813,
+   "R": 0.08132509296662481,
+   "R_tail": 0.007117696521780474,
+   "C": 0.030875682871246698
+  },
+  "init_state_sha256": "d2797a29c98ab7cad86fc4d375d906158fe81fc18ddfce4c5cbead8fc3ff4ac8",
+  "stage3": {
+   "updates": 1600,
+   "wall_sec": 225.5473519449588,
+   "process_cpu_sec": 225.47434507600002
+  },
+  "entropy": {
+   "init": [
+    70510,
+    50,
+    0,
+    2
+   ],
+   "streams": {
+    "env": [
+     70510,
+     50,
+     1,
+     2
+    ],
+    "learn": [
+     70510,
+     50,
+     2,
+     2
+    ],
+    "opp": [
+     70510,
+     50,
+     3,
+     2
+    ],
+    "start": [
+     70510,
+     50,
+     4,
+     2
+    ],
+    "minibatch": [
+     70510,
+     50,
+     5,
+     2
+    ]
+   }
+  }
+ },
+ "frozen_path_counts": {
+  "updates": 3800,
+  "episodes": 1945600,
+  "transitions": 1945600,
+  "minibatch_steps": 76000,
+  "wall_sec": 225.5473519449588,
+  "process_cpu_sec": 225.47434507600002,
+  "dev_verifier_sec": 6.03785239206627,
+  "n_dev_checks": 152
+ },
+ "totals": {
+  "updates": 5400,
+  "transitions": 2764800,
+  "episodes": 2764800,
+  "minibatch_steps": 108000,
+  "dev_checks": 216,
+  "dev_verifier_sec": 8.938005848089233,
+  "stage3_wall_sec": 564.5277756580617
+ }
+}

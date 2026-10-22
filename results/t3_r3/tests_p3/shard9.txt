@@ -1,0 +1,11 @@
+........................................................................ [ 42%]
+........................................................................ [ 84%]
+...........................                                              [100%]
+============================= slowest 5 durations ==============================
+34.41s setup    tests/test_ms_r4_launch_checks.py::test_the_genuine_reduced_wave_passes_every_check
+30.71s call     tests/test_v2_r2b.py::test_defaults_equal_the_v20_lock_commit_on_a_reduced_locked_run
+24.80s call     tests/test_v2_r2b.py::test_new_keys_at_default_equal_the_c7_reference
+9.14s call     tests/test_t3_launcher.py::test_post_launch_flags_the_reduced_runs_that_are_not_production_runs
+4.27s call     tests/test_t3_launcher.py::test_c_init_plan_on_a_few_seeds
+171 passed in 143.83s (0:02:23)
+exit=0

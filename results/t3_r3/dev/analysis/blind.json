@@ -1,0 +1,54 @@
+{
+ "arms": {
+  "bw": {
+   "pass_q50": 18,
+   "n_q50": 20,
+   "ci_lo_q50": 0.6830172859809177,
+   "ci_hi_q50": 0.9876514728297052,
+   "pass_q60": 19,
+   "n_q60": 20,
+   "ci_lo_q60": 0.7512672372279722,
+   "ci_hi_q60": 0.9987349105020502,
+   "pass_total": 37,
+   "n_total": 40,
+   "ci_lo_total": 0.796135251267101,
+   "ci_hi_total": 0.9842578201489585,
+   "reaches_target": false
+  },
+  "bwA": {
+   "pass_q50": 20,
+   "n_q50": 20,
+   "ci_lo_q50": 0.8315665290169146,
+   "ci_hi_q50": 1.0,
+   "pass_q60": 19,
+   "n_q60": 20,
+   "ci_lo_q60": 0.7512672372279722,
+   "ci_hi_q60": 0.9987349105020502,
+   "pass_total": 39,
+   "n_total": 40,
+   "ci_lo_total": 0.8684141415172343,
+   "ci_hi_total": 0.9993672550679505,
+   "reaches_target": true
+  },
+  "bwAB": {
+   "pass_q50": 18,
+   "n_q50": 20,
+   "ci_lo_q50": 0.6830172859809177,
+   "ci_hi_q50": 0.9876514728297052,
+   "pass_q60": 20,
+   "n_q60": 20,
+   "ci_lo_q60": 0.8315665290169146,
+   "ci_hi_q60": 1.0,
+   "pass_total": 38,
+   "n_total": 40,
+   "ci_lo_total": 0.8308031360405823,
+   "ci_hi_total": 0.9938863534006491,
+   "reaches_target": true
+  }
+ },
+ "proposed": "bwA",
+ "both_reach_target": true,
+ "stopped_without_verdict": [],
+ "agrees_with_headline": true,
+ "differences": []
+}

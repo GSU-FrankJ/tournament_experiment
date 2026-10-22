@@ -1,0 +1,122 @@
+{
+ "schema": "t3_retry/1",
+ "attempt": 1,
+ "trigger_check": {
+  "stage": 3,
+  "local": 1600,
+  "update": 1600,
+  "valid": true,
+  "Delta": 0.00564620993448306,
+  "s": 65.91148338813635,
+  "R": 0.16465230501094666,
+  "R_tail": 0.002816300068775699,
+  "C": 0.03675613279039254
+ },
+ "reasons": [
+  "delta_gt"
+ ],
+ "delta_gt": 0.005,
+ "counts": {
+  "updates": 1600,
+  "episodes": 819200,
+  "transitions": 819200,
+  "minibatch_steps": 32000,
+  "wall_sec": 388.1706023691222,
+  "process_cpu_sec": 386.550604818,
+  "dev_verifier_sec": 3.237171618733555,
+  "n_dev_checks": 64
+ },
+ "costs": {
+  "seconds": {
+   "train_rollout": 7.871207465883344,
+   "train_update": 375.61275095772,
+   "dev_verifier": 3.237171618733555
+  },
+  "count": {
+   "train_rollout": 1600,
+   "train_update": 1600,
+   "dev_verifier": 64
+  }
+ },
+ "rule_record": {
+  "stage": 3,
+  "enabled": false,
+  "n_checks": 64,
+  "blocks": [
+   {
+    "block_id": 1,
+    "type": "legacy",
+    "first_local": 1,
+    "last_local": 1600,
+    "exit_reason": "fixed_budget"
+   }
+  ],
+  "landing": null,
+  "fire_local": null,
+  "would_fire_local": null,
+  "budget_forced": false,
+  "training_updates": null,
+  "total_updates": 1600,
+  "params": {
+   "stage": 3,
+   "enabled": false,
+   "K": 25,
+   "M": 3,
+   "eps": 0.005,
+   "rho": 0.05,
+   "tau": 0.02,
+   "conc_limit": 0.04,
+   "n_block": 400,
+   "u_cap": 2000,
+   "n_land": 400,
+   "loc_frac": 0.25,
+   "alpha_polish": 0.5,
+   "alpha_global": 0.0,
+   "ema_beta": 0.5,
+   "lr_base": 0.0003,
+   "lr_end": 3e-05,
+   "n_nontail_bins": 20,
+   "fixed_budget": 1600
+  },
+  "entry_update": 0,
+  "exit_update": 1600,
+  "episodes": 819200,
+  "transitions": 819200,
+  "minibatch_steps": 32000,
+  "wall_sec": 388.1706023691222
+ },
+ "init_state_sha256": "2af59b7b67a0b82aae56847c326051f4f571ea9fa5d9bd3b7a50b978cfd73b17",
+ "seed_namespaces": {
+  "init": [
+   70514,
+   50,
+   0
+  ],
+  "env_noise": [
+   70514,
+   50,
+   1
+  ],
+  "learner_action": [
+   70514,
+   50,
+   2
+  ],
+  "opponent_action": [
+   70514,
+   50,
+   3
+  ],
+  "starts_roles": [
+   70514,
+   50,
+   4
+  ],
+  "minibatch": [
+   70514,
+   50,
+   5
+  ]
+ },
+ "attempt2_init_state_sha256": "d4b679be92fc425865635e66e427e2333fced2971c4a1ee086125e8705fdcfe5"
+}

@@ -1,0 +1,50 @@
+{
+ "results_tables_py_birth_utc": "2026-10-22 02:21:15.679567227 +0000",
+ "cut_utc": "2026-10-22T02:21:15.679567+00:00",
+ "n_runs": 122,
+ "n_clean": 40,
+ "n_dirty": 82,
+ "last_clean_start": "2026-10-22T02:20:09.000+00:00",
+ "first_dirty_start": "2026-10-22T02:29:08.000+00:00",
+ "runs_whose_flag_disagrees_with_the_boundary": [],
+ "commits": [
+  "b565f0e8"
+ ],
+ "dirty_by_arm": {
+  "bw": 40,
+  "bwA": 40,
+  "bwAB": 2
+ },
+ "clean_by_arm": {
+  "bw": 0,
+  "bwA": 1,
+  "bwAB": 39
+ },
+ "dirty_by_kind": {
+  "dev": 82,
+  "diagnostic": 0
+ },
+ "bwA_bw_pairs": 40,
+ "pairs_flags_differ": 0,
+ "pairs_bit_identical_full_and_flags_differ": 0,
+ "pairs_attempt1_identical_and_flags_differ": 0,
+ "pairs_bit_identical_full_total": 38,
+ "pairs_attempt1_identical_total": 2,
+ "pairs_not_ok": [],
+ "selection": {
+  "fired_dirty_bwA": [
+   "t3r3_q50_s70508_bwA",
+   "t3r3_q50_s70516_bwA"
+  ],
+  "fired_dirty_bwAB": [],
+  "fired_dirty_diagnostic": [],
+  "nonfired_dirty_bwAB_lowest_per_q": {
+   "50": null,
+   "60": "t3r3_q60_s70519_bwAB"
+  },
+  "nonfired_dirty_bwA_lowest_per_q": {
+   "50": "t3r3_q50_s70501_bwA",
+   "60": "t3r3_q60_s70501_bwA"
+  }
+ }
+}

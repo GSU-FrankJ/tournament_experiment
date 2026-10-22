@@ -1,0 +1,117 @@
+{
+ "counts": {
+  "bw": {
+   "arm": "bw",
+   "n_q50": 20,
+   "pass_q50": 18,
+   "ci_lo_q50": 0.6830172859809177,
+   "ci_hi_q50": 0.9876514728297052,
+   "n_q60": 20,
+   "pass_q60": 19,
+   "ci_lo_q60": 0.7512672372279723,
+   "ci_hi_q60": 0.9987349105020502,
+   "n_total": 40,
+   "pass_total": 37,
+   "ci_lo_total": 0.796135251267101,
+   "ci_hi_total": 0.9842578201489585
+  },
+  "bwA": {
+   "arm": "bwA",
+   "n_q50": 20,
+   "pass_q50": 20,
+   "ci_lo_q50": 0.8315665290169147,
+   "ci_hi_q50": 1.0,
+   "n_q60": 20,
+   "pass_q60": 19,
+   "ci_lo_q60": 0.7512672372279723,
+   "ci_hi_q60": 0.9987349105020502,
+   "n_total": 40,
+   "pass_total": 39,
+   "ci_lo_total": 0.8684141415172343,
+   "ci_hi_total": 0.9993672550679505
+  },
+  "bwAB": {
+   "arm": "bwAB",
+   "n_q50": 20,
+   "pass_q50": 18,
+   "ci_lo_q50": 0.6830172859809177,
+   "ci_hi_q50": 0.9876514728297052,
+   "n_q60": 20,
+   "pass_q60": 20,
+   "ci_lo_q60": 0.8315665290169147,
+   "ci_hi_q60": 1.0,
+   "n_total": 40,
+   "pass_total": 38,
+   "ci_lo_total": 0.8308031360405824,
+   "ci_hi_total": 0.9938863534006491
+  }
+ },
+ "targets": {
+  "bw": {
+   "arm": "bw",
+   "total_condition": false,
+   "q50_condition": true,
+   "q60_condition": true,
+   "reaches_target": false,
+   "pass_total": 37,
+   "pass_q50": 18,
+   "pass_q60": 19
+  },
+  "bwA": {
+   "arm": "bwA",
+   "total_condition": true,
+   "q50_condition": true,
+   "q60_condition": true,
+   "reaches_target": true,
+   "pass_total": 39,
+   "pass_q50": 20,
+   "pass_q60": 19
+  },
+  "bwAB": {
+   "arm": "bwAB",
+   "total_condition": true,
+   "q50_condition": true,
+   "q60_condition": true,
+   "reaches_target": true,
+   "pass_total": 38,
+   "pass_q50": 18,
+   "pass_q60": 20
+  }
+ },
+ "selection": {
+  "proposed": "bwA",
+  "both_reach_target": true,
+  "reason": "bwA is the first candidate arm in the order ['bwA', 'bwAB'] that reaches the target; both arms reach it, so bwA is proposed"
+ },
+ "first_attempt": {
+  "arms": {
+   "bw": {
+    "first_attempt_pass": 37,
+    "pass_final": 37,
+    "fired": 2
+   },
+   "bwA": {
+    "first_attempt_pass": 37,
+    "pass_final": 39,
+    "fired": 2
+   },
+   "bwAB": {
+    "first_attempt_pass": 35,
+    "pass_final": 38,
+    "fired": 3
+   }
+  },
+  "mismatch_bwA_vs_bw": [],
+  "stop": false,
+  "bw_raw_pass_count": 37,
+  "bw_fired_runs_that_pass_in_bw": 0
+ },
+ "stopped_without_verdict": [],
+ "infra_events": [],
+ "n_rows": 122,
+ "n_dev_runs": 120,
+ "paired_bootstrap": {
+  "n_boot": 10000,
+  "seed": 20261021
+ }
+}

@@ -1,0 +1,953 @@
+{
+ "tool": "tools/t3/t3r3_launch.py",
+ "wave": "t3r3",
+ "dry_run": false,
+ "argv": [
+  "tools/t3/t3r3_launch.py",
+  "--workers",
+  "40",
+  "--code-commit",
+  "727116a38ca5e18e993d996890db94fb2360730b"
+ ],
+ "started": "20261022_022004",
+ "workers": 40,
+ "nproc": 64,
+ "loadavg_at_start": [
+  9.958984375,
+  13.51318359375,
+  13.54736328125
+ ],
+ "disk_free_bytes": 855140569088,
+ "disk_total_bytes": 5952313540608,
+ "head": "b565f0e8dd644a39043ebd3c24875c210b2cfe63",
+ "code_commit": "727116a38ca5e18e993d996890db94fb2360730b",
+ "status_porcelain": [
+  "?? results/t3_r3/diag/arrays/",
+  "?? results/t3_r3/launch_commit.txt",
+  "?? results/t3_r3/launch_start.txt",
+  "?? results/t3_r3/launch_stdout.txt",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/continuation_table_stage1.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/continuation_table_stage2.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/drift_test.json",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage1_development.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage1_final.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage2_development.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage2_final.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage3_development.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/freeze_stage3_final.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_binmaps_stage2.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_checks_stage1.csv",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_checks_stage2.csv",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_checks_stage3.csv",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/ms_updates.csv",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/train_history.json",
+  "?? results/t3_r3/legacy/q50/seed60502/bw/weights/",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/continuation_table_stage1.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/continuation_table_stage2.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/drift_test.json",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage1_development.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage1_final.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage2_development.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage2_final.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage3_development.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/freeze_stage3_final.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_binmaps_stage2.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_checks_stage1.csv",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_checks_stage2.csv",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_checks_stage3.csv",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/ms_updates.csv",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/train_history.json",
+  "?? results/t3_r3/legacy/q60/seed60518/bw/weights/",
+  "?? results/t3_r3/replays/q50/seed60501/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60501/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60501/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60501/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60501/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60501/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60501/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60501/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60501/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60501/weights/",
+  "?? results/t3_r3/replays/q50/seed60502/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60502/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60502/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60502/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60502/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60502/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60502/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60502/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60502/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60502/weights/",
+  "?? results/t3_r3/replays/q50/seed60504/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60504/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60504/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60504/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60504/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60504/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60504/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60504/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60504/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60504/weights/",
+  "?? results/t3_r3/replays/q50/seed60505/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60505/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60505/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60505/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60505/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60505/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60505/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60505/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60505/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60505/weights/",
+  "?? results/t3_r3/replays/q50/seed60506/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60506/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60506/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60506/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60506/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60506/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60506/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60506/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60506/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60506/weights/",
+  "?? results/t3_r3/replays/q50/seed60507/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60507/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60507/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60507/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60507/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60507/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60507/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60507/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60507/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60507/weights/",
+  "?? results/t3_r3/replays/q50/seed60513/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60513/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60513/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60513/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60513/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60513/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60513/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60513/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60513/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60513/weights/",
+  "?? results/t3_r3/replays/q50/seed60515/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q50/seed60515/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q50/seed60515/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q50/seed60515/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q50/seed60515/ms_run_summary.json",
+  "?? results/t3_r3/replays/q50/seed60515/ms_updates.csv",
+  "?? results/t3_r3/replays/q50/seed60515/replay_bins.npz",
+  "?? results/t3_r3/replays/q50/seed60515/rule_log.json",
+  "?? results/t3_r3/replays/q50/seed60515/train_history.json",
+  "?? results/t3_r3/replays/q50/seed60515/weights/",
+  "?? results/t3_r3/replays/q60/seed60501/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60501/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60501/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60501/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60501/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60501/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60501/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60501/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60501/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60501/weights/",
+  "?? results/t3_r3/replays/q60/seed60502/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60502/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60502/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60502/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60502/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60502/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60502/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60502/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60502/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60502/weights/",
+  "?? results/t3_r3/replays/q60/seed60503/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60503/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60503/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60503/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60503/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60503/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60503/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60503/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60503/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60503/weights/",
+  "?? results/t3_r3/replays/q60/seed60509/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60509/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60509/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60509/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60509/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60509/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60509/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60509/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60509/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60509/weights/",
+  "?? results/t3_r3/replays/q60/seed60516/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60516/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60516/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60516/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60516/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60516/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60516/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60516/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60516/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60516/weights/",
+  "?? results/t3_r3/replays/q60/seed60518/continuation_table_stage2.npz",
+  "?? results/t3_r3/replays/q60/seed60518/freeze_stage3_development.npz",
+  "?? results/t3_r3/replays/q60/seed60518/freeze_stage3_final.npz",
+  "?? results/t3_r3/replays/q60/seed60518/ms_binmaps_stage3.npz",
+  "?? results/t3_r3/replays/q60/seed60518/ms_run_summary.json",
+  "?? results/t3_r3/replays/q60/seed60518/ms_updates.csv",
+  "?? results/t3_r3/replays/q60/seed60518/replay_bins.npz",
+  "?? results/t3_r3/replays/q60/seed60518/rule_log.json",
+  "?? results/t3_r3/replays/q60/seed60518/train_history.json",
+  "?? results/t3_r3/replays/q60/seed60518/weights/",
+  "?? results/t3_r3/replays_3b774be8/"
+ ],
+ "code_commit_resolved": "727116a38ca5e18e993d996890db94fb2360730b",
+ "diff_stat_code_commit_to_head": "reports/t3/r3/03_checks.md                         |  29 +\n reports/t3/r3/04_preregistration.md                | 272 ++++++++\n reports/t3/r3/dev_plan.csv                         | 123 ++++\n reports/t3/r3/report_scripts/prereg_tables.py      |   8 +-\n reports/t3/r3/tables/prereg_arms.md                |   5 +\n reports/t3/r3/tables/prereg_cfgdiff.md             |   4 +\n reports/t3/r3/tables/prereg_legacy.md              |   4 +\n reports/t3/r3/tables/prereg_plan.md                | 124 ++++\n reports/t3/r3/tables/prereg_seeds.md               |   4 +\n results/t3_r3/legacy/compare_q50_s60502.json       |  13 +\n results/t3_r3/legacy/compare_q50_s60502.txt        |   6 +\n results/t3_r3/legacy/compare_q60_s60518.json       |  13 +\n results/t3_r3/legacy/compare_q60_s60518.txt        |   6 +\n results/t3_r3/legacy/q50/seed60502/bw/gates.json   | 222 ++++++\n .../t3_r3/legacy/q50/seed60502/bw/manifest.json    | 753 +++++++++++++++++++++\n .../legacy/q50/seed60502/bw/ms_run_summary.json    |  60 ++\n .../t3_r3/legacy/q50/seed60502/bw/rule_log.json    | 620 +++++++++++++++++\n .../t3_r3/legacy/q50/seed60502/bw/run_config.json  | 342 ++++++++++\n results/t3_r3/legacy/q50/seed60502/bw/status.json  |  21 +\n results/t3_r3/legacy/q60/seed60518/bw/gates.json   | 222 ++++++\n .../t3_r3/legacy/q60/seed60518/bw/manifest.json    | 753 +++++++++++++++++++++\n .../legacy/q60/seed60518/bw/ms_run_summary.json    |  60 ++\n .../t3_r3/legacy/q60/seed60518/bw/rule_log.json    | 644 ++++++++++++++++++\n .../t3_r3/legacy/q60/seed60518/bw/run_config.json  | 342 ++++++++++\n results/t3_r3/legacy/q60/seed60518/bw/status.json  |  21 +\n results/t3_r3/legacy_commit.txt                    |   1 +\n results/t3_r3/legacy_end.txt                       |   1 +\n results/t3_r3/legacy_start.txt                     |   1 +\n results/t3_r3/legacy_stdout.txt                    |  29 +\n results/t3_r3/tests_p2/pytest_commit.txt           |   1 +\n results/t3_r3/tests_p2/run_shards.py               |  22 +\n results/t3_r3/tests_p2/shard0.end                  |   1 +\n results/t3_r3/tests_p2/shard0.files                |   1 +\n results/t3_r3/tests_p2/shard0.start                |   1 +\n results/t3_r3/tests_p2/shard0.txt                  |  10 +\n results/t3_r3/tests_p2/shard1.end                  |   1 +\n results/t3_r3/tests_p2/shard1.files                |   3 +\n results/t3_r3/tests_p2/shard1.start                |   1 +\n results/t3_r3/tests_p2/shard1.txt                  |  94 +++\n results/t3_r3/tests_p2/shard10.end                 |   1 +\n results/t3_r3/tests_p2/shard10.files               |   6 +\n results/t3_r3/tests_p2/shard10.start               |   1 +\n results/t3_r3/tests_p2/shard10.txt                 |  39 ++\n results/t3_r3/tests_p2/shard11.end                 |   1 +\n results/t3_r3/tests_p2/shard11.files               |   6 +\n results/t3_r3/tests_p2/shard11.start               |   1 +\n results/t3_r3/tests_p2/shard11.txt                 |  17 +\n results/t3_r3/tests_p2/shard2.end                  |   1 +\n results/t3_r3/tests_p2/shard2.files                |   7 +\n results/t3_r3/tests_p2/shard2.start                |   1 +\n results/t3_r3/tests_p2/shard2.txt                  |  11 +\n results/t3_r3/tests_p2/shard3.end                  |   1 +\n results/t3_r3/tests_p2/shard3.files                |   6 +\n results/t3_r3/tests_p2/shard3.start                |   1 +\n results/t3_r3/tests_p2/shard3.txt                  |  16 +\n results/t3_r3/tests_p2/shard4.end                  |   1 +\n results/t3_r3/tests_p2/shard4.files                |   6 +\n results/t3_r3/tests_p2/shard4.start                |   1 +\n results/t3_r3/tests_p2/shard4.txt                  |  18 +\n results/t3_r3/tests_p2/shard5.end                  |   1 +\n results/t3_r3/tests_p2/shard5.files                |   7 +\n results/t3_r3/tests_p2/shard5.start                |   1 +\n results/t3_r3/tests_p2/shard5.txt                  |  17 +\n results/t3_r3/tests_p2/shard6.end                  |   1 +\n results/t3_r3/tests_p2/shard6.files                |   6 +\n results/t3_r3/tests_p2/shard6.start                |   1 +\n results/t3_r3/tests_p2/shard6.txt                  |  10 +\n results/t3_r3/tests_p2/shard7.end                  |   1 +\n results/t3_r3/tests_p2/shard7.files                |   7 +\n results/t3_r3/tests_p2/shard7.start                |   1 +\n results/t3_r3/tests_p2/shard7.txt                  |  11 +\n results/t3_r3/tests_p2/shard8.end                  |   1 +\n results/t3_r3/tests_p2/shard8.files                |   6 +\n results/t3_r3/tests_p2/shard8.start                |   1 +\n results/t3_r3/tests_p2/shard8.txt                  |  11 +\n results/t3_r3/tests_p2/shard9.end                  |   1 +\n results/t3_r3/tests_p2/shard9.files                |   7 +\n results/t3_r3/tests_p2/shard9.start                |   1 +\n results/t3_r3/tests_p2/shard9.txt                  |  11 +\n 79 files changed, 5080 insertions(+), 3 deletions(-)",
+ "diff_stat_run_code_to_head": "",
+ "params_file": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/reports/t3/r1/params_bw_t3.json",
+ "params_sha256": "db5156962a2d7a3eca0b7d0440d995d84dc57bb88c7066e38d7d61e40148e976",
+ "n_planned": 122,
+ "planned": [
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/diagnostic/q60/seed60518/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/diagnostic/q60/seed60518/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bwAB",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bwA",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bw",
+  "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bw"
+ ],
+ "runs": [
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bwAB",
+   "returncode": 0,
+   "wall_sec": 538.6991497438867
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bwAB",
+   "returncode": 0,
+   "wall_sec": 553.9964577730279
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bwAB",
+   "returncode": 0,
+   "wall_sec": 562.1868237950839
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bwAB",
+   "returncode": 0,
+   "wall_sec": 569.9111472947989
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bwAB",
+   "returncode": 0,
+   "wall_sec": 586.7974297769833
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bwAB",
+   "returncode": 0,
+   "wall_sec": 589.9689669988584
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bwAB",
+   "returncode": 0,
+   "wall_sec": 610.7170411909465
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bwAB",
+   "returncode": 0,
+   "wall_sec": 611.3639917389955
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bwAB",
+   "returncode": 0,
+   "wall_sec": 615.1454511990305
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bwAB",
+   "returncode": 0,
+   "wall_sec": 615.4866266739555
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bwAB",
+   "returncode": 0,
+   "wall_sec": 617.6604148729239
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bwAB",
+   "returncode": 0,
+   "wall_sec": 626.2671434970107
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bwAB",
+   "returncode": 0,
+   "wall_sec": 627.433828508947
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bwAB",
+   "returncode": 0,
+   "wall_sec": 628.2418354991823
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bwAB",
+   "returncode": 0,
+   "wall_sec": 630.9327073949389
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bwAB",
+   "returncode": 0,
+   "wall_sec": 645.2527073509991
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bwAB",
+   "returncode": 0,
+   "wall_sec": 648.9406049428508
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bwAB",
+   "returncode": 0,
+   "wall_sec": 648.98977990821
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bwAB",
+   "returncode": 0,
+   "wall_sec": 653.3930234319996
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bwAB",
+   "returncode": 0,
+   "wall_sec": 655.3291447439697
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bwAB",
+   "returncode": 0,
+   "wall_sec": 660.392781078117
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bwAB",
+   "returncode": 0,
+   "wall_sec": 660.6262959670275
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bwAB",
+   "returncode": 0,
+   "wall_sec": 667.1050146990456
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bwAB",
+   "returncode": 0,
+   "wall_sec": 667.9454151131213
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bwAB",
+   "returncode": 0,
+   "wall_sec": 671.068299229024
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bwAB",
+   "returncode": 0,
+   "wall_sec": 671.2964267241769
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bwAB",
+   "returncode": 0,
+   "wall_sec": 680.4087277369108
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bwAB",
+   "returncode": 0,
+   "wall_sec": 689.5878506139852
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bwAB",
+   "returncode": 0,
+   "wall_sec": 689.8519586210605
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bwAB",
+   "returncode": 0,
+   "wall_sec": 690.2909826911055
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bwAB",
+   "returncode": 0,
+   "wall_sec": 691.1679327830207
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bwAB",
+   "returncode": 0,
+   "wall_sec": 694.693405949045
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bwAB",
+   "returncode": 0,
+   "wall_sec": 723.5220056860708
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bwAB",
+   "returncode": 0,
+   "wall_sec": 734.9480576789938
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bwAB",
+   "returncode": 0,
+   "wall_sec": 753.4020882099867
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/diagnostic/q60/seed60518/bwA",
+   "returncode": 0,
+   "wall_sec": 778.0921122869477
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/diagnostic/q60/seed60518/bwAB",
+   "returncode": 0,
+   "wall_sec": 858.3847274680156
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bwAB",
+   "returncode": 0,
+   "wall_sec": 906.4570496170782
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bwAB",
+   "returncode": 0,
+   "wall_sec": 924.7749754530378
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bwAB",
+   "returncode": 0,
+   "wall_sec": 1017.1270419477951
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bwAB",
+   "returncode": 0,
+   "wall_sec": 564.2247441709042
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bwAB",
+   "returncode": 0,
+   "wall_sec": 593.3646422720049
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bwA",
+   "returncode": 0,
+   "wall_sec": 580.5215894898865
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bwA",
+   "returncode": 0,
+   "wall_sec": 570.5360138139222
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bwA",
+   "returncode": 0,
+   "wall_sec": 577.7017961640377
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bwA",
+   "returncode": 0,
+   "wall_sec": 548.6168252851348
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bwA",
+   "returncode": 0,
+   "wall_sec": 573.9533376980107
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bwA",
+   "returncode": 0,
+   "wall_sec": 557.6737878329586
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bwA",
+   "returncode": 0,
+   "wall_sec": 538.4898486670572
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bwA",
+   "returncode": 0,
+   "wall_sec": 579.4189966979902
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bwA",
+   "returncode": 0,
+   "wall_sec": 630.0822547690477
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bwA",
+   "returncode": 0,
+   "wall_sec": 571.9171958710067
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bwA",
+   "returncode": 0,
+   "wall_sec": 587.9845920628868
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bwA",
+   "returncode": 0,
+   "wall_sec": 557.7791651559528
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bwA",
+   "returncode": 0,
+   "wall_sec": 595.7141269438434
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bwA",
+   "returncode": 0,
+   "wall_sec": 606.0320657899138
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bwA",
+   "returncode": 0,
+   "wall_sec": 573.3906418059487
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bwA",
+   "returncode": 0,
+   "wall_sec": 537.6355867008679
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bwA",
+   "returncode": 0,
+   "wall_sec": 567.9995556271169
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bwA",
+   "returncode": 0,
+   "wall_sec": 568.3820201309863
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bwA",
+   "returncode": 0,
+   "wall_sec": 594.7291606089566
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bwA",
+   "returncode": 0,
+   "wall_sec": 582.5254460799042
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bwA",
+   "returncode": 0,
+   "wall_sec": 596.0440096000675
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bwA",
+   "returncode": 0,
+   "wall_sec": 579.9910207600333
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bwA",
+   "returncode": 0,
+   "wall_sec": 593.777834818
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bwA",
+   "returncode": 0,
+   "wall_sec": 588.2137030090671
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bwA",
+   "returncode": 0,
+   "wall_sec": 630.4230477060191
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bwA",
+   "returncode": 0,
+   "wall_sec": 562.0204620480072
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bwA",
+   "returncode": 0,
+   "wall_sec": 617.1366677419282
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bwA",
+   "returncode": 0,
+   "wall_sec": 635.6790122520179
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bwA",
+   "returncode": 0,
+   "wall_sec": 577.6048771420028
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bwA",
+   "returncode": 0,
+   "wall_sec": 636.6134665880818
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bwA",
+   "returncode": 0,
+   "wall_sec": 619.4196051149629
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bwA",
+   "returncode": 0,
+   "wall_sec": 588.6928731149528
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bwA",
+   "returncode": 0,
+   "wall_sec": 590.5402034651488
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bwA",
+   "returncode": 0,
+   "wall_sec": 834.2321390311699
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bwA",
+   "returncode": 0,
+   "wall_sec": 812.2006998280995
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bwA",
+   "returncode": 0,
+   "wall_sec": 610.2974996340927
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bwA",
+   "returncode": 0,
+   "wall_sec": 615.7874634708278
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bwA",
+   "returncode": 0,
+   "wall_sec": 587.4262200291269
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70506/bw",
+   "returncode": 0,
+   "wall_sec": 523.0211922000162
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70501/bw",
+   "returncode": 0,
+   "wall_sec": 562.9175690619741
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70502/bw",
+   "returncode": 0,
+   "wall_sec": 562.19310541288
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bwA",
+   "returncode": 0,
+   "wall_sec": 604.2329841000028
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bwA",
+   "returncode": 0,
+   "wall_sec": 600.515843040077
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70504/bw",
+   "returncode": 0,
+   "wall_sec": 559.2088612860534
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70505/bw",
+   "returncode": 0,
+   "wall_sec": 554.6074148840271
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70507/bw",
+   "returncode": 0,
+   "wall_sec": 552.5229314449243
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70503/bw",
+   "returncode": 0,
+   "wall_sec": 580.0181859089062
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70509/bw",
+   "returncode": 0,
+   "wall_sec": 577.0734897980001
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70513/bw",
+   "returncode": 0,
+   "wall_sec": 554.4735982210841
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70510/bw",
+   "returncode": 0,
+   "wall_sec": 579.3015581290238
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70519/bw",
+   "returncode": 0,
+   "wall_sec": 554.1088497701567
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70511/bw",
+   "returncode": 0,
+   "wall_sec": 601.1033388460055
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70515/bw",
+   "returncode": 0,
+   "wall_sec": 579.6043763819616
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70508/bw",
+   "returncode": 0,
+   "wall_sec": 618.8784560130443
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70518/bw",
+   "returncode": 0,
+   "wall_sec": 577.3310311969835
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70516/bw",
+   "returncode": 0,
+   "wall_sec": 596.5490280790254
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70502/bw",
+   "returncode": 0,
+   "wall_sec": 566.8158678871114
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70520/bw",
+   "returncode": 0,
+   "wall_sec": 579.7894117680844
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70512/bw",
+   "returncode": 0,
+   "wall_sec": 615.8991308289114
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70505/bw",
+   "returncode": 0,
+   "wall_sec": 552.350632895017
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70517/bw",
+   "returncode": 0,
+   "wall_sec": 606.8929864610545
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q50/seed70514/bw",
+   "returncode": 0,
+   "wall_sec": 623.6132038289215
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70504/bw",
+   "returncode": 0,
+   "wall_sec": 570.2539192140102
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70503/bw",
+   "returncode": 0,
+   "wall_sec": 590.997369088931
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70510/bw",
+   "returncode": 0,
+   "wall_sec": 530.8923601100687
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70501/bw",
+   "returncode": 0,
+   "wall_sec": 610.6352412181441
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70509/bw",
+   "returncode": 0,
+   "wall_sec": 540.8990333680995
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70508/bw",
+   "returncode": 0,
+   "wall_sec": 548.6770442691632
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70507/bw",
+   "returncode": 0,
+   "wall_sec": 580.54567472497
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70506/bw",
+   "returncode": 0,
+   "wall_sec": 592.6090356009081
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70511/bw",
+   "returncode": 0,
+   "wall_sec": 553.6563331470825
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70512/bw",
+   "returncode": 0,
+   "wall_sec": 544.1857083810028
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70514/bw",
+   "returncode": 0,
+   "wall_sec": 519.4225925200153
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70515/bw",
+   "returncode": 0,
+   "wall_sec": 510.5073358218651
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70513/bw",
+   "returncode": 0,
+   "wall_sec": 525.1029158099554
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70516/bw",
+   "returncode": 0,
+   "wall_sec": 497.3290733951144
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70517/bw",
+   "returncode": 0,
+   "wall_sec": 482.4701002081856
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70518/bw",
+   "returncode": 0,
+   "wall_sec": 471.2666937841568
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70519/bw",
+   "returncode": 0,
+   "wall_sec": 416.6290656020865
+  },
+  {
+   "out": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/dev/q60/seed70520/bw",
+   "returncode": 0,
+   "wall_sec": 427.99124807002954
+  }
+ ],
+ "state": "done",
+ "loadavg_at_end": [
+  11.2001953125,
+  26.34326171875,
+  36.1572265625
+ ]
+}

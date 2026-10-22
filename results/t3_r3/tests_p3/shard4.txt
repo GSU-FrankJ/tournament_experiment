@@ -1,0 +1,11 @@
+........................................................................ [ 40%]
+........................................................................ [ 81%]
+.................................                                        [100%]
+============================= slowest 5 durations ==============================
+157.01s call     tests/test_ms_continuation.py::test_t3_nested_self_convergence
+52.73s call     tests/test_t3r3_replay.py::test_instrumentation_is_passive_and_bit_identical
+38.11s setup    tests/test_v2_refine_tools.py::test_parents_a_mid_phase_state_is_what_stage2_continues_from
+36.41s call     tests/test_t3_metrics_eval.py::test_bw_evaluation_equals_the_runners_freeze_arrays_bit_for_bit
+26.11s call     tests/test_t3r3_replay.py::test_replay_reproduces_the_original_stage3_bit_for_bit
+177 passed in 416.04s (0:06:56)
+exit=0

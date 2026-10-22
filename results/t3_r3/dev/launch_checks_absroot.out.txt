@@ -1,0 +1,128 @@
+{
+ "n_runs": 122,
+ "verdicts": {
+  "exit_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "files_complete": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "manifest_commit_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "clean_tree": {
+   "pass": 40,
+   "fail": 82,
+   "not_evaluated": 0
+  },
+  "global_rng_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_equals_plan": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "config_production_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "trigger_consistent": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "budget_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "lr_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "refresh_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "exports_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "checks_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "retry_budget_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "init_equals_plan": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "replay_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  },
+  "pair_ok": {
+   "pass": 122,
+   "fail": 0,
+   "not_evaluated": 0
+  }
+ },
+ "by_arm": {
+  "bw": {
+   "runs": 40,
+   "fired": 0,
+   "would_fire": 2,
+   "verdict_failures": {
+    "clean_tree": 40
+   }
+  },
+  "bwA": {
+   "runs": 41,
+   "fired": 3,
+   "would_fire": 3,
+   "verdict_failures": {
+    "clean_tree": 40
+   }
+  },
+  "bwAB": {
+   "runs": 41,
+   "fired": 4,
+   "would_fire": 4,
+   "verdict_failures": {
+    "clean_tree": 2,
+    "pair_ok": 40
+   }
+  }
+ },
+ "cross_arm_init": {
+  "attempt1_digest_differs_across_arms": [],
+  "attempt2_digest_differs_bwA_bwAB": [],
+  "ok": true
+ },
+ "infra_events_present": true,
+ "infra_events": {
+  "schema": "t3r3_infra_events/1",
+  "events": [],
+  "stopped_without_verdict": []
+ }
+}
