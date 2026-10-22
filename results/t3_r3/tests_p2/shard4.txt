@@ -1,0 +1,18 @@
+........................................................................ [ 38%]
+........................................................................ [ 77%]
+.........................................                                [100%]
+=============================== warnings summary ===============================
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+tests/test_ms_r4_curves.py::test_run_all_writes_per_run_files_the_combined_table_and_the_info
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1002317) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 5 durations ==============================
+160.42s call     tests/test_ms_continuation.py::test_t3_nested_self_convergence
+38.70s setup    tests/test_v2_refine_tools.py::test_parents_a_mid_phase_state_is_what_stage2_continues_from
+37.62s call     tests/test_t3_metrics_eval.py::test_bw_evaluation_equals_the_runners_freeze_arrays_bit_for_bit
+33.00s setup    tests/test_ms_r4_curves.py::test_the_development_tier_equals_the_online_checks_bit_for_bit_and_the_last_point_the_freeze[fb_a0]
+20.11s call     tests/test_ms_continuation.py::test_t2_table_equals_utils_v2_continuation_bitwise[60-random5]
+185 passed, 2 warnings in 383.76s (0:06:23)
+exit=0

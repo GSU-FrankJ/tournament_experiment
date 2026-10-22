@@ -1,0 +1,10 @@
+........................................................................ [ 55%]
+.........................................................                [100%]
+============================= slowest 5 durations ==============================
+83.26s setup    tests/test_ms_r3_analysis.py::test_extraction_of_the_tiny_wave
+20.92s setup    tests/test_ms_r3_analysis.py::test_criterion_of_the_ten_seed_world_equals_the_manual_recomputation_and_the_designed_pattern
+20.05s setup    tests/test_ms_r3_analysis.py::test_every_bootstrap_table_changes_when_the_seed_changes[arm_summary]
+11.31s setup    tests/test_ms_r3_analysis.py::test_cli_end_to_end_on_the_tiny_wave_the_missing_planned_runs_are_an_error
+6.83s setup    tests/test_ms_r3_analysis.py::test_cli_is_deterministic_and_refuses_to_overwrite
+129 passed in 243.08s (0:04:03)
+exit=0

@@ -1,0 +1,11 @@
+........................................................................ [ 48%]
+........................................................................ [ 96%]
+......                                                                   [100%]
+============================= slowest 5 durations ==============================
+111.11s setup    tests/test_t3r3_retry.py::test_a_fired_run_keeps_attempt1_equal_to_bw_and_freezes_attempt2
+49.83s setup    tests/test_t3_analysis.py::test_coverage_cost_and_curves_on_the_reduced_runs
+43.35s setup    tests/test_v2_infra.py::test_rng_alignment_after_one_batch
+26.93s setup    tests/test_v2_infra.py::test_branch_reproducibility[A_joint]
+20.79s call     tests/test_v2_refine.py::test_defaults_bit_identical_to_c7
+150 passed in 391.61s (0:06:31)
+exit=0

@@ -1,0 +1,21 @@
+{
+ "run": "t3r2_q60_s60518_bw",
+ "arm": "bw",
+ "q": 60,
+ "seed": 60518,
+ "state": "done",
+ "pid": 1001978,
+ "host": "vector2",
+ "cmd": "/home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/run/run_ms_stagewise.py --config /home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/legacy/q60/seed60518/bw/run_config.json --out-dir /home/fjiang4/tournament_experiment/.claude/worktrees/t3-bw-failures-diagnosis-25cb13/results/t3_r3/legacy/q60/seed60518/bw",
+ "start_time": "2026-10-22 02:07:36",
+ "git": {
+  "commit": "727116a38ca5e18e993d996890db94fb2360730b",
+  "short": "727116a",
+  "dirty": false
+ },
+ "end_time": "2026-10-22 02:14:46",
+ "exit_code": 0,
+ "final_global_update": 3800,
+ "total_wall_sec": 430.6050994170364,
+ "outcome": "not_evaluated_T3"
+}

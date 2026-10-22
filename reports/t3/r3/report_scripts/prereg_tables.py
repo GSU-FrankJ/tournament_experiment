@@ -38,10 +38,10 @@ def t_cfgdiff() -> str:
     import t3r3_launch as lt
     params = tc.load_bw_params()
     proto = tc.load_protocol()
-    base = lt.build_arm_config(proto, params, "bw", 50, 70501, "OUT")
+    base = lt.build_arm_config(proto, params, "bw", 50, 70501, "OUT/bw")
     rows = []
     for arm in lt.CANDIDATES:
-        cfg = lt.build_arm_config(proto, params, arm, 50, 70501, "OUT")
+        cfg = lt.build_arm_config(proto, params, arm, 50, 70501, f"OUT/{arm}")
         rows.append({"arm": f"`{arm}` against `bw`", "differing config paths (q = 50, seed 70501; the same for every seed, tested)":
                      ", ".join(f"`{k}`" for k in tc.config_diff(base, cfg))})
     return md(rows)
@@ -76,7 +76,9 @@ def t_legacy() -> str:
     rows = []
     for f in files:
         d = json.loads(f.read_text())
-        rows.append({"run": d["run"], "re-run": d["new"], "original": d["orig"], "code commit of the re-run": d["commit"][:8],
+        rel = lambda p: p[p.index("results/"):] if "results/" in p else p          # noqa: E731
+        rows.append({"run": d["run"], "re-run": rel(d["new"]), "original (T3-R2 untracked root)": rel(d["orig"]),
+                     "code commit of the re-run": d["commit"][:8],
                      "npz files compared": d["n_npz"], "all identical": d["ok"], "wall time (s)": d.get("wall_sec")})
     return md(rows)
 

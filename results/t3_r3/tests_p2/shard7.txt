@@ -1,0 +1,11 @@
+........................................................................ [ 48%]
+........................................................................ [ 96%]
+.....                                                                    [100%]
+============================= slowest 5 durations ==============================
+145.27s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[60]
+122.86s call     tests/test_v2_refine_continuation.py::test_ii_c_training_side_sensitivity[50]
+39.54s call     tests/test_v2_refine_continuation.py::test_ii_a_self_convergence[60]
+35.86s setup    tests/test_t3r2_audit.py::test_snapshot_identity_a2_on_a_reduced_run
+32.54s call     tests/test_v2_refine_continuation.py::test_ii_a_self_convergence[50]
+149 passed in 590.96s (0:09:50)
+exit=0

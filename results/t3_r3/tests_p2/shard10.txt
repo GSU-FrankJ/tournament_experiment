@@ -1,0 +1,39 @@
+........................................................................ [ 45%]
+........................................................................ [ 91%]
+......F.......                                                           [100%]
+=================================== FAILURES ===================================
+___________________ test_the_existing_launcher_is_unchanged ____________________
+
+    def test_the_existing_launcher_is_unchanged():
+        assert L1.WAVES == ("base", "v20_repro", "pilot", "r2", "r3")
+        assert L1.WAVE_DIR == {"base": "base", "v20_repro": "v20_reproduction", "pilot": "pilot", "r2": "pilot", "r3": "pilot"}
+        assert L1.MAX_WORKERS == 40
+        diff = subprocess.run(["git", "-C", str(ROOT), "diff", "--stat", H.BASE_COMMIT, "--", "tools/ms/launch_ms_r1.py", "run/run_v2_T2_locked.py",
+                               "run/run_v2_stagewise.py", "run/v2_rollout.py", "utils/v2_continuation.py", "utils/v2_metrics.py",
+                               "utils/dp_br_verifier.py", "envs", "tools/v2", "protocols"], capture_output=True, text=True)
+        if diff.returncode == 0:
+>           assert diff.stdout.strip() == "", diff.stdout          # the frozen files are byte-identical to the base commit
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError:  protocols/LOCK                   |  11 +
+E              protocols/v2_T3_locked_v1_0.json | 552 +++++++++++++++++++++++++++++++++++++++
+E              protocols/v2_T3_locked_v1_0.md   |  78 ++++++
+E              3 files changed, 641 insertions(+)
+E             
+E           assert 'protocols/LO...insertions(+)' == ''
+E             
+E             + protocols/LOCK                   |  11 +
+E             +  protocols/v2_T3_locked_v1_0.json | 552 +++++++++++++++++++++++++++++++++++++++
+E             +  protocols/v2_T3_locked_v1_0.md   |  78 ++++++
+E             +  3 files changed, 641 insertions(+)
+
+tests/test_ms_r4_launcher.py:243: AssertionError
+============================= slowest 5 durations ==============================
+61.63s setup    tests/test_ms_r3_launch_checks.py::test_a_genuine_wave_passes_every_check
+38.96s call     tests/test_t3r2_launch.py::test_t3c_eval_reproduces_a_reduced_runs_freeze_arrays_bit_for_bit
+37.05s setup    tests/test_ms_r4_analysis.py::test_end_to_end_e1_analysis_on_genuine_runs
+3.60s call     tests/test_ms_r3_launch_checks.py::test_c_nl_finds_a_changed_export_series_value_or_stream_position
+3.59s call     tests/test_ms_r3_launch_checks.py::test_c_init_finds_a_changed_or_missing_init_digest
+=========================== short test summary info ============================
+FAILED tests/test_ms_r4_launcher.py::test_the_existing_launcher_is_unchanged
+1 failed, 157 passed in 208.92s (0:03:28)
+exit=1
