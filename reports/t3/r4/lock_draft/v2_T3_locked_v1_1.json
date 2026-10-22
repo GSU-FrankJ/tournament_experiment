@@ -1,0 +1,611 @@
+{
+ "schema": "t3_locked_protocol/1",
+ "protocol_version": "T3-1.1",
+ "round": "t3_r4",
+ "name": "v2_T3_locked_v1_1",
+ "note": "T = 3 backward-induction training with the verifier-gated restart of stage 3 (arm bwA of round T3-R3) and its fresh-seed confirmation. If this document and the JSON ever disagree, the JSON is what runs.",
+ "builds_on": {
+  "protocol": "protocols/v2_T3_locked_v1_0.json",
+  "protocol_sha256": "4f02c7ae89f2578a7510e1f3934caeb4fc6085e851d8898c26fff6fe1487a741",
+  "difference": "the config key stage3_retry = {\"delta_gt\": 0.005, \"max_retries\": 1}"
+ },
+ "protocol_file": "protocols/v2_T2_locked_v2_0.json",
+ "protocol_sha256": "6ca0a6f95ee8109aeca7c787186fb40f5fec80a09c113b880fe80d20f1d47fd3",
+ "params_file": "reports/t3/r1/params_bw_t3.json",
+ "params_sha256": "db5156962a2d7a3eca0b7d0440d995d84dc57bb88c7066e38d7d61e40148e976",
+ "params": {
+  "K": 25,
+  "M": 3,
+  "conc_limit": 0.04,
+  "localized_fraction": 0.25,
+  "alpha_polish": 0.5,
+  "ema_beta": 0.5,
+  "near_tie_half_width": 20.0,
+  "stages": {
+   "3": {
+    "eps": 0.005,
+    "rho": 0.05,
+    "tau": 0.02
+   },
+   "2": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02
+   },
+   "1": {
+    "eps": 0.005,
+    "rho": 0.03,
+    "tau": 0.02
+   }
+  },
+  "legacy_pipeline": {
+   "budgets": {
+    "3": 1600,
+    "2": 1600,
+    "1": 600
+   },
+   "lr_windows": {
+    "3": [
+     {
+      "first": 1201,
+      "last": 1600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ],
+    "2": [
+     {
+      "first": 1201,
+      "last": 1600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ],
+    "1": [
+     {
+      "first": 1,
+      "last": 600,
+      "start": 0.0003,
+      "end": 3e-05
+     }
+    ]
+   }
+  }
+ },
+ "criteria_file": "reports/t3/r1/prereg_criteria.json",
+ "criteria_sha256": "b586a5e39b1fad503282b1bb903696ad7d47c52e75fb9ff6e47f06781ad88332",
+ "gates": {
+  "G-A": {
+   "eta_T_over_dw": 0.005,
+   "rmse_pos_T_over_eT0": 0.05,
+   "tail_mean_T_over_eT0": 0.02
+  },
+  "G-F": {
+   "Gmax_full_over_dw": 0.01
+  },
+  "G-N": {
+   "eta_T_over_dw_dev_minus_final_abs": 0.001,
+   "Gmax_full_over_dw_dev_minus_final_abs": 0.001
+  },
+  "G-S": {
+   "stage1_rel_err_abs": 0.05,
+   "applies_at_horizon": 2
+  },
+  "comparison": "<= inclusive, full float64 precision",
+  "tier": "G-A and G-F on the final tier; G-N compares development and final tier",
+  "run_pass": {
+   "2": [
+    "G-A",
+    "G-F",
+    "G-N",
+    "G-S"
+   ],
+   "3": [
+    "G-A",
+    "G-F",
+    "G-N"
+   ]
+  }
+ },
+ "records": {
+  "50": {
+   "run": null,
+   "q": 50,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 50,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 200,
+   "domain_half_stage2": 200,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 40,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  },
+  "60": {
+   "run": null,
+   "q": 60,
+   "seed": null,
+   "T": 2,
+   "game": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "q": 60,
+    "T": 2,
+    "e_min": 0,
+    "e_max": 100
+   },
+   "dw": 4,
+   "B": 220,
+   "domain_half_stage2": 220,
+   "ppo": {
+    "hidden": 64,
+    "lr": 0.0003,
+    "adam_betas": [
+     0.9,
+     0.999
+    ],
+    "adam_eps": 1e-08,
+    "weight_decay": 0,
+    "clip_eps": 0.2,
+    "value_coef": 0.5,
+    "entropy_coef": 0,
+    "max_grad_norm": 0.5,
+    "epochs": 10,
+    "minibatch": 256,
+    "gamma": 1,
+    "gae_lambda": 1,
+    "c_min": 100,
+    "mu_clamp": 1e-06,
+    "action_clamp": 1e-06,
+    "adv_norm_eps": 1e-08
+   },
+   "protocol": {
+    "w_h": 6,
+    "w_l": 2,
+    "k": 0.00028571428571428574,
+    "e_min": 0,
+    "e_max": 100,
+    "episodes_per_update": 512,
+    "phase_caps": {
+     "A": 1600,
+     "B": 600,
+     "C": 1000
+    },
+    "warmup": 100,
+    "stability_every": 20,
+    "drift_thr": 0.01,
+    "kl_thr": 0.01,
+    "stability_consecutive": 2,
+    "verifier_timeout": {
+     "A": 100,
+     "B": 25,
+     "C": 25
+    },
+    "k_phase": 3,
+    "k_stop": 1,
+    "phase_thr_over_dw": {
+     "A": 0.02,
+     "B": 0.02,
+     "C": 0.01
+    },
+    "conc_thr": 0.04,
+    "snapshot_every": 20,
+    "es_bin_width": 10,
+    "phase_c_root": 256,
+    "phase_c_es": 256,
+    "final_thr_over_dw": 0.01,
+    "refine_thr_over_dw": 0.002,
+    "sensitivity_thr_over_dw": 0.03,
+    "dense_conc_step": 0.05,
+    "recovery_step": 0.5,
+    "direct_rollout_episodes": 200000,
+    "direct_rollout_reps": 3,
+    "direct_rollout_seed_base": 9005000,
+    "rng_namespaces": {
+     "init": 0,
+     "env_noise": 1,
+     "learner_action": 2,
+     "opponent_action": 3,
+     "starts_roles": 4,
+     "minibatch": 5
+    },
+    "weights_every": 25
+   },
+   "smoke_overrides": {},
+   "obs_encoding": "tau=(t-1)/(T-1); dtilde_1=0; dtilde_t=d/((t-1)B); float64 -> float32",
+   "action_mapping": "e = e_min + a (e_max - e_min); a ~ Beta(mu c, (1-mu) c)",
+   "mean_extraction": "e_hat = e_min + (e_max - e_min) alpha/(alpha+beta) in float64 from float32 alpha,beta",
+   "es_bins_stage2": 44,
+   "verifier": {
+    "development": {
+     "name": "development",
+     "state_step": 4,
+     "effort_step": 1,
+     "gl_half": 16,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    },
+    "final": {
+     "name": "final",
+     "state_step": 2,
+     "effort_step": 0.5,
+     "gl_half": 32,
+     "grid_tol": 1e-09,
+     "mass_tol": 1e-10,
+     "pdl_tol_over_dw": 1e-10
+    }
+   },
+   "dtypes": {
+    "network": "float32",
+    "env_gap_reward": "float64",
+    "verifier": "float64"
+   },
+   "device": "cpu",
+   "torch_threads": 1,
+   "versions": {
+    "python": "3.12.3",
+    "torch": "2.5.1+cu121",
+    "numpy": "2.5.0"
+   },
+   "group": "FINAL_A400_B25_C25",
+   "action_sampling": "numpy float64 Beta; clamp [1e-6,1-1e-6]; store float32; old/new log-prob on stored action",
+   "lr_schedule": {
+    "kind": "constant",
+    "actor_and_critic": true,
+    "ab_lr": 0.0003,
+    "c_start_lr": 0.0003,
+    "c_end_lr": 0.0003,
+    "c_budget_updates": 1000,
+    "c_local_first": 1,
+    "c_local_last": 1000,
+    "linear_denominator": 999,
+    "apply_before_each_update": true,
+    "constant_within_update": true,
+    "preserve_adam_state": true
+   },
+   "output_dir": null
+  }
+ },
+ "settings": {
+  "arm": "bw",
+  "horizon": 3,
+  "phases": [
+   3,
+   2,
+   1
+  ],
+  "budgets": {
+   "3": 1600,
+   "2": 1600,
+   "1": 600
+  },
+  "lr_windows": {
+   "3": [
+    {
+     "first": 1201,
+     "last": 1600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ],
+   "2": [
+    {
+     "first": 1201,
+     "last": 1600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ],
+   "1": [
+    {
+     "first": 1,
+     "last": 600,
+     "start": 0.0003,
+     "end": 3e-05
+    }
+   ]
+  },
+  "lr": {
+   "start": 0.0003,
+   "end": 3e-05,
+   "text": "3e-4 constant, then linear 3e-4 -> 3e-5 over local updates 1201-1600 at stages 3 and 2 and over 1-600 at stage 1"
+  },
+  "episodes_per_update": 512,
+  "start_weights": {
+   "scheme": "bin_balanced"
+  },
+  "rule": {
+   "enabled": false,
+   "K": 25,
+   "M": 3,
+   "conc_limit": 0.04,
+   "localized_fraction": 0.25,
+   "stages": {
+    "3": {
+     "eps": 0.005,
+     "rho": 0.05,
+     "tau": 0.02
+    },
+    "2": {
+     "eps": 0.005,
+     "rho": 0.03,
+     "tau": 0.02
+    },
+    "1": {
+     "eps": 0.005,
+     "rho": 0.03,
+     "tau": 0.02
+    }
+   }
+  },
+  "clamp_likelihood": "density",
+  "init_digest": true,
+  "check_every": 25,
+  "snapshot_every": 20,
+  "weights_every": 25,
+  "evaluated_policy": "the last iterate (Beta means) on the final and the development verifier tier",
+  "code": "agents/, envs/, utils/, run/, tools/ms/, tools/v2/ and the existing files of protocols/ as at the final commit of round T3-R3 (git diff b565f0e8 HEAD over agents envs utils run tools/ms tools/v2 is empty); run/run_ms_stagewise.py is the entry point",
+  "stage3_retry": {
+   "delta_gt": 0.005,
+   "max_retries": 1
+  },
+  "retry": {
+   "code": "run/ms_retry.py, behind the config key stage3_retry in run/run_ms_stagewise.py",
+   "trigger": "read at the development check at local update 1600 of the stage-3 phase: fires iff Delta > 0.005, or Delta, s or C is not finite, or s <= 0",
+   "retry": "one in-place re-initialisation of stage 3 with derived seeds and streams and one retraining; the second attempt is frozen whatever its own check says",
+   "records": "the artefacts of attempt 1 move to attempt1/ (nothing is overwritten or deleted) and retry.json records the trigger values and the derived seeds; a run whose trigger does not fire is bit-identical to bw",
+   "budget_of_a_fired_run": {
+    "updates": 5400,
+    "policy_rows": 2764800,
+    "minibatch_steps": 108000,
+    "development_checks": 216,
+    "exports": "152 plus 64 in attempt1/"
+   }
+  }
+ },
+ "paper_wording": "a verifier-gated restart of the terminal stage: when the development-tier one-step deviation gain at the end of the stage-3 phase exceeds the gate's limit 0.005, stage 3 is re-initialised once and retrained, and the second attempt is kept; its cost is part of the method's cost.",
+ "confirmation": {
+  "qs": [
+   50,
+   60
+  ],
+  "seed_block": [
+   80501,
+   80540
+  ],
+  "same_seeds_at_both_q": true,
+  "n_runs": 80,
+  "arm": "bwA",
+  "wave": "t3r4",
+  "run_name": "t3r4_q{q}_s{seed}_bwA",
+  "run_dir": "results/t3_r4/confirmation/q{q}/seed{seed}/bwA",
+  "config_fields_set_per_run": [
+   "seed",
+   "run",
+   "record.run",
+   "record.seed",
+   "record.output_dir",
+   "pilot"
+  ],
+  "scheme_key": "stage3_retry",
+  "pilot": "t3_r4",
+  "reference_run": "T3-R1 bw seed 50501 with the key stage3_retry",
+  "seed_block_status": "reserved in round T3-R3 and never trained (reports/t3/r3/04_preregistration.md section 12)",
+  "run_pass": "exit code 0; the process-global RNG assertion is ok; a valid evaluation (final and development tier); and G-A and G-F and G-N",
+  "rule": {
+   "max_failures_total": 6,
+   "max_failures_per_q": 4,
+   "runs_per_q": 40,
+   "n_runs": 80,
+   "text": "the confirmation passes iff at most 6 of the 80 runs fail and at most 4 of the 40 runs fail at q = 50 and at most 4 of the 40 runs fail at q = 60; otherwise it fails",
+   "rationale": "fixed before any development run in the pre-registration of round T3-R3 (reports/t3/r3/04_preregistration.md section 9, D6) and binding here"
+  },
+  "operating_characteristic": {
+   "assumption": "independent per-run failure probability f, the same at both q",
+   "pass_probability": {
+    "0.01": 0.999893,
+    "0.03": 0.981819,
+    "0.05": 0.864763,
+    "0.1": 0.270786,
+    "0.15": 0.029886
+   }
+  },
+  "failure_counting": {
+   "reporting": "every planned run is reported; no seed is replaced or re-drawn",
+   "infrastructure_failure": [
+    "a negative return code (a signal, e.g. SIGKILL)",
+    "an out-of-memory kill recorded in the kernel log or the run's log",
+    "OSError ENOSPC recorded in the run's status.json or traceback"
+   ],
+   "ledger": "results/t3_r4/confirmation/infra_events.json; the analysis tool and the blind tool both read it",
+   "rerun_after_infrastructure_failure": "the attempt is moved to results/t3_r4/confirmation/crashed/ and the run is repeated once into the original path; if the repeat also fails for an infrastructure reason the confirmation stops without a verdict (no pass or fail is declared)",
+   "other_failures": "any other nonzero exit, and any global-RNG violation, is a failed run",
+   "evaluation_problems": "an evaluation error, or an evaluation with valid = False, counts as a failed run unless a re-run of the locked evaluator on the same weights succeeds; the re-run is reported; a completed run is never re-trained",
+   "scheme_steps": "a re-initialisation of stage 3 inside a run (the retry of stage3_retry) is part of the run, never a re-run"
+  },
+  "reported_not_deciding": [
+   "pass counts per q and in total with exact Clopper-Pearson 95 % intervals",
+   "the worst Gmax_full and its run; the medians of eta_3, rmse_pos_T_over_eT0, tail_mean_T_over_eT0, peak_T_signed, Gmax_full and EXP_root",
+   "the fire rate of the trigger with the runs, and the first-attempt outcome (the pass count with every fired run counted as a failure of its first attempt)",
+   "per failing run: the failing gates and values, the stage of the failing quantity, S3, the stage-2 stretch, the last-16-export range of the failing stage-3 quantity, and its class (F), (K), (V), (E) or (U) as in T3-R3's D2",
+   "cost: updates, policy rows and wall time per run, and the share of fired runs",
+   "descriptive comparisons: this confirmation pooled with bwA's 40 development runs of T3-R3; the three blocks of bw (T3-R1, T3-R2, T3-R3 development); the pass rate of T3-1.0 implied by the first-attempt outcome"
+  ],
+  "on_failure": "nothing is changed or tried; the PI decides the next step"
+ },
+ "reference_config_sha256": {
+  "50": "2e2909eb393d22257d7c57057f8578c20fdaed6a513e88c677b1b971e1db2814",
+  "60": "6c1e0f8160d89ca9bc3ac33629b33af84dbddd1a31239bc54f5bd1e4e2062755"
+ },
+ "tool_sha256": {
+  "run/ms_retry.py": "025b6308d0cb2f668e7c074f6e7471b5fe447110a8b5b5fbdeb81813715638ad",
+  "run/run_ms_stagewise.py": "39777cee6a7413a67dbc29eabb3586224149534d9eff44bc105aca25f0e0bc3b",
+  "tools/ms/launch_ms_r1.py": "7cff4f925992fb701c608947f53c2b9c3a61cc152ac773d92077d5ed58450a8e",
+  "tools/ms/ms_configs.py": "d4031a2605fd2b2a9b68e44dd6316c8d596ee82a04b086b968e7a873d9032228",
+  "tools/ms/r4_common.py": "181837ca5d5fc52a888ee4298b07fe7b9f8228a0ee432e9549bf5420eab812a5",
+  "tools/t3/compare_runs.py": "2fd6fa772fa2bb1f1a419eff6851a6970d95b89b4cd240003842ea504b650d16",
+  "tools/t3/t3_configs.py": "c52bc47fa635b55d1979feff894001efb8e275d68167092545604acf7bde31fc",
+  "tools/t3/t3_eval.py": "a60db81a6de6ac03776582498996b1f0a513ae8f132eb6bb5f35a8b3a1e903f9",
+  "tools/t3/t3_launch.py": "9c7780dbdeeb5bf679517bf68617eefc2324146ef191ea530910c518445b3979",
+  "tools/t3/t3_launch_checks.py": "b684314acf3c72c569ef8450a320f558b3cdff04a0e1dfc4134a298394608069",
+  "tools/t3/t3_metrics.py": "e92334fd4fffd78fbd1260bc1f69b282e7638a6eeb7f937e188965e0c3de8b88",
+  "tools/t3/t3c_analysis.py": "8349e9c83d8a68aed81c43f827c303841c3033d18b3b128b94ee7df80710d212",
+  "tools/t3/t3c_blind.py": "d89cdb419b92cfb28f7c21e8f9d2342f1ac617cb7aa6e596d650383a384a9cb2",
+  "tools/t3/t3c_eval.py": "16d964357b0cfb4ad6b927f81aa7a24d1c55b4ff94db423b5e7f6a1959b1554f",
+  "tools/t3/t3c_launch.py": "58314f8a35a36c6dfcc36dfdd326551609e618526c96691a6baa38871db0782a",
+  "tools/t3/t3r2_audit.py": "3edad47c780d360bbcf58ec5388515c54ddcef8df26f9e6b5ff4c4885f10af06",
+  "tools/t3/t3r2_br_calc.py": "980cf280060b6e380c41424dfd977ab698da344f8d0d004e8a46a58097ef95fd",
+  "tools/t3/t3r2_make_lock.py": "ec7aab9e85cc89a7187143fdf52e49ae85ec35b3a7c82b7aaff3365c3fe2781e",
+  "tools/t3/t3r3_analysis.py": "81bb47baf64f3a5d821ad1a7082a6f5beb240ddf9cf446f34b394b2bcbe5ff5f",
+  "tools/t3/t3r3_checks.py": "75ca1f3f683fe10ddce34fdd2be47d2305b595cfaef858b520d050dd471ebf01",
+  "tools/t3/t3r3_diag.py": "db312b7aba01f958d86961459c8e15fca6a5ff00363a556d07c701b63a5fe837",
+  "tools/t3/t3r3_last16.py": "808f59c465d9a098274bd035ef25086b4f2c89aa43118e2c3ba079772421cae4",
+  "tools/t3/t3r3_launch.py": "fe68b2348a234ae300a19eb3cc35ff34b9d0f831c1dfc98ab18180c6b9943e97",
+  "tools/t3/t3r3_pair.py": "afe85e1c18bd114f8cbec59145ae9784d6136a7bf497842a54a3a6e17b5fc3d6",
+  "tools/t3/t3r4_analysis.py": "34a7b154e016bd8b07a3acfc6624359899159f2801b396d71e0965393fad2d51",
+  "tools/t3/t3r4_blind.py": "379cedecf340a4b8a6690219be13fa40ff99489928caa1cfda58f83f458c368c",
+  "tools/t3/t3r4_checks.py": "f2278d752b53acffbff2e5ad7953721ffe48cc3755f8ac556f99487311f78b83",
+  "tools/t3/t3r4_eval.py": "09a9edcc44d1be71986cfdbd7ca8cb8137a3874d359e5a7e7071619c56568ab0",
+  "tools/t3/t3r4_launch.py": "9aeb8ba19ee97d0f4303f20faec74c2b9a7115a9312836c85093905ee7a1b4e3",
+  "tools/t3/t3r4_make_lock.py": "3d79f922e68013b2664756fd01a3019b0629c86043b03f4fa3aaa9b97493c76d",
+  "tools/t3/t3r4_post_launch.sh": "9a799e82aa7f0962b2d46c8f8d79d5e94b7977dd55fde391ffac31d8b0b9b026",
+  "tools/t3/t3r4_preflight_seeds.sh": "5e6c774f8d4afa513f61b2b246711b27a667cb8897a6151e8a4fc27cf7ac6799",
+  "tools/t3/t3r4_repro.py": "37b5d1568bba733139976e34d581b031e8cde3095ded9420e0e1baad83670404"
+ },
+ "rule_of_change": "nothing in protocols/ changes after this lock without a new version number and a stated reason"
+}
