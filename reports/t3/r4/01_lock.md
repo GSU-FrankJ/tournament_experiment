@@ -8,11 +8,11 @@ Date: 2026-10-22. Branch `t3-r4` (from `origin/t3-r3` `df2365d9`). **Generated**
 
 **Paper wording for A (verbatim):** "a verifier-gated restart of the terminal stage: when the development-tier one-step deviation gain at the end of the stage-3 phase exceeds the gate's limit 0.005, stage 3 is re-initialised once and retrained, and the second attempt is kept; its cost is part of the method's cost."
 
-The files (`reports/t3/r4/lock_draft/v2_T3_locked_v1_1.{json,md}`, written by `tools/t3/t3r4_make_lock.py`; SHA-256 of the JSON `97bb9146c379c957356706f463361c2ff48c2724fac31b9114e7aba5a2a7e38e`, of the MD `90a1047b745174209a0d05c8826cce868b8506d89cb1c1fc3239104ef0063c47`) hold no timestamp, no commit hash and no absolute path; the lock written into `protocols/` must equal them byte for byte.
+The files (`reports/t3/r4/lock_draft/v2_T3_locked_v1_1.{json,md}`, written by `tools/t3/t3r4_make_lock.py`; SHA-256 of the JSON `97bb9146c379c957356706f463361c2ff48c2724fac31b9114e7aba5a2a7e38e`, of the MD `90a1047b745174209a0d05c8826cce868b8506d89cb1c1fc3239104ef0063c47`) hold no timestamp, no full commit hash (only the abbreviated base commit `b565f0e8` of the frozen-code diff) and no absolute path; the lock written into `protocols/` must equal them byte for byte.
 
 | item | value |
 |---|---|
-| records | the v2.0 record of each q (`protocols/v2_T2_locked_v2_0.json`), `game.T` = 3 |
+| records | the v2.0 record of each q (`protocols/v2_T2_locked_v2_0.json`; the record itself has T = 2, the run configs set `game.T` = 3) |
 | parameters file | `reports/t3/r1/params_bw_t3.json` |
 | phases, budgets (updates) | [3, 2, 1], {"3": 1600, "2": 1600, "1": 600} |
 | learning rate | 3e-4 constant, then linear 3e-4 -> 3e-5 over local updates 1201-1600 at stages 3 and 2 and over 1-600 at stage 1 |

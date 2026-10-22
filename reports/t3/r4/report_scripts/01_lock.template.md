@@ -8,7 +8,7 @@ Date: {{date}}. Branch `t3-r4` (from `origin/t3-r3` `df2365d9`). **Generated** f
 
 **Paper wording for A (verbatim):** "a verifier-gated restart of the terminal stage: when the development-tier one-step deviation gain at the end of the stage-3 phase exceeds the gate's limit 0.005, stage 3 is re-initialised once and retrained, and the second attempt is kept; its cost is part of the method's cost."
 
-The files (`reports/t3/r4/lock_draft/v2_T3_locked_v1_1.{json,md}`, written by `tools/t3/t3r4_make_lock.py`; SHA-256 of the JSON `{{json_sha}}`, of the MD `{{md_sha}}`) hold no timestamp, no commit hash and no absolute path; the lock written into `protocols/` must equal them byte for byte.
+The files (`reports/t3/r4/lock_draft/v2_T3_locked_v1_1.{json,md}`, written by `tools/t3/t3r4_make_lock.py`; SHA-256 of the JSON `{{json_sha}}`, of the MD `{{md_sha}}`) hold no timestamp, no full commit hash (only the abbreviated base commit `b565f0e8` of the frozen-code diff) and no absolute path; the lock written into `protocols/` must equal them byte for byte.
 
 {{table:lock_settings}}
 

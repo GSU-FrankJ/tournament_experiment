@@ -36,7 +36,7 @@ def t_settings() -> str:
     L = lock()
     s, c = L["settings"], L["confirmation"]
     rows = [
-        {"item": "records", "value": f"the v2.0 record of each q (`{L['protocol_file']}`), `game.T` = 3"},
+        {"item": "records", "value": f"the v2.0 record of each q (`{L['protocol_file']}`; the record itself has T = 2, the run configs set `game.T` = 3)"},
         {"item": "parameters file", "value": f"`{L['params_file']}`"},
         {"item": "phases, budgets (updates)", "value": f"{s['phases']}, {json.dumps(s['budgets'])}"},
         {"item": "learning rate", "value": s["lr"]["text"]},

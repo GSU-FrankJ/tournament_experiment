@@ -1,6 +1,6 @@
 | item | value |
 |---|---|
-| records | the v2.0 record of each q (`protocols/v2_T2_locked_v2_0.json`), `game.T` = 3 |
+| records | the v2.0 record of each q (`protocols/v2_T2_locked_v2_0.json`; the record itself has T = 2, the run configs set `game.T` = 3) |
 | parameters file | `reports/t3/r1/params_bw_t3.json` |
 | phases, budgets (updates) | [3, 2, 1], {"3": 1600, "2": 1600, "1": 600} |
 | learning rate | 3e-4 constant, then linear 3e-4 -> 3e-5 over local updates 1201-1600 at stages 3 and 2 and over 1-600 at stage 1 |
