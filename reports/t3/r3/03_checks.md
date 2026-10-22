@@ -97,3 +97,20 @@ Counts against T3-R2's full suite (1,724 passed, 1 failed, 6 skipped, 2 xfailed)
 **C-LEGACY at `727116a3`** (`results/t3_r3/legacy/`, `tools/t3/t3r3_legacy.py`): T3-R2's runs (q = 50, seed 60502) and (q = 60, seed 60518) re-run from their own `run_config.json`: **both bit-identical** to their originals by `tools/t3/compare_runs.py bw` (162 npz files, the four CSVs without wall-clock columns, the final networks, frozen stages and stream states; 424 s and 436 s).
 
 **Full suite at `727116a3`** (12 shards, `results/t3_r3/tests_p2/`): **1,811 passed, 6 skipped, 2 xfailed, 2 failed.** The two failures are the known ones: `tests/test_registry_canonicalization.py::test_registry_canonicalization` and `tests/test_ms_r4_launcher.py::test_the_existing_launcher_is_unchanged` (the PI recorded it as known in the G1 reply; it has failed since the T3-1.0 lock changed `protocols/`). 1,746 (P1) + 65 new tests = 1,811. The MS-R3 tests that compare a run without the new keys with a recorded state (`test_without_the_new_keys_...`) pass, which is further evidence for the unchanged default path.
+
+## 5. P3: the checks of the wave, the deviations, the final suite
+
+**The wave** (`05_development.md` section 1): 122 runs from the pre-registration commit `b565f0e8`, all exit 0, no infrastructure event; the post-launch checks (`results/t3_r3/dev/launch_checks_absroot.json`) pass on all 122 runs except `clean_tree` (82 runs). The evaluation, the analysis and the blind recomputation agree (`results/t3_r3/dev/analysis/blind.json`: no difference).
+
+**Deviations (PI reply `pi_record/28c_dirty_tree_reply.md`; evidence in `05_development.md` section 1):**
+
+- **D-1.** 82 manifests record a dirty tree, because a report script (`reports/t3/r3/report_scripts/results_tables.py`) was written into the worktree at 02:21:15 UTC, 71 s after the launch at 02:20:02. The flag follows the file's creation without exception (40 clean runs started at 02:20:08-02:20:09, 82 dirty ones at 02:29:08-02:48:43); every manifest carries `b565f0e8`. Five clean-tree re-runs (two with a fired trigger) are bit-identical to their originals (`results/t3_r3/dev/verify_clean_tree/`). The 122 runs remain the counted records.
+- **D-2.** The first post-launch check used a relative `--root` (`config_equals_plan` 0 of 122, the same defect as T3-R2's F10); `launch_checks_absroot.json` is the record, `launch_checks.json` is kept. Commit `e6902c28`: the four tools with `--root` refuse a relative path (tested).
+- **D-3.** `results/t3_r3/post_launch.sh` ran the evaluation, the analysis and the blind recomputation after the checks had exited 1. Commit `e6902c28`: `tools/t3/t3r3_post_launch.sh` stops at the first nonzero exit (tested).
+- The `pair_ok` column is a check for `bwA` and the diagnostic runs only; for `bwAB` it is reported and decides nothing.
+
+**New code and tests in P3.** `e6902c28` (the root check in `t3r3_{launch,eval,checks,analysis}.py`, `t3r3_post_launch.sh`, 5 tests in `tests/test_t3r3_launch.py`), `87ca2144` (the two verification drivers `t3r3_vct_boundary.py` and `t3r3_vct_rerun.py`, committed as they stand after the second, compare-only pass), `11354e1f` (`t3r3_last16.py`, 3 tests in `tests/test_t3r3_last16.py`). Nothing under `agents/`, `envs/`, `utils/`, `run/` or `protocols/` changed after `727116a3`.
+
+**Full suite at `11354e1f`** (12 shards, `results/t3_r3/tests_p3/`): **1,819 passed, 6 skipped, 2 xfailed, 2 failed** (1,811 at `727116a3` plus 8 new tests). The two failures are the known ones: `tests/test_registry_canonicalization.py::test_registry_canonicalization` and `tests/test_ms_r4_launcher.py::test_the_existing_launcher_is_unchanged`.
+
+**Independent fact-check** of the reports against the CSVs: `pi_record/01_factcheck.md`.

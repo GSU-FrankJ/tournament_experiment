@@ -1,0 +1,8 @@
+| run | failing gates | eta_3 | rmse_pos/e*(0) | tail_mean/e*(0) | Gmax_full | S3 (first attempt) | S3 (frozen) | trigger fired | stage-2 stretch nodes | dev Delta at local 1600 (frozen attempt) | last 16 exports (failing quantities) | class |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `t3r3_q50_s70508_bwAB` | gate_G_A | 0.003334 | 0.05319 | 0.004076 | 0.003334 | 0.701 | 0.701 | no | 0 | 0.003334 | rmse_pos 0.05319 > 0.05: rank 6 of 16 from the top, 6 of 16 above the limit | K |
+| `t3r3_q50_s70520_bwAB` | gate_G_A | 0.004129 | 0.05428 | 0.005184 | 0.004129 | 0.009769 | 0.009769 | no | 0 | 0.004096 | rmse_pos 0.05428 > 0.05: rank 1 of 16 from the top, 1 of 16 above the limit | V |
+| `t3r3_q60_s70511_bwA` | gate_G_A;gate_G_F | 0.003955 | 0.05253 | 0.003422 | 0.04639 | 0.5235 | 0.5235 | no | 28 | 0.003955 | rmse_pos 0.05253 > 0.05: rank 3 of 16 from the top, 4 of 16 above the limit | K |
+| `t3r3_q50_s70508_bw` | gate_G_A | 0.00644 | 0.05348 | 0.002348 | 0.00644 | 0.7769 | 0.7769 | no | 0 | 0.00644 | eta_3 0.00644 > 0.005: rank 12 of 16 from the top, 13 of 16 above the limit; rmse_pos 0.05348 > 0.05: rank 12 of 16 from the top, 15 of 16 above the limit | K |
+| `t3r3_q50_s70516_bw` | gate_G_A | 0.006252 | 0.05186 | 0.002441 | 0.006252 | 0.7553 | 0.7553 | no | 0 | 0.006252 | eta_3 0.00625 > 0.005: rank 15 of 16 from the top, 16 of 16 above the limit; rmse_pos 0.05186 > 0.05: rank 14 of 16 from the top, 15 of 16 above the limit | K |
+| `t3r3_q60_s70511_bw` | gate_G_A;gate_G_F | 0.003955 | 0.05253 | 0.003422 | 0.04639 | 0.5235 | 0.5235 | no | 28 | 0.003955 | rmse_pos 0.05253 > 0.05: rank 3 of 16 from the top, 4 of 16 above the limit | K |
