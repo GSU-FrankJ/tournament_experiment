@@ -123,8 +123,12 @@ def failing_quantities(r: Mapping[str, Any]) -> List[Dict[str, Any]]:
     if not r["gate_G_F"]:
         out.append({"quantity": "Gmax_full", "value": r["Gmax_full_over_dw"], "limit": 0.01, "stage": gmax_stage})
     if not r["gate_G_N"]:
-        out.append({"quantity": "|dev - final| of eta_3 or Gmax_full", "value": abs(r["dev_eta_T_over_dw"] - r["eta_T_over_dw"]),
-                    "limit": 0.001, "stage": f"3 / {gmax_stage}"})
+        d_eta = abs(r["dev_eta_T_over_dw"] - r["eta_T_over_dw"])
+        d_gm = abs(r["dev_Gmax_full_over_dw"] - r["Gmax_full_over_dw"])
+        if not d_eta <= 0.001:
+            out.append({"quantity": "|dev - final| of eta_3", "value": d_eta, "limit": 0.001, "stage": 3})
+        if not d_gm <= 0.001:
+            out.append({"quantity": "|dev - final| of Gmax_full", "value": d_gm, "limit": 0.001, "stage": gmax_stage})
     return out
 
 
@@ -299,53 +303,78 @@ def comparison_rows(rows: Sequence[Mapping[str, Any]], gates: Mapping[str, Any],
 
 
 # ---------------------------------------------------------------------------------- the analysis
+def _reporting(errors: List[Dict[str, str]], step: str, fn: Any, default: Any = None) -> Any:
+    """Run one reporting step; an exception is recorded (and the step's result replaced by ``default``) so that the verdict, written before
+    the reporting steps, never depends on them."""
+    try:
+        return fn()
+    except Exception as exc:  # noqa: BLE001 - recorded in headline.json and reported by the exit code
+        errors.append({"step": step, "error": f"{type(exc).__name__}: {exc}"})
+        return default
+
+
 def analyse(root: Path, eval_csv: Path, ledger_path: Path, out_dir: Path, workers: int, checks_path: Optional[Path] = None,
             dg2_runs: Path = DG2_RUNS, criteria: Path = CRITERIA) -> Dict[str, Any]:
-    """Run the analysis and write the outputs; returns ``headline``."""
+    """Run the analysis and write the outputs; returns ``headline``.
+
+    The counts, the verdict and the trigger are computed and written to ``headline.json`` first. The reporting steps (last-16 exports,
+    failures, comparisons, ...) follow; a step that raises is recorded under ``reporting_errors`` and does not touch the verdict.
+
+    Raises:
+        FileNotFoundError: ``checks_path`` is given but does not exist, or the ledger does not exist.
+    """
+    if checks_path is not None and not Path(checks_path).is_file():
+        raise FileNotFoundError(f"{checks_path}: the checks file was given but does not exist")
     out_dir.mkdir(parents=True, exist_ok=True)
     gates = json.loads(Path(criteria).read_text())["gates"]
     ledger = ca.read_ledger(ledger_path)
     stopped = ca.stopped_runs(ledger)
-    ev = {r["run"]: r for r in pd.read_csv(eval_csv).to_dict("records")}
+    ev = {r["run"]: r for r in pd.read_csv(eval_csv, float_precision="round_trip").to_dict("records")}
     jobs = ck.all_jobs(root)
-    with ProcessPoolExecutor(max_workers=max(1, min(workers, len(jobs))), mp_context=mp.get_context("spawn")) as pool:
-        recs = list(pool.map(r3a.run_record, [(j,) for j in jobs]))
+    if workers <= 1:
+        recs = [r3a.run_record((j,)) for j in jobs]
+    else:
+        with ProcessPoolExecutor(max_workers=min(workers, len(jobs)), mp_context=mp.get_context("spawn")) as pool:
+            recs = list(pool.map(r3a.run_record, [(j,) for j in jobs]))
     rows = [r3a.merge_eval(rec, ev.get(rec["run"]), gates, stopped) for rec in recs]
     pd.DataFrame(rows).to_csv(out_dir / "per_run.csv", index=False)
     cnt = counts_of(rows)
     verdict = rule_verdict(cnt["fail_q50"], cnt["fail_q60"], stopped)
-    failing = [r for r in rows if not r["passed"]]
-    l16_table, l16_summary = last16_tables(rows, failing, workers)
-    pd.DataFrame(l16_table).to_csv(out_dir / "last16.csv", index=False)
-    pd.DataFrame(l16_summary).to_csv(out_dir / "last16_summary.csv", index=False)
-    fails = failure_rows(failing, l16_summary, formation_thresholds(dg2_runs))
-    pd.DataFrame(fails).to_csv(out_dir / "failures.csv", index=False)
-    fired = fired_rows(rows)
-    pd.DataFrame(fired).to_csv(out_dir / "fired.csv", index=False)
-    pd.DataFrame(values_table(rows)).to_csv(out_dir / "counts.csv", index=False)
-    cost = cost_rows(rows)
-    pd.DataFrame(cost).to_csv(out_dir / "cost.csv", index=False)
-    comp = comparison_rows(rows, gates)
-    pd.DataFrame(comp).to_csv(out_dir / "comparisons.csv", index=False)
     n_fired = sum(1 for r in rows if r.get("fired"))
     first_pass = sum(1 for r in rows if r["passed"] and not r.get("fired"))
     lo, hi = r3a.cp(n_fired, len(rows))
-    head = {"counts": cnt, "verdict": verdict,
-            "trigger": {"fired": n_fired, "n": len(rows), "rate": n_fired / len(rows), "ci_lo": lo, "ci_hi": hi, "runs": [r["run"] for r in rows if r.get("fired")],
-                        "first_attempt_pass": first_pass, "first_attempt_rate": first_pass / len(rows),
-                        "fired_runs_that_pass": sum(1 for r in rows if r.get("fired") and r["passed"])},
-            "failures": [{k: f[k] for k in ("run", "failing_gates", "class_suggested")} for f in fails],
-            "stopped_without_verdict": stopped, "infra_events": ledger.get("events", []), "n_rows": len(rows)}
-    if checks_path and Path(checks_path).is_file():
+    head: Dict[str, Any] = {
+        "counts": cnt, "verdict": verdict,
+        "trigger": {"fired": n_fired, "n": len(rows), "rate": n_fired / len(rows), "ci_lo": lo, "ci_hi": hi, "runs": [r["run"] for r in rows if r.get("fired")],
+                    "first_attempt_pass": first_pass, "first_attempt_rate": first_pass / len(rows),
+                    "fired_runs_that_pass": sum(1 for r in rows if r.get("fired") and r["passed"])},
+        "stopped_without_verdict": stopped, "infra_events": ledger.get("events", []), "n_rows": len(rows),
+        "failures": [], "reporting_complete": False, "reporting_errors": []}
+    if checks_path is not None:
         chk = json.loads(Path(checks_path).read_text())
         head["checks"] = {"checks_ok": ck.checks_ok(chk), "n_runs": chk["n_runs"], "fired": chk.get("fired")}
+    (out_dir / "headline.json").write_text(json.dumps(head, indent=1, default=str))            # the verdict first
+    # ---- the reporting steps
+    errors: List[Dict[str, str]] = []
+    failing = [r for r in rows if not r["passed"]]
+    l16_table, l16_summary = _reporting(errors, "last16", lambda: last16_tables(rows, failing, workers), ([], []))
+    pd.DataFrame(l16_table).to_csv(out_dir / "last16.csv", index=False)
+    pd.DataFrame(l16_summary).to_csv(out_dir / "last16_summary.csv", index=False)
+    fails = _reporting(errors, "failures", lambda: failure_rows(failing, l16_summary, formation_thresholds(dg2_runs)), [])
+    pd.DataFrame(fails).to_csv(out_dir / "failures.csv", index=False)
+    _reporting(errors, "fired", lambda: pd.DataFrame(fired_rows(rows)).to_csv(out_dir / "fired.csv", index=False))
+    _reporting(errors, "values", lambda: pd.DataFrame(values_table(rows)).to_csv(out_dir / "counts.csv", index=False))
+    _reporting(errors, "cost", lambda: pd.DataFrame(cost_rows(rows)).to_csv(out_dir / "cost.csv", index=False))
+    _reporting(errors, "comparisons", lambda: pd.DataFrame(comparison_rows(rows, gates)).to_csv(out_dir / "comparisons.csv", index=False))
+    head["failures"] = [{k: f[k] for k in ("run", "failing_gates", "class_suggested")} for f in fails]
+    head["reporting_errors"], head["reporting_complete"] = errors, not errors
     (out_dir / "headline.json").write_text(json.dumps(head, indent=1, default=str))
     return head
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    """CLI entry (see the module docstring). Exit code 0 on any verdict (the verdict is in ``headline.json``); 3 if the checks file is
-    given and not ok."""
+    """CLI entry (see the module docstring). Exit code 0 when the analysis is complete (the verdict is in ``headline.json`` whatever it
+    is); 3 if the checks file is given and not ok; 4 if a reporting step failed (the verdict is still in ``headline.json``)."""
     ap = argparse.ArgumentParser(description="T3-R4 confirmation analysis", allow_abbrev=False)
     ap.add_argument("--root", default=str(lt.DEFAULT_ROOT), help="results root, an absolute path")
     ap.add_argument("--eval", required=True, help="per_run.csv of t3r4_eval.py")
@@ -357,10 +386,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a = ap.parse_args(argv)
     root = lt.require_absolute(ap, "--root", a.root)
     head = analyse(root, Path(a.eval), Path(a.ledger), Path(a.out_dir), a.workers, Path(a.checks) if a.checks else None, Path(a.dg2_runs))
-    print(json.dumps({k: head[k] for k in ("counts", "verdict", "trigger", "failures")}, indent=1, default=str))
+    print(json.dumps({k: head[k] for k in ("counts", "verdict", "trigger", "failures", "reporting_errors")}, indent=1, default=str))
     if "checks" in head and not head["checks"]["checks_ok"]:
         print("STOP: the post-launch checks are not ok", file=sys.stderr)
         return 3
+    if head["reporting_errors"]:
+        print(f"STOP: {len(head['reporting_errors'])} reporting step(s) failed; the verdict is in headline.json", file=sys.stderr)
+        return 4
     return 0
 
 

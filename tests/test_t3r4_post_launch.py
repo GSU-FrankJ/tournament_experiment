@@ -31,17 +31,25 @@ def test_the_script_stops_at_the_first_failing_step(tmp_path):
     assert not (tmp_path / "eval").exists() and not (tmp_path / "analysis").exists()
 
 
-def test_the_script_runs_the_four_steps_in_order_when_each_succeeds(tmp_path):
+def test_the_script_runs_the_four_steps_in_order_and_needs_their_outputs(tmp_path):
     (tmp_path / "launch_commit.txt").write_text("abc\n")
+    # every step exits 0 but writes nothing: the final check of the outputs fails, the script does not say "done"
     r = subprocess.run(["bash", str(SCRIPT), str(tmp_path)], capture_output=True, text=True, cwd=ROOT, env={**os.environ, "T3R4_PY": "true"})
     steps = [line.split()[1] for line in r.stdout.splitlines() if line.startswith("=== ")]
-    assert r.returncode == 0 and steps == ["checks", "eval", "analysis", "blind"] and "done" in r.stdout
+    assert steps == ["checks", "eval", "analysis", "blind"] and r.returncode == 1 and "done" not in r.stdout and "missing or empty output" in r.stderr
+    # with every output present the script ends with "done"
+    (tmp_path / "eval").mkdir()
+    (tmp_path / "analysis").mkdir()
+    for f in ("launch_checks.json", "eval/per_run.csv", "analysis/headline.json", "analysis/blind.json"):
+        (tmp_path / f).write_text("x\n")
+    r = subprocess.run(["bash", str(SCRIPT), str(tmp_path)], capture_output=True, text=True, cwd=ROOT, env={**os.environ, "T3R4_PY": "true"})
+    assert r.returncode == 0 and "done" in r.stdout
 
 
 def test_the_script_names_the_launch_commit_the_plan_and_the_tools():
     text = SCRIPT.read_text()
     for needle in ("set -euo pipefail", "launch_commit.txt", "reports/t3/r4/confirmation_plan.csv", "t3r4_checks.py", "t3r4_eval.py",
-                   "t3r4_analysis.py", "t3r4_blind.py", "infra_events.json"):
+                   "t3r4_analysis.py", "t3r4_blind.py", "infra_events.json", "--headline", "--checks", "--ledger", "--commit"):
         assert needle in text, needle
 
 

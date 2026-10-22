@@ -28,4 +28,7 @@ step analysis
 step blind
 "$PY" tools/t3/t3r4_blind.py --per-run "$ROOT/eval/per_run.csv" --ledger "$ROOT/infra_events.json" \
     --headline "$ROOT/analysis/headline.json" --out "$ROOT/analysis/blind.json"
+for f in launch_checks.json eval/per_run.csv analysis/headline.json analysis/blind.json; do
+    test -s "$ROOT/$f" || { echo "missing or empty output: $ROOT/$f" >&2; exit 1; }
+done
 echo "done $(date -u +%FT%TZ)"

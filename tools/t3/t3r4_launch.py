@@ -202,10 +202,13 @@ def check_lock(lock_dir: Path, use_record: bool, lock_file: Path = LOCK_FILE, re
             raise ValueError(f"lock file {p} is missing")
     if use_record:
         records = read_lock_records(lock_file)
-        rec = t31_record(lock_file)
-        if rec is None:
+        named = [r for r in records if r.get("protocol") == LOCK_REL]
+        if not named:
             raise ValueError(f"{lock_file} holds no record for {LOCK_REL}: the confirmation is not locked")
-        if not records or records[-1].get("protocol") != LOCK_REL:
+        if len(named) > 1:
+            raise ValueError(f"{lock_file} holds {len(named)} records for {LOCK_REL}; there must be exactly one")
+        rec = named[0]
+        if records[-1] is not rec:
             raise ValueError(f"the {PROTOCOL_VERSION} record is not the last record of {lock_file}")
         if cl.sha256_file(js) != rec["protocol_sha256"] or cl.sha256_file(md) != rec["protocol_md_sha256"]:
             raise ValueError("the lock JSON / MD do not match the SHA-256 of the LOCK record")
@@ -313,9 +316,10 @@ def handle_infra_failures(jobs: Sequence[L1.Job], results: Sequence[Dict[str, An
     recorded in ``stopped_without_verdict``. Returns the results of the repeats."""
     by_out = {j.out_dir: j for j in jobs}
     repeats: List[Dict[str, Any]] = []
+    ledger_path = Path(root) / "infra_events.json"
     for res in results:
         job = by_out.get(res["out"])
-        if job is None:
+        if job is None or res.get("returncode") == 0:             # a run that exited 0 is not an infrastructure failure, whatever its log says
             continue
         cls = cl.classify_attempt(res, Path(job.out_dir))
         if cls is None:
@@ -326,19 +330,21 @@ def handle_infra_failures(jobs: Sequence[L1.Job], results: Sequence[Dict[str, An
         shutil.move(job.out_dir, str(dest))
         ledger["events"].append({"run": job.cfg["run"], "q": q, "seed": s, "arm": ARM, "attempt": 1, "reason": cls[0],
                                  "evidence": cls[1], "returncode": res.get("returncode"), "moved_to": str(dest)})
+        cl.write_ledger(ledger_path, ledger)                       # the ledger is saved after every event, before the repeat starts
         os.makedirs(job.out_dir, exist_ok=True)
         with open(os.path.join(job.out_dir, "run_config.json"), "w") as f:
             json.dump(job.cfg, f, indent=1)
         rep = runner(job)
         rep["repeat_of_infrastructure_failure"] = True
         repeats.append(rep)
-        cls2 = cl.classify_attempt(rep, Path(job.out_dir))
+        cls2 = cl.classify_attempt(rep, Path(job.out_dir)) if rep.get("returncode") != 0 else None
         if cls2 is not None:
             dest2 = Path(root) / "crashed" / f"q{q}" / f"seed{s}" / f"{ARM}_attempt2"
             shutil.move(job.out_dir, str(dest2))
             ledger["events"].append({"run": job.cfg["run"], "q": q, "seed": s, "arm": ARM, "attempt": 2, "reason": cls2[0],
                                      "evidence": cls2[1], "returncode": rep.get("returncode"), "moved_to": str(dest2)})
             ledger["stopped_without_verdict"].append(job.cfg["run"])
+            cl.write_ledger(ledger_path, ledger)
     return repeats
 
 

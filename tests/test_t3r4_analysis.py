@@ -238,6 +238,102 @@ def test_the_descriptive_comparisons_on_the_tracked_tables():
     assert 0 < comp[("pooled_bwA_120", "all")]["ci_lo"] < comp[("pooled_bwA_120", "all")]["rate"] < comp[("pooled_bwA_120", "all")]["ci_hi"] < 1
 
 
+def test_the_blind_comparison_catches_every_kind_of_disagreement(tmp_path):
+    rows = table((0, 1, 2), (0, 1, 2))
+    p, lp = write(tmp_path, rows)
+    blind = bl.recompute(p, lp)
+    cnt = ta.counts_of(merged(rows))
+    head = {"counts": cnt, "verdict": ta.rule_verdict(cnt["fail_q50"], cnt["fail_q60"], [])}
+    assert bl.compare(blind, head) == (True, [])
+    import copy
+    bad = copy.deepcopy(head)
+    bad["counts"]["pass_q50"] += 1
+    assert bl.compare(blind, bad)[0] is False and "pass_q50" in bl.compare(blind, bad)[1][0]
+    bad = copy.deepcopy(head)
+    bad["counts"]["ci_lo_total"] += 1e-6
+    assert bl.compare(blind, bad)[0] is False
+    bad = copy.deepcopy(head)
+    bad["verdict"]["verdict"] = "fail"
+    assert bl.compare(blind, bad)[0] is False
+    bad = copy.deepcopy(head)
+    bad["verdict"]["q60_condition"] = False
+    assert bl.compare(blind, bad)[0] is False
+    # the command line: exit 0 on agreement, 1 on a headline that disagrees
+    hp = tmp_path / "headline.json"
+    hp.write_text(json.dumps(head))
+    assert bl.main(["--per-run", str(p), "--ledger", str(lp), "--headline", str(hp), "--out", str(tmp_path / "blind.json")]) == 0
+    assert json.loads((tmp_path / "blind.json").read_text())["agrees_with_headline"] is True
+    hp.write_text(json.dumps(bad))
+    assert bl.main(["--per-run", str(p), "--ledger", str(lp), "--headline", str(hp)]) == 1
+
+
+def test_a_gn_failure_names_both_differences():
+    r = _fr(ga_eta=True, gate_G_F=True, gate_G_N=False, eta_T_over_dw=0.002, dev_eta_T_over_dw=0.0022, Gmax_full_over_dw=0.002,
+            dev_Gmax_full_over_dw=0.0035, Gmax_full_t=2)
+    q = ta.failing_quantities(r)
+    assert [x["quantity"] for x in q] == ["|dev - final| of Gmax_full"] and q[0]["value"] == pytest.approx(0.0015) and q[0]["stage"] == 2
+    r = _fr(ga_eta=True, gate_G_F=True, gate_G_N=False, eta_T_over_dw=0.002, dev_eta_T_over_dw=0.0041, Gmax_full_over_dw=0.002,
+            dev_Gmax_full_over_dw=0.0042, Gmax_full_t=3)
+    assert [x["quantity"] for x in ta.failing_quantities(r)] == ["|dev - final| of eta_3", "|dev - final| of Gmax_full"]
+
+
+# ---------------------------------------------------------------------------------- the analysis driver (run records stubbed)
+def _stub_run_record(args):
+    job, = args
+    return {"run": job["run"], "arm": "bwA", "q": job["q"], "seed": job["seed"], "run_kind": "confirmation", "run_dir": job["run_dir"],
+            "status": "done", "exit_code": 0, "fired": job["seed"] == 80503, "trig_Delta": 0.001, "trig_s": 60.0, "trig_C": 0.03, "trig_reasons": "",
+            "S3_frozen": 0.01, "S3_first": 0.01, "stretch_nodes": 0, "has_stretch": False, "wall_sec": 500.0, "dev_verifier_sec": 5.0,
+            "total_updates": 5400 if job["seed"] == 80503 else 3800, "total_transitions": 512 * (5400 if job["seed"] == 80503 else 3800),
+            "total_minibatch_steps": 76000, "total_dev_checks": 152, "a2_final_Delta": 0.001}
+
+
+def _driver(tmp_path, monkeypatch, rows):
+    p, lp = write(tmp_path, rows)
+    monkeypatch.setattr(ta.r3a, "run_record", _stub_run_record)
+    monkeypatch.setattr(ta.ck, "all_jobs", lambda root: [{"run": r["run"], "q": r["q"], "seed": r["seed"], "run_dir": str(tmp_path)} for r in rows])
+    return p, lp
+
+
+def test_the_verdict_is_written_before_the_reporting_steps_and_survives_a_failing_one(tmp_path, monkeypatch, capsys):
+    rows = table((0, 1), (0,))
+    p, lp = _driver(tmp_path, monkeypatch, rows)
+    monkeypatch.setattr(ta, "last16_tables", lambda *a, **k: (_ for _ in ()).throw(ValueError("u01600 differs from the evaluated value")))
+    monkeypatch.setattr(ta, "failure_rows", lambda *a, **k: [])
+    out = tmp_path / "analysis"
+    assert ta.main(["--root", str(tmp_path), "--eval", str(p), "--ledger", str(lp), "--out-dir", str(out), "--workers", "1"]) == 4
+    head = json.loads((out / "headline.json").read_text())
+    assert head["verdict"]["verdict"] == "pass" and head["counts"]["fail_total"] == 3 and head["reporting_complete"] is False
+    assert [e["step"] for e in head["reporting_errors"]] == ["last16"] and "u01600" in head["reporting_errors"][0]["error"]
+    assert head["trigger"]["fired"] == 2 and head["trigger"]["first_attempt_pass"] == 75           # 77 pass, 2 of them fired
+    assert "STOP" in capsys.readouterr().err
+    assert bl.main(["--per-run", str(p), "--ledger", str(lp), "--headline", str(out / "headline.json")]) == 0       # the blind tool still runs
+
+
+def test_a_complete_analysis_exits_0_and_writes_every_output(tmp_path, monkeypatch):
+    rows = table()
+    p, lp = _driver(tmp_path, monkeypatch, rows)
+    out = tmp_path / "analysis"
+    assert ta.main(["--root", str(tmp_path), "--eval", str(p), "--ledger", str(lp), "--out-dir", str(out), "--workers", "1"]) == 0
+    head = json.loads((out / "headline.json").read_text())
+    assert head["reporting_complete"] is True and head["reporting_errors"] == [] and head["verdict"]["verdict"] == "pass"
+    assert head["trigger"]["fired"] == 2 and head["trigger"]["runs"] == ["t3r4_q50_s80503_bwA", "t3r4_q60_s80503_bwA"]
+    assert head["trigger"]["first_attempt_pass"] == 78 and head["trigger"]["fired_runs_that_pass"] == 2
+    for name in ("per_run.csv", "counts.csv", "fired.csv", "failures.csv", "cost.csv", "comparisons.csv", "last16.csv", "last16_summary.csv"):
+        assert (out / name).is_file(), name
+
+
+def test_a_checks_file_that_is_given_but_missing_is_an_error_and_a_failed_checks_file_stops(tmp_path, monkeypatch):
+    rows = table()
+    p, lp = _driver(tmp_path, monkeypatch, rows)
+    with pytest.raises(FileNotFoundError):
+        ta.analyse(tmp_path, p, lp, tmp_path / "a1", 1, checks_path=tmp_path / "nope.json")
+    bad = tmp_path / "checks.json"
+    bad.write_text(json.dumps({"n_runs": 80, "fired": 0, "infra_events_present": True,
+                               "verdicts": {"exit_ok": {"pass": 79, "fail": 1, "not_evaluated": 0}}}))
+    assert ta.main(["--root", str(tmp_path), "--eval", str(p), "--ledger", str(lp), "--out-dir", str(tmp_path / "a2"), "--checks", str(bad),
+                    "--workers", "1"]) == 3
+
+
 def test_the_tools_refuse_a_relative_root(tmp_path):
     import t3r4_checks as ck
     import t3r4_eval as ev

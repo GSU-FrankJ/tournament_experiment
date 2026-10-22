@@ -116,3 +116,5 @@ def test_the_lock_lists_every_tool_and_run_module_that_the_t3r4_tools_import():
     assert not missing, f"imported by the t3r4 tools (directly or not) but not listed in the lock: {missing}"
     assert all(p.startswith(tuple(f"{d}/" for d in lt.CODE_DIFF_PATHS)) for p in seen - listed), sorted(seen - listed)
     assert all((ROOT / f).is_file() for f in listed)
+    # a module loaded by path (importlib), invisible to the static scan of the imports
+    assert "tools/t3/compare_runs.py" in listed and "tools/t3/t3r3_pair.py" in listed and "tools/t3/t3r4_repro.py" in listed

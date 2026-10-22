@@ -118,6 +118,57 @@ def test_an_exception_inside_the_checks_of_one_run_is_recorded_and_does_not_esca
     assert "error" in res and res["arm"] == "bwA"
 
 
+def _copy(runs, name, tmp_path):
+    root = tmp_path / name / "results" / "t3_r4" / "confirmation"
+    d = root / "q50" / "seed50500" / "bwA"
+    shutil.copytree(runs[name], d)
+    return d, root
+
+
+def test_negative_controls_rng_clean_tree_and_replay(runs, tmp_path):
+    import numpy as np
+    d, root = _copy(runs, "nofire", tmp_path)
+    cfg, plan = _plan(d, root, False)
+    man = json.load(open(d / "manifest.json"))
+    man["clean_tree"] = True
+    json.dump(man, open(d / "manifest.json", "w"))
+    res = ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))
+    assert res["clean_tree"] is True and res["global_rng_ok"] is True and res["replay_ok"] is True
+    man["clean_tree"] = False                                                                  # the dirty flag of T3-R3's D-1
+    json.dump(man, open(d / "manifest.json", "w"))
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["clean_tree"] is False
+    g = json.load(open(d / "gates.json"))
+    g["global_rng"]["status"] = "violated"
+    json.dump(g, open(d / "gates.json", "w"))
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["global_rng_ok"] is False
+    # C-REPLAY: one bit of a stored freeze array differs from what the evaluator reproduces
+    z = dict(np.load(d / "freeze_stage1_final.npz"))
+    key = next(k for k, v in z.items() if v.dtype.kind == "f" and v.size)
+    z[key] = np.nextafter(z[key], np.inf * np.ones_like(z[key]))                                 # one ulp up, same dtype
+    (d / "freeze_stage1_final.npz").unlink()
+    np.savez(d / "freeze_stage1_final.npz", **z)
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["replay_ok"] is False
+
+
+def test_the_trigger_check_compares_retry_json_with_the_check_rows_of_both_attempts(runs, tmp_path):
+    d, root = _copy(runs, "fired", tmp_path)
+    cfg, plan = _plan(d, root, True)
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is True
+    rj = json.load(open(d / "retry.json"))
+    for where, key in (("attempt1", "trigger_check"), ("attempt2", "final_check")):
+        for k in ("Delta", "s", "C"):
+            bad = json.loads(json.dumps(rj))
+            bad[where][key][k] = float(bad[where][key][k]) * (1 + 1e-9)
+            json.dump(bad, open(d / "retry.json", "w"))
+            assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is False, (where, k)
+    json.dump(rj, open(d / "retry.json", "w"))
+    assert ck.check_run((_job(d, cfg), plan, None, LOCK, str(root)))["trigger_consistent"] is True
+
+
+def test_checks_ok_also_needs_every_run_to_pass_every_verdict():
+    assert not ck.checks_ok(_agg(verdicts={"exit_ok": {"pass": 79, "fail": 0, "not_evaluated": 0}}))
+
+
 def _agg(**over):
     base = {"verdicts": {"exit_ok": {"pass": 80, "fail": 0, "not_evaluated": 0}}, "infra_events_present": True, "n_runs": 80}
     base.update(over)

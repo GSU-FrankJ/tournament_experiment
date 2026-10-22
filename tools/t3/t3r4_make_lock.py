@@ -62,7 +62,7 @@ FAILURE_COUNTING = {
     "ledger": "results/t3_r4/confirmation/infra_events.json; the analysis tool and the blind tool both read it",
     "rerun_after_infrastructure_failure": "the attempt is moved to results/t3_r4/confirmation/crashed/ and the run is repeated once into "
                                            "the original path; if the repeat also fails for an infrastructure reason the confirmation "
-                                           "stops without a verdict and that run is counted neither way",
+                                           "stops without a verdict (no pass or fail is declared)",
     "other_failures": "any other nonzero exit, and any global-RNG violation, is a failed run",
     "evaluation_problems": "an evaluation error, or an evaluation with valid = False, counts as a failed run unless a re-run of the locked "
                            "evaluator on the same weights succeeds; the re-run is reported; a completed run is never re-trained",

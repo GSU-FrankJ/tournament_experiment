@@ -121,7 +121,15 @@ def _check_run(args: Any) -> Dict[str, Any]:
     b3 = int(cfg["pipeline"]["budgets"]["3"])
     fires, reasons = ms_retry.trigger(chk, cfg["stage3_retry"]["delta_gt"], b3)
     out["would_fire"] = bool(fires)
-    out["trigger_consistent"] = bool(fires == fired and (not fired or te.read_json(d / "retry.json")["attempt1"]["reasons"] == reasons))
+    consistent = bool(fires == fired)
+    if fired:                                                       # retry.json agrees with the check files of both attempts
+        rj = te.read_json(d / "retry.json")
+        t1, f2 = rj["attempt1"]["trigger_check"], rj["attempt2"]["final_check"]
+        last2 = lc.read_csv(d / "ms_checks_stage3.csv")[-1]
+        consistent = bool(consistent and rj["attempt1"]["reasons"] == reasons
+                          and all(float(t1[k]) == chk[k] for k in ("Delta", "s", "C"))
+                          and all(float(f2[k]) == float(last2[k]) for k in ("Delta", "s", "C")))
+    out["trigger_consistent"] = consistent
     out["trigger_Delta"], out["trigger_s"], out["trigger_C"] = chk["Delta"], chk["s"], chk["C"]
     # ---- budgets of a run that fired (retry.json totals and attempt1/)
     if fired:
@@ -153,7 +161,7 @@ def _check_run(args: Any) -> Dict[str, Any]:
 
 def checks_ok(res: Mapping[str, Any]) -> bool:
     """True iff every deterministic check passed on every run, the infrastructure ledger exists and exactly 80 runs were checked."""
-    bad = [v for v, c in res["verdicts"].items() if c["fail"] or c["not_evaluated"]]
+    bad = [v for v, c in res["verdicts"].items() if c["fail"] or c["not_evaluated"] or c["pass"] != res["n_runs"]]
     return bool(not bad and res["infra_events_present"] and res["n_runs"] == N_RUNS)
 
 

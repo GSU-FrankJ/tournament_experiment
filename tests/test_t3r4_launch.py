@@ -158,6 +158,17 @@ def test_a_missing_record_a_non_final_record_a_hash_mismatch_and_a_missing_file_
         lt.check_lock(empty, use_record=False)
 
 
+def test_two_t31_records_are_refused_even_when_the_first_one_is_right(tmp_path, lock_dir):
+    js, md = lock_dir / "v2_T3_locked_v1_1.json", lock_dir / "v2_T3_locked_v1_1.md"
+    good = {"protocol": lt.LOCK_REL, "protocol_version": "T3-1.1", "protocol_sha256": cl.sha256_file(js), "protocol_md_sha256": cl.sha256_file(md)}
+    wrong = dict(good, protocol_sha256="0" * 64)
+    for recs in ([good, wrong], [wrong, good]):
+        path = tmp_path / "LOCK2"
+        path.write_text("".join(json.dumps(r, indent=1) + "\n" for r in recs))
+        with pytest.raises(ValueError, match="exactly one"):
+            lt.check_lock(lock_dir, use_record=True, lock_file=path)
+
+
 def test_a_listed_file_that_differs_from_the_lock_is_refused(tmp_path, lock_dir):
     d = tmp_path / "mut"
     d.mkdir()
@@ -183,7 +194,7 @@ def _repo(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     _git(repo, "init", "-q")
-    for rel in ("protocols/LOCK", "run/a.py", "tools/t3/b.py", "tools/ms/c.py", "agents/d.py"):
+    for rel in ("protocols/LOCK", "run/a.py", "tools/t3/b.py", "tools/ms/c.py", "tools/v2/e.py", "agents/d.py", "envs/f.py", "utils/g.py"):
         (repo / rel).parent.mkdir(parents=True, exist_ok=True)
         (repo / rel).write_text("x\n")
     _git(repo, "add", "-A")
@@ -225,11 +236,17 @@ def test_a_code_diff_since_the_base_is_refused_but_tools_t3_and_tests_are_free(t
     _git(repo, "add", "-A")
     _git(repo, "commit", "-q", "-m", "tools/t3 and tests")
     assert lt.code_diff_problems(repo, base) == []
-    for rel in ("run/a.py", "tools/ms/c.py", "agents/d.py"):
+    for rel in ("run/a.py", "tools/ms/c.py", "tools/v2/e.py", "agents/d.py", "envs/f.py", "utils/g.py"):         # every frozen path is watched
         (repo / rel).write_text("z\n")
         _git(repo, "commit", "-q", "-am", rel)
         assert any(rel in p for p in lt.code_diff_problems(repo, base)), rel
-    assert len(lt.launch_problems(repo, base)) >= 3
+    assert len(lt.launch_problems(repo, base)) >= 6
+
+
+def test_the_frozen_paths_and_the_base_commit_are_the_ones_of_the_prompt():
+    assert set(lt.CODE_DIFF_PATHS) == {"agents", "envs", "utils", "run", "tools/ms", "tools/v2"}
+    assert lt.BASE_COMMIT.startswith("b565f0e8") and len(lt.BASE_COMMIT) == 40
+    assert lt.ALLOWED_DIFF == ("seed", "run", "record.run", "record.seed", "record.output_dir", "pilot")
 
 
 def test_the_frozen_code_is_unchanged_since_the_base_commit():
@@ -285,3 +302,75 @@ def test_infrastructure_failures_are_repeated_once_and_recorded(tmp_path):
     lt.handle_infra_failures(jobs[:1], [{"out": jobs[0].out_dir, "returncode": -9}], tmp_path,
                              lambda j: {"out": j.out_dir, "returncode": -9}, ledger2)
     assert ledger2["stopped_without_verdict"] == ["r0"] and [e["attempt"] for e in ledger2["events"]] == [1, 2]
+
+
+# ---------------------------------------------------------------------------------- the real-launch wiring (the pool is stubbed: nothing trains)
+def _stub_pool(jobs, workers, record, record_path):
+    record["runs"].extend({"out": j.out_dir, "returncode": 0} for j in jobs)
+
+
+def test_a_real_launch_needs_the_t31_record_and_every_guard_and_then_runs_the_pool(tmp_path, lock_dir, monkeypatch, capsys):
+    monkeypatch.setattr(lt, "run_pool", _stub_pool)
+    root = tmp_path / "confirmation"
+    asked = []
+    # (a) the LOCK file holds no T3-1.1 record: refused before anything is written
+    monkeypatch.setattr(lt, "LOCK_FILE", _lock_file(tmp_path, lock_dir, with_record=False))
+    monkeypatch.setattr(lt, "launch_problems", lambda *a, **k: asked.append("x") or [])
+    with pytest.raises(SystemExit) as exc:
+        lt.main(["--root", str(root), "--lock-dir", str(lock_dir), "--workers", "1"])
+    assert exc.value.code == 2 and not root.exists() and asked == []
+    # (b) a record, but a guard fails: refused, nothing written
+    monkeypatch.setattr(lt, "LOCK_FILE", _lock_file(tmp_path, lock_dir))
+    monkeypatch.setattr(lt, "launch_problems", lambda *a, **k: asked.append("b") or ["HEAD is not the LOCK-record commit"])
+    with pytest.raises(SystemExit) as exc:
+        lt.main(["--root", str(root), "--lock-dir", str(lock_dir), "--workers", "1"])
+    assert exc.value.code == 2 and asked == ["b"] and not root.exists() and "LOCK-record commit" in capsys.readouterr().err
+    # (c) a record and clean guards: the configs, the ledger and the launch record are written and the pool runs
+    monkeypatch.setattr(lt, "launch_problems", lambda *a, **k: asked.append("c") or [])
+    assert lt.main(["--root", str(root), "--lock-dir", str(lock_dir), "--workers", "1", "--code-commit", "abc"]) == 0
+    assert asked == ["b", "c"] and len(list(root.glob("q*/seed*/bwA/run_config.json"))) == 80
+    rec = json.loads(next(root.glob("launch_*.json")).read_text())
+    assert rec["state"] == "done" and rec["n_planned"] == 80 and len(rec["runs"]) == 80 and rec["tool"] == "tools/t3/t3r4_launch.py"
+    assert json.loads((root / "infra_events.json").read_text())["events"] == []
+
+
+def test_a_run_that_exited_0_is_never_an_infrastructure_failure_whatever_its_log_says(tmp_path):
+    out = tmp_path / "q50" / "seed80501" / "bwA"
+    out.mkdir(parents=True)
+    (out / "run.log").write_text("MemoryError: Cannot allocate memory\n")
+    job = L1.Job({"q": 50, "seed": 80501, "run": "r0"}, str(out))
+    ledger = lt.new_ledger()
+    reps = lt.handle_infra_failures([job], [{"out": str(out), "returncode": 0}], tmp_path, lambda j: pytest.fail("a repeat"), ledger)
+    assert reps == [] and ledger["events"] == [] and out.is_dir()
+    seen = []
+    lt.handle_infra_failures([job], [{"out": str(out), "returncode": 1}], tmp_path,
+                             lambda j: seen.append(1) or {"out": j.out_dir, "returncode": 0}, ledger)
+    assert seen == [1] and [e["reason"] for e in ledger["events"]] == ["out_of_memory"]            # the same log with a nonzero exit is one
+    # a repeat that exits 0 is not classified either, so it cannot become a second infrastructure failure
+    out.mkdir(exist_ok=True)
+    (out / "run.log").write_text("Cannot allocate memory\n")
+    ledger2 = lt.new_ledger()
+    lt.handle_infra_failures([job], [{"out": str(out), "returncode": -9}], tmp_path / "other", lambda j: {"out": j.out_dir, "returncode": 0}, ledger2)
+    assert ledger2["stopped_without_verdict"] == []
+
+
+def test_the_ledger_is_saved_after_every_event_before_the_repeat_starts(tmp_path):
+    out = tmp_path / "q50" / "seed80501" / "bwA"
+    out.mkdir(parents=True)
+    job = L1.Job({"q": 50, "seed": 80501, "run": "r0"}, str(out))
+    ledger = lt.new_ledger()
+
+    def runner(j):
+        saved = json.loads((tmp_path / "infra_events.json").read_text())                  # the repeat starts: the first event is on disk
+        assert [e["attempt"] for e in saved["events"]] == [1]
+        raise RuntimeError("the launcher dies during the repeat")
+    with pytest.raises(RuntimeError):
+        lt.handle_infra_failures([job], [{"out": str(out), "returncode": -9}], tmp_path, runner, ledger)
+    assert [e["attempt"] for e in json.loads((tmp_path / "infra_events.json").read_text())["events"]] == [1]
+    ledger2 = lt.new_ledger()
+    out2 = tmp_path / "q50" / "seed80502" / "bwA"
+    out2.mkdir(parents=True)
+    job2 = L1.Job({"q": 50, "seed": 80502, "run": "r2"}, str(out2))
+    lt.handle_infra_failures([job2], [{"out": str(out2), "returncode": -9}], tmp_path, lambda j: {"out": j.out_dir, "returncode": -9}, ledger2)
+    on_disk = json.loads((tmp_path / "infra_events.json").read_text())
+    assert on_disk["stopped_without_verdict"] == ["r2"] and [e["attempt"] for e in on_disk["events"]] == [1, 2]
